@@ -362,7 +362,7 @@ export default function Reservas() {
             <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Notas Adicionales</label>
             <textarea
               rows={2}
-              value={notes}
+              value={notas}
               onChange={(e) => setNotas(e.target.value)}
               className="w-full px-4 py-2.5 border border-[#E5E5E5] text-xs focus:border-black outline-none resize-none"
               placeholder="Detalles del alquiler..."
