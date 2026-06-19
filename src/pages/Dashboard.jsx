@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { 
   Printer, Settings, Search, Plus, Trash2, CheckSquare, Square, 
-  Map, List, AlertCircle, Umbrella, Home, Check
+  Map, List, AlertCircle, Umbrella, Home, Check, LayoutDashboard
 } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
@@ -264,6 +264,14 @@ export default function Dashboard() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2 md:gap-4 shrink-0">
+              <button 
+                onClick={() => navigate("/app/home")} 
+                className="px-3 py-2 bg-black text-[#F2CA50] hover:bg-neutral-900 rounded-sm flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-colors" 
+                title="Volver al Panel CRM"
+              >
+                <LayoutDashboard size={14} />
+                <span className="hidden sm:inline">CRM</span>
+              </button>
               <button onClick={() => window.print()} className="p-2.5 hover:bg-prius-background rounded-full transition-colors" title="Imprimir Plano">
                 <Printer size={20} />
               </button>
