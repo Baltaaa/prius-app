@@ -21,7 +21,7 @@ export default function Login() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard")
+      if (session) navigate("/app/home")
     })
   }, [navigate])
 
@@ -110,7 +110,7 @@ export default function Login() {
       if (data?.user) {
         // Agregamos un retraso intencional de 2 segundos para que la animación de carga sea visible
         setTimeout(() => {
-          navigate("/dashboard")
+          navigate("/app/home")
         }, 2000)
       }
     } catch (err) {
@@ -152,11 +152,6 @@ export default function Login() {
       {/* Panel derecho - Formulario */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-prius-black/40 hover:text-prius-black mb-12 transition-colors">
-            <ArrowLeft size={16} />
-            Volver al inicio
-          </Link>
-
           <div className="mb-10">
             <img src="/logo-prius.png" alt="Prius" className="h-24 w-auto mb-8 lg:hidden" />
             <h2 className="text-3xl font-normal text-prius-black mb-2 tracking-tight">

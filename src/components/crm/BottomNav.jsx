@@ -5,16 +5,16 @@ import {
   CalendarDays, 
   Users, 
   Wallet, 
-  BarChart2 
+  Map 
 } from 'lucide-react'
 
 export default function BottomNav() {
   const tabs = [
     { name: 'Inicio', path: '/app/home', icon: LayoutDashboard },
+    { name: 'Plano', path: '/app/plano', icon: Map },
     { name: 'Reservas', path: '/app/reservas', icon: CalendarDays },
     { name: 'Clientes', path: '/app/clientes', icon: Users },
-    { name: 'Caja', path: '/app/caja', icon: Wallet },
-    { name: 'Reportes', path: '/app/reportes', icon: BarChart2 }
+    { name: 'Caja', path: '/app/caja', icon: Wallet }
   ]
 
   return (

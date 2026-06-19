@@ -21,11 +21,11 @@ export default function Sidebar() {
 
   const navItems = [
     { name: 'Inicio', path: '/app/home', icon: LayoutDashboard },
+    { name: 'Plano Playa', path: '/app/plano', icon: Map },
     { name: 'Reservas', path: '/app/reservas', icon: CalendarDays },
     { name: 'Clientes', path: '/app/clientes', icon: Users },
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
-    { name: 'Reportes', path: '/app/reportes', icon: BarChart2 },
-    { name: 'Plano Playa', path: '/dashboard', icon: Map }
+    { name: 'Reportes', path: '/app/reportes', icon: BarChart2 }
   ]
 
   return (
@@ -33,7 +33,7 @@ export default function Sidebar() {
       {/* Top Brand area */}
       <div className="flex flex-col">
         <div className="h-20 bg-black flex items-center px-6">
-          <span className="text-[#F2CA50] font-bold text-lg uppercase tracking-widest font-display">PRIUS APP</span>
+          <span className="text-[#F2CA50] font-bold text-sm uppercase tracking-widest font-display">PRIUS APP</span>
         </div>
 
         <nav className="p-4 space-y-1">

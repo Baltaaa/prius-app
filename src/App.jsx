@@ -3,7 +3,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import PrivateRoute from './components/PrivateRoute'
 
-// Prius CRM Pages and Layouts
+// Prius App Pages and Layouts
 import AppLayout from './layouts/AppLayout'
 import Home from './pages/crm/Home'
 import Reservas from './pages/crm/Reservas'
@@ -18,17 +18,7 @@ export default function App() {
         {/* Public Login Route */}
         <Route path="/" element={<Login />} />
 
-        {/* Existing Interactive Playa Map */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          } 
-        />
-
-        {/* New SPA Prius CRM Section */}
+        {/* New SPA Prius App Section */}
         <Route
           path="/app"
           element={
@@ -39,14 +29,15 @@ export default function App() {
         >
           <Route index element={<Navigate to="/app/home" replace />} />
           <Route path="home" element={<Home />} />
+          <Route path="plano" element={<Dashboard />} />
           <Route path="reservas" element={<Reservas />} />
           <Route path="clientes" element={<Clientes />} />
           <Route path="caja" element={<Caja />} />
           <Route path="reportes" element={<Reportes />} />
         </Route>
 
-        {/* Fallback to Login/App */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Fallback to default App route */}
+        <Route path="*" element={<Navigate to="/app/home" replace />} />
       </Routes>
     </BrowserRouter>
   )
