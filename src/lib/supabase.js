@@ -3,4 +3,20 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = "https://oslbsnwccchdxmbjhhcg.supabase.co"
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zbGJzbndjY2NoZHhtYmpoaGNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNzIxNjQsImV4cCI6MjA4OTY0ODE2NH0.99eHfVMfJTqbx0k1bcs-hfG8jPqRcTlR_rii8fSqnrQ"
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: 'prius-app-auth-token',
+    // Desactivamos el bloqueo nativo del navegador para evitar conflictos de concurrencia en React
+    lock: {
+      acquire: async () => {
+        return {
+          release: async () => {}
+        }
+      }
+    }
+  }
+})
