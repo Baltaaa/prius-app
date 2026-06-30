@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { 
   Printer, Settings, Search, Plus, Trash2, CheckSquare, Square, 
-  Map, List, AlertCircle, Umbrella, Home, Check
+  Map, List, AlertCircle, Umbrella, Home, Check, Eye
 } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
@@ -102,11 +102,6 @@ export default function Dashboard() {
     localStorage.setItem("prius_beach_units", JSON.stringify(initialUnits))
   }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate("/")
-  }
-
   const handleUnitClick = (unit) => {
     if (unit) setSelectedUnit(unit)
   }
@@ -174,7 +169,6 @@ export default function Dashboard() {
 
   const filteredUnitsList = Object.values(units).filter(u => isUnitMatchingSearch(u) && isUnitMatchingFilters(u))
 
-  // Formateador de fechas para la impresión (YYYY-MM-DD -> DD/MM)
   const formatDate = (dateStr) => {
     if (!dateStr) return ""
     const parts = dateStr.split("-")
@@ -184,7 +178,6 @@ export default function Dashboard() {
     return dateStr
   }
 
-  // Renderizador de celda de Carpa para Impresión (Soporta número a la izquierda o derecha)
   const renderPrintCarpaCell = (unit, numberOnLeft = true) => {
     if (!unit) return <div className="w-[42px] h-[11px]" />
     const status = unit.status || STATUS.LIBRE
@@ -213,7 +206,6 @@ export default function Dashboard() {
     )
   }
 
-  // Renderizador de celda de Sombrilla para Impresión (Casillero a la izquierda, número a la derecha)
   const renderPrintSombrillaCell = (unit) => {
     if (!unit) return null
     const status = unit.status || STATUS.LIBRE
@@ -230,35 +222,30 @@ export default function Dashboard() {
     )
   }
 
-  if (loading) {
-    return <GlobalLoader message="Cargando plano de playa" />
-  }
-
   return (
     <>
-      {/* VISTA DE PANTALLA (Oculta al imprimir) */}
-      <div className="h-full flex flex-col bg-white text-prius-black overflow-hidden animate-premium-fade no-print">
+      <div className="h-full flex flex-col bg-white text-black overflow-hidden animate-premium-fade no-print">
         
         {/* Title & Unified Search row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-hairline">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E5E5E5]">
           <div>
-            <h1 className="text-xl uppercase tracking-wider font-extrabold font-display">Plano de Playa</h1>
-            <p className="text-xs text-neutral-500 font-sans">Mapa interactivo y distribución en tiempo real.</p>
+            <h1 className="text-lg uppercase tracking-widest font-bold font-display">Plano de Playa</h1>
+            <p className="text-[10px] uppercase tracking-wider text-neutral-500 font-sans">Mapa interactivo y distribución de carpas y sombrillas.</p>
           </div>
           
           <div className="flex items-center gap-3">
             <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-prius-black/40" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Buscar por nro, cliente..."
+                placeholder="BUSCAR POR NRO, CLIENTE..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-[#E5E5E5] focus:border-black outline-none text-xs uppercase bg-white rounded-sm"
+                className="w-full pl-10 pr-4 py-2 bg-transparent border border-[#E5E5E5] focus:border-black outline-none text-xs uppercase rounded-sm"
               />
             </div>
             
-            <button onClick={() => window.print()} className="px-3 py-2 border border-[#E5E5E5] hover:bg-neutral-50 rounded-sm text-xs font-bold uppercase transition-colors" title="Imprimir Plano">
+            <button onClick={() => window.print()} className="px-4 py-2 border border-[#E5E5E5] hover:bg-black hover:text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-colors" title="Imprimir Plano">
               Imprimir
             </button>
           </div>
@@ -267,47 +254,47 @@ export default function Dashboard() {
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden mt-6">
           {/* Main Content Map Container */}
           <main className="flex-1 overflow-auto pr-0 lg:pr-6">
-            <div className="flex items-center justify-between bg-white border border-hairline p-3 rounded-sm mb-6">
+            <div className="flex items-center justify-between bg-white border border-[#E5E5E5] p-3 rounded-sm mb-6">
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => setViewMode("map")}
-                  className={`px-4 py-2 rounded-sm font-extralight text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 font-display ${viewMode === "map" ? 'bg-gold text-prius-black' : 'hover:bg-prius-background'}`}
+                  className={`px-4 py-2 rounded-sm font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border ${viewMode === "map" ? 'bg-black text-[#F2CA50] border-black' : 'border-[#E5E5E5] hover:bg-neutral-50'}`}
                 >
-                  <Map className="w-4 h-4" />
-                  Mapa de Playa
+                  <Map className="w-3.5 h-3.5" />
+                  Plano Interactivo
                 </button>
                 <button 
                   onClick={() => setViewMode("list")}
-                  className={`px-4 py-2 rounded-sm font-extralight text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 font-display ${viewMode === "list" ? 'bg-gold text-prius-black' : 'hover:bg-prius-background'}`}
+                  className={`px-4 py-2 rounded-sm font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border ${viewMode === "list" ? 'bg-black text-[#F2CA50] border-black' : 'border-[#E5E5E5] hover:bg-neutral-50'}`}
                 >
-                  Lista ({filteredUnitsList.length})
+                  Lista Completa ({filteredUnitsList.length})
                 </button>
               </div>
 
               {searchTerm && (
-                <div className="text-[10px] font-extralight uppercase tracking-wider text-gold bg-prius-black px-3 py-1.5 rounded-sm flex items-center gap-2 font-display">
-                  Filtrando: "{searchTerm}"
+                <div className="text-[9px] font-bold uppercase tracking-widest bg-[#F2CA50] text-black px-3 py-1.5 rounded-sm flex items-center gap-1.5">
+                  Filtro activo: "{searchTerm}"
                 </div>
               )}
             </div>
 
             {viewMode === "map" ? (
               /* VISTA DE MAPA */
-              <div className="bg-white border border-hairline p-4 md:p-8 rounded-sm max-w-full overflow-auto">
+              <div className="bg-[#F9F9F9] border border-[#E5E5E5] p-4 md:p-8 rounded-sm max-w-full overflow-auto">
                 <div className="mx-auto" style={{ maxWidth: "950px" }}>
                   <div className="flex justify-center mb-6">
-                    <div className="flex text-[10px] font-extralight uppercase tracking-widest font-display">
-                      <div className="w-[280px] bg-prius-background py-2 text-center border border-hairline">Recreación</div>
-                      <div className="w-[140px] bg-white py-2 text-center border-y border-hairline">Acceso</div>
+                    <div className="flex text-[9px] font-bold uppercase tracking-widest font-display">
+                      <div className="w-[280px] bg-white py-2 text-center border border-[#E5E5E5]">Recreación</div>
+                      <div className="w-[140px] bg-white py-2 text-center border-y border-[#E5E5E5]">Acceso Principal</div>
                       <div className="w-[280px] relative">
-                        <div className="absolute inset-x-0 top-0 h-[110px] bg-sky-100 text-sky-800 border border-sky-200 rounded-sm flex flex-col items-center justify-center z-20 shadow-inner font-bold">
-                          <span className="text-[11px] font-normal uppercase tracking-[0.3em] text-sky-800 font-display">PILETA</span>
+                        <div className="absolute inset-x-0 top-0 h-[110px] bg-[#E5E5E5]/50 text-black border border-[#E5E5E5] rounded-sm flex flex-col items-center justify-center z-20 font-bold">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.3em] font-display">Sector Piscina</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-center gap-4 relative">
+                  <div className="flex justify-center gap-4 relative mt-16 md:mt-24">
                     {/* Pasillo A */}
                     <div className="flex gap-12">
                       <div className="flex flex-col gap-1">
@@ -344,7 +331,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="w-px bg-hairline mx-4" />
+                    <div className="w-px bg-[#E5E5E5] mx-4" />
 
                     {/* Pasillo B */}
                     <div className="flex gap-12">
@@ -383,7 +370,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="w-px bg-hairline mx-4" />
+                    <div className="w-px bg-[#E5E5E5] mx-4" />
 
                     {/* Pasillo C */}
                     <div className="flex gap-12">
@@ -425,8 +412,8 @@ export default function Dashboard() {
                   </div>
 
                   {/* Sombrillas */}
-                  <div className="mt-12 flex flex-col items-center">
-                    <span className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 mb-4 font-display">Sombrillas</span>
+                  <div className="mt-16 flex flex-col items-center">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-6 font-display">Sector Sombrillas</span>
                     <div className="flex gap-16 justify-center">
                       <div className="flex flex-col gap-1">
                         {[
@@ -482,8 +469,8 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="mt-12 flex justify-center">
-                    <div className="w-full max-w-[600px] bg-prius-black py-3 text-center text-white font-extralight text-xs tracking-[0.3em] uppercase font-display">
+                  <div className="mt-16 flex justify-center">
+                    <div className="w-full max-w-[600px] bg-black py-4 text-center text-white font-bold text-[10px] tracking-[0.4em] uppercase font-display border border-black">
                       Mar Argentino
                     </div>
                   </div>
@@ -491,54 +478,54 @@ export default function Dashboard() {
               </div>
             ) : (
               /* VISTA DE LISTA / TABLA */
-              <div className="bg-white border border-hairline rounded-sm overflow-hidden">
+              <div className="bg-white border border-[#E5E5E5] rounded-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-prius-black text-white text-[10px] font-extralight uppercase tracking-widest font-display">
-                      <th className="p-4 border-b border-hairline">Unidad</th>
-                      <th className="p-4 border-b border-hairline">Cliente</th>
-                      <th className="p-4 border-b border-hairline">Estadía</th>
-                      <th className="p-4 border-b border-hairline">Estado Pago</th>
-                      <th className="p-4 border-b border-hairline text-right">Acciones</th>
+                    <tr className="bg-black text-white text-[9px] font-bold uppercase tracking-widest font-display">
+                      <th className="p-4 border-b border-[#E5E5E5]">Unidad</th>
+                      <th className="p-4 border-b border-[#E5E5E5]">Cliente</th>
+                      <th className="p-4 border-b border-[#E5E5E5]">Estadía</th>
+                      <th className="p-4 border-b border-[#E5E5E5]">Estado Pago</th>
+                      <th className="p-4 border-b border-[#E5E5E5] text-right">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-hairline text-xs">
+                  <tbody className="divide-y divide-[#E5E5E5] text-xs">
                     {filteredUnitsList.map((unit) => (
-                      <tr key={unit.id} className="hover:bg-prius-background transition-colors">
+                      <tr key={unit.id} className="hover:bg-[#F9F9F9] transition-colors">
                         <td className="p-4 font-bold flex items-center gap-2">
                           <span className="uppercase">{unit.type} #{unit.number}</span>
                         </td>
                         <td className="p-4">
                           {unit.clientName ? (
-                            <span className="font-medium uppercase">{unit.clientName}</span>
+                            <span className="font-bold uppercase">{unit.clientName}</span>
                           ) : (
-                            <span className="text-prius-black/30 italic">Disponible</span>
+                            <span className="text-neutral-300 italic uppercase">Disponible</span>
                           )}
                         </td>
                         <td className="p-4">
                           {unit.status === STATUS.LIBRE ? (
-                            <span className="text-green-600 font-bold uppercase text-[10px]">Libre</span>
+                            <span className="text-green-600 font-bold uppercase text-[9px] tracking-wider">Libre</span>
                           ) : unit.isTemporada ? (
-                            <span className="bg-prius-black text-white px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase">Temporada</span>
+                            <span className="bg-black text-white px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider">Temporada</span>
                           ) : (
-                            <span className="bg-gold/20 text-prius-black px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase">
+                            <span className="bg-[#F2CA50]/20 text-black px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider">
                               {unit.startDate} al {unit.endDate}
                             </span>
                           )}
                         </td>
                         <td className="p-4">
                           {unit.status === STATUS.LIBRE ? (
-                            <span className="text-prius-black/30">-</span>
+                            <span className="text-neutral-300 uppercase font-bold text-[9px]">-</span>
                           ) : unit.isPaid ? (
-                            <span className="text-green-600 font-bold uppercase text-[10px]">Pagado</span>
+                            <span className="text-green-600 font-bold uppercase text-[9px] tracking-wider">PAGADO</span>
                           ) : (
-                            <span className="text-red-500 font-bold uppercase text-[10px]">Pendiente</span>
+                            <span className="text-red-500 font-bold uppercase text-[9px] tracking-wider">PENDIENTE</span>
                           )}
                         </td>
                         <td className="p-4 text-right">
                           <button 
                             onClick={() => handleUnitClick(unit)}
-                            className="px-3 py-1.5 bg-prius-black text-white hover:bg-gold hover:text-prius-black rounded-sm font-bold text-[9px] uppercase tracking-wider"
+                            className="px-3 py-1.5 bg-black text-white hover:bg-[#F2CA50] hover:text-black rounded-sm font-bold text-[9px] uppercase tracking-wider transition-colors"
                           >
                             Gestionar
                           </button>
@@ -551,60 +538,60 @@ export default function Dashboard() {
             )}
           </main>
 
-          {/* Sidebar / Aside right for filters and metrics */}
-          <aside className="w-full lg:w-72 bg-white border-l border-hairline pl-0 lg:pl-6 pt-6 lg:pt-0 space-y-6 shrink-0 lg:overflow-y-auto">
-            {/* Filtros Rápidos */}
-            <div className="space-y-4">
-              <h3 className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 font-display">Filtros de Vista</h3>
+          {/* Sidebar / Bento Grid Aside right for filters and metrics */}
+          <aside className="w-full lg:w-72 pl-0 lg:pl-6 pt-6 lg:pt-0 space-y-6 shrink-0 lg:overflow-y-auto">
+            {/* Bento Filter Box */}
+            <div className="p-5 border border-[#E5E5E5] bg-white rounded-sm space-y-4">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">Filtros Rápidos</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-extralight uppercase tracking-wider text-prius-black/60 block mb-1 font-display">Tipo de Unidad</label>
+                  <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1 font-display">Tipo</label>
                   <select 
                     value={typeFilter} 
                     onChange={(e) => setTypeFilter(e.target.value)}
-                    className="w-full border border-hairline rounded-sm py-1.5 px-2 text-xs outline-none bg-transparent"
+                    className="w-full border border-[#E5E5E5] rounded-sm py-1.5 px-2 text-xs outline-none bg-transparent"
                   >
-                    <option value="all">Todos</option>
-                    <option value="carpa">Carpas</option>
-                    <option value="sombrilla">Sombrillas</option>
+                    <option value="all">TODOS</option>
+                    <option value="carpa">CARPAS</option>
+                    <option value="sombrilla">SOMBRILLAS</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-extralight uppercase tracking-wider text-prius-black/60 block mb-1 font-display">Estado de Reserva</label>
+                  <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1 font-display">Estado de Reserva</label>
                   <select 
                     value={statusFilter} 
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full border border-hairline rounded-sm py-1.5 px-2 text-xs outline-none bg-transparent"
+                    className="w-full border border-[#E5E5E5] rounded-sm py-1.5 px-2 text-xs outline-none bg-transparent"
                   >
-                    <option value="all">Todos</option>
-                    <option value="libre">Disponibles</option>
-                    <option value="temporada">Temporada Completa</option>
-                    <option value="periodo">Por Período</option>
+                    <option value="all">TODOS</option>
+                    <option value="libre">DISPONIBLES</option>
+                    <option value="temporada">TEMPORADA COMPLETA</option>
+                    <option value="periodo">POR PERÍODO</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            {/* Estadísticas */}
-            <div className="space-y-3 pt-4 border-t border-hairline">
-              <h3 className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 font-display">Resumen Unidades</h3>
+            {/* Bento Statistics Box */}
+            <div className="p-5 border border-[#E5E5E5] bg-white rounded-sm space-y-3">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">Resumen Unidades</h3>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-3 bg-prius-black text-white rounded-sm">
-                  <p className="text-xl font-normal">{stats.carpasOcupadas}</p>
-                  <p className="text-[8px] font-extralight uppercase opacity-60">Carpas Ocupadas</p>
+                <div className="p-3 bg-black text-white rounded-sm flex flex-col justify-between">
+                  <p className="text-xl font-bold">{stats.carpasOcupadas}</p>
+                  <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-400">Carpas Ocupadas</p>
                 </div>
-                <div className="p-3 bg-white border border-hairline">
-                  <p className="text-xl font-normal text-black">{stats.carpasLibres}</p>
-                  <p className="text-[8px] font-extralight uppercase text-neutral-400">Carpas Libres</p>
+                <div className="p-3 bg-white border border-[#E5E5E5] rounded-sm flex flex-col justify-between">
+                  <p className="text-xl font-bold text-black">{stats.carpasLibres}</p>
+                  <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-400">Carpas Libres</p>
                 </div>
               </div>
             </div>
 
-            {/* Tareas */}
-            <div className="pt-4 border-t border-hairline space-y-3">
-              <h3 className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 flex items-center justify-between font-display">
-                <span>Tareas Rápidas</span>
+            {/* Bento Tareas Box */}
+            <div className="p-5 border border-[#E5E5E5] bg-white rounded-sm space-y-3">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 flex items-center justify-between font-display">
+                <span>Tareas de la Fecha</span>
               </h3>
               
               <form onSubmit={handleAddTodo} className="flex gap-2">
@@ -613,20 +600,20 @@ export default function Dashboard() {
                   placeholder="Nueva tarea..."
                   value={newTodo}
                   onChange={(e) => setNewTodo(e.target.value)}
-                  className="flex-1 px-3 py-1.5 border border-hairline rounded-sm text-xs focus:border-gold outline-none"
+                  className="flex-1 px-3 py-1.5 border border-[#E5E5E5] rounded-sm text-xs focus:border-black outline-none"
                 />
-                <button type="submit" className="p-1.5 bg-gold hover:bg-gold-hover rounded-sm">
-                  <Plus className="w-4 h-4" />
+                <button type="submit" className="px-3 bg-black text-[#F2CA50] hover:bg-black/90 rounded-sm">
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
               </form>
 
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {todos.map(todo => (
-                  <div key={todo.id} className="flex items-start justify-between gap-2 p-2 bg-prius-background border border-hairline rounded-sm text-xs">
+                  <div key={todo.id} className="flex items-start justify-between gap-2 p-2 bg-[#F9F9F9] border border-[#E5E5E5] rounded-sm text-xs">
                     <button type="button" onClick={() => toggleTodo(todo.id)}>
-                      {todo.completed ? <CheckSquare className="w-4 h-4 text-green-600 animate-pulse" /> : <Square className="w-4 h-4" />}
+                      {todo.completed ? <CheckSquare className="w-3.5 h-3.5 text-green-600" /> : <Square className="w-3.5 h-3.5" />}
                     </button>
-                    <span className={`flex-1 leading-tight ${todo.completed ? 'line-through opacity-40' : ''}`}>
+                    <span className={`flex-1 leading-tight text-[11px] uppercase ${todo.completed ? 'line-through opacity-40' : 'text-neutral-700'}`}>
                       {todo.text}
                     </span>
                     <button type="button" onClick={() => deleteTodo(todo.id)}>
@@ -650,27 +637,22 @@ export default function Dashboard() {
 
       {/* VISTA DE IMPRESIÓN EXCLUSIVA */}
       <div className="hidden print:block bg-white text-black p-2 w-full h-full font-sans leading-tight">
-        {/* Título Principal */}
         <div className="text-center mb-1">
           <h1 className="text-[11px] font-bold uppercase tracking-wider">Plano General Temporada 25-26</h1>
           <div className="h-[2px] bg-black mt-0.5"></div>
         </div>
 
-        {/* Encabezados de Sectores */}
         <div className="grid grid-cols-3 text-center font-bold text-[7px] uppercase border border-black bg-gray-100 py-0.5 mb-1">
           <div>Recreación</div>
           <div>Acceso</div>
           <div>Piscina</div>
         </div>
 
-        {/* Grilla de Carpas Reestructurada */}
         <div className="flex justify-center gap-6 text-[7px] mb-2">
-          {/* Pasillo 1: Columna 1 (1-25) */}
           <div className="flex flex-col gap-[1px]">
             {Array.from({ length: 25 }, (_, i) => i + 1).map(num => renderPrintCarpaCell(getCarpa(num), true))}
           </div>
 
-          {/* Pasillo 2: Columna 2 (26-50) y Columna 3 (51-75) JUNTAS */}
           <div className="flex gap-0">
             <div className="flex flex-col gap-[1px]">
               {Array.from({ length: 25 }, (_, i) => i + 26).map(num => renderPrintCarpaCell(getCarpa(num), true))}
@@ -680,9 +662,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Pasillo 3: Columna 4 (76-98) y Columna 5 (99-121) JUNTAS con Piscina arriba */}
           <div className="flex flex-col">
-            {/* Piscina unificada arriba de las dos columnas */}
             <div className="w-[84px] h-[23px] bg-sky-100 border border-black flex items-center justify-center text-[6px] font-bold mb-[1px]">
               PILETA
             </div>
@@ -696,14 +676,12 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Columna 6 (122-144) */}
           <div className="flex flex-col gap-[1px]">
             <div className="h-[23px] border border-transparent" />
             {Array.from({ length: 23 }, (_, i) => i + 122).map(num => renderPrintCarpaCell(getCarpa(num), false))}
           </div>
         </div>
 
-        {/* Grilla de Sombrillas */}
         <div className="border-[1.5px] border-black p-1 mb-1.5">
           <div className="flex justify-around gap-2">
             <div className="grid grid-cols-5 gap-x-1.5 gap-y-[1px]">
@@ -715,14 +693,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Barra de Mar */}
         <div className="bg-black text-white text-center font-bold text-[7px] py-0.5 tracking-[0.3em] uppercase mb-2">
           Mar Argentino
         </div>
 
-        {/* Listado de Períodos y Alquileres Diarios */}
         <div className="grid grid-cols-2 gap-4 text-[6.5px] leading-tight border-t border-gray-200 pt-1.5">
-          {/* Columna Izquierda: Carpas */}
           <div className="space-y-[1px]">
             <p className="font-bold uppercase text-[7px] border-b border-black pb-[1px] mb-1">Carpas</p>
             {Object.values(units)
@@ -741,7 +716,6 @@ export default function Dashboard() {
               })}
           </div>
 
-          {/* Columna Derecha: Sombrillas */}
           <div className="space-y-[1px]">
             <p className="font-bold uppercase text-[7px] border-b border-black pb-[1px] mb-1">Sombrillas</p>
             {Object.values(units)

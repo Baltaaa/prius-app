@@ -5,7 +5,7 @@ import { useClientes } from '../../hooks/useClientes'
 import { useCaja } from '../../hooks/useCaja'
 import KpiCard from '../../components/crm/KpiCard'
 import StatusBadge from '../../components/crm/StatusBadge'
-import { Calendar, Wallet, Users, AlertCircle } from 'lucide-react'
+import { Calendar, Wallet, Users, AlertCircle, ArrowRight } from 'lucide-react'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -28,80 +28,82 @@ export default function Home() {
   if (resLoading || cliLoading || cajaLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <span className="text-xs uppercase tracking-widest font-semibold text-neutral-400">Cargando métricas...</span>
+        <span className="text-xs uppercase tracking-widest font-bold text-neutral-400">Cargando métricas...</span>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-premium-fade">
       {/* Title */}
-      <div>
-        <h1 className="text-xl uppercase tracking-wider font-extrabold font-display">Inicio Prius App</h1>
-        <p className="text-xs text-neutral-500">Métricas operacionales del balneario al instante.</p>
+      <div className="pb-4 border-b border-[#E5E5E5]">
+        <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-neutral-400 block mb-1">PANEL PRINCIPAL</span>
+        <h1 className="text-xl uppercase tracking-wider font-extrabold font-display text-black">Inicio Prius App</h1>
+        <p className="text-xs text-neutral-500 uppercase tracking-wide">Métricas operacionales de la temporada actual.</p>
       </div>
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {/* KPI Grid - Bento Style */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
-          title="Ocupación Hoy"
+          title="Ocupación de Unidades"
           value={`${unidadesOcupadasCount} / ${unidades.length}`}
-          subtitle="Unidades activas o reservadas"
+          subtitle="Carpas y sombrillas ocupadas"
           icon={Calendar}
           highlight
         />
         <KpiCard
-          title="Caja del Día"
+          title="Caja Registrada Hoy"
           value={formatCurrency(totalCajaHoy)}
-          subtitle={cajaHoy ? 'Cobros registrados hoy' : 'Caja de hoy sin iniciar'}
+          subtitle={cajaHoy ? 'Arqueo de cobros registrados' : 'Caja diaria sin iniciar'}
           icon={Wallet}
         />
         <KpiCard
-          title="Saldos Pendientes"
+          title="Saldos por Cobrar"
           value={reservasConSaldoCount}
-          subtitle="Reservas con deuda activa"
+          subtitle="Clientes con saldo pendiente"
           icon={AlertCircle}
         />
         <KpiCard
-          title="Clientes Totales"
+          title="Clientes Históricos"
           value={clientesCount}
-          subtitle="Clientes históricos registrados"
+          subtitle="Registrados en la cartera"
           icon={Users}
         />
       </div>
 
-      {/* Recent Reservations list */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xs uppercase tracking-widest font-bold text-neutral-500 font-display">Últimas Reservas</h2>
+      {/* Recent Reservations Bento Block */}
+      <div className="p-6 border border-[#E5E5E5] bg-white rounded-sm space-y-4">
+        <div className="flex justify-between items-center pb-2 border-b border-[#E5E5E5]">
+          <h2 className="text-xs uppercase tracking-widest font-bold text-neutral-400 font-display">Últimos Alquileres Registrados</h2>
           <button
             onClick={() => navigate('/app/reservas')}
-            className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-800 hover:text-[#F2CA50]"
+            className="text-[10px] font-bold uppercase tracking-widest text-black hover:text-[#F2CA50] flex items-center gap-1 transition-colors"
           >
-            Ver Todas →
+            <span>Ver Reservas</span>
+            <ArrowRight size={12} />
           </button>
         </div>
 
-        <div className="bg-white border border-[#E5E5E5] overflow-hidden">
+        <div className="overflow-hidden">
           {recentReservas.length === 0 ? (
-            <p className="p-6 text-xs text-center text-neutral-400 uppercase">Sin reservas recientes registradas.</p>
+            <p className="py-6 text-xs text-center text-neutral-400 uppercase tracking-wider">Sin reservas recientes registradas.</p>
           ) : (
             <div className="divide-y divide-[#E5E5E5] text-xs">
               {recentReservas.map((res) => (
-                <div key={res.id} className="p-4 flex flex-col md:flex-row justify-between md:items-center gap-2">
+                <div key={res.id} className="py-4 flex flex-col md:flex-row justify-between md:items-center gap-3">
                   <div>
                     <p className="font-bold uppercase text-black">
-                      {res.clientes?.nombre || 'CLIENTE ELIMINADO'}
+                      {res.clientes?.nombre || 'CLIENTE INNOMBRADO'}
                     </p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-tight">
-                      Unidad {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero || 'N/A'} - Temporada: {res.temporada}
+                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-0.5">
+                      Unidad {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero || 'N/A'} — Temporada: {res.temporada}
                     </p>
                   </div>
                   <div className="flex items-center gap-4 justify-between md:justify-end">
                     <div className="text-right">
                       <p className="font-bold text-black">{formatCurrency(res.valor_total)}</p>
                       {Number(res.saldo) > 0 && (
-                        <p className="text-[10px] text-red-600 font-semibold uppercase">Debes: {formatCurrency(res.saldo)}</p>
+                        <p className="text-[9px] text-red-600 font-bold uppercase tracking-wider">Deuda: {formatCurrency(res.saldo)}</p>
                       )}
                     </div>
                     <StatusBadge status={res.estado_pago} />

@@ -29,11 +29,12 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="w-[220px] h-screen bg-[#E5E5E5] text-black flex flex-col justify-between shrink-0 hidden md:flex border-r border-[#CCCCCC]">
-      {/* Top Brand area */}
+    <aside className="w-[220px] h-screen bg-black text-white flex flex-col justify-between shrink-0 hidden md:flex border-r border-neutral-900">
       <div className="flex flex-col">
-        <div className="h-20 bg-black flex items-center px-6">
-          <span className="text-[#F2CA50] font-bold text-sm uppercase tracking-widest font-display">PRIUS APP</span>
+        {/* Brand logo space with Prius brand color */}
+        <div className="h-20 bg-black flex flex-col justify-center px-6 border-b border-neutral-900">
+          <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-neutral-500 leading-none mb-1">PLAYA GRANDE</span>
+          <span className="text-[#F2CA50] font-extrabold text-sm uppercase tracking-widest font-display leading-none">PRIUS APP</span>
         </div>
 
         <nav className="p-4 space-y-1">
@@ -42,28 +43,28 @@ export default function Sidebar() {
               key={item.path}
               to={item.path}
               className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 text-xs uppercase tracking-wider font-semibold transition-all
+                flex items-center gap-3 px-4 py-3 text-[10px] uppercase tracking-wider font-bold transition-all
                 ${isActive 
-                  ? 'bg-[#F2CA50] text-black font-bold' 
-                  : 'text-black/80 hover:bg-black/5 hover:text-black'
+                  ? 'bg-neutral-900 text-[#F2CA50] border-l-2 border-[#F2CA50]' 
+                  : 'text-neutral-400 hover:bg-neutral-900/60 hover:text-white'
                 }
               `}
             >
-              <item.icon size={16} />
-              {item.name}
+              <item.icon size={14} className="shrink-0" />
+              <span>{item.name}</span>
             </NavLink>
           ))}
         </nav>
       </div>
 
-      {/* Logout button */}
-      <div className="p-4 border-t border-black/10">
+      {/* Logout option */}
+      <div className="p-4 border-t border-neutral-900">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 text-xs uppercase tracking-wider font-semibold text-black/70 hover:bg-red-50 hover:text-red-600 transition-all text-left"
+          className="w-full flex items-center gap-3 px-4 py-3 text-[10px] uppercase tracking-widest font-bold text-neutral-500 hover:bg-red-950/20 hover:text-red-400 transition-all text-left"
         >
-          <LogOut size={16} />
-          Cerrar Sesión
+          <LogOut size={14} />
+          <span>Cerrar Sesión</span>
         </button>
       </div>
     </aside>
