@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { Eye, EyeOff, ShieldCheck, ShieldAlert } from "lucide-react"
+import { Eye, EyeOff, ShieldCheck, ShieldAlert, Lock } from "lucide-react"
 import GlobalLoader from "../components/ui/GlobalLoader"
 
 export default function Login() {
@@ -34,7 +34,7 @@ export default function Login() {
   const handleMove = (clientX) => {
     if (!isDragging || isVerified) return
     const sliderWidth = sliderRef.current.clientWidth
-    const handleWidth = 48 
+    const handleWidth = 44 
     const maxDistance = sliderWidth - handleWidth
     
     let currentPos = clientX - startXRef.current
@@ -96,7 +96,7 @@ export default function Login() {
       })
 
       if (signInError) {
-        setError("Email o contraseña incorrectos")
+        setError("Email o contraseña incorrectos.")
         setIsVerified(false)
         setSliderPosition(0)
         setIsLoading(false)
@@ -106,10 +106,10 @@ export default function Login() {
       if (data?.user) {
         setTimeout(() => {
           navigate("/app/home")
-        }, 1500)
+        }, 1000)
       }
     } catch (err) {
-      setError("Error de conexión. Verifica tu internet.")
+      setError("Error de conexión. Verifica tu acceso.")
       setIsVerified(false)
       setSliderPosition(0)
       setIsLoading(false)
@@ -117,135 +117,126 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex bg-black text-white font-sans overflow-hidden">
-      {isLoading && <GlobalLoader message="Iniciando sesión de administrador" />}
+    <div className="min-h-screen bg-[#F9F9F9] flex flex-col justify-center items-center p-4 font-sans text-black">
+      {isLoading && <GlobalLoader message="Iniciando sesión en PriusAdmin" />}
 
-      {/* Left panel - Premium image and minimal logo */}
-      <div className="hidden lg:flex lg:w-1/2 bg-black relative overflow-hidden items-center justify-center p-12 border-r border-neutral-900">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/logo-prius.png" 
-            alt="Prius" 
-            className="w-full h-full object-cover opacity-5 mix-blend-luminosity filter blur-sm scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black" />
-        </div>
+      <div className="w-full max-w-md bg-white border border-[#E5E5E5] rounded p-8 space-y-6">
         
-        <div className="relative z-10 text-center max-w-md">
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#F2CA50] mb-4 block">PRIUS PLAYA GRANDE</span>
-          <h1 className="text-3xl font-extralight text-white mb-4 tracking-tight leading-none uppercase font-display">
-            SISTEMA DE GESTIÓN <br /><span className="font-bold text-[#F2CA50]">ADMINISTRATIVA</span>
-          </h1>
-          <p className="text-neutral-500 text-xs uppercase tracking-wider leading-relaxed">
-            Plataforma reservada para la coordinación y control operativo del balneario premium en Mar del Plata.
-          </p>
+        {/* Brand Badge Header */}
+        <div className="text-center space-y-2">
+          <div className="w-12 h-12 bg-black rounded mx-auto flex items-center justify-center font-bold text-[#F2CA50] text-xl">
+            P
+          </div>
+          <div>
+            <h1 className="text-lg font-bold tracking-tight text-black">PriusAdmin</h1>
+            <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider mt-0.5">Playa Grande — Iniciar Sesión</p>
+          </div>
         </div>
-      </div>
 
-      {/* Right panel - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-16 bg-black relative">
-        <div className="w-full max-w-sm space-y-8 animate-premium-fade">
-          <div className="text-center lg:text-left">
-            <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-[#F2CA50] block mb-2">GESTIÓN EXCLUSIVA</span>
-            <h2 className="text-2xl font-bold uppercase tracking-widest text-white leading-none font-display">
-              INGRESAR
-            </h2>
-            <p className="text-neutral-500 text-[10px] uppercase tracking-wider mt-1.5">
-              Identifíquese con sus credenciales autorizadas
-            </p>
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-neutral-600 uppercase tracking-wider">
+              Correo Electrónico
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@priusplayagrande.com"
+              required
+              className="w-full h-10 px-3 bg-white border border-[#E5E5E5] text-xs text-black focus:border-black outline-none rounded font-medium"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">EMAIL DE ACCESO</label>
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-neutral-600 uppercase tracking-wider">
+              Contraseña
+            </label>
+            <div className="relative">
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@priusplayagrande.com"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
                 required
-                className="w-full h-11 px-4 bg-neutral-900 border border-neutral-800 text-xs text-white focus:border-[#F2CA50] outline-none transition-all rounded-none uppercase tracking-wider font-semibold placeholder:text-neutral-700"
+                className="w-full h-10 px-3 bg-white border border-[#E5E5E5] text-xs text-black focus:border-black outline-none rounded font-medium pr-10"
               />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">CONTRASEÑA</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full h-11 px-4 bg-neutral-900 border border-neutral-800 text-xs text-white focus:border-[#F2CA50] outline-none transition-all rounded-none tracking-widest font-semibold placeholder:text-neutral-700"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Slider de Seguridad */}
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">VERIFICACIÓN DE SEGURIDAD</label>
-              <div 
-                ref={sliderRef}
-                className={`relative h-11 w-full border flex items-center justify-center select-none overflow-hidden transition-colors duration-300 ${
-                  isVerified 
-                    ? "bg-[#F2CA50]/10 border-[#F2CA50]" 
-                    : "bg-neutral-900 border-neutral-800"
-                }`}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
               >
-                <span className={`text-[8px] font-bold uppercase tracking-widest transition-opacity duration-300 ${
-                  isVerified ? "text-[#F2CA50]" : "text-neutral-500"
-                }`}>
-                  {isVerified ? "CONEXIÓN VERIFICADA" : "DESLICE PARA DESBLOQUEAR SISTEMA"}
-                </span>
-
-                <div
-                  onMouseDown={onMouseDown}
-                  onTouchStart={onTouchStart}
-                  style={{ 
-                    transform: `translateX(${sliderPosition}px)`,
-                    transition: isDragging ? "none" : "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
-                  }}
-                  className={`absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center cursor-grab active:cursor-grabbing transition-colors duration-300 ${
-                    isVerified 
-                      ? "bg-[#F2CA50] text-black" 
-                      : "bg-neutral-800 text-neutral-400 hover:bg-[#F2CA50] hover:text-black"
-                  }`}
-                >
-                  {isVerified ? (
-                    <ShieldCheck className="w-4 h-4" />
-                  ) : (
-                    <ShieldAlert className="w-4 h-4" />
-                  )}
-                </div>
-              </div>
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
+          </div>
 
-            {error && (
-              <div className="p-3 bg-red-950/40 border border-red-900/60 rounded-none text-center">
-                <p className="text-red-400 text-[10px] uppercase tracking-wider font-semibold">{error}</p>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading || !isVerified}
-              className={`w-full h-12 font-bold text-xs uppercase tracking-widest transition-all rounded-none border ${
-                isVerified && !isLoading
-                  ? "bg-[#F2CA50] text-black border-[#F2CA50] hover:bg-[#E5BF45] cursor-pointer"
-                  : "bg-transparent text-neutral-600 border-neutral-800 cursor-not-allowed"
+          {/* Slide to Verify Security Barrier */}
+          <div className="space-y-1 pt-1">
+            <label className="text-[11px] font-bold text-neutral-600 uppercase tracking-wider flex items-center gap-1.5">
+              <Lock size={12} /> Verificación de Seguridad
+            </label>
+            <div 
+              ref={sliderRef}
+              className={`relative h-11 w-full border flex items-center justify-center select-none overflow-hidden rounded transition-colors duration-200 ${
+                isVerified 
+                  ? "bg-green-50 border-green-300" 
+                  : "bg-[#F9F9F9] border-[#E5E5E5]"
               }`}
             >
-              ACCEDER AL PANEL
-            </button>
-          </form>
+              <span className={`text-[10px] font-bold uppercase tracking-wider transition-opacity duration-200 ${
+                isVerified ? "text-green-700" : "text-neutral-400"
+              }`}>
+                {isVerified ? "VERIFICADO CORRECTAMENTE" : "DESLIZAR PARA DESBLOQUEAR"}
+              </span>
+
+              <div
+                onMouseDown={onMouseDown}
+                onTouchStart={onTouchStart}
+                style={{ 
+                  transform: `translateX(${sliderPosition}px)`,
+                  transition: isDragging ? "none" : "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+                }}
+                className={`absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center cursor-grab active:cursor-grabbing rounded transition-colors duration-200 ${
+                  isVerified 
+                    ? "bg-green-600 text-white" 
+                    : "bg-[#F2CA50] text-black hover:bg-[#E5BF45]"
+                }`}
+              >
+                {isVerified ? (
+                  <ShieldCheck className="w-4 h-4" />
+                ) : (
+                  <ShieldAlert className="w-4 h-4" />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded text-center">
+              <p className="text-red-600 text-xs font-semibold">{error}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading || !isVerified}
+            className={`w-full h-11 font-bold text-xs uppercase tracking-wider rounded transition-colors ${
+              isVerified && !isLoading
+                ? "bg-[#F2CA50] hover:bg-[#E5BF45] text-black cursor-pointer"
+                : "bg-[#E5E5E5] text-neutral-400 cursor-not-allowed"
+            }`}
+          >
+            Ingresar al Panel
+          </button>
+        </form>
+
+        <div className="text-center border-t border-[#E5E5E5] pt-4">
+          <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider">
+            PriusAdmin &bull; Balneario Playa Grande
+          </p>
         </div>
       </div>
     </div>
