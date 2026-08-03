@@ -15,6 +15,7 @@ export default function PrivateRoute({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
+      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
@@ -25,7 +26,7 @@ export default function PrivateRoute({ children }) {
   }
 
   if (!session) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/" replace />
   }
 
   return children
