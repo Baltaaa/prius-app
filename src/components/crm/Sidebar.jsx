@@ -43,9 +43,9 @@ export default function Sidebar({ notificationsCount = 0 }) {
     <aside className="w-64 h-screen bg-white border-r border-[#E5E5E5] flex flex-col justify-between shrink-0 hidden md:flex sticky top-0 left-0 z-30">
       <div className="flex flex-col overflow-y-auto">
         {/* Brand Header */}
-        <div className="h-16 flex items-center px-6 border-b border-[#E5E5E5] gap-3">
-          <div className="w-9 h-9 bg-black rounded flex items-center justify-center p-1.5 overflow-hidden shrink-0">
-            <img src="/logo-prius.png" alt="Prius Logo" className="w-full h-full object-contain" />
+        <div className="h-16 flex items-center px-5 border-b border-[#E5E5E5] gap-3">
+          <div className="w-11 h-11 flex items-center justify-center shrink-0 overflow-hidden rounded-md">
+            <img src="/logo-prius.png" alt="Prius Logo" className="w-full h-full object-cover scale-125" />
           </div>
           <div>
             <h1 className="font-bold text-sm text-black tracking-tight leading-none">PriusAdmin</h1>
