@@ -226,75 +226,61 @@ export default function Dashboard() {
     <>
       <div className="h-full flex flex-col bg-white text-black overflow-hidden animate-premium-fade no-print">
         
-        {/* Title & Unified Search row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-[#E5E5E5]">
+        {/* Title & Actions Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E5E5E5]">
           <div>
-            <h1 className="text-lg uppercase tracking-widest font-bold font-display">Plano de Playa</h1>
-            <p className="text-[10px] uppercase tracking-wider text-neutral-500 font-sans">Mapa interactivo y distribución de carpas y sombrillas.</p>
+            <h1 className="text-base font-bold text-black tracking-tight uppercase">Plano de Playa</h1>
+            <p className="text-[11px] text-neutral-500 font-normal">Distribución interactiva de carpas y sombrillas.</p>
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="BUSCAR POR NRO, CLIENTE..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-transparent border border-[#E5E5E5] focus:border-black outline-none text-xs uppercase rounded-sm"
-              />
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-[#F9F9F9] border border-[#E5E5E5] p-1 rounded-sm">
+              <button 
+                onClick={() => setViewMode("map")}
+                className={`px-3 py-1 rounded-sm font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${viewMode === "map" ? 'bg-black text-[#F2CA50]' : 'text-neutral-600 hover:text-black'}`}
+              >
+                <Map className="w-3.5 h-3.5" />
+                Mapa
+              </button>
+              <button 
+                onClick={() => setViewMode("list")}
+                className={`px-3 py-1 rounded-sm font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${viewMode === "list" ? 'bg-black text-[#F2CA50]' : 'text-neutral-600 hover:text-black'}`}
+              >
+                Lista ({filteredUnitsList.length})
+              </button>
             </div>
-            
-            <button onClick={() => window.print()} className="px-4 py-2 border border-[#E5E5E5] hover:bg-black hover:text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-colors" title="Imprimir Plano">
+
+            <button 
+              onClick={() => window.print()} 
+              className="px-3 py-1.5 border border-[#E5E5E5] hover:bg-black hover:text-white rounded-sm text-xs font-semibold tracking-wide transition-colors flex items-center gap-1.5" 
+              title="Imprimir Plano"
+            >
+              <Printer className="w-3.5 h-3.5" />
               Imprimir
             </button>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden mt-4">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden mt-3">
           {/* Main Content Map Container */}
-          <main className="flex-1 overflow-auto pr-0 lg:pr-4">
-            <div className="flex items-center justify-between bg-white border border-[#E5E5E5] p-2.5 rounded-sm mb-4">
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setViewMode("map")}
-                  className={`px-3 py-1.5 rounded-sm font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border ${viewMode === "map" ? 'bg-black text-[#F2CA50] border-black' : 'border-[#E5E5E5] hover:bg-neutral-50'}`}
-                >
-                  <Map className="w-3.5 h-3.5" />
-                  Plano Interactivo
-                </button>
-                <button 
-                  onClick={() => setViewMode("list")}
-                  className={`px-3 py-1.5 rounded-sm font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border ${viewMode === "list" ? 'bg-black text-[#F2CA50] border-black' : 'border-[#E5E5E5] hover:bg-neutral-50'}`}
-                >
-                  Lista Completa ({filteredUnitsList.length})
-                </button>
-              </div>
-
-              {searchTerm && (
-                <div className="text-[9px] font-bold uppercase tracking-widest bg-[#F2CA50] text-black px-3 py-1 rounded-sm flex items-center gap-1.5">
-                  Filtro activo: "{searchTerm}"
-                </div>
-              )}
-            </div>
-
+          <main className="flex-1 overflow-auto pr-0 lg:pr-3">
             {viewMode === "map" ? (
               /* VISTA DE MAPA */
-              <div className="bg-[#F9F9F9] border border-[#E5E5E5] p-3 md:p-5 rounded-sm max-w-full overflow-auto">
+              <div className="bg-[#F9F9F9] border border-[#E5E5E5] p-3 md:p-4 rounded-sm max-w-full overflow-auto">
                 <div className="mx-auto" style={{ maxWidth: "880px" }}>
-                  <div className="flex justify-center mb-3">
+                  <div className="flex justify-center mb-2">
                     <div className="flex text-[9px] font-bold uppercase tracking-widest font-display">
-                      <div className="w-[240px] bg-white py-1.5 text-center border border-[#E5E5E5]">Recreación</div>
-                      <div className="w-[120px] bg-white py-1.5 text-center border-y border-[#E5E5E5]">Acceso Principal</div>
+                      <div className="w-[240px] bg-white py-1 text-center border border-[#E5E5E5]">Recreación</div>
+                      <div className="w-[120px] bg-white py-1 text-center border-y border-[#E5E5E5]">Acceso</div>
                       <div className="w-[240px] relative">
-                        <div className="absolute inset-x-0 top-0 h-[80px] bg-[#E5E5E5]/50 text-black border border-[#E5E5E5] rounded-sm flex flex-col items-center justify-center z-20 font-bold">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] font-display">Sector Piscina</span>
+                        <div className="absolute inset-x-0 top-0 h-[70px] bg-[#E5E5E5]/50 text-black border border-[#E5E5E5] rounded-sm flex items-center justify-center z-20 font-bold">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Sector Piscina</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-center gap-2 md:gap-3 relative mt-12 md:mt-14">
+                  <div className="flex justify-center gap-2 md:gap-3 relative mt-10">
                     {/* Pasillo A */}
                     <div className="flex gap-6 md:gap-8">
                       <div className="flex flex-col gap-[2px]">
@@ -331,7 +317,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="w-px bg-[#E5E5E5] mx-2" />
+                    <div className="w-px bg-[#E5E5E5] mx-1.5" />
 
                     {/* Pasillo B */}
                     <div className="flex gap-6 md:gap-8">
@@ -370,7 +356,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="w-px bg-[#E5E5E5] mx-2" />
+                    <div className="w-px bg-[#E5E5E5] mx-1.5" />
 
                     {/* Pasillo C */}
                     <div className="flex gap-6 md:gap-8">
@@ -412,8 +398,8 @@ export default function Dashboard() {
                   </div>
 
                   {/* Sombrillas */}
-                  <div className="mt-8 flex flex-col items-center">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-3 font-display">Sector Sombrillas</span>
+                  <div className="mt-6 flex flex-col items-center">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Sector Sombrillas</span>
                     <div className="flex gap-8 justify-center">
                       <div className="flex flex-col gap-[2px]">
                         {[
@@ -469,8 +455,8 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="mt-8 flex justify-center">
-                    <div className="w-full max-w-[500px] bg-black py-2.5 text-center text-white font-bold text-[9px] tracking-[0.3em] uppercase font-display border border-black">
+                  <div className="mt-6 flex justify-center">
+                    <div className="w-full max-w-[480px] bg-black py-2 text-center text-white font-bold text-[9px] tracking-[0.3em] uppercase">
                       Mar Argentino
                     </div>
                   </div>
@@ -481,28 +467,28 @@ export default function Dashboard() {
               <div className="bg-white border border-[#E5E5E5] rounded-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-black text-white text-[9px] font-bold uppercase tracking-widest font-display">
-                      <th className="p-4 border-b border-[#E5E5E5]">Unidad</th>
-                      <th className="p-4 border-b border-[#E5E5E5]">Cliente</th>
-                      <th className="p-4 border-b border-[#E5E5E5]">Estadía</th>
-                      <th className="p-4 border-b border-[#E5E5E5]">Estado Pago</th>
-                      <th className="p-4 border-b border-[#E5E5E5] text-right">Acciones</th>
+                    <tr className="bg-[#F9F9F9] text-black text-[10px] font-bold uppercase tracking-wider border-b border-[#E5E5E5]">
+                      <th className="p-3">Unidad</th>
+                      <th className="p-3">Cliente</th>
+                      <th className="p-3">Estadía</th>
+                      <th className="p-3">Estado Pago</th>
+                      <th className="p-3 text-right">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E5E5E5] text-xs">
                     {filteredUnitsList.map((unit) => (
                       <tr key={unit.id} className="hover:bg-[#F9F9F9] transition-colors">
-                        <td className="p-4 font-bold flex items-center gap-2">
+                        <td className="p-3 font-bold flex items-center gap-2">
                           <span className="uppercase">{unit.type} #{unit.number}</span>
                         </td>
-                        <td className="p-4">
+                        <td className="p-3">
                           {unit.clientName ? (
                             <span className="font-bold uppercase">{unit.clientName}</span>
                           ) : (
                             <span className="text-neutral-300 italic uppercase">Disponible</span>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="p-3">
                           {unit.status === STATUS.LIBRE ? (
                             <span className="text-green-600 font-bold uppercase text-[9px] tracking-wider">Libre</span>
                           ) : unit.isTemporada ? (
@@ -513,7 +499,7 @@ export default function Dashboard() {
                             </span>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="p-3">
                           {unit.status === STATUS.LIBRE ? (
                             <span className="text-neutral-300 uppercase font-bold text-[9px]">-</span>
                           ) : unit.isPaid ? (
@@ -522,10 +508,10 @@ export default function Dashboard() {
                             <span className="text-red-500 font-bold uppercase text-[9px] tracking-wider">PENDIENTE</span>
                           )}
                         </td>
-                        <td className="p-4 text-right">
+                        <td className="p-3 text-right">
                           <button 
                             onClick={() => handleUnitClick(unit)}
-                            className="px-3 py-1.5 bg-black text-white hover:bg-[#F2CA50] hover:text-black rounded-sm font-bold text-[9px] uppercase tracking-wider transition-colors"
+                            className="px-2.5 py-1 bg-black text-white hover:bg-[#F2CA50] hover:text-black rounded-sm font-bold text-[9px] uppercase tracking-wider transition-colors"
                           >
                             Gestionar
                           </button>
@@ -539,17 +525,17 @@ export default function Dashboard() {
           </main>
 
           {/* Sidebar / Bento Grid Aside right for filters and metrics */}
-          <aside className="w-full lg:w-64 pl-0 lg:pl-4 pt-4 lg:pt-0 space-y-4 shrink-0 lg:overflow-y-auto">
+          <aside className="w-full lg:w-60 pl-0 lg:pl-3 pt-3 lg:pt-0 space-y-3 shrink-0 lg:overflow-y-auto">
             {/* Bento Filter Box */}
-            <div className="p-4 border border-[#E5E5E5] bg-white rounded-sm space-y-3">
-              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">Filtros Rápidos</h3>
+            <div className="p-3 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Filtros Rápidos</h3>
               <div className="space-y-2">
                 <div>
-                  <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1 font-display">Tipo</label>
+                  <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">Tipo</label>
                   <select 
                     value={typeFilter} 
                     onChange={(e) => setTypeFilter(e.target.value)}
-                    className="w-full border border-[#E5E5E5] rounded-sm py-1.5 px-2 text-xs outline-none bg-transparent"
+                    className="w-full border border-[#E5E5E5] rounded-sm py-1 px-2 text-xs outline-none bg-transparent"
                   >
                     <option value="all">TODOS</option>
                     <option value="carpa">CARPAS</option>
@@ -558,11 +544,11 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1 font-display">Estado de Reserva</label>
+                  <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">Estado de Reserva</label>
                   <select 
                     value={statusFilter} 
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full border border-[#E5E5E5] rounded-sm py-1.5 px-2 text-xs outline-none bg-transparent"
+                    className="w-full border border-[#E5E5E5] rounded-sm py-1 px-2 text-xs outline-none bg-transparent"
                   >
                     <option value="all">TODOS</option>
                     <option value="libre">DISPONIBLES</option>
@@ -574,40 +560,40 @@ export default function Dashboard() {
             </div>
 
             {/* Bento Statistics Box */}
-            <div className="p-4 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
-              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">Resumen Unidades</h3>
+            <div className="p-3 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Resumen Unidades</h3>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 bg-black text-white rounded-sm flex flex-col justify-between">
-                  <p className="text-lg font-bold">{stats.carpasOcupadas}</p>
+                <div className="p-2 bg-black text-white rounded-sm flex flex-col justify-between">
+                  <p className="text-base font-bold">{stats.carpasOcupadas}</p>
                   <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-400">Carpas Ocupadas</p>
                 </div>
-                <div className="p-2.5 bg-white border border-[#E5E5E5] rounded-sm flex flex-col justify-between">
-                  <p className="text-lg font-bold text-black">{stats.carpasLibres}</p>
+                <div className="p-2 bg-white border border-[#E5E5E5] rounded-sm flex flex-col justify-between">
+                  <p className="text-base font-bold text-black">{stats.carpasLibres}</p>
                   <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-400">Carpas Libres</p>
                 </div>
               </div>
             </div>
 
             {/* Bento Tareas Box */}
-            <div className="p-4 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
-              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 flex items-center justify-between font-display">
+            <div className="p-3 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 flex items-center justify-between">
                 <span>Tareas de la Fecha</span>
               </h3>
               
-              <form onSubmit={handleAddTodo} className="flex gap-2">
+              <form onSubmit={handleAddTodo} className="flex gap-1.5">
                 <input
                   type="text"
                   placeholder="Nueva tarea..."
                   value={newTodo}
                   onChange={(e) => setNewTodo(e.target.value)}
-                  className="flex-1 px-2.5 py-1 border border-[#E5E5E5] rounded-sm text-xs focus:border-black outline-none"
+                  className="flex-1 px-2 py-1 border border-[#E5E5E5] rounded-sm text-xs focus:border-black outline-none"
                 />
-                <button type="submit" className="px-2.5 bg-black text-[#F2CA50] hover:bg-black/90 rounded-sm">
+                <button type="submit" className="px-2 bg-black text-[#F2CA50] hover:bg-black/90 rounded-sm">
                   <Plus className="w-3.5 h-3.5" />
                 </button>
               </form>
 
-              <div className="space-y-1.5 max-h-36 overflow-y-auto">
+              <div className="space-y-1 max-h-36 overflow-y-auto">
                 {todos.map(todo => (
                   <div key={todo.id} className="flex items-start justify-between gap-2 p-1.5 bg-[#F9F9F9] border border-[#E5E5E5] rounded-sm text-xs">
                     <button type="button" onClick={() => toggleTodo(todo.id)}>

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { Search, Bell, User, LogOut, ChevronDown, Menu, Map } from 'lucide-react'
+import { Search, Bell, User, LogOut, ChevronDown, Menu } from 'lucide-react'
 
 export default function TopBar({ onToggleMobileMenu }) {
   const navigate = useNavigate()
-  const location = useLocation()
   const [userEmail, setUserEmail] = useState('Admin')
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showNotificationsMenu, setShowNotificationsMenu] = useState(false)
@@ -29,78 +28,55 @@ export default function TopBar({ onToggleMobileMenu }) {
     }
   }
 
-  // Generate breadcrumb from current route
-  const getBreadcrumbs = () => {
-    const path = location.pathname.split('/').filter(Boolean)
-    const currentSegment = path[path.length - 1] || 'home'
-    const routeNames = {
-      home: 'Dashboard',
-      plano: 'Plano de Playa',
-      reservas: 'Reservas',
-      clientes: 'Clientes',
-      caja: 'Caja Diaria',
-      reportes: 'Reportes',
-      calendario: 'Calendario',
-      notificaciones: 'Notificaciones',
-      comprobantes: 'Comprobantes',
-      perfil: 'Perfil y Tarifas'
-    }
-    return {
-      title: routeNames[currentSegment] || 'Dashboard',
-      path: `PriusAdmin / ${routeNames[currentSegment] || 'Home'}`
-    }
-  }
-
-  const breadcrumb = getBreadcrumbs()
-
   return (
-    <header className="h-16 bg-white border-b border-[#E5E5E5] sticky top-0 z-20 flex items-center justify-between px-4 md:px-8">
-      {/* Mobile Menu Button & Title */}
+    <header className="h-14 bg-white border-b border-[#E5E5E5] sticky top-0 z-20 flex items-center justify-between px-4 md:px-6 shrink-0">
+      {/* Mobile Menu Button & Minimal Badge */}
       <div className="flex items-center gap-3">
         <button 
           onClick={onToggleMobileMenu}
-          className="md:hidden p-2 text-neutral-700 hover:bg-[#E5E5E5] rounded"
+          className="md:hidden p-1.5 text-black hover:bg-[#F9F9F9] rounded border border-[#E5E5E5]"
         >
-          <Menu size={20} />
+          <Menu size={18} />
         </button>
-        <div>
-          <h2 className="text-sm font-bold text-black tracking-tight">{breadcrumb.title}</h2>
-          <p className="text-[10px] text-neutral-400 font-medium hidden sm:block">{breadcrumb.path}</p>
-        </div>
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 hidden sm:inline-block">
+          Balneario Playa Grande
+        </span>
       </div>
 
-      {/* Global Search Bar */}
-      <form onSubmit={handleSearchSubmit} className="hidden md:flex items-center relative w-72">
-        <Search size={15} className="absolute left-3 text-neutral-400" />
-        <input
-          type="text"
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="Buscar reservas, clientes..."
-          className="w-full pl-9 pr-3 py-1.5 bg-[#F9F9F9] border border-[#E5E5E5] focus:border-black outline-none text-xs rounded"
-        />
+      {/* Center Minimal Search */}
+      <form onSubmit={handleSearchSubmit} className="flex-1 max-w-sm mx-4">
+        <div className="relative">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+          <input
+            type="text"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Buscar reservas, clientes, unidades..."
+            className="w-full pl-8 pr-3 py-1.5 bg-[#F9F9F9] border border-[#E5E5E5] focus:border-black outline-none text-xs rounded transition-colors"
+          />
+        </div>
       </form>
 
-      {/* Right Controls: Notification Bell + User Profile */}
-      <div className="flex items-center gap-4">
+      {/* Right Controls */}
+      <div className="flex items-center gap-3">
         {/* Notification Bell */}
         <div className="relative">
           <button
             onClick={() => setShowNotificationsMenu(!showNotificationsMenu)}
-            className="p-2 text-neutral-600 hover:bg-[#E5E5E5] rounded-full relative"
+            className="p-2 text-neutral-700 hover:bg-[#F9F9F9] rounded-full relative transition-colors"
             title="Centro de Alertas"
           >
-            <Bell size={18} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-[#F2CA50] rounded-full ring-2 ring-white" />
+            <Bell size={17} />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#F2CA50] rounded-full ring-2 ring-white" />
           </button>
 
           {showNotificationsMenu && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-[#E5E5E5] rounded shadow-none z-50 p-3 space-y-2">
+            <div className="absolute right-0 mt-2 w-72 bg-white border border-[#E5E5E5] rounded shadow-lg z-50 p-3 space-y-2">
               <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-2">
-                <span className="text-xs font-bold uppercase">Notificaciones</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Notificaciones</span>
                 <button 
-                  onClick={() => navigate('/app/notificaciones')} 
-                  className="text-[10px] text-[#000000] font-semibold underline"
+                  onClick={() => { navigate('/app/notificaciones'); setShowNotificationsMenu(false); }} 
+                  className="text-[10px] text-black font-semibold underline"
                 >
                   Ver todas
                 </button>
@@ -128,20 +104,20 @@ export default function TopBar({ onToggleMobileMenu }) {
               {userEmail.charAt(0).toUpperCase()}
             </div>
             <span className="text-xs font-semibold text-black hidden sm:block max-w-[120px] truncate">
-              {userEmail}
+              {userEmail.split('@')[0]}
             </span>
-            <ChevronDown size={14} className="text-neutral-500" />
+            <ChevronDown size={14} className="text-neutral-400" />
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-[#E5E5E5] rounded z-50 py-1">
+            <div className="absolute right-0 mt-2 w-48 bg-white border border-[#E5E5E5] rounded shadow-lg z-50 py-1">
               <div className="px-3 py-2 border-b border-[#E5E5E5]">
-                <p className="text-[10px] font-bold text-neutral-400 uppercase">Administrador</p>
+                <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider">Administrador</p>
                 <p className="text-xs font-medium text-black truncate">{userEmail}</p>
               </div>
               <button
                 onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
-                className="w-full text-left px-3 py-2 text-xs text-neutral-700 hover:bg-[#E5E5E5]/50 flex items-center gap-2 font-medium"
+                className="w-full text-left px-3 py-2 text-xs text-neutral-700 hover:bg-[#F9F9F9] flex items-center gap-2 font-medium"
               >
                 <User size={14} />
                 <span>Perfil y Configuración</span>
