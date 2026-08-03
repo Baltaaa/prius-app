@@ -22,10 +22,10 @@ export default function Cell({ number, unit, onClick, isHighlighted, isDimmed })
       onMouseEnter={() => unit?.clientName && setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <span className="w-6 md:w-8 text-[9px] font-bold text-prius-black/40 text-right pr-1">{number}</span>
+      <span className="w-5 md:w-6 text-[8px] font-bold text-prius-black/40 text-right pr-0.5">{number}</span>
       <button
         onClick={() => onClick(unit)}
-        className={`w-7 h-6 md:w-9 md:h-7 text-[9px] font-bold flex flex-col items-center justify-center border border-hairline cursor-pointer hover:border-gold transition-all relative ${getBgColor()} ${opacityClass} ${highlightClass}`}
+        className={`w-6 h-4.5 md:w-7 md:h-5 text-[8px] font-bold flex flex-col items-center justify-center border border-hairline cursor-pointer hover:border-gold transition-all relative ${getBgColor()} ${opacityClass} ${highlightClass}`}
       >
         <span className="leading-none">
           {isTemporada && "T"}

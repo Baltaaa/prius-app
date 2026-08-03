@@ -227,7 +227,7 @@ export default function Dashboard() {
       <div className="h-full flex flex-col bg-white text-black overflow-hidden animate-premium-fade no-print">
         
         {/* Title & Unified Search row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E5E5E5]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-[#E5E5E5]">
           <div>
             <h1 className="text-lg uppercase tracking-widest font-bold font-display">Plano de Playa</h1>
             <p className="text-[10px] uppercase tracking-wider text-neutral-500 font-sans">Mapa interactivo y distribución de carpas y sombrillas.</p>
@@ -251,28 +251,28 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden mt-6">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden mt-4">
           {/* Main Content Map Container */}
-          <main className="flex-1 overflow-auto pr-0 lg:pr-6">
-            <div className="flex items-center justify-between bg-white border border-[#E5E5E5] p-3 rounded-sm mb-6">
+          <main className="flex-1 overflow-auto pr-0 lg:pr-4">
+            <div className="flex items-center justify-between bg-white border border-[#E5E5E5] p-2.5 rounded-sm mb-4">
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => setViewMode("map")}
-                  className={`px-4 py-2 rounded-sm font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border ${viewMode === "map" ? 'bg-black text-[#F2CA50] border-black' : 'border-[#E5E5E5] hover:bg-neutral-50'}`}
+                  className={`px-3 py-1.5 rounded-sm font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border ${viewMode === "map" ? 'bg-black text-[#F2CA50] border-black' : 'border-[#E5E5E5] hover:bg-neutral-50'}`}
                 >
                   <Map className="w-3.5 h-3.5" />
                   Plano Interactivo
                 </button>
                 <button 
                   onClick={() => setViewMode("list")}
-                  className={`px-4 py-2 rounded-sm font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border ${viewMode === "list" ? 'bg-black text-[#F2CA50] border-black' : 'border-[#E5E5E5] hover:bg-neutral-50'}`}
+                  className={`px-3 py-1.5 rounded-sm font-bold text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 border ${viewMode === "list" ? 'bg-black text-[#F2CA50] border-black' : 'border-[#E5E5E5] hover:bg-neutral-50'}`}
                 >
                   Lista Completa ({filteredUnitsList.length})
                 </button>
               </div>
 
               {searchTerm && (
-                <div className="text-[9px] font-bold uppercase tracking-widest bg-[#F2CA50] text-black px-3 py-1.5 rounded-sm flex items-center gap-1.5">
+                <div className="text-[9px] font-bold uppercase tracking-widest bg-[#F2CA50] text-black px-3 py-1 rounded-sm flex items-center gap-1.5">
                   Filtro activo: "{searchTerm}"
                 </div>
               )}
@@ -280,24 +280,24 @@ export default function Dashboard() {
 
             {viewMode === "map" ? (
               /* VISTA DE MAPA */
-              <div className="bg-[#F9F9F9] border border-[#E5E5E5] p-4 md:p-8 rounded-sm max-w-full overflow-auto">
-                <div className="mx-auto" style={{ maxWidth: "950px" }}>
-                  <div className="flex justify-center mb-6">
+              <div className="bg-[#F9F9F9] border border-[#E5E5E5] p-3 md:p-5 rounded-sm max-w-full overflow-auto">
+                <div className="mx-auto" style={{ maxWidth: "880px" }}>
+                  <div className="flex justify-center mb-3">
                     <div className="flex text-[9px] font-bold uppercase tracking-widest font-display">
-                      <div className="w-[280px] bg-white py-2 text-center border border-[#E5E5E5]">Recreación</div>
-                      <div className="w-[140px] bg-white py-2 text-center border-y border-[#E5E5E5]">Acceso Principal</div>
-                      <div className="w-[280px] relative">
-                        <div className="absolute inset-x-0 top-0 h-[110px] bg-[#E5E5E5]/50 text-black border border-[#E5E5E5] rounded-sm flex flex-col items-center justify-center z-20 font-bold">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.3em] font-display">Sector Piscina</span>
+                      <div className="w-[240px] bg-white py-1.5 text-center border border-[#E5E5E5]">Recreación</div>
+                      <div className="w-[120px] bg-white py-1.5 text-center border-y border-[#E5E5E5]">Acceso Principal</div>
+                      <div className="w-[240px] relative">
+                        <div className="absolute inset-x-0 top-0 h-[80px] bg-[#E5E5E5]/50 text-black border border-[#E5E5E5] rounded-sm flex flex-col items-center justify-center z-20 font-bold">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] font-display">Sector Piscina</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-center gap-4 relative mt-16 md:mt-24">
+                  <div className="flex justify-center gap-2 md:gap-3 relative mt-12 md:mt-14">
                     {/* Pasillo A */}
-                    <div className="flex gap-12">
-                      <div className="flex flex-col gap-1">
+                    <div className="flex gap-6 md:gap-8">
+                      <div className="flex flex-col gap-[2px]">
                         {Array.from({ length: 25 }, (_, i) => i + 1).map(num => {
                           const unit = getCarpa(num)
                           const isMatch = isUnitMatchingSearch(unit) && isUnitMatchingFilters(unit)
@@ -313,7 +313,7 @@ export default function Dashboard() {
                           )
                         })}
                       </div>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-[2px]">
                         {Array.from({ length: 25 }, (_, i) => i + 26).map(num => {
                           const unit = getCarpa(num)
                           const isMatch = isUnitMatchingSearch(unit) && isUnitMatchingFilters(unit)
@@ -331,11 +331,11 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="w-px bg-[#E5E5E5] mx-4" />
+                    <div className="w-px bg-[#E5E5E5] mx-2" />
 
                     {/* Pasillo B */}
-                    <div className="flex gap-12">
-                      <div className="flex flex-col gap-1">
+                    <div className="flex gap-6 md:gap-8">
+                      <div className="flex flex-col gap-[2px]">
                         {Array.from({ length: 25 }, (_, i) => i + 51).map(num => {
                           const unit = getCarpa(num)
                           const isMatch = isUnitMatchingSearch(unit) && isUnitMatchingFilters(unit)
@@ -351,8 +351,8 @@ export default function Dashboard() {
                           )
                         })}
                       </div>
-                      <div className="flex flex-col gap-1 relative">
-                        <div className="h-[31px]" /><div className="h-[31px]" />
+                      <div className="flex flex-col gap-[2px] relative">
+                        <div className="h-[22px]" /><div className="h-[22px]" />
                         {Array.from({ length: 23 }, (_, i) => i + 76).map(num => {
                           const unit = getCarpa(num)
                           const isMatch = isUnitMatchingSearch(unit) && isUnitMatchingFilters(unit)
@@ -370,12 +370,12 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="w-px bg-[#E5E5E5] mx-4" />
+                    <div className="w-px bg-[#E5E5E5] mx-2" />
 
                     {/* Pasillo C */}
-                    <div className="flex gap-12">
-                      <div className="flex flex-col gap-1">
-                        <div className="h-[31px]" /><div className="h-[31px]" />
+                    <div className="flex gap-6 md:gap-8">
+                      <div className="flex flex-col gap-[2px]">
+                        <div className="h-[22px]" /><div className="h-[22px]" />
                         {Array.from({ length: 23 }, (_, i) => i + 99).map(num => {
                           const unit = getCarpa(num)
                           const isMatch = isUnitMatchingSearch(unit) && isUnitMatchingFilters(unit)
@@ -391,8 +391,8 @@ export default function Dashboard() {
                           )
                         })}
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <div className="h-[31px]" /><div className="h-[31px]" />
+                      <div className="flex flex-col gap-[2px]">
+                        <div className="h-[22px]" /><div className="h-[22px]" />
                         {Array.from({ length: 23 }, (_, i) => i + 122).map(num => {
                           const unit = getCarpa(num)
                           const isMatch = isUnitMatchingSearch(unit) && isUnitMatchingFilters(unit)
@@ -412,17 +412,17 @@ export default function Dashboard() {
                   </div>
 
                   {/* Sombrillas */}
-                  <div className="mt-16 flex flex-col items-center">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-6 font-display">Sector Sombrillas</span>
-                    <div className="flex gap-16 justify-center">
-                      <div className="flex flex-col gap-1">
+                  <div className="mt-8 flex flex-col items-center">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-3 font-display">Sector Sombrillas</span>
+                    <div className="flex gap-8 justify-center">
+                      <div className="flex flex-col gap-[2px]">
                         {[
                           [1, 2, 3, 4, 5],
                           [6, 7, 8, 9, 10],
                           [11, 12, 13, 14, 15],
                           [16, 17, 18, 19, 20]
                         ].map((row, rowIdx) => (
-                          <div key={`left-row-${rowIdx}`} className="flex gap-2">
+                          <div key={`left-row-${rowIdx}`} className="flex gap-1">
                             {row.map(num => {
                               const unit = getSombrilla(num)
                               const isMatch = isUnitMatchingSearch(unit) && isUnitMatchingFilters(unit)
@@ -441,14 +441,14 @@ export default function Dashboard() {
                         ))}
                       </div>
 
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-[2px]">
                         {[
                           [21, 22, 23, 24, 25],
                           [26, 27, 28, 29, 30],
                           [31, 32, 33, 34, 35],
                           [36, 37, 38, 39, 40]
                         ].map((row, rowIdx) => (
-                          <div key={`right-row-${rowIdx}`} className="flex gap-2">
+                          <div key={`right-row-${rowIdx}`} className="flex gap-1">
                             {row.map(num => {
                               const unit = getSombrilla(num)
                               const isMatch = isUnitMatchingSearch(unit) && isUnitMatchingFilters(unit)
@@ -469,8 +469,8 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="mt-16 flex justify-center">
-                    <div className="w-full max-w-[600px] bg-black py-4 text-center text-white font-bold text-[10px] tracking-[0.4em] uppercase font-display border border-black">
+                  <div className="mt-8 flex justify-center">
+                    <div className="w-full max-w-[500px] bg-black py-2.5 text-center text-white font-bold text-[9px] tracking-[0.3em] uppercase font-display border border-black">
                       Mar Argentino
                     </div>
                   </div>
@@ -539,11 +539,11 @@ export default function Dashboard() {
           </main>
 
           {/* Sidebar / Bento Grid Aside right for filters and metrics */}
-          <aside className="w-full lg:w-72 pl-0 lg:pl-6 pt-6 lg:pt-0 space-y-6 shrink-0 lg:overflow-y-auto">
+          <aside className="w-full lg:w-64 pl-0 lg:pl-4 pt-4 lg:pt-0 space-y-4 shrink-0 lg:overflow-y-auto">
             {/* Bento Filter Box */}
-            <div className="p-5 border border-[#E5E5E5] bg-white rounded-sm space-y-4">
+            <div className="p-4 border border-[#E5E5E5] bg-white rounded-sm space-y-3">
               <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">Filtros Rápidos</h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div>
                   <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1 font-display">Tipo</label>
                   <select 
@@ -574,22 +574,22 @@ export default function Dashboard() {
             </div>
 
             {/* Bento Statistics Box */}
-            <div className="p-5 border border-[#E5E5E5] bg-white rounded-sm space-y-3">
+            <div className="p-4 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
               <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 font-display">Resumen Unidades</h3>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-3 bg-black text-white rounded-sm flex flex-col justify-between">
-                  <p className="text-xl font-bold">{stats.carpasOcupadas}</p>
+                <div className="p-2.5 bg-black text-white rounded-sm flex flex-col justify-between">
+                  <p className="text-lg font-bold">{stats.carpasOcupadas}</p>
                   <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-400">Carpas Ocupadas</p>
                 </div>
-                <div className="p-3 bg-white border border-[#E5E5E5] rounded-sm flex flex-col justify-between">
-                  <p className="text-xl font-bold text-black">{stats.carpasLibres}</p>
+                <div className="p-2.5 bg-white border border-[#E5E5E5] rounded-sm flex flex-col justify-between">
+                  <p className="text-lg font-bold text-black">{stats.carpasLibres}</p>
                   <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-400">Carpas Libres</p>
                 </div>
               </div>
             </div>
 
             {/* Bento Tareas Box */}
-            <div className="p-5 border border-[#E5E5E5] bg-white rounded-sm space-y-3">
+            <div className="p-4 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
               <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 flex items-center justify-between font-display">
                 <span>Tareas de la Fecha</span>
               </h3>
@@ -600,24 +600,24 @@ export default function Dashboard() {
                   placeholder="Nueva tarea..."
                   value={newTodo}
                   onChange={(e) => setNewTodo(e.target.value)}
-                  className="flex-1 px-3 py-1.5 border border-[#E5E5E5] rounded-sm text-xs focus:border-black outline-none"
+                  className="flex-1 px-2.5 py-1 border border-[#E5E5E5] rounded-sm text-xs focus:border-black outline-none"
                 />
-                <button type="submit" className="px-3 bg-black text-[#F2CA50] hover:bg-black/90 rounded-sm">
+                <button type="submit" className="px-2.5 bg-black text-[#F2CA50] hover:bg-black/90 rounded-sm">
                   <Plus className="w-3.5 h-3.5" />
                 </button>
               </form>
 
-              <div className="space-y-2 max-h-40 overflow-y-auto">
+              <div className="space-y-1.5 max-h-36 overflow-y-auto">
                 {todos.map(todo => (
-                  <div key={todo.id} className="flex items-start justify-between gap-2 p-2 bg-[#F9F9F9] border border-[#E5E5E5] rounded-sm text-xs">
+                  <div key={todo.id} className="flex items-start justify-between gap-2 p-1.5 bg-[#F9F9F9] border border-[#E5E5E5] rounded-sm text-xs">
                     <button type="button" onClick={() => toggleTodo(todo.id)}>
                       {todo.completed ? <CheckSquare className="w-3.5 h-3.5 text-green-600" /> : <Square className="w-3.5 h-3.5" />}
                     </button>
-                    <span className={`flex-1 leading-tight text-[11px] uppercase ${todo.completed ? 'line-through opacity-40' : 'text-neutral-700'}`}>
+                    <span className={`flex-1 leading-tight text-[10px] uppercase ${todo.completed ? 'line-through opacity-40' : 'text-neutral-700'}`}>
                       {todo.text}
                     </span>
                     <button type="button" onClick={() => deleteTodo(todo.id)}>
-                      <Trash2 className="w-3.5 h-3.5 text-neutral-400 hover:text-red-600" />
+                      <Trash2 className="w-3 h-3 text-neutral-400 hover:text-red-600" />
                     </button>
                   </div>
                 ))}
