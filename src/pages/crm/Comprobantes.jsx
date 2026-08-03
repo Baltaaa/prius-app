@@ -63,7 +63,9 @@ export default function Comprobantes() {
           <div className="flex justify-between items-start border-b border-black pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-black text-[#F2CA50] rounded flex items-center justify-center font-bold text-xs">P</div>
+                <div className="w-7 h-7 bg-black rounded flex items-center justify-center p-1 shrink-0">
+                  <img src="/logo-prius.png" alt="Prius Logo" className="w-full h-full object-contain" />
+                </div>
                 <h2 className="font-extrabold text-base tracking-tight">PriusAdmin</h2>
               </div>
               <p className="text-[10px] uppercase font-bold text-neutral-500 mt-1">Balneario Prius Playa Grande &bull; Mar del Plata</p>

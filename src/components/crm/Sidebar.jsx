@@ -44,8 +44,8 @@ export default function Sidebar({ notificationsCount = 0 }) {
       <div className="flex flex-col overflow-y-auto">
         {/* Brand Header */}
         <div className="h-16 flex items-center px-6 border-b border-[#E5E5E5] gap-3">
-          <div className="w-8 h-8 bg-black rounded flex items-center justify-center font-bold text-[#F2CA50] text-sm">
-            P
+          <div className="w-9 h-9 bg-black rounded flex items-center justify-center p-1.5 overflow-hidden shrink-0">
+            <img src="/logo-prius.png" alt="Prius Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="font-bold text-sm text-black tracking-tight leading-none">PriusAdmin</h1>

@@ -124,8 +124,8 @@ export default function Login() {
         
         {/* Brand Badge Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 bg-black rounded mx-auto flex items-center justify-center font-bold text-[#F2CA50] text-xl">
-            P
+          <div className="w-14 h-14 bg-black rounded mx-auto flex items-center justify-center p-2">
+            <img src="/logo-prius.png" alt="Prius Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-lg font-bold tracking-tight text-black">PriusAdmin</h1>
