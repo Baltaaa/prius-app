@@ -5,14 +5,14 @@ export default function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] md:p-4 backdrop-blur-xs">
-      <div className="bg-white w-full h-full md:h-auto md:max-w-lg md:rounded-sm flex flex-col border border-[#E5E5E5]">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] p-4 backdrop-blur-none">
+      <div className="bg-white w-full max-w-lg rounded border border-[#E5E5E5] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[#E5E5E5] bg-black text-white">
-          <h2 className="text-xs uppercase font-bold tracking-widest font-display text-[#F2CA50]">{title}</h2>
+        <div className="flex items-center justify-between p-4 border-b border-[#E5E5E5] bg-black text-white">
+          <h2 className="text-xs uppercase font-bold tracking-wider text-[#F2CA50]">{title}</h2>
           <button 
             onClick={onClose} 
-            className="p-1 hover:bg-white/10 rounded-full text-white transition-colors"
+            className="p-1 hover:bg-white/20 rounded text-white transition-colors"
           >
             <X size={18} />
           </button>

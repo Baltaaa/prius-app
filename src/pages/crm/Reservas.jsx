@@ -111,8 +111,8 @@ export default function Reservas() {
 
   if (resLoading || cliLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <span className="text-xs uppercase tracking-widest font-semibold text-neutral-400">Cargando Reservas...</span>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-xs font-semibold text-neutral-400">Cargando Reservas...</span>
       </div>
     )
   }
@@ -120,14 +120,14 @@ export default function Reservas() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#E5E5E5] pb-4">
         <div>
-          <h1 className="text-xl uppercase tracking-wider font-extrabold font-display">Reservas</h1>
-          <p className="text-xs text-neutral-500">Control total del inventario de carpas y sombrillas.</p>
+          <h1 className="text-xl font-bold text-black tracking-tight">Gestión de Reservas</h1>
+          <p className="text-xs text-neutral-500 font-normal">Control total de ocupación y contrataciones.</p>
         </div>
         <button
           onClick={handleOpenCreate}
-          className="px-4 py-3 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 rounded-sm"
+          className="px-4 py-2.5 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-semibold text-xs rounded transition-colors flex items-center gap-2"
         >
           <Plus size={16} />
           Nueva Reserva
@@ -135,13 +135,13 @@ export default function Reservas() {
       </div>
 
       {/* Filter panel */}
-      <div className="flex flex-wrap gap-4 p-4 bg-neutral-100 border border-[#E5E5E5]">
+      <div className="flex flex-wrap gap-4 p-4 bg-[#F9F9F9] border border-[#E5E5E5] rounded">
         <div className="space-y-1">
-          <label className="text-[9px] font-bold uppercase text-neutral-500 font-display">Filtrar por Temporada</label>
+          <label className="text-[10px] font-bold text-neutral-500 uppercase">Filtrar por Temporada</label>
           <select
             value={temporadaFilter}
             onChange={(e) => setTemporadaFilter(e.target.value)}
-            className="block w-40 px-3 py-1.5 bg-white border border-[#E5E5E5] text-xs uppercase outline-none focus:border-black rounded-sm"
+            className="block w-40 px-3 py-1.5 bg-white border border-[#E5E5E5] text-xs font-semibold rounded focus:border-black outline-none"
           >
             <option value="all">TODAS</option>
             <option value="2025-2026">2025-2026</option>
@@ -150,11 +150,11 @@ export default function Reservas() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-[9px] font-bold uppercase text-neutral-500 font-display">Filtrar Pago</label>
+          <label className="text-[10px] font-bold text-neutral-500 uppercase">Filtrar Estado de Pago</label>
           <select
             value={estadoPagoFilter}
             onChange={(e) => setEstadoPagoFilter(e.target.value)}
-            className="block w-40 px-3 py-1.5 bg-white border border-[#E5E5E5] text-xs uppercase outline-none focus:border-black rounded-sm"
+            className="block w-40 px-3 py-1.5 bg-white border border-[#E5E5E5] text-xs font-semibold rounded focus:border-black outline-none"
           >
             <option value="all">TODOS</option>
             <option value="pendiente">PENDIENTES</option>
@@ -168,14 +168,14 @@ export default function Reservas() {
       <DataTable
         headers={headers}
         data={filteredReservas}
-        emptyMessage="No se encontraron reservas que cumplan con los filtros activos."
+        emptyMessage="No se encontraron reservas con los filtros activos."
         renderRow={(res) => (
-          <tr key={res.id} className="hover:bg-neutral-50">
+          <tr key={res.id} className="hover:bg-[#F9F9F9] transition-colors">
             <td className="p-4 font-bold uppercase">{res.clientes?.nombre || 'S/N'}</td>
-            <td className="p-4 uppercase font-semibold">
+            <td className="p-4 uppercase font-semibold text-neutral-800">
               {res.unidades?.tipo} #{res.unidades?.numero}
             </td>
-            <td className="p-4 uppercase font-medium">{res.temporada}</td>
+            <td className="p-4 font-medium">{res.temporada}</td>
             <td className="p-4 font-bold">{formatCurrency(res.valor_total)}</td>
             <td className={`p-4 font-bold ${Number(res.saldo) > 0 ? 'text-red-600' : 'text-neutral-900'}`}>
               {formatCurrency(res.saldo)}
@@ -183,15 +183,15 @@ export default function Reservas() {
             <td className="p-4">
               <StatusBadge status={res.estado_pago} />
             </td>
-            <td className="p-4 uppercase">{res.numero_factura || '-'}</td>
-            <td className="p-4 text-[10px]">
+            <td className="p-4 uppercase text-neutral-600">{res.numero_factura || '-'}</td>
+            <td className="p-4 text-xs text-neutral-500">
               {res.fecha_inicio ? `${res.fecha_inicio} al ${res.fecha_fin}` : 'TEMPORADA COMPLETA'}
             </td>
-            <td className="p-4 flex gap-3">
-              <button onClick={() => handleOpenEdit(res)} className="text-black hover:text-[#F2CA50]" title="Editar">
+            <td className="p-4 flex gap-2">
+              <button onClick={() => handleOpenEdit(res)} className="p-1.5 hover:bg-[#E5E5E5] rounded text-black" title="Editar">
                 <Edit2 size={15} />
               </button>
-              <button onClick={() => handleDelete(res.id, res.unidad_id)} className="text-neutral-400 hover:text-red-600" title="Borrar">
+              <button onClick={() => handleDelete(res.id, res.unidad_id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Borrar">
                 <Trash2 size={15} />
               </button>
             </td>
@@ -202,20 +202,20 @@ export default function Reservas() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-bold uppercase text-xs">{res.clientes?.nombre || 'S/N'}</h3>
-                <p className="text-[10px] text-neutral-500 uppercase">
+                <p className="text-[11px] text-neutral-500 uppercase">
                   {res.unidades?.tipo} #{res.unidades?.numero} ({res.temporada})
                 </p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => handleOpenEdit(res)} className="text-black">
+                <button onClick={() => handleOpenEdit(res)} className="text-black p-1">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={() => handleDelete(res.id, res.unidad_id)} className="text-red-600">
+                <button onClick={() => handleDelete(res.id, res.unidad_id)} className="text-red-600 p-1">
                   <Trash2 size={16} />
                 </button>
               </div>
             </div>
-            <div className="text-[11px] space-y-1 border-t border-neutral-100 pt-2 text-neutral-700">
+            <div className="text-xs space-y-1 border-t border-[#E5E5E5] pt-2 text-neutral-700">
               <div className="flex justify-between">
                 <span>Total:</span>
                 <strong className="text-black">{formatCurrency(res.valor_total)}</strong>
@@ -229,7 +229,6 @@ export default function Reservas() {
                 <StatusBadge status={res.estado_pago} />
               </div>
               <p><strong>Fechas:</strong> {res.fecha_inicio ? `${res.fecha_inicio} al ${res.fecha_fin}` : 'TEMPORADA'}</p>
-              {res.numero_factura && <p><strong>Factura:</strong> {res.numero_factura}</p>}
             </div>
           </>
         )}
@@ -243,14 +242,14 @@ export default function Reservas() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Seleccionar Cliente *</label>
+            <label className="text-xs font-semibold text-neutral-600">Seleccionar Cliente *</label>
             <select
               value={clienteId}
               onChange={(e) => setClienteId(e.target.value)}
-              className="w-full px-4 py-2.5 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none"
+              className="w-full px-3 py-2 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none rounded font-semibold"
               required
             >
-              <option value="">-- SELECCIONAR --</option>
+              <option value="">-- SELECCIONAR CLIENTE --</option>
               {clientes.map(c => (
                 <option key={c.id} value={c.id}>{c.nombre}</option>
               ))}
@@ -259,14 +258,14 @@ export default function Reservas() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Unidad Playa *</label>
+              <label className="text-xs font-semibold text-neutral-600">Unidad Playa *</label>
               <select
                 value={unidadId}
                 onChange={(e) => setUnidadId(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none"
+                className="w-full px-3 py-2 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none rounded font-semibold"
                 required
               >
-                <option value="">-- SELECCIONAR --</option>
+                <option value="">-- SELECCIONAR UNIDAD --</option>
                 {unidades.map(u => (
                   <option key={u.id} value={u.id}>
                     {u.tipo.toUpperCase()} #{u.numero} ({u.estado.toUpperCase()})
@@ -276,69 +275,69 @@ export default function Reservas() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Temporada *</label>
+              <label className="text-xs font-semibold text-neutral-600">Temporada *</label>
               <input
                 type="text"
                 required
                 value={temporada}
                 onChange={(e) => setTemporada(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] text-xs focus:border-black outline-none"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Valor Total ($) *</label>
+              <label className="text-xs font-semibold text-neutral-600">Valor Total ($) *</label>
               <input
                 type="number"
                 required
                 value={valorTotal}
                 onChange={(e) => setValorTotal(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] text-xs focus:border-black outline-none"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Saldo de Deuda ($)</label>
+              <label className="text-xs font-semibold text-neutral-600">Saldo Pendiente ($)</label>
               <input
                 type="number"
                 value={saldo}
                 onChange={(e) => setSaldo(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] text-xs focus:border-black outline-none"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Fecha Desde</label>
+              <label className="text-xs font-semibold text-neutral-600">Fecha Desde</label>
               <input
                 type="date"
                 value={fechaInicio}
                 onChange={(e) => setFechaInicio(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] text-xs focus:border-black outline-none"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Fecha Hasta</label>
+              <label className="text-xs font-semibold text-neutral-600">Fecha Hasta</label>
               <input
                 type="date"
                 value={fechaFin}
                 onChange={(e) => setFechaFin(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] text-xs focus:border-black outline-none"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Estado de Pago</label>
+              <label className="text-xs font-semibold text-neutral-600">Estado de Pago</label>
               <select
                 value={estadoPago}
                 onChange={(e) => setEstadoPago(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none"
+                className="w-full px-3 py-2 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none rounded font-semibold"
               >
                 <option value="pendiente">PENDIENTE</option>
                 <option value="parcial">PARCIAL</option>
@@ -347,31 +346,31 @@ export default function Reservas() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Nro Factura / Recibo</label>
+              <label className="text-xs font-semibold text-neutral-600">Nro Factura / Recibo</label>
               <input
                 type="text"
                 value={numeroFactura}
                 onChange={(e) => setNumeroFactura(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] text-xs focus:border-black outline-none"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded"
                 placeholder="A-0001-12345678"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Notas Adicionales</label>
+            <label className="text-xs font-semibold text-neutral-600">Notas Adicionales</label>
             <textarea
               rows={2}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="w-full px-4 py-2.5 border border-[#E5E5E5] text-xs focus:border-black outline-none resize-none"
-              placeholder="Detalles del alquiler..."
+              className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded resize-none"
+              placeholder="Notas..."
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-black hover:bg-black/90 text-white font-bold text-xs uppercase tracking-widest rounded-sm"
+            className="w-full py-3 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded transition-colors"
           >
             {editingReserva ? 'Guardar Cambios' : 'Confirmar Reserva'}
           </button>

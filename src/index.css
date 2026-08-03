@@ -3,35 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* Prius Premium Palette */
   --prius-gold: #F2CA50;
   --prius-gold-hover: #E5BF45;
   --prius-black: #000000;
   --prius-white: #FFFFFF;
   --prius-gray-bg: #F9F9F9;
-  --prius-hairline: #E5E5E5;
-  
-  /* Semantic tokens */
-  --background: #F9F9F9;
+  --prius-border: #E5E5E5;
+
+  --background: #FFFFFF;
   --foreground: #000000;
   --card: #FFFFFF;
   --card-foreground: #000000;
-  --popover: #FFFFFF;
-  --popover-foreground: #000000;
   --primary: #F2CA50;
   --primary-foreground: #000000;
-  --secondary: #000000;
-  --secondary-foreground: #FFFFFF;
-  --muted: #F9F9F9;
-  --muted-foreground: #666666;
-  --accent: #F2CA50;
-  --accent-foreground: #000000;
-  --destructive: #FF3333;
-  --destructive-foreground: #FFFFFF;
   --border: #E5E5E5;
   --input: #E5E5E5;
-  --ring: #F2CA50;
-  --radius: 2px; /* Minimal y premium, sin bordes súper redondeados */
+  --radius: 4px;
 }
 
 * {
@@ -41,46 +28,25 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: var(--background);
-  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #FFFFFF;
+  color: #000000;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.font-display {
-  font-family: 'Exo', sans-serif;
+/* Restyle scrollbars to clean flat minimalism */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-/* Bento Grid Card Styling */
-.bento-card {
-  background-color: #FFFFFF;
-  border: 1px solid var(--border);
-  padding: 24px;
-  border-radius: var(--radius);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+::-webkit-scrollbar-track {
+  background: #FFFFFF;
 }
-
-.bento-card:hover {
-  border-color: var(--prius-gold);
+::-webkit-scrollbar-thumb {
+  background: #E5E5E5;
+  border-radius: 2px;
 }
-
-/* Custom premium transitions */
-.transition-premium {
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes premiumFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-premium-fade {
-  animation: premiumFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+::-webkit-scrollbar-thumb:hover {
+  background: #000000;
 }

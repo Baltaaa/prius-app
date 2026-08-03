@@ -48,16 +48,16 @@ export default function Clientes() {
       }
       setIsModalOpen(false)
     } catch (err) {
-      alert('Error guardando cliente. Por favor intente nuevamente.')
+      alert('Error guardando cliente.')
     }
   }
 
   const handleDelete = async (id) => {
-    if (confirm('¿Está seguro de eliminar este cliente? Se perderá la relación con futuras reservas.')) {
+    if (confirm('¿Está seguro de eliminar este cliente?')) {
       try {
         await deleteCliente(id)
       } catch (err) {
-        alert('No se pudo borrar el cliente')
+        alert('No se pudo borrar el cliente.')
       }
     }
   }
@@ -67,27 +67,27 @@ export default function Clientes() {
     (c.cuit && c.cuit.includes(searchTerm))
   )
 
-  const headers = ['Nombre', 'CUIT', 'Teléfono', 'Mail', 'Notas', 'Acciones']
+  const headers = ['Nombre', 'CUIT / DNI', 'Teléfono', 'Email', 'Notas', 'Acciones']
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <span className="text-xs uppercase tracking-widest font-semibold text-neutral-400">Cargando Clientes...</span>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-xs font-semibold text-neutral-400">Cargando Clientes...</span>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      {/* Header and buttons */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#E5E5E5] pb-4">
         <div>
-          <h1 className="text-xl uppercase tracking-wider font-extrabold font-display">Clientes</h1>
-          <p className="text-xs text-neutral-500">Administración de la cartera histórica del balneario.</p>
+          <h1 className="text-xl font-bold text-black tracking-tight">Directorio de Clientes</h1>
+          <p className="text-xs text-neutral-500 font-normal">Base de datos de clientes históricos del balneario.</p>
         </div>
         <button
           onClick={handleOpenCreate}
-          className="px-4 py-3 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 rounded-sm"
+          className="px-4 py-2.5 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-semibold text-xs rounded transition-colors flex items-center gap-2"
         >
           <Plus size={16} />
           Nuevo Cliente
@@ -102,7 +102,7 @@ export default function Clientes() {
           placeholder="Buscar cliente por nombre o CUIT..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-[#E5E5E5] focus:border-black outline-none text-xs uppercase bg-white rounded-sm"
+          className="w-full pl-9 pr-4 py-2 border border-[#E5E5E5] focus:border-black outline-none text-xs bg-white rounded"
         />
       </div>
 
@@ -110,19 +110,19 @@ export default function Clientes() {
       <DataTable
         headers={headers}
         data={filteredClientes}
-        emptyMessage="No se encontraron clientes registrados con ese criterio."
+        emptyMessage="No se encontraron clientes."
         renderRow={(cliente) => (
-          <tr key={cliente.id} className="hover:bg-neutral-50">
-            <td className="p-4 font-bold uppercase">{cliente.nombre}</td>
-            <td className="p-4">{cliente.cuit || '-'}</td>
+          <tr key={cliente.id} className="hover:bg-[#F9F9F9] transition-colors">
+            <td className="p-4 font-bold uppercase text-black">{cliente.nombre}</td>
+            <td className="p-4 font-medium">{cliente.cuit || '-'}</td>
             <td className="p-4">{cliente.telefono || '-'}</td>
-            <td className="p-4 lowercase">{cliente.mail || '-'}</td>
-            <td className="p-4 max-w-[200px] truncate">{cliente.notas || '-'}</td>
-            <td className="p-4 flex gap-3">
-              <button onClick={() => handleOpenEdit(cliente)} className="text-black hover:text-[#F2CA50]" title="Editar">
+            <td className="p-4 lowercase text-neutral-600">{cliente.mail || '-'}</td>
+            <td className="p-4 max-w-[200px] truncate text-neutral-500">{cliente.notas || '-'}</td>
+            <td className="p-4 flex gap-2">
+              <button onClick={() => handleOpenEdit(cliente)} className="p-1.5 hover:bg-[#E5E5E5] rounded text-black" title="Editar">
                 <Edit2 size={15} />
               </button>
-              <button onClick={() => handleDelete(cliente.id)} className="text-neutral-400 hover:text-red-600" title="Borrar">
+              <button onClick={() => handleDelete(cliente.id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Borrar">
                 <Trash2 size={15} />
               </button>
             </td>
@@ -132,22 +132,21 @@ export default function Clientes() {
           <>
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-bold uppercase text-xs">{cliente.nombre}</h3>
-                <p className="text-[10px] text-neutral-500">CUIT: {cliente.cuit || '-'}</p>
+                <h3 className="font-bold uppercase text-xs text-black">{cliente.nombre}</h3>
+                <p className="text-[11px] text-neutral-500">CUIT: {cliente.cuit || '-'}</p>
               </div>
-              <div className="flex gap-3">
-                <button onClick={() => handleOpenEdit(cliente)} className="text-black">
+              <div className="flex gap-2">
+                <button onClick={() => handleOpenEdit(cliente)} className="p-1 text-black">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={() => handleDelete(cliente.id)} className="text-red-600">
+                <button onClick={() => handleDelete(cliente.id)} className="p-1 text-red-600">
                   <Trash2 size={16} />
                 </button>
               </div>
             </div>
-            <div className="text-[11px] space-y-1 border-t border-neutral-100 pt-2 text-neutral-700">
+            <div className="text-xs space-y-1 border-t border-[#E5E5E5] pt-2 text-neutral-700">
               <p><strong>Tel:</strong> {cliente.telefono || '-'}</p>
               <p><strong>Mail:</strong> {cliente.mail || '-'}</p>
-              {cliente.notas && <p><strong>Notas:</strong> {cliente.notas}</p>}
             </div>
           </>
         )}
@@ -161,65 +160,65 @@ export default function Clientes() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Nombre Completo *</label>
+            <label className="text-xs font-semibold text-neutral-600">Nombre Completo *</label>
             <input
               type="text"
               required
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              className="w-full px-4 py-2.5 border border-[#E5E5E5] focus:border-black outline-none text-xs uppercase"
-              placeholder="e.g. BALTASAR BRUSCHETTI"
+              className="w-full px-3 py-2 border border-[#E5E5E5] focus:border-black outline-none text-xs uppercase rounded font-semibold"
+              placeholder="Ej. JUAN PÉREZ"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Teléfono</label>
+              <label className="text-xs font-semibold text-neutral-600">Teléfono</label>
               <input
                 type="tel"
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] focus:border-black outline-none text-xs"
+                className="w-full px-3 py-2 border border-[#E5E5E5] focus:border-black outline-none text-xs rounded"
                 placeholder="+54 9..."
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">CUIT / DNI</label>
+              <label className="text-xs font-semibold text-neutral-600">CUIT / DNI</label>
               <input
                 type="text"
                 value={cuit}
                 onChange={(e) => setCuit(e.target.value)}
-                className="w-full px-4 py-2.5 border border-[#E5E5E5] focus:border-black outline-none text-xs"
+                className="w-full px-3 py-2 border border-[#E5E5E5] focus:border-black outline-none text-xs rounded"
                 placeholder="20-12345678-9"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Email</label>
+            <label className="text-xs font-semibold text-neutral-600">Email</label>
             <input
               type="email"
               value={mail}
               onChange={(e) => setMail(e.target.value)}
-              className="w-full px-4 py-2.5 border border-[#E5E5E5] focus:border-black outline-none text-xs lowercase"
-              placeholder="ejemplo@correo.com"
+              className="w-full px-3 py-2 border border-[#E5E5E5] focus:border-black outline-none text-xs lowercase rounded"
+              placeholder="cliente@email.com"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Notas / Comentarios</label>
+            <label className="text-xs font-semibold text-neutral-600">Notas / Comentarios</label>
             <textarea
               rows={3}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="w-full px-4 py-2.5 border border-[#E5E5E5] focus:border-black outline-none text-xs resize-none"
-              placeholder="Anotaciones extra sobre el cliente..."
+              className="w-full px-3 py-2 border border-[#E5E5E5] focus:border-black outline-none text-xs rounded resize-none"
+              placeholder="Comentarios adicionales..."
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-black hover:bg-black/90 text-white font-bold text-xs uppercase tracking-widest rounded-sm"
+            className="w-full py-3 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded transition-colors"
           >
             {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
           </button>
