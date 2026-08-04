@@ -100,15 +100,12 @@ export default function Login() {
           
           {/* Header de Marca con Logo Oficial (Solo la P Amarilla) */}
           <div className="flex items-center gap-3 mb-7">
-            <div className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center shrink-0 overflow-hidden">
-              {/* Usamos un contenedor con overflow y posicionamiento para mostrar solo la parte superior (sol) del logo */}
-              <div className="w-full h-full relative">
-                <img 
-                  src="/images/logo-prius-sun.png" 
-                  alt="Prius Logo" 
-                  className="absolute top-0 left-0 w-full h-[180%] object-contain object-top"
-                />
-              </div>
+            <div className="w-9 h-9 flex items-center justify-center shrink-0">
+              <img 
+                src="/images/prius-icon.png" 
+                alt="Prius Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-xl tracking-tight text-white italic">
