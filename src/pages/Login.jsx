@@ -83,21 +83,27 @@ export default function Login() {
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[#0a0d14] font-sans overflow-hidden selection:bg-[#FDE047] selection:text-black">
       {isSuccess && <GlobalLoader message="Iniciando sesión segura" />}
 
-      {/* Background with Dark Atmosphere */}
+      {/* Background Hero con Overlay CRM Dark */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#0a0d14] via-[#0a0d14]/90 to-transparent z-10" />
-        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#FDE047]/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full" />
+        <img 
+          src="/images/hero-login.webp" 
+          alt="Background" 
+          className="w-full h-full object-cover opacity-40"
+        />
+        {/* Gradiente Azul/Dark del CRM en lugar de colores cálidos */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/80 to-transparent z-10" />
+        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#0a0d14] to-transparent z-10 opacity-60" />
       </div>
 
-      {/* Glass Card Container */}
+      {/* Glass Card Container (Mockup Design) */}
       <main className="relative z-10 w-full max-w-[440px] p-6 animate-premium-fade">
-        <div className="glass-card rounded-[32px] p-10 border border-white/10 shadow-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+        <div className="glass-card rounded-[32px] p-10 border border-white/10 shadow-2xl relative overflow-hidden">
+          {/* Subtle Glow Inner */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
           
           {/* Header Brand */}
-          <div className="flex flex-col items-center mb-10">
-            <div className="w-16 h-16 bg-[#0a0d14] border border-[#FDE047]/30 rounded-2xl flex items-center justify-center shadow-[0_0_25px_rgba(253,224,71,0.1)] mb-4">
+          <div className="flex flex-col items-center mb-10 relative z-10">
+            <div className="w-16 h-16 bg-[#0a0d14] border border-[#FDE047]/30 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(253,224,71,0.1)] mb-4">
               <img 
                 src="/images/prius-icon.png" 
                 alt="Prius Logo" 
@@ -113,7 +119,7 @@ export default function Login() {
           </div>
 
           {mode === "login" ? (
-            <>
+            <div className="relative z-10">
               <div className="mb-8">
                 <h1 className="text-xl font-bold text-white tracking-tight">Acceso Staff</h1>
                 <p className="text-gray-400 text-xs mt-1">Ingresá tus credenciales autorizadas.</p>
@@ -194,9 +200,9 @@ export default function Login() {
                   )}
                 </button>
               </form>
-            </>
+            </div>
           ) : (
-            <div className="space-y-6">
+            <div className="relative z-10 space-y-6">
               <div className="space-y-1">
                 <h2 className="text-xl font-bold text-white tracking-tight">Recuperar acceso</h2>
                 <p className="text-gray-400 text-xs">Te enviaremos un link a tu correo oficial.</p>
