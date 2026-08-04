@@ -13,7 +13,7 @@ export default function Dashboard() {
   const [selectedUnit, setSelectedUnit] = useState(null)
   const [units, setUnits] = useState({})
   const [viewMode, setViewMode] = useState("map")
-  const [zoom, setZoom] = useState(0.9)
+  const [zoom, setZoom] = useState(0.85)
 
   useEffect(() => {
     checkUser()
@@ -66,7 +66,7 @@ export default function Dashboard() {
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5))
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.5))
-  const handleResetZoom = () => setZoom(0.9)
+  const handleResetZoom = () => setZoom(0.85)
 
   const getCarpa = (num) => units[`C${num}`]
   const getSombrilla = (num) => units[`S${num}`]
@@ -92,7 +92,6 @@ export default function Dashboard() {
       <div className="flex-1 min-h-0 glass-card rounded-3xl glass-card-inner relative overflow-hidden flex flex-col">
         {viewMode === "map" ? (
           <>
-            {/* Zoom Controls */}
             <div className="absolute top-6 right-6 z-20 flex flex-col gap-2">
               <button onClick={handleZoomIn} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
                 <Plus size={20} />
@@ -100,28 +99,36 @@ export default function Dashboard() {
               <button onClick={handleZoomOut} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
                 <Minus size={20} />
               </button>
-              <button onClick={handleResetZoom} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Reset Zoom">
+              <button onClick={handleResetZoom} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all">
                 <Maximize size={18} />
               </button>
             </div>
 
-            {/* Scrollable Container */}
             <div className="flex-1 overflow-auto p-12 flex justify-center items-start">
               <div 
-                className="transition-transform duration-200 origin-top"
+                className="transition-transform duration-200 origin-top flex flex-col items-center"
                 style={{ transform: `scale(${zoom})` }}
               >
-                {/* Etiquetas Superiores - Ajustadas a la nueva arquitectura */}
-                <div className="flex justify-center mb-10 gap-0">
-                  <div className="w-[180px] py-3 border border-white/10 text-center rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Recreación</div>
-                  <div className="w-[80px] py-3 border-y border-x border-white/10 text-center bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">Acceso</div>
-                  <div className="w-[200px] py-3 border border-[#FDE047]/30 text-center rounded-r-lg bg-[#FDE047]/10 text-[9px] font-bold uppercase tracking-widest text-[#FDE047]">Sector Piscina</div>
+                {/* Header Row (Etiquetas + Pileta Unificada) */}
+                <div className="flex justify-center gap-0 mb-4 items-stretch">
+                  <div className="w-[180px] h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                    Recreación
+                  </div>
+                  <div className="w-[64px] h-[50px] flex items-center justify-center border-y border-x border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">
+                    Acceso
+                  </div>
+                  {/* El Bloque de Pileta ahora arranca desde arriba */}
+                  <div className="w-[180px] h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
+                    <div className="absolute inset-0 bg-sky-400/5 animate-pulse" />
+                    <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
+                    <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
+                  </div>
                 </div>
 
-                {/* Grilla Principal Carpas con Pasillo Central */}
-                <div className="flex justify-center gap-16 items-end pb-12">
+                {/* Grilla Principal Carpas */}
+                <div className="flex justify-center gap-[64px] items-end pb-12">
                   
-                  {/* Bloque Izquierda (1-25, 26-50, 51-75) */}
+                  {/* Bloque Izquierda */}
                   <div className="flex gap-8 items-end">
                     {[
                       { start: 1, count: 25 }, { start: 26, count: 25 }, { start: 51, count: 25 }
@@ -134,28 +141,19 @@ export default function Dashboard() {
                     ))}
                   </div>
 
-                  {/* Pasillo Central (Espacio implícito por el gap-16) */}
+                  {/* Pasillo Central de 64px alineado con la etiqueta ACCESO */}
 
-                  {/* Bloque Derecha (Pileta + 76-98, 99-121, 122-144) */}
-                  <div className="flex flex-col gap-0 items-center">
-                    {/* El bloque de la Piscina */}
-                    <div className="w-[180px] h-[72px] bg-sky-500/10 border border-sky-500/20 rounded-md mb-4 flex flex-col items-center justify-center relative group overflow-hidden">
-                      <div className="absolute inset-0 bg-sky-400/5" />
-                      <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
-                      <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
-                    </div>
-                    
-                    <div className="flex gap-8 items-end">
-                      {[
-                        { start: 76, count: 23 }, { start: 99, count: 23 }, { start: 122, count: 23 }
-                      ].map((col, idx) => (
-                        <div key={idx} className="flex flex-col gap-1">
-                          {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
-                            <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
-                          ))}
-                        </div>
-                      ))}
-                    </div>
+                  {/* Bloque Derecha (Alineado debajo de la Pileta) */}
+                  <div className="flex gap-8 items-end">
+                    {[
+                      { start: 76, count: 23 }, { start: 99, count: 23 }, { start: 122, count: 23 }
+                    ].map((col, idx) => (
+                      <div key={idx} className="flex flex-col gap-1">
+                        {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
+                          <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
+                        ))}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -228,20 +226,10 @@ export default function Dashboard() {
           body { background: white !important; color: black !important; }
           .no-print { display: none !important; }
         }
-        .overflow-auto::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        .overflow-auto::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.02);
-        }
-        .overflow-auto::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 4px;
-        }
-        .overflow-auto::-webkit-scrollbar-thumb:hover {
-          background: #FDE047;
-        }
+        .overflow-auto::-webkit-scrollbar { width: 8px; height: 8px; }
+        .overflow-auto::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
+        .overflow-auto::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        .overflow-auto::-webkit-scrollbar-thumb:hover { background: #FDE047; }
       `}</style>
     </div>
   )
