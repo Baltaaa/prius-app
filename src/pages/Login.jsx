@@ -80,37 +80,34 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between items-center bg-[#1A1A1A] font-sans overflow-x-hidden selection:bg-[#E9C46A] selection:text-[#1A1A1A]">
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#1A1A1A] font-sans overflow-hidden selection:bg-[#E9C46A] selection:text-[#1A1A1A] p-4">
       {isSuccess && <GlobalLoader message="Ingresando al panel..." />}
 
-      {/* Imagen de Fondo Completa Oficial (IMG_1852.webp) */}
+      {/* Imagen de Fondo Completa (IMG_1832.webp - Vista de Pileta) */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="/images/hero-login.webp"
           alt="Prius Playa Grande"
-          className="w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.03]"
+          className="w-full h-full object-cover object-center filter brightness-[0.92]"
         />
-        {/* Degradado para óptima legibilidad */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-black/25" />
+        {/* Overlay oscuro sutil para favorecer legibilidad */}
+        <div className="absolute inset-0 bg-black/20" />
       </div>
 
-      {/* Espaciador superior responsive */}
-      <div className="w-full h-4 sm:h-8 z-10" />
-
-      {/* Tarjeta Glassmorphic Centrada / Derecha */}
-      <main className="relative z-10 w-full max-w-[460px] px-4 py-6 sm:px-6 my-auto flex justify-center md:justify-end md:mr-12 lg:mr-24 xl:mr-32">
-        <div className="w-full glass-panel rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.25)] p-7 sm:p-9 text-white transition-all duration-300 hover:border-white/30">
+      {/* Tarjeta Glassmorphic PERFECTAMENTE CENTRADA */}
+      <main className="relative z-10 w-full max-w-[420px] mx-auto">
+        <div className="w-full glass-panel rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-8 sm:p-9 text-white transition-all duration-300">
           
           {/* Header de Marca */}
-          <div className="flex items-center gap-2.5 mb-7">
-            <div className="w-9 h-9 rounded-full bg-[#E9C46A] flex items-center justify-center text-[#1A1A1A] font-bold text-base shadow-md shrink-0">
-              <span className="italic font-extrabold tracking-tighter">P</span>
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-8 h-8 rounded-full bg-[#E9C46A] flex items-center justify-center text-[#1A1A1A] font-extrabold text-base shadow-sm shrink-0">
+              <span className="italic font-serif leading-none">P</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg tracking-tight text-white italic">
                 Prius<span className="font-normal not-italic text-white/90">Admin</span>
               </span>
-              <span className="text-white/60 text-[11px] tracking-wider uppercase font-semibold">
+              <span className="text-white/70 text-[11px] tracking-wider uppercase font-semibold">
                 - PLAYA GRANDE
               </span>
             </div>
@@ -120,10 +117,10 @@ export default function Login() {
             <>
               {/* Título & Subtítulo */}
               <div className="mb-6 space-y-1">
-                <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight">
                   Iniciar sesión
                 </h1>
-                <p className="text-white/80 text-sm font-normal pt-1">
+                <p className="text-white/80 text-xs font-normal">
                   Ingresá tus credenciales para acceder al panel.
                 </p>
               </div>
@@ -132,7 +129,7 @@ export default function Login() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 
                 {/* Input Correo Electrónico */}
-                <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-white/15">
+                <div className="relative flex items-center bg-white/10 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white/60 focus-within:bg-black/20">
                   <Mail size={16} className="text-white/70 shrink-0 mr-3" />
                   <input
                     type="email"
@@ -140,12 +137,13 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="CORREO ELECTRÓNICO"
-                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
+                    autoComplete="email"
+                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                   />
                 </div>
 
                 {/* Input Contraseña */}
-                <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-white/15">
+                <div className="relative flex items-center bg-white/10 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white/60 focus-within:bg-black/20">
                   <Lock size={16} className="text-white/70 shrink-0 mr-3" />
                   <input
                     type={showPassword ? "text" : "password"}
@@ -153,7 +151,8 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="CONTRASEÑA"
-                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
+                    autoComplete="current-password"
+                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                   />
                   <button
                     type="button"
@@ -166,21 +165,21 @@ export default function Login() {
                 </div>
 
                 {/* Checkbox Mantener sesión & Olvidaste contraseña */}
-                <div className="flex items-center justify-between text-xs pt-1 text-white/80 font-normal">
+                <div className="flex items-center justify-between text-[11px] pt-1 text-white/80 font-normal">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={remember}
                       onChange={(e) => setRemember(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#E9C46A] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#E9C46A]"
+                      className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 text-[#E9C46A] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#E9C46A]"
                     />
-                    <span className="text-white/90">Mantener sesión iniciada</span>
+                    <span>Mantener sesión iniciada</span>
                   </label>
 
                   <button
                     type="button"
                     onClick={() => setMode("recover")}
-                    className="underline text-white/90 hover:text-white transition-colors"
+                    className="underline text-white/80 hover:text-white transition-colors"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -194,11 +193,11 @@ export default function Login() {
                   </div>
                 )}
 
-                {/* Botón Principal Dorado (Pill-shape #E9C46A, Montserrat Bold 14px, tracking 1px) */}
+                {/* Botón Principal Dorado */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 mt-4 bg-[#E9C46A] hover:bg-[#d8b358] active:scale-[0.99] text-[#1A1A1A] font-bold text-sm uppercase tracking-[1px] rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                  className="w-full h-12 mt-3 bg-[#E9C46A] hover:bg-[#d8b358] active:scale-[0.99] text-[#1A1A1A] font-bold text-xs uppercase tracking-widest rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
                   {isLoading ? (
                     <Loader2 size={18} className="animate-spin text-[#1A1A1A]" />
@@ -241,7 +240,7 @@ export default function Login() {
                 </div>
               ) : (
                 <form onSubmit={handleRecover} className="space-y-4">
-                  <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-white/15">
+                  <div className="relative flex items-center bg-white/10 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white/60 focus-within:bg-black/20">
                     <Mail size={16} className="text-white/70 shrink-0 mr-3" />
                     <input
                       type="email"
@@ -249,7 +248,7 @@ export default function Login() {
                       onChange={(e) => setRecoverEmail(e.target.value)}
                       required
                       placeholder="CORREO REGISTRADO"
-                      className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
+                      className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                     />
                   </div>
 
@@ -263,7 +262,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={recoverStatus === "sending"}
-                    className="w-full h-12 bg-[#E9C46A] hover:bg-[#d8b358] text-[#1A1A1A] font-bold text-sm uppercase tracking-[1px] rounded-full transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    className="w-full h-12 bg-[#E9C46A] hover:bg-[#d8b358] text-[#1A1A1A] font-bold text-xs uppercase tracking-widest rounded-full transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                   >
                     {recoverStatus === "sending" ? (
                       <Loader2 size={18} className="animate-spin text-[#1A1A1A]" />
@@ -288,8 +287,8 @@ export default function Login() {
         </div>
       </main>
 
-      {/* Footer Fijo en la Base */}
-      <footer className="relative z-10 py-4 px-4 w-full text-center">
+      {/* Footer Fijo en el centro de la base */}
+      <footer className="absolute bottom-4 left-0 right-0 z-10 text-center px-4 pointer-events-none">
         <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.25em] drop-shadow-md">
           PRIUSADMIN &bull; ACCESO RESTRINGIDO AL STAFF
         </p>
