@@ -3,22 +3,24 @@
 @tailwind utilities;
 
 :root {
-  --prius-gold: #F2CA50;
-  --prius-gold-hover: #E5BF45;
-  --prius-black: #000000;
+  --prius-gold: #E9C46A;
+  --prius-gold-hover: #D8B358;
+  --prius-black: #1A1A1A;
   --prius-white: #FFFFFF;
-  --prius-gray-bg: #F9F9F9;
+  --prius-gray-bg: #F8F9FA;
+  --prius-text-dark: #2D3436;
+  --prius-text-muted: #636E72;
   --prius-border: #E5E5E5;
 
   --background: #FFFFFF;
-  --foreground: #000000;
+  --foreground: #2D3436;
   --card: #FFFFFF;
-  --card-foreground: #000000;
-  --primary: #F2CA50;
-  --primary-foreground: #000000;
+  --card-foreground: #2D3436;
+  --primary: #E9C46A;
+  --primary-foreground: #1A1A1A;
   --border: #E5E5E5;
   --input: #E5E5E5;
-  --radius: 4px;
+  --radius: 12px;
 }
 
 * {
@@ -28,14 +30,22 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #FFFFFF;
-  color: #000000;
+  font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+  background-color: #F8F9FA;
+  color: #2D3436;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Restyle scrollbars to clean flat minimalism */
+/* Custom Glassmorphic utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Restyle scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -45,8 +55,8 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: #E5E5E5;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #000000;
+  background: #1A1A1A;
 }
