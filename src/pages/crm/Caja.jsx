@@ -49,7 +49,7 @@ export default function Caja() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-xs font-semibold text-neutral-400">Cargando Caja...</span>
+        <span className="text-xs font-semibold text-white/40">Cargando Caja...</span>
       </div>
     )
   }
@@ -57,14 +57,14 @@ export default function Caja() {
   return (
     <div className="space-y-6">
       {/* Header info */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#E5E5E5] pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-4">
         <div>
-          <h1 className="text-xl font-bold text-black tracking-tight">Caja Diaria y Gastos</h1>
-          <p className="text-xs text-neutral-500 font-normal">Arqueo diario de cobros, transferencias y egresos directos.</p>
+          <h1 className="text-xl font-bold text-white tracking-tight">Caja Diaria y Gastos</h1>
+          <p className="text-xs text-white/50 font-normal">Arqueo diario de cobros, transferencias y egresos directos.</p>
         </div>
         
         {cajaHoy && (
-          <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-bold tracking-wider uppercase border ${cajaHoy.cerrada ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+          <span className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-bold tracking-wider uppercase border ${cajaHoy.cerrada ? 'bg-rose-400/10 text-rose-400 border-rose-400/20' : 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'}`}>
             {cajaHoy.cerrada ? 'CAJA CERRADA' : 'CAJA ABIERTA'}
           </span>
         )}
@@ -72,13 +72,13 @@ export default function Caja() {
 
       {/* Unopened state */}
       {!cajaHoy ? (
-        <div className="p-12 text-center bg-white border border-[#E5E5E5] rounded space-y-4">
-          <Calendar className="w-12 h-12 text-neutral-400 mx-auto" />
-          <h2 className="text-sm uppercase font-bold text-black">Caja diaria no iniciada</h2>
-          <p className="text-xs text-neutral-500 max-w-sm mx-auto">Debes iniciar la caja del día para registrar los movimientos financieros de hoy.</p>
+        <div className="p-12 text-center bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md space-y-4">
+          <Calendar className="w-12 h-12 text-white/35 mx-auto" />
+          <h2 className="text-sm uppercase font-bold text-white">Caja diaria no iniciada</h2>
+          <p className="text-xs text-white/50 max-w-sm mx-auto">Debes iniciar la caja del día para registrar los movimientos financieros de hoy.</p>
           <button
             onClick={iniciarCaja}
-            className="px-6 py-2.5 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded inline-flex items-center gap-2 transition-colors"
+            className="px-6 py-2.5 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded-full inline-flex items-center gap-2 transition-colors shadow-lg shadow-[#F2CA50]/10"
           >
             <Plus size={16} />
             Iniciar Caja Diaria
@@ -92,72 +92,72 @@ export default function Caja() {
             
             {/* Totals Balance Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 border border-[#E5E5E5] bg-white rounded">
-                <span className="text-xs font-semibold text-neutral-400 uppercase">Cobros de Hoy</span>
-                <p className="text-xl font-bold mt-1 text-black">{formatCurrency(cajaHoy.total_cobros)}</p>
+              <div className="p-4 border border-white/10 bg-white/5 rounded-2xl backdrop-blur-md">
+                <span className="text-xs font-semibold text-white/40 uppercase">Cobros de Hoy</span>
+                <p className="text-xl font-bold mt-1 text-white">{formatCurrency(cajaHoy.total_cobros)}</p>
               </div>
-              <div className="p-4 border border-[#E5E5E5] bg-white rounded">
-                <span className="text-xs font-semibold text-neutral-400 uppercase">Gastos de Hoy</span>
-                <p className="text-xl font-bold mt-1 text-red-600">{formatCurrency(cajaHoy.total_gastos)}</p>
+              <div className="p-4 border border-white/10 bg-white/5 rounded-2xl backdrop-blur-md">
+                <span className="text-xs font-semibold text-white/40 uppercase">Gastos de Hoy</span>
+                <p className="text-xl font-bold mt-1 text-rose-400">{formatCurrency(cajaHoy.total_gastos)}</p>
               </div>
-              <div className="p-4 border border-[#E5E5E5] bg-black text-white rounded">
-                <span className="text-xs font-semibold text-neutral-300 uppercase">Caja Neta</span>
+              <div className="p-4 border border-white/10 bg-black/60 rounded-2xl backdrop-blur-md">
+                <span className="text-xs font-semibold text-white/50 uppercase">Caja Neta</span>
                 <p className="text-xl font-bold mt-1 text-[#F2CA50]">{formatCurrency(cajaHoy.total_neto)}</p>
               </div>
             </div>
 
             {/* Inputs grid if not closed */}
             {!cajaHoy.cerrada ? (
-              <div className="p-5 border border-[#E5E5E5] bg-white rounded space-y-4">
-                <h3 className="text-xs font-bold uppercase text-neutral-600">Actualizar Medios de Pago</h3>
+              <div className="p-5 border border-white/10 bg-white/5 rounded-2xl backdrop-blur-md space-y-4">
+                <h3 className="text-xs font-bold uppercase text-white/70">Actualizar Medios de Pago</h3>
                 <form onSubmit={handleUpdateValues} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-neutral-500 uppercase">Efectivo ($)</label>
+                    <label className="text-[10px] font-bold text-white/50 uppercase">Efectivo ($)</label>
                     <input
                       type="number"
                       placeholder={cajaHoy.efectivo}
                       value={efectivo}
                       onChange={(e) => setEfectivo(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl font-semibold placeholder:text-white/30"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-neutral-500 uppercase">Transferencias ($)</label>
+                    <label className="text-[10px] font-bold text-white/50 uppercase">Transferencias ($)</label>
                     <input
                       type="number"
                       placeholder={cajaHoy.medio_pago_1}
                       value={transferencias}
                       onChange={(e) => setTransferencias(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl font-semibold placeholder:text-white/30"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-neutral-500 uppercase">Tarjeta/Digital ($)</label>
+                    <label className="text-[10px] font-bold text-white/50 uppercase">Tarjeta/Digital ($)</label>
                     <input
                       type="number"
                       placeholder={cajaHoy.medio_pago_2}
                       value={digitales}
                       onChange={(e) => setDigitales(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl font-semibold placeholder:text-white/30"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-2 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded sm:col-span-3 transition-colors"
+                    className="w-full py-2.5 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded-full sm:col-span-3 transition-colors"
                   >
                     Guardar Totales de Cobro
                   </button>
                 </form>
               </div>
             ) : (
-              <div className="p-4 bg-[#F9F9F9] border border-[#E5E5E5] rounded text-center text-xs text-neutral-500">
+              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center text-xs text-white/50">
                 La caja de hoy está cerrada y archivada.
               </div>
             )}
 
             {/* Expenses segment */}
-            <div className="p-5 border border-[#E5E5E5] bg-white rounded space-y-4">
-              <h3 className="text-xs font-bold uppercase text-neutral-600">Gastos Registrados</h3>
+            <div className="p-5 border border-white/10 bg-white/5 rounded-2xl backdrop-blur-md space-y-4">
+              <h3 className="text-xs font-bold uppercase text-white/70">Gastos Registrados</h3>
               
               {!cajaHoy.cerrada && (
                 <form onSubmit={handleAddGasto} className="flex flex-col sm:flex-row gap-3 items-end">
@@ -168,7 +168,7 @@ export default function Caja() {
                       placeholder="DESCRIPCIÓN DEL GASTO"
                       value={descGasto}
                       onChange={(e) => setDescGasto(e.target.value.toUpperCase())}
-                      className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white placeholder:text-white/35 text-xs focus:border-[#F2CA50] outline-none rounded-xl font-semibold"
                     />
                   </div>
                   <div className="w-full sm:w-36 space-y-1">
@@ -178,12 +178,12 @@ export default function Caja() {
                       placeholder="MONTO ($)"
                       value={montoGasto}
                       onChange={(e) => setMontoGasto(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white placeholder:text-white/35 text-xs focus:border-[#F2CA50] outline-none rounded-xl font-semibold"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-black hover:bg-neutral-800 text-white font-bold text-xs uppercase tracking-wider rounded inline-flex items-center gap-2 shrink-0 h-9 transition-colors"
+                    className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider rounded-full inline-flex items-center gap-2 shrink-0 h-9 transition-colors"
                   >
                     <Plus size={14} /> Registrar
                   </button>
@@ -191,18 +191,18 @@ export default function Caja() {
               )}
 
               {/* Expenses list display */}
-              <div className="divide-y divide-[#E5E5E5] text-xs">
+              <div className="divide-y divide-white/10 text-xs">
                 {gastos.map((g) => (
                   <div key={g.id} className="py-2.5 flex justify-between items-center">
                     <div>
-                      <p className="font-semibold uppercase text-black">{g.descripcion}</p>
+                      <p className="font-semibold uppercase text-white">{g.descripcion}</p>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="font-bold text-red-600">{formatCurrency(g.monto)}</span>
+                      <span className="font-bold text-rose-400">{formatCurrency(g.monto)}</span>
                       {!cajaHoy.cerrada && (
                         <button
                           onClick={() => eliminarGasto(g.id, g.monto)}
-                          className="text-neutral-400 hover:text-red-600 p-1"
+                          className="text-white/35 hover:text-rose-400 p-1"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -211,7 +211,7 @@ export default function Caja() {
                   </div>
                 ))}
                 {gastos.length === 0 && (
-                  <p className="py-3 text-center text-xs text-neutral-400">Sin gastos registrados hoy.</p>
+                  <p className="py-3 text-center text-xs text-white/35">Sin gastos registrados hoy.</p>
                 )}
               </div>
             </div>
@@ -220,16 +220,16 @@ export default function Caja() {
           {/* Right sidebar inside Caja */}
           <div className="space-y-6">
             {!cajaHoy.cerrada && (
-              <div className="p-5 border border-red-200 bg-red-50/50 rounded space-y-3">
-                <h3 className="text-xs uppercase font-bold text-red-700">Arqueo y Cierre</h3>
-                <p className="text-xs text-red-600/80 leading-normal">Al cerrar la caja de hoy, no se podrán agregar más movimientos financieros.</p>
+              <div className="p-5 border border-rose-400/20 bg-rose-400/10 rounded-2xl backdrop-blur-md space-y-3">
+                <h3 className="text-xs uppercase font-bold text-rose-400">Arqueo y Cierre</h3>
+                <p className="text-xs text-rose-300/80 leading-normal">Al cerrar la caja de hoy, no se podrán agregar más movimientos financieros.</p>
                 <button
                   onClick={() => {
                     if (confirm('¿Está seguro de cerrar la caja de hoy?')) {
                       cerrarCaja()
                     }
                   }}
-                  className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded transition-colors"
+                  className="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs uppercase tracking-wider rounded-full transition-colors"
                 >
                   Cerrar Caja de Hoy
                 </button>
@@ -237,19 +237,19 @@ export default function Caja() {
             )}
 
             {/* General History list */}
-            <div className="p-5 border border-[#E5E5E5] bg-white rounded space-y-4">
-              <h3 className="text-xs font-bold uppercase text-neutral-600">Historial Reciente</h3>
+            <div className="p-5 border border-white/10 bg-white/5 rounded-2xl backdrop-blur-md space-y-4">
+              <h3 className="text-xs font-bold uppercase text-white/70">Historial Reciente</h3>
               <div className="space-y-2 max-h-80 overflow-y-auto text-xs">
                 {historialCajas.map((hist) => (
-                  <div key={hist.id} className="p-2.5 border border-[#E5E5E5] hover:bg-[#F9F9F9] rounded flex justify-between items-center">
+                  <div key={hist.id} className="p-3 border border-white/10 hover:bg-white/5 rounded-xl flex justify-between items-center transition-colors">
                     <div>
-                      <p className="font-bold text-black">{hist.fecha}</p>
-                      <span className={`text-[10px] font-bold ${hist.cerrada ? 'text-neutral-400' : 'text-green-600'}`}>
+                      <p className="font-bold text-white">{hist.fecha}</p>
+                      <span className={`text-[10px] font-bold ${hist.cerrada ? 'text-white/35' : 'text-emerald-400'}`}>
                         {hist.cerrada ? 'CERRADA' : 'ABIERTA'}
                       </span>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-black">{formatCurrency(hist.total_neto)}</p>
+                      <p className="font-semibold text-white">{formatCurrency(hist.total_neto)}</p>
                     </div>
                   </div>
                 ))}
