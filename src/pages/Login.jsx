@@ -83,10 +83,10 @@ export default function Login() {
     <div className="relative min-h-screen w-full flex items-center justify-center md:justify-end bg-[#1A1A1A] font-sans overflow-hidden selection:bg-[#E9C46A] selection:text-[#1A1A1A] p-4 md:pr-16 lg:pr-28 xl:pr-36">
       {isSuccess && <GlobalLoader message="Ingresando al panel..." />}
 
-      {/* Imagen de Fondo Completa (Pileta / Playa) */}
+      {/* Imagen de Fondo Completa Oficial Prius 2024-2025 */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
-          src="/images/hero-login.webp"
+          src="/images/hero-login.jpg"
           alt="Prius Playa Grande"
           className="w-full h-full object-cover object-center filter brightness-[0.95]"
         />
@@ -197,7 +197,7 @@ export default function Login() {
                   </div>
                 )}
 
-                {/* Botón Principal Dorado Dorado Prius */}
+                {/* Botón Principal Dorado Prius */}
                 <button
                   type="submit"
                   disabled={isLoading}
