@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { Printer } from "lucide-react"
+import { Printer, Plus, Minus, Maximize, Search } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnitModal from "../components/dashboard/UnitModal"
@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [selectedUnit, setSelectedUnit] = useState(null)
   const [units, setUnits] = useState({})
   const [viewMode, setViewMode] = useState("map")
+  const [zoom, setZoom] = useState(0.9) // Estado inicial del zoom
 
   useEffect(() => {
     checkUser()
@@ -63,11 +64,15 @@ export default function Dashboard() {
     setSelectedUnit(null)
   }
 
+  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5))
+  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.5))
+  const handleResetZoom = () => setZoom(0.9)
+
   const getCarpa = (num) => units[`C${num}`]
   const getSombrilla = (num) => units[`S${num}`]
 
   return (
-    <div className="h-full flex flex-col space-y-4 animate-premium-fade no-print overflow-hidden">
+    <div className="h-full flex flex-col space-y-4 animate-premium-fade no-print overflow-hidden pb-4">
       {/* Header Section */}
       <div className="flex justify-between items-center shrink-0">
         <div>
@@ -83,76 +88,104 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Workspace */}
-      <div className="flex-1 min-h-0 glass-card rounded-3xl glass-card-inner flex items-center justify-center relative overflow-hidden p-6">
+      {/* Workspace Area */}
+      <div className="flex-1 min-h-0 glass-card rounded-3xl glass-card-inner relative overflow-hidden flex flex-col">
         {viewMode === "map" ? (
-          <div className="transform scale-[0.65] lg:scale-[0.85] xl:scale-[0.95] origin-center transition-transform duration-500">
-            {/* Etiquetas Superiores */}
-            <div className="flex justify-center mb-8 gap-1">
-              <div className="w-[124px] py-2 border border-white/10 text-center rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Recreación</div>
-              <div className="w-[62px] py-2 border border-white/10 text-center bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Acceso</div>
-              <div className="w-[200px] py-2 border border-[#FDE047]/30 text-center rounded-r-lg bg-[#FDE047]/10 text-[9px] font-bold uppercase tracking-widest text-[#FDE047]">Sector Piscina</div>
+          <>
+            {/* Zoom Controls */}
+            <div className="absolute top-6 right-6 z-20 flex flex-col gap-2">
+              <button onClick={handleZoomIn} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
+                <Plus size={20} />
+              </button>
+              <button onClick={handleZoomOut} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
+                <Minus size={20} />
+              </button>
+              <button onClick={handleResetZoom} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Reset Zoom">
+                <Maximize size={18} />
+              </button>
             </div>
 
-            {/* Grilla Principal Carpas */}
-            <div className="flex justify-center gap-8 items-end">
-              {/* Pasillos 1, 2, 3 (Completos 25u) */}
-              {[
-                { start: 1, count: 25 }, { start: 26, count: 25 }, { start: 51, count: 25 }
-              ].map((col, idx) => (
-                <div key={idx} className="flex flex-col gap-0.5">
-                  {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
-                    <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
-                  ))}
+            {/* Scrollable Container */}
+            <div className="flex-1 overflow-auto p-12 flex justify-center items-start">
+              <div 
+                className="transition-transform duration-200 origin-top"
+                style={{ transform: `scale(${zoom})` }}
+              >
+                {/* Etiquetas Superiores */}
+                <div className="flex justify-center mb-10 gap-1">
+                  <div className="w-[124px] py-3 border border-white/10 text-center rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Recreación</div>
+                  <div className="w-[62px] py-3 border-y border-white/10 text-center bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Acceso</div>
+                  <div className="w-[200px] py-3 border border-[#FDE047]/30 text-center rounded-r-lg bg-[#FDE047]/10 text-[9px] font-bold uppercase tracking-widest text-[#FDE047]">Sector Piscina</div>
                 </div>
-              ))}
 
-              {/* Grupo Pool (Empujado por el Sector Piscina) */}
-              <div className="flex flex-col gap-0.5 items-center">
-                 {/* El "Mueble" de la Piscina que empuja hacia abajo */}
-                 <div className="w-[170px] h-[58px] bg-white/5 border border-white/10 rounded-sm mb-4 flex items-center justify-center relative group overflow-hidden">
-                    <div className="absolute inset-0 bg-sky-500/5 group-hover:bg-sky-500/10 transition-colors" />
-                    <span className="relative z-10 text-[9px] font-bold text-gray-600 uppercase tracking-[0.4em]">Pileta</span>
-                 </div>
-                 
-                 <div className="flex gap-8 items-end">
+                {/* Grilla Principal Carpas */}
+                <div className="flex justify-center gap-10 items-end pb-12">
+                  {/* Pasillos 1, 2, 3 (Completos 25u) */}
+                  {[
+                    { start: 1, count: 25 }, { start: 26, count: 25 }, { start: 51, count: 25 }
+                  ].map((col, idx) => (
+                    <div key={idx} className="flex flex-col gap-1">
+                      {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
+                      ))}
+                    </div>
+                  ))}
+
+                  {/* Grupo Pool (Empujado por el Sector Piscina) */}
+                  <div className="flex flex-col gap-0 items-center">
+                    {/* El "Mueble" de la Piscina que empuja hacia abajo */}
+                    <div className="w-[180px] h-[72px] bg-sky-500/10 border border-sky-500/20 rounded-md mb-4 flex flex-col items-center justify-center relative group overflow-hidden">
+                      <div className="absolute inset-0 bg-sky-400/5 animate-pulse" />
+                      <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
+                      <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
+                    </div>
+                    
+                    <div className="flex gap-10 items-end">
+                      {[
+                        { start: 76, count: 23 }, { start: 99, count: 23 }, { start: 122, count: 23 }
+                      ].map((col, idx) => (
+                        <div key={idx} className="flex flex-col gap-1">
+                          {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
+                            <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sector Sombrillas */}
+                <div className="mt-16 flex flex-col items-center">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="h-[1px] w-12 bg-white/10" />
+                    <span className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-500">Sector Sombrillas</span>
+                    <div className="h-[1px] w-12 bg-white/10" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-20">
                     {[
-                      { start: 76, count: 23 }, { start: 99, count: 23 }, { start: 122, count: 23 }
-                    ].map((col, idx) => (
-                      <div key={idx} className="flex flex-col gap-0.5">
-                        {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
-                          <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
-                        ))}
-                      </div>
-                    ))}
-                 </div>
-              </div>
-            </div>
-
-            {/* Sombrillas */}
-            <div className="mt-12 flex flex-col items-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-500 mb-6">Sector Sombrillas</span>
-              <div className="grid grid-cols-2 gap-16">
-                {[
-                  [1, 6, 11, 16], [21, 26, 31, 36]
-                ].map((starts, colIdx) => (
-                  <div key={colIdx} className="space-y-0.5">
-                    {starts.map(start => (
-                      <div key={start} className="flex gap-0.5">
-                        {[0, 1, 2, 3, 4].map(off => (
-                          <Cell key={start + off} number={start + off} unit={getSombrilla(start + off)} onClick={handleUnitClick} />
+                      [1, 6, 11, 16], [21, 26, 31, 36]
+                    ].map((starts, colIdx) => (
+                      <div key={colIdx} className="space-y-1">
+                        {starts.map(start => (
+                          <div key={start} className="flex gap-1">
+                            {[0, 1, 2, 3, 4].map(off => (
+                              <Cell key={start + off} number={start + off} unit={getSombrilla(start + off)} onClick={handleUnitClick} />
+                            ))}
+                          </div>
                         ))}
                       </div>
                     ))}
                   </div>
-                ))}
+                </div>
+
+                <div className="mt-16 w-full bg-white/5 border border-white/5 py-5 text-center text-gray-600 font-black text-[11px] tracking-[1em] uppercase rounded-2xl">
+                  Océano Atlántico
+                </div>
               </div>
             </div>
-
-            <div className="mt-10 w-full bg-white/5 border border-white/5 py-4 text-center text-gray-500 font-bold text-[10px] tracking-[0.8em] uppercase rounded-xl">Océano Atlántico</div>
-          </div>
+          </>
         ) : (
-          <div className="w-full h-full overflow-auto p-4">
+          <div className="w-full h-full overflow-auto p-6">
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 bg-[#0a0d14] z-10">
                 <tr className="border-b border-white/10 text-[10px] font-bold uppercase tracking-widest text-gray-500">
@@ -184,7 +217,28 @@ export default function Dashboard() {
       </div>
 
       {selectedUnit && <UnitModal unit={selectedUnit} onClose={() => setSelectedUnit(null)} onSave={handleSaveUnit} />}
-      <style>{`@media print {@page {size: A4; margin:0;} body {background:white!important; color:black!important;} .no-print {display:none!important;}}`}</style>
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 0; }
+          body { background: white !important; color: black !important; }
+          .no-print { display: none !important; }
+        }
+        /* Custom Scrollbar for the map container */
+        .overflow-auto::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        .overflow-auto::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.02);
+        }
+        .overflow-auto::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+        .overflow-auto::-webkit-scrollbar-thumb:hover {
+          background: #FDE047;
+        }
+      `}</style>
     </div>
   )
 }
