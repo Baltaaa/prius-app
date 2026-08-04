@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { Eye, EyeOff, Loader2, Mail, Lock, ArrowUpRight, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react"
+import { Eye, EyeOff, Loader2, Mail, Lock, ArrowUpRight, AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react"
 import GlobalLoader from "../components/ui/GlobalLoader"
 
 export default function Login() {
@@ -19,7 +19,6 @@ export default function Login() {
   const [mode, setMode] = useState("login") // "login" | "recover"
   const [recoverEmail, setRecoverEmail] = useState("")
   const [recoverStatus, setRecoverStatus] = useState("idle") // idle | sending | sent | error
-  const [recoverError, setRecoverError] = useState("")
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -51,136 +50,119 @@ export default function Login() {
         }, 1200)
       }
     } catch (err) {
-      setError("Error de conexión. Verificá tu acceso a internet.")
+      setError("Error de conexión.")
       setIsLoading(false)
     }
   }
 
   const handleRecover = async (e) => {
     e.preventDefault()
-    setRecoverError("")
     setRecoverStatus("sending")
-
     try {
-      const { error: recoverErr } = await supabase.auth.resetPasswordForEmail(recoverEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      })
-
+      const { error: recoverErr } = await supabase.auth.resetPasswordForEmail(recoverEmail)
       if (recoverErr) {
         setRecoverStatus("error")
-        setRecoverError("No pudimos enviar el email. Verificá la dirección.")
         return
       }
-
       setRecoverStatus("sent")
     } catch (err) {
       setRecoverStatus("error")
-      setRecoverError("Error de conexión. Intentá nuevamente.")
     }
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#0a0d14] font-sans overflow-hidden selection:bg-[#FDE047] selection:text-black">
+    <div className="relative min-h-screen w-full flex items-center justify-end bg-[#0a0d14] font-sans overflow-hidden px-6 md:px-24 selection:bg-[#FDE047] selection:text-black">
       {isSuccess && <GlobalLoader message="Iniciando sesión segura" />}
 
-      {/* Background Hero con Overlay CRM Dark */}
+      {/* Fullscreen Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
           src="/images/hero-login.webp" 
           alt="Background" 
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover"
         />
-        {/* Gradiente Azul/Dark del CRM en lugar de colores cálidos */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/80 to-transparent z-10" />
-        <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#0a0d14] to-transparent z-10 opacity-60" />
+        {/* Dark Overlay for better contrast */}
+        <div className="absolute inset-0 bg-black/30 z-10" />
       </div>
 
-      {/* Glass Card Container (Mockup Design) */}
-      <main className="relative z-10 w-full max-w-[440px] p-6 animate-premium-fade">
-        <div className="glass-card rounded-[32px] p-10 border border-white/10 shadow-2xl relative overflow-hidden">
-          {/* Subtle Glow Inner */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
+      {/* Glass Card Container (Right Aligned per Screenshot) */}
+      <main className="relative z-20 w-full max-w-[480px] animate-premium-fade">
+        <div className="bg-[#0a0d14]/60 backdrop-blur-xl rounded-[40px] p-10 border border-white/10 shadow-2xl overflow-hidden">
           
           {/* Header Brand */}
-          <div className="flex flex-col items-center mb-10 relative z-10">
-            <div className="w-16 h-16 bg-[#0a0d14] border border-[#FDE047]/30 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(253,224,71,0.1)] mb-4">
-              <img 
-                src="/images/prius-icon.png" 
-                alt="Prius Logo" 
-                className="w-10 h-10 object-contain"
-              />
+          <div className="flex items-center gap-3 mb-12">
+            <div className="w-10 h-10 bg-[#0a0d14] border border-[#FDE047]/30 rounded-xl flex items-center justify-center shadow-lg p-2">
+              <img src="/images/prius-icon.png" alt="P" className="w-full h-full object-contain" />
             </div>
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white tracking-tight italic">
-                Prius<span className="text-[#FDE047] not-italic font-medium">Admin</span>
-              </h2>
-              <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em] uppercase mt-1">Playa Grande</p>
+            <div className="flex items-center gap-2">
+               <span className="text-xl font-bold text-white italic">Prius<span className="text-[#FDE047] not-italic font-medium">Admin</span></span>
+               <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest pt-1 border-l border-white/20 pl-2">PLAYA GRANDE</span>
             </div>
           </div>
 
           {mode === "login" ? (
-            <div className="relative z-10">
-              <div className="mb-8">
-                <h1 className="text-xl font-bold text-white tracking-tight">Acceso Staff</h1>
-                <p className="text-gray-400 text-xs mt-1">Ingresá tus credenciales autorizadas.</p>
+            <div className="space-y-8">
+              <div>
+                <h1 className="text-5xl font-bold text-white tracking-tight mb-2">Iniciar sesión</h1>
+                <p className="text-white/70 text-sm font-medium">Ingresá tus credenciales para acceder al panel.</p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
-                  <div className="relative">
-                    <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <div className="relative group">
+                    <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-[#FDE047] transition-colors" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       placeholder="CORREO ELECTRÓNICO"
-                      className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-xs font-bold tracking-wider uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all"
+                      className="w-full h-16 pl-14 pr-4 bg-white/5 border border-white/10 rounded-full outline-none text-white text-[11px] font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/10 transition-all placeholder:text-white/30"
                     />
                   </div>
 
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <div className="relative group">
+                    <Lock size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-[#FDE047] transition-colors" />
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       placeholder="CONTRASEÑA"
-                      className="w-full h-14 pl-12 pr-12 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-xs font-bold tracking-wider uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all"
+                      className="w-full h-16 pl-14 pr-14 bg-white/5 border border-white/10 rounded-full outline-none text-white text-[11px] font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/10 transition-all placeholder:text-white/30"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                      className="absolute right-5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
                     >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest pt-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-gray-500 hover:text-gray-300 transition-colors">
+                <div className="flex items-center justify-between text-[11px] font-bold text-white/60">
+                  <label className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
                     <input
                       type="checkbox"
                       checked={remember}
                       onChange={(e) => setRemember(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#FDE047] focus:ring-0 accent-[#FDE047]"
+                      className="w-4 h-4 rounded border-white/20 bg-white/5 text-[#FDE047] focus:ring-0 accent-[#FDE047]"
                     />
-                    <span>Recordarme</span>
+                    <span className="uppercase tracking-wider">Mantener sesión iniciada</span>
                   </label>
 
                   <button
                     type="button"
                     onClick={() => setMode("recover")}
-                    className="text-gray-500 hover:text-[#FDE047] transition-colors"
+                    className="hover:text-[#FDE047] transition-colors uppercase tracking-wider underline underline-offset-4"
                   >
-                    ¿Olvidaste la clave?
+                    ¿Olvidaste tu contraseña?
                   </button>
                 </div>
 
                 {error && (
-                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3">
                     <AlertCircle size={16} className="text-red-400 shrink-0" />
                     <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">{error}</span>
                   </div>
@@ -189,73 +171,66 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-14 bg-[#FDE047] hover:bg-yellow-300 active:scale-[0.98] text-black font-black text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-yellow-400/5 flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
+                  className="w-full h-16 bg-[#FDE047] hover:bg-yellow-300 active:scale-[0.98] text-black font-black text-xs uppercase tracking-[0.2em] rounded-full transition-all shadow-xl shadow-yellow-400/5 flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {isLoading ? (
-                    <Loader2 size={18} className="animate-spin" />
+                    <Loader2 size={20} className="animate-spin" />
                   ) : (
                     <>
-                      INGRESAR AL PANEL <ArrowUpRight size={18} />
+                      INGRESAR AL PANEL <ArrowUpRight size={20} />
                     </>
                   )}
                 </button>
               </form>
             </div>
           ) : (
-            <div className="relative z-10 space-y-6">
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-white tracking-tight">Recuperar acceso</h2>
-                <p className="text-gray-400 text-xs">Te enviaremos un link a tu correo oficial.</p>
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-3xl font-bold text-white tracking-tight mb-2">Recuperar cuenta</h2>
+                <p className="text-white/70 text-sm">Te enviaremos las instrucciones a tu email.</p>
               </div>
 
               {recoverStatus === "sent" ? (
-                <div className="p-6 bg-green-500/10 border border-green-500/20 rounded-2xl space-y-4">
+                <div className="p-6 bg-green-500/10 border border-green-500/20 rounded-[30px] space-y-4">
                   <div className="flex items-center gap-2 text-green-400 font-bold text-xs uppercase tracking-widest">
                     <CheckCircle2 size={16} />
                     <span>Correo enviado</span>
                   </div>
-                  <p className="text-gray-400 text-[11px] leading-relaxed uppercase font-semibold">
-                    Revisá la bandeja de entrada de <strong className="text-white">{recoverEmail}</strong>.
-                  </p>
                   <button
                     onClick={() => setMode("login")}
-                    className="text-[10px] font-bold text-[#FDE047] uppercase tracking-widest underline underline-offset-4"
+                    className="text-[11px] font-bold text-[#FDE047] uppercase tracking-widest underline underline-offset-4"
                   >
                     Volver al login
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleRecover} className="space-y-4">
-                  <div className="relative">
-                    <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                <form onSubmit={handleRecover} className="space-y-6">
+                  <div className="relative group">
+                    <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-[#FDE047] transition-colors" />
                     <input
                       type="email"
                       value={recoverEmail}
                       onChange={(e) => setRecoverEmail(e.target.value)}
                       required
-                      placeholder="CORREO REGISTRADO"
-                      className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-xs font-bold tracking-wider uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all"
+                      placeholder="CORREO ELECTRÓNICO"
+                      className="w-full h-16 pl-14 pr-4 bg-white/5 border border-white/10 rounded-full outline-none text-white text-[11px] font-bold tracking-widest uppercase focus:border-[#FDE047]/50 transition-all placeholder:text-white/30"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={recoverStatus === "sending"}
-                    className="w-full h-14 bg-[#FDE047] hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-[0.15em] rounded-xl transition-all flex items-center justify-center gap-2"
+                    className="w-full h-16 bg-[#FDE047] hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-[0.15em] rounded-full transition-all flex items-center justify-center gap-2"
                   >
-                    {recoverStatus === "sending" ? (
-                      <Loader2 size={18} className="animate-spin" />
-                    ) : (
-                      "RECUPERAR CONTRASEÑA"
-                    )}
+                    {recoverStatus === "sending" ? <Loader2 size={20} className="animate-spin" /> : "ENVIAR INSTRUCCIONES"}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setMode("login")}
-                    className="w-full text-center text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest flex items-center justify-center gap-2 pt-2"
+                    className="w-full text-center text-[11px] font-bold text-white/40 hover:text-white uppercase tracking-widest flex items-center justify-center gap-2"
                   >
-                    <ArrowLeft size={14} /> Volver
+                    <ArrowLeft size={16} /> Volver
                   </button>
                 </form>
               )}
@@ -264,9 +239,9 @@ export default function Login() {
         </div>
       </main>
 
-      <footer className="absolute bottom-6 left-0 right-0 z-10 text-center px-4">
-        <p className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.4em]">
-          PRIUSADMIN &bull; BALNEARIO PLAYA GRANDE &bull; SISTEMA RESTRINGIDO
+      <footer className="absolute bottom-10 left-0 right-0 z-10 text-center px-4">
+        <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]">
+          PRIUSADMIN &bull; ACCESO RESTRINGIDO AL STAFF
         </p>
       </footer>
     </div>
