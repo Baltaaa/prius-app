@@ -5,21 +5,21 @@ export default function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] p-4 backdrop-blur-none">
-      <div className="bg-white w-full max-w-lg rounded border border-[#E5E5E5] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] p-4 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="glass-card w-full max-w-lg rounded-2xl flex flex-col overflow-hidden border border-white/10 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#E5E5E5] bg-black text-white">
-          <h2 className="text-xs uppercase font-bold tracking-wider text-[#F2CA50]">{title}</h2>
+        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
+          <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-[#FDE047]">{title}</h2>
           <button 
             onClick={onClose} 
-            className="p-1 hover:bg-white/20 rounded text-white transition-colors"
+            className="p-2 hover:bg-white/10 rounded-lg text-white/50 hover:text-white transition-all"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-8 space-y-6">
           {children}
         </div>
       </div>
