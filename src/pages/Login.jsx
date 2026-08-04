@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { Eye, EyeOff, Loader2, Mail, Lock, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react"
+import { Eye, EyeOff, Loader2, Mail, Lock, ArrowUpRight, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react"
 import GlobalLoader from "../components/ui/GlobalLoader"
 
 export default function Login() {
@@ -48,7 +48,7 @@ export default function Login() {
         setIsSuccess(true)
         setTimeout(() => {
           navigate("/app/home")
-        }, 700)
+        }, 600)
       }
     } catch (err) {
       setError("Error de conexión. Verificá tu acceso a internet.")
@@ -79,326 +79,221 @@ export default function Login() {
     }
   }
 
-  const backToLogin = () => {
-    setMode("login")
-    setRecoverStatus("idle")
-    setRecoverError("")
-    setRecoverEmail("")
-  }
-
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row font-sans bg-white text-black">
+    <div className="relative min-h-screen w-full flex flex-col justify-between items-center bg-black font-sans overflow-x-hidden selection:bg-[#F2CA50] selection:text-black">
       {isSuccess && <GlobalLoader message="Ingresando al panel" />}
 
-      <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes shake {
-          10%, 90% { transform: translateX(-1px); }
-          20%, 80% { transform: translateX(2px); }
-          30%, 50%, 70% { transform: translateX(-3px); }
-          40%, 60% { transform: translateX(3px); }
-        }
-        .anim-fade-up { animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        .anim-fade-in { animation: fadeIn 0.7s ease both; }
-        .anim-shake { animation: shake 0.4s ease; }
-        @media (prefers-reduced-motion: reduce) {
-          .anim-fade-up, .anim-fade-in, .anim-shake { animation: none; }
-        }
-      `}</style>
-
-      {/* Hero mobile — banda superior compacta */}
-      <div className="relative lg:hidden h-[30vh] min-h-[210px] max-h-[280px] w-full overflow-hidden bg-black shrink-0">
+      {/* Imagen de Fondo Completa con Filtro y Sombras */}
+      <div className="absolute inset-0 z-0">
         <img
           src="/images/hero-login.webp"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover object-[center_30%]"
+          alt="Prius Playa Grande"
+          className="w-full h-full object-cover object-center scale-105 filter brightness-[0.92] contrast-[1.05]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/10" />
-        <div className="relative z-10 h-full flex items-end p-5 anim-fade-in">
-          <BrandLockup theme="dark" />
-        </div>
+        {/* Overlay degradado suave para garantizar contraste de texto */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30" />
       </div>
 
-      {/* Panel de marca — desktop */}
-      <div className="relative hidden lg:flex lg:w-[44%] xl:w-[40%] flex-col justify-between overflow-hidden bg-black shrink-0">
-        <img
-          src="/images/hero-login.webp"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover object-[center_25%]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" />
+      {/* Spacing top */}
+      <div className="w-full h-4 sm:h-8 z-10" />
 
-        <div className="relative z-10 p-10 xl:p-12 anim-fade-in">
-          <BrandLockup theme="dark" />
-        </div>
-
-        <div className="relative z-10 p-10 xl:p-12 space-y-4">
-          <h1 className="text-3xl xl:text-[2.5rem] leading-[1.15] font-bold text-white tracking-tight anim-fade-up" style={{ animationDelay: "0.1s" }}>
-            El panel de gestión<br />de Playa Grande.
-          </h1>
-          <p className="text-white/60 text-sm leading-relaxed max-w-xs font-normal anim-fade-up" style={{ animationDelay: "0.2s" }}>
-            Plano interactivo, caja diaria y reservas de temporada, todo en un mismo lugar.
-          </p>
-        </div>
-      </div>
-
-      {/* Panel de formulario */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 py-10 sm:px-10 bg-white relative -mt-5 lg:mt-0 rounded-t-lg lg:rounded-none z-10">
-        <div className="w-full max-w-[380px]">
+      {/* Tarjeta Glassmorphic Centrada / Derecha */}
+      <main className="relative z-10 w-full max-w-[460px] px-4 py-6 sm:px-6 my-auto flex justify-center md:justify-end md:mr-12 lg:mr-24 xl:mr-32">
+        <div className="w-full bg-black/30 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-7 sm:p-9 text-white transition-all duration-300 hover:border-white/30">
+          
+          {/* Header con Marca */}
+          <div className="flex items-center gap-2.5 mb-7">
+            <div className="w-8 h-8 rounded-full bg-[#F2CA50] flex items-center justify-center text-black font-bold text-base shadow-md shrink-0">
+              <span className="font-serif italic font-extrabold tracking-tighter">P</span>
+            </div>
+            <div className="flex items-center gap-2 font-display">
+              <span className="font-bold text-lg tracking-tight text-white italic">
+                Prius<span className="font-normal not-italic text-white/90">Admin</span>
+              </span>
+              <span className="text-white/60 text-xs tracking-wider uppercase font-medium">
+                - PLAYA GRANDE
+              </span>
+            </div>
+          </div>
 
           {mode === "login" ? (
             <>
-              <div className="mb-8 pb-4 border-b border-[#E5E5E5] anim-fade-up" style={{ animationDelay: "0.05s" }}>
-                <h2 className="text-xl font-bold text-black tracking-tight">
+              {/* Título & Subtítulo */}
+              <div className="mb-6 space-y-1">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-none">
                   Iniciar sesión
-                </h2>
-                <p className="text-xs text-neutral-500 font-normal mt-0.5">
+                </h1>
+                <p className="text-white/80 text-xs font-normal pt-1">
                   Ingresá tus credenciales para acceder al panel.
                 </p>
               </div>
 
+              {/* Formulario */}
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="anim-fade-up" style={{ animationDelay: "0.1s" }}>
-                  <FloatingInput
-                    id="email"
+                
+                {/* Input Correo Electrónico */}
+                <div className="relative flex items-center bg-black/20 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-black/40">
+                  <Mail size={16} className="text-white/70 shrink-0 mr-3" />
+                  <input
                     type="email"
-                    label="Correo electrónico"
                     value={email}
-                    onChange={setEmail}
-                    icon={<Mail size={15} />}
-                    autoComplete="email"
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="CORREO ELECTRÓNICO"
+                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
                   />
                 </div>
 
-                <div className="anim-fade-up" style={{ animationDelay: "0.15s" }}>
-                  <FloatingInput
-                    id="password"
+                {/* Input Contraseña */}
+                <div className="relative flex items-center bg-black/20 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-black/40">
+                  <Lock size={16} className="text-white/70 shrink-0 mr-3" />
+                  <input
                     type={showPassword ? "text" : "password"}
-                    label="Contraseña"
                     value={password}
-                    onChange={setPassword}
-                    icon={<Lock size={15} />}
-                    autoComplete="current-password"
-                    trailing={
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-neutral-400 hover:text-black transition-colors"
-                        aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                      >
-                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                      </button>
-                    }
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="CONTRASEÑA"
+                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-white/70 hover:text-white transition-colors ml-2 focus:outline-none"
+                    aria-label="Ver contraseña"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
 
-                <div className="flex items-center justify-between pt-1 anim-fade-up" style={{ animationDelay: "0.2s" }}>
-                  <label className="flex items-center gap-2 cursor-pointer select-none group">
-                    <span className="relative flex items-center justify-center">
-                      <input
-                        type="checkbox"
-                        checked={remember}
-                        onChange={(e) => setRemember(e.target.checked)}
-                        className="peer sr-only"
-                      />
-                      <span className="w-4 h-4 rounded-sm border border-[#E5E5E5] peer-checked:bg-black peer-checked:border-black transition-colors flex items-center justify-center">
-                        {remember && <CheckCircle2 size={11} className="text-[#F2CA50]" strokeWidth={3} />}
-                      </span>
-                    </span>
-                    <span className="text-xs font-semibold text-neutral-600 group-hover:text-black transition-colors">
-                      Mantener sesión iniciada
-                    </span>
+                {/* Checkbox Mantener sesión & Olvidaste contraseña */}
+                <div className="flex items-center justify-between text-[11px] pt-1 text-white/80">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={remember}
+                      onChange={(e) => setRemember(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/30 bg-black/20 text-[#F2CA50] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#F2CA50]"
+                    />
+                    <span className="font-normal text-white/90">Mantener sesión iniciada</span>
                   </label>
 
                   <button
                     type="button"
                     onClick={() => setMode("recover")}
-                    className="text-xs font-semibold text-neutral-500 hover:text-black transition-colors"
+                    className="underline text-white/90 hover:text-white transition-colors"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
                 </div>
 
+                {/* Mensaje de Error */}
                 {error && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded anim-shake">
-                    <AlertCircle size={14} className="text-red-500 shrink-0" />
-                    <p className="text-red-600 text-xs font-semibold">{error}</p>
+                  <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-white text-xs font-medium animate-fadeIn">
+                    <AlertCircle size={15} className="text-red-400 shrink-0" />
+                    <span>{error}</span>
                   </div>
                 )}
 
+                {/* Botón Principal Dorado */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-11 mt-2 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed anim-fade-up"
-                  style={{ animationDelay: "0.25s" }}
+                  className="w-full h-12 mt-4 bg-[#F2CA50] hover:bg-[#e4be42] active:scale-[0.99] text-black font-extrabold text-xs uppercase tracking-widest rounded-full transition-all duration-200 shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
                   {isLoading ? (
-                    <Loader2 size={15} className="animate-spin" />
+                    <Loader2 size={18} className="animate-spin text-black" />
                   ) : (
                     <>
-                      Ingresar al panel
-                      <ArrowRight size={14} />
+                      <span>INGRESAR AL PANEL</span>
+                      <ArrowUpRight size={18} strokeWidth={2.5} />
                     </>
                   )}
                 </button>
               </form>
-
-              <div className="mt-8 pt-4 border-t border-[#E5E5E5] anim-fade-up" style={{ animationDelay: "0.3s" }}>
-                <p className="text-center text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-                  PriusAdmin &bull; Acceso restringido al staff
-                </p>
-              </div>
             </>
           ) : (
-            <RecoverPanel
-              email={recoverEmail}
-              setEmail={setRecoverEmail}
-              status={recoverStatus}
-              error={recoverError}
-              onSubmit={handleRecover}
-              onBack={backToLogin}
-            />
+            /* Panel de Recuperación de Contraseña */
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  Recuperar acceso
+                </h2>
+                <p className="text-white/80 text-xs">
+                  Ingresá tu correo registrado para enviarte las instrucciones de restablecimiento.
+                </p>
+              </div>
+
+              {recoverStatus === "sent" ? (
+                <div className="p-4 bg-green-500/20 border border-green-500/40 rounded-2xl text-white text-xs space-y-2">
+                  <div className="flex items-center gap-2 text-green-300 font-bold">
+                    <CheckCircle2 size={16} />
+                    <span>Enlace enviado</span>
+                  </div>
+                  <p className="text-white/90 leading-relaxed">
+                    Te enviamos un correo a <strong className="text-white">{recoverEmail}</strong>. Por favor, revisá tu bandeja de entrada o spam.
+                  </p>
+                  <button
+                    onClick={() => setMode("login")}
+                    className="mt-3 text-xs font-bold text-[#F2CA50] underline block"
+                  >
+                    Volver a iniciar sesión
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleRecover} className="space-y-4">
+                  <div className="relative flex items-center bg-black/20 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-black/40">
+                    <Mail size={16} className="text-white/70 shrink-0 mr-3" />
+                    <input
+                      type="email"
+                      value={recoverEmail}
+                      onChange={(e) => setRecoverEmail(e.target.value)}
+                      required
+                      placeholder="CORREO REGISTRADO"
+                      className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
+                    />
+                  </div>
+
+                  {recoverError && (
+                    <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-white text-xs">
+                      <AlertCircle size={15} className="text-red-400 shrink-0" />
+                      <span>{recoverError}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={recoverStatus === "sending"}
+                    className="w-full h-12 bg-[#F2CA50] hover:bg-[#e4be42] text-black font-extrabold text-xs uppercase tracking-widest rounded-full transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  >
+                    {recoverStatus === "sending" ? (
+                      <Loader2 size={18} className="animate-spin text-black" />
+                    ) : (
+                      "ENVIAR LINK DE RECUPERACIÓN"
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setMode("login")}
+                    className="w-full text-center text-xs text-white/80 hover:text-white flex items-center justify-center gap-1.5 pt-1"
+                  >
+                    <ArrowLeft size={14} />
+                    <span>Volver al inicio de sesión</span>
+                  </button>
+                </form>
+              )}
+            </div>
           )}
+
         </div>
-      </div>
-    </div>
-  )
-}
+      </main>
 
-function BrandLockup({ theme = "dark" }) {
-  const isDark = theme === "dark"
-  return (
-    <div className="flex items-center gap-3">
-      <div className="w-11 h-11 flex items-center justify-center shrink-0 overflow-hidden rounded-md bg-white">
-        <img src="/logo-prius.png" alt="Prius Logo" className="w-full h-full object-cover scale-125" />
-      </div>
-      <div>
-        <h1 className={`font-bold text-sm tracking-tight leading-none ${isDark ? "text-white" : "text-black"}`}>
-          PriusAdmin
-        </h1>
-        <p className={`text-[10px] font-medium tracking-wide uppercase mt-0.5 ${isDark ? "text-white/60" : "text-neutral-500"}`}>
-          Playa Grande
+      {/* Footer Fijo en la Base */}
+      <footer className="relative z-10 py-4 px-4 w-full text-center">
+        <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.25em] drop-shadow-md">
+          PRIUSADMIN &bull; ACCESO RESTRINGIDO AL STAFF
         </p>
-      </div>
-    </div>
-  )
-}
-
-function FloatingInput({ id, type, label, value, onChange, icon, trailing, autoComplete }) {
-  const [focused, setFocused] = useState(false)
-  const active = focused || value.length > 0
-
-  return (
-    <div
-      className={`flex items-center gap-2.5 h-[50px] px-3.5 border rounded bg-white transition-colors duration-150 ${
-        focused ? "border-black" : "border-[#E5E5E5]"
-      }`}
-    >
-      <span className={`transition-colors duration-150 ${focused ? "text-black" : "text-neutral-400"}`}>
-        {icon}
-      </span>
-      <div className="relative flex-1 h-full">
-        <label
-          htmlFor={id}
-          className={`absolute left-0 pointer-events-none transition-all duration-150 text-neutral-400 ${
-            active ? "top-[6px] text-[10px] font-bold uppercase tracking-wider" : "top-1/2 -translate-y-1/2 text-xs font-medium"
-          }`}
-        >
-          {label}
-        </label>
-        <input
-          id={id}
-          type={type}
-          value={value}
-          required
-          autoComplete={autoComplete}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className={`w-full h-full bg-transparent outline-none text-xs text-black font-medium ${active ? "pt-[15px]" : ""}`}
-        />
-      </div>
-      {trailing}
-    </div>
-  )
-}
-
-function RecoverPanel({ email, setEmail, status, error, onSubmit, onBack }) {
-  if (status === "sent") {
-    return (
-      <div className="anim-fade-up">
-        <div className="w-10 h-10 rounded flex items-center justify-center mb-5 bg-[#F2CA50]/20">
-          <CheckCircle2 size={18} className="text-black" />
-        </div>
-        <h2 className="text-xl font-bold text-black tracking-tight">
-          Revisá tu correo
-        </h2>
-        <p className="text-xs text-neutral-500 font-normal mt-2 leading-relaxed">
-          Le enviamos un link de recuperación a <span className="text-black font-semibold">{email}</span>. Puede tardar unos minutos en llegar.
-        </p>
-        <button
-          onClick={onBack}
-          className="mt-8 text-xs font-bold text-black uppercase tracking-wider hover:opacity-60 transition-opacity"
-        >
-          Volver al inicio de sesión
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <div className="anim-fade-up">
-      <div className="mb-8 pb-4 border-b border-[#E5E5E5]">
-        <h2 className="text-xl font-bold text-black tracking-tight">
-          Recuperar contraseña
-        </h2>
-        <p className="text-xs text-neutral-500 font-normal mt-0.5">
-          Ingresá tu email y te mandamos un link para restablecerla.
-        </p>
-      </div>
-
-      <form onSubmit={onSubmit} className="space-y-4">
-        <FloatingInput
-          id="recover-email"
-          type="email"
-          label="Correo electrónico"
-          value={email}
-          onChange={setEmail}
-          icon={<Mail size={15} />}
-          autoComplete="email"
-        />
-
-        {error && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded anim-shake">
-            <AlertCircle size={14} className="text-red-500 shrink-0" />
-            <p className="text-red-600 text-xs font-semibold">{error}</p>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={status === "sending"}
-          className="w-full h-11 mt-2 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {status === "sending" ? <Loader2 size={15} className="animate-spin" /> : "Enviar link de recuperación"}
-        </button>
-
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-full text-center text-xs font-semibold text-neutral-500 hover:text-black transition-colors pt-1"
-        >
-          Volver al inicio de sesión
-        </button>
-      </form>
+      </footer>
     </div>
   )
 }
