@@ -5,7 +5,7 @@ import { useClientes } from '../../hooks/useClientes'
 import { useCaja } from '../../hooks/useCaja'
 import KpiCard from '../../components/crm/KpiCard'
 import StatusBadge from '../../components/crm/StatusBadge'
-import { Calendar, Wallet, Users, AlertCircle, ArrowRight, UmbrellaBeach } from 'lucide-react'
+import { Calendar, Wallet, Users, AlertCircle, ArrowRight } from 'lucide-react'
 
 export default function Home() {
   const navigate = useNavigate()
