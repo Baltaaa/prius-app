@@ -87,21 +87,17 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row font-sans bg-white">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row font-sans bg-white text-black">
       {isSuccess && <GlobalLoader message="Ingresando al panel" />}
 
       <style>{`
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(14px); }
+          from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
-        }
-        @keyframes drawLine {
-          from { width: 0; }
-          to { width: 40px; }
         }
         @keyframes shake {
           10%, 90% { transform: translateX(-1px); }
@@ -109,87 +105,66 @@ export default function Login() {
           30%, 50%, 70% { transform: translateX(-3px); }
           40%, 60% { transform: translateX(3px); }
         }
-        .anim-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        .anim-fade-in { animation: fadeIn 0.8s ease both; }
-        .anim-draw-line { animation: drawLine 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .anim-fade-up { animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .anim-fade-in { animation: fadeIn 0.7s ease both; }
         .anim-shake { animation: shake 0.4s ease; }
         @media (prefers-reduced-motion: reduce) {
-          .anim-fade-up, .anim-fade-in, .anim-draw-line, .anim-shake { animation: none; }
+          .anim-fade-up, .anim-fade-in, .anim-shake { animation: none; }
         }
       `}</style>
 
       {/* Hero mobile — banda superior compacta */}
-      <div className="relative lg:hidden h-[32vh] min-h-[220px] max-h-[300px] w-full overflow-hidden bg-black shrink-0">
+      <div className="relative lg:hidden h-[30vh] min-h-[210px] max-h-[280px] w-full overflow-hidden bg-black shrink-0">
         <img
           src="/images/hero-login.webp"
           alt=""
-          className="absolute inset-0 w-full h-full object-cover object-[center_30%] opacity-90"
+          className="absolute inset-0 w-full h-full object-cover object-[center_30%]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/10" />
-        <div className="relative z-10 h-full flex flex-col justify-between p-6 anim-fade-in">
-          <div className="flex items-center gap-2.5">
-            <img src="/logo-prius.png" alt="Prius" className="w-7 h-7 object-contain brightness-0 invert" />
-            <span className="text-white font-display text-xs tracking-[0.25em] uppercase font-medium">
-              Prius Admin
-            </span>
-          </div>
-          <p className="text-white/70 text-[11px] font-medium uppercase tracking-[0.15em]">
-            Balneario Playa Grande
-          </p>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/10" />
+        <div className="relative z-10 h-full flex items-end p-5 anim-fade-in">
+          <BrandLockup theme="dark" />
         </div>
       </div>
 
       {/* Panel de marca — desktop */}
-      <div className="relative hidden lg:flex lg:w-[46%] xl:w-[42%] flex-col justify-between overflow-hidden bg-black">
+      <div className="relative hidden lg:flex lg:w-[44%] xl:w-[40%] flex-col justify-between overflow-hidden bg-black shrink-0">
         <img
           src="/images/hero-login.webp"
           alt=""
-          className="absolute inset-0 w-full h-full object-cover object-[center_25%] opacity-95"
+          className="absolute inset-0 w-full h-full object-cover object-[center_25%]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/15" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" />
 
-        {/* Header: logo */}
-        <div className="relative z-10 p-10 xl:p-14 anim-fade-in">
-          <div className="flex items-center gap-3">
-            <img src="/logo-prius.png" alt="Prius" className="w-9 h-9 object-contain brightness-0 invert" />
-            <span className="text-white font-display text-sm tracking-[0.25em] uppercase font-medium">
-              Prius Admin
-            </span>
-          </div>
+        <div className="relative z-10 p-10 xl:p-12 anim-fade-in">
+          <BrandLockup theme="dark" />
         </div>
 
-        {/* Footer: mensaje de marca */}
-        <div className="relative z-10 p-10 xl:p-14 space-y-5">
-          <div className="w-10 h-[2px] bg-gold anim-draw-line" />
-          <h1 className="font-display text-3xl xl:text-4xl leading-[1.15] text-white font-medium anim-fade-up" style={{ animationDelay: "0.15s" }}>
+        <div className="relative z-10 p-10 xl:p-12 space-y-4">
+          <h1 className="text-3xl xl:text-[2.5rem] leading-[1.15] font-bold text-white tracking-tight anim-fade-up" style={{ animationDelay: "0.1s" }}>
             El panel de gestión<br />de Playa Grande.
           </h1>
-          <p className="text-white/55 text-sm leading-relaxed max-w-xs anim-fade-up" style={{ animationDelay: "0.3s" }}>
+          <p className="text-white/60 text-sm leading-relaxed max-w-xs font-normal anim-fade-up" style={{ animationDelay: "0.2s" }}>
             Plano interactivo, caja diaria y reservas de temporada, todo en un mismo lugar.
-          </p>
-          <p className="text-[10px] font-medium text-white/30 uppercase tracking-[0.2em] pt-6 anim-fade-up" style={{ animationDelay: "0.45s" }}>
-            Balneario Playa Grande &bull; Mar del Plata
           </p>
         </div>
       </div>
 
       {/* Panel de formulario */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 py-10 sm:px-10 bg-white relative -mt-5 lg:mt-0 rounded-t-2xl lg:rounded-none z-10">
+      <div className="flex-1 flex flex-col justify-center items-center px-6 py-10 sm:px-10 bg-white relative -mt-5 lg:mt-0 rounded-t-lg lg:rounded-none z-10">
         <div className="w-full max-w-[380px]">
 
           {mode === "login" ? (
             <>
-              <div className="mb-9 anim-fade-up" style={{ animationDelay: "0.05s" }}>
-                <h2 className="text-2xl font-display font-semibold text-black tracking-tight">
+              <div className="mb-8 pb-4 border-b border-[#E5E5E5] anim-fade-up" style={{ animationDelay: "0.05s" }}>
+                <h2 className="text-xl font-bold text-black tracking-tight">
                   Iniciar sesión
                 </h2>
-                <p className="text-sm text-neutral-500 mt-1.5">
+                <p className="text-xs text-neutral-500 font-normal mt-0.5">
                   Ingresá tus credenciales para acceder al panel.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="anim-fade-up" style={{ animationDelay: "0.1s" }}>
                   <FloatingInput
                     id="email"
@@ -197,19 +172,19 @@ export default function Login() {
                     label="Correo electrónico"
                     value={email}
                     onChange={setEmail}
-                    icon={<Mail size={16} />}
+                    icon={<Mail size={15} />}
                     autoComplete="email"
                   />
                 </div>
 
-                <div className="anim-fade-up" style={{ animationDelay: "0.17s" }}>
+                <div className="anim-fade-up" style={{ animationDelay: "0.15s" }}>
                   <FloatingInput
                     id="password"
                     type={showPassword ? "text" : "password"}
                     label="Contraseña"
                     value={password}
                     onChange={setPassword}
-                    icon={<Lock size={16} />}
+                    icon={<Lock size={15} />}
                     autoComplete="current-password"
                     trailing={
                       <button
@@ -219,13 +194,13 @@ export default function Login() {
                         className="text-neutral-400 hover:text-black transition-colors"
                         aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                       >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                       </button>
                     }
                   />
                 </div>
 
-                <div className="flex items-center justify-between anim-fade-up" style={{ animationDelay: "0.22s" }}>
+                <div className="flex items-center justify-between pt-1 anim-fade-up" style={{ animationDelay: "0.2s" }}>
                   <label className="flex items-center gap-2 cursor-pointer select-none group">
                     <span className="relative flex items-center justify-center">
                       <input
@@ -234,11 +209,11 @@ export default function Login() {
                         onChange={(e) => setRemember(e.target.checked)}
                         className="peer sr-only"
                       />
-                      <span className="w-4 h-4 rounded-sm border border-[#D9D9D9] peer-checked:bg-black peer-checked:border-black transition-colors flex items-center justify-center">
-                        {remember && <CheckCircle2 size={12} className="text-gold" strokeWidth={3} />}
+                      <span className="w-4 h-4 rounded-sm border border-[#E5E5E5] peer-checked:bg-black peer-checked:border-black transition-colors flex items-center justify-center">
+                        {remember && <CheckCircle2 size={11} className="text-[#F2CA50]" strokeWidth={3} />}
                       </span>
                     </span>
-                    <span className="text-xs text-neutral-500 group-hover:text-black transition-colors">
+                    <span className="text-xs font-semibold text-neutral-600 group-hover:text-black transition-colors">
                       Mantener sesión iniciada
                     </span>
                   </label>
@@ -246,7 +221,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setMode("recover")}
-                    className="text-xs font-medium text-neutral-500 hover:text-black transition-colors underline-offset-4 hover:underline"
+                    className="text-xs font-semibold text-neutral-500 hover:text-black transition-colors"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -255,29 +230,29 @@ export default function Login() {
                 {error && (
                   <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded anim-shake">
                     <AlertCircle size={14} className="text-red-500 shrink-0" />
-                    <p className="text-red-600 text-xs font-medium">{error}</p>
+                    <p className="text-red-600 text-xs font-semibold">{error}</p>
                   </div>
                 )}
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 mt-2 font-semibold text-sm rounded-md bg-black text-white hover:bg-black/85 active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed anim-fade-up"
-                  style={{ animationDelay: "0.28s" }}
+                  className="w-full h-11 mt-2 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed anim-fade-up"
+                  style={{ animationDelay: "0.25s" }}
                 >
                   {isLoading ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 size={15} className="animate-spin" />
                   ) : (
                     <>
                       Ingresar al panel
-                      <ArrowRight size={15} />
+                      <ArrowRight size={14} />
                     </>
                   )}
                 </button>
               </form>
 
-              <div className="mt-10 pt-6 border-t border-[#F0F0F0] anim-fade-up" style={{ animationDelay: "0.34s" }}>
-                <p className="text-center text-[10px] font-medium text-neutral-400 uppercase tracking-[0.15em]">
+              <div className="mt-8 pt-4 border-t border-[#E5E5E5] anim-fade-up" style={{ animationDelay: "0.3s" }}>
+                <p className="text-center text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
                   PriusAdmin &bull; Acceso restringido al staff
                 </p>
               </div>
@@ -298,45 +273,60 @@ export default function Login() {
   )
 }
 
+function BrandLockup({ theme = "dark" }) {
+  const isDark = theme === "dark"
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-11 h-11 flex items-center justify-center shrink-0 overflow-hidden rounded-md bg-white">
+        <img src="/logo-prius.png" alt="Prius Logo" className="w-full h-full object-cover scale-125" />
+      </div>
+      <div>
+        <h1 className={`font-bold text-sm tracking-tight leading-none ${isDark ? "text-white" : "text-black"}`}>
+          PriusAdmin
+        </h1>
+        <p className={`text-[10px] font-medium tracking-wide uppercase mt-0.5 ${isDark ? "text-white/60" : "text-neutral-500"}`}>
+          Playa Grande
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function FloatingInput({ id, type, label, value, onChange, icon, trailing, autoComplete }) {
   const [focused, setFocused] = useState(false)
   const active = focused || value.length > 0
 
   return (
-    <div className="relative">
-      <div
-        className={`flex items-center gap-2.5 h-[52px] px-3.5 border rounded-md bg-white transition-colors duration-150 ${
-          focused ? "border-black" : "border-[#E5E5E5]"
-        }`}
-      >
-        <span className={`transition-colors duration-150 ${focused ? "text-black" : "text-neutral-400"}`}>
-          {icon}
-        </span>
-        <div className="relative flex-1 h-full">
-          <label
-            htmlFor={id}
-            className={`absolute left-0 pointer-events-none transition-all duration-150 text-neutral-400 ${
-              active ? "top-[7px] text-[10px] font-semibold uppercase tracking-wider" : "top-1/2 -translate-y-1/2 text-sm"
-            }`}
-          >
-            {label}
-          </label>
-          <input
-            id={id}
-            type={type}
-            value={value}
-            required
-            autoComplete={autoComplete}
-            onChange={(e) => onChange(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            className={`w-full h-full bg-transparent outline-none text-sm text-black font-medium ${
-              active ? "pt-[15px]" : ""
-            }`}
-          />
-        </div>
-        {trailing}
+    <div
+      className={`flex items-center gap-2.5 h-[50px] px-3.5 border rounded bg-white transition-colors duration-150 ${
+        focused ? "border-black" : "border-[#E5E5E5]"
+      }`}
+    >
+      <span className={`transition-colors duration-150 ${focused ? "text-black" : "text-neutral-400"}`}>
+        {icon}
+      </span>
+      <div className="relative flex-1 h-full">
+        <label
+          htmlFor={id}
+          className={`absolute left-0 pointer-events-none transition-all duration-150 text-neutral-400 ${
+            active ? "top-[6px] text-[10px] font-bold uppercase tracking-wider" : "top-1/2 -translate-y-1/2 text-xs font-medium"
+          }`}
+        >
+          {label}
+        </label>
+        <input
+          id={id}
+          type={type}
+          value={value}
+          required
+          autoComplete={autoComplete}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className={`w-full h-full bg-transparent outline-none text-xs text-black font-medium ${active ? "pt-[15px]" : ""}`}
+        />
       </div>
+      {trailing}
     </div>
   )
 }
@@ -345,18 +335,18 @@ function RecoverPanel({ email, setEmail, status, error, onSubmit, onBack }) {
   if (status === "sent") {
     return (
       <div className="anim-fade-up">
-        <div className="w-11 h-11 rounded-full bg-green-50 flex items-center justify-center mb-5">
-          <CheckCircle2 size={20} className="text-green-600" />
+        <div className="w-10 h-10 rounded flex items-center justify-center mb-5 bg-[#F2CA50]/20">
+          <CheckCircle2 size={18} className="text-black" />
         </div>
-        <h2 className="text-2xl font-display font-semibold text-black tracking-tight">
+        <h2 className="text-xl font-bold text-black tracking-tight">
           Revisá tu correo
         </h2>
-        <p className="text-sm text-neutral-500 mt-2 leading-relaxed">
-          Le enviamos un link de recuperación a <span className="text-black font-medium">{email}</span>. Puede tardar unos minutos en llegar.
+        <p className="text-xs text-neutral-500 font-normal mt-2 leading-relaxed">
+          Le enviamos un link de recuperación a <span className="text-black font-semibold">{email}</span>. Puede tardar unos minutos en llegar.
         </p>
         <button
           onClick={onBack}
-          className="mt-8 text-sm font-semibold text-black hover:opacity-60 transition-opacity"
+          className="mt-8 text-xs font-bold text-black uppercase tracking-wider hover:opacity-60 transition-opacity"
         >
           Volver al inicio de sesión
         </button>
@@ -366,45 +356,45 @@ function RecoverPanel({ email, setEmail, status, error, onSubmit, onBack }) {
 
   return (
     <div className="anim-fade-up">
-      <div className="mb-9">
-        <h2 className="text-2xl font-display font-semibold text-black tracking-tight">
+      <div className="mb-8 pb-4 border-b border-[#E5E5E5]">
+        <h2 className="text-xl font-bold text-black tracking-tight">
           Recuperar contraseña
         </h2>
-        <p className="text-sm text-neutral-500 mt-1.5">
+        <p className="text-xs text-neutral-500 font-normal mt-0.5">
           Ingresá tu email y te mandamos un link para restablecerla.
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-5">
+      <form onSubmit={onSubmit} className="space-y-4">
         <FloatingInput
           id="recover-email"
           type="email"
           label="Correo electrónico"
           value={email}
           onChange={setEmail}
-          icon={<Mail size={16} />}
+          icon={<Mail size={15} />}
           autoComplete="email"
         />
 
         {error && (
           <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded anim-shake">
             <AlertCircle size={14} className="text-red-500 shrink-0" />
-            <p className="text-red-600 text-xs font-medium">{error}</p>
+            <p className="text-red-600 text-xs font-semibold">{error}</p>
           </div>
         )}
 
         <button
           type="submit"
           disabled={status === "sending"}
-          className="w-full h-12 mt-2 font-semibold text-sm rounded-md bg-black text-white hover:bg-black/85 active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-60"
+          className="w-full h-11 mt-2 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          {status === "sending" ? <Loader2 size={16} className="animate-spin" /> : "Enviar link de recuperación"}
+          {status === "sending" ? <Loader2 size={15} className="animate-spin" /> : "Enviar link de recuperación"}
         </button>
 
         <button
           type="button"
           onClick={onBack}
-          className="w-full text-center text-xs font-medium text-neutral-500 hover:text-black transition-colors pt-1"
+          className="w-full text-center text-xs font-semibold text-neutral-500 hover:text-black transition-colors pt-1"
         >
           Volver al inicio de sesión
         </button>
