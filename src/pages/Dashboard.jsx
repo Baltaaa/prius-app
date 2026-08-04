@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { Printer, Map, List } from "lucide-react"
+import { Printer } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnitModal from "../components/dashboard/UnitModal"
@@ -13,7 +13,6 @@ export default function Dashboard() {
   const [selectedUnit, setSelectedUnit] = useState(null)
   const [units, setUnits] = useState({})
   const [viewMode, setViewMode] = useState("map")
-  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
     checkUser()
@@ -67,115 +66,114 @@ export default function Dashboard() {
   const getCarpa = (num) => units[`C${num}`]
   const getSombrilla = (num) => units[`S${num}`]
 
-  const occupiedUnits = Object.values(units).filter(u => u.status !== STATUS.LIBRE)
-
   return (
-    <div className="h-full flex flex-col space-y-4 animate-premium-fade pb-4 overflow-hidden">
-      {/* Header Section - No Print */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 no-print">
+    <div className="h-full flex flex-col space-y-4 animate-premium-fade no-print overflow-hidden">
+      {/* Header Section */}
+      <div className="flex justify-between items-center shrink-0">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Plano de Playa</h1>
-          <p className="text-gray-400 text-xs mt-1">Gestión interactiva de unidades en tiempo real.</p>
+          <p className="text-gray-400 text-[10px] uppercase font-bold tracking-widest mt-1">Gestión de Unidades Prius Playa Grande</p>
         </div>
-        
         <div className="flex items-center gap-3">
           <div className="glass-card p-1 rounded-xl flex">
-            <button 
-              onClick={() => setViewMode("map")}
-              className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${viewMode === "map" ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'}`}
-            >
-              Mapa
-            </button>
-            <button 
-              onClick={() => setViewMode("list")}
-              className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${viewMode === "list" ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'}`}
-            >
-              Lista
-            </button>
+            <button onClick={() => setViewMode("map")} className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${viewMode === "map" ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'}`}>Mapa</button>
+            <button onClick={() => setViewMode("list")} className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${viewMode === "list" ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'}`}>Lista</button>
           </div>
-          <button 
-            onClick={() => window.print()}
-            className="glass-card px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"
-          >
-            <Printer size={14} /> Imprimir A4
-          </button>
+          <button onClick={() => window.print()} className="glass-card px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"><Printer size={14} /> Imprimir A4</button>
         </div>
       </div>
 
-      {/* Main content - Pantalla */}
-      <div className="flex-1 min-h-0 overflow-hidden no-print">
+      {/* Workspace */}
+      <div className="flex-1 min-h-0 glass-card rounded-3xl glass-card-inner flex items-center justify-center relative overflow-hidden p-6">
         {viewMode === "map" ? (
-          <div className="glass-card h-full rounded-3xl glass-card-inner flex items-center justify-center p-4 relative overflow-hidden">
-            {/* El plano escalado para entrar siempre en pantalla */}
-            <div className="transform scale-[0.65] lg:scale-[0.8] xl:scale-[0.9] origin-center transition-transform duration-500">
-              <div className="flex justify-center mb-8">
-                <div className="flex text-[8px] font-bold uppercase tracking-[0.2em] text-gray-500">
-                  <div className="w-40 py-2 border border-white/5 text-center rounded-l-xl bg-white/5">Recreación</div>
-                  <div className="w-24 py-2 border-y border-white/5 text-center bg-white/5">Acceso</div>
-                  <div className="w-40 py-2 border border-white/5 text-center rounded-r-xl bg-sky-500/10 text-sky-400 border-sky-500/20">Sector Piscina</div>
-                </div>
-              </div>
+          <div className="transform scale-[0.65] lg:scale-[0.85] xl:scale-[0.95] origin-center transition-transform duration-500">
+            {/* Etiquetas Superiores */}
+            <div className="flex justify-center mb-8 gap-1">
+              <div className="w-[124px] py-2 border border-white/10 text-center rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Recreación</div>
+              <div className="w-[62px] py-2 border border-white/10 text-center bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Acceso</div>
+              <div className="w-[200px] py-2 border border-[#FDE047]/30 text-center rounded-r-lg bg-[#FDE047]/10 text-[9px] font-bold uppercase tracking-widest text-[#FDE047]">Sector Piscina</div>
+            </div>
 
-              <div className="flex justify-center gap-6 relative">
+            {/* Grilla Principal Carpas */}
+            <div className="flex justify-center gap-8 items-end">
+              {/* Pasillos 1, 2, 3 (Completos 25u) */}
+              {[
+                { start: 1, count: 25 }, { start: 26, count: 25 }, { start: 51, count: 25 }
+              ].map((col, idx) => (
+                <div key={idx} className="flex flex-col gap-0.5">
+                  {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
+                    <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
+                  ))}
+                </div>
+              ))}
+
+              {/* Grupo Pool (Empujado por el Sector Piscina) */}
+              <div className="flex flex-col gap-0.5 items-center">
+                 {/* El "Mueble" de la Piscina que empuja hacia abajo */}
+                 <div className="w-[170px] h-[58px] bg-white/5 border border-white/10 rounded-sm mb-4 flex items-center justify-center relative group overflow-hidden">
+                    <div className="absolute inset-0 bg-sky-500/5 group-hover:bg-sky-500/10 transition-colors" />
+                    <span className="relative z-10 text-[9px] font-bold text-gray-600 uppercase tracking-[0.4em]">Pileta</span>
+                 </div>
+                 
+                 <div className="flex gap-8 items-end">
+                    {[
+                      { start: 76, count: 23 }, { start: 99, count: 23 }, { start: 122, count: 23 }
+                    ].map((col, idx) => (
+                      <div key={idx} className="flex flex-col gap-0.5">
+                        {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
+                          <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
+                        ))}
+                      </div>
+                    ))}
+                 </div>
+              </div>
+            </div>
+
+            {/* Sombrillas */}
+            <div className="mt-12 flex flex-col items-center">
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-500 mb-6">Sector Sombrillas</span>
+              <div className="grid grid-cols-2 gap-16">
                 {[
-                  { start: 1, end: 25 }, { start: 26, end: 50 }, { start: 51, end: 75 },
-                  { start: 76, end: 98 }, { start: 99, end: 121 }, { start: 122, end: 144 }
-                ].map((col, idx) => (
-                  <div key={idx} className="flex flex-col gap-0.5">
-                    {Array.from({ length: col.end - col.start + 1 }, (_, i) => col.start + i).map(num => (
-                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
+                  [1, 6, 11, 16], [21, 26, 31, 36]
+                ].map((starts, colIdx) => (
+                  <div key={colIdx} className="space-y-0.5">
+                    {starts.map(start => (
+                      <div key={start} className="flex gap-0.5">
+                        {[0, 1, 2, 3, 4].map(off => (
+                          <Cell key={start + off} number={start + off} unit={getSombrilla(start + off)} onClick={handleUnitClick} />
+                        ))}
+                      </div>
                     ))}
                   </div>
                 ))}
               </div>
-
-              <div className="mt-12 flex flex-col items-center">
-                <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-gray-500 mb-4">Sector Sombrillas</span>
-                <div className="grid grid-cols-2 gap-8">
-                  {[[1, 6, 11, 16], [21, 26, 31, 36]].map((starts, colIdx) => (
-                    <div key={colIdx} className="space-y-0.5">
-                      {starts.map(start => (
-                        <div key={start} className="flex gap-0.5">
-                          {[0, 1, 2, 3, 4].map(off => (
-                            <Cell key={start + off} number={start + off} unit={getSombrilla(start + off)} onClick={handleUnitClick} />
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-8 w-full bg-white/5 border border-white/5 py-3 text-center text-gray-500 font-bold text-[9px] tracking-[0.5em] uppercase rounded-xl">
-                Océano Atlántico
-              </div>
             </div>
+
+            <div className="mt-10 w-full bg-white/5 border border-white/5 py-4 text-center text-gray-500 font-bold text-[10px] tracking-[0.8em] uppercase rounded-xl">Océano Atlántico</div>
           </div>
         ) : (
-          <div className="glass-card h-full rounded-3xl overflow-auto glass-card-inner">
+          <div className="w-full h-full overflow-auto p-4">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-white/5 text-[10px] font-bold uppercase tracking-widest text-gray-500 sticky top-0 bg-[#0a0d14]">
-                  <th className="px-8 py-4">Unidad</th>
-                  <th className="px-8 py-4">Cliente</th>
-                  <th className="px-8 py-4">Estado</th>
-                  <th className="px-8 py-4 text-right">Gestión</th>
+              <thead className="sticky top-0 bg-[#0a0d14] z-10">
+                <tr className="border-b border-white/10 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  <th className="px-6 py-4">Unidad</th>
+                  <th className="px-6 py-4">Titular</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4 text-right">Acción</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-sm text-gray-300">
+              <tbody className="divide-y divide-white/5">
                 {Object.values(units).map(unit => (
-                  <tr key={unit.id} className="hover:bg-white/5 transition-all">
-                    <td className="px-8 py-3 font-bold text-white uppercase">{unit.type} #{unit.number}</td>
-                    <td className="px-8 py-3 uppercase font-medium">{unit.clientName || 'Disponible'}</td>
-                    <td className="px-8 py-3">
-                      <span className={`px-3 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${unit.status === STATUS.LIBRE ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-[#FDE047]/10 text-[#FDE047] border border-[#FDE047]/20'}`}>
+                  <tr key={unit.id} className="hover:bg-white/5 text-xs text-gray-300">
+                    <td className="px-6 py-4 font-bold uppercase">{unit.type} #{unit.number}</td>
+                    <td className="px-6 py-4 uppercase">{unit.clientName || '-'}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${unit.status === STATUS.LIBRE ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-[#FDE047]/10 text-[#FDE047] border-[#FDE047]/20'}`}>
                         {unit.status}
                       </span>
                     </td>
-                    <td className="px-8 py-3 text-right">
-                      <button onClick={() => handleUnitClick(unit)} className="text-[#FDE047] hover:text-white font-bold text-[10px] uppercase underline-offset-4 hover:underline">
-                        Administrar
-                      </button>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => handleUnitClick(unit)} className="text-[#FDE047] font-bold text-[10px] uppercase hover:underline">Administrar</button>
                     </td>
                   </tr>
                 ))}
@@ -185,105 +183,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* VISTA DE IMPRESIÓN (OCULTA EN UI) */}
-      <div className="hidden print:block print:bg-white print:text-black print:p-0 print:m-0 w-full">
-        <div className="p-8 space-y-8">
-          <div className="flex justify-between items-center border-b-2 border-black pb-4">
-            <div>
-              <h1 className="text-2xl font-black uppercase tracking-tighter">Prius Playa Grande</h1>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Estado General de Unidades — Temporada 2025/2026</p>
-            </div>
-            <div className="text-right text-[10px] font-bold">
-              <p>FECHA: {new Date().toLocaleDateString()}</p>
-              <p>HORA: {new Date().toLocaleTimeString()}</p>
-            </div>
-          </div>
-
-          {/* Plano de Playa para impresión (Escalado A4) */}
-          <div className="flex flex-col items-center scale-[0.75] origin-top">
-             {/* Estructura del plano simplificada para impresión */}
-             <div className="flex justify-center gap-4">
-                {[1, 26, 51, 76, 99, 122].map((startNum, idx) => (
-                  <div key={idx} className="flex flex-col gap-0.5">
-                    {Array.from({ length: idx < 3 ? 25 : 23 }, (_, i) => startNum + i).map(num => {
-                      const u = getCarpa(num);
-                      const isOcc = u?.status !== STATUS.LIBRE;
-                      return (
-                        <div key={num} className={`w-6 h-4 border border-black flex items-center justify-center text-[7px] font-bold ${isOcc ? 'bg-black text-white' : ''}`}>
-                          {num}
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
-             </div>
-             <div className="mt-8 grid grid-cols-8 gap-1">
-                {Array.from({ length: 40 }, (_, i) => i + 1).map(num => {
-                  const u = getSombrilla(num);
-                  const isOcc = u?.status !== STATUS.LIBRE;
-                  return (
-                    <div key={num} className={`w-8 h-6 border border-black flex items-center justify-center text-[7px] font-bold ${isOcc ? 'bg-black text-white' : ''}`}>
-                      S{num}
-                    </div>
-                  )
-                })}
-             </div>
-          </div>
-
-          {/* Listado de Periodos / Ocupación */}
-          <div className="mt-12">
-            <h2 className="text-xs font-black uppercase tracking-widest border-b border-black mb-4">Detalle de Unidades Ocupadas</h2>
-            <table className="w-full text-left border-collapse text-[9px]">
-              <thead>
-                <tr className="border-b border-black font-bold uppercase">
-                  <th className="py-2">Unidad</th>
-                  <th className="py-2">Titular / Cliente</th>
-                  <th className="py-2">Periodo / Tipo</th>
-                  <th className="py-2 text-right">Estado Pago</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {occupiedUnits.map(u => (
-                  <tr key={u.id}>
-                    <td className="py-1.5 font-bold uppercase">{u.type} #{u.number}</td>
-                    <td className="py-1.5 uppercase">{u.clientName || 'S/N'}</td>
-                    <td className="py-1.5 uppercase">
-                      {u.isTemporada ? 'Temporada Completa' : `${u.startDate} al ${u.endDate}`}
-                    </td>
-                    <td className="py-1.5 text-right font-bold uppercase">{u.isPaid ? 'Pagado' : 'Pendiente'}</td>
-                  </tr>
-                ))}
-                {occupiedUnits.length === 0 && (
-                  <tr>
-                    <td colSpan="4" className="py-8 text-center text-gray-500 italic">No hay unidades ocupadas en este momento.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="fixed bottom-8 left-8 right-8 text-center border-t border-gray-200 pt-4 text-[8px] font-bold text-gray-400 uppercase tracking-widest">
-            Documento interno generado por PriusAdmin Playa Grande.
-          </div>
-        </div>
-      </div>
-
-      {selectedUnit && (
-        <UnitModal unit={selectedUnit} onClose={() => setSelectedUnit(null)} onSave={handleSaveUnit} />
-      )}
-
-      {/* Estilos CSS específicos para forzar el fit en pantalla y la impresión A4 */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media screen {
-          body { overflow: hidden; }
-        }
-        @media print {
-          @page { size: A4; margin: 0; }
-          body { background: white !important; color: black !important; }
-          .no-print { display: none !important; }
-          .print-block { display: block !important; }
-        }
-      `}} />
+      {selectedUnit && <UnitModal unit={selectedUnit} onClose={() => setSelectedUnit(null)} onSave={handleSaveUnit} />}
+      <style>{`@media print {@page {size: A4; margin:0;} body {background:white!important; color:black!important;} .no-print {display:none!important;}}`}</style>
     </div>
   )
 }
