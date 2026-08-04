@@ -112,7 +112,7 @@ export default function Reservas() {
   if (resLoading || cliLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-xs font-semibold text-white/40">Cargando Reservas...</span>
+        <span className="text-xs font-semibold text-neutral-400">Cargando Reservas...</span>
       </div>
     )
   }
@@ -120,14 +120,14 @@ export default function Reservas() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#E5E5E5] pb-4">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Gestión de Reservas</h1>
-          <p className="text-xs text-white/50 font-normal">Control total de ocupación y contrataciones.</p>
+          <h1 className="text-xl font-bold text-black tracking-tight">Gestión de Reservas</h1>
+          <p className="text-xs text-neutral-500 font-normal">Control total de ocupación y contrataciones.</p>
         </div>
         <button
           onClick={handleOpenCreate}
-          className="px-5 py-2.5 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs rounded-full transition-all flex items-center gap-2 shadow-lg shadow-[#F2CA50]/10"
+          className="px-4 py-2.5 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-semibold text-xs rounded transition-colors flex items-center gap-2"
         >
           <Plus size={16} />
           Nueva Reserva
@@ -135,13 +135,13 @@ export default function Reservas() {
       </div>
 
       {/* Filter panel */}
-      <div className="flex flex-wrap gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+      <div className="flex flex-wrap gap-4 p-4 bg-[#F9F9F9] border border-[#E5E5E5] rounded">
         <div className="space-y-1">
-          <label className="text-[10px] font-bold text-white/50 uppercase">Filtrar por Temporada</label>
+          <label className="text-[10px] font-bold text-neutral-500 uppercase">Filtrar por Temporada</label>
           <select
             value={temporadaFilter}
             onChange={(e) => setTemporadaFilter(e.target.value)}
-            className="block w-40 px-3 py-1.5 bg-[#181818] border border-white/10 text-xs font-semibold text-white rounded-xl focus:border-[#F2CA50] outline-none"
+            className="block w-40 px-3 py-1.5 bg-white border border-[#E5E5E5] text-xs font-semibold rounded focus:border-black outline-none"
           >
             <option value="all">TODAS</option>
             <option value="2025-2026">2025-2026</option>
@@ -150,11 +150,11 @@ export default function Reservas() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] font-bold text-white/50 uppercase">Filtrar Estado de Pago</label>
+          <label className="text-[10px] font-bold text-neutral-500 uppercase">Filtrar Estado de Pago</label>
           <select
             value={estadoPagoFilter}
             onChange={(e) => setEstadoPagoFilter(e.target.value)}
-            className="block w-40 px-3 py-1.5 bg-[#181818] border border-white/10 text-xs font-semibold text-white rounded-xl focus:border-[#F2CA50] outline-none"
+            className="block w-40 px-3 py-1.5 bg-white border border-[#E5E5E5] text-xs font-semibold rounded focus:border-black outline-none"
           >
             <option value="all">TODOS</option>
             <option value="pendiente">PENDIENTES</option>
@@ -170,28 +170,28 @@ export default function Reservas() {
         data={filteredReservas}
         emptyMessage="No se encontraron reservas con los filtros activos."
         renderRow={(res) => (
-          <tr key={res.id} className="hover:bg-white/5 transition-colors">
-            <td className="p-4 font-bold uppercase text-white">{res.clientes?.nombre || 'S/N'}</td>
-            <td className="p-4 uppercase font-semibold text-white/80">
+          <tr key={res.id} className="hover:bg-[#F9F9F9] transition-colors">
+            <td className="p-4 font-bold uppercase">{res.clientes?.nombre || 'S/N'}</td>
+            <td className="p-4 uppercase font-semibold text-neutral-800">
               {res.unidades?.tipo} #{res.unidades?.numero}
             </td>
-            <td className="p-4 font-medium text-white/70">{res.temporada}</td>
-            <td className="p-4 font-bold text-white">{formatCurrency(res.valor_total)}</td>
-            <td className={`p-4 font-bold ${Number(res.saldo) > 0 ? 'text-rose-400' : 'text-white/90'}`}>
+            <td className="p-4 font-medium">{res.temporada}</td>
+            <td className="p-4 font-bold">{formatCurrency(res.valor_total)}</td>
+            <td className={`p-4 font-bold ${Number(res.saldo) > 0 ? 'text-red-600' : 'text-neutral-900'}`}>
               {formatCurrency(res.saldo)}
             </td>
             <td className="p-4">
               <StatusBadge status={res.estado_pago} />
             </td>
-            <td className="p-4 uppercase text-white/50">{res.numero_factura || '-'}</td>
-            <td className="p-4 text-xs text-white/50">
+            <td className="p-4 uppercase text-neutral-600">{res.numero_factura || '-'}</td>
+            <td className="p-4 text-xs text-neutral-500">
               {res.fecha_inicio ? `${res.fecha_inicio} al ${res.fecha_fin}` : 'TEMPORADA COMPLETA'}
             </td>
             <td className="p-4 flex gap-2">
-              <button onClick={() => handleOpenEdit(res)} className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white" title="Editar">
+              <button onClick={() => handleOpenEdit(res)} className="p-1.5 hover:bg-[#E5E5E5] rounded text-black" title="Editar">
                 <Edit2 size={15} />
               </button>
-              <button onClick={() => handleDelete(res.id, res.unidad_id)} className="p-1.5 hover:bg-rose-500/10 rounded-lg text-rose-400" title="Borrar">
+              <button onClick={() => handleDelete(res.id, res.unidad_id)} className="p-1.5 hover:bg-red-50 rounded text-red-600" title="Borrar">
                 <Trash2 size={15} />
               </button>
             </td>
@@ -201,28 +201,28 @@ export default function Reservas() {
           <>
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-bold uppercase text-xs text-white">{res.clientes?.nombre || 'S/N'}</h3>
-                <p className="text-[11px] text-white/50 uppercase">
+                <h3 className="font-bold uppercase text-xs">{res.clientes?.nombre || 'S/N'}</h3>
+                <p className="text-[11px] text-neutral-500 uppercase">
                   {res.unidades?.tipo} #{res.unidades?.numero} ({res.temporada})
                 </p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => handleOpenEdit(res)} className="text-white/80 hover:text-white p-1">
+                <button onClick={() => handleOpenEdit(res)} className="text-black p-1">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={() => handleDelete(res.id, res.unidad_id)} className="text-rose-400 p-1">
+                <button onClick={() => handleDelete(res.id, res.unidad_id)} className="text-red-600 p-1">
                   <Trash2 size={16} />
                 </button>
               </div>
             </div>
-            <div className="text-xs space-y-1 border-t border-white/10 pt-2 text-white/70">
+            <div className="text-xs space-y-1 border-t border-[#E5E5E5] pt-2 text-neutral-700">
               <div className="flex justify-between">
                 <span>Total:</span>
-                <strong className="text-white">{formatCurrency(res.valor_total)}</strong>
+                <strong className="text-black">{formatCurrency(res.valor_total)}</strong>
               </div>
               <div className="flex justify-between">
                 <span>Saldo:</span>
-                <strong className={Number(res.saldo) > 0 ? 'text-rose-400' : 'text-white'}>{formatCurrency(res.saldo)}</strong>
+                <strong className={Number(res.saldo) > 0 ? 'text-red-600' : 'text-black'}>{formatCurrency(res.saldo)}</strong>
               </div>
               <div className="flex justify-between items-center">
                 <span>Estado:</span>
@@ -242,11 +242,11 @@ export default function Reservas() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-white/70">Seleccionar Cliente *</label>
+            <label className="text-xs font-semibold text-neutral-600">Seleccionar Cliente *</label>
             <select
               value={clienteId}
               onChange={(e) => setClienteId(e.target.value)}
-              className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs uppercase focus:border-[#F2CA50] outline-none rounded-xl font-semibold [&>option]:bg-[#181818]"
+              className="w-full px-3 py-2 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none rounded font-semibold"
               required
             >
               <option value="">-- SELECCIONAR CLIENTE --</option>
@@ -258,11 +258,11 @@ export default function Reservas() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-white/70">Unidad Playa *</label>
+              <label className="text-xs font-semibold text-neutral-600">Unidad Playa *</label>
               <select
                 value={unidadId}
                 onChange={(e) => setUnidadId(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs uppercase focus:border-[#F2CA50] outline-none rounded-xl font-semibold [&>option]:bg-[#181818]"
+                className="w-full px-3 py-2 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none rounded font-semibold"
                 required
               >
                 <option value="">-- SELECCIONAR UNIDAD --</option>
@@ -275,69 +275,69 @@ export default function Reservas() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-white/70">Temporada *</label>
+              <label className="text-xs font-semibold text-neutral-600">Temporada *</label>
               <input
                 type="text"
                 required
                 value={temporada}
                 onChange={(e) => setTemporada(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-white/70">Valor Total ($) *</label>
+              <label className="text-xs font-semibold text-neutral-600">Valor Total ($) *</label>
               <input
                 type="number"
                 required
                 value={valorTotal}
                 onChange={(e) => setValorTotal(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl font-semibold"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-white/70">Saldo Pendiente ($)</label>
+              <label className="text-xs font-semibold text-neutral-600">Saldo Pendiente ($)</label>
               <input
                 type="number"
                 value={saldo}
                 onChange={(e) => setSaldo(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl font-semibold"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded font-semibold"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-white/70">Fecha Desde</label>
+              <label className="text-xs font-semibold text-neutral-600">Fecha Desde</label>
               <input
                 type="date"
                 value={fechaInicio}
                 onChange={(e) => setFechaInicio(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-white/70">Fecha Hasta</label>
+              <label className="text-xs font-semibold text-neutral-600">Fecha Hasta</label>
               <input
                 type="date"
                 value={fechaFin}
                 onChange={(e) => setFechaFin(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-white/70">Estado de Pago</label>
+              <label className="text-xs font-semibold text-neutral-600">Estado de Pago</label>
               <select
                 value={estadoPago}
                 onChange={(e) => setEstadoPago(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs uppercase focus:border-[#F2CA50] outline-none rounded-xl font-semibold [&>option]:bg-[#181818]"
+                className="w-full px-3 py-2 border border-[#E5E5E5] bg-white text-xs uppercase focus:border-black outline-none rounded font-semibold"
               >
                 <option value="pendiente">PENDIENTE</option>
                 <option value="parcial">PARCIAL</option>
@@ -346,31 +346,31 @@ export default function Reservas() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-white/70">Nro Factura / Recibo</label>
+              <label className="text-xs font-semibold text-neutral-600">Nro Factura / Recibo</label>
               <input
                 type="text"
                 value={numeroFactura}
                 onChange={(e) => setNumeroFactura(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl"
+                className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded"
                 placeholder="A-0001-12345678"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-white/70">Notas Adicionales</label>
+            <label className="text-xs font-semibold text-neutral-600">Notas Adicionales</label>
             <textarea
               rows={2}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white text-xs focus:border-[#F2CA50] outline-none rounded-xl resize-none"
+              className="w-full px-3 py-2 border border-[#E5E5E5] text-xs focus:border-black outline-none rounded resize-none"
               placeholder="Notas..."
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded-full transition-colors"
+            className="w-full py-3 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-xs uppercase tracking-wider rounded transition-colors"
           >
             {editingReserva ? 'Guardar Cambios' : 'Confirmar Reserva'}
           </button>

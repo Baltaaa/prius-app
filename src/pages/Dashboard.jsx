@@ -2,27 +2,30 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { 
-  Printer, Plus, Trash2, CheckSquare, Square, 
-  Map, List
+  Printer, Settings, Search, Plus, Trash2, CheckSquare, Square, 
+  Map, List, AlertCircle, Umbrella, Home, Check, Eye
 } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnitModal from "../components/dashboard/UnitModal"
+import SettingsPanel from "../components/dashboard/SettingsPanel"
 import Cell from "../components/dashboard/Cell"
+import GlobalLoader from "../components/ui/GlobalLoader"
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [showSettings, setShowSettings] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState(null)
   const [units, setUnits] = useState({})
   const [viewMode, setViewMode] = useState("map") // "map" o "list"
   
   // Filtros y Búsqueda
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [paymentFilter, setPaymentFilter] = useState("all")
-  const [typeFilter, setTypeFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all") // "all", "libre", "temporada", "periodo"
+  const [paymentFilter, setPaymentFilter] = useState("all") // "all", "paid", "unpaid"
+  const [typeFilter, setTypeFilter] = useState("all") // "all", "carpa", "sombrilla"
 
   // Tareas del Día (To-Do List)
   const [todos, setTodos] = useState(() => {
@@ -46,7 +49,7 @@ export default function Dashboard() {
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
-      navigate("/")
+      navigate("/login")
       return
     }
     setUser(session.user)
@@ -221,27 +224,27 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="h-full flex flex-col text-white overflow-hidden no-print">
+      <div className="h-full flex flex-col bg-white text-black overflow-hidden animate-premium-fade no-print">
         
         {/* Title & Actions Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E5E5E5]">
           <div>
-            <h1 className="text-base font-bold text-white tracking-tight uppercase">Plano de Playa</h1>
-            <p className="text-[11px] text-white/50 font-normal">Distribución interactiva de carpas y sombrillas.</p>
+            <h1 className="text-base font-bold text-black tracking-tight uppercase">Plano de Playa</h1>
+            <p className="text-[11px] text-neutral-500 font-normal">Distribución interactiva de carpas y sombrillas.</p>
           </div>
           
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-white/5 border border-white/10 p-1 rounded-full backdrop-blur-md">
+            <div className="flex items-center bg-[#F9F9F9] border border-[#E5E5E5] p-1 rounded-sm">
               <button 
                 onClick={() => setViewMode("map")}
-                className={`px-4 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${viewMode === "map" ? 'bg-[#F2CA50] text-black' : 'text-white/70 hover:text-white'}`}
+                className={`px-3 py-1 rounded-sm font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${viewMode === "map" ? 'bg-black text-[#F2CA50]' : 'text-neutral-600 hover:text-black'}`}
               >
                 <Map className="w-3.5 h-3.5" />
                 Mapa
               </button>
               <button 
                 onClick={() => setViewMode("list")}
-                className={`px-4 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${viewMode === "list" ? 'bg-[#F2CA50] text-black' : 'text-white/70 hover:text-white'}`}
+                className={`px-3 py-1 rounded-sm font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${viewMode === "list" ? 'bg-black text-[#F2CA50]' : 'text-neutral-600 hover:text-black'}`}
               >
                 Lista ({filteredUnitsList.length})
               </button>
@@ -249,7 +252,7 @@ export default function Dashboard() {
 
             <button 
               onClick={() => window.print()} 
-              className="px-4 py-1.5 border border-white/10 bg-white/5 hover:bg-white/10 text-white rounded-full text-xs font-semibold tracking-wide transition-colors flex items-center gap-1.5 backdrop-blur-md" 
+              className="px-3 py-1.5 border border-[#E5E5E5] hover:bg-black hover:text-white rounded-sm text-xs font-semibold tracking-wide transition-colors flex items-center gap-1.5" 
               title="Imprimir Plano"
             >
               <Printer className="w-3.5 h-3.5" />
@@ -263,15 +266,15 @@ export default function Dashboard() {
           <main className="flex-1 overflow-auto pr-0 lg:pr-3">
             {viewMode === "map" ? (
               /* VISTA DE MAPA */
-              <div className="bg-white/5 border border-white/10 p-3 md:p-4 rounded-2xl backdrop-blur-md max-w-full overflow-auto">
+              <div className="bg-[#F9F9F9] border border-[#E5E5E5] p-3 md:p-4 rounded-sm max-w-full overflow-auto">
                 <div className="mx-auto" style={{ maxWidth: "880px" }}>
                   <div className="flex justify-center mb-2">
                     <div className="flex text-[9px] font-bold uppercase tracking-widest font-display">
-                      <div className="w-[240px] bg-white/5 py-1 text-center border border-white/10 rounded-l-xl text-white/70">Recreación</div>
-                      <div className="w-[120px] bg-white/5 py-1 text-center border-y border-white/10 text-white/70">Acceso</div>
+                      <div className="w-[240px] bg-white py-1 text-center border border-[#E5E5E5]">Recreación</div>
+                      <div className="w-[120px] bg-white py-1 text-center border-y border-[#E5E5E5]">Acceso</div>
                       <div className="w-[240px] relative">
-                        <div className="absolute inset-x-0 top-0 h-[70px] bg-white/5 text-white border border-white/10 rounded-r-xl flex items-center justify-center z-20 font-bold backdrop-blur-md">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#F2CA50]">Sector Piscina</span>
+                        <div className="absolute inset-x-0 top-0 h-[70px] bg-[#E5E5E5]/50 text-black border border-[#E5E5E5] rounded-sm flex items-center justify-center z-20 font-bold">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Sector Piscina</span>
                         </div>
                       </div>
                     </div>
@@ -314,7 +317,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="w-px bg-white/10 mx-1.5" />
+                    <div className="w-px bg-[#E5E5E5] mx-1.5" />
 
                     {/* Pasillo B */}
                     <div className="flex gap-6 md:gap-8">
@@ -353,7 +356,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="w-px bg-white/10 mx-1.5" />
+                    <div className="w-px bg-[#E5E5E5] mx-1.5" />
 
                     {/* Pasillo C */}
                     <div className="flex gap-6 md:gap-8">
@@ -396,7 +399,7 @@ export default function Dashboard() {
 
                   {/* Sombrillas */}
                   <div className="mt-6 flex flex-col items-center">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2">Sector Sombrillas</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Sector Sombrillas</span>
                     <div className="flex gap-8 justify-center">
                       <div className="flex flex-col gap-[2px]">
                         {[
@@ -453,7 +456,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="mt-6 flex justify-center">
-                    <div className="w-full max-w-[480px] bg-white/10 border border-white/10 py-2 text-center text-white font-bold text-[9px] tracking-[0.3em] uppercase rounded-xl backdrop-blur-md">
+                    <div className="w-full max-w-[480px] bg-black py-2 text-center text-white font-bold text-[9px] tracking-[0.3em] uppercase">
                       Mar Argentino
                     </div>
                   </div>
@@ -461,10 +464,10 @@ export default function Dashboard() {
               </div>
             ) : (
               /* VISTA DE LISTA / TABLA */
-              <div className="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md overflow-hidden">
+              <div className="bg-white border border-[#E5E5E5] rounded-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-white/5 text-white/60 text-[10px] font-bold uppercase tracking-wider border-b border-white/10">
+                    <tr className="bg-[#F9F9F9] text-black text-[10px] font-bold uppercase tracking-wider border-b border-[#E5E5E5]">
                       <th className="p-3">Unidad</th>
                       <th className="p-3">Cliente</th>
                       <th className="p-3">Estadía</th>
@@ -472,43 +475,43 @@ export default function Dashboard() {
                       <th className="p-3 text-right">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10 text-xs">
+                  <tbody className="divide-y divide-[#E5E5E5] text-xs">
                     {filteredUnitsList.map((unit) => (
-                      <tr key={unit.id} className="hover:bg-white/5 transition-colors">
+                      <tr key={unit.id} className="hover:bg-[#F9F9F9] transition-colors">
                         <td className="p-3 font-bold flex items-center gap-2">
-                          <span className="uppercase text-white">{unit.type} #{unit.number}</span>
+                          <span className="uppercase">{unit.type} #{unit.number}</span>
                         </td>
                         <td className="p-3">
                           {unit.clientName ? (
-                            <span className="font-bold uppercase text-white">{unit.clientName}</span>
+                            <span className="font-bold uppercase">{unit.clientName}</span>
                           ) : (
-                            <span className="text-white/30 italic uppercase">Disponible</span>
+                            <span className="text-neutral-300 italic uppercase">Disponible</span>
                           )}
                         </td>
                         <td className="p-3">
                           {unit.status === STATUS.LIBRE ? (
-                            <span className="text-emerald-400 font-bold uppercase text-[9px] tracking-wider">Libre</span>
+                            <span className="text-green-600 font-bold uppercase text-[9px] tracking-wider">Libre</span>
                           ) : unit.isTemporada ? (
-                            <span className="bg-white/10 text-white border border-white/10 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">Temporada</span>
+                            <span className="bg-black text-white px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider">Temporada</span>
                           ) : (
-                            <span className="bg-[#F2CA50]/20 text-[#F2CA50] border border-[#F2CA50]/30 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                            <span className="bg-[#F2CA50]/20 text-black px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider">
                               {unit.startDate} al {unit.endDate}
                             </span>
                           )}
                         </td>
                         <td className="p-3">
                           {unit.status === STATUS.LIBRE ? (
-                            <span className="text-white/30 uppercase font-bold text-[9px]">-</span>
+                            <span className="text-neutral-300 uppercase font-bold text-[9px]">-</span>
                           ) : unit.isPaid ? (
-                            <span className="text-emerald-400 font-bold uppercase text-[9px] tracking-wider">PAGADO</span>
+                            <span className="text-green-600 font-bold uppercase text-[9px] tracking-wider">PAGADO</span>
                           ) : (
-                            <span className="text-rose-400 font-bold uppercase text-[9px] tracking-wider">PENDIENTE</span>
+                            <span className="text-red-500 font-bold uppercase text-[9px] tracking-wider">PENDIENTE</span>
                           )}
                         </td>
                         <td className="p-3 text-right">
                           <button 
                             onClick={() => handleUnitClick(unit)}
-                            className="px-3 py-1 bg-[#F2CA50] text-black hover:bg-[#E5BF45] rounded-full font-bold text-[9px] uppercase tracking-wider transition-colors"
+                            className="px-2.5 py-1 bg-black text-white hover:bg-[#F2CA50] hover:text-black rounded-sm font-bold text-[9px] uppercase tracking-wider transition-colors"
                           >
                             Gestionar
                           </button>
@@ -524,15 +527,15 @@ export default function Dashboard() {
           {/* Sidebar / Bento Grid Aside right for filters and metrics */}
           <aside className="w-full lg:w-60 pl-0 lg:pl-3 pt-3 lg:pt-0 space-y-3 shrink-0 lg:overflow-y-auto">
             {/* Bento Filter Box */}
-            <div className="p-4 border border-white/10 bg-white/5 rounded-2xl backdrop-blur-md space-y-3">
-              <h3 className="text-[9px] font-bold uppercase tracking-widest text-white/40">Filtros Rápidos</h3>
+            <div className="p-3 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Filtros Rápidos</h3>
               <div className="space-y-2">
                 <div>
-                  <label className="text-[9px] font-bold uppercase tracking-wider text-white/50 block mb-1">Tipo</label>
+                  <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">Tipo</label>
                   <select 
                     value={typeFilter} 
                     onChange={(e) => setTypeFilter(e.target.value)}
-                    className="w-full border border-white/10 rounded-xl py-1.5 px-2 text-xs outline-none bg-[#181818] text-white"
+                    className="w-full border border-[#E5E5E5] rounded-sm py-1 px-2 text-xs outline-none bg-transparent"
                   >
                     <option value="all">TODOS</option>
                     <option value="carpa">CARPAS</option>
@@ -541,11 +544,11 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <label className="text-[9px] font-bold uppercase tracking-wider text-white/50 block mb-1">Estado de Reserva</label>
+                  <label className="text-[9px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">Estado de Reserva</label>
                   <select 
                     value={statusFilter} 
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full border border-white/10 rounded-xl py-1.5 px-2 text-xs outline-none bg-[#181818] text-white"
+                    className="w-full border border-[#E5E5E5] rounded-sm py-1 px-2 text-xs outline-none bg-transparent"
                   >
                     <option value="all">TODOS</option>
                     <option value="libre">DISPONIBLES</option>
@@ -557,23 +560,23 @@ export default function Dashboard() {
             </div>
 
             {/* Bento Statistics Box */}
-            <div className="p-4 border border-white/10 bg-white/5 rounded-2xl backdrop-blur-md space-y-3">
-              <h3 className="text-[9px] font-bold uppercase tracking-widest text-white/40">Resumen Unidades</h3>
+            <div className="p-3 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Resumen Unidades</h3>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-3 bg-white/10 border border-white/10 text-white rounded-xl flex flex-col justify-between">
+                <div className="p-2 bg-black text-white rounded-sm flex flex-col justify-between">
                   <p className="text-base font-bold">{stats.carpasOcupadas}</p>
-                  <p className="text-[8px] font-bold uppercase tracking-wider text-white/50">Carpas Ocupadas</p>
+                  <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-400">Carpas Ocupadas</p>
                 </div>
-                <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex flex-col justify-between">
-                  <p className="text-base font-bold text-white">{stats.carpasLibres}</p>
-                  <p className="text-[8px] font-bold uppercase tracking-wider text-white/50">Carpas Libres</p>
+                <div className="p-2 bg-white border border-[#E5E5E5] rounded-sm flex flex-col justify-between">
+                  <p className="text-base font-bold text-black">{stats.carpasLibres}</p>
+                  <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-400">Carpas Libres</p>
                 </div>
               </div>
             </div>
 
             {/* Bento Tareas Box */}
-            <div className="p-4 border border-white/10 bg-white/5 rounded-2xl backdrop-blur-md space-y-3">
-              <h3 className="text-[9px] font-bold uppercase tracking-widest text-white/40 flex items-center justify-between">
+            <div className="p-3 border border-[#E5E5E5] bg-white rounded-sm space-y-2">
+              <h3 className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 flex items-center justify-between">
                 <span>Tareas de la Fecha</span>
               </h3>
               
@@ -583,24 +586,24 @@ export default function Dashboard() {
                   placeholder="Nueva tarea..."
                   value={newTodo}
                   onChange={(e) => setNewTodo(e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder:text-white/35 focus:border-[#F2CA50] outline-none"
+                  className="flex-1 px-2 py-1 border border-[#E5E5E5] rounded-sm text-xs focus:border-black outline-none"
                 />
-                <button type="submit" className="px-2.5 bg-[#F2CA50] text-black hover:bg-[#E5BF45] rounded-xl font-bold">
+                <button type="submit" className="px-2 bg-black text-[#F2CA50] hover:bg-black/90 rounded-sm">
                   <Plus className="w-3.5 h-3.5" />
                 </button>
               </form>
 
-              <div className="space-y-1.5 max-h-36 overflow-y-auto">
+              <div className="space-y-1 max-h-36 overflow-y-auto">
                 {todos.map(todo => (
-                  <div key={todo.id} className="flex items-start justify-between gap-2 p-2 bg-white/5 border border-white/10 rounded-xl text-xs">
+                  <div key={todo.id} className="flex items-start justify-between gap-2 p-1.5 bg-[#F9F9F9] border border-[#E5E5E5] rounded-sm text-xs">
                     <button type="button" onClick={() => toggleTodo(todo.id)}>
-                      {todo.completed ? <CheckSquare className="w-3.5 h-3.5 text-emerald-400" /> : <Square className="w-3.5 h-3.5 text-white/40" />}
+                      {todo.completed ? <CheckSquare className="w-3.5 h-3.5 text-green-600" /> : <Square className="w-3.5 h-3.5" />}
                     </button>
-                    <span className={`flex-1 leading-tight text-[10px] uppercase ${todo.completed ? 'line-through opacity-40' : 'text-white/80'}`}>
+                    <span className={`flex-1 leading-tight text-[10px] uppercase ${todo.completed ? 'line-through opacity-40' : 'text-neutral-700'}`}>
                       {todo.text}
                     </span>
                     <button type="button" onClick={() => deleteTodo(todo.id)}>
-                      <Trash2 className="w-3 h-3 text-white/35 hover:text-rose-400" />
+                      <Trash2 className="w-3 h-3 text-neutral-400 hover:text-red-600" />
                     </button>
                   </div>
                 ))}
