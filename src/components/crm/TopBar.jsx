@@ -48,9 +48,12 @@ export default function TopBar({ onToggleMobileMenu }) {
         </div>
 
         {/* Notifications */}
-        <button className="text-gray-400 hover:text-white relative">
+        <button 
+          onClick={() => navigate('/app/notificaciones')}
+          className="text-gray-400 hover:text-white relative p-2 rounded-lg hover:bg-white/5 transition-all"
+        >
           <Bell size={20} />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-[#FDE047] rounded-full border-2 border-[#0a0d14]" />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-[#FDE047] rounded-full border-2 border-[#0a0d14]" />
         </button>
 
         {/* Profile */}
@@ -75,7 +78,7 @@ export default function TopBar({ onToggleMobileMenu }) {
                 <p className="text-xs font-medium text-white truncate">{userEmail}</p>
               </div>
               <button
-                onClick={() => navigate('/app/perfil')}
+                onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
                 className="w-full text-left px-4 py-2.5 text-xs text-gray-300 hover:bg-white/10 flex items-center gap-2 rounded-lg"
               >
                 <User size={14} /> Perfil

@@ -56,60 +56,59 @@ export default function UnitModal({ unit, onClose, onSave }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-prius-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto border border-hairline shadow-xl" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-6 border-b border-hairline bg-prius-black">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] p-4 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}>
+      <div className="glass-card w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl flex flex-col border border-white/10 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
           <div className="text-white">
-            <h2 className="text-lg font-extralight flex items-center gap-2 uppercase tracking-tight font-display">
-              {unit?.type === "sombrilla" ? <Umbrella className="w-5 h-5 text-gold" /> : <Home className="w-5 h-5 text-gold" />}
+            <h2 className="text-sm font-bold flex items-center gap-2 uppercase tracking-[0.2em] text-[#FDE047]">
+              {unit?.type === "sombrilla" ? <Umbrella size={18} /> : <Home size={18} />}
               {unit?.type === "sombrilla" ? "Sombrilla" : "Carpa"} #{unit?.number}
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg text-white/50 hover:text-white transition-all">
+            <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          <div>
-            <label className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 block mb-2 font-display">Nombre del Cliente</label>
+        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre del Cliente</label>
             <input
               type="text"
               value={formData.clientName}
               onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value.toUpperCase() }))}
-              className="w-full px-4 py-2 border border-hairline rounded-sm focus:border-gold outline-none text-sm"
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-[#FDE047]/50 outline-none text-sm text-white placeholder-white/20 uppercase font-bold"
               placeholder="NOMBRE COMPLETO"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 block mb-2 font-display">Teléfono</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Teléfono</label>
               <input
                 type="tel"
                 value={formData.clientPhone}
                 onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
-                className="w-full px-4 py-2 border border-hairline rounded-sm focus:border-gold outline-none text-sm"
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-[#FDE047]/50 outline-none text-sm text-white placeholder-white/20"
                 placeholder="+54 9..."
               />
             </div>
-            <div>
-              <label className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 block mb-2 font-display">Email</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Email</label>
               <input
                 type="email"
                 value={formData.clientEmail}
                 onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
-                className="w-full px-4 py-2 border border-hairline rounded-sm focus:border-gold outline-none text-sm"
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-[#FDE047]/50 outline-none text-sm text-white placeholder-white/20"
                 placeholder="ejemplo@mail.com"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-prius-background border border-hairline rounded-sm">
+            <label className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
               <input
                 type="checkbox"
-                id="isTemporada"
                 checked={formData.isTemporada}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
@@ -117,57 +116,54 @@ export default function UnitModal({ unit, onClose, onSave }) {
                   startDate: e.target.checked ? "" : prev.startDate,
                   endDate: e.target.checked ? "" : prev.endDate
                 }))}
-                className="w-4 h-4 accent-gold cursor-pointer"
+                className="w-4 h-4 accent-[#FDE047] cursor-pointer"
               />
-              <label htmlFor="isTemporada" className="text-[10px] font-extralight uppercase tracking-widest cursor-pointer select-none font-display">
-                Temporada (T)
-              </label>
-            </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-300 group-hover:text-white transition-colors">Temporada</span>
+            </label>
 
-            <div className="flex items-center gap-3 p-3 bg-prius-background border border-hairline rounded-sm">
+            <label className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
               <input
                 type="checkbox"
-                id="isPaid"
                 checked={formData.isPaid}
                 onChange={(e) => setFormData(prev => ({ ...prev, isPaid: e.target.checked }))}
-                className="w-4 h-4 accent-gold cursor-pointer"
+                className="w-4 h-4 accent-green-400 cursor-pointer"
               />
-              <label htmlFor="isPaid" className="text-[10px] font-extralight uppercase tracking-widest cursor-pointer select-none flex items-center gap-1 font-display">
-                <DollarSign className="w-3 h-3 text-green-600" /> Pagado
-              </label>
-            </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-300 flex items-center gap-1 group-hover:text-white transition-colors">
+                <DollarSign size={12} className="text-green-400" /> Pagado
+              </span>
+            </label>
           </div>
 
           {!formData.isTemporada && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 block mb-2 font-display">Desde</label>
+            <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-200">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Desde</label>
                 <input
                   type="date"
                   value={formData.startDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                  className="w-full px-4 py-2 border border-hairline rounded-sm focus:border-gold outline-none text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-[#FDE047]/50 outline-none text-sm text-white invert-[0.8] brightness-200"
                 />
               </div>
-              <div>
-                <label className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 block mb-2 font-display">Hasta</label>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Hasta</label>
                 <input
                   type="date"
                   value={formData.endDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                  className="w-full px-4 py-2 border border-hairline rounded-sm focus:border-gold outline-none text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-[#FDE047]/50 outline-none text-sm text-white invert-[0.8] brightness-200"
                 />
               </div>
             </div>
           )}
 
-          <div>
-            <label className="text-[10px] font-extralight uppercase tracking-widest text-prius-black/40 block mb-2 font-display">Notas / Observaciones</label>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Notas / Observaciones</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               rows={2}
-              className="w-full px-4 py-2 border border-hairline rounded-sm focus:border-gold outline-none resize-none text-sm"
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-[#FDE047]/50 outline-none resize-none text-sm text-white placeholder-white/20"
               placeholder="Detalles adicionales..."
             />
           </div>
@@ -176,24 +172,24 @@ export default function UnitModal({ unit, onClose, onSave }) {
             <button
               type="button"
               onClick={handleWhatsAppShare}
-              className="w-full py-2.5 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-sm font-extralight text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 font-display"
+              className="w-full py-3 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-xl font-bold text-[10px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2"
             >
-              <MessageSquare className="w-4 h-4" />
+              <MessageSquare size={16} />
               Enviar Confirmación WhatsApp
             </button>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={handleClear}
-              className="flex-1 py-3 border border-hairline hover:bg-red-50 hover:text-red-600 rounded-sm font-extralight text-[10px] uppercase tracking-widest transition-all font-display"
+              className="flex-1 py-4 border border-white/10 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all text-gray-400"
             >
               Liberar Unidad
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 bg-gold hover:bg-gold-hover text-prius-black rounded-sm font-extralight text-[10px] uppercase tracking-widest transition-all font-display"
+              className="flex-1 py-4 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl"
             >
               Guardar Cambios
             </button>

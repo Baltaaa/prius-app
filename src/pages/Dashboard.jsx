@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { 
-  Printer, Settings, Search, Plus, Trash2, CheckSquare, Square, 
-  Map, List, AlertCircle, Umbrella, Home, Check, Eye
-} from "lucide-react"
+import { Printer, Map, List } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnitModal from "../components/dashboard/UnitModal"
 import Cell from "../components/dashboard/Cell"
-import GlobalLoader from "../components/ui/GlobalLoader"
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedUnit, setSelectedUnit] = useState(null)
   const [units, setUnits] = useState({})
@@ -31,7 +26,6 @@ export default function Dashboard() {
       navigate("/")
       return
     }
-    setUser(session.user)
     setLoading(false)
   }
 
@@ -79,7 +73,7 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="h-full flex flex-col space-y-8 animate-premium-fade no-print">
+    <div className="h-full flex flex-col space-y-8 animate-premium-fade no-print pb-12">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
@@ -113,8 +107,8 @@ export default function Dashboard() {
 
       {/* Main content */}
       {viewMode === "map" ? (
-        <div className="glass-card p-8 rounded-3xl glass-card-inner overflow-auto min-h-[600px] flex items-center justify-center">
-          <div className="inline-block mx-auto transform scale-90 md:scale-100">
+        <div className="glass-card p-4 md:p-8 rounded-3xl glass-card-inner overflow-auto min-h-[700px] flex items-start justify-center">
+          <div className="inline-block pt-8 transform scale-90 md:scale-100 origin-top">
             {/* Cabecera del plano */}
             <div className="flex justify-center mb-12">
               <div className="flex text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
