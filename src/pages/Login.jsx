@@ -80,37 +80,38 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between items-center bg-black font-sans overflow-x-hidden selection:bg-[#F2CA50] selection:text-black">
+    <div className="relative min-h-screen w-full flex flex-col justify-center items-center bg-black font-sans overflow-x-hidden selection:bg-[#F2CA50] selection:text-black">
       {isSuccess && <GlobalLoader message="Ingresando al panel" />}
 
-      {/* Imagen de Fondo Completa con Filtro y Sombras */}
-      <div className="absolute inset-0 z-0">
+      {/* Imagen de Fondo Completa */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="/images/hero-login.webp"
           alt="Prius Playa Grande"
-          className="w-full h-full object-cover object-center scale-105 filter brightness-[0.92] contrast-[1.05]"
+          className="w-full h-full object-cover object-center filter brightness-[0.95]"
+          onError={(e) => {
+            // Fallback en caso de que falte webp
+            e.currentTarget.src = "/images/screen.png"
+          }}
         />
-        {/* Overlay degradado suave para garantizar contraste de texto */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30" />
+        {/* Sombra sutil general */}
+        <div className="absolute inset-0 bg-black/15" />
       </div>
 
-      {/* Spacing top */}
-      <div className="w-full h-4 sm:h-8 z-10" />
-
       {/* Tarjeta Glassmorphic Centrada / Derecha */}
-      <main className="relative z-10 w-full max-w-[460px] px-4 py-6 sm:px-6 my-auto flex justify-center md:justify-end md:mr-12 lg:mr-24 xl:mr-32">
-        <div className="w-full bg-black/30 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-7 sm:p-9 text-white transition-all duration-300 hover:border-white/30">
+      <main className="relative z-10 w-full max-w-[480px] px-4 py-8 sm:px-6 my-auto flex justify-center md:justify-end md:mr-16 lg:mr-28 xl:mr-36">
+        <div className="w-full bg-white/10 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl p-7 sm:p-9 text-white transition-all duration-300">
           
-          {/* Header con Marca */}
-          <div className="flex items-center gap-2.5 mb-7">
-            <div className="w-8 h-8 rounded-full bg-[#F2CA50] flex items-center justify-center text-black font-bold text-base shadow-md shrink-0">
-              <span className="font-serif italic font-extrabold tracking-tighter">P</span>
+          {/* Header Marca */}
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-9 h-9 rounded-full bg-[#E8C351] flex items-center justify-center text-black font-extrabold shadow-md shrink-0">
+              <span className="font-serif italic text-xl leading-none">P</span>
             </div>
-            <div className="flex items-center gap-2 font-display">
-              <span className="font-bold text-lg tracking-tight text-white italic">
-                Prius<span className="font-normal not-italic text-white/90">Admin</span>
+            <div className="flex items-center gap-2 font-sans">
+              <span className="font-bold text-xl tracking-tight text-white italic">
+                Prius<span className="font-normal not-italic">Admin</span>
               </span>
-              <span className="text-white/60 text-xs tracking-wider uppercase font-medium">
+              <span className="text-white/80 text-xs font-medium tracking-wider uppercase">
                 - PLAYA GRANDE
               </span>
             </div>
@@ -119,11 +120,11 @@ export default function Login() {
           {mode === "login" ? (
             <>
               {/* Título & Subtítulo */}
-              <div className="mb-6 space-y-1">
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-none">
+              <div className="mb-7 space-y-1">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
                   Iniciar sesión
                 </h1>
-                <p className="text-white/80 text-xs font-normal pt-1">
+                <p className="text-white/90 text-xs font-normal">
                   Ingresá tus credenciales para acceder al panel.
                 </p>
               </div>
@@ -132,49 +133,49 @@ export default function Login() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 
                 {/* Input Correo Electrónico */}
-                <div className="relative flex items-center bg-black/20 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-black/40">
-                  <Mail size={16} className="text-white/70 shrink-0 mr-3" />
+                <div className="relative flex items-center bg-white/20 border border-white/40 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-white/30">
+                  <Mail size={17} className="text-white/90 shrink-0 mr-3" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="CORREO ELECTRÓNICO"
-                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
+                    className="w-full bg-transparent text-white placeholder-white/80 text-xs font-semibold tracking-wider uppercase outline-none"
                   />
                 </div>
 
                 {/* Input Contraseña */}
-                <div className="relative flex items-center bg-black/20 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-black/40">
-                  <Lock size={16} className="text-white/70 shrink-0 mr-3" />
+                <div className="relative flex items-center bg-white/20 border border-white/40 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-white/30">
+                  <Lock size={17} className="text-white/90 shrink-0 mr-3" />
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="CONTRASEÑA"
-                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
+                    className="w-full bg-transparent text-white placeholder-white/80 text-xs font-semibold tracking-wider uppercase outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-white/70 hover:text-white transition-colors ml-2 focus:outline-none"
+                    className="text-white/80 hover:text-white transition-colors ml-2 focus:outline-none"
                     aria-label="Ver contraseña"
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
                 </div>
 
                 {/* Checkbox Mantener sesión & Olvidaste contraseña */}
-                <div className="flex items-center justify-between text-[11px] pt-1 text-white/80">
+                <div className="flex items-center justify-between text-xs pt-1 text-white/90 font-medium px-1">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={remember}
                       onChange={(e) => setRemember(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/30 bg-black/20 text-[#F2CA50] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#F2CA50]"
+                      className="w-4 h-4 rounded border-white/40 bg-white/20 text-[#F2CA50] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#F2CA50]"
                     />
-                    <span className="font-normal text-white/90">Mantener sesión iniciada</span>
+                    <span>Mantener sesión iniciada</span>
                   </label>
 
                   <button
@@ -188,24 +189,24 @@ export default function Login() {
 
                 {/* Mensaje de Error */}
                 {error && (
-                  <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-white text-xs font-medium animate-fadeIn">
-                    <AlertCircle size={15} className="text-red-400 shrink-0" />
+                  <div className="flex items-center gap-2 p-3 bg-red-500/30 border border-red-500/50 rounded-xl text-white text-xs font-medium">
+                    <AlertCircle size={16} className="text-red-300 shrink-0" />
                     <span>{error}</span>
                   </div>
                 )}
 
-                {/* Botón Principal Dorado */}
+                {/* Botón Dorado Redondeado */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 mt-4 bg-[#F2CA50] hover:bg-[#e4be42] active:scale-[0.99] text-black font-extrabold text-xs uppercase tracking-widest rounded-full transition-all duration-200 shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                  className="w-full h-12 mt-4 bg-[#F2CA50] hover:bg-[#e4be42] active:scale-[0.99] text-black font-extrabold text-xs uppercase tracking-wider rounded-full transition-all duration-200 shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
                   {isLoading ? (
                     <Loader2 size={18} className="animate-spin text-black" />
                   ) : (
                     <>
                       <span>INGRESAR AL PANEL</span>
-                      <ArrowUpRight size={18} strokeWidth={2.5} />
+                      <ArrowUpRight size={18} strokeWidth={3} className="text-black" />
                     </>
                   )}
                 </button>
@@ -218,19 +219,19 @@ export default function Login() {
                 <h2 className="text-2xl font-bold text-white tracking-tight">
                   Recuperar acceso
                 </h2>
-                <p className="text-white/80 text-xs">
-                  Ingresá tu correo registrado para enviarte las instrucciones de restablecimiento.
+                <p className="text-white/90 text-xs">
+                  Ingresá tu correo registrado para enviarte las instrucciones.
                 </p>
               </div>
 
               {recoverStatus === "sent" ? (
-                <div className="p-4 bg-green-500/20 border border-green-500/40 rounded-2xl text-white text-xs space-y-2">
+                <div className="p-4 bg-green-500/30 border border-green-500/50 rounded-2xl text-white text-xs space-y-2">
                   <div className="flex items-center gap-2 text-green-300 font-bold">
                     <CheckCircle2 size={16} />
                     <span>Enlace enviado</span>
                   </div>
                   <p className="text-white/90 leading-relaxed">
-                    Te enviamos un correo a <strong className="text-white">{recoverEmail}</strong>. Por favor, revisá tu bandeja de entrada o spam.
+                    Te enviamos un correo a <strong className="text-white">{recoverEmail}</strong>. Por favor, revisá tu casilla.
                   </p>
                   <button
                     onClick={() => setMode("login")}
@@ -241,21 +242,21 @@ export default function Login() {
                 </div>
               ) : (
                 <form onSubmit={handleRecover} className="space-y-4">
-                  <div className="relative flex items-center bg-black/20 border border-white/25 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-black/40">
-                    <Mail size={16} className="text-white/70 shrink-0 mr-3" />
+                  <div className="relative flex items-center bg-white/20 border border-white/40 rounded-full px-4 h-12 transition-all focus-within:border-white focus-within:bg-white/30">
+                    <Mail size={17} className="text-white/90 shrink-0 mr-3" />
                     <input
                       type="email"
                       value={recoverEmail}
                       onChange={(e) => setRecoverEmail(e.target.value)}
                       required
                       placeholder="CORREO REGISTRADO"
-                      className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none"
+                      className="w-full bg-transparent text-white placeholder-white/80 text-xs font-semibold tracking-wider uppercase outline-none"
                     />
                   </div>
 
                   {recoverError && (
-                    <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-white text-xs">
-                      <AlertCircle size={15} className="text-red-400 shrink-0" />
+                    <div className="flex items-center gap-2 p-3 bg-red-500/30 border border-red-500/50 rounded-xl text-white text-xs">
+                      <AlertCircle size={16} className="text-red-300 shrink-0" />
                       <span>{recoverError}</span>
                     </div>
                   )}
@@ -263,7 +264,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={recoverStatus === "sending"}
-                    className="w-full h-12 bg-[#F2CA50] hover:bg-[#e4be42] text-black font-extrabold text-xs uppercase tracking-widest rounded-full transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    className="w-full h-12 bg-[#F2CA50] hover:bg-[#e4be42] text-black font-extrabold text-xs uppercase tracking-wider rounded-full transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                   >
                     {recoverStatus === "sending" ? (
                       <Loader2 size={18} className="animate-spin text-black" />
@@ -275,7 +276,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setMode("login")}
-                    className="w-full text-center text-xs text-white/80 hover:text-white flex items-center justify-center gap-1.5 pt-1"
+                    className="w-full text-center text-xs text-white/90 hover:text-white flex items-center justify-center gap-1.5 pt-1"
                   >
                     <ArrowLeft size={14} />
                     <span>Volver al inicio de sesión</span>
@@ -289,8 +290,8 @@ export default function Login() {
       </main>
 
       {/* Footer Fijo en la Base */}
-      <footer className="relative z-10 py-4 px-4 w-full text-center">
-        <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.25em] drop-shadow-md">
+      <footer className="absolute bottom-4 left-0 right-0 z-10 text-center px-4">
+        <p className="text-[11px] font-bold text-white uppercase tracking-[0.2em] drop-shadow-md">
           PRIUSADMIN &bull; ACCESO RESTRINGIDO AL STAFF
         </p>
       </footer>
