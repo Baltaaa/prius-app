@@ -48,7 +48,7 @@ export default function Login() {
         setIsSuccess(true)
         setTimeout(() => {
           navigate("/app/home")
-        }, 600)
+        }, 1200)
       }
     } catch (err) {
       setError("Error de conexión. Verificá tu acceso a internet.")
@@ -80,203 +80,187 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center md:justify-end bg-[#1A1A1A] font-sans overflow-hidden selection:bg-[#F2CA50] selection:text-[#1A1A1A] p-4 md:pr-16 lg:pr-24 xl:pr-32">
-      {isSuccess && <GlobalLoader message="Ingresando al panel..." />}
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#0a0d14] font-sans overflow-hidden selection:bg-[#FDE047] selection:text-black">
+      {isSuccess && <GlobalLoader message="Iniciando sesión segura" />}
 
-      {/* Imagen de Fondo con Filtro Cálido Atardecer */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <img
-          src="/images/hero-login.jpg"
-          alt="Prius Playa Grande"
-          className="w-full h-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-tr from-amber-900/40 via-orange-900/10 to-transparent" />
-        <div className="absolute inset-0 bg-black/10" />
+      {/* Background with Dark Atmosphere */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#0a0d14] via-[#0a0d14]/90 to-transparent z-10" />
+        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#FDE047]/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full" />
       </div>
 
-      {/* Tarjeta Glassmorphic Pura */}
-      <main className="relative z-10 w-full max-w-[420px]">
-        <div className="w-full glass-card rounded-3xl shadow-2xl p-8 sm:p-9 text-white transition-all duration-300">
+      {/* Glass Card Container */}
+      <main className="relative z-10 w-full max-w-[440px] p-6 animate-premium-fade">
+        <div className="glass-card rounded-[32px] p-10 border border-white/10 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
           
-          {/* Header de Marca con Logo Oficial (Solo la P Amarilla) */}
-          <div className="flex items-center gap-3 mb-7">
-            <div className="w-9 h-9 flex items-center justify-center shrink-0">
+          {/* Header Brand */}
+          <div className="flex flex-col items-center mb-10">
+            <div className="w-16 h-16 bg-[#0a0d14] border border-[#FDE047]/30 rounded-2xl flex items-center justify-center shadow-[0_0_25px_rgba(253,224,71,0.1)] mb-4">
               <img 
                 src="/images/prius-icon.png" 
                 alt="Prius Logo" 
-                className="w-full h-full object-contain"
+                className="w-10 h-10 object-contain"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-xl tracking-tight text-white italic">
-                Prius<span className="font-semibold not-italic text-[#E9C46A]">Admin</span>
-              </span>
-              <span className="text-white/60 text-[11px] font-semibold tracking-wider uppercase">
-                - PLAYA GRANDE
-              </span>
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white tracking-tight italic">
+                Prius<span className="text-[#FDE047] not-italic font-medium">Admin</span>
+              </h2>
+              <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em] uppercase mt-1">Playa Grande</p>
             </div>
           </div>
 
           {mode === "login" ? (
             <>
-              <div className="mb-7 space-y-1">
-                <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
-                  Iniciar sesión
-                </h1>
-                <p className="text-white/80 text-xs font-normal">
-                  Ingresá tus credenciales para acceder al panel.
-                </p>
+              <div className="mb-8">
+                <h1 className="text-xl font-bold text-white tracking-tight">Acceso Staff</h1>
+                <p className="text-gray-400 text-xs mt-1">Ingresá tus credenciales autorizadas.</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/30">
-                  <Mail size={16} className="text-white/80 shrink-0 mr-3" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="CORREO ELECTRÓNICO"
-                    autoComplete="email"
-                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
-                  />
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="CORREO ELECTRÓNICO"
+                      className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-xs font-bold tracking-wider uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="CONTRASEÑA"
+                      className="w-full h-14 pl-12 pr-12 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-xs font-bold tracking-wider uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/30">
-                  <Lock size={16} className="text-white/80 shrink-0 mr-3" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="CONTRASEÑA"
-                    autoComplete="current-password"
-                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-white/70 hover:text-white transition-colors ml-2 focus:outline-none"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between text-xs pt-1 text-white/70 font-normal">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-gray-500 hover:text-gray-300 transition-colors">
                     <input
                       type="checkbox"
                       checked={remember}
                       onChange={(e) => setRemember(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#E9C46A] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#E9C46A]"
+                      className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#FDE047] focus:ring-0 accent-[#FDE047]"
                     />
-                    <span>Mantener sesión iniciada</span>
+                    <span>Recordarme</span>
                   </label>
 
                   <button
                     type="button"
                     onClick={() => setMode("recover")}
-                    className="underline text-white/70 hover:text-white transition-colors"
+                    className="text-gray-500 hover:text-[#FDE047] transition-colors"
                   >
-                    ¿Olvidaste tu contraseña?
+                    ¿Olvidaste la clave?
                   </button>
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-white text-xs font-medium">
-                    <AlertCircle size={15} className="text-red-300 shrink-0" />
-                    <span>{error}</span>
+                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                    <AlertCircle size={16} className="text-red-400 shrink-0" />
+                    <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">{error}</span>
                   </div>
                 )}
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 mt-4 bg-[#E9C46A] hover:bg-[#d8b358] active:scale-[0.99] text-[#1A1A1A] font-bold text-xs uppercase tracking-widest rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                  className="w-full h-14 bg-[#FDE047] hover:bg-yellow-300 active:scale-[0.98] text-black font-black text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-yellow-400/5 flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
                 >
                   {isLoading ? (
-                    <Loader2 size={18} className="animate-spin text-[#1A1A1A]" />
+                    <Loader2 size={18} className="animate-spin" />
                   ) : (
                     <>
-                      <span>INGRESAR AL PANEL</span>
-                      <ArrowUpRight size={18} strokeWidth={2.5} />
+                      INGRESAR AL PANEL <ArrowUpRight size={18} />
                     </>
                   )}
                 </button>
               </form>
             </>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="space-y-1">
-                <h2 className="text-2xl font-semibold text-white tracking-tight">
-                  Recuperar acceso
-                </h2>
-                <p className="text-white/80 text-xs">
-                  Ingresá tu correo registrado para enviarte las instrucciones.
-                </p>
+                <h2 className="text-xl font-bold text-white tracking-tight">Recuperar acceso</h2>
+                <p className="text-gray-400 text-xs">Te enviaremos un link a tu correo oficial.</p>
               </div>
 
               {recoverStatus === "sent" ? (
-                <div className="p-4 bg-green-500/20 border border-green-500/40 rounded-2xl text-white text-xs space-y-2">
-                  <div className="flex items-center gap-2 text-green-300 font-bold">
+                <div className="p-6 bg-green-500/10 border border-green-500/20 rounded-2xl space-y-4">
+                  <div className="flex items-center gap-2 text-green-400 font-bold text-xs uppercase tracking-widest">
                     <CheckCircle2 size={16} />
-                    <span>Enlace enviado</span>
+                    <span>Correo enviado</span>
                   </div>
-                  <p className="text-white/90 leading-relaxed">
-                    Te enviamos un correo a <strong className="text-white">{recoverEmail}</strong>.
+                  <p className="text-gray-400 text-[11px] leading-relaxed uppercase font-semibold">
+                    Revisá la bandeja de entrada de <strong className="text-white">{recoverEmail}</strong>.
                   </p>
                   <button
                     onClick={() => setMode("login")}
-                    className="mt-3 text-xs font-bold text-[#E9C46A] underline block"
+                    className="text-[10px] font-bold text-[#FDE047] uppercase tracking-widest underline underline-offset-4"
                   >
-                    Volver a iniciar sesión
+                    Volver al login
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleRecover} className="space-y-4">
-                  <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/30">
-                    <Mail size={16} className="text-white/80 shrink-0 mr-3" />
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
                     <input
                       type="email"
                       value={recoverEmail}
                       onChange={(e) => setRecoverEmail(e.target.value)}
                       required
                       placeholder="CORREO REGISTRADO"
-                      className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
+                      className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-xs font-bold tracking-wider uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={recoverStatus === "sending"}
-                    className="w-full h-12 bg-[#E9C46A] hover:bg-[#d8b358] text-[#1A1A1A] font-bold text-xs uppercase tracking-widest rounded-full transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    className="w-full h-14 bg-[#FDE047] hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-[0.15em] rounded-xl transition-all flex items-center justify-center gap-2"
                   >
                     {recoverStatus === "sending" ? (
-                      <Loader2 size={18} className="animate-spin text-[#1A1A1A]" />
+                      <Loader2 size={18} className="animate-spin" />
                     ) : (
-                      "ENVIAR LINK DE RECUPERACIÓN"
+                      "RECUPERAR CONTRASEÑA"
                     )}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setMode("login")}
-                    className="w-full text-center text-xs text-white/80 hover:text-white flex items-center justify-center gap-1.5 pt-1"
+                    className="w-full text-center text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest flex items-center justify-center gap-2 pt-2"
                   >
-                    <ArrowLeft size={14} />
-                    <span>Volver al inicio de sesión</span>
+                    <ArrowLeft size={14} /> Volver
                   </button>
                 </form>
               )}
             </div>
           )}
-
         </div>
       </main>
 
-      <footer className="absolute bottom-4 left-0 right-0 z-10 text-center px-4 pointer-events-none">
-        <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.2em] drop-shadow-md">
-          PRIUSADMIN &bull; ACCESO RESTRINGIDO AL STAFF
+      <footer className="absolute bottom-6 left-0 right-0 z-10 text-center px-4">
+        <p className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.4em]">
+          PRIUSADMIN &bull; BALNEARIO PLAYA GRANDE &bull; SISTEMA RESTRINGIDO
         </p>
       </footer>
     </div>

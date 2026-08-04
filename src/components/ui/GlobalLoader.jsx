@@ -1,56 +1,45 @@
-import React, { useEffect, useState } from "react"
+import React from 'react'
+import { Loader2 } from 'lucide-react'
 
-export default function GlobalLoader({ message = "Cargando experiencia Prius" }) {
-  const [progress, setProgress] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          return 100
-        }
-        // Incremento orgánico y fluido
-        const remaining = 100 - prev
-        const increment = Math.max(1, Math.floor(Math.random() * (remaining * 0.2)))
-        return prev + increment
-      })
-    }, 150)
-
-    return () => clearInterval(interval)
-  }, [])
-
+export default function GlobalLoader({ message = "Sincronizando..." }) {
   return (
-    <div className="fixed inset-0 bg-prius-black z-[9999] flex flex-col items-center justify-center p-6 select-none animate-premium-fade">
-      <div className="relative flex flex-col items-center max-w-xs w-full text-center space-y-8">
-        {/* Logo con animación de pulso suave */}
-        <div className="relative w-48 h-48 flex items-center justify-center">
-          <img 
-            src="/logo-prius.png" 
-            alt="Prius" 
-            className="w-full h-full object-contain brightness-0 invert animate-pulse duration-[2000ms]"
-          />
-        </div>
-
-        {/* Mensaje y barra de progreso */}
-        <div className="w-full space-y-3">
-          <p className="text-[10px] font-extralight uppercase tracking-[0.3em] text-gold font-display">
-            {message}
-          </p>
-          
-          {/* Contenedor de la barra (1px hairline border) */}
-          <div className="w-full h-[2px] bg-white/10 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gold transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0a0d14]/90 backdrop-blur-md">
+      <div className="relative flex flex-col items-center">
+        {/* Logo container with pulsing glow */}
+        <div className="w-20 h-20 mb-8 relative">
+          <div className="absolute inset-0 bg-[#FDE047]/20 rounded-full animate-ping" />
+          <div className="relative z-10 w-full h-full bg-[#0a0d14] border border-[#FDE047]/30 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(253,224,71,0.15)]">
+            <img 
+              src="/images/prius-icon.png" 
+              alt="P" 
+              className="w-10 h-10 object-contain"
             />
           </div>
-          
-          <p className="text-[9px] font-extralight text-white/40 font-mono">
-            {progress}%
+        </div>
+
+        {/* Loading Spinner */}
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-6 h-6 text-[#FDE047] animate-spin" />
+          <p className="text-[10px] font-bold text-[#FDE047] uppercase tracking-[0.3em] animate-pulse">
+            {message}
           </p>
         </div>
+
+        {/* Decorative line */}
+        <div className="mt-8 w-48 h-[1px] bg-white/5 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FDE047] to-transparent w-24 animate-shimmer" />
+        </div>
       </div>
+      
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite linear;
+        }
+      `}</style>
     </div>
   )
 }
