@@ -83,21 +83,21 @@ export default function Login() {
     <div className="relative min-h-screen w-full flex items-center justify-center md:justify-end bg-[#1A1A1A] font-sans overflow-hidden selection:bg-[#F2CA50] selection:text-[#1A1A1A] p-4 md:pr-16 lg:pr-24 xl:pr-32">
       {isSuccess && <GlobalLoader message="Ingresando al panel..." />}
 
-      {/* Imagen de Fondo con Filtro Caribeño */}
+      {/* Imagen de Fondo con Filtro Cálido Atardecer */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="/images/hero-login.jpg"
           alt="Prius Playa Grande"
-          className="w-full h-full object-cover object-center scale-105"
+          className="w-full h-full object-cover object-center"
         />
-        {/* Overlay Caribeño: Gradiente cian/turquesa para resaltar el agua */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#005f73]/50 via-[#0a9396]/30 to-[#94d2bd]/20" />
+        {/* Overlay Cálido: Gradiente ámbar/bronce para un look de atardecer de playa */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-amber-900/40 via-orange-900/10 to-transparent" />
         <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      {/* Tarjeta Glassmorphic */}
+      {/* Tarjeta Glassmorphic Pura (Transparente + Blur) */}
       <main className="relative z-10 w-full max-w-[420px]">
-        <div className="w-full glass-card rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] p-8 sm:p-9 text-white transition-all duration-300">
+        <div className="w-full glass-card rounded-3xl shadow-2xl p-8 sm:p-9 text-white transition-all duration-300">
           
           {/* Header de Marca */}
           <div className="flex items-center gap-2.5 mb-7">
@@ -108,7 +108,7 @@ export default function Login() {
               <span className="font-bold text-xl tracking-tight text-white italic">
                 Prius<span className="font-semibold not-italic text-[#E9C46A]">Admin</span>
               </span>
-              <span className="text-white/80 text-[11px] font-semibold tracking-wider uppercase">
+              <span className="text-white/60 text-[11px] font-semibold tracking-wider uppercase">
                 - PLAYA GRANDE
               </span>
             </div>
@@ -121,7 +121,7 @@ export default function Login() {
                 <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
                   Iniciar sesión
                 </h1>
-                <p className="text-white/90 text-xs font-normal">
+                <p className="text-white/80 text-xs font-normal">
                   Ingresá tus credenciales para acceder al panel.
                 </p>
               </div>
@@ -130,7 +130,7 @@ export default function Login() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 
                 {/* Input Correo Electrónico */}
-                <div className="relative flex items-center bg-white/15 border border-white/30 rounded-full px-4 h-12 transition-all focus-within:border-white/70 focus-within:bg-black/20">
+                <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/30">
                   <Mail size={16} className="text-white/80 shrink-0 mr-3" />
                   <input
                     type="email"
@@ -139,12 +139,12 @@ export default function Login() {
                     required
                     placeholder="CORREO ELECTRÓNICO"
                     autoComplete="email"
-                    className="w-full bg-transparent text-white placeholder-white/70 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
+                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                   />
                 </div>
 
                 {/* Input Contraseña */}
-                <div className="relative flex items-center bg-white/15 border border-white/30 rounded-full px-4 h-12 transition-all focus-within:border-white/70 focus-within:bg-black/20">
+                <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/30">
                   <Lock size={16} className="text-white/80 shrink-0 mr-3" />
                   <input
                     type={showPassword ? "text" : "password"}
@@ -153,7 +153,7 @@ export default function Login() {
                     required
                     placeholder="CONTRASEÑA"
                     autoComplete="current-password"
-                    className="w-full bg-transparent text-white placeholder-white/70 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
+                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                   />
                   <button
                     type="button"
@@ -166,7 +166,7 @@ export default function Login() {
                 </div>
 
                 {/* Checkbox Mantener sesión & Olvidaste contraseña */}
-                <div className="flex items-center justify-between text-xs pt-1 text-white/90 font-normal">
+                <div className="flex items-center justify-between text-xs pt-1 text-white/70 font-normal">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -180,7 +180,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setMode("recover")}
-                    className="underline text-white/90 hover:text-white transition-colors"
+                    className="underline text-white/70 hover:text-white transition-colors"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -241,7 +241,7 @@ export default function Login() {
                 </div>
               ) : (
                 <form onSubmit={handleRecover} className="space-y-4">
-                  <div className="relative flex items-center bg-white/15 border border-white/30 rounded-full px-4 h-12 transition-all focus-within:border-white/70 focus-within:bg-black/20">
+                  <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/30">
                     <Mail size={16} className="text-white/80 shrink-0 mr-3" />
                     <input
                       type="email"
@@ -249,7 +249,7 @@ export default function Login() {
                       onChange={(e) => setRecoverEmail(e.target.value)}
                       required
                       placeholder="CORREO REGISTRADO"
-                      className="w-full bg-transparent text-white placeholder-white/70 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
+                      className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                     />
                   </div>
 
@@ -290,7 +290,7 @@ export default function Login() {
 
       {/* Footer Fijo en la parte inferior central */}
       <footer className="absolute bottom-4 left-0 right-0 z-10 text-center px-4 pointer-events-none">
-        <p className="text-[10px] font-bold text-white/90 uppercase tracking-[0.2em] drop-shadow-md">
+        <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.2em] drop-shadow-md">
           PRIUSADMIN &bull; ACCESO RESTRINGIDO AL STAFF
         </p>
       </footer>
