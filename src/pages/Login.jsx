@@ -80,38 +80,32 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center md:justify-end bg-[#1A1A1A] font-sans overflow-hidden selection:bg-[#E9C46A] selection:text-[#1A1A1A] p-4 md:pr-16 lg:pr-28 xl:pr-36">
+    <div className="relative min-h-screen w-full flex items-center justify-center md:justify-end bg-[#1A1A1A] font-sans overflow-hidden selection:bg-[#F2CA50] selection:text-[#1A1A1A] p-4 md:pr-16 lg:pr-24 xl:pr-32">
       {isSuccess && <GlobalLoader message="Ingresando al panel..." />}
 
-      {/* Imagen de Fondo Completa Oficial Prius 2024-2025 */}
+      {/* Imagen de Fondo Completa Nítida y Clara */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="/images/hero-login.jpg"
           alt="Prius Playa Grande"
-          className="w-full h-full object-cover object-center filter brightness-[0.95]"
+          className="w-full h-full object-cover object-center"
         />
-        {/* Overlay oscuro suave */}
-        <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      {/* Tarjeta Glassmorphic alineada a la derecha exactamente como en el mockup */}
-      <main className="relative z-10 w-full max-w-[440px]">
-        <div className="w-full bg-white/10 backdrop-blur-2xl border border-white/25 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.35)] p-8 sm:p-9 text-white transition-all duration-300">
+      {/* Tarjeta Glassmorphic Identica al Mockup */}
+      <main className="relative z-10 w-full max-w-[420px]">
+        <div className="w-full glass-card rounded-3xl shadow-2xl p-8 sm:p-9 text-white transition-all duration-300">
           
-          {/* Header de Marca con la imagen oficial del Logo Prius */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-9 h-9 flex items-center justify-center shrink-0 overflow-hidden">
-              <img 
-                src="/logo-prius.png" 
-                alt="Prius Logo" 
-                className="w-full h-full object-contain filter drop-shadow" 
-              />
+          {/* Header de Marca */}
+          <div className="flex items-center gap-2.5 mb-7">
+            <div className="w-8 h-8 rounded-full bg-[#E9C46A] flex items-center justify-center text-[#1A1A1A] font-extrabold shadow-sm shrink-0">
+              <span className="italic font-serif text-lg leading-none">P</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-2xl tracking-tight text-white italic font-serif">
-                Prius<span className="font-semibold not-italic font-sans text-white/95">Admin</span>
+              <span className="font-bold text-xl tracking-tight text-white italic">
+                Prius<span className="font-semibold not-italic text-[#E9C46A]">Admin</span>
               </span>
-              <span className="text-white/70 text-xs font-semibold tracking-wider uppercase">
+              <span className="text-white/80 text-[11px] font-semibold tracking-wider uppercase">
                 - PLAYA GRANDE
               </span>
             </div>
@@ -120,11 +114,11 @@ export default function Login() {
           {mode === "login" ? (
             <>
               {/* Título & Subtítulo */}
-              <div className="mb-7 space-y-1.5">
+              <div className="mb-7 space-y-1">
                 <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
                   Iniciar sesión
                 </h1>
-                <p className="text-white/80 text-xs font-normal">
+                <p className="text-white/90 text-xs font-normal">
                   Ingresá tus credenciales para acceder al panel.
                 </p>
               </div>
@@ -133,7 +127,7 @@ export default function Login() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 
                 {/* Input Correo Electrónico */}
-                <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/20">
+                <div className="relative flex items-center bg-white/15 border border-white/30 rounded-full px-4 h-12 transition-all focus-within:border-white/70 focus-within:bg-black/20">
                   <Mail size={16} className="text-white/80 shrink-0 mr-3" />
                   <input
                     type="email"
@@ -142,12 +136,12 @@ export default function Login() {
                     required
                     placeholder="CORREO ELECTRÓNICO"
                     autoComplete="email"
-                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
+                    className="w-full bg-transparent text-white placeholder-white/70 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                   />
                 </div>
 
                 {/* Input Contraseña */}
-                <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/20">
+                <div className="relative flex items-center bg-white/15 border border-white/30 rounded-full px-4 h-12 transition-all focus-within:border-white/70 focus-within:bg-black/20">
                   <Lock size={16} className="text-white/80 shrink-0 mr-3" />
                   <input
                     type={showPassword ? "text" : "password"}
@@ -156,7 +150,7 @@ export default function Login() {
                     required
                     placeholder="CONTRASEÑA"
                     autoComplete="current-password"
-                    className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
+                    className="w-full bg-transparent text-white placeholder-white/70 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                   />
                   <button
                     type="button"
@@ -169,13 +163,13 @@ export default function Login() {
                 </div>
 
                 {/* Checkbox Mantener sesión & Olvidaste contraseña */}
-                <div className="flex items-center justify-between text-xs pt-1 text-white/80 font-normal">
+                <div className="flex items-center justify-between text-xs pt-1 text-white/90 font-normal">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={remember}
                       onChange={(e) => setRemember(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#E8C552] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#E8C552]"
+                      className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#E9C46A] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#E9C46A]"
                     />
                     <span>Mantener sesión iniciada</span>
                   </label>
@@ -183,7 +177,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setMode("recover")}
-                    className="underline text-white/80 hover:text-white transition-colors"
+                    className="underline text-white/90 hover:text-white transition-colors"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -197,11 +191,11 @@ export default function Login() {
                   </div>
                 )}
 
-                {/* Botón Principal Dorado Prius */}
+                {/* Botón Principal Dorado */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 mt-4 bg-[#E8C552] hover:bg-[#d8b542] active:scale-[0.99] text-[#1A1A1A] font-bold text-xs uppercase tracking-widest rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                  className="w-full h-12 mt-4 bg-[#E9C46A] hover:bg-[#d8b358] active:scale-[0.99] text-[#1A1A1A] font-bold text-xs uppercase tracking-widest rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
                   {isLoading ? (
                     <Loader2 size={18} className="animate-spin text-[#1A1A1A]" />
@@ -237,14 +231,14 @@ export default function Login() {
                   </p>
                   <button
                     onClick={() => setMode("login")}
-                    className="mt-3 text-xs font-bold text-[#E8C552] underline block"
+                    className="mt-3 text-xs font-bold text-[#E9C46A] underline block"
                   >
                     Volver a iniciar sesión
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleRecover} className="space-y-4">
-                  <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/20">
+                  <div className="relative flex items-center bg-white/15 border border-white/30 rounded-full px-4 h-12 transition-all focus-within:border-white/70 focus-within:bg-black/20">
                     <Mail size={16} className="text-white/80 shrink-0 mr-3" />
                     <input
                       type="email"
@@ -252,7 +246,7 @@ export default function Login() {
                       onChange={(e) => setRecoverEmail(e.target.value)}
                       required
                       placeholder="CORREO REGISTRADO"
-                      className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
+                      className="w-full bg-transparent text-white placeholder-white/70 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                     />
                   </div>
 
@@ -266,7 +260,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={recoverStatus === "sending"}
-                    className="w-full h-12 bg-[#E8C552] hover:bg-[#d8b542] text-[#1A1A1A] font-bold text-xs uppercase tracking-widest rounded-full transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    className="w-full h-12 bg-[#E9C46A] hover:bg-[#d8b358] text-[#1A1A1A] font-bold text-xs uppercase tracking-widest rounded-full transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                   >
                     {recoverStatus === "sending" ? (
                       <Loader2 size={18} className="animate-spin text-[#1A1A1A]" />
@@ -291,9 +285,9 @@ export default function Login() {
         </div>
       </main>
 
-      {/* Footer Fijo en el centro de la base */}
+      {/* Footer Fijo en la parte inferior central */}
       <footer className="absolute bottom-4 left-0 right-0 z-10 text-center px-4 pointer-events-none">
-        <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.2em] drop-shadow-md">
+        <p className="text-[10px] font-bold text-white/90 uppercase tracking-[0.2em] drop-shadow-md">
           PRIUSADMIN &bull; ACCESO RESTRINGIDO AL STAFF
         </p>
       </footer>

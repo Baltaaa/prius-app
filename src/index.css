@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --prius-gold: #E9C46A;
-  --prius-gold-hover: #D8B358;
+  --prius-gold: #F2CA50;
+  --prius-gold-hover: #E5BF45;
   --prius-black: #1A1A1A;
   --prius-white: #FFFFFF;
   --prius-gray-bg: #F8F9FA;
@@ -16,7 +16,7 @@
   --foreground: #2D3436;
   --card: #FFFFFF;
   --card-foreground: #2D3436;
-  --primary: #E9C46A;
+  --primary: #F2CA50;
   --primary-foreground: #1A1A1A;
   --border: #E5E5E5;
   --input: #E5E5E5;
@@ -37,23 +37,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Evitar el recuadro blanco del autofill/autocompletar del navegador */
+/* Evitar el recuadro blanco de autocompletar en los inputs */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px rgba(0, 0, 0, 0.35) inset !important;
+  -webkit-box-shadow: 0 0 0 30px rgba(0, 0, 0, 0.25) inset !important;
   -webkit-text-fill-color: #ffffff !important;
   transition: background-color 5000s ease-in-out 0s;
   caret-color: #ffffff;
 }
 
-/* Glassmorphism panel */
-.glass-panel {
+/* Glassmorphism panel idéntico al mockup */
+.glass-card {
   background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* Restyle scrollbars */
