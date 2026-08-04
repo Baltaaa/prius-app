@@ -83,18 +83,21 @@ export default function Login() {
     <div className="relative min-h-screen w-full flex items-center justify-center md:justify-end bg-[#1A1A1A] font-sans overflow-hidden selection:bg-[#F2CA50] selection:text-[#1A1A1A] p-4 md:pr-16 lg:pr-24 xl:pr-32">
       {isSuccess && <GlobalLoader message="Ingresando al panel..." />}
 
-      {/* Imagen de Fondo Completa Nítida y Clara */}
+      {/* Imagen de Fondo con Filtro Caribeño */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="/images/hero-login.jpg"
           alt="Prius Playa Grande"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-center scale-105"
         />
+        {/* Overlay Caribeño: Gradiente cian/turquesa para resaltar el agua */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#005f73]/50 via-[#0a9396]/30 to-[#94d2bd]/20" />
+        <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      {/* Tarjeta Glassmorphic Identica al Mockup */}
+      {/* Tarjeta Glassmorphic */}
       <main className="relative z-10 w-full max-w-[420px]">
-        <div className="w-full glass-card rounded-3xl shadow-2xl p-8 sm:p-9 text-white transition-all duration-300">
+        <div className="w-full glass-card rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] p-8 sm:p-9 text-white transition-all duration-300">
           
           {/* Header de Marca */}
           <div className="flex items-center gap-2.5 mb-7">
