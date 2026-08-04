@@ -90,19 +90,25 @@ export default function Login() {
           alt="Prius Playa Grande"
           className="w-full h-full object-cover object-center"
         />
-        {/* Overlay Cálido: Gradiente ámbar/bronce para un look de atardecer de playa */}
         <div className="absolute inset-0 bg-gradient-to-tr from-amber-900/40 via-orange-900/10 to-transparent" />
         <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      {/* Tarjeta Glassmorphic Pura (Transparente + Blur) */}
+      {/* Tarjeta Glassmorphic Pura */}
       <main className="relative z-10 w-full max-w-[420px]">
         <div className="w-full glass-card rounded-3xl shadow-2xl p-8 sm:p-9 text-white transition-all duration-300">
           
-          {/* Header de Marca */}
-          <div className="flex items-center gap-2.5 mb-7">
-            <div className="w-8 h-8 rounded-full bg-[#E9C46A] flex items-center justify-center text-[#1A1A1A] font-extrabold shadow-sm shrink-0">
-              <span className="italic font-serif text-lg leading-none">P</span>
+          {/* Header de Marca con Logo Oficial (Solo la P Amarilla) */}
+          <div className="flex items-center gap-3 mb-7">
+            <div className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center shrink-0 overflow-hidden">
+              {/* Usamos un contenedor con overflow y posicionamiento para mostrar solo la parte superior (sol) del logo */}
+              <div className="w-full h-full relative">
+                <img 
+                  src="/images/logo-prius-sun.png" 
+                  alt="Prius Logo" 
+                  className="absolute top-0 left-0 w-full h-[180%] object-contain object-top"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-xl tracking-tight text-white italic">
@@ -116,7 +122,6 @@ export default function Login() {
 
           {mode === "login" ? (
             <>
-              {/* Título & Subtítulo */}
               <div className="mb-7 space-y-1">
                 <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
                   Iniciar sesión
@@ -126,10 +131,7 @@ export default function Login() {
                 </p>
               </div>
 
-              {/* Formulario */}
               <form onSubmit={handleSubmit} className="space-y-4">
-                
-                {/* Input Correo Electrónico */}
                 <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/30">
                   <Mail size={16} className="text-white/80 shrink-0 mr-3" />
                   <input
@@ -143,7 +145,6 @@ export default function Login() {
                   />
                 </div>
 
-                {/* Input Contraseña */}
                 <div className="relative flex items-center bg-white/10 border border-white/20 rounded-full px-4 h-12 transition-all focus-within:border-white/50 focus-within:bg-black/30">
                   <Lock size={16} className="text-white/80 shrink-0 mr-3" />
                   <input
@@ -159,13 +160,11 @@ export default function Login() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="text-white/70 hover:text-white transition-colors ml-2 focus:outline-none"
-                    aria-label="Ver contraseña"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
 
-                {/* Checkbox Mantener sesión & Olvidaste contraseña */}
                 <div className="flex items-center justify-between text-xs pt-1 text-white/70 font-normal">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
@@ -186,7 +185,6 @@ export default function Login() {
                   </button>
                 </div>
 
-                {/* Mensaje de Error */}
                 {error && (
                   <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-white text-xs font-medium">
                     <AlertCircle size={15} className="text-red-300 shrink-0" />
@@ -194,7 +192,6 @@ export default function Login() {
                   </div>
                 )}
 
-                {/* Botón Principal Dorado */}
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -212,7 +209,6 @@ export default function Login() {
               </form>
             </>
           ) : (
-            /* Panel de Recuperación de Contraseña */
             <div className="space-y-5">
               <div className="space-y-1">
                 <h2 className="text-2xl font-semibold text-white tracking-tight">
@@ -230,7 +226,7 @@ export default function Login() {
                     <span>Enlace enviado</span>
                   </div>
                   <p className="text-white/90 leading-relaxed">
-                    Te enviamos un correo a <strong className="text-white">{recoverEmail}</strong>. Por favor, revisá tu casilla.
+                    Te enviamos un correo a <strong className="text-white">{recoverEmail}</strong>.
                   </p>
                   <button
                     onClick={() => setMode("login")}
@@ -252,13 +248,6 @@ export default function Login() {
                       className="w-full bg-transparent text-white placeholder-white/60 text-xs font-medium uppercase tracking-wider outline-none border-none focus:ring-0"
                     />
                   </div>
-
-                  {recoverError && (
-                    <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-white text-xs">
-                      <AlertCircle size={15} className="text-red-300 shrink-0" />
-                      <span>{recoverError}</span>
-                    </div>
-                  )}
 
                   <button
                     type="submit"
@@ -288,7 +277,6 @@ export default function Login() {
         </div>
       </main>
 
-      {/* Footer Fijo en la parte inferior central */}
       <footer className="absolute bottom-4 left-0 right-0 z-10 text-center px-4 pointer-events-none">
         <p className="text-[10px] font-bold text-white/80 uppercase tracking-[0.2em] drop-shadow-md">
           PRIUSADMIN &bull; ACCESO RESTRINGIDO AL STAFF
