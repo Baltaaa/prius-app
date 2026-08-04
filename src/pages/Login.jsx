@@ -99,10 +99,18 @@ export default function Login() {
       <main className="relative z-10 w-full max-w-[420px]">
         <div className="w-full glass-card rounded-3xl shadow-2xl p-8 sm:p-9 text-white transition-all duration-300">
           
-          {/* Header con Isotipo P sola */}
-          <div className="mb-7">
-            <div className="w-12 h-12 rounded-full bg-[#E9C46A] flex items-center justify-center text-[#1A1A1A] font-extrabold shadow-sm shrink-0">
-              <span className="italic font-serif text-2xl leading-none">P</span>
+          {/* Header de Marca */}
+          <div className="flex items-center gap-2.5 mb-7">
+            <div className="w-8 h-8 rounded-full bg-[#E9C46A] flex items-center justify-center text-[#1A1A1A] font-extrabold shadow-sm shrink-0">
+              <span className="italic font-serif text-lg leading-none">P</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-xl tracking-tight text-white italic">
+                Prius<span className="font-semibold not-italic text-[#E9C46A]">Admin</span>
+              </span>
+              <span className="text-white/60 text-[11px] font-semibold tracking-wider uppercase">
+                - PLAYA GRANDE
+              </span>
             </div>
           </div>
 
