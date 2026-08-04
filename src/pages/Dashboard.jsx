@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { Printer, Plus, Minus, Maximize, Search } from "lucide-react"
+import { Printer, Plus, Minus, Maximize } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnitModal from "../components/dashboard/UnitModal"
@@ -13,7 +13,7 @@ export default function Dashboard() {
   const [selectedUnit, setSelectedUnit] = useState(null)
   const [units, setUnits] = useState({})
   const [viewMode, setViewMode] = useState("map")
-  const [zoom, setZoom] = useState(0.9) // Estado inicial del zoom
+  const [zoom, setZoom] = useState(0.9)
 
   useEffect(() => {
     checkUser()
@@ -111,36 +111,41 @@ export default function Dashboard() {
                 className="transition-transform duration-200 origin-top"
                 style={{ transform: `scale(${zoom})` }}
               >
-                {/* Etiquetas Superiores */}
-                <div className="flex justify-center mb-10 gap-1">
-                  <div className="w-[124px] py-3 border border-white/10 text-center rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Recreación</div>
-                  <div className="w-[62px] py-3 border-y border-white/10 text-center bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Acceso</div>
+                {/* Etiquetas Superiores - Ajustadas a la nueva arquitectura */}
+                <div className="flex justify-center mb-10 gap-0">
+                  <div className="w-[180px] py-3 border border-white/10 text-center rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">Recreación</div>
+                  <div className="w-[80px] py-3 border-y border-x border-white/10 text-center bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">Acceso</div>
                   <div className="w-[200px] py-3 border border-[#FDE047]/30 text-center rounded-r-lg bg-[#FDE047]/10 text-[9px] font-bold uppercase tracking-widest text-[#FDE047]">Sector Piscina</div>
                 </div>
 
-                {/* Grilla Principal Carpas */}
-                <div className="flex justify-center gap-10 items-end pb-12">
-                  {/* Pasillos 1, 2, 3 (Completos 25u) */}
-                  {[
-                    { start: 1, count: 25 }, { start: 26, count: 25 }, { start: 51, count: 25 }
-                  ].map((col, idx) => (
-                    <div key={idx} className="flex flex-col gap-1">
-                      {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
-                      ))}
-                    </div>
-                  ))}
+                {/* Grilla Principal Carpas con Pasillo Central */}
+                <div className="flex justify-center gap-16 items-end pb-12">
+                  
+                  {/* Bloque Izquierda (1-25, 26-50, 51-75) */}
+                  <div className="flex gap-8 items-end">
+                    {[
+                      { start: 1, count: 25 }, { start: 26, count: 25 }, { start: 51, count: 25 }
+                    ].map((col, idx) => (
+                      <div key={idx} className="flex flex-col gap-1">
+                        {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
+                          <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
 
-                  {/* Grupo Pool (Empujado por el Sector Piscina) */}
+                  {/* Pasillo Central (Espacio implícito por el gap-16) */}
+
+                  {/* Bloque Derecha (Pileta + 76-98, 99-121, 122-144) */}
                   <div className="flex flex-col gap-0 items-center">
-                    {/* El "Mueble" de la Piscina que empuja hacia abajo */}
+                    {/* El bloque de la Piscina */}
                     <div className="w-[180px] h-[72px] bg-sky-500/10 border border-sky-500/20 rounded-md mb-4 flex flex-col items-center justify-center relative group overflow-hidden">
-                      <div className="absolute inset-0 bg-sky-400/5 animate-pulse" />
+                      <div className="absolute inset-0 bg-sky-400/5" />
                       <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
                       <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
                     </div>
                     
-                    <div className="flex gap-10 items-end">
+                    <div className="flex gap-8 items-end">
                       {[
                         { start: 76, count: 23 }, { start: 99, count: 23 }, { start: 122, count: 23 }
                       ].map((col, idx) => (
@@ -223,7 +228,6 @@ export default function Dashboard() {
           body { background: white !important; color: black !important; }
           .no-print { display: none !important; }
         }
-        /* Custom Scrollbar for the map container */
         .overflow-auto::-webkit-scrollbar {
           width: 8px;
           height: 8px;
