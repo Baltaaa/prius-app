@@ -109,26 +109,38 @@ export default function Dashboard() {
                 className="transition-transform duration-200 origin-top flex flex-col items-center"
                 style={{ transform: `scale(${zoom})` }}
               >
-                {/* Header Row (Etiquetas + Pileta Unificada) */}
-                <div className="flex justify-center gap-0 mb-4 items-stretch">
-                  <div className="w-[180px] h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                {/* 
+                  Cálculo de Anchos para Alineación Perfecta:
+                  - Cada columna (Cell + Label) mide ~52px en Desktop.
+                  - Gaps entre columnas son 32px (gap-8).
+                  - 3 columnas + 2 gaps = (52*3) + (32*2) = 156 + 64 = 220px.
+                  - Pasillo Central = 64px (gap-16 en el contenedor principal).
+                */}
+                
+                {/* Row Superior Unificada */}
+                <div className="flex justify-center gap-0 items-start mb-6">
+                  {/* Recreación alineada con las 3 primeras columnas */}
+                  <div className="w-[220px] h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
                     Recreación
                   </div>
-                  <div className="w-[64px] h-[50px] flex items-center justify-center border-y border-x border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">
+                  
+                  {/* Acceso alineado con el Pasillo Central */}
+                  <div className="w-[64px] h-[50px] flex items-center justify-center border-y border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">
                     Acceso
                   </div>
-                  {/* El Bloque de Pileta ahora arranca desde arriba */}
-                  <div className="w-[180px] h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
+                  
+                  {/* Pileta alineada con las 3 últimas columnas, bajando para ocupar el espacio físico */}
+                  <div className="w-[220px] h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
                     <div className="absolute inset-0 bg-sky-400/5 animate-pulse" />
                     <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
                     <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
                   </div>
                 </div>
 
-                {/* Grilla Principal Carpas */}
+                {/* Contenedor de Carpas */}
                 <div className="flex justify-center gap-[64px] items-end pb-12">
                   
-                  {/* Bloque Izquierda */}
+                  {/* Bloque Izquierda (3 Pasillos completos) */}
                   <div className="flex gap-8 items-end">
                     {[
                       { start: 1, count: 25 }, { start: 26, count: 25 }, { start: 51, count: 25 }
@@ -141,9 +153,9 @@ export default function Dashboard() {
                     ))}
                   </div>
 
-                  {/* Pasillo Central de 64px alineado con la etiqueta ACCESO */}
+                  {/* Espacio del Pasillo Central (Implícito por gap-[64px]) */}
 
-                  {/* Bloque Derecha (Alineado debajo de la Pileta) */}
+                  {/* Bloque Derecha (3 Pasillos cortos alineados bajo Pileta) */}
                   <div className="flex gap-8 items-end">
                     {[
                       { start: 76, count: 23 }, { start: 99, count: 23 }, { start: 122, count: 23 }
