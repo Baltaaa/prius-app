@@ -3,24 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --prius-gold: #F2CA50;
-  --prius-gold-hover: #E5BF45;
-  --prius-black: #1A1A1A;
-  --prius-white: #FFFFFF;
-  --prius-gray-bg: #F8F9FA;
-  --prius-text-dark: #2D3436;
-  --prius-text-muted: #636E72;
-  --prius-border: #E5E5E5;
-
-  --background: #FFFFFF;
-  --foreground: #2D3436;
-  --card: #FFFFFF;
-  --card-foreground: #2D3436;
-  --primary: #F2CA50;
-  --primary-foreground: #1A1A1A;
-  --border: #E5E5E5;
-  --input: #E5E5E5;
-  --radius: 12px;
+  --prius-accent: #FDE047;
+  --prius-dark: #111520;
+  --prius-darker: #0a0d14;
 }
 
 * {
@@ -30,43 +15,45 @@
 }
 
 body {
-  font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
-  background-color: #1A1A1A;
-  color: #2D3436;
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--prius-darker);
+  background: radial-gradient(circle at top right, #1a2a44, #0a0d14 60%);
+  color: white;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
-/* Eliminar el recuadro de autocompletar manteniendo el texto blanco */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active {
-  -webkit-text-fill-color: #ffffff !important;
-  transition: background-color 5000s ease-in-out 0s;
-  caret-color: #ffffff;
-}
-
-/* Glassmorphism panel sin tinte blanco, solo blur y borde */
+/* Glassmorphism Classes */
 .glass-card {
-  background: transparent;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* Restyle scrollbars */
+.glass-card-inner {
+  background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
-  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #FFFFFF;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #E5E5E5;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #1A1A1A;
+  background: var(--prius-accent);
+}
+
+/* Transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }

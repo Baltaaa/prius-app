@@ -8,16 +8,16 @@ export default function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="h-screen w-screen flex bg-white font-sans text-black overflow-hidden">
+    <div className="h-screen w-screen flex text-white overflow-hidden">
       {/* Desktop Fixed Sidebar */}
       <Sidebar />
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden relative">
         <TopBar onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)} />
 
         {/* Content View with internal vertical scroll */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-white max-w-7xl w-full mx-auto pb-20 md:pb-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-7xl w-full mx-auto pb-24 md:pb-12">
           <Outlet />
         </main>
 
