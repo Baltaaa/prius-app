@@ -118,15 +118,36 @@ export default function Login() {
         }
       `}</style>
 
-      {/* Panel de marca — oculto en mobile */}
+      {/* Hero mobile — banda superior compacta */}
+      <div className="relative lg:hidden h-[32vh] min-h-[220px] max-h-[300px] w-full overflow-hidden bg-black shrink-0">
+        <img
+          src="/images/hero-login.webp"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-[center_30%] opacity-90"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/10" />
+        <div className="relative z-10 h-full flex flex-col justify-between p-6 anim-fade-in">
+          <div className="flex items-center gap-2.5">
+            <img src="/logo-prius.png" alt="Prius" className="w-7 h-7 object-contain brightness-0 invert" />
+            <span className="text-white font-display text-xs tracking-[0.25em] uppercase font-medium">
+              Prius Admin
+            </span>
+          </div>
+          <p className="text-white/70 text-[11px] font-medium uppercase tracking-[0.15em]">
+            Balneario Playa Grande
+          </p>
+        </div>
+      </div>
+
+      {/* Panel de marca — desktop */}
       <div className="relative hidden lg:flex lg:w-[46%] xl:w-[42%] flex-col justify-between overflow-hidden bg-black">
         <img
-          src="/images/hero-bg.png"
+          src="/images/hero-login.webp"
           alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105"
+          className="absolute inset-0 w-full h-full object-cover object-[center_25%] opacity-95"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/15" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
 
         {/* Header: logo */}
         <div className="relative z-10 p-10 xl:p-14 anim-fade-in">
@@ -144,7 +165,7 @@ export default function Login() {
           <h1 className="font-display text-3xl xl:text-4xl leading-[1.15] text-white font-medium anim-fade-up" style={{ animationDelay: "0.15s" }}>
             El panel de gestión<br />de Playa Grande.
           </h1>
-          <p className="text-white/50 text-sm leading-relaxed max-w-xs anim-fade-up" style={{ animationDelay: "0.3s" }}>
+          <p className="text-white/55 text-sm leading-relaxed max-w-xs anim-fade-up" style={{ animationDelay: "0.3s" }}>
             Plano interactivo, caja diaria y reservas de temporada, todo en un mismo lugar.
           </p>
           <p className="text-[10px] font-medium text-white/30 uppercase tracking-[0.2em] pt-6 anim-fade-up" style={{ animationDelay: "0.45s" }}>
@@ -154,18 +175,8 @@ export default function Login() {
       </div>
 
       {/* Panel de formulario */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 py-12 sm:px-10 bg-white relative">
+      <div className="flex-1 flex flex-col justify-center items-center px-6 py-10 sm:px-10 bg-white relative -mt-5 lg:mt-0 rounded-t-2xl lg:rounded-none z-10">
         <div className="w-full max-w-[380px]">
-
-          {/* Logo — solo mobile */}
-          <div className="flex lg:hidden items-center gap-3 mb-10 anim-fade-up">
-            <div className="w-10 h-10 rounded-md overflow-hidden flex items-center justify-center bg-black">
-              <img src="/logo-prius.png" alt="Prius" className="w-full h-full object-cover scale-125" />
-            </div>
-            <span className="font-display text-sm tracking-[0.2em] uppercase font-semibold text-black">
-              Prius Admin
-            </span>
-          </div>
 
           {mode === "login" ? (
             <>
