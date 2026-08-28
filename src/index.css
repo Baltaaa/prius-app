@@ -17,23 +17,29 @@
 body {
   font-family: 'Montserrat', sans-serif;
   background-color: var(--prius-darker);
+  /* Gradiente estático pintado una sola vez, sin blur encima */
   background: radial-gradient(circle at top right, #1a2a44, #0a0d14 60%);
+  background-attachment: fixed;
   color: white;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
 
-/* Glassmorphism Classes */
+/*
+  Glassmorphism SIN backdrop-filter.
+  El blur en tiempo real fuerza al compositor a re-rasterizar toda la zona
+  del panel en cada hover/scroll; con decenas de .glass-card (muchas anidadas)
+  eso es la causa principal del lag. Un fondo sólido semi-opaco se ve
+  prácticamente igual sobre un tema oscuro y cuesta cero.
+*/
 .glass-card {
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(23, 32, 48, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
 }
 
 .glass-card-inner {
-  background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 /* Custom Scrollbar */
@@ -51,9 +57,18 @@ body {
   background: var(--prius-accent);
 }
 
-/* Transitions */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+/*
+  Entrada suave de las vistas. One-shot (no infinite): solo anima opacity y
+  transform, ambas compuestas por GPU, así no genera trabajo de layout.
+*/
+@keyframes premium-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-premium-fade {
+  animation: premium-fade 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-premium-fade { animation: none; }
 }

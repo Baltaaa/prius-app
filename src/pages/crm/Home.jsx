@@ -6,16 +6,13 @@ import { useCaja } from '../../hooks/useCaja'
 import KpiCard from '../../components/crm/KpiCard'
 import StatusBadge from '../../components/crm/StatusBadge'
 import { Calendar, Wallet, Users, AlertCircle, ArrowRight } from 'lucide-react'
+import { formatCurrency, formatDate } from '../../lib/format'
 
 export default function Home() {
   const navigate = useNavigate()
   const { reservas, unidades, loading: resLoading } = useReservas()
   const { clientes, loading: cliLoading } = useClientes()
   const { cajaHoy, loading: cajaLoading } = useCaja()
-
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val || 0)
-  }
 
   const unidadesOcupadasCount = unidades.filter(u => u.estado === 'ocupada' || u.estado === 'reservada').length
   const totalCajaHoy = cajaHoy ? cajaHoy.total_cobros : 0
@@ -99,7 +96,7 @@ export default function Home() {
                 {recentReservas.map((res) => (
                   <tr key={res.id} className="hover:bg-white/5 transition-colors group">
                     <td className="py-6 px-6 font-medium text-gray-400">
-                      {res.created_at ? new Date(res.created_at).toLocaleDateString() : 'N/A'}
+                      {formatDate(res.created_at)}
                     </td>
                     <td className="py-6 px-6 font-bold text-white uppercase tracking-tight">
                       {res.clientes?.nombre || 'CLIENTE S/N'}

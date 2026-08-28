@@ -5,7 +5,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] p-4 backdrop-blur-md animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[999] p-4 animate-in fade-in duration-300">
       <div className="glass-card w-full max-w-lg rounded-2xl flex flex-col overflow-hidden border border-white/10 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">

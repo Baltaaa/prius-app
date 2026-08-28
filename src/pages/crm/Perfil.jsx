@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { User, Shield, DollarSign, Save } from 'lucide-react'
+import { User, Shield, DollarSign, Save, Check } from 'lucide-react'
 
 export default function Perfil() {
   const [userEmail, setUserEmail] = useState('')
   const [tarifaCarpa, setTarifaCarpa] = useState(() => localStorage.getItem('prius_tarifa_carpa') || '1500000')
   const [tarifaSombrilla, setTarifaSombrilla] = useState(() => localStorage.getItem('prius_tarifa_sombrilla') || '900000')
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setUserEmail(user.email || 'Admin')
     })
   }, [])
+
+  const handleGuardarTarifas = () => {
+    localStorage.setItem('prius_tarifa_carpa', tarifaCarpa)
+    localStorage.setItem('prius_tarifa_sombrilla', tarifaSombrilla)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
 
   return (
     <div className="space-y-10 animate-premium-fade">
@@ -55,22 +63,27 @@ export default function Perfil() {
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Precio Base Carpa</label>
-              <input 
-                type="number" 
-                value={tarifaCarpa} 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-[#FDE047]" 
+              <input
+                type="number"
+                value={tarifaCarpa}
+                onChange={(e) => setTarifaCarpa(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-[#FDE047]"
               />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Precio Base Sombrilla</label>
-              <input 
-                type="number" 
-                value={tarifaSombrilla} 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-[#FDE047]" 
+              <input
+                type="number"
+                value={tarifaSombrilla}
+                onChange={(e) => setTarifaSombrilla(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-[#FDE047]"
               />
             </div>
-            <button className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl flex items-center justify-center gap-2">
-              <Save size={16} /> Actualizar Tarifas
+            <button
+              onClick={handleGuardarTarifas}
+              className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl flex items-center justify-center gap-2"
+            >
+              {saved ? <><Check size={16} /> Guardado</> : <><Save size={16} /> Actualizar Tarifas</>}
             </button>
           </div>
         </div>

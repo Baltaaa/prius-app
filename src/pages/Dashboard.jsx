@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { Printer, Plus, Minus, Maximize } from "lucide-react"
@@ -53,9 +53,10 @@ export default function Dashboard() {
     setUnits(initialUnits)
   }
 
-  const handleUnitClick = (unit) => {
+  // useCallback: referencia estable para no romper el React.memo de las 184 Cell
+  const handleUnitClick = useCallback((unit) => {
     if (unit) setSelectedUnit(unit)
-  }
+  }, [])
 
   const handleSaveUnit = (updatedUnit) => {
     const newUnits = { ...units, [updatedUnit.id]: updatedUnit }
@@ -131,7 +132,7 @@ export default function Dashboard() {
                   
                   {/* Pileta alineada con las 3 últimas columnas, bajando para ocupar el espacio físico */}
                   <div className="w-[220px] h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
-                    <div className="absolute inset-0 bg-sky-400/5 animate-pulse" />
+                    <div className="absolute inset-0 bg-sky-400/5" />
                     <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
                     <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
                   </div>

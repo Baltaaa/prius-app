@@ -74,22 +74,29 @@ export default function Login() {
     <div className="relative min-h-screen w-full flex items-center justify-end bg-[#0a0d14] font-sans overflow-hidden px-6 md:px-24 selection:bg-[#FDE047] selection:text-black">
       {isSuccess && <GlobalLoader message="Iniciando sesión segura" />}
 
-      {/* Fullscreen Background Image with Modern CRM Overlay */}
+      {/*
+        Fondo estático. Antes: JPEG de 5405×3601 (~3.5 MB, ~78 MP = ~300 MB de
+        bitmap en RAM) con animación `scale()` infinita de 20s Y un `backdrop-blur-2xl`
+        + `backdrop-grayscale` encima -> el navegador recomponía un blur de radio
+        gigante sobre una imagen en movimiento en cada frame. Esa era la causa del lag.
+        Ahora: imagen de 1600px / 250 KB, sin animación, overlays con gradientes
+        (baratos, se pintan una vez) y tarjeta con fondo sólido.
+      */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src="/images/hero-login.webp" 
-          alt="Prius Playa Grande" 
-          className="w-full h-full object-cover scale-105 animate-slow-zoom"
+        <img
+          src="/images/hero-login-opt.jpg"
+          alt="Prius Playa Grande"
+          fetchpriority="high"
+          decoding="async"
+          className="w-full h-full object-cover"
         />
-        {/* Modern Multi-layer Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0d14]/40 via-transparent to-[#0a0d14] z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/20 to-transparent z-10" />
-        <div className="absolute inset-0 bg-[#0a0d14]/10 backdrop-grayscale-[0.2] z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0d14]/50 via-[#0a0d14]/20 to-[#0a0d14]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d14] via-transparent to-[#0a0d14]/30" />
       </div>
 
-      {/* Glass Card Container (Right Aligned) */}
+      {/* Card Container (Right Aligned) */}
       <main className="relative z-20 w-full max-w-[480px] animate-premium-fade">
-        <div className="bg-[#0a0d14]/70 backdrop-blur-2xl rounded-[40px] p-10 border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden relative group">
+        <div className="bg-[#0a0d14]/90 rounded-[40px] p-10 border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] overflow-hidden relative group">
           {/* Subtle Inner Glow */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none" />
           
@@ -249,16 +256,6 @@ export default function Login() {
           PRIUSADMIN &bull; BALNEARIO PLAYA GRANDE &bull; SISTEMA AUTORIZADO
         </p>
       </footer>
-
-      <style>{`
-        @keyframes slow-zoom {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.1); }
-        }
-        .animate-slow-zoom {
-          animation: slow-zoom 20s infinite alternate ease-in-out;
-        }
-      `}</style>
     </div>
   )
 }

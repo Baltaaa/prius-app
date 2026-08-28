@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import StatusBadge from '../../components/crm/StatusBadge'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
@@ -20,16 +20,16 @@ export default function Calendario() {
   const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1))
   const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1))
 
-  if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Cargando Calendario...</span></div>
-
-  const monthReservas = reservas.filter(r => {
-    if (!r.fecha_inicio || !r.fecha_fin) return true
-    const inicio = new Date(r.fecha_inicio)
-    const fin = new Date(r.fecha_fin)
+  const monthReservas = useMemo(() => {
     const monthStart = new Date(year, month, 1)
     const monthEnd = new Date(year, month, daysInMonth)
-    return (inicio <= monthEnd && fin >= monthStart)
-  })
+    return reservas.filter(r => {
+      if (!r.fecha_inicio || !r.fecha_fin) return true
+      return new Date(r.fecha_inicio) <= monthEnd && new Date(r.fecha_fin) >= monthStart
+    })
+  }, [reservas, year, month, daysInMonth])
+
+  if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Cargando Calendario...</span></div>
 
   return (
     <div className="space-y-10 animate-premium-fade">
@@ -46,7 +46,7 @@ export default function Calendario() {
         </div>
       </div>
 
-      <div className="glass-card rounded-3xl overflow-hidden glass-card-inner">
+      <div className="glass-card rounded-3xl overflow-x-auto glass-card-inner">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-white/5 text-[10px] font-bold uppercase tracking-widest text-gray-500">

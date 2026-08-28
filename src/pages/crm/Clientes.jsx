@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useClientes } from '../../hooks/useClientes'
+import { useDebounced } from '../../hooks/useDebounced'
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
 import { Plus, Edit2, Trash2, Search } from 'lucide-react'
@@ -62,10 +63,14 @@ export default function Clientes() {
     }
   }
 
-  const filteredClientes = clientes.filter(c => 
-    c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (c.cuit && c.cuit.includes(searchTerm))
-  )
+  const debouncedSearch = useDebounced(searchTerm)
+  const filteredClientes = useMemo(() => {
+    const term = debouncedSearch.toLowerCase()
+    return clientes.filter(c =>
+      c.nombre.toLowerCase().includes(term) ||
+      (c.cuit && c.cuit.includes(debouncedSearch))
+    )
+  }, [clientes, debouncedSearch])
 
   const headers = ['Nombre', 'CUIT / DNI', 'Teléfono', 'Email', 'Notas', 'Acciones']
 

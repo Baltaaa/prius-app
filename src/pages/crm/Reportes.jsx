@@ -1,21 +1,49 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { Download, BarChart3 } from 'lucide-react'
 import KpiCard from '../../components/crm/KpiCard'
+import { formatCurrency } from '../../lib/format'
 
 export default function Reportes() {
   const { reservas, loading } = useReservas()
   const [temporadaFilter, setTemporadaFilter] = useState('2025-2026')
 
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val || 0)
+  const activeReservas = useMemo(
+    () => reservas.filter(r => temporadaFilter === 'all' || r.temporada === temporadaFilter),
+    [reservas, temporadaFilter]
+  )
+
+  const handleExportCSV = () => {
+    const headers = ['Cliente', 'CUIT', 'Unidad', 'Temporada', 'Monto Total', 'Saldo', 'Estado Pago']
+    const rows = activeReservas.map(r => [
+      r.clientes?.nombre || '',
+      r.clientes?.cuit || '',
+      `${r.unidades?.tipo || ''} #${r.unidades?.numero || ''}`,
+      r.temporada || '',
+      r.valor_total || 0,
+      r.saldo || 0,
+      r.estado_pago || '',
+    ])
+    const csv = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+
+    const blob = new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `reporte-reservas-${temporadaFilter}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
-  const activeReservas = reservas.filter(r => temporadaFilter === 'all' || r.temporada === temporadaFilter)
-
-  const totalIngresosEsperados = activeReservas.reduce((acc, curr) => acc + Number(curr.valor_total || 0), 0)
-  const totalSaldosPendientes = activeReservas.reduce((acc, curr) => acc + Number(curr.saldo || 0), 0)
-  const totalCobrado = totalIngresosEsperados - totalSaldosPendientes
+  const { totalIngresosEsperados, totalSaldosPendientes, totalCobrado } = useMemo(() => {
+    const ingresos = activeReservas.reduce((acc, curr) => acc + Number(curr.valor_total || 0), 0)
+    const saldos = activeReservas.reduce((acc, curr) => acc + Number(curr.saldo || 0), 0)
+    return { totalIngresosEsperados: ingresos, totalSaldosPendientes: saldos, totalCobrado: ingresos - saldos }
+  }, [activeReservas])
 
   if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Analizando Datos...</span></div>
 
@@ -26,7 +54,11 @@ export default function Reportes() {
           <h1 className="text-4xl font-bold text-white tracking-tight">Reportes</h1>
           <p className="text-gray-400 text-sm mt-2">Métricas avanzadas de facturación y ocupación.</p>
         </div>
-        <button className="glass-card px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#FDE047] hover:text-black transition-all flex items-center gap-2">
+        <button
+          onClick={handleExportCSV}
+          disabled={activeReservas.length === 0}
+          className="glass-card px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#FDE047] hover:text-black transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white"
+        >
           <Download size={16} /> Exportar CSV
         </button>
       </div>
@@ -50,6 +82,7 @@ export default function Reportes() {
           </select>
         </div>
         
+        <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-white/5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
@@ -68,6 +101,7 @@ export default function Reportes() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

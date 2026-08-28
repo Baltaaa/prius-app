@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react'
 
 export default function GlobalLoader({ message = "Sincronizando..." }) {
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0a0d14]/90 backdrop-blur-md">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0a0d14]">
       <div className="relative flex flex-col items-center">
         {/* Logo container with pulsing glow */}
         <div className="w-20 h-20 mb-8 relative">

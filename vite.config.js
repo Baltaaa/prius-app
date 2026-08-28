@@ -8,4 +8,15 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  // Pre-bundla estas deps una sola vez: evita que el dev server sirva
+  // cientos de módulos sueltos (sobre todo lucide-react) en cada carga.
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'lucide-react',
+      '@supabase/supabase-js',
+    ],
+  },
 })

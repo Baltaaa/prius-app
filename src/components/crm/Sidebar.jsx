@@ -1,22 +1,25 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { 
-  LayoutDashboard, 
-  CalendarDays, 
-  Users, 
-  Wallet, 
-  BarChart2, 
-  Map, 
+import { useNotifications } from '../../hooks/useNotifications'
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Users,
+  Wallet,
+  BarChart2,
+  Map,
   LogOut,
   Calendar,
   Bell,
   FileText,
-  UserCheck
+  UserCheck,
+  X
 } from 'lucide-react'
 
-export default function Sidebar({ notificationsCount = 1 }) {
+export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }) {
   const navigate = useNavigate()
+  const { count: notificationsCount } = useNotifications()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -39,17 +42,30 @@ export default function Sidebar({ notificationsCount = 1 }) {
   ]
 
   return (
-    <aside className="w-64 h-screen bg-[#0a0d14] border-r border-white/10 flex flex-col justify-between shrink-0 hidden md:flex sticky top-0 left-0 z-30">
+    <>
+      {/* Backdrop del drawer mobile */}
+      {mobileOpen && (
+        <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={onCloseMobile} />
+      )}
+
+      <aside
+        className={`w-64 h-screen bg-[#0a0d14] border-r border-white/10 flex flex-col justify-between shrink-0
+          fixed md:sticky top-0 left-0 z-40 md:z-30 transition-transform duration-300 md:translate-x-0
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
       <div className="flex flex-col overflow-hidden">
         {/* Brand Header */}
         <div className="h-20 flex items-center px-6 border-b border-white/5 gap-3">
           <div className="text-[#FDE047] text-3xl font-bold italic shrink-0">
             <img src="/images/prius-icon.png" alt="P" className="w-8 h-8 object-contain" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="font-bold text-lg text-white tracking-tight leading-none">Prius</h1>
             <p className="text-[10px] text-gray-500 font-semibold tracking-wider uppercase mt-1">PriusAdmin</p>
           </div>
+          <button onClick={onCloseMobile} className="md:hidden p-1.5 text-gray-500 hover:text-white rounded-lg hover:bg-white/5">
+            <X size={18} />
+          </button>
         </div>
 
         {/* Navigation Content */}
@@ -63,6 +79,7 @@ export default function Sidebar({ notificationsCount = 1 }) {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  onClick={onCloseMobile}
                   className={({ isActive }) => `
                     flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${isActive 
@@ -87,6 +104,7 @@ export default function Sidebar({ notificationsCount = 1 }) {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  onClick={onCloseMobile}
                   className={({ isActive }) => `
                     flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${isActive 
@@ -121,6 +139,7 @@ export default function Sidebar({ notificationsCount = 1 }) {
           <span>Cerrar Sesión</span>
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   )
 }

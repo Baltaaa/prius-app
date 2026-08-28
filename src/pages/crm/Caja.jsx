@@ -1,15 +1,12 @@
 import React, { useState } from 'react'
 import { useCaja } from '../../hooks/useCaja'
 import { Plus, Trash2, Wallet, Calendar, ArrowUpRight, TrendingDown } from 'lucide-react'
+import { formatCurrency } from '../../lib/format'
 
 export default function Caja() {
-  const { cajaHoy, historialCajas, gastos, loading, iniciarCaja, agregarGasto, cerrarCaja } = useCaja()
+  const { cajaHoy, historialCajas, gastos, loading, iniciarCaja, agregarGasto, eliminarGasto, cerrarCaja } = useCaja()
   const [descGasto, setDescGasto] = useState('')
   const [montoGasto, setMontoGasto] = useState('')
-
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val || 0)
-  }
 
   if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Sincronizando Caja...</span></div>
 
@@ -84,7 +81,10 @@ export default function Caja() {
                     <span className="text-sm font-bold text-gray-300 uppercase">{g.descripcion}</span>
                     <div className="flex items-center gap-6">
                       <span className="text-sm font-bold text-red-400">{formatCurrency(g.monto)}</span>
-                      <button className="text-gray-600 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100">
+                      <button
+                        onClick={() => { if (confirm(`¿Eliminar el gasto "${g.descripcion}"?`)) eliminarGasto(g.id, g.monto) }}
+                        className="text-gray-600 hover:text-red-400 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
