@@ -29,8 +29,10 @@ export default function Reservas() {
   const [clienteId, setClienteId] = useState('')
   const [unidadId, setUnidadId] = useState('')
   const [temporada, setTemporada] = useState('2025-2026')
+  const [tipoAlquiler, setTipoAlquiler] = useState('temporada')
   const [fechaInicio, setFechaInicio] = useState('')
   const [fechaFin, setFechaFin] = useState('')
+  const [fecha, setFecha] = useState('')
   const [valorTotal, setValorTotal] = useState('')
   const [saldo, setSaldo] = useState('')
   const [estadoPago, setEstadoPago] = useState('pendiente')
@@ -40,8 +42,10 @@ export default function Reservas() {
     setClienteId('')
     setUnidadId('')
     setTemporada('2025-2026')
+    setTipoAlquiler('temporada')
     setFechaInicio('')
     setFechaFin('')
+    setFecha('')
     setValorTotal('')
     setSaldo('')
     setEstadoPago('pendiente')
@@ -59,8 +63,10 @@ export default function Reservas() {
     setClienteId(res.cliente_id || '')
     setUnidadId(res.unidad_id || '')
     setTemporada(res.temporada || '2025-2026')
+    setTipoAlquiler(res.tipo_alquiler || 'temporada')
     setFechaInicio(res.fecha_inicio || '')
     setFechaFin(res.fecha_fin || '')
+    setFecha(res.fecha || '')
     setValorTotal(res.valor_total ?? '')
     setSaldo(res.saldo ?? '')
     setEstadoPago(res.estado_pago || 'pendiente')
@@ -74,8 +80,11 @@ export default function Reservas() {
       cliente_id: clienteId,
       unidad_id: unidadId,
       temporada,
-      fecha_inicio: fechaInicio || null,
-      fecha_fin: fechaFin || null,
+      tipo_alquiler: tipoAlquiler,
+      estado: 'activa',
+      fecha_inicio: tipoAlquiler === 'periodo' ? fechaInicio || null : null,
+      fecha_fin: tipoAlquiler === 'periodo' ? fechaFin || null : null,
+      fecha: tipoAlquiler === 'dia' ? fecha || null : null,
       valor_total: Number(valorTotal || 0),
       saldo: Number(saldo || 0),
       estado_pago: estadoPago,
@@ -283,26 +292,71 @@ export default function Reservas() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha Inicio</label>
-              <input
-                type="date"
-                value={fechaInicio}
-                onChange={(e) => setFechaInicio(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold [color-scheme:dark]"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha Fin</label>
-              <input
-                type="date"
-                value={fechaFin}
-                onChange={(e) => setFechaFin(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold [color-scheme:dark]"
-              />
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tipo de alquiler</label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { key: 'temporada', label: 'Temporada' },
+                { key: 'periodo', label: 'Período' },
+                { key: 'dia', label: 'Día' },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTipoAlquiler(t.key)}
+                  className={`py-3 rounded-xl text-[9px] font-bold uppercase tracking-widest border transition-all ${
+                    tipoAlquiler === t.key
+                      ? 'bg-[#FDE047] text-black border-[#FDE047]'
+                      : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
           </div>
+
+          {tipoAlquiler === 'periodo' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha Inicio</label>
+                <input
+                  type="date"
+                  required
+                  value={fechaInicio}
+                  onChange={(e) => setFechaInicio(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold [color-scheme:dark]"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha Fin</label>
+                <input
+                  type="date"
+                  required
+                  value={fechaFin}
+                  onChange={(e) => setFechaFin(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold [color-scheme:dark]"
+                />
+              </div>
+            </div>
+          )}
+
+          {tipoAlquiler === 'dia' && (
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha</label>
+              <input
+                type="date"
+                required
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold [color-scheme:dark]"
+              />
+            </div>
+          )}
+
+          {tipoAlquiler === 'temporada' && (
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Temporada completa — sin fechas</p>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
