@@ -42,8 +42,8 @@ export default function Dashboard() {
     })
   }, [])
 
-  // Reserva activa por unidad (para pintar cliente y tipo en cada celda).
-  // La vigencia real la resuelve la DB; acá solo elegimos qué reserva mostrar.
+  // Reserva VIGENTE HOY por unidad. La celda se pinta según su tipo_alquiler
+  // (T/P/D); si no hay reserva vigente hoy, la unidad va libre.
   const reservaPorUnidad = useMemo(() => {
     const hoy = new Date().toISOString().split("T")[0]
     const map = {}
@@ -53,7 +53,7 @@ export default function Dashboard() {
         r.tipo_alquiler === "temporada" ||
         (r.tipo_alquiler === "dia" && r.fecha === hoy) ||
         (r.tipo_alquiler === "periodo" && r.fecha_inicio <= hoy && hoy <= r.fecha_fin)
-      if (vigenteHoy || !map[r.unidad_id]) map[r.unidad_id] = r
+      if (vigenteHoy) map[r.unidad_id] = r
     }
     return map
   }, [reservas])
@@ -64,12 +64,13 @@ export default function Dashboard() {
       const px = PREFIJO[u.tipo]
       if (!px) continue
       const r = reservaPorUnidad[u.id]
-      const ocupada = u.estado === "ocupada" || u.estado === "reservada"
-      const status = ocupada
-        ? r?.tipo_alquiler === "temporada"
+      const status = !r
+        ? STATUS.LIBRE
+        : r.tipo_alquiler === "temporada"
           ? STATUS.TEMPORADA
-          : STATUS.PERIODO
-        : STATUS.LIBRE
+          : r.tipo_alquiler === "dia"
+            ? STATUS.DIA
+            : STATUS.PERIODO
       map[`${px}${u.numero}`] = {
         id: `${px}${u.numero}`,
         dbId: u.id,
@@ -77,6 +78,7 @@ export default function Dashboard() {
         number: u.numero,
         type: u.tipo,
         status,
+        tipoAlquiler: r?.tipo_alquiler || null,
         clientName: r?.clientes?.nombre || "",
         clientPhone: r?.clientes?.telefono || "",
         clientEmail: r?.clientes?.mail || "",

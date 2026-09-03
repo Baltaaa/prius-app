@@ -9,13 +9,19 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed }) {
   const status = unit?.status || STATUS.LIBRE
   const isTemporada = status === STATUS.TEMPORADA
   const isPeriodo = status === STATUS.PERIODO
+  const isDia = status === STATUS.DIA
+  const isOcupada = isTemporada || isPeriodo || isDia
   const [showTooltip, setShowTooltip] = useState(false)
 
+  // T (temporada): amarillo pleno. P (período activo hoy): tono claro traslúcido.
+  // D (día activo hoy): blanco pleno. Libre: casi vacía.
   const styles = isTemporada
     ? "bg-[#FDE047] text-black border-[#FDE047]"
     : isPeriodo
       ? "bg-white/20 text-white border-white/30"
-      : "bg-white/5 text-white/20 border-white/10 hover:border-white/30"
+      : isDia
+        ? "bg-white text-black border-white"
+        : "bg-white/5 text-white/20 border-white/10 hover:border-white/30"
 
   const opacityClass = isDimmed ? "opacity-20" : "opacity-100"
   const highlightClass = isHighlighted
@@ -36,8 +42,9 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed }) {
         <span className="leading-none">
           {isTemporada && "T"}
           {isPeriodo && "P"}
+          {isDia && "D"}
         </span>
-        {unit?.isPaid && (status === STATUS.TEMPORADA || status === STATUS.PERIODO) && (
+        {unit?.isPaid && isOcupada && (
           <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
         )}
       </button>
@@ -47,8 +54,10 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed }) {
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-52 glass-card text-white text-[11px] p-4 rounded-xl shadow-2xl z-50 pointer-events-none border border-white/20">
           <p className="font-bold uppercase tracking-wider text-[#FDE047] mb-2">{unit.clientName}</p>
           <div className="space-y-1 opacity-80 font-medium">
-            {unit.isTemporada ? (
+            {isTemporada ? (
               <p>Temporada Completa</p>
+            ) : isDia ? (
+              <p>Día {unit.startDate}</p>
             ) : (
               <p>{unit.startDate} al {unit.endDate}</p>
             )}

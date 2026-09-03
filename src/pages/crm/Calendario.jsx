@@ -23,11 +23,27 @@ export default function Calendario() {
   const monthReservas = useMemo(() => {
     const monthStart = new Date(year, month, 1)
     const monthEnd = new Date(year, month, daysInMonth)
-    return reservas.filter(r => {
-      if (!r.fecha_inicio || !r.fecha_fin) return true
-      return new Date(r.fecha_inicio) <= monthEnd && new Date(r.fecha_fin) >= monthStart
-    })
+    const dentro = (d) => d && new Date(d) >= monthStart && new Date(d) <= monthEnd
+
+    return reservas
+      .filter((r) => r.estado !== 'cancelada')
+      .filter((r) => {
+        // Temporada completa: siempre visible.
+        if (r.tipo_alquiler === 'temporada') return true
+        // Día: la fecha cae en el mes.
+        if (r.tipo_alquiler === 'dia') return dentro(r.fecha)
+        // Período (o reservas viejas sin tipo): solapa el mes.
+        if (!r.fecha_inicio || !r.fecha_fin) return false
+        return new Date(r.fecha_inicio) <= monthEnd && new Date(r.fecha_fin) >= monthStart
+      })
   }, [reservas, year, month, daysInMonth])
+
+  const rangoTexto = (r) => {
+    if (r.tipo_alquiler === 'temporada') return 'TEMPORADA'
+    if (r.tipo_alquiler === 'dia') return `DÍA ${r.fecha ?? ''}`
+    if (r.fecha_inicio && r.fecha_fin) return `${r.fecha_inicio} al ${r.fecha_fin}`
+    return 'TEMPORADA'
+  }
 
   if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Cargando Calendario...</span></div>
 
@@ -61,9 +77,7 @@ export default function Calendario() {
               <tr key={res.id} className="hover:bg-white/5 transition-all group">
                 <td className="px-8 py-5 font-bold text-white uppercase">{res.unidades?.tipo} #{res.unidades?.numero}</td>
                 <td className="px-8 py-5 uppercase font-medium">{res.clientes?.nombre}</td>
-                <td className="px-8 py-5 text-gray-400">
-                  {res.fecha_inicio ? `${res.fecha_inicio} al ${res.fecha_fin}` : 'TEMPORADA'}
-                </td>
+                <td className="px-8 py-5 text-gray-400">{rangoTexto(res)}</td>
                 <td className="px-8 py-5 text-right font-bold text-[#FDE047]">
                   ${res.saldo}
                 </td>
