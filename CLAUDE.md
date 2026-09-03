@@ -18,7 +18,8 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 - shadcn/ui + lucide-react
 
 ## Vocabulario de dominio (usar estos términos, no traducir)
-- **Carpas / sombrillas**: unidades de playa alquilables.
+- **Carpas / sombrillas / cabinas / locker**: unidades de playa alquilables, 4 tipos distintos (antes documentado incorrectamente como un solo grupo). El plano de playa solo dibuja carpas y sombrillas; cabinas y lockers están dentro del complejo y se manejan en su propia sección del CRM (flujo aparte, pendiente).
+- **T / P / D (Temporada / Período / Día)**: tipo de alquiler de una reserva, no estado de la unidad. Es el dato que históricamente el carpero anotaba a mano sobre el plano impreso (ej: "C.19 ADRIAN 27/12 AL 09/01" = Carpa 19, cliente Adrian, tipo Período, 27/12 al 09/01).
 - **Plano interactivo**: mapa visual de la playa con el estado de cada unidad.
 - **Caja diaria**: registro de movimientos de dinero del día.
 - **Preconfirmada**: estado intermedio de una reserva.
@@ -26,13 +27,26 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 - **Mercado Pago**: pasarela de pago principal candidata.
 - **CUIT / clave fiscal**: credenciales fiscales argentinas.
 
-## Estructura de datos (Supabase — 6 tablas)
+## Estructura de datos (Supabase — 7 tablas)
 1. `clientes`
 2. `unidades` (carpas/sombrillas)
 3. `reservas`
 4. `pagos`
 5. `caja_diaria`
 6. `gastos_caja`
+7. `leads` — capturados desde el formulario de contacto de la landing (`beachFlow`). Mismo proyecto Supabase que el CRM.
+
+Campos clave para el plano:
+- `unidades.tipo`: carpa | sombrilla | cabina | locker
+- `unidades.estado`: libre | ocupada | reservada — derivado, escrito solo por trigger, nunca editado a mano desde el CRM (`reservada` queda para holds/preconfirmadas)
+- `reservas.tipo_alquiler`: temporada | periodo | dia (temporada = temporada completa, sin fechas obligatorias)
+- `reservas.estado`: activa | cancelada
+- `reservas.fecha`: solo para `tipo_alquiler = 'dia'`
+
+**Nota de auditoría (ago 2026):** el proyecto Supabase tenía tablas duplicadas en inglés (`beach_clubs`, `admin_users`, `units`, `reservations`), remanentes de la etapa con Dyad — sin datos, sin referencias en código, eliminadas vía migración tras confirmar que no se usaban. Las tablas válidas son siempre las 7 listadas arriba, en español.
+
+**✅ Deuda técnica de `Dashboard.jsx` (localStorage) resuelta (sep 2026):** el plano ahora lee/escribe contra Supabase con Realtime. `prius_beach_units` eliminado.
+
 
 ## Módulos del CRM (7)
 Home, Plano, Reservas, Clientes, Caja, Reportes, + el dashboard de plano existente.
@@ -47,6 +61,8 @@ El dueño piensa el sistema como **cliente-céntrico y reactivo en tiempo real**
    - **Listados de clientes/reservas** → reflejan el estado actualizado.
 
 **Implementación esperada:** patrón "single write, multiple reactive reads" usando Supabase Realtime. Evitar que cada pantalla (Plano, Caja, Reportes) dispare su propia lógica de escritura; todas deben suscribirse al mismo canal reactivo sobre `reservas`/`pagos`, idealmente con triggers de Postgres que actualicen `unidades.estado` y `caja_diaria`/`gastos_caja` automáticamente al insertar una reserva o un pago.
+
+El plano nunca recibe un estado tipeado a mano: reacciona vía trigger Postgres (`trg_reserva_actualiza_unidad`) a INSERT/UPDATE/DELETE en `reservas`. La vigencia de la reserva determina `unidades.estado` (libre/ocupada). Los vencimientos sin actividad de escritura (una reserva `periodo`/`dia` que vence sin que se dispare ningún write ese día) los resuelve `pg_cron` corriendo `fn_recalcular_estados_unidades()` a diario (03:05 UTC / 00:05 ART); el front además llama esa función por RPC al abrir el plano.
 
 ## Sistema de reservas públicas (planificado, sin auth)
 - Sin login para el cliente final.
