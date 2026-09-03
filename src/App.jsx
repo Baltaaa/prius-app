@@ -14,6 +14,7 @@ const Clientes = lazy(() => import('./pages/crm/Clientes'))
 const Caja = lazy(() => import('./pages/crm/Caja'))
 const Reportes = lazy(() => import('./pages/crm/Reportes'))
 const Calendario = lazy(() => import('./pages/crm/Calendario'))
+const Actividad = lazy(() => import('./pages/crm/Actividad'))
 const Notificaciones = lazy(() => import('./pages/crm/Notificaciones'))
 const Comprobantes = lazy(() => import('./pages/crm/Comprobantes'))
 const Perfil = lazy(() => import('./pages/crm/Perfil'))
@@ -45,6 +46,7 @@ export default function App() {
 
             {/* Módulos Nuevos */}
             <Route path="calendario" element={<Calendario />} />
+            <Route path="actividad" element={<Actividad />} />
             <Route path="notificaciones" element={<Notificaciones />} />
             <Route path="comprobantes" element={<Comprobantes />} />
             <Route path="perfil" element={<Perfil />} />

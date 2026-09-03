@@ -29,6 +29,7 @@ export function DataProvider({ children }) {
   const [cajaHoy, setCajaHoy] = useState(null)
   const [historialCajas, setHistorialCajas] = useState([])
   const [gastos, setGastos] = useState([])
+  const [eventos, setEventos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -72,10 +73,21 @@ export function DataProvider({ children }) {
     setHistorialCajas(hist || [])
   }, [todayStr])
 
+  // Línea de tiempo del CRM: log de eventos (tabla `eventos`, escrita por triggers).
+  const fetchEventos = useCallback(async () => {
+    const { data } = await supabase
+      .from('eventos')
+      .select('*')
+      .order('fecha_ref', { ascending: false })
+      .order('ts', { ascending: false })
+      .limit(300)
+    setEventos(data || [])
+  }, [])
+
   const refetchAll = useCallback(async () => {
     setLoading(true)
     try {
-      await Promise.all([fetchUnidades(), fetchReservas(), fetchClientes(), fetchCaja()])
+      await Promise.all([fetchUnidades(), fetchReservas(), fetchClientes(), fetchCaja(), fetchEventos()])
       setError(null)
     } catch (err) {
       console.error('Error cargando datos del CRM:', err)
@@ -83,7 +95,7 @@ export function DataProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja])
+  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos])
 
   useEffect(() => { refetchAll() }, [refetchAll])
 
@@ -107,10 +119,12 @@ export function DataProvider({ children }) {
         () => debouncedRefetch('caja', fetchCaja))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos_caja' },
         () => debouncedRefetch('caja', fetchCaja))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos' },
+        () => debouncedRefetch('eventos', fetchEventos))
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [debouncedRefetch, fetchReservas, fetchUnidades, fetchClientes, fetchCaja])
+  }, [debouncedRefetch, fetchReservas, fetchUnidades, fetchClientes, fetchCaja, fetchEventos])
 
   // ---- Mutaciones (optimistas; realtime concilia el resto) ----
 
@@ -223,17 +237,17 @@ export function DataProvider({ children }) {
   }, [cajaHoy])
 
   const value = useMemo(() => ({
-    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, loading, error,
+    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, eventos, loading, error,
     createReserva, updateReserva, deleteReserva,
     createCliente, updateCliente, deleteCliente,
     iniciarCaja, actualizarCajaValores, agregarGasto, eliminarGasto, cerrarCaja,
-    refetchAll, fetchReservas, fetchClientes, fetchCaja,
+    refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos,
   }), [
-    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, loading, error,
+    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, eventos, loading, error,
     createReserva, updateReserva, deleteReserva,
     createCliente, updateCliente, deleteCliente,
     iniciarCaja, actualizarCajaValores, agregarGasto, eliminarGasto, cerrarCaja,
-    refetchAll, fetchReservas, fetchClientes, fetchCaja,
+    refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos,
   ])
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
