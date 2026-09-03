@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../../context/DataProvider'
-import { CalendarDays, Wallet, Users, Map, Receipt, Activity } from 'lucide-react'
+import { CalendarDays, Wallet, Users, Map as MapIcon, Receipt, Activity } from 'lucide-react'
 
 // Línea de tiempo del CRM: toda acción sobre reservas, pagos, clientes, unidades
 // y gastos, escrita por triggers en la tabla `eventos` y ordenada por su fecha
@@ -9,7 +9,7 @@ const META = {
   reservas: { icon: CalendarDays, label: 'Reserva', color: 'text-[#FDE047]' },
   pagos: { icon: Wallet, label: 'Pago', color: 'text-green-400' },
   clientes: { icon: Users, label: 'Cliente', color: 'text-sky-400' },
-  unidades: { icon: Map, label: 'Unidad', color: 'text-purple-400' },
+  unidades: { icon: MapIcon, label: 'Unidad', color: 'text-purple-400' },
   gastos_caja: { icon: Receipt, label: 'Gasto', color: 'text-red-400' },
 }
 const OPS = { INSERT: 'Alta', UPDATE: 'Cambio', DELETE: 'Baja' }
