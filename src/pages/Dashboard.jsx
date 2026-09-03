@@ -1,72 +1,144 @@
-import { useCallback, useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { supabase } from "../lib/supabase"
 import { Printer, Plus, Minus, Maximize } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnitModal from "../components/dashboard/UnitModal"
 import Cell from "../components/dashboard/Cell"
+import { useData } from "../context/DataProvider"
+
+// El plano de playa solo dibuja carpas y sombrillas. Cabinas y lockers están
+// dentro del complejo y se manejan en su propia sección del CRM.
+const PREFIJO = { carpa: "C", sombrilla: "S" }
+
+function temporadaActual() {
+  const now = new Date()
+  const y = now.getFullYear()
+  return now.getMonth() >= 8 ? `${y}/${y + 1}` : `${y - 1}/${y}`
+}
 
 export default function Dashboard() {
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
+  const {
+    unidades,
+    reservas,
+    clientes,
+    loading,
+    createReserva,
+    updateReserva,
+    deleteReserva,
+    createCliente,
+  } = useData()
+
   const [selectedUnit, setSelectedUnit] = useState(null)
-  const [units, setUnits] = useState({})
   const [viewMode, setViewMode] = useState("map")
   const [zoom, setZoom] = useState(0.85)
 
+  // El estado de cada unidad lo escribe el trigger de Postgres al vencer/crear
+  // reservas, y el pg_cron nocturno libera las que vencieron sin actividad.
+  // Al abrir el plano forzamos ese recálculo para no depender del cron.
   useEffect(() => {
-    checkUser()
-    initializeUnits()
+    supabase.rpc("fn_recalcular_estados_unidades").then(({ error }) => {
+      if (error) console.error("No se pudo recalcular estados del plano:", error.message)
+    })
   }, [])
 
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      navigate("/")
-      return
+  // Reserva activa por unidad (para pintar cliente y tipo en cada celda).
+  // La vigencia real la resuelve la DB; acá solo elegimos qué reserva mostrar.
+  const reservaPorUnidad = useMemo(() => {
+    const hoy = new Date().toISOString().split("T")[0]
+    const map = {}
+    for (const r of reservas) {
+      if (!r.unidad_id || r.estado === "cancelada") continue
+      const vigenteHoy =
+        r.tipo_alquiler === "temporada" ||
+        (r.tipo_alquiler === "dia" && r.fecha === hoy) ||
+        (r.tipo_alquiler === "periodo" && r.fecha_inicio <= hoy && hoy <= r.fecha_fin)
+      if (vigenteHoy || !map[r.unidad_id]) map[r.unidad_id] = r
     }
-    setLoading(false)
-  }
+    return map
+  }, [reservas])
 
-  const initializeUnits = () => {
-    const savedUnits = localStorage.getItem("prius_beach_units")
-    if (savedUnits) {
-      setUnits(JSON.parse(savedUnits))
-      return
-    }
-    const initialUnits = {}
-    for (let i = 1; i <= 144; i++) {
-      initialUnits[`C${i}`] = {
-        id: `C${i}`, number: i, type: "carpa", status: STATUS.LIBRE,
-        clientName: "", clientPhone: "", clientEmail: "",
-        startDate: "", endDate: "", notes: "", isPaid: false, isTemporada: false
+  const units = useMemo(() => {
+    const map = {}
+    for (const u of unidades) {
+      const px = PREFIJO[u.tipo]
+      if (!px) continue
+      const r = reservaPorUnidad[u.id]
+      const ocupada = u.estado === "ocupada" || u.estado === "reservada"
+      const status = ocupada
+        ? r?.tipo_alquiler === "temporada"
+          ? STATUS.TEMPORADA
+          : STATUS.PERIODO
+        : STATUS.LIBRE
+      map[`${px}${u.numero}`] = {
+        id: `${px}${u.numero}`,
+        dbId: u.id,
+        reservaId: r?.id || null,
+        number: u.numero,
+        type: u.tipo,
+        status,
+        clientName: r?.clientes?.nombre || "",
+        clientPhone: r?.clientes?.telefono || "",
+        clientEmail: r?.clientes?.mail || "",
+        startDate: r?.fecha_inicio || r?.fecha || "",
+        endDate: r?.fecha_fin || r?.fecha || "",
+        notes: r?.notas || "",
+        isPaid: r?.estado_pago === "pagado",
+        isTemporada: r?.tipo_alquiler === "temporada",
       }
     }
-    for (let i = 1; i <= 40; i++) {
-      initialUnits[`S${i}`] = {
-        id: `S${i}`, number: i, type: "sombrilla", status: STATUS.LIBRE,
-        clientName: "", clientPhone: "", clientEmail: "",
-        startDate: "", endDate: "", notes: "", isPaid: false, isTemporada: false
-      }
-    }
-    setUnits(initialUnits)
-  }
+    return map
+  }, [unidades, reservaPorUnidad])
 
   // useCallback: referencia estable para no romper el React.memo de las 184 Cell
   const handleUnitClick = useCallback((unit) => {
     if (unit) setSelectedUnit(unit)
   }, [])
 
-  const handleSaveUnit = (updatedUnit) => {
-    const newUnits = { ...units, [updatedUnit.id]: updatedUnit }
-    setUnits(newUnits)
-    localStorage.setItem("prius_beach_units", JSON.stringify(newUnits))
-    setSelectedUnit(null)
+  // Escribe SOLO en reservas / clientes. El estado de la unidad lo deriva el trigger.
+  const handleSaveUnit = async (form) => {
+    try {
+      const liberar = !form.clientName?.trim() || form.status === STATUS.LIBRE
+      if (liberar) {
+        if (form.reservaId) await deleteReserva(form.reservaId, form.dbId)
+        setSelectedUnit(null)
+        return
+      }
+
+      let cliente = clientes.find(
+        (c) => c.nombre?.trim().toLowerCase() === form.clientName.trim().toLowerCase(),
+      )
+      if (!cliente) {
+        cliente = await createCliente({
+          nombre: form.clientName.trim().toUpperCase(),
+          telefono: form.clientPhone || null,
+          mail: form.clientEmail || null,
+        })
+      }
+
+      const esTemporada = form.isTemporada
+      const payload = {
+        cliente_id: cliente.id,
+        unidad_id: form.dbId,
+        temporada: temporadaActual(),
+        tipo_alquiler: esTemporada ? "temporada" : "periodo",
+        fecha_inicio: esTemporada ? null : form.startDate || null,
+        fecha_fin: esTemporada ? null : form.endDate || null,
+        estado: "activa",
+        estado_pago: form.isPaid ? "pagado" : "pendiente",
+        notas: form.notes || null,
+      }
+
+      if (form.reservaId) await updateReserva(form.reservaId, payload)
+      else await createReserva(payload)
+      setSelectedUnit(null)
+    } catch (e) {
+      console.error("Error guardando la reserva desde el plano:", e)
+    }
   }
 
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5))
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.5))
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.1, 1.5))
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.1, 0.5))
   const handleResetZoom = () => setZoom(0.85)
 
   const getCarpa = (num) => units[`C${num}`]
@@ -91,7 +163,11 @@ export default function Dashboard() {
 
       {/* Workspace Area */}
       <div className="flex-1 min-h-0 glass-card rounded-3xl glass-card-inner relative overflow-hidden flex flex-col">
-        {viewMode === "map" ? (
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+            Cargando plano…
+          </div>
+        ) : viewMode === "map" ? (
           <>
             <div className="absolute top-6 right-6 z-20 flex flex-col gap-2">
               <button onClick={handleZoomIn} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
@@ -106,30 +182,30 @@ export default function Dashboard() {
             </div>
 
             <div className="flex-1 overflow-auto p-12 flex justify-center items-start">
-              <div 
+              <div
                 className="transition-transform duration-200 origin-top flex flex-col items-center"
                 style={{ transform: `scale(${zoom})` }}
               >
-                {/* 
+                {/*
                   Cálculo de Anchos para Alineación Perfecta:
                   - Cada columna (Cell + Label) mide ~52px en Desktop.
                   - Gaps entre columnas son 32px (gap-8).
                   - 3 columnas + 2 gaps = (52*3) + (32*2) = 156 + 64 = 220px.
                   - Pasillo Central = 64px (gap-16 en el contenedor principal).
                 */}
-                
+
                 {/* Row Superior Unificada */}
                 <div className="flex justify-center gap-0 items-start mb-6">
                   {/* Recreación alineada con las 3 primeras columnas */}
                   <div className="w-[220px] h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
                     Recreación
                   </div>
-                  
+
                   {/* Acceso alineado con el Pasillo Central */}
                   <div className="w-[64px] h-[50px] flex items-center justify-center border-y border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">
                     Acceso
                   </div>
-                  
+
                   {/* Pileta alineada con las 3 últimas columnas, bajando para ocupar el espacio físico */}
                   <div className="w-[220px] h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
                     <div className="absolute inset-0 bg-sky-400/5" />
@@ -140,7 +216,7 @@ export default function Dashboard() {
 
                 {/* Contenedor de Carpas */}
                 <div className="flex justify-center gap-[64px] items-end pb-12">
-                  
+
                   {/* Bloque Izquierda (3 Pasillos completos) */}
                   <div className="flex gap-8 items-end">
                     {[
