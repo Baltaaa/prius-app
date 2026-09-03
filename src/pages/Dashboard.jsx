@@ -96,40 +96,39 @@ export default function Dashboard() {
   }, [])
 
   // Escribe SOLO en reservas / clientes. El estado de la unidad lo deriva el trigger.
-  const handleSaveUnit = async (form) => {
+  const handleSaveUnit = async (result) => {
     try {
-      const liberar = !form.clientName?.trim() || form.status === STATUS.LIBRE
-      if (liberar) {
-        if (form.reservaId) await deleteReserva(form.reservaId, form.dbId)
+      if (result.action === "liberar") {
+        if (result.reservaId) await deleteReserva(result.reservaId)
         setSelectedUnit(null)
         return
       }
 
-      let cliente = clientes.find(
-        (c) => c.nombre?.trim().toLowerCase() === form.clientName.trim().toLowerCase(),
-      )
-      if (!cliente) {
-        cliente = await createCliente({
-          nombre: form.clientName.trim().toUpperCase(),
-          telefono: form.clientPhone || null,
-          mail: form.clientEmail || null,
+      let clienteId = result.cliente.id
+      if (!clienteId) {
+        const nuevo = await createCliente({
+          nombre: result.cliente.nombre.trim().toUpperCase(),
+          telefono: result.cliente.telefono || null,
+          mail: result.cliente.mail || null,
         })
+        clienteId = nuevo.id
       }
 
-      const esTemporada = form.isTemporada
+      const t = result.tipo_alquiler
       const payload = {
-        cliente_id: cliente.id,
-        unidad_id: form.dbId,
+        cliente_id: clienteId,
+        unidad_id: result.dbId,
         temporada: temporadaActual(),
-        tipo_alquiler: esTemporada ? "temporada" : "periodo",
-        fecha_inicio: esTemporada ? null : form.startDate || null,
-        fecha_fin: esTemporada ? null : form.endDate || null,
+        tipo_alquiler: t,
+        fecha_inicio: t === "periodo" ? result.fecha_inicio : null,
+        fecha_fin: t === "periodo" ? result.fecha_fin : null,
+        fecha: t === "dia" ? result.fecha : null,
         estado: "activa",
-        estado_pago: form.isPaid ? "pagado" : "pendiente",
-        notas: form.notes || null,
+        estado_pago: result.estado_pago,
+        notas: result.notas,
       }
 
-      if (form.reservaId) await updateReserva(form.reservaId, payload)
+      if (result.reservaId) await updateReserva(result.reservaId, payload)
       else await createReserva(payload)
       setSelectedUnit(null)
     } catch (e) {
@@ -308,7 +307,14 @@ export default function Dashboard() {
         )}
       </div>
 
-      {selectedUnit && <UnitModal unit={selectedUnit} onClose={() => setSelectedUnit(null)} onSave={handleSaveUnit} />}
+      {selectedUnit && (
+        <UnitModal
+          unit={selectedUnit}
+          clientes={clientes}
+          onClose={() => setSelectedUnit(null)}
+          onSave={handleSaveUnit}
+        />
+      )}
       <style>{`
         @media print {
           @page { size: A4; margin: 0; }

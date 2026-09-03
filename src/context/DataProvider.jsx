@@ -114,12 +114,13 @@ export function DataProvider({ children }) {
 
   // ---- Mutaciones (optimistas; realtime concilia el resto) ----
 
+  // El estado de la unidad NO se escribe desde el front: lo deriva el trigger
+  // trg_reserva_actualiza_unidad segun la vigencia de la reserva, y Realtime
+  // sobre `unidades` refresca la copia local.
   const createReserva = useCallback(async (reserva) => {
     const { data, error } = await supabase.from('reservas').insert([reserva]).select(RESERVA_SELECT)
     if (error) throw error
-    await supabase.from('unidades').update({ estado: 'reservada' }).eq('id', reserva.unidad_id)
     setReservas((prev) => [data[0], ...prev])
-    setUnidades((prev) => prev.map((u) => (u.id === reserva.unidad_id ? { ...u, estado: 'reservada' } : u)))
     return data[0]
   }, [])
 
@@ -131,13 +132,10 @@ export function DataProvider({ children }) {
     return data[0]
   }, [])
 
-  const deleteReserva = useCallback(async (id, unidadId) => {
+  const deleteReserva = useCallback(async (id) => {
     const { error } = await supabase.from('reservas').delete().eq('id', id)
     if (error) throw error
-    if (unidadId) {
-      await supabase.from('unidades').update({ estado: 'libre' }).eq('id', unidadId)
-      setUnidades((prev) => prev.map((u) => (u.id === unidadId ? { ...u, estado: 'libre' } : u)))
-    }
+    // El trigger libera la unidad al borrarse la reserva; Realtime concilia.
     setReservas((prev) => prev.filter((r) => r.id !== id))
   }, [])
 
