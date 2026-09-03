@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { createPortal } from "react-dom"
 import { X, Umbrella, Home, MessageSquare } from "lucide-react"
 
 // Carga rápida de reserva desde el plano (CRM interno, no pasa por Edge Function).
@@ -16,14 +17,23 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
   const [clienteNombre, setClienteNombre] = useState(unit?.clientName || "")
   const [clienteTelefono, setClienteTelefono] = useState(unit?.clientPhone || "")
   const [clienteEmail, setClienteEmail] = useState(unit?.clientEmail || "")
-  const [tipoAlquiler, setTipoAlquiler] = useState(
-    unit?.isTemporada ? "temporada" : unit?.startDate ? "periodo" : "temporada",
-  )
+  const [tipoAlquiler, setTipoAlquiler] = useState(unit?.tipoAlquiler || "temporada")
   const [fechaInicio, setFechaInicio] = useState(unit?.startDate || "")
   const [fechaFin, setFechaFin] = useState(unit?.endDate || "")
   const [fecha, setFecha] = useState(unit?.startDate || "")
   const [pagado, setPagado] = useState(unit?.isPaid ?? false)
   const [notas, setNotas] = useState(unit?.notes || "")
+
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onClose?.()
+    document.addEventListener("keydown", onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.removeEventListener("keydown", onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
 
   const clienteExistente = useMemo(
     () =>
@@ -77,9 +87,9 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
     )
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] p-4 backdrop-blur-md animate-in fade-in duration-300"
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-[999] p-4 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -272,6 +282,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
