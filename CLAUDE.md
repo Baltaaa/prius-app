@@ -27,7 +27,7 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 - **Mercado Pago**: pasarela de pago principal candidata.
 - **CUIT / clave fiscal**: credenciales fiscales argentinas.
 
-## Estructura de datos (Supabase — 7 tablas)
+## Estructura de datos (Supabase — 8 tablas)
 1. `clientes`
 2. `unidades` (carpas/sombrillas)
 3. `reservas`
@@ -35,6 +35,7 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 5. `caja_diaria`
 6. `gastos_caja`
 7. `leads` — capturados desde el formulario de contacto de la landing (`beachFlow`). Mismo proyecto Supabase que el CRM.
+8. `eventos` — log de auditoría escrito solo por triggers (`fn_log_evento`). Cada INSERT/UPDATE/DELETE sobre reservas/pagos/clientes/unidades/gastos_caja queda registrado con su fecha de negocio (`fecha_ref`). Alimenta la Línea de Tiempo (`/app/actividad`). RLS: solo lectura para `authenticated`.
 
 Campos clave para el plano:
 - `unidades.tipo`: carpa | sombrilla | cabina | locker
