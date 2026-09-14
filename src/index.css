@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
   --prius-accent: #FDE047;
   --prius-dark: #111520;
@@ -40,6 +41,20 @@ body {
 
 .glass-card-inner {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+/*
+  Variante para los popovers aislados del header (búsqueda, notificaciones,
+  perfil): nunca más de uno montado a la vez y sin anidamiento, así que acá sí
+  vale el backdrop-filter que se sacó de .glass-card más arriba. El fondo
+  semi-opaco liso se veía sucio con contenido de color detrás.
+*/
+.glass-popover {
+  background: rgba(23, 32, 48, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
 }
 
 /* Custom Scrollbar */

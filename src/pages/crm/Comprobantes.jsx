@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import { useReservas } from '../../hooks/useReservas'
+import { usePagos } from '../../hooks/usePagos'
+import { formatCurrency, formatDate } from '../../lib/format'
+import { formatMedioPago } from '../../lib/pagos'
 import { Printer, FileText, CheckCircle } from 'lucide-react'
 
 export default function Comprobantes() {
@@ -7,10 +10,10 @@ export default function Comprobantes() {
   const [selectedReservaId, setSelectedReservaId] = useState('')
 
   const selectedReserva = reservas.find(r => r.id === selectedReservaId) || reservas[0]
-
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val || 0)
-  }
+  // Reutiliza el módulo Comprobantes para listar los pagos/comprobantes ya
+  // registrados desde Clientes/Reservas (usePagos), en vez de armar una
+  // pantalla de facturación aparte.
+  const { pagos: pagosReserva } = usePagos(selectedReserva?.id)
 
   if (loading) {
     return (
@@ -119,6 +122,26 @@ export default function Comprobantes() {
               </strong>
             </div>
           </div>
+
+          {/* Historial de pagos registrados (Fase 2, tabla `pagos`) */}
+          {pagosReserva.length > 0 && (
+            <div className="space-y-3 no-print">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Pagos Registrados</p>
+              <div className="space-y-2">
+                {pagosReserva.map((p) => (
+                  <div key={p.id} className="flex justify-between items-center text-xs px-4 py-3 bg-white/5 border border-white/10 rounded-xl">
+                    <div className="text-gray-400">
+                      <span className="text-white font-bold">{formatDate(p.fecha)}</span>
+                      {' — '}{formatMedioPago(p)}
+                      {p.comprobante && <span> · Comp. {p.comprobante}</span>}
+                      {p.nro_cuota && <span> · Cuota {p.nro_cuota}</span>}
+                    </div>
+                    <strong className="text-green-400">{formatCurrency(p.monto)}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Footer note */}
           <div className="border-t border-white/5 pt-8 text-[10px] text-gray-500 text-center space-y-2 print:border-black print:text-black">

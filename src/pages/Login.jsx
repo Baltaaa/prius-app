@@ -101,13 +101,13 @@ export default function Login() {
           <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none" />
           
           {/* Header Brand */}
-          <div className="flex items-center gap-3 mb-12 relative z-10">
-            <div className="w-10 h-10 bg-[#0a0d14] border border-[#FDE047]/30 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(253,224,71,0.15)] p-2">
-              <img src="/images/prius-icon.png" alt="P" className="w-full h-full object-contain" />
+          <div className="flex items-center mb-12 relative z-10">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center p-2">
+              <img src="/images/prius-icon.png" alt="P" className="w-full h-full object-contain shadow-[0_0_20px_rgba(253,224,71,0.15)] rounded-full" />
             </div>
             <div className="flex items-center gap-2">
-               <span className="text-xl font-bold text-white italic">Prius<span className="text-[#FDE047] not-italic font-medium">Admin</span></span>
-               <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest pt-1 border-l border-white/10 pl-2">ESTATE</span>
+               <span className="text-xl font-bold text-white italic">Prius<span className="text-[#FDE047] not-italic font-medium">App</span></span>
+               
             </div>
           </div>
 
@@ -253,7 +253,7 @@ export default function Login() {
 
       <footer className="absolute bottom-10 left-0 right-0 z-10 text-center px-4">
         <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.6em]">
-          PRIUSADMIN &bull; BALNEARIO PLAYA GRANDE &bull; SISTEMA AUTORIZADO
+          PRIUSAPP &bull; BALNEARIO PLAYA GRANDE &bull; SISTEMA AUTORIZADO
         </p>
       </footer>
     </div>

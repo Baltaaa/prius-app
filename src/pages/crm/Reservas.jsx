@@ -1,12 +1,21 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatCurrency } from '../../lib/format'
+import { formatCurrency, formatDate } from '../../lib/format'
 import { useDebounced } from '../../hooks/useDebounced'
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
+import PagoModal from '../../components/crm/PagoModal'
+import CurrencyInput from '../../components/crm/CurrencyInput'
 import StatusBadge from '../../components/crm/StatusBadge'
-import { Plus, Edit2, Trash2, Search, Filter, Check } from 'lucide-react'
+import { Plus, Edit2, Trash2, Search, Filter, Check, Wallet, CalendarClock, Globe, MonitorSmartphone } from 'lucide-react'
+
+// Reservas es la COLA OPERATIVA de alquileres acotados en el tiempo (período
+// o día) — llegadas recientes, filtrable por fecha/estado. Los clientes de
+// temporada completa (sin fechas) NO viven acá: son el directorio maestro,
+// ver Clientes.jsx. Ver nota en CLAUDE.md "Reservas vs Clientes".
+const TIPOS_OPERATIVOS = ['periodo', 'dia']
 
 const FILTROS_ESTADO = [
   { value: 'todos', label: 'Todas' },
@@ -15,40 +24,50 @@ const FILTROS_ESTADO = [
   { value: 'pendiente', label: 'Pendiente' },
 ]
 
+const FILTROS_TIPO = [
+  { value: 'todos', label: 'Período y Día' },
+  { value: 'periodo', label: 'Solo Período' },
+  { value: 'dia', label: 'Solo Día' },
+]
+
+// Fecha de llegada de una reserva operativa: fecha_inicio para período, fecha para día.
+const fechaLlegada = (r) => (r.tipo_alquiler === 'dia' ? r.fecha : r.fecha_inicio) || r.created_at
+
 export default function Reservas() {
   const { reservas, unidades, loading: resLoading, createReserva, updateReserva, deleteReserva } = useReservas()
   const { clientes, loading: cliLoading } = useClientes()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReserva, setEditingReserva] = useState(null)
+  const [pagoReserva, setPagoReserva] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('todos')
+  const [filtroTipo, setFiltroTipo] = useState('todos')
+  const [desde, setDesde] = useState('')
+  const [hasta, setHasta] = useState('')
   const [showFiltros, setShowFiltros] = useState(false)
 
   // Form state
   const [clienteId, setClienteId] = useState('')
   const [unidadId, setUnidadId] = useState('')
   const [temporada, setTemporada] = useState('2025-2026')
-  const [tipoAlquiler, setTipoAlquiler] = useState('temporada')
+  const [tipoAlquiler, setTipoAlquiler] = useState('periodo')
   const [fechaInicio, setFechaInicio] = useState('')
   const [fechaFin, setFechaFin] = useState('')
   const [fecha, setFecha] = useState('')
-  const [valorTotal, setValorTotal] = useState('')
-  const [saldo, setSaldo] = useState('')
-  const [estadoPago, setEstadoPago] = useState('pendiente')
+  const [valorTotal, setValorTotal] = useState(0)
   const [notas, setNotas] = useState('')
 
   const resetForm = () => {
     setClienteId('')
     setUnidadId('')
     setTemporada('2025-2026')
-    setTipoAlquiler('temporada')
+    setTipoAlquiler('periodo')
     setFechaInicio('')
     setFechaFin('')
     setFecha('')
-    setValorTotal('')
-    setSaldo('')
-    setEstadoPago('pendiente')
+    setValorTotal(0)
     setNotas('')
   }
 
@@ -63,13 +82,11 @@ export default function Reservas() {
     setClienteId(res.cliente_id || '')
     setUnidadId(res.unidad_id || '')
     setTemporada(res.temporada || '2025-2026')
-    setTipoAlquiler(res.tipo_alquiler || 'temporada')
+    setTipoAlquiler(res.tipo_alquiler || 'periodo')
     setFechaInicio(res.fecha_inicio || '')
     setFechaFin(res.fecha_fin || '')
     setFecha(res.fecha || '')
-    setValorTotal(res.valor_total ?? '')
-    setSaldo(res.saldo ?? '')
-    setEstadoPago(res.estado_pago || 'pendiente')
+    setValorTotal(res.valor_total ?? 0)
     setNotas(res.notas || '')
     setIsModalOpen(true)
   }
@@ -82,12 +99,15 @@ export default function Reservas() {
       temporada,
       tipo_alquiler: tipoAlquiler,
       estado: 'activa',
+      // Reservas solo da de alta período/día — todavía manual (sin origen web).
+      origen: 'manual',
       fecha_inicio: tipoAlquiler === 'periodo' ? fechaInicio || null : null,
       fecha_fin: tipoAlquiler === 'periodo' ? fechaFin || null : null,
       fecha: tipoAlquiler === 'dia' ? fecha || null : null,
       valor_total: Number(valorTotal || 0),
-      saldo: Number(saldo || 0),
-      estado_pago: estadoPago,
+      // saldo / estado_pago ya no se cargan a mano: los recalcula el trigger
+      // fn_reserva_recalcula_saldo (a partir de valor_total y la suma de
+      // `pagos`) — ver PagoModal / usePagos.
       notas,
     }
     try {
@@ -112,21 +132,47 @@ export default function Reservas() {
     }
   }
 
+  // Deep-link desde la búsqueda global del TopBar: /app/reservas?id=<uuid>
+  // abre directo el modal de edición de esa reserva.
+  useEffect(() => {
+    const id = searchParams.get('id')
+    if (!id || resLoading || cliLoading) return
+    const res = reservas.find((r) => r.id === id)
+    if (res) handleOpenEdit(res)
+    setSearchParams({}, { replace: true })
+  }, [searchParams, reservas, resLoading, cliLoading])
+
   const debouncedSearch = useDebounced(searchTerm)
+
+  // Cola operativa: solo período/día. La temporada completa vive en Clientes
+  // (directorio maestro), no acá — ver CLAUDE.md.
+  const reservasOperativas = useMemo(
+    () => reservas.filter((r) => TIPOS_OPERATIVOS.includes(r.tipo_alquiler)),
+    [reservas],
+  )
 
   const filteredReservas = useMemo(() => {
     const term = debouncedSearch.trim().toLowerCase()
-    return reservas.filter((r) => {
-      const matchesSearch =
-        !term ||
-        r.clientes?.nombre?.toLowerCase().includes(term) ||
-        String(r.unidades?.numero ?? '').includes(term)
-      const matchesEstado = filtroEstado === 'todos' || r.estado_pago === filtroEstado
-      return matchesSearch && matchesEstado
-    })
-  }, [reservas, debouncedSearch, filtroEstado])
+    return reservasOperativas
+      .filter((r) => {
+        const matchesSearch =
+          !term ||
+          r.clientes?.nombre?.toLowerCase().includes(term) ||
+          String(r.unidades?.numero ?? '').includes(term)
+        const matchesEstado = filtroEstado === 'todos' || r.estado_pago === filtroEstado
+        const matchesTipo = filtroTipo === 'todos' || r.tipo_alquiler === filtroTipo
+        const llegada = fechaLlegada(r)
+        const matchesDesde = !desde || (llegada && llegada >= desde)
+        const matchesHasta = !hasta || (llegada && llegada <= hasta)
+        return matchesSearch && matchesEstado && matchesTipo && matchesDesde && matchesHasta
+      })
+      // Llegadas más recientes primero.
+      .sort((a, b) => (fechaLlegada(b) || '').localeCompare(fechaLlegada(a) || ''))
+  }, [reservasOperativas, debouncedSearch, filtroEstado, filtroTipo, desde, hasta])
 
-  const headers = ['Cliente', 'Unidad', 'Temporada', 'Monto Total', 'Saldo', 'Estado Pago', 'Acciones']
+  const filtrosActivos = filtroEstado !== 'todos' || filtroTipo !== 'todos' || desde || hasta
+
+  const headers = ['Llegada', 'Cliente', 'Unidad', 'Monto Total', 'Saldo', 'Estado', 'Origen', 'Acciones']
 
   if (resLoading || cliLoading) {
     return (
@@ -140,9 +186,14 @@ export default function Reservas() {
     <div className="space-y-10 animate-premium-fade">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">Gestión de Reservas</h1>
-          <p className="text-gray-400 text-sm mt-2">Control centralizado de alquileres y pagos.</p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#FDE047]/10 border border-[#FDE047]/20 flex items-center justify-center shrink-0">
+            <CalendarClock size={20} className="text-[#FDE047]" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-bold text-white tracking-tight">Cola de Reservas</h1>
+            <p className="text-gray-400 text-sm mt-2">Alquileres por período y día, ordenados por llegada. La temporada completa vive en Clientes.</p>
+          </div>
         </div>
         <button
           onClick={handleOpenCreate}
@@ -152,9 +203,9 @@ export default function Reservas() {
         </button>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[300px] relative">
+      {/* Toolbar / filtros — feed cronológico con filtros siempre visibles */}
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex-1 min-w-[240px] relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
@@ -164,28 +215,58 @@ export default function Reservas() {
             className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 focus:border-[#FDE047]/50 rounded-xl outline-none text-white text-sm transition-all"
           />
         </div>
+        <input
+          type="date"
+          value={desde}
+          onChange={(e) => setDesde(e.target.value)}
+          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-[#FDE047]/50 outline-none [color-scheme:dark]"
+          title="Llegada desde"
+        />
+        <input
+          type="date"
+          value={hasta}
+          onChange={(e) => setHasta(e.target.value)}
+          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-[#FDE047]/50 outline-none [color-scheme:dark]"
+          title="Llegada hasta"
+        />
         <div className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
-            className={`glass-card px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-[#FDE047]' : 'text-gray-400 hover:text-white'}`}
+            className={`glass-card px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-[#FDE047]' : 'text-gray-400 hover:text-white'}`}
           >
-            <Filter size={16} /> {filtroEstado === 'todos' ? 'Filtros Avanzados' : `Estado: ${filtroEstado}`}
+            <Filter size={16} /> Filtros {filtrosActivos ? 'Activos' : ''}
           </button>
 
           {showFiltros && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowFiltros(false)} />
-              <div className="absolute right-0 mt-2 w-48 glass-card rounded-xl overflow-hidden z-50 p-1">
-                {FILTROS_ESTADO.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => { setFiltroEstado(f.value); setShowFiltros(false) }}
-                    className="w-full text-left px-4 py-2.5 text-xs text-gray-300 hover:bg-white/10 flex items-center justify-between rounded-lg"
-                  >
-                    {f.label}
-                    {filtroEstado === f.value && <Check size={14} className="text-[#FDE047]" />}
-                  </button>
-                ))}
+              <div className="absolute right-0 mt-2 w-56 glass-card rounded-xl overflow-hidden z-50 p-3 space-y-3">
+                <div>
+                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1 px-1">Estado de pago</p>
+                  {FILTROS_ESTADO.map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => setFiltroEstado(f.value)}
+                      className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/10 flex items-center justify-between rounded-lg"
+                    >
+                      {f.label}
+                      {filtroEstado === f.value && <Check size={14} className="text-[#FDE047]" />}
+                    </button>
+                  ))}
+                </div>
+                <div className="border-t border-white/10 pt-2">
+                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1 px-1">Tipo de alquiler</p>
+                  {FILTROS_TIPO.map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => setFiltroTipo(f.value)}
+                      className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/10 flex items-center justify-between rounded-lg"
+                    >
+                      {f.label}
+                      {filtroTipo === f.value && <Check size={14} className="text-[#FDE047]" />}
+                    </button>
+                  ))}
+                </div>
               </div>
             </>
           )}
@@ -196,12 +277,12 @@ export default function Reservas() {
       <DataTable
         headers={headers}
         data={filteredReservas}
-        emptyMessage="No se encontraron reservas con esos filtros."
+        emptyMessage="No hay reservas de período/día con esos filtros."
         renderRow={(res) => (
           <tr key={res.id} className="hover:bg-white/5 transition-all group">
+            <td className="px-6 py-5 text-gray-300 font-medium whitespace-nowrap">{formatDate(fechaLlegada(res))}</td>
             <td className="px-6 py-5 font-bold text-white uppercase">{res.clientes?.nombre || 'S/N'}</td>
             <td className="px-6 py-5 font-medium text-gray-300 uppercase">{res.unidades?.tipo} #{res.unidades?.numero}</td>
-            <td className="px-6 py-5 text-gray-400 font-medium">{res.temporada}</td>
             <td className="px-6 py-5 font-bold text-white">{formatCurrency(res.valor_total)}</td>
             <td className={`px-6 py-5 font-bold ${Number(res.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
               {formatCurrency(res.saldo)}
@@ -210,7 +291,21 @@ export default function Reservas() {
               <StatusBadge status={res.estado_pago} />
             </td>
             <td className="px-6 py-5">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
+                {res.origen === 'web' ? 'Web' : 'Manual'}
+              </span>
+            </td>
+            <td className="px-6 py-5">
               <div className="flex gap-2">
+                <button
+                  onClick={() => setPagoReserva(res)}
+                  disabled={Number(res.saldo) <= 0}
+                  className="p-2 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-green-400 transition-all"
+                  title={Number(res.saldo) > 0 ? 'Registrar pago' : 'Sin saldo pendiente'}
+                >
+                  <Wallet size={16} />
+                </button>
                 <button onClick={() => handleOpenEdit(res)} className="p-2 hover:bg-white/10 rounded-lg text-[#FDE047] transition-all">
                   <Edit2 size={16} />
                 </button>
@@ -225,9 +320,10 @@ export default function Reservas() {
           <>
             <div className="flex justify-between items-start gap-3">
               <div className="min-w-0">
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatDate(fechaLlegada(res))}</p>
                 <h3 className="font-bold uppercase text-sm text-white truncate">{res.clientes?.nombre || 'S/N'}</h3>
                 <p className="text-[11px] text-gray-500 uppercase mt-0.5">
-                  {res.unidades?.tipo} #{res.unidades?.numero} &bull; {res.temporada}
+                  {res.unidades?.tipo} #{res.unidades?.numero} &bull; {res.tipo_alquiler}
                 </p>
               </div>
               <StatusBadge status={res.estado_pago} />
@@ -240,6 +336,13 @@ export default function Reservas() {
                 </p>
               </div>
               <div className="flex gap-2">
+                <button
+                  onClick={() => setPagoReserva(res)}
+                  disabled={Number(res.saldo) <= 0}
+                  className="p-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-30 rounded-lg text-green-400 transition-all"
+                >
+                  <Wallet size={16} />
+                </button>
                 <button onClick={() => handleOpenEdit(res)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-[#FDE047] transition-all">
                   <Edit2 size={16} />
                 </button>
@@ -253,7 +356,7 @@ export default function Reservas() {
       />
 
       {/* Modal Form */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingReserva ? 'Editar Reserva' : 'Nueva Contratación'}>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingReserva ? 'Editar Reserva' : 'Nueva Reserva'}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Cliente</label>
@@ -294,9 +397,8 @@ export default function Reservas() {
 
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tipo de alquiler</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {[
-                { key: 'temporada', label: 'Temporada' },
                 { key: 'periodo', label: 'Período' },
                 { key: 'dia', label: 'Día' },
               ].map((t) => (
@@ -314,6 +416,9 @@ export default function Reservas() {
                 </button>
               ))}
             </div>
+            <p className="text-[9px] text-gray-500 uppercase tracking-widest">
+              Temporada completa se carga desde el Directorio de Clientes.
+            </p>
           </div>
 
           {tipoAlquiler === 'periodo' && (
@@ -354,44 +459,30 @@ export default function Reservas() {
             </div>
           )}
 
-          {tipoAlquiler === 'temporada' && (
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Temporada completa — sin fechas</p>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto Total</label>
-              <input
-                type="number"
-                required
-                value={valorTotal}
-                onChange={(e) => setValorTotal(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Saldo Pendiente</label>
-              <input
-                type="number"
-                value={saldo}
-                onChange={(e) => setSaldo(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold"
-              />
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Estado de Pago</label>
-            <select
-              value={estadoPago}
-              onChange={(e) => setEstadoPago(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none uppercase font-bold"
-            >
-              <option value="pendiente">Pendiente</option>
-              <option value="parcial">Parcial</option>
-              <option value="pagado">Pagado</option>
-            </select>
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto Total</label>
+            <CurrencyInput
+              value={valorTotal}
+              onChange={setValorTotal}
+              required
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold"
+            />
           </div>
+
+          {/* Saldo y estado de pago ya no se cargan a mano: los recalcula el
+              trigger fn_reserva_recalcula_saldo / fn_pago_actualiza_saldo a
+              partir de valor_total y los pagos registrados en `pagos`. */}
+          {editingReserva && (
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+              <div>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Saldo Pendiente</p>
+                <p className={`text-lg font-bold ${Number(editingReserva.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                  {formatCurrency(editingReserva.saldo)}
+                </p>
+              </div>
+              <StatusBadge status={editingReserva.estado_pago} />
+            </div>
+          )}
 
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Notas</label>
@@ -408,6 +499,14 @@ export default function Reservas() {
           </button>
         </form>
       </Modal>
+
+      {/* Pago Modal (Fase 2) — mismo componente/hook que usa Clientes */}
+      <PagoModal
+        isOpen={!!pagoReserva}
+        onClose={() => setPagoReserva(null)}
+        reservasOptions={pagoReserva ? [pagoReserva] : []}
+        initialReservaId={pagoReserva?.id || ''}
+      />
     </div>
   )
 }

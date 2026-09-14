@@ -2,6 +2,7 @@ import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useNotifications } from '../../hooks/useNotifications'
+import { useLeads } from '../../hooks/useLeads'
 import {
   LayoutDashboard,
   CalendarDays,
@@ -15,12 +16,14 @@ import {
   FileText,
   UserCheck,
   Activity,
+  Inbox,
   X
 } from 'lucide-react'
 
 export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }) {
   const navigate = useNavigate()
   const { count: notificationsCount } = useNotifications()
+  const { sinContactar: leadsSinContactar } = useLeads()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -31,11 +34,13 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
     { name: 'Dashboard', path: '/app/home', icon: LayoutDashboard },
     { name: 'Plano de Playa', path: '/app/plano', icon: Map },
     { name: 'Reservas', path: '/app/reservas', icon: CalendarDays },
+    { name: 'Clientes', path: '/app/clientes', icon: Users },
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
     { name: 'Reportes', path: '/app/reportes', icon: BarChart2 }
   ]
 
   const additionalNav = [
+    { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
     { name: 'Calendario', path: '/app/calendario', icon: Calendar },
     { name: 'Línea de Tiempo', path: '/app/actividad', icon: Activity },
     { name: 'Notificaciones', path: '/app/notificaciones', icon: Bell, badge: notificationsCount },

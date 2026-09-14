@@ -30,6 +30,8 @@ export function DataProvider({ children }) {
   const [historialCajas, setHistorialCajas] = useState([])
   const [gastos, setGastos] = useState([])
   const [eventos, setEventos] = useState([])
+  const [leads, setLeads] = useState([])
+  const [pagos, setPagos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -84,10 +86,34 @@ export function DataProvider({ children }) {
     setEventos(data || [])
   }, [])
 
+  // Bandeja de leads del CRM: tabla `leads`, alimentada por el form de la landing
+  // (beachFlow) vía webhook n8n. Reemplaza como canal de lectura a la
+  // notificación automática por CallMeBot al WhatsApp administrativo.
+  const fetchLeads = useCallback(async () => {
+    const { data } = await supabase
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setLeads(data || [])
+  }, [])
+
+  // Motor de pagos (Fase 2): historial crudo de `pagos`. El saldo/estado_pago
+  // de la reserva ya lo recalcula el trigger fn_pago_actualiza_saldo — este
+  // fetch es solo para listar el historial (Clientes, Reservas, Comprobantes).
+  const fetchPagos = useCallback(async () => {
+    const { data } = await supabase
+      .from('pagos')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setPagos(data || [])
+  }, [])
+
   const refetchAll = useCallback(async () => {
     setLoading(true)
     try {
-      await Promise.all([fetchUnidades(), fetchReservas(), fetchClientes(), fetchCaja(), fetchEventos()])
+      await Promise.all([
+        fetchUnidades(), fetchReservas(), fetchClientes(), fetchCaja(), fetchEventos(), fetchLeads(), fetchPagos(),
+      ])
       setError(null)
     } catch (err) {
       console.error('Error cargando datos del CRM:', err)
@@ -95,7 +121,7 @@ export function DataProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos])
+  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos])
 
   useEffect(() => { refetchAll() }, [refetchAll])
 
@@ -121,10 +147,26 @@ export function DataProvider({ children }) {
         () => debouncedRefetch('caja', fetchCaja))
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos' },
         () => debouncedRefetch('eventos', fetchEventos))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pagos' },
+        () => debouncedRefetch('pagos', fetchPagos))
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
-  }, [debouncedRefetch, fetchReservas, fetchUnidades, fetchClientes, fetchCaja, fetchEventos])
+    // `leads` va en su propio canal: un binding postgres_changes sobre una tabla
+    // ausente de la publication `supabase_realtime` (hoy: clientes, caja_diaria,
+    // gastos_caja) anula TODOS los eventos del canal que lo contiene. Aislar
+    // leads garantiza que la bandeja reciba INSERT/UPDATE en vivo aunque el
+    // canal principal esté degradado.
+    const leadsChannel = supabase
+      .channel('crm-leads-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' },
+        () => debouncedRefetch('leads', fetchLeads))
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+      supabase.removeChannel(leadsChannel)
+    }
+  }, [debouncedRefetch, fetchReservas, fetchUnidades, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos])
 
   // ---- Mutaciones (optimistas; realtime concilia el resto) ----
 
@@ -236,18 +278,43 @@ export function DataProvider({ children }) {
     return data[0]
   }, [cajaHoy])
 
+  // Alta de pago (Fase 2, motor de pagos): un solo punto de escritura,
+  // reutilizado por Clientes y Reservas vía usePagos(). El trigger Postgres
+  // fn_pago_actualiza_saldo ya recalcula reservas.saldo/estado_pago; acá
+  // forzamos además un refetch de reservas para no depender del round-trip
+  // de Realtime en la misma pestaña que hizo la escritura.
+  const createPago = useCallback(async (pago) => {
+    const { data, error } = await supabase.from('pagos').insert([pago]).select()
+    if (error) throw error
+    setPagos((prev) => [data[0], ...prev])
+    await fetchReservas()
+    return data[0]
+  }, [fetchReservas])
+
+  // Update reactivo de un lead (estado: nuevo -> contactado -> descartado, o
+  // notas_crm). Optimista; Realtime sobre `leads` concilia el resto.
+  const updateLead = useCallback(async (id, updates) => {
+    setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, ...updates } : l)))
+    const { data, error } = await supabase.from('leads').update(updates).eq('id', id).select()
+    if (error) { fetchLeads(); throw error }
+    setLeads((prev) => prev.map((l) => (l.id === id ? data[0] : l)))
+    return data[0]
+  }, [fetchLeads])
+
   const value = useMemo(() => ({
-    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, eventos, loading, error,
+    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, eventos, leads, pagos, loading, error,
     createReserva, updateReserva, deleteReserva,
     createCliente, updateCliente, deleteCliente,
     iniciarCaja, actualizarCajaValores, agregarGasto, eliminarGasto, cerrarCaja,
-    refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos,
+    updateLead, createPago,
+    refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
   }), [
-    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, eventos, loading, error,
+    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, eventos, leads, pagos, loading, error,
     createReserva, updateReserva, deleteReserva,
     createCliente, updateCliente, deleteCliente,
     iniciarCaja, actualizarCajaValores, agregarGasto, eliminarGasto, cerrarCaja,
-    refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos,
+    updateLead, createPago,
+    refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
   ])
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
