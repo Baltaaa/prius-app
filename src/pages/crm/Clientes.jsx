@@ -409,80 +409,90 @@ export default function Clientes() {
                 data-cliente-id={cliente.id}
                 className={`glass-card rounded-xl overflow-hidden border transition-all ${isExpanded ? 'border-cyan-400/40' : 'border-white/10'}`}
               >
-                {/* Toda la caja es clickeable para expandir/colapsar */}
+                {/* Toda la caja es clickeable para expandir/colapsar. Mobile
+                    (Tarea 4.7): dos líneas explícitas — nombre/unidad arriba,
+                    badge/saldo/acciones abajo. `sm:contents` hace que ambos
+                    grupos desaparezcan como contenedor a partir de `sm` y sus
+                    hijos vuelvan a la misma fila flex-wrap de siempre, sin
+                    duplicar el layout de desktop. */}
                 <div
                   onClick={() => setExpandedId(isExpanded ? null : cliente.id)}
-                  className="w-full text-left px-6 py-5 flex flex-wrap items-center gap-x-6 gap-y-2 cursor-pointer hover:bg-white/5 transition-all"
+                  className="w-full text-left px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-6 gap-y-2 cursor-pointer hover:bg-white/5 transition-all"
                 >
-                  <ChevronDown
-                    size={18}
-                    className={`text-cyan-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                  />
-                  <div className="min-w-[160px]">
-                    <p className="font-bold text-white uppercase">{cliente.nombre}</p>
-                    <p className="text-gray-300 text-xs mt-0.5 flex items-center gap-1.5">
-                      <Phone size={11} className="text-gray-600 shrink-0" />
-                      {cliente.telefono || <span className="text-gray-500">Sin cargar</span>}
-                    </p>
-                  </div>
-                  <div
-                    className="flex items-baseline gap-2 flex-wrap min-w-[90px]"
-                    title={unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
-                  >
-                    {unidadesCliente.length === 0 ? (
-                      <span className="text-[11px] text-gray-500 font-bold tracking-widest">Sin unidad</span>
-                    ) : (
-                      <>
-                        {unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
-                          <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
-                            <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
-                            <span className="text-base font-extrabold text-white leading-none">{u.numero}</span>
-                          </span>
-                        ))}
-                        {unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
-                          <span className="text-[10px] text-gray-500 font-bold tracking-widest">
-                            +{unidadesCliente.length - MAX_UNIDADES_VISIBLES}
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  {reservaBadge && <StatusBadge status={estadoBadgeStatus(reservaBadge)} />}
-                  <div className="flex-1" />
-                  {/* Columna fija: siempre a la misma distancia del borde,
-                      sin importar el largo de unidad/badge de cada fila. */}
-                  <p className="w-28 text-right shrink-0">
-                    {saldoInfo.sinVerificar ? (
-                      // Si la reserva que manda el badge ya está pagada o
-                      // bonificada, ese "sin verificar" agregado no es una
-                      // deuda real — nunca se muestra $0 acá, así que no se
-                      // muestra nada (ver CLAUDE.md "Nunca $0").
-                      saldoHeaderSaldado ? null : (
-                        <span className="text-red-400 text-[9px] font-bold uppercase tracking-widest whitespace-nowrap">Monto nulo</span>
-                      )
-                    ) : sinPrecio ? (
-                      <span className="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
-                    ) : (
-                      formatMontoVisible(saldoInfo.total) && (
-                        <span className="font-bold text-sm text-red-400">{formatMontoVisible(saldoInfo.total)}</span>
-                      )
-                    )}
-                  </p>
-                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => setPagoCliente(cliente)}
-                      disabled={reservasPagables.length === 0}
-                      className="p-2 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-green-400 transition-all"
-                      title="Registrar pago"
+                  <div className="flex items-center gap-3 sm:contents">
+                    <ChevronDown
+                      size={18}
+                      className={`text-cyan-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    />
+                    <div className="min-w-[160px]">
+                      <p className="font-bold text-white uppercase truncate">{cliente.nombre}</p>
+                      <p className="text-gray-300 text-xs mt-0.5 flex items-center gap-1.5">
+                        <Phone size={11} className="text-gray-600 shrink-0" />
+                        {cliente.telefono || <span className="text-gray-500">Sin cargar</span>}
+                      </p>
+                    </div>
+                    <div
+                      className="flex items-baseline gap-2 flex-wrap min-w-[90px]"
+                      title={unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
                     >
-                      <Wallet size={16} />
-                    </button>
-                    <button onClick={() => handleOpenEdit(cliente)} className="p-2 hover:bg-white/10 rounded-lg text-[#FDE047] transition-all" title="Editar">
-                      <Edit2 size={16} />
-                    </button>
-                    <button onClick={() => setClienteAEliminar(cliente)} className="p-2 hover:bg-red-500/10 rounded-lg text-red-400 transition-all" title="Borrar">
-                      <Trash2 size={16} />
-                    </button>
+                      {unidadesCliente.length === 0 ? (
+                        <span className="text-[11px] text-gray-500 font-bold tracking-widest">Sin unidad</span>
+                      ) : (
+                        <>
+                          {unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
+                            <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
+                              <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
+                              <span className="text-base font-extrabold text-white leading-none">{u.numero}</span>
+                            </span>
+                          ))}
+                          {unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
+                            <span className="text-[10px] text-gray-500 font-bold tracking-widest">
+                              +{unidadesCliente.length - MAX_UNIDADES_VISIBLES}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 sm:contents">
+                    {reservaBadge && <StatusBadge status={estadoBadgeStatus(reservaBadge)} />}
+                    <div className="flex-1" />
+                    {/* Columna fija: siempre a la misma distancia del borde,
+                        sin importar el largo de unidad/badge de cada fila. */}
+                    <p className="w-28 text-right shrink-0">
+                      {saldoInfo.sinVerificar ? (
+                        // Si la reserva que manda el badge ya está pagada o
+                        // bonificada, ese "sin verificar" agregado no es una
+                        // deuda real — nunca se muestra $0 acá, así que no se
+                        // muestra nada (ver CLAUDE.md "Nunca $0").
+                        saldoHeaderSaldado ? null : (
+                          <span className="text-red-400 text-[9px] font-bold uppercase tracking-widest whitespace-nowrap">Monto nulo</span>
+                        )
+                      ) : sinPrecio ? (
+                        <span className="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
+                      ) : (
+                        formatMontoVisible(saldoInfo.total) && (
+                          <span className="font-bold text-sm text-red-400">{formatMontoVisible(saldoInfo.total)}</span>
+                        )
+                      )}
+                    </p>
+                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => setPagoCliente(cliente)}
+                        disabled={reservasPagables.length === 0}
+                        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-green-400 transition-all"
+                        title="Registrar pago"
+                      >
+                        <Wallet size={16} />
+                      </button>
+                      <button onClick={() => handleOpenEdit(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-[#FDE047] transition-all" title="Editar">
+                        <Edit2 size={16} />
+                      </button>
+                      <button onClick={() => setClienteAEliminar(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-500/10 rounded-lg text-red-400 transition-all" title="Borrar">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
