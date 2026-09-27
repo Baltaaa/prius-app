@@ -42,6 +42,36 @@ export default function Dashboard() {
   // (ver CLAUDE.md "Modal de unidad en el Plano").
   const [selectedUnitId, setSelectedUnitId] = useState(null)
   const [zoom, setZoom] = useState(0.95)
+  const MIN_ZOOM = 0.5
+  const MAX_ZOOM = 1.5
+
+  // Pinch-to-zoom táctil (Tarea 4.6, mobile-first): mismo estado `zoom` que
+  // ya usan los botones +/-/reset, solo se le suma otra forma de tocarlo. No
+  // toca ningún estado de reservas/unidades — es puramente gestual sobre el
+  // `transform: scale()` que ya existía. El pan de una sola mano sigue
+  // siendo el scroll nativo del contenedor `overflow-auto` (no hace falta
+  // reimplementarlo). refs (no state) para no re-renderizar en cada
+  // touchmove — solo `zoom` dispara render, vía setZoom.
+  const pinchRef = useRef({ active: false, startDist: 0, startZoom: 1 })
+  const touchDistance = (touches) => {
+    const [a, b] = touches
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
+  }
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      pinchRef.current = { active: true, startDist: touchDistance(e.touches), startZoom: zoom }
+    }
+  }
+  const handleTouchMove = (e) => {
+    if (!pinchRef.current.active || e.touches.length !== 2) return
+    e.preventDefault()
+    const dist = touchDistance(e.touches)
+    const ratio = dist / pinchRef.current.startDist
+    setZoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, pinchRef.current.startZoom * ratio)))
+  }
+  const handleTouchEnd = (e) => {
+    if (e.touches.length < 2) pinchRef.current.active = false
+  }
   const [selectedDate, setSelectedDate] = useState(todayStr())
   const esHoy = selectedDate === todayStr()
 
@@ -216,7 +246,15 @@ export default function Dashboard() {
             <div
               ref={mapSlideRef}
               onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
-              className="flex-1 overflow-auto p-12 flex justify-center items-start"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              // touch-action: pan-x/pan-y deja el scroll de una mano nativo
+              // (mover el mapa) pero saca el pinch-zoom nativo del navegador
+              // de encima — el pinch de dos dedos lo maneja el JS de arriba
+              // sobre el mismo `zoom` que ya usan los botones +/-/reset.
+              style={{ touchAction: 'pan-x pan-y' }}
+              className="flex-1 overflow-auto p-4 sm:p-12 flex justify-center items-start"
             >
               <div
                 className="transition-transform duration-200 origin-top flex flex-col items-center"
