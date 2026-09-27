@@ -42,8 +42,9 @@ Tablas principales: `clientes`, `unidades`, `reservas`, `pagos`, `caja_diaria`, 
 - `reservas.bonificada` (boolean, default `false`): unidad bonificada, propiedad de la RESERVA y no de la unidad (una misma unidad puede ser bonificada una temporada y no la siguiente). `bonificada = true` fuerza `valor_total = 0` y `estado_pago = 'pagado'` — lo hace cumplir `fn_reserva_recalcula_saldo` (dispara también con `update of bonificada`, no solo de `valor_total`), no se carga a mano. Una reserva bonificada no admite pagos: el insert de `pagos` sobre ella está bloqueado a nivel de base (`trg_pago_bloquea_bonificada`), no solo en la UI — por lo tanto tampoco genera movimientos en `caja_diaria`/`ingresos_caja` (nunca llega a existir el pago que los dispara).
 - El agrupamiento por pasillo/sector es solo visual en el front.
 
-## Módulos del CRM (7)
-Home, Plano, Reservas, Clientes, Caja, Reportes, + el dashboard de plano existente.
+## Módulos del CRM (8)
+Home, Plano, Cabinas y Lockers, Reservas, Clientes, Caja, Reportes, + el dashboard de plano existente.
+- **Cabinas y Lockers** (`/app/cabinas-lockers`, sept 2026): sección en desarrollo, debajo de Plano de Playa en Gestión Operativa, con badge "Pronto" en el menú. Es de **solo lectura** — no escribe nada en la base. Hoy no hay unidades `tipo='cabina'`/`'locker'` cargadas (auditado, 0 registros): la página usa datos reales de `unidades` en cuanto existan, y mientras tanto muestra tarjetas de ejemplo marcadas visualmente como tales. Botones de acción (asignar, liberar, registrar pago) deshabilitados con el texto "Próximamente".
 
 ## Principio arquitectónico clave (del catch-up con el dueño, julio 2026)
 El dueño piensa el sistema como **cliente-céntrico y reactivo en tiempo real**, no como módulos aislados. Toda acción del cliente (reserva, pago, check-in, consumo de servicio) debe:
@@ -108,9 +109,23 @@ En Clientes, Reservas y el modal de unidad del Plano, un monto nunca se muestra 
 - Colores: `#FFFFFF`, `#F2CA50`, `#000000`, `#E5E5E5`
 - Tipografía: Inter
 - Estética plana: sin sombras, sin gradientes
-- Mobile-first, con bottom nav bar en pantallas chicas. La versión mobile debe sentirse como una app nativa de Play Store: totalmente interactiva, moderna, prolija visualmente e intuitiva — no una web responsive genérica.
+
+### Layout (sept 2026)
+El contenido de cada página ocupa todo el ancho disponible entre el sidebar y el borde derecho — nunca max-width ni centrado (`mx-auto`) a nivel de página. El padding horizontal (`px-4 sm:px-6 md:px-8`) se define una única vez en `AppLayout.jsx` (el `<main>`) y es idéntico al de `TopBar.jsx`, así el borde izquierdo de las tarjetas queda siempre alineado con el ícono del título del header y el derecho con el final del bloque de usuario. Ninguna página debe agregar su propio max-width/padding de contenedor que lo contradiga.
+
+### Mobile-first
+La versión mobile debe sentirse como una app nativa, no como una web responsive achicada: totalmente interactiva, moderna, prolija e intuitiva. Diseño base pensado para 360px de ancho y escalado hacia arriba (verificar en 360/390/768/1024/1440/1920).
+- **Navegación**: en pantallas chicas el Sidebar queda oculto por completo (`hidden md:flex`, ver `Sidebar.jsx`) y aparece `BottomNav.jsx`, fijo, con 5 ítems: Inicio, Plano, Reservas, Clientes y Más (resalta el activo en amarillo, respeta el safe-area inferior vía `env(safe-area-inset-bottom)`). "Más" abre un bottom sheet con Caja Diaria, Reportes, Cabinas y Lockers, los módulos adicionales y Cerrar sesión — no se duplica la misma navegación de dos formas distintas en mobile.
+- **Header mobile** (`TopBar.jsx`): título de sección + avatar; el buscador inline de desktop pasa a un ícono que abre una búsqueda a pantalla completa (misma lógica de resultados); la campana de notificaciones se mantiene siempre visible.
+- **Tablas → tarjetas**: toda tabla (últimas reservas del dashboard, Reservas, Reportes, etc.) se muestra como lista de tarjetas en mobile y como tabla en desktop (`hidden md:block` / `md:hidden`, o el prop `renderMobileCard` de `DataTable.jsx`).
+- **Modales → bottom sheet**: en mobile, `Modal.jsx` (y `UnidadPreviewModal.jsx`, que fue el patrón original) se abren como bottom sheet de altura completa, con gesto de cierre arriba y esquinas redondeadas solo arriba; en desktop quedan centrados sin cambios.
+- **Tamaño táctil mínimo**: 44×44px en todo lo clickeable (botones, ítems de nav, celdas de acción). Nada de información que dependa solo de `:hover` para verse.
+- **Plano**: pinch-to-zoom táctil sobre el mismo estado `zoom` que usan los botones +/-/reset (ver `Dashboard.jsx`); el pan de una mano es el scroll nativo del contenedor.
 
 Layout del plano de carpas (definido con el dueño, sept 2026): 6 hileras y 3 pasillos. Hilera 1–25 sola (número izq). Pasillo A. Bloque 26–50 (número izq) + 51–75 (número der) espalda con espalda. Pasillo B (central, acceso al balneario, más ancho, alineado con ACCESO). Bloque 76–98 (número izq) + 99–121 (número der) espalda con espalda. Pasillo C. Hilera 122–144 (número der). Números siempre por fuera de los bloques. Header y barra del océano abarcan todo el ancho del plano. Sector Sombrillas: layout fijo, no se modifica. La numeración de carpas y sombrillas es la real del balneario y nunca se altera.
+
+### Instalable como app (sept 2026)
+`public/manifest.webmanifest` (nombre "Prius Playa Grande", corto "Prius", `display: standalone`, colores del fondo oscuro de la app) + meta tags de iOS en `index.html` (`apple-mobile-web-app-capable`, `apple-touch-icon`, etc.) para poder agregarla a la pantalla de inicio y que abra sin la barra del navegador. **Sin service worker ni cache offline a propósito**: la app depende de datos en tiempo real (Supabase Realtime), cachear una vista vieja sería peor que no tener nada.
 
 Impresión A4 del plano diario: la usan los carperos en la playa, reemplaza la planilla Excel diaria. Una sola hoja A4 vertical, blanco y negro estricto (sin rellenos ni íconos). Fecha arriba a la izquierda, plano con el mismo layout que en pantalla y letra T/P/D en cada casilla ocupada. Debajo del océano, listado alineado a la izquierda de períodos y días activos ese día (no temporadas), en dos columnas: carpas a la izquierda y sombrillas a la derecha. Formato "C.01 Nombre del dd/mm al dd/mm/aa" y "S.09 Nombre dd/mm/aa" para un solo día. Nunca más de una hoja.
 
