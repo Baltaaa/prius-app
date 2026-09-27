@@ -15,7 +15,6 @@ import Cell from "../components/dashboard/Cell"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import { useData } from "../context/DataProvider"
 import { coSocios } from "../lib/reservas"
-import { unidadEmoji } from "../lib/format"
 
 // El plano de playa solo dibuja carpas y sombrillas. Cabinas y lockers están
 // dentro del complejo y se manejan en su propia sección del CRM.
@@ -42,7 +41,6 @@ export default function Dashboard() {
   // actualiza solo si la reserva cambia por Realtime mientras está abierto
   // (ver CLAUDE.md "Modal de unidad en el Plano").
   const [selectedUnitId, setSelectedUnitId] = useState(null)
-  const [viewMode, setViewMode] = useState("map")
   const [zoom, setZoom] = useState(0.95)
   const [selectedDate, setSelectedDate] = useState(todayStr())
   const esHoy = selectedDate === todayStr()
@@ -191,10 +189,6 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="glass-card p-1 rounded-xl flex">
-            <button onClick={() => setViewMode("map")} className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${viewMode === "map" ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'}`}>Mapa</button>
-            <button onClick={() => setViewMode("list")} className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${viewMode === "list" ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'}`}>Lista</button>
-          </div>
           <button onClick={() => window.print()} className="glass-card px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"><Printer size={14} /> Imprimir A4</button>
         </div>
       </div>
@@ -205,7 +199,7 @@ export default function Dashboard() {
           <div className="flex-1 flex items-center justify-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">
             Cargando plano…
           </div>
-        ) : viewMode === "map" ? (
+        ) : (
           <>
             <div className="absolute top-6 right-6 z-20 flex flex-col gap-2">
               <button onClick={handleZoomIn} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
@@ -342,35 +336,6 @@ export default function Dashboard() {
               </div>
             </div>
           </>
-        ) : (
-          <div className="w-full h-full overflow-auto p-6">
-            <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 bg-[#0a0d14] z-10">
-                <tr className="border-b border-white/10 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                  <th className="px-6 py-4">Unidad</th>
-                  <th className="px-6 py-4">Titular</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4 text-right">Acción</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {Object.values(units).map(unit => (
-                  <tr key={unit.id} className="hover:bg-white/5 text-xs text-gray-300">
-                    <td className="px-6 py-4 font-bold uppercase">{unidadEmoji(unit.type)} {unit.type} #{unit.number}</td>
-                    <td className="px-6 py-4 uppercase">{unit.clientName || '-'}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${unit.status === STATUS.LIBRE ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-[#FDE047]/10 text-[#FDE047] border-[#FDE047]/20'}`}>
-                        {unit.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={() => handleUnitClick(unit)} className="text-[#FDE047] font-bold text-[10px] uppercase hover:underline">Administrar</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         )}
       </div>
 
