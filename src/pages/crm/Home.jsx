@@ -1,25 +1,54 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
 import { useCaja } from '../../hooks/useCaja'
 import KpiCard from '../../components/crm/KpiCard'
 import StatusBadge from '../../components/crm/StatusBadge'
+import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
 import { Calendar, Wallet, Users, AlertCircle, ArrowRight } from 'lucide-react'
-import { formatCurrency, formatDate } from '../../lib/format'
+import { formatCurrency, formatDate, unidadEmoji } from '../../lib/format'
+import { estadoBadgeStatus } from '../../lib/reservas'
 
 export default function Home() {
   const navigate = useNavigate()
   const { reservas, unidades, loading: resLoading } = useReservas()
   const { clientes, loading: cliLoading } = useClientes()
-  const { cajaHoy, loading: cajaLoading } = useCaja()
+  const { cajaHoy, historialCajas, loading: cajaLoading } = useCaja()
+  const [detalleReserva, setDetalleReserva] = useState(null)
 
   const unidadesOcupadasCount = unidades.filter(u => u.estado === 'ocupada' || u.estado === 'reservada').length
   const totalCajaHoy = cajaHoy ? cajaHoy.total_cobros : 0
   const reservasConSaldoCount = reservas.filter(r => Number(r.saldo) > 0).length
   const clientesCount = clientes.length
 
-  const recentReservas = reservas.slice(0, 5)
+  // Caja Diaria: % contra el mejor día de cobros registrado en el historial
+  // (nunca un techo inventado — si no hay historial más allá de hoy, no hay
+  // referencia honesta y la barra queda oculta).
+  const mejorDiaCaja = useMemo(
+    () => Math.max(0, ...historialCajas.filter(c => c.fecha !== cajaHoy?.fecha).map(c => Number(c.total_cobros) || 0)),
+    [historialCajas, cajaHoy],
+  )
+
+  // Saldos Pendientes: % del total facturado (valor_total de reservas activas)
+  // que sigue sin cobrarse — nunca un número de reservas suelto sin contexto.
+  const { totalFacturado, totalPendiente } = useMemo(() => {
+    let facturado = 0, pendiente = 0
+    for (const r of reservas) {
+      if (r.estado === 'cancelada') continue
+      facturado += Number(r.valor_total) || 0
+      pendiente += Number(r.saldo) || 0
+    }
+    return { totalFacturado: facturado, totalPendiente: pendiente }
+  }, [reservas])
+
+  // Solo reservas reales de la cola operativa (mismo criterio que Reservas.jsx:
+  // TIPOS_OPERATIVOS = ['periodo', 'dia']). Las altas de temporada cargadas
+  // desde Clientes son filas de `reservas` pero no aparecen en /app/reservas,
+  // así que "Ver Detalle" nunca las va a encontrar ahí — se excluyen acá.
+  const recentReservas = reservas
+    .filter((r) => r.tipo_alquiler === 'periodo' || r.tipo_alquiler === 'dia')
+    .slice(0, 5)
 
   if (resLoading || cliLoading || cajaLoading) {
     return (
@@ -31,32 +60,29 @@ export default function Home() {
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-white tracking-tight">Dashboard General</h1>
-        <p className="text-gray-400 text-sm mt-2">Resumen de métricas y actividades principales en tiempo real.</p>
-      </div>
-
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KpiCard
           title="Ocupación Total"
           value={`${unidadesOcupadasCount} / ${unidades.length}`}
-          subtitle="Carpas y sombrillas alquiladas"
+          subtitle="🏠 Carpas y ⛱️ sombrillas alquiladas"
           icon={Calendar}
           highlight
+          progress={unidades.length > 0 ? { value: unidadesOcupadasCount, max: unidades.length } : null}
         />
         <KpiCard
           title="Caja Diaria"
           value={formatCurrency(totalCajaHoy)}
           subtitle={cajaHoy ? 'Cobros registrados hoy' : 'Caja sin iniciar'}
           icon={Wallet}
+          progress={mejorDiaCaja > 0 ? { value: totalCajaHoy, max: mejorDiaCaja } : null}
         />
         <KpiCard
           title="Saldos Pendientes"
           value={reservasConSaldoCount}
           subtitle="Cuentas con saldo deudor"
           icon={AlertCircle}
+          progress={totalFacturado > 0 ? { value: totalPendiente, max: totalFacturado } : null}
         />
         <KpiCard
           title="Base de Clientes"
@@ -101,15 +127,15 @@ export default function Home() {
                     <td className="py-6 px-6 font-bold text-white uppercase tracking-tight">
                       {res.clientes?.nombre || 'CLIENTE S/N'}
                     </td>
-                    <td className="py-6 px-6">
-                      {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero || 'N/A'}
+                    <td className="py-6 px-6 uppercase">
+                      {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero ?? 'N/A'}
                     </td>
                     <td className="py-6 px-6">
-                      <StatusBadge status={res.estado_pago} />
+                      <StatusBadge status={estadoBadgeStatus(res)} />
                     </td>
                     <td className="py-6 px-6 text-right">
-                      <button 
-                        onClick={() => navigate('/app/reservas')}
+                      <button
+                        onClick={() => setDetalleReserva(res)}
                         className="text-[#FDE047] hover:text-white font-bold text-xs uppercase underline-offset-4 hover:underline transition-all"
                       >
                         Ver Detalle
@@ -122,6 +148,8 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      <ReservaDetalleModal reserva={detalleReserva} onClose={() => setDetalleReserva(null)} />
     </div>
   )
 }

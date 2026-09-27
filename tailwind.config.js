@@ -16,10 +16,15 @@ export default {
           background: '#F9F9F9',
         }
       },
+      // `display` es la fuente de marca para títulos H1 de pantalla (todas
+      // las pantallas del CRM + Login) — antes cada página heredaba
+      // Montserrat del body sin querer, y Home.jsx quedó suelto con
+      // font-serif (Fraunces) por accidente, sin relación con el resto.
+      // El cuerpo de texto sigue siendo Montserrat (body { font-family } en
+      // index.css) — este cambio es solo para títulos, no se tocó `sans`.
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'sans-serif'],
-        display: ['Exo', 'sans-serif'],
-        serif: ['Exo', 'sans-serif'],
+        display: ['Space Grotesk', 'sans-serif'],
       },
       borderRadius: {
         lg: '8px',

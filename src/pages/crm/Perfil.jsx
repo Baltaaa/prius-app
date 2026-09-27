@@ -23,11 +23,6 @@ export default function Perfil() {
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      <div>
-        <h1 className="text-4xl font-bold text-white tracking-tight">Perfil y Tarifas</h1>
-        <p className="text-gray-400 text-sm mt-2">Configuración de cuenta y valores de temporada.</p>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="glass-card p-8 rounded-3xl glass-card-inner space-y-8">
           <div className="flex items-center gap-6 border-b border-white/5 pb-8">
@@ -62,7 +57,7 @@ export default function Perfil() {
 
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Precio Base Carpa</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">🏠 Precio Base Carpa</label>
               <input
                 type="number"
                 value={tarifaCarpa}
@@ -71,7 +66,7 @@ export default function Perfil() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Precio Base Sombrilla</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">⛱️ Precio Base Sombrilla</label>
               <input
                 type="number"
                 value={tarifaSombrilla}

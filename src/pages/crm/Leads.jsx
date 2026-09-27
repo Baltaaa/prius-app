@@ -62,30 +62,27 @@ export default function Leads() {
 
   return (
     <div className="space-y-8 animate-premium-fade">
-      <div>
-        <h1 className="text-4xl font-bold text-white tracking-tight">Leads</h1>
-        <p className="text-gray-400 text-sm mt-2">
-          Consultas del formulario de la web, en tiempo real.
-          {sinContactar > 0 && (
-            <span className="ml-2 text-[#FDE047] font-semibold">{sinContactar} sin contactar</span>
-          )}
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {FILTROS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFiltro(f.key)}
-            className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${
-              filtro === f.key
-                ? 'bg-[#FDE047] text-black border-[#FDE047]'
-                : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap gap-2">
+          {FILTROS.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFiltro(f.key)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${
+                filtro === f.key
+                  ? 'bg-[#FDE047] text-black border-[#FDE047]'
+                  : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        {sinContactar > 0 && (
+          <p className="text-sm text-gray-400">
+            <span className="text-[#FDE047] font-semibold">{sinContactar} sin contactar</span>
+          </p>
+        )}
       </div>
 
       {visibles.length === 0 && (

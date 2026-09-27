@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
-import { formatCurrency, formatDate } from '../../lib/format'
+import { formatCurrency, formatDate, unidadEmoji } from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
-import { Printer, FileText, CheckCircle } from 'lucide-react'
+import { pagoSinVerificar, tienePagoSinVerificar } from '../../lib/reservas'
+import MontoReserva from '../../components/crm/MontoReserva'
+import SaldoReserva from '../../components/crm/SaldoReserva'
+import { Printer, FileText, CheckCircle, HelpCircle } from 'lucide-react'
 
 export default function Comprobantes() {
   const { reservas, loading } = useReservas()
@@ -25,37 +28,32 @@ export default function Comprobantes() {
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 no-print">
-        <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">Emisión de Comprobantes</h1>
-          <p className="text-gray-400 text-sm mt-2">Generación de recibos oficiales para clientes.</p>
-        </div>
-
-        {selectedReserva && (
-          <button
-            onClick={() => window.print()}
-            className="bg-[#FDE047] hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl"
-          >
-            <Printer size={18} /> Imprimir Comprobante
-          </button>
-        )}
-      </div>
-
-      {/* Select Reserva Control */}
+      {/* Select Reserva Control + acción de impresión, en una sola fila */}
       <div className="glass-card p-6 rounded-2xl glass-card-inner space-y-2 no-print">
-        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Contrato de Reserva</label>
-        <select
-          value={selectedReservaId}
-          onChange={(e) => setSelectedReservaId(e.target.value)}
-          className="w-full max-w-xl px-4 py-3 bg-white/5 border border-white/10 text-white text-sm font-bold rounded-xl focus:border-[#FDE047]/50 outline-none uppercase"
-        >
-          {reservas.map(r => (
-            <option key={r.id} value={r.id} className="bg-[#0a0d14]">
-              {r.clientes?.nombre || 'S/N'} — {r.unidades?.tipo} #{r.unidades?.numero} ({r.temporada})
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex-1 min-w-[240px] space-y-2">
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Contrato de Reserva</label>
+            <select
+              value={selectedReservaId}
+              onChange={(e) => setSelectedReservaId(e.target.value)}
+              className="w-full max-w-xl px-4 py-3 bg-white/5 border border-white/10 text-white text-sm font-bold rounded-xl focus:border-[#FDE047]/50 outline-none uppercase"
+            >
+              {reservas.map(r => (
+                <option key={r.id} value={r.id} className="bg-[#0a0d14]">
+                  {r.clientes?.nombre || 'S/N'} — {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero} ({r.temporada})
+                </option>
+              ))}
+            </select>
+          </div>
+          {selectedReserva && (
+            <button
+              onClick={() => window.print()}
+              className="bg-[#FDE047] hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
+            >
+              <Printer size={18} /> Imprimir Comprobante
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Printable Voucher Ticket */}
@@ -96,30 +94,46 @@ export default function Comprobantes() {
             <div className="space-y-4">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-1">Detalle del Alquiler</p>
               <div>
-                <p className="font-bold text-base uppercase text-white print:text-black">{selectedReserva.unidades?.tipo || 'Unidad'} #{selectedReserva.unidades?.numero || 'N/A'}</p>
+                <p className="font-bold text-base uppercase text-white print:text-black">{unidadEmoji(selectedReserva.unidades?.tipo)} {selectedReserva.unidades?.tipo || 'Unidad'} #{selectedReserva.unidades?.numero || 'N/A'}</p>
                 <div className="text-xs text-gray-400 space-y-1 mt-2 print:text-black">
                   <p>Temporada: {selectedReserva.temporada}</p>
-                  <p>Ingreso: {selectedReserva.fecha_inicio || 'T. Completa'}</p>
+                  <p>
+                    Ingreso:{' '}
+                    {selectedReserva.tipo_alquiler === 'periodo'
+                      ? `${formatDate(selectedReserva.fecha_inicio)} al ${formatDate(selectedReserva.fecha_fin)}`
+                      : selectedReserva.tipo_alquiler === 'dia'
+                        ? formatDate(selectedReserva.fecha)
+                        : 'Temporada Completa'}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Pricing breakdown */}
+          {/* Pricing breakdown — siempre derivado de estado_pago + pagos
+              reales (MontoReserva/SaldoReserva), nunca de `valor_total`/
+              `saldo` en crudo: para temporada migrada del excel histórico
+              esos campos pueden estar vacíos o contradecir el estado real. */}
           <div className="space-y-3">
             <div className="flex justify-between py-2 border-b border-white/5 print:border-black">
               <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Monto Total Contratado:</span>
-              <strong className="text-sm font-bold text-white print:text-black">{formatCurrency(selectedReserva.valor_total)}</strong>
+              <MontoReserva reserva={selectedReserva} className="text-sm font-bold text-white print:text-black" />
             </div>
             <div className="flex justify-between py-2 border-b border-white/5 print:border-black">
               <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Monto Abonado:</span>
-              <strong className="text-sm font-bold text-green-400 print:text-black">{formatCurrency(Number(selectedReserva.valor_total) - Number(selectedReserva.saldo))}</strong>
+              {tienePagoSinVerificar(pagosReserva) ? (
+                <strong className="inline-flex items-center gap-1.5 text-gray-500 text-xs uppercase tracking-widest">
+                  <HelpCircle size={13} /> Sin verificar
+                </strong>
+              ) : (
+                <strong className="text-sm font-bold text-green-400 print:text-black">
+                  {formatCurrency(pagosReserva.reduce((acc, p) => acc + Number(p.monto || 0), 0))}
+                </strong>
+              )}
             </div>
             <div className="flex justify-between py-4 pt-6">
               <span className="text-sm text-gray-300 font-bold uppercase tracking-[0.2em]">Saldo Pendiente:</span>
-              <strong className={`text-xl font-bold ${Number(selectedReserva.saldo) > 0 ? 'text-[#FDE047]' : 'text-green-400'} print:text-black`}>
-                {formatCurrency(selectedReserva.saldo)}
-              </strong>
+              <SaldoReserva reserva={selectedReserva} pagos={pagosReserva} className="text-xl print:text-black" />
             </div>
           </div>
 
@@ -136,7 +150,13 @@ export default function Comprobantes() {
                       {p.comprobante && <span> · Comp. {p.comprobante}</span>}
                       {p.nro_cuota && <span> · Cuota {p.nro_cuota}</span>}
                     </div>
-                    <strong className="text-green-400">{formatCurrency(p.monto)}</strong>
+                    {pagoSinVerificar(p) ? (
+                      <strong className="inline-flex items-center gap-1.5 text-gray-500 text-[11px] uppercase tracking-widest">
+                        <HelpCircle size={12} /> Sin verificar
+                      </strong>
+                    ) : (
+                      <strong className="text-green-400">{formatCurrency(p.monto)}</strong>
+                    )}
                   </div>
                 ))}
               </div>

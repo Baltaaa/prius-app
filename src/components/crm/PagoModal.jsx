@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { usePagos } from '../../hooks/usePagos'
-import { formatCurrency, formatDate } from '../../lib/format'
+import { formatCurrency, formatDate, unidadEmoji } from '../../lib/format'
 import { MEDIO_PAGO_LABEL, formatMedioPago } from '../../lib/pagos'
 import Modal from './Modal'
 import CurrencyInput from './CurrencyInput'
+import { useDialog } from '../../context/DialogProvider'
 
 const MEDIOS = Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => ({ value, label }))
 const CUOTAS_SUGERIDAS = [1, 3, 6, 12]
@@ -22,6 +23,7 @@ const inputClass =
 // return distinto adentro del mismo componente.
 export default function PagoModal({ isOpen, onClose, reservasOptions = [], initialReservaId = '', pagoExistente = null }) {
   const { createPago } = usePagos()
+  const { alert } = useDialog()
 
   const [reservaId, setReservaId] = useState(initialReservaId)
   const [monto, setMonto] = useState(0)
@@ -70,7 +72,7 @@ export default function PagoModal({ isOpen, onClose, reservasOptions = [], initi
             <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
               <p className="text-sm font-bold text-white uppercase">{reservaSeleccionada.clientes?.nombre || 'S/N'}</p>
               <p className="text-xs text-gray-400 mt-1">
-                {reservaSeleccionada.unidades?.tipo} #{reservaSeleccionada.unidades?.numero}
+                {unidadEmoji(reservaSeleccionada.unidades?.tipo)} {reservaSeleccionada.unidades?.tipo} #{reservaSeleccionada.unidades?.numero}
               </p>
             </div>
           )}
@@ -116,7 +118,7 @@ export default function PagoModal({ isOpen, onClose, reservasOptions = [], initi
       })
       onClose()
     } catch (err) {
-      alert('No se pudo registrar el pago.')
+      await alert('No se pudo registrar el pago.')
     } finally {
       setSaving(false)
     }
@@ -137,7 +139,7 @@ export default function PagoModal({ isOpen, onClose, reservasOptions = [], initi
               <option value="" disabled>Seleccionar...</option>
               {reservasOptions.map((r) => (
                 <option key={r.id} value={r.id} className="bg-[#0a0d14]">
-                  {r.clientes?.nombre || 'S/N'} — {r.unidades?.tipo} #{r.unidades?.numero} (saldo {formatCurrency(r.saldo)})
+                  {r.clientes?.nombre || 'S/N'} — {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero} (saldo {formatCurrency(r.saldo)})
                 </option>
               ))}
             </select>
@@ -146,7 +148,7 @@ export default function PagoModal({ isOpen, onClose, reservasOptions = [], initi
           <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
             <p className="text-sm font-bold text-white uppercase">{reservaSeleccionada.clientes?.nombre || 'S/N'}</p>
             <p className="text-xs text-gray-400 mt-1">
-              {reservaSeleccionada.unidades?.tipo} #{reservaSeleccionada.unidades?.numero} &bull; Saldo actual: {formatCurrency(reservaSeleccionada.saldo)}
+              {unidadEmoji(reservaSeleccionada.unidades?.tipo)} {reservaSeleccionada.unidades?.tipo} #{reservaSeleccionada.unidades?.numero} &bull; Saldo actual: {formatCurrency(reservaSeleccionada.saldo)}
             </p>
           </div>
         ) : (

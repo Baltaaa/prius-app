@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { Download, BarChart3 } from 'lucide-react'
 import KpiCard from '../../components/crm/KpiCard'
-import { formatCurrency } from '../../lib/format'
+import { formatCurrency, unidadEmoji } from '../../lib/format'
 
 export default function Reportes() {
   const { reservas, loading } = useReservas()
@@ -39,9 +39,13 @@ export default function Reportes() {
     URL.revokeObjectURL(url)
   }
 
+  // Las reservas bonificadas (valor_total=0 forzado por la base) no aportan
+  // facturación ni deuda — se excluyen explícitamente acá para que el
+  // reporte no dependa de que ese 0 se mantenga siempre así en la base.
   const { totalIngresosEsperados, totalSaldosPendientes, totalCobrado } = useMemo(() => {
-    const ingresos = activeReservas.reduce((acc, curr) => acc + Number(curr.valor_total || 0), 0)
-    const saldos = activeReservas.reduce((acc, curr) => acc + Number(curr.saldo || 0), 0)
+    const facturables = activeReservas.filter((r) => !r.bonificada)
+    const ingresos = facturables.reduce((acc, curr) => acc + Number(curr.valor_total || 0), 0)
+    const saldos = facturables.reduce((acc, curr) => acc + Number(curr.saldo || 0), 0)
     return { totalIngresosEsperados: ingresos, totalSaldosPendientes: saldos, totalCobrado: ingresos - saldos }
   }, [activeReservas])
 
@@ -49,20 +53,6 @@ export default function Reportes() {
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">Reportes</h1>
-          <p className="text-gray-400 text-sm mt-2">Métricas avanzadas de facturación y ocupación.</p>
-        </div>
-        <button
-          onClick={handleExportCSV}
-          disabled={activeReservas.length === 0}
-          className="glass-card px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#FDE047] hover:text-black transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white"
-        >
-          <Download size={16} /> Exportar CSV
-        </button>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KpiCard title="Facturación Bruta" value={formatCurrency(totalIngresosEsperados)} icon={BarChart3} highlight />
         <KpiCard title="Total Cobrado" value={formatCurrency(totalCobrado)} icon={BarChart3} />
@@ -70,16 +60,25 @@ export default function Reportes() {
       </div>
 
       <div className="glass-card p-8 rounded-3xl glass-card-inner">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
           <h2 className="text-sm font-bold uppercase tracking-widest text-white">Detalle de Contratos</h2>
-          <select 
-            value={temporadaFilter} 
-            onChange={(e) => setTemporadaFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs font-bold uppercase text-gray-400 outline-none focus:border-[#FDE047]"
-          >
-            <option value="all">Todas las temporadas</option>
-            <option value="2025-2026">2025-2026</option>
-          </select>
+          <div className="flex items-center gap-3">
+            <select
+              value={temporadaFilter}
+              onChange={(e) => setTemporadaFilter(e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs font-bold uppercase text-gray-400 outline-none focus:border-[#FDE047]"
+            >
+              <option value="all">Todas las temporadas</option>
+              <option value="2025-2026">2025-2026</option>
+            </select>
+            <button
+              onClick={handleExportCSV}
+              disabled={activeReservas.length === 0}
+              className="glass-card px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#FDE047] hover:text-black transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white"
+            >
+              <Download size={16} /> Exportar CSV
+            </button>
+          </div>
         </div>
         
         <div className="overflow-x-auto">
@@ -95,7 +94,7 @@ export default function Reportes() {
             {activeReservas.map(res => (
               <tr key={res.id} className="hover:bg-white/5 transition-all">
                 <td className="px-6 py-4 font-bold uppercase text-white">{res.clientes?.nombre}</td>
-                <td className="px-6 py-4 uppercase font-medium">{res.unidades?.tipo} #{res.unidades?.numero}</td>
+                <td className="px-6 py-4 uppercase font-medium">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
                 <td className="px-6 py-4 text-right font-bold text-[#FDE047]">{formatCurrency(res.valor_total)}</td>
               </tr>
             ))}

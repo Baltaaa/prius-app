@@ -13,8 +13,8 @@ const Reservas = lazy(() => import('./pages/crm/Reservas'))
 const Clientes = lazy(() => import('./pages/crm/Clientes'))
 const Caja = lazy(() => import('./pages/crm/Caja'))
 const Reportes = lazy(() => import('./pages/crm/Reportes'))
-const Calendario = lazy(() => import('./pages/crm/Calendario'))
 const Actividad = lazy(() => import('./pages/crm/Actividad'))
+const Ocupacion = lazy(() => import('./pages/crm/Ocupacion'))
 const Leads = lazy(() => import('./pages/crm/Leads'))
 const Notificaciones = lazy(() => import('./pages/crm/Notificaciones'))
 const Comprobantes = lazy(() => import('./pages/crm/Comprobantes'))
@@ -47,7 +47,7 @@ export default function App() {
             <Route path="leads" element={<Leads />} />
 
             {/* Módulos Nuevos */}
-            <Route path="calendario" element={<Calendario />} />
+            <Route path="ocupacion" element={<Ocupacion />} />
             <Route path="actividad" element={<Actividad />} />
             <Route path="notificaciones" element={<Notificaciones />} />
             <Route path="comprobantes" element={<Comprobantes />} />

@@ -14,10 +14,17 @@ import { supabase } from '../lib/supabase'
   del mismo lugar. Suscripción Realtime para "single write, multiple reactive reads".
 */
 
+// clientes!reservas_cliente_id_fkey: desambigua el embed — hay dos caminos
+// posibles entre reservas y clientes (la FK directa reservas.cliente_id y la
+// tabla puente reserva_clientes), PostgREST tira PGRST201 si no se especifica
+// cuál. cliente_id sigue siendo el titular/responsable de la reserva.
+// reserva_clientes trae además la lista completa de co-socios vinculados a
+// esa unidad (titular incluido) — ver lib/reservas.js `coSocios()`.
 const RESERVA_SELECT = `
   *,
-  clientes (id, nombre, telefono, cuit, mail),
-  unidades (id, numero, tipo, zona)
+  clientes!reservas_cliente_id_fkey (id, nombre, telefono, cuit, mail),
+  unidades (id, numero, tipo, zona),
+  reserva_clientes (cliente_id, clientes (id, nombre))
 `
 
 const DataContext = createContext(null)
@@ -29,9 +36,12 @@ export function DataProvider({ children }) {
   const [cajaHoy, setCajaHoy] = useState(null)
   const [historialCajas, setHistorialCajas] = useState([])
   const [gastos, setGastos] = useState([])
+  const [todosGastos, setTodosGastos] = useState([])
+  const [ingresosCaja, setIngresosCaja] = useState([])
   const [eventos, setEventos] = useState([])
   const [leads, setLeads] = useState([])
   const [pagos, setPagos] = useState([])
+  const [temporadas, setTemporadas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -75,6 +85,22 @@ export function DataProvider({ children }) {
     setHistorialCajas(hist || [])
   }, [todayStr])
 
+  // Historial de Caja Diaria (navegación por fecha): egresos e ingresos de
+  // TODOS los días, no solo el de hoy. `gastos` (arriba) sigue siendo solo
+  // los de `cajaHoy`, para no tocar el flujo de "Registrar Egreso" existente.
+  const fetchTodosGastos = useCallback(async () => {
+    const { data } = await supabase.from('gastos_caja').select('*').order('created_at', { ascending: false })
+    setTodosGastos(data || [])
+  }, [])
+
+  // Ingresos itemizados de caja (Fase 2, cruce con pagos): cada pago en
+  // efectivo/tarjeta/transferencia genera acá su fila vía el trigger
+  // fn_pago_crea_ingreso_caja — nada se carga a mano desde el front.
+  const fetchIngresosCaja = useCallback(async () => {
+    const { data } = await supabase.from('ingresos_caja').select('*').order('created_at', { ascending: false })
+    setIngresosCaja(data || [])
+  }, [])
+
   // Línea de tiempo del CRM: log de eventos (tabla `eventos`, escrita por triggers).
   const fetchEventos = useCallback(async () => {
     const { data } = await supabase
@@ -108,11 +134,21 @@ export function DataProvider({ children }) {
     setPagos(data || [])
   }, [])
 
+  // Temporadas (Frente 2): entidad real en vez del string suelto
+  // reservas.temporada. Alta de reserva/caja nueva toma sola la que tenga
+  // estado='activa' (trigger fn_reserva_asigna_temporada / fn_caja_asigna_temporada,
+  // no se elige a mano en la UI) — este fetch es solo para leerla y mostrarla.
+  const fetchTemporadas = useCallback(async () => {
+    const { data } = await supabase.from('temporadas').select('*').order('fecha_inicio', { ascending: false })
+    setTemporadas(data || [])
+  }, [])
+
   const refetchAll = useCallback(async () => {
     setLoading(true)
     try {
       await Promise.all([
         fetchUnidades(), fetchReservas(), fetchClientes(), fetchCaja(), fetchEventos(), fetchLeads(), fetchPagos(),
+        fetchTodosGastos(), fetchIngresosCaja(), fetchTemporadas(),
       ])
       setError(null)
     } catch (err) {
@@ -121,7 +157,7 @@ export function DataProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos])
+  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos, fetchTodosGastos, fetchIngresosCaja, fetchTemporadas])
 
   useEffect(() => { refetchAll() }, [refetchAll])
 
@@ -144,11 +180,13 @@ export function DataProvider({ children }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'caja_diaria' },
         () => debouncedRefetch('caja', fetchCaja))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos_caja' },
-        () => debouncedRefetch('caja', fetchCaja))
+        () => { debouncedRefetch('caja', fetchCaja); debouncedRefetch('todosGastos', fetchTodosGastos) })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos' },
         () => debouncedRefetch('eventos', fetchEventos))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pagos' },
         () => debouncedRefetch('pagos', fetchPagos))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ingresos_caja' },
+        () => { debouncedRefetch('ingresosCaja', fetchIngresosCaja); debouncedRefetch('caja', fetchCaja) })
       .subscribe()
 
     // `leads` va en su propio canal: un binding postgres_changes sobre una tabla
@@ -166,7 +204,7 @@ export function DataProvider({ children }) {
       supabase.removeChannel(channel)
       supabase.removeChannel(leadsChannel)
     }
-  }, [debouncedRefetch, fetchReservas, fetchUnidades, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos])
+  }, [debouncedRefetch, fetchReservas, fetchUnidades, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos, fetchTodosGastos, fetchIngresosCaja])
 
   // ---- Mutaciones (optimistas; realtime concilia el resto) ----
 
@@ -188,11 +226,27 @@ export function DataProvider({ children }) {
     return data[0]
   }, [])
 
+  // Hard delete real: borra la fila de reservas y (via FK cascade en la DB,
+  // pagos.reserva_id / ingresos_caja.*) sus pagos e ingresos de caja
+  // asociados, todo en la misma transacción implícita del DELETE. Nunca toca
+  // clientes (reservas.cliente_id es ON DELETE SET NULL).
   const deleteReserva = useCallback(async (id) => {
     const { error } = await supabase.from('reservas').delete().eq('id', id)
     if (error) throw error
     // El trigger libera la unidad al borrarse la reserva; Realtime concilia.
     setReservas((prev) => prev.filter((r) => r.id !== id))
+  }, [])
+
+  // Soft delete: no borra la fila ni sus pagos (queda para caja/reportes/
+  // histórico) — solo pasa estado a 'cancelada'. Libera la unidad (trigger
+  // trg_reserva_actualiza_unidad, que solo cuenta reservas vigentes) y el
+  // rango de fechas del exclusion constraint de no-solapamiento (que también
+  // filtra por estado='activa').
+  const cancelarReserva = useCallback(async (id) => {
+    const { data, error } = await supabase.from('reservas').update({ estado: 'cancelada' }).eq('id', id).select(RESERVA_SELECT)
+    if (error) throw error
+    setReservas((prev) => prev.map((r) => (r.id === id ? data[0] : r)))
+    return data[0]
   }, [])
 
   const createCliente = useCallback(async (cliente) => {
@@ -216,6 +270,14 @@ export function DataProvider({ children }) {
     setClientes((prev) => prev.filter((c) => c.id !== id))
   }, [])
 
+  // unidades.id <- reservas.unidad_id es ON DELETE SET NULL: borrar una
+  // unidad no borra sus reservas históricas, solo les saca la referencia.
+  const deleteUnidad = useCallback(async (id) => {
+    const { error } = await supabase.from('unidades').delete().eq('id', id)
+    if (error) throw error
+    setUnidades((prev) => prev.filter((u) => u.id !== id))
+  }, [])
+
   const iniciarCaja = useCallback(async () => {
     const newCaja = {
       fecha: todayStr, efectivo: 0, medio_pago_1: 0, medio_pago_2: 0,
@@ -228,12 +290,15 @@ export function DataProvider({ children }) {
     return data[0]
   }, [todayStr])
 
+  // total_neto ya no se calcula a mano acá: lo recalcula siempre
+  // trg_caja_calcula_totales (BEFORE UPDATE en caja_diaria) a partir de
+  // saldo_apertura + total_cobros - total_gastos — un solo lugar para esa
+  // cuenta (Task 3), en vez de repetirla en cada mutación del front.
   const actualizarCajaValores = useCallback(async (updates) => {
     if (!cajaHoy) return
     const total_cobros =
       Number(updates.efectivo || 0) + Number(updates.medio_pago_1 || 0) + Number(updates.medio_pago_2 || 0)
-    const finalUpdates = { ...updates, total_cobros, total_neto: total_cobros - Number(cajaHoy.total_gastos || 0) }
-    const { data, error } = await supabase.from('caja_diaria').update(finalUpdates).eq('id', cajaHoy.id).select()
+    const { data, error } = await supabase.from('caja_diaria').update({ ...updates, total_cobros }).eq('id', cajaHoy.id).select()
     if (error) throw error
     setCajaHoy(data[0])
     setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? data[0] : c)))
@@ -246,11 +311,10 @@ export function DataProvider({ children }) {
       .from('gastos_caja').insert([{ caja_id: cajaHoy.id, descripcion, monto: Number(monto) }]).select()
     if (error) throw error
     const nuevoTotalGastos = Number(cajaHoy.total_gastos) + Number(monto)
-    const { data: updated } = await supabase.from('caja_diaria').update({
-      total_gastos: nuevoTotalGastos,
-      total_neto: Number(cajaHoy.total_cobros) - nuevoTotalGastos,
-    }).eq('id', cajaHoy.id).select()
+    const { data: updated } = await supabase.from('caja_diaria')
+      .update({ total_gastos: nuevoTotalGastos }).eq('id', cajaHoy.id).select()
     setGastos((prev) => [...prev, data[0]])
+    setTodosGastos((prev) => [data[0], ...prev])
     setCajaHoy(updated[0])
     setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? updated[0] : c)))
   }, [cajaHoy])
@@ -260,11 +324,10 @@ export function DataProvider({ children }) {
     const { error } = await supabase.from('gastos_caja').delete().eq('id', gastoId)
     if (error) throw error
     const nuevoTotalGastos = Math.max(0, Number(cajaHoy.total_gastos) - Number(monto))
-    const { data: updated } = await supabase.from('caja_diaria').update({
-      total_gastos: nuevoTotalGastos,
-      total_neto: Number(cajaHoy.total_cobros) - nuevoTotalGastos,
-    }).eq('id', cajaHoy.id).select()
+    const { data: updated } = await supabase.from('caja_diaria')
+      .update({ total_gastos: nuevoTotalGastos }).eq('id', cajaHoy.id).select()
     setGastos((prev) => prev.filter((g) => g.id !== gastoId))
+    setTodosGastos((prev) => prev.filter((g) => g.id !== gastoId))
     setCajaHoy(updated[0])
     setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? updated[0] : c)))
   }, [cajaHoy])
@@ -301,20 +364,26 @@ export function DataProvider({ children }) {
     return data[0]
   }, [fetchLeads])
 
+  const temporadaActiva = useMemo(() => temporadas.find((t) => t.estado === 'activa') || null, [temporadas])
+
   const value = useMemo(() => ({
-    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, eventos, leads, pagos, loading, error,
-    createReserva, updateReserva, deleteReserva,
-    createCliente, updateCliente, deleteCliente,
+    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
+    eventos, leads, pagos, temporadas, temporadaActiva, loading, error,
+    createReserva, updateReserva, deleteReserva, cancelarReserva,
+    createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, actualizarCajaValores, agregarGasto, eliminarGasto, cerrarCaja,
     updateLead, createPago,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
+    fetchTodosGastos, fetchIngresosCaja, fetchTemporadas,
   }), [
-    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, eventos, leads, pagos, loading, error,
-    createReserva, updateReserva, deleteReserva,
-    createCliente, updateCliente, deleteCliente,
+    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
+    eventos, leads, pagos, temporadas, temporadaActiva, loading, error,
+    createReserva, updateReserva, deleteReserva, cancelarReserva,
+    createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, actualizarCajaValores, agregarGasto, eliminarGasto, cerrarCaja,
     updateLead, createPago,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
+    fetchTodosGastos, fetchIngresosCaja, fetchTemporadas,
   ])
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

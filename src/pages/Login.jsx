@@ -106,7 +106,7 @@ export default function Login() {
               <img src="/images/prius-icon.png" alt="P" className="w-full h-full object-contain shadow-[0_0_20px_rgba(253,224,71,0.15)] rounded-full" />
             </div>
             <div className="flex items-center gap-2">
-               <span className="text-xl font-bold text-white italic">Prius<span className="text-[#FDE047] not-italic font-medium">App</span></span>
+               <span className="text-xl font-display font-extrabold text-white">Prius<span className="text-[#FDE047] font-semibold">App</span></span>
                
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function Login() {
           {mode === "login" ? (
             <div className="space-y-8 relative z-10">
               <div>
-                <h1 className="text-5xl font-bold text-white tracking-tight mb-2">Iniciar sesión</h1>
+                <h1 className="text-5xl font-display font-extrabold text-white tracking-tight mb-2">Iniciar sesión</h1>
                 <p className="text-white/50 text-sm font-medium">Acceso exclusivo para el equipo Prius.</p>
               </div>
 
@@ -197,7 +197,7 @@ export default function Login() {
           ) : (
             <div className="space-y-8 relative z-10">
               <div>
-                <h2 className="text-3xl font-bold text-white tracking-tight mb-2">Recuperar cuenta</h2>
+                <h2 className="text-3xl font-display font-extrabold text-white tracking-tight mb-2">Recuperar cuenta</h2>
                 <p className="text-white/50 text-sm">Enviaremos un enlace seguro a tu email.</p>
               </div>
 

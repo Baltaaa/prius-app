@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 import { X, Umbrella, Home, MessageSquare } from "lucide-react"
+import ConfirmDeleteModal from "../crm/ConfirmDeleteModal"
+import { unidadEmoji } from "../../lib/format"
 
 // Carga rápida de reserva desde el plano (CRM interno, no pasa por Edge Function).
 // Al confirmar devuelve un payload plano; Dashboard.jsx hace el INSERT en reservas
@@ -13,6 +15,7 @@ const TIPOS = [
 
 export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
   const tieneReserva = Boolean(unit?.reservaId)
+  const [showLiberarConfirm, setShowLiberarConfirm] = useState(false)
 
   const [clienteNombre, setClienteNombre] = useState(unit?.clientName || "")
   const [clienteTelefono, setClienteTelefono] = useState(unit?.clientPhone || "")
@@ -64,7 +67,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
     })
   }
 
-  const handleLiberar = () => {
+  const handleConfirmLiberar = () => {
     onSave({ action: "liberar", reservaId: unit?.reservaId || null, dbId: unit?.dbId })
   }
 
@@ -77,7 +80,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
           : `Del ${fechaInicio} al ${fechaFin}`
     const text =
       `Hola ${clienteNombre || "Cliente"}, te confirmamos tu reserva en Prius Playa Grande:\n\n` +
-      `📍 Unidad: ${unit?.type === "sombrilla" ? "Sombrilla" : "Carpa"} #${unit?.number}\n` +
+      `📍 Unidad: ${unidadEmoji(unit?.type)} ${unit?.type === "sombrilla" ? "Sombrilla" : "Carpa"} #${unit?.number}\n` +
       `📅 ${detalleFechas}\n` +
       `💳 Estado de Pago: ${pagado ? "PAGADO" : "PENDIENTE"}\n\n` +
       `¡Te esperamos para disfrutar de la mejor experiencia de costa! 🌊☀️`
@@ -88,6 +91,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
   }
 
   return createPortal(
+    <>
     <div
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-[999] p-4 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
@@ -99,7 +103,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
           <h2 className="text-sm font-bold flex items-center gap-2 uppercase tracking-[0.2em] text-[#FDE047]">
             {unit?.type === "sombrilla" ? <Umbrella size={18} /> : <Home size={18} />}
-            {unit?.type === "sombrilla" ? "Sombrilla" : "Carpa"} #{unit?.number}
+            {unidadEmoji(unit?.type)} {unit?.type === "sombrilla" ? "Sombrilla" : "Carpa"} #{unit?.number}
           </h2>
           <button
             onClick={onClose}
@@ -134,6 +138,13 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
                   : " "}
             </p>
           </div>
+
+          {unit?.coSocios?.length > 0 && (
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Co-socios</label>
+              <p className="text-xs text-white uppercase">{unit.coSocios.join(', ')}</p>
+            </div>
+          )}
 
           {esClienteNuevo && (
             <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-200">
@@ -266,7 +277,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
             {tieneReserva && (
               <button
                 type="button"
-                onClick={handleLiberar}
+                onClick={() => setShowLiberarConfirm(true)}
                 className="flex-1 py-4 border border-white/10 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all text-gray-400"
               >
                 Liberar Unidad
@@ -282,7 +293,17 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
           </div>
         </form>
       </div>
-    </div>,
+    </div>
+
+      <ConfirmDeleteModal
+        isOpen={showLiberarConfirm}
+        onClose={() => setShowLiberarConfirm(false)}
+        onConfirm={handleConfirmLiberar}
+        tipo="reserva"
+        identificador={unit?.clientName || ''}
+        detalle={`Se elimina la reserva de ${unidadEmoji(unit?.type)} ${unit?.type === "sombrilla" ? "la sombrilla" : "la carpa"} #${unit?.number} y sus pagos asociados. No se puede deshacer.`}
+      />
+    </>,
     document.body,
   )
 }

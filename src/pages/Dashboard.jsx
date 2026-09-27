@@ -1,37 +1,75 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { supabase } from "../lib/supabase"
-import { Printer, Plus, Minus, Maximize } from "lucide-react"
+import { Printer, Plus, Minus, Maximize, ChevronLeft, ChevronRight } from "lucide-react"
 
-import { STATUS } from "../components/dashboard/constants"
-import UnitModal from "../components/dashboard/UnitModal"
+import {
+  STATUS,
+  PLANO_COL_WIDTH,
+  PLANO_PASILLO_LATERAL,
+  PLANO_PASILLO_CENTRAL,
+  PLANO_BLOQUE_GAP,
+  PLANO_SECTOR_WIDTH,
+} from "../components/dashboard/constants"
+import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
 import Cell from "../components/dashboard/Cell"
+import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import { useData } from "../context/DataProvider"
+import { coSocios } from "../lib/reservas"
+import { unidadEmoji } from "../lib/format"
 
 // El plano de playa solo dibuja carpas y sombrillas. Cabinas y lockers están
 // dentro del complejo y se manejan en su propia sección del CRM.
 const PREFIJO = { carpa: "C", sombrilla: "S" }
 
-function temporadaActual() {
-  const now = new Date()
-  const y = now.getFullYear()
-  return now.getMonth() >= 8 ? `${y}/${y + 1}` : `${y - 1}/${y}`
+const todayStr = () => new Date().toISOString().split("T")[0]
+
+// Rango inclusivo de números de unidad, reutilizado por cada hilera del plano.
+const range = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => start + i)
+
+// Mismo helper que Caja.jsx: suma/resta un día a una fecha yyyy-mm-dd sin
+// líos de timezone.
+const shiftDate = (fecha, delta) => {
+  const d = new Date(fecha + "T00:00:00")
+  d.setDate(d.getDate() + delta)
+  return d.toISOString().split("T")[0]
 }
 
 export default function Dashboard() {
-  const {
-    unidades,
-    reservas,
-    clientes,
-    loading,
-    createReserva,
-    updateReserva,
-    deleteReserva,
-    createCliente,
-  } = useData()
+  const { unidades, reservas, loading, temporadaActiva } = useData()
 
-  const [selectedUnit, setSelectedUnit] = useState(null)
+  // Se guarda el ID, no una copia de `units[...]`: así el modal de preview
+  // sigue leyendo el objeto vivo del useMemo de abajo en cada render y se
+  // actualiza solo si la reserva cambia por Realtime mientras está abierto
+  // (ver CLAUDE.md "Modal de unidad en el Plano").
+  const [selectedUnitId, setSelectedUnitId] = useState(null)
   const [viewMode, setViewMode] = useState("map")
-  const [zoom, setZoom] = useState(0.85)
+  const [zoom, setZoom] = useState(0.95)
+  const [selectedDate, setSelectedDate] = useState(todayStr())
+  const esHoy = selectedDate === todayStr()
+
+  // Deslizamiento del mapa al cambiar de fecha: animación por clase CSS sobre
+  // un wrapper (ver index.css), nunca por `key` — un `key` en un ancestro de
+  // las ~184 Cell forzaría un remount completo y ahí sí habría lag.
+  const mapSlideRef = useRef(null)
+  const mapSlideTimeoutRef = useRef(null)
+  const slideMap = (direction) => {
+    const el = mapSlideRef.current
+    if (!el) return
+    const cls = direction === "forward" ? "plano-slide-left" : "plano-slide-right"
+    el.classList.remove("plano-slide-left", "plano-slide-right")
+    void el.offsetWidth // fuerza reflow para poder re-disparar la misma animación en clicks seguidos
+    el.classList.add(cls)
+    // Fallback además de onAnimationEnd: en una pestaña sin foco (o con
+    // "prefers-reduced-motion") el evento animationend puede no llegar a
+    // tiempo — igual hay que soltar la clase para no dejarla pegada.
+    clearTimeout(mapSlideTimeoutRef.current)
+    mapSlideTimeoutRef.current = setTimeout(() => el.classList.remove("plano-slide-left", "plano-slide-right"), 250)
+  }
+  const goToDate = (newDate) => {
+    if (newDate === selectedDate) return
+    slideMap(newDate > selectedDate ? "forward" : "backward")
+    setSelectedDate(newDate)
+  }
 
   // El estado de cada unidad lo escribe el trigger de Postgres al vencer/crear
   // reservas, y el pg_cron nocturno libera las que vencieron sin actividad.
@@ -42,21 +80,22 @@ export default function Dashboard() {
     })
   }, [])
 
-  // Reserva VIGENTE HOY por unidad. La celda se pinta según su tipo_alquiler
-  // (T/P/D); si no hay reserva vigente hoy, la unidad va libre.
+  // Reserva vigente en `selectedDate` (hoy por defecto) por unidad. La celda
+  // se pinta según su tipo_alquiler (T/P/D); si no hay reserva vigente ese
+  // día, la unidad va libre. Un abonado de temporada completa cubre
+  // cualquier fecha dentro de la temporada, sin importar cuál se elija.
   const reservaPorUnidad = useMemo(() => {
-    const hoy = new Date().toISOString().split("T")[0]
     const map = {}
     for (const r of reservas) {
       if (!r.unidad_id || r.estado === "cancelada") continue
-      const vigenteHoy =
+      const vigente =
         r.tipo_alquiler === "temporada" ||
-        (r.tipo_alquiler === "dia" && r.fecha === hoy) ||
-        (r.tipo_alquiler === "periodo" && r.fecha_inicio <= hoy && hoy <= r.fecha_fin)
-      if (vigenteHoy) map[r.unidad_id] = r
+        (r.tipo_alquiler === "dia" && r.fecha === selectedDate) ||
+        (r.tipo_alquiler === "periodo" && r.fecha_inicio <= selectedDate && selectedDate <= r.fecha_fin)
+      if (vigente) map[r.unidad_id] = r
     }
     return map
-  }, [reservas])
+  }, [reservas, selectedDate])
 
   const units = useMemo(() => {
     const map = {}
@@ -66,11 +105,13 @@ export default function Dashboard() {
       const r = reservaPorUnidad[u.id]
       const status = !r
         ? STATUS.LIBRE
-        : r.tipo_alquiler === "temporada"
-          ? STATUS.TEMPORADA
-          : r.tipo_alquiler === "dia"
-            ? STATUS.DIA
-            : STATUS.PERIODO
+        : r.estado_pago === "pendiente_confirmacion"
+          ? STATUS.PENDIENTE_CONFIRMACION
+          : r.tipo_alquiler === "temporada"
+            ? STATUS.TEMPORADA
+            : r.tipo_alquiler === "dia"
+              ? STATUS.DIA
+              : STATUS.PERIODO
       map[`${px}${u.numero}`] = {
         id: `${px}${u.numero}`,
         dbId: u.id,
@@ -82,77 +123,73 @@ export default function Dashboard() {
         clientName: r?.clientes?.nombre || "",
         clientPhone: r?.clientes?.telefono || "",
         clientEmail: r?.clientes?.mail || "",
+        coSocios: r ? coSocios(r).map((c) => c.nombre) : [],
         startDate: r?.fecha_inicio || r?.fecha || "",
         endDate: r?.fecha_fin || r?.fecha || "",
         notes: r?.notas || "",
         isPaid: r?.estado_pago === "pagado",
         isTemporada: r?.tipo_alquiler === "temporada",
+        // Fila cruda de `reservas` (con clientes/unidades/reserva_clientes
+        // embebidos por el select del DataProvider) — el preview del modal la
+        // usa directo en vez de reconstruir un objeto plano a mano.
+        reserva: r || null,
       }
     }
     return map
   }, [unidades, reservaPorUnidad])
 
+  const selectedUnit = selectedUnitId ? units[selectedUnitId] : null
+
   // useCallback: referencia estable para no romper el React.memo de las 184 Cell
   const handleUnitClick = useCallback((unit) => {
-    if (unit) setSelectedUnit(unit)
+    if (unit) setSelectedUnitId(unit.id)
   }, [])
-
-  // Escribe SOLO en reservas / clientes. El estado de la unidad lo deriva el trigger.
-  const handleSaveUnit = async (result) => {
-    try {
-      if (result.action === "liberar") {
-        if (result.reservaId) await deleteReserva(result.reservaId)
-        setSelectedUnit(null)
-        return
-      }
-
-      let clienteId = result.cliente.id
-      if (!clienteId) {
-        const nuevo = await createCliente({
-          nombre: result.cliente.nombre.trim().toUpperCase(),
-          telefono: result.cliente.telefono || null,
-          mail: result.cliente.mail || null,
-        })
-        clienteId = nuevo.id
-      }
-
-      const t = result.tipo_alquiler
-      const payload = {
-        cliente_id: clienteId,
-        unidad_id: result.dbId,
-        temporada: temporadaActual(),
-        tipo_alquiler: t,
-        fecha_inicio: t === "periodo" ? result.fecha_inicio : null,
-        fecha_fin: t === "periodo" ? result.fecha_fin : null,
-        fecha: t === "dia" ? result.fecha : null,
-        estado: "activa",
-        estado_pago: result.estado_pago,
-        notas: result.notas,
-      }
-
-      if (result.reservaId) await updateReserva(result.reservaId, payload)
-      else await createReserva(payload)
-      setSelectedUnit(null)
-    } catch (e) {
-      console.error("Error guardando la reserva desde el plano:", e)
-    }
-  }
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.1, 1.5))
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.1, 0.5))
-  const handleResetZoom = () => setZoom(0.85)
+  const handleResetZoom = () => setZoom(0.95)
 
   const getCarpa = (num) => units[`C${num}`]
   const getSombrilla = (num) => units[`S${num}`]
 
   return (
-    <div className="h-full flex flex-col space-y-4 animate-premium-fade no-print overflow-hidden pb-4">
-      {/* Header Section */}
-      <div className="flex justify-between items-center shrink-0">
-        <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Plano de Playa</h1>
-          <p className="text-gray-400 text-[10px] uppercase font-bold tracking-widest mt-1">Gestión de Unidades Prius Playa Grande</p>
+    <div className="h-full flex flex-col animate-premium-fade overflow-hidden">
+    <div className="no-print flex-1 flex flex-col space-y-4 overflow-hidden pb-4">
+      {/* Toolbar: navegación por fecha (izquierda) + vista/impresión (derecha),
+          todo en una sola fila para liberar alto vertical para el mapa. El
+          título grande vive ahora en el TopBar. */}
+      <div className="flex flex-wrap justify-between items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => goToDate(shiftDate(selectedDate, -1))}
+            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
+            title="Día anterior"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => e.target.value && goToDate(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#FDE047]/50 outline-none [color-scheme:dark]"
+          />
+          <button
+            onClick={() => goToDate(shiftDate(selectedDate, 1))}
+            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
+            title="Día siguiente"
+          >
+            <ChevronRight size={16} />
+          </button>
+          {!esHoy && (
+            <button
+              onClick={() => goToDate(todayStr())}
+              className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300 transition-all px-2"
+            >
+              Volver a hoy
+            </button>
+          )}
         </div>
+
         <div className="flex items-center gap-3">
           <div className="glass-card p-1 rounded-xl flex">
             <button onClick={() => setViewMode("map")} className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${viewMode === "map" ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'}`}>Mapa</button>
@@ -182,33 +219,39 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto p-12 flex justify-center items-start">
+            <div
+              ref={mapSlideRef}
+              onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
+              className="flex-1 overflow-auto p-12 flex justify-center items-start"
+            >
               <div
                 className="transition-transform duration-200 origin-top flex flex-col items-center"
                 style={{ transform: `scale(${zoom})` }}
               >
                 {/*
-                  Cálculo de Anchos para Alineación Perfecta:
-                  - Cada columna (Cell + Label) mide ~52px en Desktop.
-                  - Gaps entre columnas son 32px (gap-8).
-                  - 3 columnas + 2 gaps = (52*3) + (32*2) = 156 + 64 = 220px.
-                  - Pasillo Central = 64px (gap-16 en el contenedor principal).
+                  Layout definido con el dueño (sept 2026, ver CLAUDE.md):
+                  1 hilera sola (1-25) + pasillo A + bloque doble espalda-con-
+                  espalda (26-50/51-75) + pasillo B (central, ancho, alineado
+                  con Acceso) + bloque doble (76-98/99-121) + pasillo C +
+                  1 hilera sola (122-144). Anchos en PLANO_* (constants.js),
+                  único lugar con estos valores — también los usa
+                  PlanoImpresion.jsx (como fr) para la hoja A4.
                 */}
 
                 {/* Row Superior Unificada */}
                 <div className="flex justify-center gap-0 items-start mb-6">
-                  {/* Recreación alineada con las 3 primeras columnas */}
-                  <div className="w-[220px] h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                  {/* Recreación: sector izquierdo completo (hilera + pasillo A + bloque doble) */}
+                  <div style={{ width: PLANO_SECTOR_WIDTH }} className="h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
                     Recreación
                   </div>
 
-                  {/* Acceso alineado con el Pasillo Central */}
-                  <div className="w-[64px] h-[50px] flex items-center justify-center border-y border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">
+                  {/* Acceso: mismo ancho que el Pasillo B, centrado con él */}
+                  <div style={{ width: PLANO_PASILLO_CENTRAL }} className="h-[50px] flex items-center justify-center border-y border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">
                     Acceso
                   </div>
 
-                  {/* Pileta alineada con las 3 últimas columnas, bajando para ocupar el espacio físico */}
-                  <div className="w-[220px] h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
+                  {/* Pileta: sector derecho completo, bajando para ocupar el espacio físico */}
+                  <div style={{ width: PLANO_SECTOR_WIDTH }} className="h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
                     <div className="absolute inset-0 bg-sky-400/5" />
                     <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
                     <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
@@ -216,33 +259,55 @@ export default function Dashboard() {
                 </div>
 
                 {/* Contenedor de Carpas */}
-                <div className="flex justify-center gap-[64px] items-end pb-12">
-
-                  {/* Bloque Izquierda (3 Pasillos completos) */}
-                  <div className="flex gap-8 items-end">
-                    {[
-                      { start: 1, count: 25 }, { start: 26, count: 25 }, { start: 51, count: 25 }
-                    ].map((col, idx) => (
-                      <div key={idx} className="flex flex-col gap-1">
-                        {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
-                          <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
-                        ))}
-                      </div>
+                <div className="flex justify-center items-end pb-12">
+                  {/* Hilera 1-25, número a la izquierda */}
+                  <div className="flex flex-col gap-1">
+                    {range(1, 25).map(num => (
+                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" />
                     ))}
                   </div>
 
-                  {/* Espacio del Pasillo Central (Implícito por gap-[64px]) */}
+                  {/* Pasillo A */}
+                  <div style={{ width: PLANO_PASILLO_LATERAL }} />
 
-                  {/* Bloque Derecha (3 Pasillos cortos alineados bajo Pileta) */}
-                  <div className="flex gap-8 items-end">
-                    {[
-                      { start: 76, count: 23 }, { start: 99, count: 23 }, { start: 122, count: 23 }
-                    ].map((col, idx) => (
-                      <div key={idx} className="flex flex-col gap-1">
-                        {Array.from({ length: col.count }, (_, i) => col.start + i).map(num => (
-                          <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} />
-                        ))}
-                      </div>
+                  {/* Bloque doble 26-50 (izq) + 51-75 (der), espalda con espalda */}
+                  <div className="flex items-end" style={{ gap: PLANO_BLOQUE_GAP }}>
+                    <div className="flex flex-col gap-1">
+                      {range(26, 50).map(num => (
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" />
+                      ))}
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      {range(51, 75).map(num => (
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pasillo B, central, más ancho, alineado con Acceso */}
+                  <div style={{ width: PLANO_PASILLO_CENTRAL }} />
+
+                  {/* Bloque doble 76-98 (izq) + 99-121 (der), espalda con espalda */}
+                  <div className="flex items-end" style={{ gap: PLANO_BLOQUE_GAP }}>
+                    <div className="flex flex-col gap-1">
+                      {range(76, 98).map(num => (
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" />
+                      ))}
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      {range(99, 121).map(num => (
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pasillo C */}
+                  <div style={{ width: PLANO_PASILLO_LATERAL }} />
+
+                  {/* Hilera 122-144, número a la derecha */}
+                  <div className="flex flex-col gap-1">
+                    {range(122, 144).map(num => (
+                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" />
                     ))}
                   </div>
                 </div>
@@ -251,7 +316,7 @@ export default function Dashboard() {
                 <div className="mt-16 flex flex-col items-center">
                   <div className="flex items-center gap-4 mb-8">
                     <div className="h-[1px] w-12 bg-white/10" />
-                    <span className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-500">Sector Sombrillas</span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-500">⛱️ Sector Sombrillas</span>
                     <div className="h-[1px] w-12 bg-white/10" />
                   </div>
                   <div className="grid grid-cols-2 gap-20">
@@ -291,7 +356,7 @@ export default function Dashboard() {
               <tbody className="divide-y divide-white/5">
                 {Object.values(units).map(unit => (
                   <tr key={unit.id} className="hover:bg-white/5 text-xs text-gray-300">
-                    <td className="px-6 py-4 font-bold uppercase">{unit.type} #{unit.number}</td>
+                    <td className="px-6 py-4 font-bold uppercase">{unidadEmoji(unit.type)} {unit.type} #{unit.number}</td>
                     <td className="px-6 py-4 uppercase">{unit.clientName || '-'}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${unit.status === STATUS.LIBRE ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-[#FDE047]/10 text-[#FDE047] border-[#FDE047]/20'}`}>
@@ -310,17 +375,22 @@ export default function Dashboard() {
       </div>
 
       {selectedUnit && (
-        <UnitModal
+        <UnidadPreviewModal
           unit={selectedUnit}
-          clientes={clientes}
-          onClose={() => setSelectedUnit(null)}
-          onSave={handleSaveUnit}
+          reservas={reservas}
+          temporadaActiva={temporadaActiva}
+          onClose={() => setSelectedUnitId(null)}
         />
       )}
+    </div>
+
+    {/* Hoja A4 de impresión: oculta en pantalla, única cosa visible al imprimir. */}
+    {!loading && <PlanoImpresion units={units} selectedDate={selectedDate} />}
+
       <style>{`
         @media print {
-          @page { size: A4; margin: 0; }
-          body { background: white !important; color: black !important; }
+          @page { size: A4 portrait; margin: 8mm; }
+          html, body { background: white !important; color: black !important; }
           .no-print { display: none !important; }
         }
         .overflow-auto::-webkit-scrollbar { width: 8px; height: 8px; }

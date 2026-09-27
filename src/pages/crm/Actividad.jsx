@@ -50,11 +50,6 @@ export default function Actividad() {
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      <div>
-        <h1 className="text-4xl font-bold text-white tracking-tight">Línea de Tiempo</h1>
-        <p className="text-gray-400 text-sm mt-2">Toda acción sobre reservas, pagos, clientes y unidades, ordenada por fecha.</p>
-      </div>
-
       <div className="flex flex-wrap gap-2">
         {FILTROS.map((f) => (
           <button

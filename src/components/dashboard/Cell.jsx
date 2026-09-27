@@ -1,32 +1,51 @@
 import { memo, useState } from "react"
+import { Hourglass } from "lucide-react"
 import { STATUS } from "./constants"
 
 // 184 celdas montadas a la vez en el Plano. React.memo evita re-renderizarlas
 // todas cuando cambia el zoom o se abre un modal, y `transition-colors` en vez
 // de `transition-all` evita que el navegador anime layout/box-shadow de 184
 // elementos en paralelo.
-function Cell({ number, unit, onClick, isHighlighted, isDimmed }) {
+//
+// 6 variantes visuales sin ambigüedad (sep 2026):
+//   T amarillo + punto verde   → temporada saldada al 100%
+//   T amarillo sin punto       → temporada confirmada, seña/parcial
+//   ⏳ fondo blanco            → temporada pendiente_confirmacion (cliente de
+//                                la temporada pasada, todavía sin confirmar)
+//   celda vacía                → libre
+//   P fondo oscuro             → período
+//   D fondo gris claro         → día
+function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "left" }) {
   const status = unit?.status || STATUS.LIBRE
+  const isPendienteConfirmacion = status === STATUS.PENDIENTE_CONFIRMACION
   const isTemporada = status === STATUS.TEMPORADA
   const isPeriodo = status === STATUS.PERIODO
   const isDia = status === STATUS.DIA
-  const isOcupada = isTemporada || isPeriodo || isDia
+  const isOcupada = isTemporada || isPeriodo || isDia || isPendienteConfirmacion
   const [showTooltip, setShowTooltip] = useState(false)
 
-  // T (temporada): amarillo pleno. P (período activo hoy): tono claro traslúcido.
-  // D (día activo hoy): blanco pleno. Libre: casi vacía.
-  const styles = isTemporada
-    ? "bg-[#FDE047] text-black border-[#FDE047]"
-    : isPeriodo
-      ? "bg-white/20 text-white border-white/30"
-      : isDia
-        ? "bg-white text-black border-white"
-        : "bg-white/5 text-white/20 border-white/10 hover:border-white/30"
+  const styles = isPendienteConfirmacion
+    ? "bg-white text-black border-white"
+    : isTemporada
+      ? "bg-[#FDE047] text-black border-[#FDE047]"
+      : isPeriodo
+        ? "bg-slate-600 text-white border-slate-500"
+        : isDia
+          ? "bg-gray-300 text-black border-gray-300"
+          : "bg-white/5 text-white/20 border-white/10 hover:border-white/30"
 
   const opacityClass = isDimmed ? "opacity-20" : "opacity-100"
   const highlightClass = isHighlighted
     ? "ring-2 ring-[#FDE047] scale-105 z-10 shadow-[0_0_15px_rgba(253,224,71,0.3)]"
     : ""
+
+  const numberLabel = (
+    <span
+      className={`w-5 md:w-6 text-[9px] font-bold text-white/30 ${numberSide === "right" ? "text-left pl-1.5" : "text-right pr-1.5"}`}
+    >
+      {number}
+    </span>
+  )
 
   return (
     <div
@@ -34,12 +53,13 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed }) {
       onMouseEnter={() => unit?.clientName && setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <span className="w-5 md:w-6 text-[9px] font-bold text-white/30 text-right pr-1.5">{number}</span>
+      {numberSide === "left" && numberLabel}
       <button
         onClick={() => onClick(unit)}
         className={`w-6 h-4.5 md:w-7 md:h-5 text-[9px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative ${styles} ${opacityClass} ${highlightClass}`}
       >
         <span className="leading-none">
+          {isPendienteConfirmacion && <Hourglass size={9} />}
           {isTemporada && "T"}
           {isPeriodo && "P"}
           {isDia && "D"}
@@ -48,22 +68,34 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed }) {
           <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
         )}
       </button>
+      {numberSide === "right" && numberLabel}
 
       {/* Tooltip */}
       {showTooltip && unit?.clientName && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-52 glass-card text-white text-[11px] p-4 rounded-xl shadow-2xl z-50 pointer-events-none border border-white/20">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-52 glass-tooltip text-white text-[11px] p-4 rounded-xl shadow-2xl z-50 pointer-events-none border border-white/20">
           <p className="font-bold uppercase tracking-wider text-[#FDE047] mb-2">{unit.clientName}</p>
           <div className="space-y-1 opacity-80 font-medium">
-            {isTemporada ? (
-              <p>Temporada Completa</p>
-            ) : isDia ? (
-              <p>Día {unit.startDate}</p>
+            {isPendienteConfirmacion ? (
+              <>
+                <p className="text-white/90">Cliente de la temporada pasada</p>
+                <p className="font-bold mt-2 text-gray-300 normal-case tracking-normal">
+                  Todavía no confirmó ni pagó nada para esta temporada
+                </p>
+              </>
             ) : (
-              <p>{unit.startDate} al {unit.endDate}</p>
+              <>
+                {isTemporada ? (
+                  <p>Temporada Completa</p>
+                ) : isDia ? (
+                  <p>Día {unit.startDate}</p>
+                ) : (
+                  <p>{unit.startDate} al {unit.endDate}</p>
+                )}
+                <p className={`font-bold mt-2 ${unit.isPaid ? 'text-green-400' : 'text-red-400'}`}>
+                  {unit.isPaid ? "PAGADO" : "PAGO PENDIENTE"}
+                </p>
+              </>
             )}
-            <p className={`font-bold mt-2 ${unit.isPaid ? 'text-green-400' : 'text-red-400'}`}>
-              {unit.isPaid ? "PAGADO" : "PAGO PENDIENTE"}
-            </p>
           </div>
         </div>
       )}

@@ -11,12 +11,12 @@ import {
   BarChart2,
   Map,
   LogOut,
-  Calendar,
   Bell,
   FileText,
   UserCheck,
   Activity,
   Inbox,
+  GanttChartSquare,
   X
 } from 'lucide-react'
 
@@ -41,7 +41,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
 
   const additionalNav = [
     { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
-    { name: 'Calendario', path: '/app/calendario', icon: Calendar },
+    { name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare },
     { name: 'Línea de Tiempo', path: '/app/actividad', icon: Activity },
     { name: 'Notificaciones', path: '/app/notificaciones', icon: Bell, badge: notificationsCount },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },
@@ -56,19 +56,19 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
       )}
 
       <aside
-        className={`w-64 h-screen bg-[#0a0d14] border-r border-white/10 flex flex-col justify-between shrink-0
+        className={`no-print w-64 h-screen bg-[#0a0d14] border-r border-white/10 flex flex-col justify-between shrink-0
           fixed md:sticky top-0 left-0 z-40 md:z-30 transition-transform duration-300 md:translate-x-0
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
       <div className="flex flex-col overflow-hidden">
         {/* Brand Header */}
-        <div className="h-20 flex items-center px-6 border-b border-white/5 gap-3">
+        <div className="h-20 flex items-center px-4 border-b border-white/5 gap-2">
           <div className="text-[#FDE047] text-3xl font-bold italic shrink-0">
             <img src="/images/prius-icon.png" alt="P" className="w-8 h-8 object-contain" />
           </div>
-          <div className="flex-1">
-            <h1 className="font-bold text-lg text-white tracking-tight leading-none">Prius</h1>
-            <p className="text-[10px] text-gray-500 font-semibold tracking-wider uppercase mt-1">PriusAdmin</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-display font-extrabold text-[16px] text-white tracking-tight leading-none whitespace-nowrap">Prius Playa Grande</h1>
+            <p className="text-[10px] text-gray-500 font-semibold tracking-wider uppercase mt-1">PriusApp</p>
           </div>
           <button onClick={onCloseMobile} className="md:hidden p-1.5 text-gray-500 hover:text-white rounded-lg hover:bg-white/5">
             <X size={18} />

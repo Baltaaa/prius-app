@@ -22,12 +22,14 @@ export function useNotifications() {
         : []),
       ...checkinsHoy.map((r) => ({
         id: `checkin-${r.id}`,
+        reservaId: r.id,
         type: 'checkin',
         titulo: r.clientes?.nombre || 'Cliente s/n',
         detalle: `Ingreso hoy · ${r.unidades?.tipo || 'Unidad'} #${r.unidades?.numero ?? ''}`,
       })),
       ...saldosPendientes.map((r) => ({
         id: `saldo-${r.id}`,
+        reservaId: r.id,
         type: 'saldo',
         titulo: r.clientes?.nombre || 'Cliente s/n',
         detalle: `Saldo pendiente: $${r.saldo}`,

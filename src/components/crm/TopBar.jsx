@@ -1,23 +1,85 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useData } from '../../context/DataProvider'
 import { useDebounced } from '../../hooks/useDebounced'
-import { Search, Bell, User, LogOut, ChevronDown, Menu, Wallet, Calendar, AlertCircle } from 'lucide-react'
+import { unidadEmoji, normalizeText } from '../../lib/format'
+import { estadoBadgeStatus } from '../../lib/reservas'
+import {
+  Search, Bell, User, LogOut, ChevronDown, Menu, Wallet, Calendar, AlertCircle,
+  LayoutDashboard, Map, CalendarClock, Users, BarChart2, Inbox,
+  Activity, FileText, UserCheck,
+} from 'lucide-react'
 import StatusBadge from './StatusBadge'
 
 const NOTIF_ICON = { caja: Wallet, checkin: Calendar, saldo: AlertCircle }
 
-// Normaliza para comparar sin importar mayúsculas/acentos (ej: "Perez" matchea "Pérez").
-const normalize = (s) =>
-  String(s || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+// Título + subtítulo + ícono de cada sección, unificados acá (antes vivían
+// duplicados: sidebar, este label chico, y de nuevo como bloque grande en
+// cada página). Sincronizado con las rutas del Sidebar (mismo listado que
+// mainNav + additionalNav en Sidebar.jsx). Los subtítulos son el texto que
+// antes estaba debajo del <h1> grande de cada página.
+const SECTION_TITLES = [
+  {
+    path: '/app/home', name: 'Dashboard', subtitle: 'Resumen de métricas y actividades principales en tiempo real.',
+    icon: LayoutDashboard, iconBg: 'bg-[#FDE047]/10', iconBorder: 'border-[#FDE047]/20', iconColor: 'text-[#FDE047]',
+  },
+  {
+    path: '/app/plano', name: 'Plano de Playa', subtitle: 'Gestión de Unidades Prius Playa Grande',
+    icon: Map, iconBg: 'bg-sky-400/10', iconBorder: 'border-sky-400/20', iconColor: 'text-sky-400',
+  },
+  {
+    path: '/app/reservas', name: 'Cola de Reservas', subtitle: 'Alquileres por período y día, ordenados por llegada.',
+    icon: CalendarClock, iconBg: 'bg-[#FDE047]/10', iconBorder: 'border-[#FDE047]/20', iconColor: 'text-[#FDE047]',
+  },
+  {
+    path: '/app/clientes', name: 'Directorio de Clientes', subtitle: 'Historial completo: temporadas y alquileres pasados.',
+    icon: Users, iconBg: 'bg-cyan-400/10', iconBorder: 'border-cyan-400/20', iconColor: 'text-cyan-400',
+  },
+  {
+    path: '/app/caja', name: 'Caja Diaria', subtitle: 'Arqueo, historial y cruce automático con pagos.',
+    icon: Wallet, iconBg: 'bg-green-400/10', iconBorder: 'border-green-400/20', iconColor: 'text-green-400',
+  },
+  {
+    path: '/app/reportes', name: 'Reportes', subtitle: 'Métricas avanzadas de facturación y ocupación.',
+    icon: BarChart2, iconBg: 'bg-purple-400/10', iconBorder: 'border-purple-400/20', iconColor: 'text-purple-400',
+  },
+  {
+    path: '/app/leads', name: 'Leads', subtitle: 'Consultas del formulario de la web, en tiempo real.',
+    icon: Inbox, iconBg: 'bg-orange-400/10', iconBorder: 'border-orange-400/20', iconColor: 'text-orange-400',
+  },
+  {
+    path: '/app/actividad', name: 'Línea de Tiempo', subtitle: 'Toda acción sobre reservas, pagos, clientes y unidades.',
+    icon: Activity, iconBg: 'bg-teal-400/10', iconBorder: 'border-teal-400/20', iconColor: 'text-teal-400',
+  },
+  {
+    path: '/app/notificaciones', name: 'Notificaciones', subtitle: 'Alertas de sistema, saldos y operaciones diarias.',
+    icon: Bell, iconBg: 'bg-amber-400/10', iconBorder: 'border-amber-400/20', iconColor: 'text-amber-400',
+  },
+  {
+    path: '/app/comprobantes', name: 'Comprobantes', subtitle: 'Generación de recibos oficiales para clientes.',
+    icon: FileText, iconBg: 'bg-violet-400/10', iconBorder: 'border-violet-400/20', iconColor: 'text-violet-400',
+  },
+  {
+    path: '/app/perfil', name: 'Perfil y Tarifas', subtitle: 'Configuración de cuenta y valores de temporada.',
+    icon: UserCheck, iconBg: 'bg-pink-400/10', iconBorder: 'border-pink-400/20', iconColor: 'text-pink-400',
+  },
+]
+
+const DEFAULT_SECTION = { name: 'Balneario Playa Grande', subtitle: '', icon: LayoutDashboard, iconBg: 'bg-white/5', iconBorder: 'border-white/10', iconColor: 'text-gray-400' }
+
+function useSection(pathname) {
+  return SECTION_TITLES.find((s) => pathname.startsWith(s.path)) || DEFAULT_SECTION
+}
+
+const normalize = normalizeText
 
 export default function TopBar({ onToggleMobileMenu }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const section = useSection(location.pathname)
+  const SectionIcon = section.icon
   const [userEmail, setUserEmail] = useState('Admin')
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
@@ -75,21 +137,37 @@ export default function TopBar({ onToggleMobileMenu }) {
   }
 
   return (
-    <header className="h-20 flex items-center gap-3 px-4 sm:px-6 md:px-8 border-b border-white/5 sticky top-0 z-20 shrink-0">
-      <div className="flex items-center gap-4 shrink-0">
+    <header className="no-print relative h-20 flex items-center gap-3 px-4 sm:px-6 md:px-8 border-b border-white/5 sticky top-0 z-20 shrink-0">
+      {/* Ancho fijo: el título de sección cambia de largo (Dashboard vs
+          Perfil y Tarifas) pero no puede correr la barra de búsqueda, que se
+          centra contra el nav completo (ver div absoluto más abajo), no
+          contra este espacio. Título + subtítulo + ícono de color: antes
+          vivían repetidos como bloque grande en cada página, ahora viven acá
+          una sola vez. */}
+      <div className="flex items-center gap-3 shrink-0 min-w-0 w-48 sm:w-64 md:w-80">
         <button
           onClick={onToggleMobileMenu}
           className="md:hidden p-2 text-white hover:bg-white/5 rounded-lg border border-white/10"
         >
           <Menu size={20} />
         </button>
-        <span className="text-sm font-bold tracking-widest text-gray-400 uppercase hidden sm:inline-block">
-          Balneario Playa Grande
-        </span>
+        <div className="hidden sm:flex items-center gap-3 min-w-0">
+          <div className={`w-10 h-10 rounded-xl ${section.iconBg} border ${section.iconBorder} flex items-center justify-center shrink-0`}>
+            <SectionIcon size={18} className={section.iconColor} />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-sm font-display font-extrabold text-white tracking-tight truncate">{section.name}</h1>
+            {section.subtitle && (
+              <p className="text-[9px] text-gray-500 font-semibold uppercase tracking-wider truncate">{section.subtitle}</p>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Búsqueda global: visible en todos los breakpoints */}
-      <div className="relative flex-1 min-w-0 max-w-md">
+      {/* Búsqueda global: centrada respecto al nav completo (posición
+          absoluta, independiente del ancho del título o del bloque de
+          notificaciones/perfil) para que no se corra al cambiar de sección. */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] sm:w-96 max-w-[calc(100%-2rem)] z-10">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
         <input
           type="text"
@@ -136,10 +214,10 @@ export default function TopBar({ onToggleMobileMenu }) {
                           <span className="min-w-0">
                             <span className="block text-xs font-bold text-white truncate">{reserva.clientes?.nombre || 'S/N'}</span>
                             <span className="block text-[11px] text-gray-500 uppercase truncate">
-                              {reserva.unidades?.tipo} #{reserva.unidades?.numero}
+                              {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}
                             </span>
                           </span>
-                          <StatusBadge status={reserva.estado_pago} />
+                          <StatusBadge status={estadoBadgeStatus(reserva)} />
                         </button>
                       ))}
                     </div>
@@ -151,7 +229,7 @@ export default function TopBar({ onToggleMobileMenu }) {
         )}
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+      <div className="flex items-center gap-3 sm:gap-6 shrink-0 ml-auto">
         {/* Notifications */}
         <div className="relative">
           <button
@@ -182,14 +260,24 @@ export default function TopBar({ onToggleMobileMenu }) {
                   ) : (
                     notifItems.slice(0, 5).map((item) => {
                       const Icon = NOTIF_ICON[item.type] || Bell
+                      // checkin/saldo referencian una reserva puntual (ver
+                      // useNotifications) — clickear salta directo a esa
+                      // reserva, mismo patrón que un resultado de búsqueda.
+                      // "Caja pendiente" no tiene reserva asociada: queda inerte.
+                      const Tag = item.reservaId ? 'button' : 'div'
                       return (
-                        <div key={item.id} className="px-4 py-3 flex items-start gap-3 hover:bg-white/5 transition-all">
+                        <Tag
+                          key={item.id}
+                          type={item.reservaId ? 'button' : undefined}
+                          onClick={item.reservaId ? () => { navigate(`/app/reservas?id=${item.reservaId}`); setShowNotifications(false) } : undefined}
+                          className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-all ${item.reservaId ? 'hover:bg-white/10 cursor-pointer' : 'hover:bg-white/5'}`}
+                        >
                           <Icon size={16} className="text-[#FDE047] mt-0.5 shrink-0" />
                           <div className="min-w-0">
                             <p className="text-xs font-bold text-white truncate">{item.titulo}</p>
                             <p className="text-[11px] text-gray-400 mt-0.5">{item.detalle}</p>
                           </div>
-                        </div>
+                        </Tag>
                       )
                     })
                   )}

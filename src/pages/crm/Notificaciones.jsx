@@ -1,6 +1,7 @@
 import React from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { useCaja } from '../../hooks/useCaja'
+import { unidadEmoji } from '../../lib/format'
 import { AlertCircle, Calendar, Wallet } from 'lucide-react'
 
 export default function Notificaciones() {
@@ -15,11 +16,6 @@ export default function Notificaciones() {
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      <div>
-        <h1 className="text-4xl font-bold text-white tracking-tight">Notificaciones</h1>
-        <p className="text-gray-400 text-sm mt-2">Alertas de sistema, saldos y operaciones diarias.</p>
-      </div>
-
       <div className="grid grid-cols-1 gap-6">
         {!cajaHoy && (
           <div className="glass-card p-6 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 flex items-center gap-6">
@@ -43,7 +39,7 @@ export default function Notificaciones() {
               <div key={r.id} className="flex justify-between items-center p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all">
                 <div>
                   <p className="text-xs font-bold uppercase text-white tracking-tight">{r.clientes?.nombre}</p>
-                  <p className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">{r.unidades?.tipo} #{r.unidades?.numero}</p>
+                  <p className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</p>
                 </div>
                 <span className="text-sm font-bold text-red-400">${r.saldo}</span>
               </div>

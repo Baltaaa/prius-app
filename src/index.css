@@ -57,6 +57,38 @@ body {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
 }
 
+/*
+  Tooltip del Plano de Playa (Cell.jsx): a diferencia de .glass-popover (fondo
+  del header, sobre el gradiente liso de <body>), este flota sobre decenas de
+  celdas de color sólido — con 0.7 de opacidad se seguía transparentando. Casi
+  opaco de base + blur solo de remate para lo poco que se filtra en los bordes.
+*/
+.glass-tooltip {
+  background: rgba(10, 13, 20, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+/*
+  Deslizamiento al cambiar de fecha en el Plano de Playa: solo anima el
+  wrapper (transform + opacity, GPU-only, sin recalcular layout), nunca
+  desmonta las ~184 celdas de adentro — la clase se agrega/saca a mano sobre
+  ese wrapper (ver Dashboard.jsx), no depende de un `key` que forzaría un
+  remount costoso.
+*/
+@keyframes plano-slide-in-left {
+  from { transform: translateX(24px); opacity: 0.4; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes plano-slide-in-right {
+  from { transform: translateX(-24px); opacity: 0.4; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.plano-slide-left { animation: plano-slide-in-left 200ms ease-out; }
+.plano-slide-right { animation: plano-slide-in-right 200ms ease-out; }
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

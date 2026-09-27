@@ -4,11 +4,11 @@ import { useData } from '../context/DataProvider'
 // tocar las páginas que lo consumen.
 export function useReservas() {
   const {
-    reservas, unidades, loading, error,
-    createReserva, updateReserva, deleteReserva, refetchAll,
+    reservas, unidades, temporadaActiva, loading, error,
+    createReserva, updateReserva, deleteReserva, cancelarReserva, refetchAll,
   } = useData()
   return {
-    reservas, unidades, loading, error,
-    createReserva, updateReserva, deleteReserva, refetch: refetchAll,
+    reservas, unidades, temporadaActiva, loading, error,
+    createReserva, updateReserva, deleteReserva, cancelarReserva, refetch: refetchAll,
   }
 }
