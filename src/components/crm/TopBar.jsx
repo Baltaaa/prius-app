@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useNotifications } from '../../hooks/useNotifications'
@@ -7,7 +8,7 @@ import { useDebounced } from '../../hooks/useDebounced'
 import { unidadEmoji, normalizeText } from '../../lib/format'
 import { estadoBadgeStatus } from '../../lib/reservas'
 import {
-  Search, Bell, User, LogOut, ChevronDown, Menu, Wallet, Calendar, AlertCircle,
+  Search, Bell, User, LogOut, ChevronDown, X, Wallet, Calendar, AlertCircle,
   LayoutDashboard, Map, CalendarClock, Users, BarChart2, Inbox,
   Activity, FileText, UserCheck, DoorClosed,
 } from 'lucide-react'
@@ -79,7 +80,7 @@ function useSection(pathname) {
 
 const normalize = normalizeText
 
-export default function TopBar({ onToggleMobileMenu }) {
+export default function TopBar() {
   const navigate = useNavigate()
   const location = useLocation()
   const section = useSection(location.pathname)
@@ -88,6 +89,10 @@ export default function TopBar({ onToggleMobileMenu }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [searchValue, setSearchValue] = useState('')
+  // Mobile (Tarea 4.2): el buscador inline de desktop pasa a un ícono que
+  // abre una búsqueda a pantalla completa, para no competir por espacio con
+  // título/avatar en 360px.
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const { items: notifItems, count: notifCount } = useNotifications()
   const { clientes, reservas } = useData()
 
@@ -148,30 +153,26 @@ export default function TopBar({ onToggleMobileMenu }) {
           contra este espacio. Título + subtítulo + ícono de color: antes
           vivían repetidos como bloque grande en cada página, ahora viven acá
           una sola vez. */}
-      <div className="flex items-center gap-3 shrink-0 min-w-0 w-48 sm:w-64 md:w-80">
-        <button
-          onClick={onToggleMobileMenu}
-          className="md:hidden p-2 text-white hover:bg-white/5 rounded-lg border border-white/10"
-        >
-          <Menu size={20} />
-        </button>
-        <div className="hidden sm:flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-3 shrink-0 min-w-0 flex-1 sm:flex-none sm:w-64 md:w-80">
+        <div className="flex items-center gap-3 min-w-0">
           <div className={`w-10 h-10 rounded-xl ${section.iconBg} border ${section.iconBorder} flex items-center justify-center shrink-0`}>
             <SectionIcon size={18} className={section.iconColor} />
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-display font-extrabold text-white tracking-tight truncate">{section.name}</h1>
             {section.subtitle && (
-              <p className="text-[9px] text-gray-500 font-semibold uppercase tracking-wider truncate">{section.subtitle}</p>
+              <p className="hidden sm:block text-[9px] text-gray-500 font-semibold uppercase tracking-wider truncate">{section.subtitle}</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Búsqueda global: centrada respecto al nav completo (posición
-          absoluta, independiente del ancho del título o del bloque de
-          notificaciones/perfil) para que no se corra al cambiar de sección. */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] sm:w-96 max-w-[calc(100%-2rem)] z-10">
+      {/* Búsqueda global (desktop): centrada respecto al nav completo
+          (posición absoluta, independiente del ancho del título o del bloque
+          de notificaciones/perfil) para que no se corra al cambiar de
+          sección. En mobile pasa a un ícono que abre pantalla completa (ver
+          bloque debajo del header) — no compite por espacio con título/avatar. */}
+      <div className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 max-w-[calc(100%-2rem)] z-10">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
         <input
           type="text"
@@ -183,7 +184,7 @@ export default function TopBar({ onToggleMobileMenu }) {
 
         {showDropdown && (
           <>
-            {/* Backdrop: cierra el dropdown al tocar afuera (clave en mobile) */}
+            {/* Backdrop: cierra el dropdown al tocar afuera */}
             <div className="fixed inset-0 z-40" onClick={closeSearch} />
             <div className="absolute left-0 right-0 mt-2 glass-popover rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto">
               {clienteMatches.length === 0 && reservaMatches.length === 0 ? (
@@ -233,7 +234,14 @@ export default function TopBar({ onToggleMobileMenu }) {
         )}
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-6 shrink-0 ml-auto">
+      <div className="flex items-center gap-1 sm:gap-6 shrink-0 ml-auto">
+        {/* Búsqueda (mobile): ícono que abre pantalla completa */}
+        <button
+          onClick={() => setMobileSearchOpen(true)}
+          className="sm:hidden text-gray-400 hover:text-white p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
+        >
+          <Search size={20} />
+        </button>
         {/* Notifications */}
         <div className="relative">
           <button
@@ -335,6 +343,76 @@ export default function TopBar({ onToggleMobileMenu }) {
           )}
         </div>
       </div>
+
+      {/* Búsqueda mobile a pantalla completa (Tarea 4.2) — mismos resultados
+          que el buscador de desktop, reutiliza clienteMatches/reservaMatches. */}
+      {mobileSearchOpen && createPortal(
+        <div className="sm:hidden fixed inset-0 z-[997] bg-[#05070c] flex flex-col">
+          <div className="flex items-center gap-3 px-4 h-20 border-b border-white/5 shrink-0">
+            <Search size={18} className="text-gray-500 shrink-0" />
+            <input
+              autoFocus
+              type="text"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Buscar cliente o reserva..."
+              className="flex-1 min-w-0 bg-transparent outline-none text-white text-sm placeholder-gray-500"
+            />
+            <button
+              onClick={() => { setMobileSearchOpen(false); closeSearch() }}
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-white shrink-0"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {!showDropdown ? (
+              <p className="px-6 py-8 text-center text-xs text-gray-500">Escribí para buscar un cliente o una reserva.</p>
+            ) : clienteMatches.length === 0 && reservaMatches.length === 0 ? (
+              <p className="px-6 py-8 text-center text-xs text-gray-500">Sin resultados para "{searchValue}"</p>
+            ) : (
+              <>
+                {clienteMatches.length > 0 && (
+                  <div>
+                    <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Clientes</p>
+                    {clienteMatches.map((cliente) => (
+                      <button
+                        key={cliente.id}
+                        onClick={() => { goToCliente(cliente); setMobileSearchOpen(false) }}
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-white/10 transition-colors border-b border-white/5"
+                      >
+                        <p className="text-sm font-bold text-white truncate">{cliente.nombre}</p>
+                        {cliente.telefono && <p className="text-xs text-gray-500">{cliente.telefono}</p>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {reservaMatches.length > 0 && (
+                  <div>
+                    <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Reservas</p>
+                    {reservaMatches.map((reserva) => (
+                      <button
+                        key={reserva.id}
+                        onClick={() => { goToReserva(reserva); setMobileSearchOpen(false) }}
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-white/10 transition-colors border-b border-white/5 flex items-center justify-between gap-3"
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold text-white truncate">{reserva.clientes?.nombre || 'S/N'}</span>
+                          <span className="block text-xs text-gray-500 uppercase truncate">
+                            {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}
+                          </span>
+                        </span>
+                        <StatusBadge status={estadoBadgeStatus(reserva)} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>,
+        document.body,
+      )}
     </header>
   )
 }

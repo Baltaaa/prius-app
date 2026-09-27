@@ -17,11 +17,14 @@ import {
   Activity,
   Inbox,
   GanttChartSquare,
-  X,
   DoorClosed
 } from 'lucide-react'
 
-export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }) {
+// Mobile-first (sept 2026): en pantallas chicas la navegación vive en
+// BottomNav.jsx (5 ítems + "Más") — este Sidebar queda oculto por completo
+// (hidden md:flex) en vez de convertirse en drawer, para no duplicar la
+// misma navegación de dos formas distintas en mobile.
+export default function Sidebar() {
   const navigate = useNavigate()
   const { count: notificationsCount } = useNotifications()
   const { sinContactar: leadsSinContactar } = useLeads()
@@ -51,17 +54,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
   ]
 
   return (
-    <>
-      {/* Backdrop del drawer mobile */}
-      {mobileOpen && (
-        <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={onCloseMobile} />
-      )}
-
-      <aside
-        className={`no-print w-64 h-screen bg-[#0a0d14] border-r border-white/10 flex flex-col justify-between shrink-0
-          fixed md:sticky top-0 left-0 z-40 md:z-30 transition-transform duration-300 md:translate-x-0
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
-      >
+    <aside className="no-print hidden md:flex w-64 h-screen bg-[#0a0d14] border-r border-white/10 flex-col justify-between shrink-0 sticky top-0 left-0 z-30">
       <div className="flex flex-col overflow-hidden">
         {/* Brand Header */}
         <div className="h-20 flex items-center px-4 border-b border-white/5 gap-2">
@@ -72,9 +65,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
             <h1 className="font-display font-extrabold text-[16px] text-white tracking-tight leading-none whitespace-nowrap">Prius Playa Grande</h1>
             <p className="text-[10px] text-gray-500 font-semibold tracking-wider uppercase mt-1">PriusApp</p>
           </div>
-          <button onClick={onCloseMobile} className="md:hidden p-1.5 text-gray-500 hover:text-white rounded-lg hover:bg-white/5">
-            <X size={18} />
-          </button>
         </div>
 
         {/* Navigation Content */}
@@ -88,7 +78,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  onClick={onCloseMobile}
                   className={({ isActive }) => `
                     flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${isActive
@@ -120,7 +109,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  onClick={onCloseMobile}
                   className={({ isActive }) => `
                     flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${isActive 
@@ -155,7 +143,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
           <span>Cerrar Sesión</span>
         </button>
       </div>
-      </aside>
-    </>
+    </aside>
   )
 }

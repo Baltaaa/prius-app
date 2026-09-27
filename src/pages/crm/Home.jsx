@@ -61,7 +61,7 @@ export default function Home() {
   return (
     <div className="space-y-10 animate-premium-fade">
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <KpiCard
           title="Ocupación Total"
           value={`${unidadesOcupadasCount} / ${unidades.length}`}
@@ -92,61 +92,86 @@ export default function Home() {
         />
       </div>
 
-      {/* Table Section */}
-      <div className="glass-card p-8 rounded-2xl glass-card-inner">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-sm font-bold tracking-[0.2em] text-white uppercase">ÚLTIMAS RESERVAS REGISTRADAS</h2>
+      {/* Table Section — tabla en desktop, tarjetas en mobile (Tarea 4.3) */}
+      <div className="glass-card p-4 sm:p-8 rounded-2xl glass-card-inner">
+        <div className="flex justify-between items-center mb-4 sm:mb-8 gap-3">
+          <h2 className="text-xs sm:text-sm font-bold tracking-[0.15em] sm:tracking-[0.2em] text-white uppercase truncate">Últimas reservas</h2>
           <button
             onClick={() => navigate('/app/reservas')}
-            className="bg-[#FDE047] hover:bg-yellow-300 text-black text-xs px-5 py-2.5 rounded-lg transition-all flex items-center gap-2 font-bold uppercase tracking-wider"
+            className="shrink-0 bg-[#FDE047] hover:bg-yellow-300 text-black text-[10px] sm:text-xs px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg transition-all flex items-center gap-2 font-bold uppercase tracking-wider"
           >
-            Ver todas <ArrowRight size={16} />
+            Ver todas <ArrowRight size={14} />
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          {recentReservas.length === 0 ? (
-            <p className="py-12 text-center text-gray-500 italic text-sm">No se han registrado reservas recientemente.</p>
-          ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-white/10 text-[10px] text-gray-500 uppercase tracking-[0.15em] font-bold">
-                  <th className="pb-4 px-6">FECHA</th>
-                  <th className="pb-4 px-6">CLIENTE</th>
-                  <th className="pb-4 px-6">SERVICIO</th>
-                  <th className="pb-4 px-6">ESTADO</th>
-                  <th className="pb-4 px-6 text-right">ACCIÓN</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm text-gray-300 divide-y divide-white/5">
-                {recentReservas.map((res) => (
-                  <tr key={res.id} className="hover:bg-white/5 transition-colors group">
-                    <td className="py-6 px-6 font-medium text-gray-400">
-                      {formatDate(res.created_at)}
-                    </td>
-                    <td className="py-6 px-6 font-bold text-white uppercase tracking-tight">
-                      {res.clientes?.nombre || 'CLIENTE S/N'}
-                    </td>
-                    <td className="py-6 px-6 uppercase">
-                      {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero ?? 'N/A'}
-                    </td>
-                    <td className="py-6 px-6">
-                      <StatusBadge status={estadoBadgeStatus(res)} />
-                    </td>
-                    <td className="py-6 px-6 text-right">
-                      <button
-                        onClick={() => setDetalleReserva(res)}
-                        className="text-[#FDE047] hover:text-white font-bold text-xs uppercase underline-offset-4 hover:underline transition-all"
-                      >
-                        Ver Detalle
-                      </button>
-                    </td>
+        {recentReservas.length === 0 ? (
+          <p className="py-12 text-center text-gray-500 italic text-sm">No se han registrado reservas recientemente.</p>
+        ) : (
+          <>
+            {/* Mobile: tarjetas */}
+            <div className="md:hidden space-y-3">
+              {recentReservas.map((res) => (
+                <button
+                  key={res.id}
+                  onClick={() => setDetalleReserva(res)}
+                  className="w-full text-left p-4 min-h-[44px] bg-white/5 border border-white/10 rounded-xl flex flex-col gap-2 hover:bg-white/10 transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatDate(res.created_at)}</p>
+                      <p className="font-bold text-white uppercase truncate">{res.clientes?.nombre || 'CLIENTE S/N'}</p>
+                      <p className="text-xs text-gray-400 uppercase mt-0.5">
+                        {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero ?? 'N/A'}
+                      </p>
+                    </div>
+                    <StatusBadge status={estadoBadgeStatus(res)} />
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Desktop: tabla */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-white/10 text-[10px] text-gray-500 uppercase tracking-[0.15em] font-bold">
+                    <th className="pb-4 px-6">FECHA</th>
+                    <th className="pb-4 px-6">CLIENTE</th>
+                    <th className="pb-4 px-6">SERVICIO</th>
+                    <th className="pb-4 px-6">ESTADO</th>
+                    <th className="pb-4 px-6 text-right">ACCIÓN</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                </thead>
+                <tbody className="text-sm text-gray-300 divide-y divide-white/5">
+                  {recentReservas.map((res) => (
+                    <tr key={res.id} className="hover:bg-white/5 transition-colors group">
+                      <td className="py-6 px-6 font-medium text-gray-400">
+                        {formatDate(res.created_at)}
+                      </td>
+                      <td className="py-6 px-6 font-bold text-white uppercase tracking-tight">
+                        {res.clientes?.nombre || 'CLIENTE S/N'}
+                      </td>
+                      <td className="py-6 px-6 uppercase">
+                        {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero ?? 'N/A'}
+                      </td>
+                      <td className="py-6 px-6">
+                        <StatusBadge status={estadoBadgeStatus(res)} />
+                      </td>
+                      <td className="py-6 px-6 text-right">
+                        <button
+                          onClick={() => setDetalleReserva(res)}
+                          className="text-[#FDE047] hover:text-white font-bold text-xs uppercase underline-offset-4 hover:underline transition-all"
+                        >
+                          Ver Detalle
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
       <ReservaDetalleModal reserva={detalleReserva} onClose={() => setDetalleReserva(null)} />

@@ -53,20 +53,20 @@ export default function Reportes() {
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
         <KpiCard title="Facturación Bruta" value={formatCurrency(totalIngresosEsperados)} icon={BarChart3} highlight />
         <KpiCard title="Total Cobrado" value={formatCurrency(totalCobrado)} icon={BarChart3} />
         <KpiCard title="Deuda Externa" value={formatCurrency(totalSaldosPendientes)} icon={BarChart3} />
       </div>
 
-      <div className="glass-card p-8 rounded-3xl glass-card-inner">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-white">Detalle de Contratos</h2>
-          <div className="flex items-center gap-3">
+      <div className="glass-card p-4 sm:p-8 rounded-3xl glass-card-inner">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-8">
+          <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white">Detalle de Contratos</h2>
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <select
               value={temporadaFilter}
               onChange={(e) => setTemporadaFilter(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs font-bold uppercase text-gray-400 outline-none focus:border-[#FDE047]"
+              className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 min-h-[44px] text-xs font-bold uppercase text-gray-400 outline-none focus:border-[#FDE047]"
             >
               <option value="all">Todas las temporadas</option>
               <option value="2025-2026">2025-2026</option>
@@ -74,14 +74,28 @@ export default function Reportes() {
             <button
               onClick={handleExportCSV}
               disabled={activeReservas.length === 0}
-              className="glass-card px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#FDE047] hover:text-black transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white"
+              className="glass-card px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#FDE047] hover:text-black transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white"
             >
               <Download size={16} /> Exportar CSV
             </button>
           </div>
         </div>
-        
-        <div className="overflow-x-auto">
+
+        {/* Mobile: tarjetas */}
+        <div className="sm:hidden space-y-3">
+          {activeReservas.map(res => (
+            <div key={res.id} className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-bold uppercase text-white truncate">{res.clientes?.nombre}</p>
+                <p className="text-xs text-gray-400 uppercase mt-0.5">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</p>
+              </div>
+              <p className="font-bold text-[#FDE047] shrink-0">{formatCurrency(res.valor_total)}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: tabla */}
+        <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-white/5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
