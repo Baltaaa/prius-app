@@ -19,8 +19,14 @@ export default function AppLayout() {
           <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden relative">
             <TopBar onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)} />
 
-            {/* Content View with internal vertical scroll */}
-            <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-7xl w-full mx-auto pb-4 md:pb-12">
+            {/* Content View with internal vertical scroll. Padding horizontal
+                IDÉNTICO al del header (px-4 sm:px-6 md:px-8, ver TopBar.jsx)
+                para que el borde de las tarjetas quede alineado con el ícono
+                del título — nunca max-w/mx-auto acá, el contenido ocupa todo
+                el ancho entre el sidebar y el borde derecho. Definido una
+                sola vez acá: ninguna página debe agregar su propio
+                max-w/px/mx-auto que lo contradiga. */}
+            <main className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-20 md:pb-12">
               <Outlet />
             </main>
           </div>
