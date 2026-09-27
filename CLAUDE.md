@@ -19,7 +19,7 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 
 ## Vocabulario de dominio (usar estos términos, no traducir)
 - **Carpas / sombrillas / cabinas / lockers**: unidades de playa alquilables.
-- **Plano interactivo**: mapa visual de la playa con el estado de cada unidad.
+- **Plano interactivo**: mapa visual de la playa con el estado de cada unidad. Vista única (sept 2026): el Plano solo renderiza el mapa — la vista lista y su toggle "Mapa/Lista" se sacaron por completo, no quedó ni oculta ni como alternativa.
 - **Caja diaria**: registro de movimientos de dinero del día.
 - **Preconfirmada / pendiente_confirmacion**: estado de una reserva sin confirmar.
 - **Candado / bloqueada**: marca en una reserva (cualquier `tipo_alquiler`) que impide editar su fecha y su unidad hasta que un admin la desbloquee explícitamente. Cliente y pagos de esa reserva siguen editables aunque esté bloqueada.
