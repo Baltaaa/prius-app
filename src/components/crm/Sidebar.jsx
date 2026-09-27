@@ -17,7 +17,8 @@ import {
   Activity,
   Inbox,
   GanttChartSquare,
-  X
+  X,
+  DoorClosed
 } from 'lucide-react'
 
 export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }) {
@@ -33,6 +34,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
   const mainNav = [
     { name: 'Dashboard', path: '/app/home', icon: LayoutDashboard },
     { name: 'Plano de Playa', path: '/app/plano', icon: Map },
+    { name: 'Cabinas y Lockers', path: '/app/cabinas-lockers', icon: DoorClosed, comingSoon: true },
     { name: 'Reservas', path: '/app/reservas', icon: CalendarDays },
     { name: 'Clientes', path: '/app/clientes', icon: Users },
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
@@ -88,15 +90,22 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile = () => {} }
                   to={item.path}
                   onClick={onCloseMobile}
                   className={({ isActive }) => `
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                    ${isActive 
-                      ? 'bg-white/10 text-[#FDE047] border-l-2 border-[#FDE047]' 
+                    flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
+                    ${isActive
+                      ? 'bg-white/10 text-[#FDE047] border-l-2 border-[#FDE047]'
                       : 'text-gray-400 hover:bg-white/5 hover:text-white'
                     }
                   `}
                 >
-                  <item.icon size={18} className="shrink-0" />
-                  <span>{item.name}</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <item.icon size={18} className="shrink-0" />
+                    <span className="truncate">{item.name}</span>
+                  </div>
+                  {item.comingSoon && (
+                    <span className="shrink-0 px-1.5 py-0.5 text-[8px] font-bold bg-white/10 text-gray-400 rounded uppercase tracking-wider">
+                      Pronto
+                    </span>
+                  )}
                 </NavLink>
               ))}
             </nav>

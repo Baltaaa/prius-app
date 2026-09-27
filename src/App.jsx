@@ -8,6 +8,7 @@ import GlobalLoader from './components/ui/GlobalLoader'
 // Todo el CRM va lazy -> se descarga recién al autenticarse, en chunks por página.
 const AppLayout = lazy(() => import('./layouts/AppLayout'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
+const CabinasLockers = lazy(() => import('./pages/crm/CabinasLockers'))
 const Home = lazy(() => import('./pages/crm/Home'))
 const Reservas = lazy(() => import('./pages/crm/Reservas'))
 const Clientes = lazy(() => import('./pages/crm/Clientes'))
@@ -40,6 +41,7 @@ export default function App() {
             <Route index element={<Navigate to="/app/home" replace />} />
             <Route path="home" element={<Home />} />
             <Route path="plano" element={<Dashboard />} />
+            <Route path="cabinas-lockers" element={<CabinasLockers />} />
             <Route path="reservas" element={<Reservas />} />
             <Route path="clientes" element={<Clientes />} />
             <Route path="caja" element={<Caja />} />

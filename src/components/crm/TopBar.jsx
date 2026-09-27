@@ -9,7 +9,7 @@ import { estadoBadgeStatus } from '../../lib/reservas'
 import {
   Search, Bell, User, LogOut, ChevronDown, Menu, Wallet, Calendar, AlertCircle,
   LayoutDashboard, Map, CalendarClock, Users, BarChart2, Inbox,
-  Activity, FileText, UserCheck,
+  Activity, FileText, UserCheck, DoorClosed,
 } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 
@@ -28,6 +28,10 @@ const SECTION_TITLES = [
   {
     path: '/app/plano', name: 'Plano de Playa', subtitle: 'Gestión de Unidades Prius Playa Grande',
     icon: Map, iconBg: 'bg-sky-400/10', iconBorder: 'border-sky-400/20', iconColor: 'text-sky-400',
+  },
+  {
+    path: '/app/cabinas-lockers', name: 'Cabinas y Lockers', subtitle: 'Sección en desarrollo — solo lectura.',
+    icon: DoorClosed, iconBg: 'bg-white/10', iconBorder: 'border-white/20', iconColor: 'text-gray-300',
   },
   {
     path: '/app/reservas', name: 'Cola de Reservas', subtitle: 'Alquileres por período y día, ordenados por llegada.',
