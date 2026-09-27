@@ -1,4 +1,4 @@
-import { formatCurrency, unidadEmoji } from '../../lib/format'
+import { formatMontoVisible, unidadEmoji } from '../../lib/format'
 import { esPendienteConfirmacion, pagoSinVerificar, saldoNumerico } from '../../lib/reservas'
 import { CreditCard, Hourglass, Gift } from 'lucide-react'
 
@@ -112,11 +112,17 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
       </div>
       <div className="overflow-x-auto">
         <div className="flex gap-2 min-w-fit pb-1">
-          {/* Precio de venta — informativo, no clickeable */}
-          <div className={`${cellBase} bg-white/5 border border-white/10 text-white`}>
-            <span className="text-[8px] text-gray-500 uppercase tracking-widest">Precio Venta</span>
-            {formatCurrency(reserva.valor_total)}
-          </div>
+          {/* Precio de venta — informativo, no clickeable. Nunca se
+              renderiza en $0 (ver lib/format.js formatMontoVisible); en la
+              práctica esta rama ya solo se alcanza con valor_total > 0 (el
+              guard de más arriba corta antes si no lo es), pero se aplica el
+              mismo helper acá para no formatear montos a mano. */}
+          {formatMontoVisible(reserva.valor_total) && (
+            <div className={`${cellBase} bg-white/5 border border-white/10 text-white`}>
+              <span className="text-[8px] text-gray-500 uppercase tracking-widest">Precio Venta</span>
+              {formatMontoVisible(reserva.valor_total)}
+            </div>
+          )}
 
           {cuotas.map((pago) => {
             // Comprobante cargado en la migración pero sin poder leer el
@@ -140,7 +146,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
                 title={saldada ? 'Reserva saldada — cuota bloqueada' : 'Ver detalle del pago'}
               >
                 <span className="text-[8px] text-gray-500 uppercase tracking-widest">Cuota {pago.nro_cuota}</span>
-                {sinVerificar ? <MontoNulo /> : formatCurrency(pago.monto)}
+                {sinVerificar ? <MontoNulo /> : formatMontoVisible(pago.monto)}
                 {pago.medio === 'tarjeta_credito' && pago.cuotas_tarjeta && (
                   <span className="flex items-center gap-0.5 text-[8px] text-[#FDE047] font-bold">
                     <CreditCard size={10} /> {pago.cuotas_tarjeta}x
@@ -164,12 +170,13 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
             </button>
           )}
 
-          {/* Saldo — informativo, no clickeable */}
+          {/* Saldo — informativo, no clickeable. Saldada => "Unidad saldada"
+              (nunca "$0" liso); si no, el monto solo se muestra si es > 0. */}
           <div className={`${cellBase} bg-white/5 border border-white/10 ${
-            saldada ? 'text-green-400' : saldoCalculado === null ? 'text-gray-400' : saldoCalculado > 0 ? 'text-red-400' : 'text-green-400'
+            saldada ? 'text-green-400' : saldoCalculado === null ? 'text-gray-400' : 'text-red-400'
           }`}>
             <span className="text-[8px] text-gray-500 uppercase tracking-widest">Saldo</span>
-            {saldada ? 'Saldado' : saldoCalculado === null ? <MontoNulo /> : formatCurrency(saldoCalculado)}
+            {saldada ? 'Unidad saldada' : saldoCalculado === null ? <MontoNulo /> : formatMontoVisible(saldoCalculado)}
           </div>
         </div>
       </div>

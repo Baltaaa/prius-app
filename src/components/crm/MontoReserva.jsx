@@ -1,5 +1,5 @@
 import { HelpCircle, Gift, Hourglass } from 'lucide-react'
-import { formatCurrency } from '../../lib/format'
+import { formatCurrency, formatMontoVisible } from '../../lib/format'
 import { montoInfo, esPendienteConfirmacion } from '../../lib/reservas'
 
 // Un "$0" en pantalla es ambiguo: puede ser un monto real (bonificado) o un
@@ -39,7 +39,7 @@ export default function MontoReserva({ reserva, className = '' }) {
 
   return (
     <span className={`inline-flex items-center gap-1.5 ${className}`}>
-      {formatCurrency(valorTotal)}
+      {formatMontoVisible(valorTotal)}
       {bonificada && (
         <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">
           <Gift size={10} /> Bonificada

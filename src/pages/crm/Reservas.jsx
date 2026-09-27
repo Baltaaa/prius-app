@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatCurrency, formatDate, unidadEmoji, normalizeText } from '../../lib/format'
+import { formatCurrency, formatMontoVisible, formatDate, unidadEmoji, normalizeText } from '../../lib/format'
 import { coSocios, estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import { useDebounced } from '../../hooks/useDebounced'
@@ -567,8 +567,8 @@ export default function Reservas() {
                 </td>
                 <td className="px-6 py-5 font-medium text-gray-300 uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
                 <td className="px-6 py-5 font-bold text-white"><MontoReserva reserva={res} /></td>
-                <td className={`px-6 py-5 font-bold ${Number(res.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                  {formatCurrency(res.saldo)}
+                <td className="px-6 py-5 font-bold text-red-400">
+                  {formatMontoVisible(res.saldo)}
                 </td>
                 <td className="px-6 py-5">
                   <div className="flex items-center gap-2">
@@ -601,8 +601,8 @@ export default function Reservas() {
               </td>
               <td className="px-6 py-5 font-medium text-gray-300 uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
               <td className="px-6 py-5 font-bold text-white"><MontoReserva reserva={res} /></td>
-              <td className={`px-6 py-5 font-bold ${Number(res.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                {formatCurrency(res.saldo)}
+              <td className="px-6 py-5 font-bold text-red-400">
+                {formatMontoVisible(res.saldo)}
               </td>
               <td className="px-6 py-5">
                 <StatusBadge status={estadoBadgeStatus(res)} />
@@ -666,8 +666,8 @@ export default function Reservas() {
                 <div className="flex justify-between items-center border-t border-white/5 pt-3 mt-3">
                   <div>
                     <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Saldo</p>
-                    <p className={`text-sm font-bold ${Number(res.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                      {formatCurrency(res.saldo)}
+                    <p className="text-sm font-bold text-red-400">
+                      {formatMontoVisible(res.saldo)}
                     </p>
                   </div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Ver cliente</p>
@@ -695,8 +695,8 @@ export default function Reservas() {
               <div className="flex justify-between items-center border-t border-white/5 pt-3">
                 <div>
                   <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Saldo</p>
-                  <p className={`text-sm font-bold ${Number(res.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                    {formatCurrency(res.saldo)}
+                  <p className="text-sm font-bold text-red-400">
+                    {formatMontoVisible(res.saldo)}
                   </p>
                 </div>
                 <div className="flex gap-2">

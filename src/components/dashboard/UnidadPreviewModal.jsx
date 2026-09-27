@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { X, Umbrella, Home, Users, ArrowRight, MapPin } from "lucide-react"
 import { usePagos } from "../../hooks/usePagos"
 import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib/reservas"
-import { formatCurrency, formatDate, unidadEmoji } from "../../lib/format"
+import { formatCurrency, formatMontoVisible, formatDate, unidadEmoji } from "../../lib/format"
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 
@@ -185,8 +185,11 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                   </div>
                   <div>
                     <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Saldo</p>
-                    <p className={`mt-0.5 font-bold ${saldo === null ? "text-gray-400" : saldo > 0 ? "text-red-400" : "text-green-400"}`}>
-                      {esPendienteConfirmacion ? "—" : saldo === null ? "Sin verificar" : saldo > 0 ? formatCurrency(saldo) : "Saldada"}
+                    {/* Saldo en $0 (pagada/saldada/bonificada): no se muestra
+                        nada acá, nunca "$0" ni un texto de reemplazo — ver
+                        CLAUDE.md "Nunca $0". */}
+                    <p className={`mt-0.5 font-bold ${saldo === null ? "text-gray-400" : "text-red-400"}`}>
+                      {esPendienteConfirmacion ? "—" : saldo === null ? "Sin verificar" : formatMontoVisible(saldo)}
                     </p>
                   </div>
                 </div>

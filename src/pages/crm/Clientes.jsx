@@ -4,7 +4,7 @@ import { useClientes } from '../../hooks/useClientes'
 import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
-import { formatCurrency, formatDate, unidadEmoji } from '../../lib/format'
+import { formatMontoVisible, formatDate, unidadEmoji } from '../../lib/format'
 import { coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import Modal from '../../components/crm/Modal'
@@ -453,17 +453,19 @@ export default function Clientes() {
                       sin importar el largo de unidad/badge de cada fila. */}
                   <p className="w-28 text-right shrink-0">
                     {saldoInfo.sinVerificar ? (
-                      saldoHeaderSaldado ? (
-                        <span className="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Saldado</span>
-                      ) : (
+                      // Si la reserva que manda el badge ya está pagada o
+                      // bonificada, ese "sin verificar" agregado no es una
+                      // deuda real — nunca se muestra $0 acá, así que no se
+                      // muestra nada (ver CLAUDE.md "Nunca $0").
+                      saldoHeaderSaldado ? null : (
                         <span className="text-red-400 text-[9px] font-bold uppercase tracking-widest whitespace-nowrap">Monto nulo</span>
                       )
                     ) : sinPrecio ? (
                       <span className="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
                     ) : (
-                      <span className={`font-bold text-sm ${saldoInfo.total > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                        {formatCurrency(saldoInfo.total)}
-                      </span>
+                      formatMontoVisible(saldoInfo.total) && (
+                        <span className="font-bold text-sm text-red-400">{formatMontoVisible(saldoInfo.total)}</span>
+                      )
                     )}
                   </p>
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>

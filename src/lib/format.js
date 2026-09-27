@@ -13,6 +13,18 @@ const FECHA_SOLO_RE = /^\d{4}-\d{2}-\d{2}$/
 
 export const formatCurrency = (val) => currencyFmt.format(Number(val) || 0)
 
+// Nunca mostrar "$ 0" (sep 2026): un monto en cero es visualmente idéntico a
+// "no se cargó nada" cuando en realidad significa "no hay deuda" (reserva
+// pagada/saldada) o "sin cargo" (bonificada) — dos cosas muy distintas que
+// terminaban mostrando el mismo texto engañoso. Devuelve el monto formateado
+// SOLO si es mayor a 0; `null` en cualquier otro caso (0, null, undefined)
+// para que el llamador no renderice nada ahí. No usar en Caja/Reportes,
+// donde un total en $0 sí es un dato real del día/período.
+export const formatMontoVisible = (val) => {
+  const n = Number(val)
+  return n > 0 ? currencyFmt.format(n) : null
+}
+
 // Normaliza para comparar sin importar mayúsculas/acentos (ej: "Perez" matchea
 // "Pérez"). Único lugar con esta lógica — antes vivía duplicada en TopBar.jsx.
 export const normalizeText = (s) =>
