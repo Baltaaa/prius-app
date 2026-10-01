@@ -29,15 +29,23 @@ export function AuthProvider({ children }) {
       if (activo) setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // No awaitar trabajo async (fetchPerfil pega a la base) directo adentro
+    // del callback: onAuthStateChange lo corre bajo el lock interno de
+    // gotrue-js (navigator.locks sobre el storageKey), y un signIn/signOut
+    // concurrente que necesite ese mismo lock queda bloqueado hasta que
+    // gotrue lo libera a la fuerza a los 5s — el login quedaba colgado
+    // (confirmado en producción: "Lock ... was not released within 5000ms").
+    // setTimeout saca el trabajo afuera del lock, como recomienda Supabase.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
       if (event === 'SIGNED_OUT') {
         setPerfil(null)
         setLoading(false)
         return
       }
-      await fetchPerfil(session?.user?.id)
-      setLoading(false)
+      setTimeout(() => {
+        fetchPerfil(session?.user?.id).then(() => setLoading(false))
+      }, 0)
     })
 
     return () => { activo = false; subscription.unsubscribe() }
