@@ -86,3 +86,13 @@ export const CONDICION_IVA_LABEL = {
 // using errcode) — un solo lugar para no repetir los strings mágicos.
 export const ERROR_CAJA_CERRADA = 'P0003'
 export const ERROR_EXCEDE_SALDO = 'P0002'
+
+// Fecha en que arrancó a funcionar la caja digital — espejo en el front de
+// fn_caja_inicio() en la base (única fuente de verdad real, ver migración
+// pagos_historicos_fecha_y_caja). Un pago con fecha anterior a esto es
+// histórico: no exige caja abierta y nunca entra a ningún resumen de caja.
+export const CAJA_INICIO = '2026-10-01'
+
+export function esPagoHistorico(fechaIso) {
+  return !!fechaIso && fechaIso < CAJA_INICIO
+}

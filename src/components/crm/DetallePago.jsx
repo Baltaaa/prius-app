@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useData } from '../../context/DataProvider'
-import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
+import { formatPesos, formatFecha, formatFechaHora, unidadEmoji } from '../../lib/format'
 import {
   formatMedioPago, TIPO_PAGO_LABEL, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL,
   comprobanteEtiqueta,
@@ -114,7 +114,13 @@ export default function DetallePago({ isOpen, onClose, pago, reserva }) {
           </div>
           <div>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha</p>
-            <p className="text-sm text-white mt-1">{formatFecha(pago.fecha_hora || pago.fecha)}</p>
+            {/* pago.fecha es la fecha real del pago (editable, la del
+                comprobante si vino con uno) — nunca fecha_hora, que es solo
+                el timestamp de carga en el sistema (auditoría). */}
+            <p className="text-sm text-white mt-1">{formatFecha(pago.fecha)}</p>
+            {pago.fecha_hora && (
+              <p className="text-[10px] text-gray-600 mt-0.5">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
+            )}
           </div>
           {pago.concepto && (
             <div className="col-span-2">
@@ -135,7 +141,14 @@ export default function DetallePago({ isOpen, onClose, pago, reserva }) {
           <div className="flex items-center justify-between px-4 py-3 bg-white/5">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-300">
               <FileText size={14} />
-              {pago.comprobante_id ? 'Comprobante' : 'Sin comprobante'}
+              {pago.comprobante_id ? (
+                <span>
+                  {pago.comprobantes ? comprobanteEtiqueta(pago.comprobantes) : 'Comprobante'}
+                  {pago.comprobantes?.fecha && (
+                    <span className="text-gray-500 normal-case font-normal tracking-normal"> · {formatFecha(pago.comprobantes.fecha)}</span>
+                  )}
+                </span>
+              ) : 'Sin comprobante'}
             </div>
             {!cargandoComprobante && (
               <button

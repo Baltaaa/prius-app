@@ -130,7 +130,7 @@ export default function Caja() {
 
   const handleCerrarCaja = async ({ efectivoContado, observaciones, datosZ }) => {
     try {
-      await cerrarCaja(efectivoContado, datosZ, observaciones)
+      await cerrarCaja(cajaSeleccionada.id, efectivoContado, datosZ, observaciones)
     } catch (err) {
       await alert(err.message || 'No se pudo cerrar la caja.')
       throw err

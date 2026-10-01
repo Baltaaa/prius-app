@@ -4,7 +4,7 @@ import { usePagos } from '../../hooks/usePagos'
 import { formatPesos, unidadEmoji } from '../../lib/format'
 import {
   MEDIO_PAGO_LABEL, TIPO_PAGO_LABEL, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL,
-  sugerirTipoPago, comprobanteTipoDefault, ERROR_CAJA_CERRADA, ERROR_EXCEDE_SALDO,
+  sugerirTipoPago, comprobanteTipoDefault, ERROR_CAJA_CERRADA, ERROR_EXCEDE_SALDO, esPagoHistorico,
 } from '../../lib/pagos'
 import Modal from './Modal'
 import MoneyInput from '../inputs/MoneyInput'
@@ -115,6 +115,19 @@ export default function RegistrarPago({
 
   const esperandoCaja = cajaCerrada
 
+  // La fecha del comprobante define la fecha del pago (si no hay comprobante
+  // cargado todavía, es un cobro de hoy en vivo — comportamiento de siempre).
+  // Anterior al inicio de la caja digital = histórico: no exige caja
+  // abierta, nunca entra a ningún resumen de caja (ver lib/pagos.js).
+  const fechaPago = comprobanteAbierto && fechaComprobante ? fechaComprobante : null
+  const esHistorico = esPagoHistorico(fechaPago)
+
+  // Con el acordeón abierto y sin elegir "mismo comprobante que otro pago",
+  // punto de venta y número son obligatorios — si no, el pago se registraba
+  // igual pero sin comprobante, sin ningún aviso (bug reportado: el usuario
+  // creía haber cargado un comprobante y no quedaba asociado a nada).
+  const comprobanteIncompleto = comprobanteAbierto && !mismoComprobanteDe && (!comprobanteTipo || !puntoVenta || !numero)
+
   const construirComprobantePayload = () => {
     if (!comprobanteAbierto) return null
     if (mismoComprobanteDe) return { comprobante_id: mismoComprobanteDe }
@@ -132,10 +145,10 @@ export default function RegistrarPago({
       const pago = await registrarPago({
         clienteId: cliente.id, monto, medio, tipoPago, concepto,
         reservaId: reservaId || null, referencia, comprobante: construirComprobantePayload(),
-        permitirExcedente,
+        permitirExcedente, fecha: fechaPago,
       })
       if (puntoVenta) localStorage.setItem(LAST_PV_KEY, String(puntoVenta))
-      setExito({ monto })
+      setExito({ monto, historico: esHistorico })
       onSuccess?.(pago)
     } catch (err) {
       if (err.code === ERROR_CAJA_CERRADA) {
@@ -183,7 +196,11 @@ export default function RegistrarPago({
           </div>
           <div>
             <p className="text-lg font-bold text-white">{formatPesos(exito.monto)} registrado</p>
-            <p className="text-xs text-gray-400 uppercase tracking-widest mt-1">El cobro ya está reflejado en la reserva y en la caja de hoy.</p>
+            <p className="text-xs text-gray-400 uppercase tracking-widest mt-1">
+              {exito.historico
+                ? 'El cobro ya está reflejado en la reserva. Pago histórico: no impacta en la caja diaria.'
+                : 'El cobro ya está reflejado en la reserva y en la caja de hoy.'}
+            </p>
           </div>
           <div className="flex gap-3 pt-2">
             <button
@@ -376,10 +393,28 @@ export default function RegistrarPago({
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <IntegerInput label="Punto de venta" value={puntoVenta} onChange={setPuntoVenta} min={1} max={99999} placeholder="1" />
-                    <IntegerInput label="Número" value={numero} onChange={setNumero} min={1} max={99999999} placeholder="727" />
+                    <IntegerInput
+                      label="Punto de venta" value={puntoVenta} onChange={setPuntoVenta} min={1} max={99999}
+                      placeholder="Ej: 1" error={comprobanteIncompleto && !puntoVenta ? 'Obligatorio' : undefined}
+                    />
+                    <IntegerInput
+                      label="Número" value={numero} onChange={setNumero} min={1} max={99999999}
+                      placeholder="Ej: 727" error={comprobanteIncompleto && !numero ? 'Obligatorio' : undefined}
+                    />
                   </div>
-                  <DateInput label="Fecha" value={fechaComprobante} onChange={setFechaComprobante} max={new Date().toISOString().split('T')[0]} />
+                  <DateInput
+                    label="Fecha"
+                    value={fechaComprobante}
+                    onChange={setFechaComprobante}
+                    max={new Date().toISOString().split('T')[0]}
+                    calendarOnly
+                    hint={esHistorico ? 'Pago histórico · no impacta en la caja diaria' : undefined}
+                  />
+                  {comprobanteIncompleto && (
+                    <p className="text-[11px] text-red-400">
+                      Completá punto de venta y número, o cerrá "Cargar comprobante ahora" si lo vas a cargar después — si no, el pago se registra sin comprobante asociado.
+                    </p>
+                  )}
                 </>
               )}
             </div>
@@ -388,10 +423,14 @@ export default function RegistrarPago({
 
         <button
           type="submit"
-          disabled={saving || monto <= 0 || (!reservaId && !allowSinReserva) || !cliente?.id}
+          disabled={saving || monto <= 0 || (!reservaId && !allowSinReserva) || !cliente?.id || comprobanteIncompleto}
           className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
         >
-          {saving ? 'Registrando...' : `Confirmar ${monto > 0 ? formatPesos(monto) : 'Pago'}`}
+          {saving
+            ? 'Registrando...'
+            : esHistorico
+              ? `Confirmar pago histórico ${monto > 0 ? formatPesos(monto) : ''}`.trim()
+              : `Confirmar ${monto > 0 ? formatPesos(monto) : 'Pago'}`}
         </button>
       </form>
     </Modal>

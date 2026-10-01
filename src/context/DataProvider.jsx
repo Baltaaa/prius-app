@@ -139,7 +139,7 @@ export function DataProvider({ children }) {
   const fetchPagos = useCallback(async () => {
     const { data } = await supabase
       .from('pagos')
-      .select('*')
+      .select('*, comprobantes(id, tipo, punto_venta, numero, fecha, estado)')
       .order('created_at', { ascending: false })
     setPagos(data || [])
   }, [])
@@ -321,15 +321,23 @@ export function DataProvider({ children }) {
     return data
   }, [fetchCaja])
 
-  const cerrarCaja = useCallback(async (efectivoContado, datosZ, observaciones) => {
-    if (!cajaHoy) return
+  // `cajaId` explícito: Caja.jsx deja navegar a cualquier fecha y cerrar una
+  // caja que quedó abierta de un día anterior (no se cierra sola a medianoche
+  // — hay que cerrarla a mano). Antes esto asumía `cajaHoy.id` sin importar
+  // qué caja estaba realmente seleccionada: si `cajaHoy` era null (hoy
+  // todavía no se abrió, que es exactamente el caso de una caja de ayer sin
+  // cerrar) la función hacía `return` en silencio — el stepper de cierre
+  // completaba sus 3 pasos y cerraba el modal como si hubiera funcionado,
+  // pero no se mandaba ningún RPC y la caja seguía abierta en la base.
+  const cerrarCaja = useCallback(async (cajaId, efectivoContado, datosZ, observaciones) => {
+    if (!cajaId) return
     const { data, error } = await supabase.rpc('cerrar_caja', {
-      p_caja_id: cajaHoy.id, p_efectivo_contado: Number(efectivoContado) || 0,
+      p_caja_id: cajaId, p_efectivo_contado: Number(efectivoContado) || 0,
       p_datos_z: datosZ || null, p_observaciones: observaciones || null,
     })
     if (error) throw error
-    setCajaHoy(data)
-    setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? data : c)))
+    if (cajaHoy?.id === cajaId) setCajaHoy(data)
+    setHistorialCajas((prev) => prev.map((c) => (c.id === cajaId ? data : c)))
     return data
   }, [cajaHoy])
 
@@ -343,36 +351,43 @@ export function DataProvider({ children }) {
   // Alta de pago (Fase 3, RPC-only): un solo punto de escritura, reutilizado
   // por RegistrarPago (Clientes/Reservas/Plano). registrar_pago valida saldo,
   // bonificada y caja abierta, y crea el comprobante si vino incluido.
+  // `fecha` (opcional, default hoy en la RPC): si es anterior a
+  // fn_caja_inicio() el pago queda histórico — sin caja_id, no exige caja
+  // abierta y no aparece en ningún resumen de caja (ver lib/pagos.js).
   const registrarPago = useCallback(async ({
-    clienteId, monto, medio, tipoPago, concepto, reservaId, referencia, comprobante, permitirExcedente,
+    clienteId, monto, medio, tipoPago, concepto, reservaId, referencia, comprobante, permitirExcedente, fecha,
   }) => {
     const { data, error } = await supabase.rpc('registrar_pago', {
       p_cliente_id: clienteId, p_monto: Number(monto), p_medio: medio, p_tipo_pago: tipoPago,
       p_concepto: concepto, p_reserva_id: reservaId || null, p_referencia: referencia || null,
       p_comprobante: comprobante || null, p_permitir_excedente: !!permitirExcedente,
+      p_fecha: fecha || undefined,
     })
     if (error) throw error
-    setPagos((prev) => [data, ...prev])
+    // fetchPagos (no un merge optimista con `data`) para que el pago nuevo
+    // ya traiga el comprobante embebido (`data` del RPC es la fila cruda de
+    // `pagos`, sin el join a `comprobantes` que usa el detalle).
+    await fetchPagos()
     await fetchReservas()
     await fetchCaja()
     return data
-  }, [fetchReservas, fetchCaja])
+  }, [fetchPagos, fetchReservas, fetchCaja])
 
   const anularPago = useCallback(async (pagoId, motivo) => {
     const { data, error } = await supabase.rpc('anular_pago', { p_pago_id: pagoId, p_motivo: motivo })
     if (error) throw error
-    setPagos((prev) => prev.map((p) => (p.id === pagoId ? data : p)))
+    await fetchPagos()
     await fetchReservas()
     await fetchCaja()
     return data
-  }, [fetchReservas, fetchCaja])
+  }, [fetchPagos, fetchReservas, fetchCaja])
 
   const completarComprobante = useCallback(async (pagoId, comprobante) => {
     const { data, error } = await supabase.rpc('completar_comprobante', { p_pago_id: pagoId, p_comprobante: comprobante })
     if (error) throw error
-    setPagos((prev) => prev.map((p) => (p.id === pagoId ? data : p)))
+    await fetchPagos()
     return data
-  }, [])
+  }, [fetchPagos])
 
   // Update reactivo de un lead (estado: nuevo -> contactado -> descartado, o
   // notas_crm). Optimista; Realtime sobre `leads` concilia el resto.
