@@ -15,6 +15,7 @@ import Cell from "../components/dashboard/Cell"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import { useData } from "../context/DataProvider"
 import { coSocios } from "../lib/reservas"
+import DateInput from "../components/inputs/DateInput"
 
 // El plano de playa solo dibuja carpas y sombrillas. Cabinas y lockers están
 // dentro del complejo y se manejan en su propia sección del CRM.
@@ -195,12 +196,7 @@ export default function Dashboard() {
           >
             <ChevronLeft size={16} />
           </button>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => e.target.value && goToDate(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#FDE047]/50 outline-none [color-scheme:dark]"
-          />
+          <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} className="w-36" />
           <button
             onClick={() => goToDate(shiftDate(selectedDate, 1))}
             className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"

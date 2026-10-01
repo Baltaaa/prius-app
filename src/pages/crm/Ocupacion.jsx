@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../../context/DataProvider'
-import { unidadEmoji, formatDate } from '../../lib/format'
+import { unidadEmoji, formatFecha } from '../../lib/format'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
+import DateInput from '../../components/inputs/DateInput'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Vista tipo Gantt: una fila por unidad, una barra por reserva mostrando su
@@ -139,19 +140,9 @@ export default function Ocupacion() {
           >
             <ChevronLeft size={16} />
           </button>
-          <input
-            type="date"
-            value={desde}
-            onChange={(e) => e.target.value && setDesde(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:border-[#FDE047]/50 outline-none [color-scheme:dark]"
-          />
+          <DateInput value={desde} onChange={(v) => v && setDesde(v)} className="w-36" />
           <span className="text-gray-600 text-xs">→</span>
-          <input
-            type="date"
-            value={hasta}
-            onChange={(e) => e.target.value && setHasta(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:border-[#FDE047]/50 outline-none [color-scheme:dark]"
-          />
+          <DateInput value={hasta} onChange={(v) => v && setHasta(v)} min={desde} className="w-36" />
           <button
             onClick={() => shiftRango(7)}
             className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
@@ -196,7 +187,7 @@ export default function Ocupacion() {
                     className="absolute top-0 h-full border-l border-white/5 pl-1.5 text-[9px] text-gray-500 font-bold flex items-center"
                     style={{ left: `${m.left}%` }}
                   >
-                    {formatDate(m.dia).slice(0, 5)}
+                    {formatFecha(m.dia).slice(0, 5)}
                   </div>
                 ))}
               </div>
@@ -223,7 +214,7 @@ export default function Ocupacion() {
                           key={`${b.reserva.id}-${i}`}
                           type="button"
                           onClick={() => setReservaDetalle(b.reserva)}
-                          title={`${b.reserva.clientes?.nombre || 'S/N'} — ${formatDate(b.reserva.fecha_inicio || b.reserva.fecha)} a ${formatDate(b.reserva.fecha_fin || b.reserva.fecha)}`}
+                          title={`${b.reserva.clientes?.nombre || 'S/N'} — ${formatFecha(b.reserva.fecha_inicio || b.reserva.fecha)} a ${formatFecha(b.reserva.fecha_fin || b.reserva.fecha)}`}
                           className={`absolute top-1.5 h-6 border text-[9px] font-bold text-black/80 uppercase truncate px-1.5 flex items-center transition-all hover:brightness-110 ${b.color} ${
                             b.recortadaIzq ? 'rounded-l-none' : 'rounded-l-md'
                           } ${b.recortadaDer ? 'rounded-r-none' : 'rounded-r-md'}`}

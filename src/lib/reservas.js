@@ -36,7 +36,7 @@ export const estadoBadgeStatus = (reserva) => (reserva?.bonificada ? 'bonificada
 // se definió, mostrar "$0"/"Unidad saldada" ahí sería información falsa
 // (bug detectado con Adriana Aguero, Sombrilla #11). Válido para reservas
 // cuyo `saldo` lo mantiene el trigger `fn_pago_actualiza_saldo` en tiempo
-// real (período/día, dadas de alta por PagoModal) — para temporada migrada
+// real (período/día, dadas de alta por RegistrarPago) — para temporada migrada
 // desde el excel histórico usar `saldoNumerico` en vez de este helper, ver
 // nota abajo.
 export function estaSaldada(reserva) {
@@ -70,9 +70,14 @@ export const tienePagoSinVerificar = (pagosDeReserva) => (pagosDeReserva || []).
 // verificar — Agustín y compañía). El llamador NUNCA debe tratar `null` como
 // 0: hay que mostrar "Sin verificar", no "$0" ni "Unidad saldada".
 export function saldoNumerico(reserva, pagosDeReserva = []) {
+  // Un pago anulado (motivo + caja abierta, ver CLAUDE.md "Flujo de dinero")
+  // nunca cuenta para el saldo ni dispara "sin verificar" — es como si no
+  // hubiera existido. Migraciones viejas no tienen `estado` cargado: se
+  // tratan como vigentes (!== 'anulado', no === 'vigente').
+  const vigentes = (pagosDeReserva || []).filter((p) => p.estado !== 'anulado')
   if (esPendienteConfirmacion(reserva)) return 0 // precio ni se definió, no hay deuda que contar todavía
-  if (montoInfo(reserva).pendiente || tienePagoSinVerificar(pagosDeReserva)) return null
-  const pagado = pagosDeReserva.reduce((acc, p) => acc + Number(p.monto || 0), 0)
+  if (montoInfo(reserva).pendiente || tienePagoSinVerificar(vigentes)) return null
+  const pagado = vigentes.reduce((acc, p) => acc + Number(p.monto || 0), 0)
   return Math.max(Number(reserva.valor_total || 0) - pagado, 0)
 }
 

@@ -1,5 +1,5 @@
 import { usePagos } from '../../hooks/usePagos'
-import { formatCurrency, formatDate, unidadEmoji } from '../../lib/format'
+import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { coSocios, pagoSinVerificar, estadoBadgeStatus } from '../../lib/reservas'
 import { HelpCircle } from 'lucide-react'
@@ -53,18 +53,18 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
             <>
               <div>
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Desde</p>
-                <p className="text-sm text-white mt-1">{formatDate(reserva.fecha_inicio)}</p>
+                <p className="text-sm text-white mt-1">{formatFecha(reserva.fecha_inicio)}</p>
               </div>
               <div>
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Hasta</p>
-                <p className="text-sm text-white mt-1">{formatDate(reserva.fecha_fin)}</p>
+                <p className="text-sm text-white mt-1">{formatFecha(reserva.fecha_fin)}</p>
               </div>
             </>
           )}
           {esDia && (
             <div>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha</p>
-              <p className="text-sm text-white mt-1">{formatDate(reserva.fecha)}</p>
+              <p className="text-sm text-white mt-1">{formatFecha(reserva.fecha)}</p>
             </div>
           )}
         </div>
@@ -100,7 +100,7 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
               {pagos.map((p) => (
                 <div key={p.id} className="flex justify-between items-center text-xs px-4 py-3 bg-white/5 border border-white/10 rounded-xl">
                   <div className="text-gray-400">
-                    <span className="text-white font-bold">{formatDate(p.fecha)}</span>
+                    <span className="text-white font-bold">{formatFecha(p.fecha)}</span>
                     {' — '}{formatMedioPago(p)}
                     {p.comprobante && <span> · Comp. {p.comprobante}</span>}
                     {p.nro_cuota && <span> · Cuota {p.nro_cuota}</span>}
@@ -110,7 +110,7 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
                       <HelpCircle size={12} /> Sin verificar
                     </strong>
                   ) : (
-                    <strong className="text-green-400">{formatCurrency(p.monto)}</strong>
+                    <strong className="text-green-400">{formatPesos(p.monto)}</strong>
                   )}
                 </div>
               ))}

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../../context/DataProvider'
+import { formatFechaLarga, formatHora } from '../../lib/format'
 import { CalendarDays, Wallet, Users, Map as MapIcon, Receipt, Activity } from 'lucide-react'
 
 // Línea de tiempo del CRM: toda acción sobre reservas, pagos, clientes, unidades
@@ -22,9 +23,8 @@ const FILTROS = [
   { key: 'gastos_caja', label: 'Gastos' },
 ]
 
-const fmtFecha = (s) =>
-  new Date(s + 'T00:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-const fmtHora = (ts) => new Date(ts).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+const fmtFecha = formatFechaLarga
+const fmtHora = formatHora
 
 export default function Actividad() {
   const { eventos, loading } = useData()

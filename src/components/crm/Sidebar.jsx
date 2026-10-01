@@ -1,8 +1,8 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useLeads } from '../../hooks/useLeads'
+import { useAuth } from '../../context/AuthProvider'
 import {
   LayoutDashboard,
   CalendarDays,
@@ -28,10 +28,11 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const { count: notificationsCount } = useNotifications()
   const { sinContactar: leadsSinContactar } = useLeads()
+  const { signOut, permiso } = useAuth()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate('/')
+    await signOut()
+    navigate('/login')
   }
 
   const mainNav = [
@@ -41,7 +42,7 @@ export default function Sidebar() {
     { name: 'Reservas', path: '/app/reservas', icon: CalendarDays },
     { name: 'Clientes', path: '/app/clientes', icon: Users },
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
-    { name: 'Reportes', path: '/app/reportes', icon: BarChart2 }
+    ...(permiso('reportes_globales') ? [{ name: 'Reportes', path: '/app/reportes', icon: BarChart2 }] : []),
   ]
 
   const additionalNav = [

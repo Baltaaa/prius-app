@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
-import { formatCurrency, formatDate, unidadEmoji } from '../../lib/format'
+import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { pagoSinVerificar, tienePagoSinVerificar } from '../../lib/reservas'
 import MontoReserva from '../../components/crm/MontoReserva'
@@ -100,9 +100,9 @@ export default function Comprobantes() {
                   <p>
                     Ingreso:{' '}
                     {selectedReserva.tipo_alquiler === 'periodo'
-                      ? `${formatDate(selectedReserva.fecha_inicio)} al ${formatDate(selectedReserva.fecha_fin)}`
+                      ? `${formatFecha(selectedReserva.fecha_inicio)} al ${formatFecha(selectedReserva.fecha_fin)}`
                       : selectedReserva.tipo_alquiler === 'dia'
-                        ? formatDate(selectedReserva.fecha)
+                        ? formatFecha(selectedReserva.fecha)
                         : 'Temporada Completa'}
                   </p>
                 </div>
@@ -127,7 +127,7 @@ export default function Comprobantes() {
                 </strong>
               ) : (
                 <strong className="text-sm font-bold text-green-400 print:text-black">
-                  {formatCurrency(pagosReserva.reduce((acc, p) => acc + Number(p.monto || 0), 0))}
+                  {formatPesos(pagosReserva.reduce((acc, p) => acc + Number(p.monto || 0), 0))}
                 </strong>
               )}
             </div>
@@ -145,7 +145,7 @@ export default function Comprobantes() {
                 {pagosReserva.map((p) => (
                   <div key={p.id} className="flex justify-between items-center text-xs px-4 py-3 bg-white/5 border border-white/10 rounded-xl">
                     <div className="text-gray-400">
-                      <span className="text-white font-bold">{formatDate(p.fecha)}</span>
+                      <span className="text-white font-bold">{formatFecha(p.fecha)}</span>
                       {' — '}{formatMedioPago(p)}
                       {p.comprobante && <span> · Comp. {p.comprobante}</span>}
                       {p.nro_cuota && <span> · Cuota {p.nro_cuota}</span>}
@@ -155,7 +155,7 @@ export default function Comprobantes() {
                         <HelpCircle size={12} /> Sin verificar
                       </strong>
                     ) : (
-                      <strong className="text-green-400">{formatCurrency(p.monto)}</strong>
+                      <strong className="text-green-400">{formatPesos(p.monto)}</strong>
                     )}
                   </div>
                 ))}

@@ -4,16 +4,25 @@ import { useClientes } from '../../hooks/useClientes'
 import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
-import { formatMontoVisible, formatDate, unidadEmoji } from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji } from '../../lib/format'
+import { cuitValido, parseDNI, parseUnidadQuery } from '../../lib/parse'
 import { coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
+import { usePermiso } from '../../context/AuthProvider'
 import Modal from '../../components/crm/Modal'
-import PagoModal from '../../components/crm/PagoModal'
+import RegistrarPago from '../../components/crm/RegistrarPago'
+import DetallePago from '../../components/crm/DetallePago'
 import PagosGrid from '../../components/crm/PagosGrid'
-import CurrencyInput from '../../components/crm/CurrencyInput'
+import MoneyInput from '../../components/inputs/MoneyInput'
+import TextInput from '../../components/inputs/TextInput'
+import PhoneInput from '../../components/inputs/PhoneInput'
+import DniInput from '../../components/inputs/DniInput'
+import CuitInput from '../../components/inputs/CuitInput'
+import SelectChips from '../../components/inputs/SelectChips'
+import SearchInput from '../../components/inputs/SearchInput'
 import StatusBadge from '../../components/crm/StatusBadge'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
-import { Plus, Edit2, Trash2, Search, Wallet, ChevronDown, Mail, Phone, FileText, Sun, CircleDollarSign } from 'lucide-react'
+import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, Sun, CircleDollarSign } from 'lucide-react'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
 // reserva de período/día activa hoy — temporada actual, temporadas pasadas,
@@ -79,6 +88,7 @@ export default function Clientes() {
   const { clientes, loading, createCliente, updateCliente, deleteCliente } = useClientes()
   const { reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva } = useReservas()
   const { pagos: todosPagos } = usePagos() // sin reservaId: historial completo, filtrado acá por cliente
+  const puedeBonificar = usePermiso('bonificar')
   const [searchParams, setSearchParams] = useSearchParams()
   const { alert } = useDialog()
   const [searchTerm, setSearchTerm] = useState('')
@@ -112,8 +122,11 @@ export default function Clientes() {
 
   // Form states — cliente
   const [nombre, setNombre] = useState('')
-  const [telefono, setTelefono] = useState('')
+  const [telefono, setTelefono] = useState(null)
+  const [dni, setDni] = useState('')
   const [cuit, setCuit] = useState('')
+  const [condicionIva, setCondicionIva] = useState('consumidor_final')
+  const [razonSocial, setRazonSocial] = useState('')
   const [mail, setMail] = useState('')
   const [notas, setNotas] = useState('')
 
@@ -145,8 +158,11 @@ export default function Clientes() {
   const handleOpenCreate = () => {
     setEditingCliente(null)
     setNombre('')
-    setTelefono('')
+    setTelefono(null)
+    setDni('')
     setCuit('')
+    setCondicionIva('consumidor_final')
+    setRazonSocial('')
     setMail('')
     setNotas('')
     setAgregarTemporadaNueva(false)
@@ -157,16 +173,27 @@ export default function Clientes() {
   const handleOpenEdit = (cliente) => {
     setEditingCliente(cliente)
     setNombre(cliente.nombre)
-    setTelefono(cliente.telefono || '')
+    setTelefono(cliente.telefono || null)
+    setDni(cliente.dni || '')
     setCuit(cliente.cuit || '')
+    setCondicionIva(cliente.condicion_iva || 'consumidor_final')
+    setRazonSocial(cliente.razon_social || '')
     setMail(cliente.mail || '')
     setNotas(cliente.notas || '')
     setIsModalOpen(true)
   }
 
+  const requiereCuit = condicionIva === 'responsable_inscripto' || condicionIva === 'exento'
+  const cuitFormularioValido = !requiereCuit || (cuit.length === 11 && cuitValido(cuit))
+  const razonSocialValida = condicionIva !== 'responsable_inscripto' || (razonSocial.trim().length >= 2 && razonSocial.trim().length <= 120)
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const payload = { nombre: nombre.toUpperCase(), telefono, cuit, mail, notas }
+    if (!cuitFormularioValido || !razonSocialValida) return
+    const payload = {
+      nombre: nombre.toUpperCase(), telefono, dni: dni || null, cuit: cuit || null,
+      condicion_iva: condicionIva, razon_social: razonSocial || null, mail, notas,
+    }
     try {
       if (editingCliente) {
         await updateCliente(editingCliente.id, payload)
@@ -279,14 +306,24 @@ export default function Clientes() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, loading])
 
-  const debouncedSearch = useDebounced(searchTerm)
+  const debouncedSearch = useDebounced(searchTerm, 250)
   const filteredClientes = useMemo(() => {
-    const term = debouncedSearch.toLowerCase()
-    return clientes.filter(c =>
-      c.nombre.toLowerCase().includes(term) ||
-      (c.cuit && c.cuit.includes(debouncedSearch))
-    )
-  }, [clientes, debouncedSearch])
+    const term = debouncedSearch.trim().toLowerCase()
+    if (term.length < 2) return clientes
+    const dniTerm = parseDNI(debouncedSearch)
+    const unidadQuery = parseUnidadQuery(term)
+    return clientes.filter((c) => {
+      if (c.nombre.toLowerCase().includes(term)) return true
+      if (c.apellido && c.apellido.toLowerCase().includes(term)) return true
+      if (c.cuit && c.cuit.includes(debouncedSearch)) return true
+      if (dniTerm.length >= 7 && c.dni && c.dni.includes(dniTerm)) return true
+      if (unidadQuery) {
+        return reservas.some((r) => r.cliente_id === c.id && r.unidades?.numero === unidadQuery.numero
+          && (!unidadQuery.tipo || r.unidades?.tipo === unidadQuery.tipo))
+      }
+      return false
+    })
+  }, [clientes, debouncedSearch, reservas])
 
   // TODAS las reservas de cada cliente (histórico completo: activas y
   // canceladas, cualquier tipo_alquiler) — a diferencia de Reservas.jsx, acá
@@ -359,16 +396,13 @@ export default function Clientes() {
     <div className="space-y-10 animate-premium-fade">
       {/* Toolbar: buscador + alta, en una sola fila pegada al navbar */}
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Buscar cliente por nombre o CUIT..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 focus:border-cyan-400/50 rounded-xl outline-none text-white text-sm transition-all"
-          />
-        </div>
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar por nombre, DNI, CUIT o unidad (ej. carpa 19)..."
+          className="flex-1 max-w-md"
+          inputClassName="focus:border-cyan-400/50 py-3"
+        />
         <button
           onClick={handleOpenCreate}
           className="sm:ml-auto bg-[#FDE047] hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
@@ -428,7 +462,7 @@ export default function Clientes() {
                       <p className="font-bold text-white uppercase truncate">{cliente.nombre}</p>
                       <p className="text-gray-300 text-xs mt-0.5 flex items-center gap-1.5">
                         <Phone size={11} className="text-gray-600 shrink-0" />
-                        {cliente.telefono || <span className="text-gray-500">Sin cargar</span>}
+                        {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-gray-500">Sin cargar</span>}
                       </p>
                     </div>
                     <div
@@ -472,8 +506,8 @@ export default function Clientes() {
                       ) : sinPrecio ? (
                         <span className="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
                       ) : (
-                        formatMontoVisible(saldoInfo.total) && (
-                          <span className="font-bold text-sm text-red-400">{formatMontoVisible(saldoInfo.total)}</span>
+                        formatPesosVisible(saldoInfo.total) && (
+                          <span className="font-bold text-sm text-red-400">{formatPesosVisible(saldoInfo.total)}</span>
                         )
                       )}
                     </p>
@@ -508,12 +542,16 @@ export default function Clientes() {
                         <p className="text-sm text-white mt-1 lowercase">{cliente.mail || <span className="text-gray-500 normal-case">Sin cargar</span>}</p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> CUIT / DNI</p>
-                        <p className="text-sm text-white mt-1">{cliente.cuit || <span className="text-gray-500">Sin cargar</span>}</p>
+                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> CUIT</p>
+                        <p className="text-sm text-white mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-gray-500">Sin cargar</span>}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> DNI</p>
+                        <p className="text-sm text-white mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-gray-500">Sin cargar</span>}</p>
                       </div>
                       <div>
                         <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cliente desde</p>
-                        <p className="text-sm text-white mt-1">{formatDate(cliente.created_at)}</p>
+                        <p className="text-sm text-white mt-1">{formatFecha(cliente.created_at)}</p>
                       </div>
                       {cliente.notas && (
                         <div className="col-span-2 md:col-span-4">
@@ -550,8 +588,8 @@ export default function Clientes() {
                               r.tipo_alquiler === 'temporada'
                                 ? r.temporada
                                 : r.tipo_alquiler === 'dia'
-                                  ? formatDate(r.fecha)
-                                  : `${formatDate(r.fecha_inicio)} — ${formatDate(r.fecha_fin)}`
+                                  ? formatFecha(r.fecha)
+                                  : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`
                             return (
                               <div key={r.id} className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs space-y-1.5">
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -642,62 +680,64 @@ export default function Clientes() {
         title={editingCliente ? 'Editar Cliente' : 'Nuevo Cliente'}
       >
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Nombre Completo</label>
-            <input
-              type="text"
-              required
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              className={`${inputClass} uppercase`}
-              placeholder="Ej. JUAN PÉREZ"
-            />
-          </div>
+          <TextInput
+            label="Nombre Completo"
+            required
+            value={nombre}
+            onChange={(v) => setNombre(v.replace(/[´`]/g, "'").toUpperCase())}
+            maxLength={120}
+            placeholder="Ej. JUAN PÉREZ"
+          />
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Teléfono</label>
-              <input
-                type="tel"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                className={inputClass}
-                placeholder="+54 9..."
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">CUIT / DNI</label>
-              <input
-                type="text"
-                value={cuit}
-                onChange={(e) => setCuit(e.target.value)}
-                className={inputClass}
-                placeholder="20-12345678-9"
-              />
-            </div>
+            <PhoneInput label="Teléfono" required value={telefono} onChange={setTelefono} />
+            <DniInput label="DNI (opcional)" value={dni} onChange={setDni} />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Email</label>
-            <input
-              type="email"
-              value={mail}
-              onChange={(e) => setMail(e.target.value)}
-              className={`${inputClass} lowercase`}
-              placeholder="cliente@email.com"
+          <TextInput label="Email" type="email" value={mail} onChange={(v) => setMail(v.toLowerCase())} placeholder="cliente@email.com" />
+
+          <SelectChips
+            label="Condición IVA"
+            required
+            value={condicionIva}
+            onChange={setCondicionIva}
+            options={[
+              { value: 'consumidor_final', label: 'Consumidor Final' },
+              { value: 'monotributo', label: 'Monotributo' },
+              { value: 'responsable_inscripto', label: 'Responsable Inscripto' },
+              { value: 'exento', label: 'Exento' },
+            ]}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <CuitInput
+              label={requiereCuit ? 'CUIT' : 'CUIT (opcional)'}
+              required={requiereCuit}
+              value={cuit}
+              onChange={setCuit}
+              error={cuit.length === 11 && !cuitFormularioValido ? 'CUIT inválido' : undefined}
             />
+            {condicionIva === 'responsable_inscripto' && (
+              <TextInput
+                label="Razón Social"
+                required
+                value={razonSocial}
+                onChange={setRazonSocial}
+                maxLength={120}
+                error={razonSocial && !razonSocialValida ? 'Entre 2 y 120 caracteres' : undefined}
+              />
+            )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Notas / Comentarios</label>
-            <textarea
-              rows={3}
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              className={`${inputClass} resize-none font-normal normal-case`}
-              placeholder="Comentarios adicionales..."
-            />
-          </div>
+          <TextInput
+            as="textarea"
+            label="Notas / Comentarios"
+            rows={3}
+            value={notas}
+            onChange={setNotas}
+            maxLength={500}
+            placeholder="Comentarios adicionales..."
+          />
 
           {/* Alta de temporada opcional, solo al crear (no al editar) — el
               mismo formulario se reutiliza en el modal standalone de abajo
@@ -734,32 +774,28 @@ export default function Clientes() {
                       <p className={`${inputClass} text-gray-300`}>{temporadaActiva?.nombre || '—'}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <label htmlFor="cliente-temporada-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
-                      Unidad bonificada
-                    </label>
-                    <input
-                      id="cliente-temporada-bonificada"
-                      type="checkbox"
-                      checked={tBonificada}
-                      onChange={(e) => setTBonificada(e.target.checked)}
-                      className="accent-cyan-400 w-4 h-4 cursor-pointer"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto Total</label>
-                    <CurrencyInput
-                      value={tBonificada ? 0 : tValorTotal}
-                      onChange={setTValorTotal}
-                      disabled={tBonificada}
-                      className={`${inputClass} disabled:opacity-50 disabled:cursor-not-allowed`}
-                    />
-                    {tBonificada && (
-                      <p className="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">
-                        Carpa bonificada: sin cargo, no registra pagos.
-                      </p>
-                    )}
-                  </div>
+                  {puedeBonificar && (
+                    <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+                      <label htmlFor="cliente-temporada-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
+                        Unidad bonificada
+                      </label>
+                      <input
+                        id="cliente-temporada-bonificada"
+                        type="checkbox"
+                        checked={tBonificada}
+                        onChange={(e) => setTBonificada(e.target.checked)}
+                        className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                      />
+                    </div>
+                  )}
+                  <MoneyInput
+                    label="Monto Total"
+                    value={tBonificada ? 0 : tValorTotal}
+                    onChange={setTValorTotal}
+                    disabled={tBonificada}
+                    max={100_000_000}
+                    hint={tBonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
+                  />
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Notas de la reserva</label>
                     <textarea
@@ -809,42 +845,30 @@ export default function Clientes() {
               <p className={`${inputClass} text-gray-300`}>{temporadaActiva?.nombre || '—'}</p>
             </div>
           </div>
-          <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-            <label htmlFor="temporada-existente-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
-              Unidad bonificada
-            </label>
-            <input
-              id="temporada-existente-bonificada"
-              type="checkbox"
-              checked={tBonificada}
-              onChange={(e) => setTBonificada(e.target.checked)}
-              className="accent-cyan-400 w-4 h-4 cursor-pointer"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto Total</label>
-            <CurrencyInput
-              value={tBonificada ? 0 : tValorTotal}
-              onChange={setTValorTotal}
-              required={!tBonificada}
-              disabled={tBonificada}
-              className={`${inputClass} disabled:opacity-50 disabled:cursor-not-allowed`}
-            />
-            {tBonificada && (
-              <p className="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">
-                Carpa bonificada: sin cargo, no registra pagos.
-              </p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Notas de la reserva</label>
-            <textarea
-              rows={3}
-              value={tNotas}
-              onChange={(e) => setTNotas(e.target.value)}
-              className={`${inputClass} resize-none font-normal normal-case`}
-            />
-          </div>
+          {puedeBonificar && (
+            <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+              <label htmlFor="temporada-existente-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
+                Unidad bonificada
+              </label>
+              <input
+                id="temporada-existente-bonificada"
+                type="checkbox"
+                checked={tBonificada}
+                onChange={(e) => setTBonificada(e.target.checked)}
+                className="accent-cyan-400 w-4 h-4 cursor-pointer"
+              />
+            </div>
+          )}
+          <MoneyInput
+            label="Monto Total"
+            value={tBonificada ? 0 : tValorTotal}
+            onChange={setTValorTotal}
+            required={!tBonificada}
+            disabled={tBonificada}
+            max={100_000_000}
+            hint={tBonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
+          />
+          <TextInput as="textarea" label="Notas de la reserva" rows={3} value={tNotas} onChange={setTNotas} maxLength={500} />
           <button
             type="submit"
             disabled={savingTemporada}
@@ -869,10 +893,7 @@ export default function Clientes() {
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Cliente</p>
             <p className="text-sm text-white font-bold uppercase mt-1">{confirmarReserva?.cliente?.nombre}</p>
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto Total</label>
-            <CurrencyInput value={confirmarValorTotal} onChange={setConfirmarValorTotal} required className={inputClass} />
-          </div>
+          <MoneyInput label="Monto Total" value={confirmarValorTotal} onChange={setConfirmarValorTotal} required max={100_000_000} />
           <button
             type="submit"
             disabled={savingConfirmacion}
@@ -883,27 +904,34 @@ export default function Clientes() {
         </form>
       </Modal>
 
-      {/* Pago Modal (Fase 2) — mismo componente/hook que usa Reservas */}
-      <PagoModal
+      {/* Registrar Pago (Tarea 4) — mismo componente que usa Reservas y el Plano */}
+      <RegistrarPago
         isOpen={!!pagoCliente}
         onClose={() => setPagoCliente(null)}
+        cliente={pagoCliente}
         reservasOptions={
           pagoCliente
-            ? (reservasPorCliente[pagoCliente.id] || [])
-                .filter((r) => r.estado !== 'cancelada' && !r.bonificada)
-                .map((r) => ({ ...r, clientes: pagoCliente }))
+            ? (reservasPorCliente[pagoCliente.id] || []).filter((r) => r.estado !== 'cancelada' && !r.bonificada)
             : []
         }
       />
 
-      {/* Pago Modal disparado desde una celda de PagosGrid: reserva ya fija,
-          y si la celda tenía un pago cargado entra en modo consulta. */}
-      <PagoModal
-        isOpen={!!pagoCelda}
+      {/* Disparado desde una celda de PagosGrid: reserva ya fija. Si la celda
+          tenía un pago cargado, se abre en modo consulta (DetallePago); si
+          era la celda "+ Cargar", se abre el alta (RegistrarPago). */}
+      <RegistrarPago
+        isOpen={!!pagoCelda && !pagoCelda.pago}
         onClose={() => setPagoCelda(null)}
+        cliente={pagoCelda?.reserva?.clientes}
         reservasOptions={pagoCelda ? [pagoCelda.reserva] : []}
         initialReservaId={pagoCelda?.reserva?.id || ''}
-        pagoExistente={pagoCelda?.pago || null}
+        allowSinReserva={false}
+      />
+      <DetallePago
+        isOpen={!!pagoCelda && !!pagoCelda.pago}
+        onClose={() => setPagoCelda(null)}
+        pago={pagoCelda?.pago ? todosPagos.find((p) => p.id === pagoCelda.pago.id) || pagoCelda.pago : null}
+        reserva={pagoCelda?.reserva}
       />
 
       <ConfirmDeleteModal

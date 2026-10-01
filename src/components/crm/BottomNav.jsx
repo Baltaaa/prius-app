@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
-import { supabase } from '../../lib/supabase'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useLeads } from '../../hooks/useLeads'
+import { useAuth } from '../../context/AuthProvider'
 import {
   Home, Map, CalendarDays, Users, MoreHorizontal, X, Wallet, BarChart2,
   DoorClosed, Inbox, GanttChartSquare, Activity, Bell, FileText, UserCheck, LogOut,
@@ -26,10 +26,11 @@ export default function BottomNav() {
   const [showMore, setShowMore] = useState(false)
   const { count: notificationsCount } = useNotifications()
   const { sinContactar: leadsSinContactar } = useLeads()
+  const { signOut, permiso } = useAuth()
 
   const masItems = [
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
-    { name: 'Reportes', path: '/app/reportes', icon: BarChart2 },
+    ...(permiso('reportes_globales') ? [{ name: 'Reportes', path: '/app/reportes', icon: BarChart2 }] : []),
     { name: 'Cabinas y Lockers', path: '/app/cabinas-lockers', icon: DoorClosed, comingSoon: true },
     { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
     { name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare },
@@ -40,8 +41,8 @@ export default function BottomNav() {
   ]
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate('/')
+    await signOut()
+    navigate('/login')
   }
 
   return (

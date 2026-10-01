@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { Eye, EyeOff, Loader2, Mail, Lock, ArrowUpRight, AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react"
 import GlobalLoader from "../components/ui/GlobalLoader"
 
-export default function Login() {
+export default function Login({ modo }) {
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -16,15 +17,15 @@ export default function Login() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   // Recuperación de contraseña
-  const [mode, setMode] = useState("login") // "login" | "recover"
+  const [mode, setMode] = useState(modo === "recover" ? "recover" : "login") // "login" | "recover"
   const [recoverEmail, setRecoverEmail] = useState("")
   const [recoverStatus, setRecoverStatus] = useState("idle") // idle | sending | sent | error
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/app/home")
+      if (session) navigate(location.state?.from || "/app/home", { replace: true })
     })
-  }, [navigate])
+  }, [navigate, location.state])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -46,7 +47,7 @@ export default function Login() {
       if (data?.user) {
         setIsSuccess(true)
         setTimeout(() => {
-          navigate("/app/home")
+          navigate(location.state?.from || "/app/home", { replace: true })
         }, 1200)
       }
     } catch (err) {
@@ -59,7 +60,9 @@ export default function Login() {
     e.preventDefault()
     setRecoverStatus("sending")
     try {
-      const { error: recoverErr } = await supabase.auth.resetPasswordForEmail(recoverEmail)
+      const { error: recoverErr } = await supabase.auth.resetPasswordForEmail(recoverEmail, {
+        redirectTo: `${window.location.origin}/restablecer-contrasena`,
+      })
       if (recoverErr) {
         setRecoverStatus("error")
         return
@@ -128,7 +131,8 @@ export default function Login() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       placeholder="CORREO ELECTRÓNICO"
-                      className="w-full h-16 pl-14 pr-4 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white text-[11px] font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
+                      style={{ fontSize: 16 }}
+                      className="w-full h-16 pl-14 pr-4 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
                     />
                   </div>
 
@@ -140,7 +144,8 @@ export default function Login() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       placeholder="CONTRASEÑA"
-                      className="w-full h-16 pl-14 pr-14 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white text-[11px] font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
+                      style={{ fontSize: 16 }}
+                      className="w-full h-16 pl-14 pr-14 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
                     />
                     <button
                       type="button"
@@ -225,7 +230,8 @@ export default function Login() {
                       onChange={(e) => setRecoverEmail(e.target.value)}
                       required
                       placeholder="CORREO ELECTRÓNICO"
-                      className="w-full h-16 pl-14 pr-4 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white text-[11px] font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
+                      style={{ fontSize: 16 }}
+                      className="w-full h-16 pl-14 pr-4 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
                     />
                   </div>
 

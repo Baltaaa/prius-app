@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { Download, BarChart3 } from 'lucide-react'
 import KpiCard from '../../components/crm/KpiCard'
-import { formatCurrency, unidadEmoji } from '../../lib/format'
+import { formatPesos, unidadEmoji } from '../../lib/format'
 
 export default function Reportes() {
   const { reservas, loading } = useReservas()
@@ -54,9 +54,9 @@ export default function Reportes() {
   return (
     <div className="space-y-10 animate-premium-fade">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
-        <KpiCard title="Facturación Bruta" value={formatCurrency(totalIngresosEsperados)} icon={BarChart3} highlight />
-        <KpiCard title="Total Cobrado" value={formatCurrency(totalCobrado)} icon={BarChart3} />
-        <KpiCard title="Deuda Externa" value={formatCurrency(totalSaldosPendientes)} icon={BarChart3} />
+        <KpiCard title="Facturación Bruta" value={formatPesos(totalIngresosEsperados)} icon={BarChart3} highlight />
+        <KpiCard title="Total Cobrado" value={formatPesos(totalCobrado)} icon={BarChart3} />
+        <KpiCard title="Deuda Externa" value={formatPesos(totalSaldosPendientes)} icon={BarChart3} />
       </div>
 
       <div className="glass-card p-4 sm:p-8 rounded-3xl glass-card-inner">
@@ -89,7 +89,7 @@ export default function Reportes() {
                 <p className="font-bold uppercase text-white truncate">{res.clientes?.nombre}</p>
                 <p className="text-xs text-gray-400 uppercase mt-0.5">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</p>
               </div>
-              <p className="font-bold text-[#FDE047] shrink-0">{formatCurrency(res.valor_total)}</p>
+              <p className="font-bold text-[#FDE047] shrink-0">{formatPesos(res.valor_total)}</p>
             </div>
           ))}
         </div>
@@ -109,7 +109,7 @@ export default function Reportes() {
               <tr key={res.id} className="hover:bg-white/5 transition-all">
                 <td className="px-6 py-4 font-bold uppercase text-white">{res.clientes?.nombre}</td>
                 <td className="px-6 py-4 uppercase font-medium">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
-                <td className="px-6 py-4 text-right font-bold text-[#FDE047]">{formatCurrency(res.valor_total)}</td>
+                <td className="px-6 py-4 text-right font-bold text-[#FDE047]">{formatPesos(res.valor_total)}</td>
               </tr>
             ))}
           </tbody>

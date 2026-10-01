@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useData } from '../../context/DataProvider'
+import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
 import { unidadEmoji, normalizeText } from '../../lib/format'
+import { parseDNI, parseUnidadQuery } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
+import SearchInput from '../inputs/SearchInput'
 import {
   Search, Bell, User, LogOut, ChevronDown, X, Wallet, Calendar, AlertCircle,
   LayoutDashboard, Map, CalendarClock, Users, BarChart2, Inbox,
@@ -85,7 +87,6 @@ export default function TopBar() {
   const location = useLocation()
   const section = useSection(location.pathname)
   const SectionIcon = section.icon
-  const [userEmail, setUserEmail] = useState('Admin')
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -95,42 +96,59 @@ export default function TopBar() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const { items: notifItems, count: notifCount } = useNotifications()
   const { clientes, reservas } = useData()
+  const { perfil, rol, signOut } = useAuth()
 
-  useEffect(() => {
-    // getSession lee de localStorage (sin red); getUser hacía un request en cada montaje
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.email) setUserEmail(session.user.email)
-    })
-  }, [])
+  const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
+  const rolLabel = rol === 'superadmin' ? 'Superadmin' : rol === 'admin' ? 'Admin' : ''
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate('/')
+    await signOut()
+    navigate('/login')
   }
 
   // Búsqueda global: client-side sobre los datos ya en DataProvider (sin
-  // round-trip a Supabase). Debounce de 200ms para no re-filtrar en cada
-  // tecla; el dato ya está en memoria, esto solo evita renders de más.
-  const debouncedSearch = useDebounced(searchValue, 200)
+  // round-trip a Supabase). Debounce de 250ms y mínimo 2 caracteres antes de
+  // filtrar — el dato ya está en memoria, esto solo evita renders de más en
+  // cada tecla. Busca por nombre, apellido, teléfono, DNI (con o sin puntos)
+  // y, en reservas, también por número de unidad ("19", "carpa 19", "c.19").
+  const debouncedSearch = useDebounced(searchValue, 250)
   const term = useMemo(() => normalize(debouncedSearch).trim(), [debouncedSearch])
+  const dniTerm = useMemo(() => parseDNI(debouncedSearch), [debouncedSearch])
+  const unidadQuery = useMemo(() => parseUnidadQuery(debouncedSearch.trim()), [debouncedSearch])
+  const activo = term.length >= 2 || (dniTerm.length >= 7) || !!unidadQuery
 
   const clienteMatches = useMemo(() => {
-    if (!term) return []
+    if (!activo) return []
     return clientes
-      .filter((c) => normalize(c.nombre).includes(term) || (c.telefono && normalize(c.telefono).includes(term)))
+      .filter((c) => {
+        if (term.length >= 2) {
+          if (normalize(c.nombre).includes(term)) return true
+          if (c.apellido && normalize(c.apellido).includes(term)) return true
+          if (c.telefono && normalize(c.telefono).includes(term)) return true
+        }
+        if (dniTerm.length >= 7 && c.dni && c.dni.includes(dniTerm)) return true
+        return false
+      })
       .slice(0, 5)
-  }, [clientes, term])
+  }, [clientes, term, dniTerm, activo])
 
   const reservaMatches = useMemo(() => {
-    if (!term) return []
+    if (!activo) return []
     return reservas
       .filter((r) => {
         const nombre = r.clientes?.nombre
         const telefono = r.clientes?.telefono
-        return (nombre && normalize(nombre).includes(term)) || (telefono && normalize(telefono).includes(term))
+        if (term.length >= 2) {
+          if (nombre && normalize(nombre).includes(term)) return true
+          if (telefono && normalize(telefono).includes(term)) return true
+        }
+        if (unidadQuery && r.unidades?.numero === unidadQuery.numero) {
+          if (!unidadQuery.tipo || r.unidades?.tipo === unidadQuery.tipo) return true
+        }
+        return false
       })
       .slice(0, 5)
-  }, [reservas, term])
+  }, [reservas, term, unidadQuery, activo])
 
   const showDropdown = searchValue.trim().length > 0
   const closeSearch = () => setSearchValue('')
@@ -173,13 +191,10 @@ export default function TopBar() {
           sección. En mobile pasa a un ícono que abre pantalla completa (ver
           bloque debajo del header) — no compite por espacio con título/avatar. */}
       <div className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 max-w-[calc(100%-2rem)] z-10">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-        <input
-          type="text"
+        <SearchInput
           value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="Buscar cliente o reserva..."
-          className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 focus:border-white/30 outline-none text-sm rounded-lg text-white placeholder-gray-500 transition-all"
+          onChange={setSearchValue}
+          placeholder="Buscar cliente, reserva o unidad..."
         />
 
         {showDropdown && (
@@ -187,7 +202,9 @@ export default function TopBar() {
             {/* Backdrop: cierra el dropdown al tocar afuera */}
             <div className="fixed inset-0 z-40" onClick={closeSearch} />
             <div className="absolute left-0 right-0 mt-2 glass-popover rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto">
-              {clienteMatches.length === 0 && reservaMatches.length === 0 ? (
+              {!activo ? (
+                <p className="px-4 py-6 text-center text-xs text-gray-500">Seguí escribiendo (mínimo 2 caracteres)...</p>
+              ) : clienteMatches.length === 0 && reservaMatches.length === 0 ? (
                 <p className="px-4 py-6 text-center text-xs text-gray-500">Sin resultados para "{searchValue}"</p>
               ) : (
                 <>
@@ -313,10 +330,10 @@ export default function TopBar() {
             className="flex items-center gap-3 p-1 hover:bg-white/5 rounded-lg transition-all"
           >
             <div className="w-8 h-8 bg-[#FDE047] text-black rounded flex items-center justify-center font-bold text-sm">
-              {userEmail.charAt(0).toUpperCase()}
+              {nombreMostrado.charAt(0).toUpperCase()}
             </div>
             <span className="text-sm font-medium text-white hidden sm:block">
-              {userEmail.split('@')[0]}
+              {nombreMostrado}
             </span>
             <ChevronDown size={14} className="text-gray-500" />
           </button>
@@ -324,8 +341,8 @@ export default function TopBar() {
           {showProfileMenu && (
             <div className="absolute right-0 mt-3 w-56 glass-popover rounded-xl overflow-hidden z-50 p-1">
               <div className="px-4 py-3 border-b border-white/10">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Administrador</p>
-                <p className="text-xs font-medium text-white truncate">{userEmail}</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{rolLabel}</p>
+                <p className="text-xs font-medium text-white truncate">{nombreMostrado}</p>
               </div>
               <button
                 onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
@@ -349,14 +366,12 @@ export default function TopBar() {
       {mobileSearchOpen && createPortal(
         <div className="sm:hidden fixed inset-0 z-[997] bg-[#05070c] flex flex-col">
           <div className="flex items-center gap-3 px-4 h-20 border-b border-white/5 shrink-0">
-            <Search size={18} className="text-gray-500 shrink-0" />
-            <input
-              autoFocus
-              type="text"
+            <SearchInput
               value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Buscar cliente o reserva..."
-              className="flex-1 min-w-0 bg-transparent outline-none text-white text-sm placeholder-gray-500"
+              onChange={setSearchValue}
+              placeholder="Buscar cliente, reserva o unidad..."
+              autoFocus
+              className="flex-1 min-w-0"
             />
             <button
               onClick={() => { setMobileSearchOpen(false); closeSearch() }}
@@ -367,7 +382,9 @@ export default function TopBar() {
           </div>
           <div className="flex-1 overflow-y-auto">
             {!showDropdown ? (
-              <p className="px-6 py-8 text-center text-xs text-gray-500">Escribí para buscar un cliente o una reserva.</p>
+              <p className="px-6 py-8 text-center text-xs text-gray-500">Escribí para buscar un cliente, una reserva o una unidad (ej. "carpa 19").</p>
+            ) : !activo ? (
+              <p className="px-6 py-8 text-center text-xs text-gray-500">Seguí escribiendo (mínimo 2 caracteres)...</p>
             ) : clienteMatches.length === 0 && reservaMatches.length === 0 ? (
               <p className="px-6 py-8 text-center text-xs text-gray-500">Sin resultados para "{searchValue}"</p>
             ) : (

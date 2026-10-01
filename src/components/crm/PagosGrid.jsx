@@ -1,4 +1,4 @@
-import { formatMontoVisible, unidadEmoji } from '../../lib/format'
+import { formatPesosVisible, unidadEmoji } from '../../lib/format'
 import { esPendienteConfirmacion, pagoSinVerificar, saldoNumerico } from '../../lib/reservas'
 import { CreditCard, Hourglass, Gift } from 'lucide-react'
 
@@ -94,7 +94,10 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
   // ante un monto sin verificar, porque lo que importa para cerrar/bloquear
   // la grilla es si YA se cubrió el total con lo que sí se conoce, no si cada
   // cuota individual está verificada.
-  const montosConocidos = cuotas.reduce((acc, p) => acc + (p.monto != null ? Number(p.monto) : 0), 0)
+  // Un pago anulado no cuenta para el total cubierto — "nada se borra, se
+  // anula con motivo" (CLAUDE.md), pero tampoco debe seguir pesando como si
+  // estuviera vigente.
+  const montosConocidos = cuotas.reduce((acc, p) => acc + (p.estado !== 'anulado' && p.monto != null ? Number(p.monto) : 0), 0)
   const saldada = reserva.estado_pago === 'pagado' || montosConocidos >= Number(reserva.valor_total || 0)
 
   // Saldo mostrado: sigue siendo el real (saldoNumerico, nunca reserva.saldo
@@ -113,14 +116,14 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
       <div className="overflow-x-auto">
         <div className="flex gap-2 min-w-fit pb-1">
           {/* Precio de venta — informativo, no clickeable. Nunca se
-              renderiza en $0 (ver lib/format.js formatMontoVisible); en la
+              renderiza en $0 (ver lib/format.js formatPesosVisible); en la
               práctica esta rama ya solo se alcanza con valor_total > 0 (el
               guard de más arriba corta antes si no lo es), pero se aplica el
               mismo helper acá para no formatear montos a mano. */}
-          {formatMontoVisible(reserva.valor_total) && (
+          {formatPesosVisible(reserva.valor_total) && (
             <div className={`${cellBase} bg-white/5 border border-white/10 text-white`}>
               <span className="text-[8px] text-gray-500 uppercase tracking-widest">Precio Venta</span>
-              {formatMontoVisible(reserva.valor_total)}
+              {formatPesosVisible(reserva.valor_total)}
             </div>
           )}
 
@@ -130,23 +133,28 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
             // misma mentira que "Unidad saldada" en el saldo — sabemos que
             // pagó, no cuánto.
             const sinVerificar = pagoSinVerificar(pago)
+            const anulado = pago.estado === 'anulado'
+            // Un pago anulado siempre se puede abrir (para ver el motivo) —
+            // "disabled"/bloqueado solo aplica a la regla de reserva saldada.
             return (
               <button
                 key={pago.id}
                 type="button"
-                disabled={saldada}
-                onClick={saldada ? undefined : () => onCellClick(reserva, pago)}
+                disabled={saldada && !anulado}
+                onClick={() => onCellClick(reserva, pago)}
                 className={`${cellBase} ${
-                  saldada
-                    ? 'bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed'
-                    : sinVerificar
-                      ? 'bg-gray-500/10 border border-gray-500/30 text-gray-400 hover:bg-gray-500/20 cursor-pointer'
-                      : 'bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 cursor-pointer'
+                  anulado
+                    ? 'bg-white/5 border border-white/10 text-gray-600 line-through cursor-pointer hover:bg-white/10'
+                    : saldada
+                      ? 'bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed'
+                      : sinVerificar
+                        ? 'bg-gray-500/10 border border-gray-500/30 text-gray-400 hover:bg-gray-500/20 cursor-pointer'
+                        : 'bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 cursor-pointer'
                 }`}
-                title={saldada ? 'Reserva saldada — cuota bloqueada' : 'Ver detalle del pago'}
+                title={anulado ? `Pago anulado — ${pago.anulado_motivo || 'sin motivo'}` : saldada ? 'Reserva saldada — cuota bloqueada' : 'Ver detalle del pago'}
               >
                 <span className="text-[8px] text-gray-500 uppercase tracking-widest">Cuota {pago.nro_cuota}</span>
-                {sinVerificar ? <MontoNulo /> : formatMontoVisible(pago.monto)}
+                {sinVerificar ? <MontoNulo /> : formatPesosVisible(pago.monto)}
                 {pago.medio === 'tarjeta_credito' && pago.cuotas_tarjeta && (
                   <span className="flex items-center gap-0.5 text-[8px] text-[#FDE047] font-bold">
                     <CreditCard size={10} /> {pago.cuotas_tarjeta}x
@@ -176,7 +184,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
             saldada ? 'text-green-400' : saldoCalculado === null ? 'text-gray-400' : 'text-red-400'
           }`}>
             <span className="text-[8px] text-gray-500 uppercase tracking-widest">Saldo</span>
-            {saldada ? 'Unidad saldada' : saldoCalculado === null ? <MontoNulo /> : formatMontoVisible(saldoCalculado)}
+            {saldada ? 'Unidad saldada' : saldoCalculado === null ? <MontoNulo /> : formatPesosVisible(saldoCalculado)}
           </div>
         </div>
       </div>

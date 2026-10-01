@@ -7,7 +7,7 @@ import KpiCard from '../../components/crm/KpiCard'
 import StatusBadge from '../../components/crm/StatusBadge'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
 import { Calendar, Wallet, Users, AlertCircle, ArrowRight } from 'lucide-react'
-import { formatCurrency, formatDate, unidadEmoji } from '../../lib/format'
+import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
 import { estadoBadgeStatus } from '../../lib/reservas'
 
 export default function Home() {
@@ -72,7 +72,7 @@ export default function Home() {
         />
         <KpiCard
           title="Caja Diaria"
-          value={formatCurrency(totalCajaHoy)}
+          value={formatPesos(totalCajaHoy)}
           subtitle={cajaHoy ? 'Cobros registrados hoy' : 'Caja sin iniciar'}
           icon={Wallet}
           progress={mejorDiaCaja > 0 ? { value: totalCajaHoy, max: mejorDiaCaja } : null}
@@ -118,7 +118,7 @@ export default function Home() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatDate(res.created_at)}</p>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatFecha(res.created_at)}</p>
                       <p className="font-bold text-white uppercase truncate">{res.clientes?.nombre || 'CLIENTE S/N'}</p>
                       <p className="text-xs text-gray-400 uppercase mt-0.5">
                         {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero ?? 'N/A'}
@@ -146,7 +146,7 @@ export default function Home() {
                   {recentReservas.map((res) => (
                     <tr key={res.id} className="hover:bg-white/5 transition-colors group">
                       <td className="py-6 px-6 font-medium text-gray-400">
-                        {formatDate(res.created_at)}
+                        {formatFecha(res.created_at)}
                       </td>
                       <td className="py-6 px-6 font-bold text-white uppercase tracking-tight">
                         {res.clientes?.nombre || 'CLIENTE S/N'}

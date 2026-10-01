@@ -2,14 +2,18 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatCurrency, formatMontoVisible, formatDate, unidadEmoji, normalizeText } from '../../lib/format'
+import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji, normalizeText } from '../../lib/format'
+import { parseUnidadQuery } from '../../lib/parse'
+import SearchInput from '../../components/inputs/SearchInput'
+import DateInput from '../../components/inputs/DateInput'
 import { coSocios, estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
+import { usePermiso } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
-import PagoModal from '../../components/crm/PagoModal'
-import CurrencyInput from '../../components/crm/CurrencyInput'
+import RegistrarPago from '../../components/crm/RegistrarPago'
+import MoneyInput from '../../components/inputs/MoneyInput'
 import StatusBadge from '../../components/crm/StatusBadge'
 import MontoReserva from '../../components/crm/MontoReserva'
 import ReservaCalendar from '../../components/crm/ReservaCalendar'
@@ -53,6 +57,7 @@ export default function Reservas() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const { confirm, alert } = useDialog()
+  const puedeBonificar = usePermiso('bonificar')
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReserva, setEditingReserva] = useState(null)
@@ -128,7 +133,7 @@ export default function Reservas() {
     setSavingNuevoCliente(true)
     try {
       const nuevo = await createCliente({
-        nombre: nuevoClienteNombre.trim().toUpperCase(),
+        nombre: nuevoClienteNombre.trim().replace(/[´`]/g, "'").toUpperCase(),
         telefono: nuevoClienteTelefono || null,
         mail: nuevoClienteMail || null,
         cuit: nuevoClienteCuit || null,
@@ -241,7 +246,7 @@ export default function Reservas() {
       bonificada,
       // saldo / estado_pago ya no se cargan a mano: los recalcula el trigger
       // fn_reserva_recalcula_saldo (a partir de valor_total/bonificada y la
-      // suma de `pagos`) — ver PagoModal / usePagos.
+      // suma de `pagos`) — ver RegistrarPago / usePagos.
       notas,
     }
     try {
@@ -356,13 +361,15 @@ export default function Reservas() {
 
   const filteredReservas = useMemo(() => {
     const term = debouncedSearch.trim().toLowerCase()
+    const unidadQuery = parseUnidadQuery(term)
     const base = filtroUnidadId ? [...reservasOperativas, ...temporadasDeUnidadFiltrada] : reservasOperativas
     return base
       .filter((r) => {
         const matchesSearch =
           !term ||
           r.clientes?.nombre?.toLowerCase().includes(term) ||
-          String(r.unidades?.numero ?? '').includes(term)
+          String(r.unidades?.numero ?? '').includes(term) ||
+          (unidadQuery && r.unidades?.numero === unidadQuery.numero && (!unidadQuery.tipo || r.unidades?.tipo === unidadQuery.tipo))
         const matchesEstado = filtroEstado === 'todos' || r.estado_pago === filtroEstado
         const matchesTipo = filtroTipo === 'todos' || r.tipo_alquiler === filtroTipo
         const matchesUnidad = !filtroUnidadId || r.unidad_id === filtroUnidadId
@@ -455,30 +462,15 @@ export default function Reservas() {
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
       <div className="flex flex-wrap gap-4 items-center">
-        <div className="flex-1 min-w-[160px] relative">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Buscar por cliente o unidad..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 focus:border-[#FDE047]/50 rounded-xl outline-none text-white text-sm transition-all"
-          />
-        </div>
-        <input
-          type="date"
-          value={desde}
-          onChange={(e) => setDesde(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-[#FDE047]/50 outline-none [color-scheme:dark]"
-          title="Llegada desde"
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar por cliente o unidad (ej. carpa 19)..."
+          className="flex-1 min-w-[160px]"
+          inputClassName="focus:border-[#FDE047]/50 py-3"
         />
-        <input
-          type="date"
-          value={hasta}
-          onChange={(e) => setHasta(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-[#FDE047]/50 outline-none [color-scheme:dark]"
-          title="Llegada hasta"
-        />
+        <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-40" />
+        <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-40" />
         <div className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
@@ -556,7 +548,7 @@ export default function Reservas() {
                 onClick={() => navigate(`/app/clientes?id=${res.cliente_id}`)}
                 className="hover:bg-white/5 transition-all group cursor-pointer"
               >
-                <td className="px-6 py-5 text-gray-300 font-medium whitespace-nowrap">{formatDate(fechaLlegada(res))}</td>
+                <td className="px-6 py-5 text-gray-300 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
                 <td className="px-6 py-5 font-bold text-white uppercase">
                   {res.clientes?.nombre || 'S/N'}
                   {coSocios(res).length > 0 && (
@@ -568,7 +560,7 @@ export default function Reservas() {
                 <td className="px-6 py-5 font-medium text-gray-300 uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
                 <td className="px-6 py-5 font-bold text-white"><MontoReserva reserva={res} /></td>
                 <td className="px-6 py-5 font-bold text-red-400">
-                  {formatMontoVisible(res.saldo)}
+                  {formatPesosVisible(res.saldo)}
                 </td>
                 <td className="px-6 py-5">
                   <div className="flex items-center gap-2">
@@ -590,7 +582,7 @@ export default function Reservas() {
           }
           return (
             <tr key={res.id} className="hover:bg-white/5 transition-all group">
-              <td className="px-6 py-5 text-gray-300 font-medium whitespace-nowrap">{formatDate(fechaLlegada(res))}</td>
+              <td className="px-6 py-5 text-gray-300 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
               <td className="px-6 py-5 font-bold text-white uppercase">
                 {res.clientes?.nombre || 'S/N'}
                 {coSocios(res).length > 0 && (
@@ -602,7 +594,7 @@ export default function Reservas() {
               <td className="px-6 py-5 font-medium text-gray-300 uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
               <td className="px-6 py-5 font-bold text-white"><MontoReserva reserva={res} /></td>
               <td className="px-6 py-5 font-bold text-red-400">
-                {formatMontoVisible(res.saldo)}
+                {formatPesosVisible(res.saldo)}
               </td>
               <td className="px-6 py-5">
                 <StatusBadge status={estadoBadgeStatus(res)} />
@@ -645,7 +637,7 @@ export default function Reservas() {
               <div onClick={() => navigate(`/app/clientes?id=${res.cliente_id}`)} className="cursor-pointer -m-5 p-5">
                 <div className="flex justify-between items-start gap-3">
                   <div className="min-w-0">
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatDate(fechaLlegada(res))}</p>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>
                     <h3 className="font-bold uppercase text-sm text-white truncate">{res.clientes?.nombre || 'S/N'}</h3>
                     <p className="text-[11px] text-gray-500 uppercase mt-0.5">
                       {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}
@@ -667,7 +659,7 @@ export default function Reservas() {
                   <div>
                     <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Saldo</p>
                     <p className="text-sm font-bold text-red-400">
-                      {formatMontoVisible(res.saldo)}
+                      {formatPesosVisible(res.saldo)}
                     </p>
                   </div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Ver cliente</p>
@@ -679,7 +671,7 @@ export default function Reservas() {
             <>
               <div className="flex justify-between items-start gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatDate(fechaLlegada(res))}</p>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>
                   <h3 className="font-bold uppercase text-sm text-white truncate">{res.clientes?.nombre || 'S/N'}</h3>
                   <p className="text-[11px] text-gray-500 uppercase mt-0.5">
                     {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero} &bull; {res.tipo_alquiler}
@@ -696,7 +688,7 @@ export default function Reservas() {
                 <div>
                   <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Saldo</p>
                   <p className="text-sm font-bold text-red-400">
-                    {formatMontoVisible(res.saldo)}
+                    {formatPesosVisible(res.saldo)}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -967,34 +959,30 @@ export default function Reservas() {
             </div>
           )}
 
-          <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-            <label htmlFor="reserva-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
-              Unidad bonificada
-            </label>
-            <input
-              id="reserva-bonificada"
-              type="checkbox"
-              checked={bonificada}
-              onChange={(e) => setBonificada(e.target.checked)}
-              className="accent-cyan-400 w-4 h-4 cursor-pointer"
-            />
-          </div>
+          {puedeBonificar && (
+            <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+              <label htmlFor="reserva-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
+                Unidad bonificada
+              </label>
+              <input
+                id="reserva-bonificada"
+                type="checkbox"
+                checked={bonificada}
+                onChange={(e) => setBonificada(e.target.checked)}
+                className="accent-cyan-400 w-4 h-4 cursor-pointer"
+              />
+            </div>
+          )}
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto Total</label>
-            <CurrencyInput
-              value={bonificada ? 0 : valorTotal}
-              onChange={setValorTotal}
-              required
-              disabled={bonificada}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-            {bonificada && (
-              <p className="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">
-                Carpa bonificada: sin cargo, no registra pagos.
-              </p>
-            )}
-          </div>
+          <MoneyInput
+            label="Monto Total"
+            value={bonificada ? 0 : valorTotal}
+            onChange={setValorTotal}
+            required
+            disabled={bonificada}
+            max={100_000_000}
+            hint={bonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
+          />
 
           {/* Saldo y estado de pago ya no se cargan a mano: los recalcula el
               trigger fn_reserva_recalcula_saldo / fn_pago_actualiza_saldo a
@@ -1005,7 +993,7 @@ export default function Reservas() {
               <div>
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Saldo Pendiente</p>
                 <p className={`text-lg font-bold ${Number(editingReserva.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                  {estaSaldada(editingReserva) ? 'Unidad saldada' : formatCurrency(editingReserva.saldo)}
+                  {estaSaldada(editingReserva) ? 'Unidad saldada' : formatPesos(editingReserva.saldo)}
                 </p>
               </div>
               <StatusBadge status={estadoBadgeStatus(editingReserva)} />
@@ -1028,12 +1016,14 @@ export default function Reservas() {
         </form>
       </Modal>
 
-      {/* Pago Modal (Fase 2) — mismo componente/hook que usa Clientes */}
-      <PagoModal
+      {/* Registrar Pago (Tarea 4) — mismo componente que usa Clientes y el Plano */}
+      <RegistrarPago
         isOpen={!!pagoReserva}
         onClose={() => setPagoReserva(null)}
+        cliente={pagoReserva?.clientes}
         reservasOptions={pagoReserva ? [pagoReserva] : []}
         initialReservaId={pagoReserva?.id || ''}
+        allowSinReserva={false}
       />
 
       <ConfirmDeleteModal

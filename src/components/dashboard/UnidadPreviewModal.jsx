@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { X, Umbrella, Home, Users, ArrowRight, MapPin } from "lucide-react"
 import { usePagos } from "../../hooks/usePagos"
 import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib/reservas"
-import { formatCurrency, formatMontoVisible, formatDate, unidadEmoji } from "../../lib/format"
+import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from "../../lib/format"
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 
@@ -56,8 +56,8 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
     : reserva.tipo_alquiler === "temporada"
       ? "Temporada completa"
       : reserva.tipo_alquiler === "dia"
-        ? formatDate(reserva.fecha)
-        : `${formatDate(reserva.fecha_inicio)} — ${formatDate(reserva.fecha_fin)}`
+        ? formatFecha(reserva.fecha)
+        : `${formatFecha(reserva.fecha_inicio)} — ${formatFecha(reserva.fecha_fin)}`
 
   const irAClientes = () => navigate(`/app/clientes?id=${reserva.cliente_id}`)
   const irAReserva = () => navigate(`/app/reservas?id=${reserva.id}`)
@@ -180,7 +180,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                   <div>
                     <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Costo total</p>
                     <p className="text-white mt-0.5">
-                      {esPendienteConfirmacion ? "Sin confirmar" : bonificada ? "Sin cargo" : precioSinVerificar ? "Sin verificar" : Number(valorTotal) > 0 ? formatCurrency(valorTotal) : "Sin precio"}
+                      {esPendienteConfirmacion ? "Sin confirmar" : bonificada ? "Sin cargo" : precioSinVerificar ? "Sin verificar" : Number(valorTotal) > 0 ? formatPesos(valorTotal) : "Sin precio"}
                     </p>
                   </div>
                   <div>
@@ -189,7 +189,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                         nada acá, nunca "$0" ni un texto de reemplazo — ver
                         CLAUDE.md "Nunca $0". */}
                     <p className={`mt-0.5 font-bold ${saldo === null ? "text-gray-400" : "text-red-400"}`}>
-                      {esPendienteConfirmacion ? "—" : saldo === null ? "Sin verificar" : formatMontoVisible(saldo)}
+                      {esPendienteConfirmacion ? "—" : saldo === null ? "Sin verificar" : formatPesosVisible(saldo)}
                     </p>
                   </div>
                 </div>
@@ -251,7 +251,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                     <span className="font-bold text-cyan-400 uppercase tracking-widest">{TIPO_LABEL[r.tipo_alquiler] || r.tipo_alquiler}</span>
                     <span className="text-gray-300 truncate">{r.clientes?.nombre || "S/N"}</span>
                     <span className="text-gray-500">
-                      {r.tipo_alquiler === "temporada" ? r.temporada : r.tipo_alquiler === "dia" ? formatDate(r.fecha) : `${formatDate(r.fecha_inicio)} — ${formatDate(r.fecha_fin)}`}
+                      {r.tipo_alquiler === "temporada" ? r.temporada : r.tipo_alquiler === "dia" ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
                     </span>
                     <div className="flex-1" />
                     <StatusBadge status={estadoBadgeStatus(r)} />

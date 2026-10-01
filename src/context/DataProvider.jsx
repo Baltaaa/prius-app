@@ -22,7 +22,7 @@ import { supabase } from '../lib/supabase'
 // esa unidad (titular incluido) — ver lib/reservas.js `coSocios()`.
 const RESERVA_SELECT = `
   *,
-  clientes!reservas_cliente_id_fkey (id, nombre, telefono, cuit, mail),
+  clientes!reservas_cliente_id_fkey (id, nombre, apellido, telefono, cuit, mail, condicion_iva, razon_social),
   unidades (id, numero, tipo, zona),
   reserva_clientes (cliente_id, clientes (id, nombre))
 `
@@ -93,12 +93,22 @@ export function DataProvider({ children }) {
     setTodosGastos(data || [])
   }, [])
 
-  // Ingresos itemizados de caja (Fase 2, cruce con pagos): cada pago en
-  // efectivo/tarjeta/transferencia genera acá su fila vía el trigger
-  // fn_pago_crea_ingreso_caja — nada se carga a mano desde el front.
+  // Ingresos itemizados de caja (Fase 3): antes venían de la tabla puente
+  // `ingresos_caja` (deprecada, ver migración caja_dinero_fase3); ahora se
+  // arman directo desde `pagos.caja_id`, que la RPC registrar_pago asigna
+  // sola. Misma forma de fila que antes para no tocar el render de Caja.jsx.
   const fetchIngresosCaja = useCallback(async () => {
-    const { data } = await supabase.from('ingresos_caja').select('*').order('created_at', { ascending: false })
-    setIngresosCaja(data || [])
+    const { data } = await supabase
+      .from('pagos')
+      .select('id, caja_id, reserva_id, cliente_id, monto, medio, concepto, fecha_hora, estado')
+      .not('caja_id', 'is', null)
+      .eq('estado', 'vigente')
+      .order('fecha_hora', { ascending: false })
+    setIngresosCaja((data || []).map((p) => ({
+      id: p.id, caja_id: p.caja_id, pago_id: p.id, reserva_id: p.reserva_id, cliente_id: p.cliente_id,
+      monto: p.monto, medio: p.medio, es_efectivo: p.medio === 'efectivo',
+      concepto: p.concepto || 'Pago', created_at: p.fecha_hora,
+    })))
   }, [])
 
   // Línea de tiempo del CRM: log de eventos (tabla `eventos`, escrita por triggers).
@@ -184,9 +194,7 @@ export function DataProvider({ children }) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos' },
         () => debouncedRefetch('eventos', fetchEventos))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pagos' },
-        () => debouncedRefetch('pagos', fetchPagos))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ingresos_caja' },
-        () => { debouncedRefetch('ingresosCaja', fetchIngresosCaja); debouncedRefetch('caja', fetchCaja) })
+        () => { debouncedRefetch('pagos', fetchPagos); debouncedRefetch('ingresosCaja', fetchIngresosCaja); debouncedRefetch('caja', fetchCaja) })
       .subscribe()
 
     // `leads` va en su propio canal: un binding postgres_changes sobre una tabla
@@ -278,81 +286,93 @@ export function DataProvider({ children }) {
     setUnidades((prev) => prev.filter((u) => u.id !== id))
   }, [])
 
-  const iniciarCaja = useCallback(async () => {
-    const newCaja = {
-      fecha: todayStr, efectivo: 0, medio_pago_1: 0, medio_pago_2: 0,
-      total_cobros: 0, total_gastos: 0, total_neto: 0, cerrada: false,
-    }
-    const { data, error } = await supabase.from('caja_diaria').insert([newCaja]).select()
+  // Caja Fase 3 (dinero): el CRUD directo sobre caja_diaria/gastos_caja/pagos
+  // está revocado a nivel RLS — todo pasa por las funciones RPC de Postgres
+  // (abrir_caja/registrar_gasto/anular_gasto/cerrar_caja/registrar_pago/
+  // anular_pago/completar_comprobante), que validan y devuelven la fila ya
+  // actualizada. El refetch puntual evita depender del round-trip de
+  // Realtime en la misma pestaña que hizo la escritura.
+  const iniciarCaja = useCallback(async (montoInicial) => {
+    const { data, error } = await supabase.rpc('abrir_caja', { p_monto_inicial: Number(montoInicial) || 0 })
     if (error) throw error
-    setCajaHoy(data[0])
-    setHistorialCajas((prev) => [data[0], ...prev])
-    return data[0]
-  }, [todayStr])
+    setCajaHoy(data)
+    setHistorialCajas((prev) => [data, ...prev.filter((c) => c.id !== data.id)])
+    return data
+  }, [])
 
-  // total_neto ya no se calcula a mano acá: lo recalcula siempre
-  // trg_caja_calcula_totales (BEFORE UPDATE en caja_diaria) a partir de
-  // saldo_apertura + total_cobros - total_gastos — un solo lugar para esa
-  // cuenta (Task 3), en vez de repetirla en cada mutación del front.
-  const actualizarCajaValores = useCallback(async (updates) => {
-    if (!cajaHoy) return
-    const total_cobros =
-      Number(updates.efectivo || 0) + Number(updates.medio_pago_1 || 0) + Number(updates.medio_pago_2 || 0)
-    const { data, error } = await supabase.from('caja_diaria').update({ ...updates, total_cobros }).eq('id', cajaHoy.id).select()
+  const registrarGasto = useCallback(async ({ concepto, categoria, medioPago, monto, proveedor, comprobanteProveedor }) => {
+    const { data, error } = await supabase.rpc('registrar_gasto', {
+      p_concepto: concepto, p_categoria: categoria, p_medio_pago: medioPago, p_monto: Number(monto),
+      p_proveedor: proveedor || null, p_comprobante_proveedor: comprobanteProveedor || null,
+    })
     if (error) throw error
-    setCajaHoy(data[0])
-    setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? data[0] : c)))
-    return data[0]
+    setTodosGastos((prev) => [data, ...prev])
+    if (cajaHoy) setGastos((prev) => [...prev, data])
+    await fetchCaja()
+    return data
+  }, [cajaHoy, fetchCaja])
+
+  const anularGasto = useCallback(async (gastoId, motivo) => {
+    const { data, error } = await supabase.rpc('anular_gasto', { p_gasto_id: gastoId, p_motivo: motivo })
+    if (error) throw error
+    setTodosGastos((prev) => prev.map((g) => (g.id === gastoId ? data : g)))
+    setGastos((prev) => prev.map((g) => (g.id === gastoId ? data : g)))
+    await fetchCaja()
+    return data
+  }, [fetchCaja])
+
+  const cerrarCaja = useCallback(async (efectivoContado, datosZ, observaciones) => {
+    if (!cajaHoy) return
+    const { data, error } = await supabase.rpc('cerrar_caja', {
+      p_caja_id: cajaHoy.id, p_efectivo_contado: Number(efectivoContado) || 0,
+      p_datos_z: datosZ || null, p_observaciones: observaciones || null,
+    })
+    if (error) throw error
+    setCajaHoy(data)
+    setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? data : c)))
+    return data
   }, [cajaHoy])
 
-  const agregarGasto = useCallback(async (descripcion, monto) => {
-    if (!cajaHoy) return
-    const { data, error } = await supabase
-      .from('gastos_caja').insert([{ caja_id: cajaHoy.id, descripcion, monto: Number(monto) }]).select()
+  const reabrirCaja = useCallback(async (cajaId, motivo) => {
+    const { data, error } = await supabase.rpc('reabrir_caja', { p_caja_id: cajaId, p_motivo: motivo })
     if (error) throw error
-    const nuevoTotalGastos = Number(cajaHoy.total_gastos) + Number(monto)
-    const { data: updated } = await supabase.from('caja_diaria')
-      .update({ total_gastos: nuevoTotalGastos }).eq('id', cajaHoy.id).select()
-    setGastos((prev) => [...prev, data[0]])
-    setTodosGastos((prev) => [data[0], ...prev])
-    setCajaHoy(updated[0])
-    setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? updated[0] : c)))
-  }, [cajaHoy])
+    await fetchCaja()
+    return data
+  }, [fetchCaja])
 
-  const eliminarGasto = useCallback(async (gastoId, monto) => {
-    if (!cajaHoy) return
-    const { error } = await supabase.from('gastos_caja').delete().eq('id', gastoId)
+  // Alta de pago (Fase 3, RPC-only): un solo punto de escritura, reutilizado
+  // por RegistrarPago (Clientes/Reservas/Plano). registrar_pago valida saldo,
+  // bonificada y caja abierta, y crea el comprobante si vino incluido.
+  const registrarPago = useCallback(async ({
+    clienteId, monto, medio, tipoPago, concepto, reservaId, referencia, comprobante, permitirExcedente,
+  }) => {
+    const { data, error } = await supabase.rpc('registrar_pago', {
+      p_cliente_id: clienteId, p_monto: Number(monto), p_medio: medio, p_tipo_pago: tipoPago,
+      p_concepto: concepto, p_reserva_id: reservaId || null, p_referencia: referencia || null,
+      p_comprobante: comprobante || null, p_permitir_excedente: !!permitirExcedente,
+    })
     if (error) throw error
-    const nuevoTotalGastos = Math.max(0, Number(cajaHoy.total_gastos) - Number(monto))
-    const { data: updated } = await supabase.from('caja_diaria')
-      .update({ total_gastos: nuevoTotalGastos }).eq('id', cajaHoy.id).select()
-    setGastos((prev) => prev.filter((g) => g.id !== gastoId))
-    setTodosGastos((prev) => prev.filter((g) => g.id !== gastoId))
-    setCajaHoy(updated[0])
-    setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? updated[0] : c)))
-  }, [cajaHoy])
-
-  const cerrarCaja = useCallback(async () => {
-    if (!cajaHoy) return
-    const { data, error } = await supabase.from('caja_diaria').update({ cerrada: true }).eq('id', cajaHoy.id).select()
-    if (error) throw error
-    setCajaHoy(data[0])
-    setHistorialCajas((prev) => prev.map((c) => (c.id === cajaHoy.id ? data[0] : c)))
-    return data[0]
-  }, [cajaHoy])
-
-  // Alta de pago (Fase 2, motor de pagos): un solo punto de escritura,
-  // reutilizado por Clientes y Reservas vía usePagos(). El trigger Postgres
-  // fn_pago_actualiza_saldo ya recalcula reservas.saldo/estado_pago; acá
-  // forzamos además un refetch de reservas para no depender del round-trip
-  // de Realtime en la misma pestaña que hizo la escritura.
-  const createPago = useCallback(async (pago) => {
-    const { data, error } = await supabase.from('pagos').insert([pago]).select()
-    if (error) throw error
-    setPagos((prev) => [data[0], ...prev])
+    setPagos((prev) => [data, ...prev])
     await fetchReservas()
-    return data[0]
-  }, [fetchReservas])
+    await fetchCaja()
+    return data
+  }, [fetchReservas, fetchCaja])
+
+  const anularPago = useCallback(async (pagoId, motivo) => {
+    const { data, error } = await supabase.rpc('anular_pago', { p_pago_id: pagoId, p_motivo: motivo })
+    if (error) throw error
+    setPagos((prev) => prev.map((p) => (p.id === pagoId ? data : p)))
+    await fetchReservas()
+    await fetchCaja()
+    return data
+  }, [fetchReservas, fetchCaja])
+
+  const completarComprobante = useCallback(async (pagoId, comprobante) => {
+    const { data, error } = await supabase.rpc('completar_comprobante', { p_pago_id: pagoId, p_comprobante: comprobante })
+    if (error) throw error
+    setPagos((prev) => prev.map((p) => (p.id === pagoId ? data : p)))
+    return data
+  }, [])
 
   // Update reactivo de un lead (estado: nuevo -> contactado -> descartado, o
   // notas_crm). Optimista; Realtime sobre `leads` concilia el resto.
@@ -371,8 +391,8 @@ export function DataProvider({ children }) {
     eventos, leads, pagos, temporadas, temporadaActiva, loading, error,
     createReserva, updateReserva, deleteReserva, cancelarReserva,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
-    iniciarCaja, actualizarCajaValores, agregarGasto, eliminarGasto, cerrarCaja,
-    updateLead, createPago,
+    iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
+    updateLead, registrarPago, anularPago, completarComprobante,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas,
   }), [
@@ -380,8 +400,8 @@ export function DataProvider({ children }) {
     eventos, leads, pagos, temporadas, temporadaActiva, loading, error,
     createReserva, updateReserva, deleteReserva, cancelarReserva,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
-    iniciarCaja, actualizarCajaValores, agregarGasto, eliminarGasto, cerrarCaja,
-    updateLead, createPago,
+    iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
+    updateLead, registrarPago, anularPago, completarComprobante,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas,
   ])

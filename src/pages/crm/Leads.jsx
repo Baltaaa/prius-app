@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLeads, waLink } from '../../hooks/useLeads'
+import { formatFechaHora } from '../../lib/format'
 import { Mail, Phone, Check, X, RotateCcw, Inbox } from 'lucide-react'
 
 // Logo real de WhatsApp (no hay en lucide-react, se agrega inline para no sumar
@@ -30,8 +31,7 @@ const ESTADO_META = {
   descartado: { label: 'Descartado', cls: 'bg-white/5 text-gray-500 border border-white/10' },
 }
 
-const fmt = (s) =>
-  new Date(s).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+const fmt = formatFechaHora
 
 export default function Leads() {
   const { leads, loading, sinContactar, updateLead } = useLeads()
