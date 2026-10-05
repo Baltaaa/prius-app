@@ -18,6 +18,7 @@ export const PERMISOS: Record<string, Rol[]> = {
   ajustes_precio: ['superadmin'],
   editar_unidades: ['superadmin'],
   gestion_usuarios: ['superadmin'],
+  editar_comprobante: ['superadmin'],
 
   // Operación diaria — explícitas para que quede documentada la matriz
   // completa, aunque el default ya las permitiría para admin.

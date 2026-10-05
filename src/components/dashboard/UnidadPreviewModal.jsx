@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { X, Umbrella, Home, Users, ArrowRight, MapPin } from "lucide-react"
@@ -7,18 +7,20 @@ import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib
 import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from "../../lib/format"
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
+import Historial from "../crm/Historial"
 
 const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
-const MAX_HISTORIAL = 5
 
-// Preview de solo lectura de una unidad del Plano — reemplaza por completo al
-// viejo UnitModal (alta/edición). No tiene inputs ni "Guardar cambios": toda
-// edición o alta se hace enrutando a Clientes/Reservas, que son la fuente de
-// verdad de escritura (ver CLAUDE.md "Modal de unidad en el Plano: preview,
-// no editor"). Se alimenta de `reservas`/`unit`, ya vivos vía la misma
-// suscripción Realtime que usa el Plano — no hace fetch propio, así que se
-// actualiza solo si la reserva cambia con el modal abierto.
-export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, onClose }) {
+// Preview de una unidad del Plano — reemplaza por completo al viejo UnitModal
+// (alta/edición). La mayoría de la edición/alta sigue enrutando a
+// Clientes/Reservas (ver CLAUDE.md "Modal de unidad en el Plano"); las dos
+// excepciones agregadas en oct 2026 son "Asignar cliente de temporada" y
+// "Mover a otra unidad", que abren AsignarUnidadModal/MoverUnidadDialog desde
+// Dashboard.jsx sin salir del Plano (`onAsignarTemporada`/`onMoverUnidad`).
+// Se alimenta de `reservas`/`unit`, ya vivos vía la misma suscripción
+// Realtime que usa el Plano — no hace fetch propio, así que se actualiza
+// solo si la reserva cambia con el modal abierto.
+export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, onClose, onAsignarTemporada, onMoverUnidad }) {
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose?.()
     document.addEventListener("keydown", onKey)
@@ -33,14 +35,6 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
   const navigate = useNavigate()
   const reserva = unit?.reserva || null
   const { pagos } = usePagos(reserva?.id)
-
-  const historial = useMemo(() => {
-    if (!unit?.dbId) return []
-    return (reservas || [])
-      .filter((r) => r.unidad_id === unit.dbId && r.estado !== "cancelada")
-      .filter((r) => !temporadaActiva || r.temporada_id === temporadaActiva.id)
-      .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-  }, [reservas, unit?.dbId, temporadaActiva])
 
   if (!unit) return null
 
@@ -61,7 +55,6 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
 
   const irAClientes = () => navigate(`/app/clientes?id=${reserva.cliente_id}`)
   const irAReserva = () => navigate(`/app/reservas?id=${reserva.id}`)
-  const asignarTemporada = () => navigate(`/app/clientes?unidad=${unit.dbId}&tipo=temporada`)
   const nuevaReservaAcotada = () => navigate(`/app/reservas?unidad=${unit.dbId}&tipo=periodo`)
   // Historial completo: Reservas.jsx solo lista período/día (la cola
   // operativa) — las de tipo_alquiler='temporada' de esta unidad no van a
@@ -143,7 +136,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
               </div>
               <div className="flex flex-col gap-2">
                 <button
-                  onClick={asignarTemporada}
+                  onClick={() => onAsignarTemporada?.(unit)}
                   className="w-full py-3.5 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                 >
                   Asignar cliente de temporada <ArrowRight size={14} />
@@ -203,12 +196,22 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
 
               <div className="flex flex-col gap-2">
                 {reserva.tipo_alquiler === "temporada" ? (
-                  <button
-                    onClick={irAClientes}
-                    className="w-full py-3.5 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
-                  >
-                    {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver ficha del cliente"} <ArrowRight size={14} />
-                  </button>
+                  <>
+                    <button
+                      onClick={irAClientes}
+                      className="w-full py-3.5 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                    >
+                      {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver ficha del cliente"} <ArrowRight size={14} />
+                    </button>
+                    {!reserva.bloqueada && (
+                      <button
+                        onClick={() => onMoverUnidad?.(reserva, unit)}
+                        className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+                      >
+                        Mover a otra unidad
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <>
                     <button
@@ -229,36 +232,19 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
             </div>
           )}
 
-          {/* Historial de la temporada */}
+          {/* Historial de la unidad — mismo componente que la ficha de
+              cliente y el detalle de reserva (ítem 2, oct 2026). */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Historial de la temporada</p>
-              {historial.length > MAX_HISTORIAL && (
-                <button
-                  onClick={verHistorialCompleto}
-                  className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-all"
-                >
-                  Ver todas
-                </button>
-              )}
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Historial</p>
+              <button
+                onClick={verHistorialCompleto}
+                className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-all"
+              >
+                Ver todas las reservas
+              </button>
             </div>
-            {historial.length === 0 ? (
-              <p className="text-xs text-gray-500 uppercase tracking-widest">Sin reservas registradas esta temporada.</p>
-            ) : (
-              <div className="space-y-2">
-                {historial.slice(0, MAX_HISTORIAL).map((r) => (
-                  <div key={r.id} className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-xs flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <span className="font-bold text-cyan-400 uppercase tracking-widest">{TIPO_LABEL[r.tipo_alquiler] || r.tipo_alquiler}</span>
-                    <span className="text-gray-300 truncate">{r.clientes?.nombre || "S/N"}</span>
-                    <span className="text-gray-500">
-                      {r.tipo_alquiler === "temporada" ? r.temporada : r.tipo_alquiler === "dia" ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
-                    </span>
-                    <div className="flex-1" />
-                    <StatusBadge status={estadoBadgeStatus(r)} />
-                  </div>
-                ))}
-              </div>
-            )}
+            <Historial tipo="unidad" id={unit.dbId} compact />
           </div>
         </div>
       </div>

@@ -81,6 +81,46 @@ export function saldoNumerico(reserva, pagosDeReserva = []) {
   return Math.max(Number(reserva.valor_total || 0) - pagado, 0)
 }
 
+// Reservas con precio unificado (oct 2026, caso Ana Lescano): varias reservas
+// del mismo cliente comparten un solo precio pactado (`reserva_grupos`,
+// `reservas.grupo_id`). Deliberadamente no se tocan pagos: un pago sigue
+// contra UNA reserva puntual, el grupo solo cambia cómo se LEE el saldo/
+// estado — se suman los pagos de todas las reservas del grupo contra el
+// precio_total del grupo, nunca el valor_total individual de cada una.
+export const esGrupo = (reserva) => !!reserva?.grupo_id && !!reserva?.reserva_grupos
+
+// Todas las reservas que comparten el mismo grupo_id que `reserva` (ella
+// incluida). Si no está agrupada, devuelve solo ella misma.
+export function reservasDelGrupo(reserva, todasLasReservas) {
+  if (!reserva?.grupo_id) return reserva ? [reserva] : []
+  return (todasLasReservas || []).filter((r) => r.grupo_id === reserva.grupo_id)
+}
+
+// Saldo del grupo completo: precio_total del grupo menos la suma de los
+// pagos vigentes de TODAS sus reservas. `pagosPorReserva` es el mapa
+// reserva_id -> pagos[] que ya arma Clientes.jsx. Mismo contrato que
+// saldoNumerico: null = no hay forma honesta de calcularlo (pago sin
+// verificar en cualquiera de las reservas del grupo).
+export function saldoGrupo(reserva, todasLasReservas, pagosPorReserva) {
+  const grupo = reserva?.reserva_grupos
+  if (!grupo) return null
+  const miembros = reservasDelGrupo(reserva, todasLasReservas)
+  const pagos = miembros.flatMap((r) => pagosPorReserva?.[r.id] || [])
+  const vigentes = pagos.filter((p) => p.estado !== 'anulado')
+  if (tienePagoSinVerificar(vigentes)) return null
+  const pagado = vigentes.reduce((acc, p) => acc + Number(p.monto || 0), 0)
+  return Math.max(Number(grupo.precio_total || 0) - pagado, 0)
+}
+
+// estado_pago equivalente para un grupo, misma semántica que la columna de
+// una reserva suelta (pendiente / parcial / pagado) — pendiente_confirmacion
+// y bonificada no aplican a un grupo (un grupo siempre tiene precio pactado).
+export function estadoPagoGrupo(saldo, grupo) {
+  if (saldo === null) return null
+  if (saldo <= 0) return 'pagado'
+  return Number(saldo) < Number(grupo.precio_total || 0) ? 'parcial' : 'pendiente'
+}
+
 // Rangos de fechas ya ocupados por otras reservas activas (período/día) de
 // una unidad — usado por el date picker del form de Reservas (Tarea 7,
 // disponibilidad dinámica) para tachar/bloquear días, con la misma regla que

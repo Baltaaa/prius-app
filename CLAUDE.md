@@ -25,7 +25,8 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 - **Caja diaria**: sesión de caja del día (apertura, movimientos, cierre con arqueo y Z).
 - **Arqueo**: comparación entre efectivo esperado y efectivo contado al cierre.
 - **Z**: cierre diario del controlador fiscal; sus datos se cargan a mano al cerrar la caja (opcional).
-- **Comprobante**: factura o recibo emitido por fuera del CRM (FA/FB/FC, RA/RB/RC/RX + punto de venta y número, ej. "FB 727", "RB 1131").
+- **Comprobante**: factura o recibo emitido por fuera del CRM (FA/FB/FC, RA/RB/RC/RX + número). Formato único de display en toda la app: `TIPO-NUMERO` (ej. "FB-727", "RB-1131") — sin punto de venta, sin ceros a la izquierda, helper único `formatComprobante()` en `lib/format.ts` (espejado en SQL por `fn_comprobante_etiqueta()`, usado dentro de `resumen_caja()`).
+- **Reserva con precio unificado / grupo**: varias reservas del mismo cliente (ej. varios períodos no contiguos) bajo un solo precio pactado en vez de uno por reserva — tabla `reserva_grupos` + `reservas.grupo_id`. Ver "Estructura de datos".
 - **Seña / parcial / saldo**: tipos de pago sobre una reserva.
 - **Bonificada**: reserva/unidad sin cargo (costo 0, no registra pagos).
 - **tipo_alquiler**: temporada / período / día.
@@ -40,7 +41,8 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 ## Estructura de datos (Supabase)
 - `clientes`: datos personales + datos fiscales (condicion_iva, cuit, razon_social). DNI único cuando está cargado. Columnas históricas reutilizadas, ojo al nombrarlas: `mail` (no `email`).
 - `unidades`: carpas/sombrillas/cabinas/lockers. `unidades.estado` siempre derivado por trigger, nunca manual. Número único por tipo. El agrupamiento por pasillo (A/B/C) es solo visual en el frontend.
-- `reservas`: tipo_alquiler, fechas, precio_lista, ajuste, costo_total, bonificada, estado_pago (pendiente / parcial / pagado / pendiente_confirmacion, derivado de pagos por trigger salvo pendiente_confirmacion). Sin superposición de fechas por unidad (constraint de exclusión `reservas_no_overlap_periodo_dia`, filtra `estado='activa'`). Columna histórica reutilizada: `valor_total` (no `costo_total`) es la fuente real.
+- `reservas`: tipo_alquiler, fechas, precio_lista, ajuste, costo_total, bonificada, estado_pago (pendiente / parcial / pagado / pendiente_confirmacion, derivado de pagos por trigger salvo pendiente_confirmacion). Sin superposición de fechas por unidad (constraint de exclusión `reservas_no_overlap_periodo_dia`, filtra `estado='activa'`). Columna histórica reutilizada: `valor_total` (no `costo_total`) es la fuente real. `grupo_id` (nullable, FK a `reserva_grupos`) agrupa varias reservas del mismo cliente bajo un solo precio pactado (oct 2026, caso Ana Lescano) — con grupo_id seteado, `saldo`/`estado_pago` de ESA fila los calculan los mismos triggers (`fn_reserva_recalcula_saldo`/`fn_pago_actualiza_saldo`) pero contra `reserva_grupos.precio_total` y la suma de pagos de TODAS las reservas del grupo, nunca contra el `valor_total` individual — las tres reservas del grupo terminan con el mismo saldo/estado. `monto_grupo_referencia` (legado de la migración del excel) quedó deprecado, no se usa en ningún cálculo.
+- `reserva_grupos`: id, cliente_id, temporada, precio_total, notas, created_at. Alta/lectura directa (mismo patrón de permisos que `reservas`, sin RPC) desde `crearGrupoReservas()` en DataProvider — acción "Agrupar reservas" en Clientes.jsx.
 - `reserva_clientes`: una reserva puede tener varios clientes.
 - `comprobantes`: facturas/recibos cargados manualmente; unique (tipo, punto_venta, numero); un comprobante puede tener varios pagos.
 - `pagos`: fuente de verdad de ingresos. medio (no `medio_pago`, columna histórica reutilizada), tipo_pago, origen (crm / web / migracion), caja_id asignado por el sistema, comprobante_id opcional, estado vigente/anulado.
@@ -90,15 +92,19 @@ En Clientes, Reservas y el modal de unidad del Plano, un monto nunca se muestra 
 - Pagos sin precio definido: empty state corto con botón "Definir precio" (no aplica a una reserva bonificada).
 - Grilla de pagos por reserva (`PagosGrid.jsx`): sin cantidad fija de columnas — Precio venta (no se renderiza si es $0), una celda "Cuota N" por cada pago ya registrado y una sola celda "+ Cargar" después del último, y Saldo. Bonificada: una sola línea, "Carpa bonificada — no registra pagos." Saldada (`estado_pago = 'pagado'`, o suma de montos conocidos ≥ `valor_total`): sin celda "+ Cargar", Saldo dice "Unidad saldada", cuotas bloqueadas para todos los usuarios (no hay roles todavía; "solo un admin puede reabrirlas" queda pendiente de ese sistema).
 
-### Modal de unidad en el Plano: preview, no editor
-- El modal de unidad (`UnidadPreviewModal.jsx`) es solo lectura. No tiene inputs ni "Guardar cambios", y por lo tanto tampoco dispara `RegistrarPago` desde ahí.
+### Modal de unidad en el Plano: preview, con dos excepciones inline
+- El modal de unidad (`UnidadPreviewModal.jsx`) es mayormente de solo lectura — no dispara `RegistrarPago` desde ahí.
 - Muestra: datos de la unidad, estado derivado, reserva actual (titular, co-socios, tipo, fechas, estado, total/pagado/saldo, notas) e historial de la temporada.
-- Toda edición o alta se hace enrutando: unidad libre → "Asignar cliente de temporada" (Clientes) o "Nueva reserva por período o día" (Reservas), con la unidad precargada por params. Unidad con reserva de temporada → ficha del cliente; período o día → detalle de la reserva.
-- Liberar unidad, registrar pagos y editar notas se hacen en el destino, no en el modal.
+- La mayoría de la edición/alta sigue enrutando: "Nueva reserva por período o día" (Reservas, con la unidad precargada por params); unidad con reserva de período/día → detalle de la reserva.
+- **Excepciones agregadas oct 2026, resuelven inline sin salir del Plano** (`onAsignarTemporada`/`onMoverUnidad`, manejadas en `Dashboard.jsx`):
+  - Unidad libre → "Asignar cliente de temporada" abre `AsignarUnidadModal.jsx`: combobox de cliente existente o alta inline (`ClienteSelector.jsx`, mismo componente que Reservas.jsx) + precio/bonificada, crea la reserva de temporada directo.
+  - Unidad con reserva de temporada activa (no bloqueada) → "Mover a otra unidad" abre `MoverUnidadDialog.jsx`: pide la contraseña del superadmin logueado y llama al RPC `mover_unidad_temporada` (SECURITY DEFINER, valida rol y contraseña server-side — un usuario no-superadmin no puede ejecutarlo ni manipulando el frontend).
+- Unidad con reserva de temporada → además de mover, ficha del cliente para todo lo demás (pagos, notas, liberar).
 - "Ver todas" del historial de la temporada filtra Reservas por esa unidad (`?filtroUnidad=<uuid>`) e incluye también sus reservas de `tipo_alquiler = temporada`.
 - Desktop: modal centrado. Mobile: bottom sheet de altura completa con acciones fijas abajo.
 - Se alimenta de la misma suscripción Realtime del Plano.
 - `UnitModal.jsx` (el viejo modal de alta/edición que este preview reemplazó) quedó desconectado a propósito — no lo importa ninguna pantalla. No borrar ni reconectar sin confirmar antes.
+- `ClienteSelector.jsx` (`src/components/crm/`): combobox de cliente + alta inline validada (mismas reglas que Clientes.jsx, `lib/validators/cliente.ts`) — único componente para elegir/crear cliente en toda la app, usado por Reservas.jsx y AsignarUnidadModal.jsx.
 
 ## Disponibilidad y no-solapamiento de reservas
 - Las reservas de tipo `día` y `período` no pueden solaparse en fechas sobre la misma unidad — exclusion constraint de Postgres (`daterange` + GiST) sobre `unidad_id`, filtrando `estado='activa'`. Las reservas de temporada ocupan la unidad para todo el rango de la temporada.
@@ -115,7 +121,7 @@ En Clientes, Reservas y el modal de unidad del Plano, un monto nunca se muestra 
 ## Formato y validación de datos (obligatorio en toda la app)
 - **Pesos**: montos enteros, sin centavos. Formato único `$ 1.089.000`; negativos `−$ 15.000` (signo menos real U+2212); cero `$ 0`. Nunca abreviar. tabular-nums y alineado a la derecha en tablas. Única excepción: CSV con entero plano. En la base, CHECK monto = round(monto) en pagos/gastos_caja/reservas/caja_diaria.
 - **Fechas**: `30/09/2026`, `30/09/2026 08:12`, rangos estilo carpero `27/12 al 09/01` (sin año, incluso cruzando dic→ene dentro de la misma temporada; con año solo si el rango no pertenece a la temporada activa). Siempre en zona America/Argentina/Buenos_Aires, nunca la del navegador — las columnas `date` puras (`yyyy-mm-dd`) se anclan a mediodía UTC antes de formatear para no correrse un día.
-- **DNI** `30.123.456` (7–8 dígitos, se guarda solo dígitos, único entre clientes). **CUIT** `20-30123456-7` (11 dígitos, dígito verificador módulo 11, función `cuit_valido()` espejada en `lib/parse.ts` y en SQL). **Teléfono** guardado en E.164, mostrado `+54 9 223 512-3456`. **Comprobante** `FB 00001-00000727` / corto `FB 727`. **Unidad** `Carpa 19`. **Código de reserva** `PRIUS-A3X9K2`.
+- **DNI** `30.123.456` (7–8 dígitos, se guarda solo dígitos, único entre clientes). **CUIT** `20-30123456-7` (11 dígitos, dígito verificador módulo 11, función `cuit_valido()` espejada en `lib/parse.ts` y en SQL). **Teléfono** guardado en E.164, mostrado `+54 9 223 512-3456`. **Comprobante** `FB-727` (ver "Vocabulario de dominio"). **Unidad** `Carpa 19`. **Código de reserva** `PRIUS-A3X9K2`.
 - Nombres normalizados (capitalización con partículas en minúscula — de/del/la/las/los/y salvo al inicio —, ´/` → ').
 - Única fuente de verdad: `src/lib/format.ts` (mostrar), `src/lib/parse.ts` (parsear/normalizar/validar), `src/lib/validators/` (zod por entidad, en progreso) y componentes en `src/components/inputs/` (`MoneyInput`, `IntegerInput`, `DniInput`, `CuitInput`, `PhoneInput` construidos; `DateInput`, `ComprobanteInput`, `TextInput`, `SearchInput`, `SelectChips` pendientes).
 - Prohibido: `input type="number"` y `type="date"` nativos, `toLocaleString`/`Intl`/`toFixed` fuera de `format.ts`/`parse.ts` — barrido completo de la app todavía en progreso (hecho: Caja apertura; pendiente: el resto de los inputs de Reservas/Clientes/UnitModal/filtros/login, más la regla de ESLint que lo prohíba automáticamente).

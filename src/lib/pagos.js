@@ -64,17 +64,6 @@ export function comprobanteTipoDefault(condicionIva) {
   return condicionIva === 'responsable_inscripto' ? 'factura_a' : 'factura_b'
 }
 
-// Etiqueta corta "FB 0001-00000727", espejo de fn_comprobante_etiqueta en la
-// base — usada para previsualizar antes de guardar (la base es la fuente de
-// verdad una vez creado el comprobante).
-export function comprobanteEtiqueta(comprobante) {
-  if (!comprobante) return null
-  const sigla = COMPROBANTE_TIPO_SIGLA[comprobante.tipo] || '??'
-  const pv = String(comprobante.punto_venta ?? '').padStart(4, '0')
-  const nro = String(comprobante.numero ?? '').padStart(8, '0')
-  return `${sigla} ${pv}-${nro}`
-}
-
 export const CONDICION_IVA_LABEL = {
   consumidor_final: 'Consumidor Final',
   monotributo: 'Monotributo',

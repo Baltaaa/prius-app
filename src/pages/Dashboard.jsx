@@ -11,6 +11,8 @@ import {
   PLANO_SECTOR_WIDTH,
 } from "../components/dashboard/constants"
 import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
+import AsignarUnidadModal from "../components/dashboard/AsignarUnidadModal"
+import MoverUnidadDialog from "../components/dashboard/MoverUnidadDialog"
 import Cell from "../components/dashboard/Cell"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import { useData } from "../context/DataProvider"
@@ -42,6 +44,8 @@ export default function Dashboard() {
   // actualiza solo si la reserva cambia por Realtime mientras está abierto
   // (ver CLAUDE.md "Modal de unidad en el Plano").
   const [selectedUnitId, setSelectedUnitId] = useState(null)
+  const [asignarUnit, setAsignarUnit] = useState(null) // unidad libre a asignar, o null
+  const [moverTarget, setMoverTarget] = useState(null) // { reserva, unit } a mover, o null
   const [zoom, setZoom] = useState(0.95)
   const MIN_ZOOM = 0.5
   const MAX_ZOOM = 1.5
@@ -168,6 +172,13 @@ export default function Dashboard() {
   }, [unidades, reservaPorUnidad])
 
   const selectedUnit = selectedUnitId ? units[selectedUnitId] : null
+
+  // Unidades libres AHORA (sin reserva de temporada vigente) — destino
+  // posible para "Mover a otra unidad" (ítem 5).
+  const unidadesLibres = useMemo(
+    () => Object.values(units).filter((u) => u.status === STATUS.LIBRE).map((u) => ({ id: u.dbId, tipo: u.type, numero: u.number })),
+    [units],
+  )
 
   // useCallback: referencia estable para no romper el React.memo de las 184 Cell
   const handleUnitClick = useCallback((unit) => {
@@ -379,8 +390,25 @@ export default function Dashboard() {
           reservas={reservas}
           temporadaActiva={temporadaActiva}
           onClose={() => setSelectedUnitId(null)}
+          onAsignarTemporada={(unit) => { setSelectedUnitId(null); setAsignarUnit(unit) }}
+          onMoverUnidad={(reserva, unit) => { setSelectedUnitId(null); setMoverTarget({ reserva, unit }) }}
         />
       )}
+
+      <AsignarUnidadModal
+        isOpen={!!asignarUnit}
+        onClose={() => setAsignarUnit(null)}
+        unit={asignarUnit}
+        temporadaActiva={temporadaActiva}
+      />
+
+      <MoverUnidadDialog
+        isOpen={!!moverTarget}
+        onClose={() => setMoverTarget(null)}
+        reserva={moverTarget?.reserva}
+        unidadOrigen={moverTarget?.unit}
+        unidadesLibres={unidadesLibres}
+      />
     </div>
 
     {/* Hoja A4 de impresión: oculta en pantalla, única cosa visible al imprimir. */}

@@ -1,67 +1,136 @@
-import React from 'react'
-import { useReservas } from '../../hooks/useReservas'
-import { useCaja } from '../../hooks/useCaja'
-import { unidadEmoji } from '../../lib/format'
-import { AlertCircle, Calendar, Wallet } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useNotifications } from '../../hooks/useNotifications'
+import { AlertCircle, Calendar, Wallet, Check, CheckCheck, Bell } from 'lucide-react'
+
+const TIPO_META = {
+  caja: { icon: Wallet, color: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', accion: 'Ir a Caja' },
+  checkin: { icon: Calendar, color: 'text-sky-400', bg: 'bg-sky-400/10', border: 'border-sky-400/20', accion: 'Ver la reserva' },
+  saldo: { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-400/10', border: 'border-red-400/20', accion: 'Ver pago' },
+}
+
+const SWIPE_THRESHOLD = 80
+
+// Un ítem por notificación, con swipe-to-dismiss en mobile (pointer events:
+// funciona igual con touch y mouse, no hace falta duplicar handlers). El
+// gesto solo marca como leída — nada se borra, la notificación es un cálculo
+// en vivo (useNotifications), no una fila que exista para borrar.
+function NotificacionItem({ item, onAccion, onLeida }) {
+  const [dx, setDx] = useState(0)
+  const [dragging, setDragging] = useState(false)
+  const startX = useRef(0)
+  const meta = TIPO_META[item.type] || { icon: Bell, color: 'text-gray-400', bg: 'bg-white/5', border: 'border-white/10', accion: null }
+  const Icon = meta.icon
+
+  const handlePointerDown = (e) => {
+    startX.current = e.clientX
+    setDragging(true)
+  }
+  const handlePointerMove = (e) => {
+    if (!dragging) return
+    setDx(Math.min(0, e.clientX - startX.current))
+  }
+  const handlePointerUp = () => {
+    setDragging(false)
+    if (dx < -SWIPE_THRESHOLD) onLeida(item.id)
+    setDx(0)
+  }
+
+  return (
+    <div
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => { setDragging(false); setDx(0) }}
+      style={{ transform: `translateX(${dx}px)`, transition: dragging ? 'none' : 'transform 0.2s ease' }}
+      className={`relative flex items-start gap-4 p-4 rounded-xl border touch-pan-y ${item.leida ? 'opacity-50' : ''} ${meta.bg} ${meta.border}`}
+    >
+      <div className={`w-10 h-10 rounded-full ${meta.bg} border ${meta.border} flex items-center justify-center shrink-0`}>
+        <Icon className={meta.color} size={18} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold text-white uppercase tracking-tight">{item.titulo}</p>
+        <p className="text-xs text-gray-400 mt-0.5">{item.detalle}</p>
+        <div className="flex items-center gap-4 mt-2">
+          {meta.accion && item.reservaId && (
+            <button
+              type="button"
+              onClick={() => onAccion(item)}
+              className={`text-[10px] font-bold uppercase tracking-widest ${meta.color} hover:opacity-80 transition-all`}
+            >
+              {meta.accion}
+            </button>
+          )}
+          {!item.leida && (
+            <button
+              type="button"
+              onClick={() => onLeida(item.id)}
+              className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-all flex items-center gap-1"
+            >
+              <Check size={12} /> Marcar como leída
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Seccion({ titulo, items, onAccion, onLeida }) {
+  if (items.length === 0) return null
+  return (
+    <div className="space-y-3">
+      <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#FDE047]">{titulo} ({items.length})</h2>
+      <div className="space-y-2">
+        {items.map((item) => (
+          <NotificacionItem key={item.id} item={item} onAccion={onAccion} onLeida={onLeida} />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function Notificaciones() {
-  const { reservas, loading: resLoading } = useReservas()
-  const { cajaHoy, loading: cajaLoading } = useCaja()
+  const { urgentes, informativas, loading, marcarLeida, marcarTodas, count } = useNotifications()
+  const navigate = useNavigate()
 
-  if (resLoading || cajaLoading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Cargando Alertas...</span></div>
+  if (loading) {
+    return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Cargando notificaciones...</span></div>
+  }
 
-  const reservasConSaldo = reservas.filter(r => Number(r.saldo) > 0)
-  const todayStr = new Date().toISOString().split('T')[0]
-  const checkinsHoy = reservas.filter(r => r.fecha_inicio === todayStr)
+  const handleAccion = (item) => {
+    if (item.type === 'caja') return navigate('/app/caja')
+    if (item.reservaId) return navigate(`/app/reservas?id=${item.reservaId}`)
+  }
+
+  const sinLeer = [...urgentes, ...informativas].filter((i) => !i.leida)
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      <div className="grid grid-cols-1 gap-6">
-        {!cajaHoy && (
-          <div className="glass-card p-6 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 flex items-center gap-6">
-            <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
-              <Wallet className="text-yellow-500" size={24} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-widest">Caja Pendiente</h3>
-              <p className="text-xs text-gray-400 mt-1">Recuerde iniciar la caja diaria para registrar movimientos de hoy.</p>
-            </div>
-          </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-sm font-bold uppercase tracking-widest text-white">Notificaciones</h1>
+        {sinLeer.length > 0 && (
+          <button
+            type="button"
+            onClick={marcarTodas}
+            className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all flex items-center gap-1.5"
+          >
+            <CheckCheck size={14} /> Marcar todas como leídas
+          </button>
         )}
-
-        <div className="glass-card p-8 rounded-3xl glass-card-inner">
-          <div className="flex items-center gap-3 mb-8 border-b border-white/5 pb-4">
-            <AlertCircle size={20} className="text-red-400" />
-            <h2 className="text-sm font-bold uppercase tracking-widest text-white">Saldos Pendientes ({reservasConSaldo.length})</h2>
-          </div>
-          <div className="space-y-4">
-            {reservasConSaldo.map(r => (
-              <div key={r.id} className="flex justify-between items-center p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all">
-                <div>
-                  <p className="text-xs font-bold uppercase text-white tracking-tight">{r.clientes?.nombre}</p>
-                  <p className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</p>
-                </div>
-                <span className="text-sm font-bold text-red-400">${r.saldo}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="glass-card p-8 rounded-3xl glass-card-inner">
-          <div className="flex items-center gap-3 mb-8 border-b border-white/5 pb-4">
-            <Calendar size={20} className="text-sky-400" />
-            <h2 className="text-sm font-bold uppercase tracking-widest text-white">Check-ins de Hoy ({checkinsHoy.length})</h2>
-          </div>
-          <div className="space-y-4">
-            {checkinsHoy.map(r => (
-              <div key={r.id} className="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center">
-                <span className="text-xs font-bold uppercase text-white">{r.clientes?.nombre}</span>
-                <span className="text-[10px] font-bold text-sky-400 bg-sky-400/10 px-3 py-1 rounded-full uppercase tracking-wider">Ingreso Hoy</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
+
+      {count === 0 && urgentes.length === 0 && informativas.length === 0 ? (
+        <div className="glass-card rounded-3xl p-12 text-center text-gray-600 uppercase text-xs tracking-widest flex flex-col items-center gap-3">
+          <Bell size={28} className="opacity-40" />
+          Todo tranquilo por ahora — sin notificaciones.
+        </div>
+      ) : (
+        <div className="space-y-10">
+          <Seccion titulo="Urgentes" items={urgentes} onAccion={handleAccion} onLeida={marcarLeida} />
+          <Seccion titulo="Informativas" items={informativas} onAccion={handleAccion} onLeida={marcarLeida} />
+        </div>
+      )}
     </div>
   )
 }

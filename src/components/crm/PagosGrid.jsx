@@ -1,4 +1,4 @@
-import { formatPesosVisible, unidadEmoji } from '../../lib/format'
+import { formatPesosVisible, unidadEmoji, formatComprobante } from '../../lib/format'
 import { esPendienteConfirmacion, pagoSinVerificar, saldoNumerico } from '../../lib/reservas'
 import { CreditCard, Hourglass, Gift } from 'lucide-react'
 
@@ -134,24 +134,24 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
             // pagó, no cuánto.
             const sinVerificar = pagoSinVerificar(pago)
             const anulado = pago.estado === 'anulado'
-            // Un pago anulado siempre se puede abrir (para ver el motivo) —
-            // "disabled"/bloqueado solo aplica a la regla de reserva saldada.
+            // Todo pago es clickeable sin importar el estado de la reserva —
+            // ver su detalle (y su comprobante) no depende de si ya está
+            // saldada. Solo cambia el estilo visual.
             return (
               <button
                 key={pago.id}
                 type="button"
-                disabled={saldada && !anulado}
                 onClick={() => onCellClick(reserva, pago)}
                 className={`${cellBase} ${
                   anulado
                     ? 'bg-white/5 border border-white/10 text-gray-600 line-through cursor-pointer hover:bg-white/10'
                     : saldada
-                      ? 'bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed'
+                      ? 'bg-white/5 border border-white/10 text-gray-300 cursor-pointer hover:bg-white/10'
                       : sinVerificar
                         ? 'bg-gray-500/10 border border-gray-500/30 text-gray-400 hover:bg-gray-500/20 cursor-pointer'
                         : 'bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 cursor-pointer'
                 }`}
-                title={anulado ? `Pago anulado — ${pago.anulado_motivo || 'sin motivo'}` : saldada ? 'Reserva saldada — cuota bloqueada' : 'Ver detalle del pago'}
+                title={anulado ? `Pago anulado — ${pago.anulado_motivo || 'sin motivo'}` : 'Ver detalle del pago'}
               >
                 <span className="text-[8px] text-gray-500 uppercase tracking-widest">Cuota {pago.nro_cuota}</span>
                 {sinVerificar ? <MontoNulo /> : formatPesosVisible(pago.monto)}
@@ -160,6 +160,11 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
                     <CreditCard size={10} /> {pago.cuotas_tarjeta}x
                   </span>
                 )}
+                <span className="text-[8px] text-gray-500 font-normal normal-case tracking-normal">
+                  {pago.comprobantes?.length > 0
+                    ? pago.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
+                    : 'Sin comprobante'}
+                </span>
               </button>
             )
           })}

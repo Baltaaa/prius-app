@@ -2,7 +2,13 @@ import React, { useState, useMemo } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { Download, BarChart3 } from 'lucide-react'
 import KpiCard from '../../components/crm/KpiCard'
+import BrandSelect from '../../components/ui/BrandSelect'
 import { formatPesos, unidadEmoji } from '../../lib/format'
+
+const OPCIONES_TEMPORADA = [
+  { value: 'all', label: 'Todas las temporadas' },
+  { value: '2025-2026', label: '2025-2026' },
+]
 
 export default function Reportes() {
   const { reservas, loading } = useReservas()
@@ -63,14 +69,9 @@ export default function Reportes() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-8">
           <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white">Detalle de Contratos</h2>
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <select
-              value={temporadaFilter}
-              onChange={(e) => setTemporadaFilter(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 min-h-[44px] text-xs font-bold uppercase text-gray-400 outline-none focus:border-[#FDE047]"
-            >
-              <option value="all">Todas las temporadas</option>
-              <option value="2025-2026">2025-2026</option>
-            </select>
+            <div className="w-56">
+              <BrandSelect value={temporadaFilter} onChange={setTemporadaFilter} options={OPCIONES_TEMPORADA} className="py-2.5" />
+            </div>
             <button
               onClick={handleExportCSV}
               disabled={activeReservas.length === 0}

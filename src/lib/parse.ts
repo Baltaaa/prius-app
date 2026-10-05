@@ -112,6 +112,15 @@ export function normalizarEmail(raw: string | null | undefined): string {
   return String(raw ?? '').trim().toLowerCase()
 }
 
+// Formato razonable de email (no RFC 5322 completo, alcanza para frenar
+// "123456" o "asd" en el campo) — algo@algo.dominio, sin espacios.
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export function emailValido(raw: string | null | undefined): boolean {
+  const email = normalizarEmail(raw)
+  return email.length === 0 || EMAIL_REGEX.test(email)
+}
+
 /** Mayúsculas, sin espacios, agrega "PRIUS-" si falta. */
 export function normalizarCodigoReserva(raw: string | null | undefined): string {
   const limpio = String(raw ?? '').trim().toUpperCase().replace(/\s+/g, '')

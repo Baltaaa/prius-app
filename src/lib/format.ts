@@ -168,13 +168,10 @@ const COMPROBANTE_SIGLA: Record<string, string> = {
   recibo_a: 'RA', recibo_b: 'RB', recibo_c: 'RC', recibo_x: 'RX',
 }
 
-/** "FB 00001-00000727" (largo) o "FB 727" (corto, como lo escriben a mano). */
-export function formatComprobante(tipo: string, puntoVenta: number | string, numero: number | string, corto = false): string {
+/** Formato único de comprobante en toda la app: "RB-3663" / "FB-727". Sin punto de venta, sin ceros a la izquierda. */
+export function formatComprobante(tipo: string, numero: number | string): string {
   const sigla = COMPROBANTE_SIGLA[tipo] || '??'
-  if (corto) return `${sigla} ${Number(numero) || 0}`
-  const pv = String(puntoVenta ?? '').padStart(5, '0')
-  const nro = String(numero ?? '').padStart(8, '0')
-  return `${sigla} ${pv}-${nro}`
+  return `${sigla}-${String(numero ?? '').trim()}`
 }
 
 const UNIDAD_LABEL: Record<string, string> = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina', locker: 'Locker' }

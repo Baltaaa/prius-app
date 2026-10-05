@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import MoneyInput from '../../components/inputs/MoneyInput'
 import DateInput from '../../components/inputs/DateInput'
+import BrandSelect from '../../components/ui/BrandSelect'
 
 const MAX_MONTO_INICIAL = 10_000_000
 import { CATEGORIA_GASTO_LABEL, formatHora, descargarCajaCSV } from '../../lib/caja'
@@ -306,9 +307,9 @@ export default function Caja() {
               ))}
               <div className="flex-1" />
               {tab === 'movimientos' && (
-                <select value={filtroMedio} onChange={(e) => setFiltroMedio(e.target.value)} className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs uppercase font-bold focus:border-[#FDE047]/50 outline-none">
-                  {FILTROS_MEDIO.map((f) => <option key={f.value} value={f.value} className="bg-[#0a0d14]">{f.label}</option>)}
-                </select>
+                <div className="w-48">
+                  <BrandSelect value={filtroMedio} onChange={setFiltroMedio} options={FILTROS_MEDIO} className="py-2.5" />
+                </div>
               )}
             </div>
 

@@ -29,7 +29,7 @@ export default function AppLayout() {
                 sola vez acá: ninguna página debe agregar su propio
                 max-w/px/mx-auto que lo contradiga. pb-20 en mobile deja lugar
                 al BottomNav fijo (56px + safe-area) para que no tape contenido. */}
-            <main className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-20 md:pb-12">
+            <main id="app-main-scroll" className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-20 md:pb-12">
               <Outlet />
             </main>
           </div>

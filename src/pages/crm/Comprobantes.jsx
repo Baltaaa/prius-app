@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
+import BrandSelect from '../../components/ui/BrandSelect'
 import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { pagoSinVerificar, tienePagoSinVerificar } from '../../lib/reservas'
@@ -18,6 +19,14 @@ export default function Comprobantes() {
   // pantalla de facturación aparte.
   const { pagos: pagosReserva } = usePagos(selectedReserva?.id)
 
+  const opcionesReserva = useMemo(
+    () => reservas.map((r) => ({
+      value: r.id,
+      label: `${r.clientes?.nombre || 'S/N'} — ${unidadEmoji(r.unidades?.tipo)} ${r.unidades?.tipo} #${r.unidades?.numero} (${r.temporada})`,
+    })),
+    [reservas],
+  )
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -33,17 +42,9 @@ export default function Comprobantes() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex-1 min-w-[240px] space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Contrato de Reserva</label>
-            <select
-              value={selectedReservaId}
-              onChange={(e) => setSelectedReservaId(e.target.value)}
-              className="w-full max-w-xl px-4 py-3 bg-white/5 border border-white/10 text-white text-sm font-bold rounded-xl focus:border-[#FDE047]/50 outline-none uppercase"
-            >
-              {reservas.map(r => (
-                <option key={r.id} value={r.id} className="bg-[#0a0d14]">
-                  {r.clientes?.nombre || 'S/N'} — {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero} ({r.temporada})
-                </option>
-              ))}
-            </select>
+            <div className="max-w-xl">
+              <BrandSelect value={selectedReservaId} onChange={setSelectedReservaId} options={opcionesReserva} />
+            </div>
           </div>
           {selectedReserva && (
             <button

@@ -2,10 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji, normalizeText } from '../../lib/format'
+import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from '../../lib/format'
 import { parseUnidadQuery } from '../../lib/parse'
 import SearchInput from '../../components/inputs/SearchInput'
 import DateInput from '../../components/inputs/DateInput'
+import BrandSelect from '../../components/ui/BrandSelect'
 import { coSocios, estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
@@ -14,11 +15,13 @@ import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
 import RegistrarPago from '../../components/crm/RegistrarPago'
 import MoneyInput from '../../components/inputs/MoneyInput'
+import ClienteSelector from '../../components/crm/ClienteSelector'
 import StatusBadge from '../../components/crm/StatusBadge'
 import MontoReserva from '../../components/crm/MontoReserva'
 import ReservaCalendar from '../../components/crm/ReservaCalendar'
+import Historial from '../../components/crm/Historial'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
-import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, UserPlus, X, Lock, Unlock } from 'lucide-react'
+import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, X, Lock, Unlock } from 'lucide-react'
 
 // Identificador legible para el gate de tipeo del ConfirmDeleteModal —
 // reservas.codigo no existe en el schema (queda para el sistema de reservas
@@ -53,7 +56,7 @@ const fechaLlegada = (r) => (r.tipo_alquiler === 'dia' ? r.fecha : r.fecha_inici
 
 export default function Reservas() {
   const { reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva, deleteReserva, cancelarReserva } = useReservas()
-  const { clientes, loading: cliLoading, createCliente } = useClientes()
+  const { loading: cliLoading } = useClientes()
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const { confirm, alert } = useDialog()
@@ -72,10 +75,6 @@ export default function Reservas() {
 
   // Form state
   const [clienteId, setClienteId] = useState('')
-  // Texto del combobox de cliente — separado de clienteId porque mientras se
-  // está escribiendo/filtrando todavía no hay un cliente elegido.
-  const [clienteInputValue, setClienteInputValue] = useState('')
-  const [showClienteDropdown, setShowClienteDropdown] = useState(false)
   const [unidadId, setUnidadId] = useState('')
   const [tipoAlquiler, setTipoAlquiler] = useState('periodo')
   const [fechaInicio, setFechaInicio] = useState('')
@@ -93,29 +92,8 @@ export default function Reservas() {
   // solo se refleja para no confundir al que carga el form.
   const [bonificada, setBonificada] = useState(false)
 
-  // Alta de cliente nuevo sin salir del modal de reserva (sep 2026): el
-  // cliente se crea de una, apenas se toca "Guardar cliente" — no se difiere
-  // al submit de la reserva. Así, si después se cancela la reserva, el
-  // cliente igual quedó guardado en la base (no depende del resto del form).
-  const [showNuevoCliente, setShowNuevoCliente] = useState(false)
-  const [nuevoClienteNombre, setNuevoClienteNombre] = useState('')
-  const [nuevoClienteTelefono, setNuevoClienteTelefono] = useState('')
-  const [nuevoClienteMail, setNuevoClienteMail] = useState('')
-  const [nuevoClienteCuit, setNuevoClienteCuit] = useState('')
-  const [savingNuevoCliente, setSavingNuevoCliente] = useState(false)
-
-  const resetNuevoClienteForm = () => {
-    setShowNuevoCliente(false)
-    setNuevoClienteNombre('')
-    setNuevoClienteTelefono('')
-    setNuevoClienteMail('')
-    setNuevoClienteCuit('')
-  }
-
   const resetForm = () => {
     setClienteId('')
-    setClienteInputValue('')
-    setShowClienteDropdown(false)
     setUnidadId('')
     setTipoAlquiler('periodo')
     setFechaInicio('')
@@ -125,27 +103,6 @@ export default function Reservas() {
     setNotas('')
     setBloqueada(false)
     setBonificada(false)
-    resetNuevoClienteForm()
-  }
-
-  const handleGuardarClienteInline = async () => {
-    if (!nuevoClienteNombre.trim()) return
-    setSavingNuevoCliente(true)
-    try {
-      const nuevo = await createCliente({
-        nombre: nuevoClienteNombre.trim().replace(/[´`]/g, "'").toUpperCase(),
-        telefono: nuevoClienteTelefono || null,
-        mail: nuevoClienteMail || null,
-        cuit: nuevoClienteCuit || null,
-      })
-      setClienteId(nuevo.id)
-      setClienteInputValue(nuevo.nombre)
-      resetNuevoClienteForm()
-    } catch (err) {
-      await alert('No se pudo crear el cliente.')
-    } finally {
-      setSavingNuevoCliente(false)
-    }
   }
 
   const handleOpenCreate = () => {
@@ -156,10 +113,7 @@ export default function Reservas() {
 
   const handleOpenEdit = (res) => {
     setEditingReserva(res)
-    resetNuevoClienteForm()
     setClienteId(res.cliente_id || '')
-    setClienteInputValue(res.clientes?.nombre || '')
-    setShowClienteDropdown(false)
     setUnidadId(res.unidad_id || '')
     setTipoAlquiler(res.tipo_alquiler || 'periodo')
     setFechaInicio(res.fecha_inicio || '')
@@ -193,11 +147,8 @@ export default function Reservas() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    // El <select> de cliente se reemplaza por el form inline mientras se está
-    // creando uno nuevo (sin `required` en el DOM en ese momento) — se valida
-    // acá para no dejar pasar una reserva sin cliente_id.
-    if (showNuevoCliente || !clienteId) {
-      await alert('Seleccioná un cliente o guardá el cliente nuevo antes de continuar.')
+    if (!clienteId) {
+      await alert('Seleccioná un cliente antes de continuar.')
       return
     }
     // El date picker (Tarea 7) reemplazó los <input type="date" required> —
@@ -389,14 +340,6 @@ export default function Reservas() {
 
   const headers = ['Llegada', 'Cliente', 'Unidad', 'Monto Total', 'Saldo', 'Estado', 'Origen', 'Acciones']
 
-  // Combobox de cliente: filtra por nombre a medida que se escribe, sin
-  // acentos/mayúsculas — "+ Añadir cliente nuevo" siempre queda al final.
-  const clientesFiltrados = useMemo(() => {
-    const term = normalizeText(clienteInputValue).trim()
-    const lista = term ? clientes.filter((c) => normalizeText(c.nombre).includes(term)) : clientes
-    return lista.slice(0, 8)
-  }, [clientes, clienteInputValue])
-
   // Unidades con una reserva de TEMPORADA activa: quedan tomadas para toda la
   // temporada sin importar qué fecha se elija, así que ni siquiera aparecen
   // como opción para una reserva nueva de período/día — evita un doble
@@ -440,6 +383,20 @@ export default function Reservas() {
   )
 
   const conflictoFechas = unidadId ? unidadTieneConflictoDeFechas(unidadId) : false
+
+  const GRUPO_UNIDAD = { carpa: 'Carpas', sombrilla: 'Sombrillas', cabina: 'Cabinas', locker: 'Lockers' }
+  const opcionesUnidad = useMemo(
+    () =>
+      [...unidadesDisponibles]
+        .sort((a, b) => (GRUPO_UNIDAD[a.tipo] || a.tipo).localeCompare(GRUPO_UNIDAD[b.tipo] || b.tipo) || a.numero - b.numero)
+        .map((u) => ({
+          value: u.id,
+          group: GRUPO_UNIDAD[u.tipo] || u.tipo,
+          label: `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}${u.id === unidadId && conflictoFechas ? ' (ocupada esas fechas)' : ''}`,
+        })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [unidadesDisponibles, unidadId, conflictoFechas],
+  )
 
   // Días ya ocupados por otra reserva período/día de la unidad elegida, para
   // tacharlos/bloquearlos en el date picker del form (Tarea 7) — misma regla
@@ -722,113 +679,10 @@ export default function Reservas() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Cliente</label>
-            {!showNuevoCliente ? (
-              <div className="relative">
-                <input
-                  type="text"
-                  autoComplete="off"
-                  placeholder="Buscar cliente por nombre..."
-                  value={clienteInputValue}
-                  onChange={(e) => {
-                    setClienteInputValue(e.target.value)
-                    setClienteId('')
-                    setShowClienteDropdown(true)
-                  }}
-                  onFocus={(e) => {
-                    setShowClienteDropdown(true)
-                    e.target.select()
-                  }}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none uppercase font-bold"
-                />
-                {showClienteDropdown && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowClienteDropdown(false)} />
-                    <div className="absolute left-0 right-0 mt-2 glass-card rounded-xl overflow-hidden z-50 max-h-64 overflow-y-auto">
-                      {clientesFiltrados.length === 0 ? (
-                        <p className="px-4 py-3 text-xs text-gray-500 uppercase tracking-widest">Sin resultados</p>
-                      ) : (
-                        clientesFiltrados.map((c) => (
-                          <button
-                            key={c.id}
-                            type="button"
-                            onClick={() => {
-                              setClienteId(c.id)
-                              setClienteInputValue(c.nombre)
-                              setShowClienteDropdown(false)
-                            }}
-                            className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-white/10 transition-all uppercase font-bold"
-                          >
-                            {c.nombre}
-                          </button>
-                        ))
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowNuevoCliente(true)
-                          setShowClienteDropdown(false)
-                        }}
-                        className="w-full text-left px-4 py-2.5 text-sm text-[#FDE047] hover:bg-white/10 transition-all font-bold border-t border-white/10 flex items-center gap-2"
-                      >
-                        <UserPlus size={14} /> Añadir cliente nuevo
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-3 p-4 bg-white/5 border border-[#FDE047]/30 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-[#FDE047] uppercase tracking-widest">Cliente Nuevo</p>
-                  <button
-                    type="button"
-                    onClick={resetNuevoClienteForm}
-                    className="text-gray-500 hover:text-white transition-all"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  required
-                  placeholder="Nombre completo"
-                  value={nuevoClienteNombre}
-                  onChange={(e) => setNuevoClienteNombre(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#FDE047]/50 outline-none uppercase font-bold"
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="tel"
-                    placeholder="Teléfono"
-                    value={nuevoClienteTelefono}
-                    onChange={(e) => setNuevoClienteTelefono(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold"
-                  />
-                  <input
-                    type="text"
-                    placeholder="CUIT / DNI"
-                    value={nuevoClienteCuit}
-                    onChange={(e) => setNuevoClienteCuit(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold"
-                  />
-                </div>
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={nuevoClienteMail}
-                  onChange={(e) => setNuevoClienteMail(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:border-[#FDE047]/50 outline-none lowercase font-bold"
-                />
-                <button
-                  type="button"
-                  onClick={handleGuardarClienteInline}
-                  disabled={!nuevoClienteNombre.trim() || savingNuevoCliente}
-                  className="w-full py-2.5 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-widest text-[10px] rounded-xl transition-all flex items-center justify-center gap-2"
-                >
-                  <UserPlus size={14} /> {savingNuevoCliente ? 'Guardando...' : 'Guardar Cliente'}
-                </button>
-              </div>
-            )}
+            <ClienteSelector
+              value={clienteId}
+              onChange={(id) => setClienteId(id)}
+            />
           </div>
 
           {editingReserva && (
@@ -852,23 +706,15 @@ export default function Reservas() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unidad</label>
-              <select
-                required
-                disabled={bloqueada}
+              <BrandSelect
                 value={unidadId}
-                onChange={(e) => setUnidadId(e.target.value)}
-                className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white text-sm outline-none uppercase font-bold disabled:opacity-50 disabled:cursor-not-allowed ${
-                  conflictoFechas ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-[#FDE047]/50'
-                }`}
-              >
-                <option value="" disabled>Seleccionar...</option>
-                {unidadesDisponibles.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
-                    {u.id === unidadId && conflictoFechas ? ' (ocupada esas fechas)' : ''}
-                  </option>
-                ))}
-              </select>
+                onChange={setUnidadId}
+                disabled={bloqueada}
+                options={opcionesUnidad}
+                invalid={conflictoFechas}
+                searchable
+                searchPlaceholder="Buscar unidad..."
+              />
               {/* Unidades con temporada activa no aparecen en la lista; las de
                   período/día que se solapan con las fechas elegidas quedan
                   afuera también, salvo la ya seleccionada (se avisa acá). */}
@@ -1009,6 +855,13 @@ export default function Reservas() {
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none resize-none"
             />
           </div>
+
+          {editingReserva && (
+            <div>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Historial</p>
+              <Historial tipo="reserva" id={editingReserva.id} compact />
+            </div>
+          )}
 
           <button type="submit" className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl">
             {editingReserva ? 'Guardar Cambios' : 'Confirmar Operación'}

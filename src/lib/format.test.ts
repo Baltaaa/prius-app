@@ -77,11 +77,11 @@ describe('formatDNI / formatCUIT', () => {
 })
 
 describe('formatComprobante', () => {
-  it('largo con ceros a la izquierda', () => {
-    expect(formatComprobante('factura_b', 1, 727)).toBe('FB 00001-00000727')
+  it('sigla-numero, sin punto de venta ni ceros a la izquierda', () => {
+    expect(formatComprobante('factura_b', 727)).toBe('FB-727')
   })
-  it('corto', () => {
-    expect(formatComprobante('factura_b', 1, 727, true)).toBe('FB 727')
+  it('recibo b', () => {
+    expect(formatComprobante('recibo_b', 3663)).toBe('RB-3663')
   })
 })
 

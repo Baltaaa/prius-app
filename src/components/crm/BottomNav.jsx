@@ -67,9 +67,16 @@ export default function BottomNav() {
         ))}
         <button
           onClick={() => setShowMore(true)}
-          className="flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[9px] font-bold uppercase tracking-wider text-gray-500 transition-all"
+          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[9px] font-bold uppercase tracking-wider text-gray-500 transition-all"
         >
-          <MoreHorizontal size={20} />
+          <span className="relative">
+            <MoreHorizontal size={20} />
+            {notificationsCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#FDE047] text-black text-[8px] font-bold flex items-center justify-center">
+                {notificationsCount > 9 ? '9+' : notificationsCount}
+              </span>
+            )}
+          </span>
           Más
         </button>
       </nav>

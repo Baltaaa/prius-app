@@ -24,7 +24,8 @@ const RESERVA_SELECT = `
   *,
   clientes!reservas_cliente_id_fkey (id, nombre, apellido, telefono, cuit, mail, condicion_iva, razon_social),
   unidades (id, numero, tipo, zona),
-  reserva_clientes (cliente_id, clientes (id, nombre))
+  reserva_clientes (cliente_id, clientes (id, nombre)),
+  reserva_grupos (id, cliente_id, temporada, precio_total, notas)
 `
 
 const DataContext = createContext(null)
@@ -137,9 +138,15 @@ export function DataProvider({ children }) {
   // de la reserva ya lo recalcula el trigger fn_pago_actualiza_saldo — este
   // fetch es solo para listar el historial (Clientes, Reservas, Comprobantes).
   const fetchPagos = useCallback(async () => {
+    // comprobantes!comprobantes_pago_id_fkey: un pago puede tener VARIOS
+    // comprobantes (oct 2026, caso D'Agostino con 5) — se embebe como array
+    // vía ese FK, no el singular `comprobantes(...)` de antes (que seguía
+    // pagos.comprobante_id, pensado solo para el flujo en vivo de un
+    // comprobante a la vez). PostgREST exige desambiguar: hay dos caminos
+    // posibles entre pagos y comprobantes.
     const { data } = await supabase
       .from('pagos')
-      .select('*, comprobantes(id, tipo, punto_venta, numero, fecha, estado)')
+      .select('*, comprobantes!comprobantes_pago_id_fkey(id, tipo, punto_venta, numero, fecha, estado, monto_total)')
       .order('created_at', { ascending: false })
     setPagos(data || [])
   }, [])
@@ -256,6 +263,26 @@ export function DataProvider({ children }) {
     setReservas((prev) => prev.map((r) => (r.id === id ? data[0] : r)))
     return data[0]
   }, [])
+
+  // Agrupa varias reservas del MISMO cliente bajo un precio total único (oct
+  // 2026, caso Ana Lescano: 3 períodos, un solo pactado). Crea la fila de
+  // reserva_grupos y apunta `grupo_id` en cada reserva — dos escrituras, no
+  // atómicas a nivel DB, mismo patrón ya usado en Clientes.jsx para alta de
+  // cliente + reserva de temporada. Si la segunda falla, el grupo queda
+  // creado sin reservas asociadas (huérfano, visible solo por auditoría
+  // manual) — aceptable para una acción administrativa de baja frecuencia.
+  const crearGrupoReservas = useCallback(async ({ clienteId, temporada, precioTotal, notas, reservaIds }) => {
+    const { data: grupo, error: errGrupo } = await supabase
+      .from('reserva_grupos')
+      .insert([{ cliente_id: clienteId, temporada: temporada || null, precio_total: precioTotal, notas: notas || null }])
+      .select()
+    if (errGrupo) throw errGrupo
+    const grupoId = grupo[0].id
+    const { error: errReservas } = await supabase.from('reservas').update({ grupo_id: grupoId }).in('id', reservaIds)
+    if (errReservas) throw errReservas
+    await fetchReservas()
+    return grupo[0]
+  }, [fetchReservas])
 
   const createCliente = useCallback(async (cliente) => {
     const { data, error } = await supabase.from('clientes').insert([cliente]).select()
@@ -389,6 +416,19 @@ export function DataProvider({ children }) {
     return data
   }, [fetchPagos])
 
+  // Ítem 4 (oct 2026): cargar/corregir monto y fecha de un comprobante ya
+  // existente. El RPC valida rol server-side (solo superadmin) y no toca
+  // caja_diaria ni pagos.monto — queda auditado solo en `eventos`, vía el
+  // trigger de fn_log_evento sobre `comprobantes`.
+  const editarComprobante = useCallback(async (comprobanteId, monto, fecha) => {
+    const { data, error } = await supabase.rpc('editar_comprobante', {
+      p_comprobante_id: comprobanteId, p_monto: monto, p_fecha: fecha || null,
+    })
+    if (error) throw error
+    await fetchPagos()
+    return data
+  }, [fetchPagos])
+
   // Update reactivo de un lead (estado: nuevo -> contactado -> descartado, o
   // notas_crm). Optimista; Realtime sobre `leads` concilia el resto.
   const updateLead = useCallback(async (id, updates) => {
@@ -404,19 +444,19 @@ export function DataProvider({ children }) {
   const value = useMemo(() => ({
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
     eventos, leads, pagos, temporadas, temporadaActiva, loading, error,
-    createReserva, updateReserva, deleteReserva, cancelarReserva,
+    createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, registrarPago, anularPago, completarComprobante,
+    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas,
   }), [
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
     eventos, leads, pagos, temporadas, temporadaActiva, loading, error,
-    createReserva, updateReserva, deleteReserva, cancelarReserva,
+    createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, registrarPago, anularPago, completarComprobante,
+    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas,
   ])

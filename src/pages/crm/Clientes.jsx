@@ -4,15 +4,21 @@ import { useClientes } from '../../hooks/useClientes'
 import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji } from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
 import { cuitValido, parseDNI, parseUnidadQuery } from '../../lib/parse'
-import { coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus } from '../../lib/reservas'
+import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
+import {
+  coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus,
+  esGrupo, reservasDelGrupo, saldoGrupo, estadoPagoGrupo,
+} from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
 import Modal from '../../components/crm/Modal'
 import RegistrarPago from '../../components/crm/RegistrarPago'
 import DetallePago from '../../components/crm/DetallePago'
 import PagosGrid from '../../components/crm/PagosGrid'
+import Historial from '../../components/crm/Historial'
+import ScrollToTopButton from '../../components/crm/ScrollToTopButton'
 import MoneyInput from '../../components/inputs/MoneyInput'
 import TextInput from '../../components/inputs/TextInput'
 import PhoneInput from '../../components/inputs/PhoneInput'
@@ -20,9 +26,10 @@ import DniInput from '../../components/inputs/DniInput'
 import CuitInput from '../../components/inputs/CuitInput'
 import SelectChips from '../../components/inputs/SelectChips'
 import SearchInput from '../../components/inputs/SearchInput'
+import BrandSelect from '../../components/ui/BrandSelect'
 import StatusBadge from '../../components/crm/StatusBadge'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
-import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, Sun, CircleDollarSign } from 'lucide-react'
+import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, CircleDollarSign, Filter, Check } from 'lucide-react'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
 // reserva de período/día activa hoy — temporada actual, temporadas pasadas,
@@ -59,6 +66,15 @@ const unidadesDeReservas = (reservasCliente) => {
 
 const MAX_UNIDADES_VISIBLES = 3
 
+const FILTROS_ESTADO_CLIENTE = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'pagado', label: 'Pagado' },
+  { value: 'parcial', label: 'Seña parcial' },
+  { value: 'pendiente', label: 'Sin pago' },
+  { value: 'pendiente_confirmacion', label: 'Sin confirmar' },
+  { value: 'bonificada', label: 'Bonificada' },
+]
+
 // Reserva "de la temporada" para el badge único de la fila colapsada:
 // prioriza la de tipo_alquiler='temporada' activa (lo más común en este
 // directorio); si no hay, cae a la reserva activa más reciente de cualquier
@@ -86,12 +102,25 @@ const precioSinDefinir = (reservasCliente) => {
 
 export default function Clientes() {
   const { clientes, loading, createCliente, updateCliente, deleteCliente } = useClientes()
-  const { reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva } = useReservas()
+  const {
+    reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva, crearGrupoReservas,
+  } = useReservas()
   const { pagos: todosPagos } = usePagos() // sin reservaId: historial completo, filtrado acá por cliente
+
+  const GRUPO_UNIDAD_CLIENTES = { carpa: 'Carpas', sombrilla: 'Sombrillas', cabina: 'Cabinas', locker: 'Lockers' }
+  const opcionesUnidadTemporada = useMemo(
+    () =>
+      [...unidades]
+        .sort((a, b) => (GRUPO_UNIDAD_CLIENTES[a.tipo] || a.tipo).localeCompare(GRUPO_UNIDAD_CLIENTES[b.tipo] || b.tipo) || a.numero - b.numero)
+        .map((u) => ({ value: u.id, group: GRUPO_UNIDAD_CLIENTES[u.tipo] || u.tipo, label: `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}` })),
+    [unidades],
+  )
   const puedeBonificar = usePermiso('bonificar')
   const [searchParams, setSearchParams] = useSearchParams()
   const { alert } = useDialog()
   const [searchTerm, setSearchTerm] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState('todos')
+  const [showFiltros, setShowFiltros] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCliente, setEditingCliente] = useState(null)
   const [pagoCliente, setPagoCliente] = useState(null)
@@ -134,19 +163,16 @@ export default function Clientes() {
   // Clientes, no de Reservas, porque un "cliente de temporada" es un
   // registro en `reservas` con tipo_alquiler='temporada' vinculado a un
   // cliente_id — Reservas.jsx ahora es solo la cola de período/día y ese
-  // tipo se sacó a propósito de su selector. Dos puntos de entrada
-  // reutilizan los mismos campos: (1) checkbox opcional al crear un cliente
-  // nuevo, (2) botón "Agregar Temporada" en la fila expandida de uno ya
-  // existente (`temporadaTarget`).
+  // tipo se sacó a propósito de su selector. Único punto de entrada: checkbox
+  // opcional al crear un cliente nuevo (el botón "Agregar Temporada" para un
+  // cliente ya existente se sacó, oct 2026).
   const [agregarTemporadaNueva, setAgregarTemporadaNueva] = useState(false)
-  const [temporadaTarget, setTemporadaTarget] = useState(null) // cliente existente, o null
   const [tUnidadId, setTUnidadId] = useState('')
   const [tValorTotal, setTValorTotal] = useState(0)
   const [tNotas, setTNotas] = useState('')
   // Unidad bonificada (sep 2026): fuerza el precio a 0 y lo deshabilita — el
   // trigger fn_reserva_recalcula_saldo hace cumplir esto igual en la base.
   const [tBonificada, setTBonificada] = useState(false)
-  const [savingTemporada, setSavingTemporada] = useState(false)
 
   const resetTemporadaForm = () => {
     setTUnidadId('')
@@ -183,13 +209,14 @@ export default function Clientes() {
     setIsModalOpen(true)
   }
 
-  const requiereCuit = condicionIva === 'responsable_inscripto' || condicionIva === 'exento'
-  const cuitFormularioValido = !requiereCuit || (cuit.length === 11 && cuitValido(cuit))
-  const razonSocialValida = condicionIva !== 'responsable_inscripto' || (razonSocial.trim().length >= 2 && razonSocial.trim().length <= 120)
+  const requiereCuit = requiereCuitClienteForm(condicionIva)
+  const clienteFormErrors = validarClienteForm({ nombre, telefono, condicionIva, cuit, mail }, razonSocial)
+  const cuitFormularioValido = !clienteFormErrors.cuit
+  const razonSocialValida = !clienteFormErrors.razonSocial
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!cuitFormularioValido || !razonSocialValida) return
+    if (Object.keys(clienteFormErrors).length > 0) return
     const payload = {
       nombre: nombre.toUpperCase(), telefono, dni: dni || null, cuit: cuit || null,
       condicion_iva: condicionIva, razon_social: razonSocial || null, mail, notas,
@@ -220,34 +247,49 @@ export default function Clientes() {
     }
   }
 
-  // Alta de temporada para un cliente YA existente, desde la fila expandida.
-  const handleSubmitTemporada = async (e) => {
-    e.preventDefault()
-    if (!temporadaTarget || !tUnidadId) return
-    setSavingTemporada(true)
-    try {
-      await createReserva({
-        cliente_id: temporadaTarget.id,
-        unidad_id: tUnidadId,
-        // temporada / temporada_id: los asigna solo el trigger
-        // fn_reserva_asigna_temporada (Frente 2), no se mandan a mano.
-        tipo_alquiler: 'temporada',
-        estado: 'activa',
-        origen: 'manual',
-        valor_total: tBonificada ? 0 : Number(tValorTotal || 0),
-        bonificada: tBonificada,
-        notas: tNotas,
-      })
-      setTemporadaTarget(null)
-      resetTemporadaForm()
-    } catch (err) {
-      await alert('No se pudo crear la reserva de temporada.')
-    } finally {
-      setSavingTemporada(false)
-    }
+  const [clienteAEliminar, setClienteAEliminar] = useState(null)
+
+  // Agrupar reservas sueltas bajo un precio unificado (oct 2026, caso Ana
+  // Lescano) — ver crearGrupoReservas en DataProvider y lib/reservas.js.
+  const [agruparCliente, setAgruparCliente] = useState(null) // cliente, o null
+  const [agruparSeleccion, setAgruparSeleccion] = useState(new Set())
+  const [agruparPrecioTotal, setAgruparPrecioTotal] = useState(0)
+  const [agruparTemporada, setAgruparTemporada] = useState('')
+  const [savingGrupo, setSavingGrupo] = useState(false)
+
+  const handleAbrirAgrupar = (cliente) => {
+    setAgruparCliente(cliente)
+    setAgruparSeleccion(new Set())
+    setAgruparPrecioTotal(0)
+    setAgruparTemporada(temporadaActiva?.nombre || '')
   }
 
-  const [clienteAEliminar, setClienteAEliminar] = useState(null)
+  const handleToggleSeleccionGrupo = (reservaId) => {
+    setAgruparSeleccion((prev) => {
+      const next = new Set(prev)
+      if (next.has(reservaId)) next.delete(reservaId)
+      else next.add(reservaId)
+      return next
+    })
+  }
+
+  const handleCrearGrupo = async () => {
+    if (!agruparCliente || agruparSeleccion.size < 2 || !agruparPrecioTotal) return
+    setSavingGrupo(true)
+    try {
+      await crearGrupoReservas({
+        clienteId: agruparCliente.id,
+        temporada: agruparTemporada,
+        precioTotal: Number(agruparPrecioTotal),
+        reservaIds: Array.from(agruparSeleccion),
+      })
+      setAgruparCliente(null)
+    } catch (err) {
+      await alert(err.message || 'No se pudo agrupar las reservas.')
+    } finally {
+      setSavingGrupo(false)
+    }
+  }
 
   const handleConfirmDeleteCliente = async () => {
     if (!clienteAEliminar) return
@@ -294,8 +336,7 @@ export default function Clientes() {
   // Deep-link desde "Asignar cliente de temporada" en el modal de unidad del
   // Plano: /app/clientes?unidad=<uuid>&tipo=temporada — abre el alta de
   // cliente nuevo con la unidad ya precargada en el form de temporada. Solo
-  // arma un cliente NUEVO (el alta de temporada para un cliente existente ya
-  // tiene su propio flujo, el botón "Agregar Temporada" de la fila expandida).
+  // arma un cliente NUEVO.
   useEffect(() => {
     const unidad = searchParams.get('unidad')
     if (!unidad || searchParams.get('id') || loading) return
@@ -347,6 +388,22 @@ export default function Clientes() {
     return map
   }, [todosPagos])
 
+  // Filtro por estado (badge): mismo criterio que el badge del header de cada
+  // fila — un grupo con precio unificado manda por sobre cualquier período
+  // suelto, igual que en el render.
+  const clientesVisibles = useMemo(() => {
+    if (filtroEstado === 'todos') return filteredClientes
+    return filteredClientes.filter((cliente) => {
+      const reservasCliente = reservasPorCliente[cliente.id] || []
+      const grupo = reservasCliente.find((r) => esGrupo(r) && r.estado !== 'cancelada')
+      if (grupo) {
+        return estadoPagoGrupo(saldoGrupo(grupo, reservas, pagosPorReserva), grupo.reserva_grupos) === filtroEstado
+      }
+      const badge = reservaActivaDeTemporada(reservasCliente)
+      return badge ? estadoBadgeStatus(badge) === filtroEstado : false
+    })
+  }, [filteredClientes, filtroEstado, reservasPorCliente, reservas, pagosPorReserva])
+
   // Saldo total por cliente: SIEMPRE derivado de estado_pago + pagos reales
   // (saldoNumerico), nunca del campo suelto `reserva.saldo` — para temporada
   // migrada del excel histórico ese campo quedó siempre vacío/"$-", no es un
@@ -357,9 +414,21 @@ export default function Clientes() {
   // "no sabemos cuánto" daría un total falso.
   const saldoPorCliente = useMemo(() => {
     const map = {}
+    const gruposContados = new Set()
     for (const r of reservas) {
       if (r.estado === 'cancelada' || !r.cliente_id) continue
       const entry = (map[r.cliente_id] ||= { total: 0, sinVerificar: false })
+      // Una reserva agrupada (precio unificado, ver lib/reservas.js) no suma
+      // su propio saldo individual — el grupo entero cuenta UNA sola vez,
+      // contra precio_total, nunca contra valor_total de cada período suelto.
+      if (esGrupo(r)) {
+        if (gruposContados.has(r.grupo_id)) continue
+        gruposContados.add(r.grupo_id)
+        const saldo = saldoGrupo(r, reservas, pagosPorReserva)
+        if (saldo === null) entry.sinVerificar = true
+        else entry.total += saldo
+        continue
+      }
       const saldo = saldoNumerico(r, pagosPorReserva[r.id] || [])
       if (saldo === null) entry.sinVerificar = true
       else entry.total += saldo
@@ -403,6 +472,31 @@ export default function Clientes() {
           className="flex-1 max-w-md"
           inputClassName="focus:border-cyan-400/50 py-3"
         />
+        <div className="relative">
+          <button
+            onClick={() => setShowFiltros((v) => !v)}
+            className={`glass-card px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-[#FDE047]' : 'text-gray-400 hover:text-white'}`}
+          >
+            <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
+          </button>
+          {showFiltros && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowFiltros(false)} />
+              <div className="absolute left-0 mt-2 w-48 glass-card rounded-xl overflow-hidden z-50 p-3">
+                {FILTROS_ESTADO_CLIENTE.map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => { setFiltroEstado(f.value); setShowFiltros(false) }}
+                    className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/10 flex items-center justify-between rounded-lg"
+                  >
+                    {f.label}
+                    {filtroEstado === f.value && <Check size={14} className="text-[#FDE047]" />}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
         <button
           onClick={handleOpenCreate}
           className="sm:ml-auto bg-[#FDE047] hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
@@ -412,13 +506,13 @@ export default function Clientes() {
       </div>
 
       {/* Directorio: filas-tarjeta expandibles, NO una tabla */}
-      {filteredClientes.length === 0 ? (
+      {clientesVisibles.length === 0 ? (
         <div className="p-12 text-center text-sm tracking-wider text-gray-500 glass-card rounded-xl">
           No se encontraron clientes.
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredClientes.map((cliente) => {
+          {clientesVisibles.map((cliente) => {
             const reservasCliente = reservasPorCliente[cliente.id] || []
             const saldoInfo = saldoPorCliente[cliente.id] || { total: 0, sinVerificar: false }
             const isExpanded = expandedId === cliente.id
@@ -426,16 +520,41 @@ export default function Clientes() {
               ...reservasCliente,
               ...(reservasComoCoSocioPorCliente[cliente.id] || []),
             ])
-            const reservaBadge = reservaActivaDeTemporada(reservasCliente)
-            const sinPrecio = precioSinDefinir(reservasCliente)
+            // Un grupo con precio unificado (Ana Lescano) manda por sobre
+            // cualquier período suelto para el badge/saldo del header — es la
+            // imagen más completa del cliente.
+            const reservaGrupoCliente = reservasCliente.find((r) => esGrupo(r) && r.estado !== 'cancelada')
+            const reservaBadge = reservaGrupoCliente || reservaActivaDeTemporada(reservasCliente)
+            const sinPrecio = !reservaGrupoCliente && precioSinDefinir(reservasCliente)
             // Reservas sobre las que tiene sentido ofrecer "Registrar pago"
             // desde acá — las bonificadas nunca admiten pagos (bloqueado a
             // nivel base), así que quedan afuera de las opciones del modal.
             const reservasPagables = reservasCliente.filter((r) => r.estado !== 'cancelada' && !r.bonificada)
+            const badgeStatus = reservaGrupoCliente
+              ? estadoPagoGrupo(saldoGrupo(reservaGrupoCliente, reservas, pagosPorReserva), reservaGrupoCliente.reserva_grupos)
+              : (reservaBadge ? estadoBadgeStatus(reservaBadge) : null)
             // Exception del saldo "Monto nulo" (Tarea 3.2): si la reserva que
             // manda el badge del header ya está pagada o bonificada, el saldo
             // agregado en $0 es real (saldado), no un monto sin verificar.
-            const saldoHeaderSaldado = reservaBadge && (reservaBadge.estado_pago === 'pagado' || reservaBadge.bonificada)
+            const saldoHeaderSaldado = reservaGrupoCliente
+              ? badgeStatus === 'pagado'
+              : reservaBadge && (reservaBadge.estado_pago === 'pagado' || reservaBadge.bonificada)
+
+            // Reservas con precio unificado (ver lib/reservas.js) se sacan de
+            // la lista suelta y se agrupan por grupo_id — cada grupo renderiza
+            // UN solo bloque (precio_total/pagado/saldo arriba, períodos y
+            // pagos abajo) en vez de una fila + PagosGrid por período.
+            const reservasSueltas = reservasCliente.filter((r) => !r.grupo_id)
+            // Ítem 4: cuántos comprobantes de este cliente todavía no tienen
+            // monto cargado (muchos vienen así de la migración del Excel).
+            const comprobantesPendientesCliente = todosPagos
+              .filter((p) => p.cliente_id === cliente.id)
+              .flatMap((p) => p.comprobantes || [])
+              .filter((c) => c.monto_total == null).length
+            const gruposCliente = {}
+            for (const r of reservasCliente) {
+              if (r.grupo_id) (gruposCliente[r.grupo_id] ||= []).push(r)
+            }
 
             return (
               <div
@@ -490,7 +609,7 @@ export default function Clientes() {
                   </div>
 
                   <div className="flex items-center gap-3 sm:contents">
-                    {reservaBadge && <StatusBadge status={estadoBadgeStatus(reservaBadge)} />}
+                    {badgeStatus && <StatusBadge status={badgeStatus} />}
                     <div className="flex-1" />
                     {/* Columna fija: siempre a la misma distancia del borde,
                         sin importar el largo de unidad/badge de cada fila. */}
@@ -561,28 +680,114 @@ export default function Clientes() {
                       )}
                     </div>
 
-                    {/* Reservas asociadas: históricas y actuales, cualquier tipo */}
+                    {/* Grupos con precio unificado: un bloque por grupo,
+                        arriba precio_total/pagado/saldo/estado, abajo cada
+                        período y la lista de pagos con su comprobante — ver
+                        CLAUDE.md / caso Ana Lescano. */}
+                    {Object.entries(gruposCliente).map(([grupoId, reservasGrupo]) => {
+                      const grupo = reservasGrupo[0].reserva_grupos
+                      const saldo = saldoGrupo(reservasGrupo[0], reservas, pagosPorReserva)
+                      const estado = estadoPagoGrupo(saldo, grupo)
+                      const pagoGrupo = reservasGrupo.flatMap((r) => (pagosPorReserva[r.id] || []).map((p) => ({ ...p, __reserva: r })))
+                        .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
+                      const pagado = Math.max(Number(grupo.precio_total || 0) - (saldo ?? 0), 0)
+                      const primeraReservaActiva = reservasGrupo.find((r) => r.estado !== 'cancelada') || reservasGrupo[0]
+                      return (
+                        <div key={grupoId} className="px-4 py-4 bg-white/5 border border-cyan-400/20 rounded-xl space-y-4">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">
+                              Reserva con precio unificado{grupo.temporada ? ` · ${grupo.temporada}` : ''}
+                            </p>
+                            {estado && <StatusBadge status={estado} />}
+                          </div>
+                          <div className="grid grid-cols-3 gap-4 text-xs">
+                            <div>
+                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Precio total</p>
+                              <p className="text-sm font-bold text-white mt-1">{formatPesosVisible(grupo.precio_total)}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Pagado</p>
+                              <p className="text-sm font-bold text-green-400 mt-1">{formatPesosVisible(pagado)}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Saldo</p>
+                              <p className={`text-sm font-bold mt-1 ${saldo === null ? 'text-red-400' : saldo > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                                {saldo === null ? 'Monto nulo' : saldo > 0 ? formatPesosVisible(saldo) : 'Unidad saldada'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Períodos</p>
+                            {reservasGrupo.map((r) => (
+                              <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-300">
+                                <span>{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</span>
+                                <span className="text-gray-500">
+                                  {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
+                                </span>
+                                {r.estado === 'cancelada' && <span className="text-red-400 font-bold uppercase text-[10px]">Cancelada</span>}
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Pagos</p>
+                              <button
+                                type="button"
+                                onClick={() => setPagoCelda({ reserva: { ...primeraReservaActiva, clientes: cliente }, pago: null })}
+                                className="text-[10px] font-bold uppercase tracking-widest text-green-400 hover:text-green-300 transition-all"
+                              >
+                                + Cargar pago
+                              </button>
+                            </div>
+                            {pagoGrupo.length === 0 ? (
+                              <p className="text-xs text-gray-500">Sin pagos registrados.</p>
+                            ) : (
+                              pagoGrupo.map((p) => (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => setPagoCelda({ reserva: { ...p.__reserva, clientes: cliente }, pago: p })}
+                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs ${
+                                    p.estado === 'anulado' ? 'bg-white/5 text-gray-600 line-through' : 'bg-white/5 text-white hover:bg-white/10'
+                                  }`}
+                                >
+                                  <span>{formatFecha(p.fecha)}</span>
+                                  <span className="font-bold">{p.monto == null ? 'Monto nulo' : formatPesosVisible(p.monto)}</span>
+                                  <span className="text-gray-500">
+                                    {p.comprobantes?.length > 0
+                                      ? p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
+                                      : 'Sin comprobante'}
+                                  </span>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {/* Reservas sueltas: históricas y actuales, cualquier tipo */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                          Reservas ({reservasCliente.length})
+                          Reservas ({reservasSueltas.length})
                         </p>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            resetTemporadaForm()
-                            setTemporadaTarget(cliente)
-                          }}
-                          className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-all"
-                        >
-                          <Sun size={13} /> Agregar Temporada
-                        </button>
+                        {reservasSueltas.filter((r) => r.estado !== 'cancelada').length >= 2 && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleAbrirAgrupar(cliente) }}
+                            className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-all"
+                          >
+                            Agrupar reservas
+                          </button>
+                        )}
                       </div>
-                      {reservasCliente.length === 0 ? (
-                        <p className="text-xs text-gray-500 uppercase tracking-widest">Sin reservas registradas.</p>
+                      {reservasSueltas.length === 0 ? (
+                        <p className="text-xs text-gray-500 uppercase tracking-widest">Sin reservas sueltas.</p>
                       ) : (
                         <div className="space-y-2">
-                          {reservasCliente.map((r) => {
+                          {reservasSueltas.map((r) => {
                             const socios = coSocios(r)
                             const fechas =
                               r.tipo_alquiler === 'temporada'
@@ -641,14 +846,21 @@ export default function Clientes() {
                         reserva, no del cliente). Reemplaza la lista plana de
                         historial que había antes. */}
                     <div>
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">
-                        Pagos por Reserva
-                      </p>
-                      {reservasCliente.length === 0 ? (
-                        <p className="text-xs text-gray-500 uppercase tracking-widest">Sin reservas — nada para cobrar todavía.</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                          Pagos por Reserva
+                        </p>
+                        {comprobantesPendientesCliente > 0 && (
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-red-400">
+                            {comprobantesPendientesCliente} comprobante{comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
+                          </span>
+                        )}
+                      </div>
+                      {reservasSueltas.length === 0 ? (
+                        <p className="text-xs text-gray-500 uppercase tracking-widest">Sin reservas sueltas — nada para cobrar acá (ver pagos del grupo arriba).</p>
                       ) : (
                         <div className="space-y-4">
-                          {reservasCliente.map((r) => (
+                          {reservasSueltas.map((r) => (
                             <PagosGrid
                               key={r.id}
                               reserva={r}
@@ -664,6 +876,13 @@ export default function Clientes() {
                           ))}
                         </div>
                       )}
+                    </div>
+
+                    {/* Historial del cliente — mismo componente que la
+                        unidad del Plano y el detalle de reserva (ítem 2). */}
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Historial</p>
+                      <Historial tipo="cliente" id={cliente.id} compact />
                     </div>
                   </div>
                 )}
@@ -694,7 +913,10 @@ export default function Clientes() {
             <DniInput label="DNI (opcional)" value={dni} onChange={setDni} />
           </div>
 
-          <TextInput label="Email" type="email" value={mail} onChange={(v) => setMail(v.toLowerCase())} placeholder="cliente@email.com" />
+          <TextInput
+            label="Email" type="email" value={mail} onChange={(v) => setMail(v.toLowerCase())}
+            placeholder="cliente@email.com" error={mail && clienteFormErrors.mail ? clienteFormErrors.mail : undefined}
+          />
 
           <SelectChips
             label="Condición IVA"
@@ -759,15 +981,7 @@ export default function Clientes() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unidad</label>
-                      <select
-                        required={agregarTemporadaNueva}
-                        value={tUnidadId}
-                        onChange={(e) => setTUnidadId(e.target.value)}
-                        className={`${inputClass} uppercase`}
-                      >
-                        <option value="" disabled>Seleccionar...</option>
-                        {unidades.map((u) => <option key={u.id} value={u.id}>{unidadEmoji(u.tipo)} {u.tipo} #{u.numero}</option>)}
-                      </select>
+                      <BrandSelect value={tUnidadId} onChange={setTUnidadId} options={opcionesUnidadTemporada} />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Temporada</label>
@@ -815,66 +1029,6 @@ export default function Clientes() {
             className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
-          </button>
-        </form>
-      </Modal>
-
-      {/* Alta de temporada para un cliente YA existente (botón "Agregar
-          Temporada" en la fila expandida) — mismos campos que arriba. */}
-      <Modal
-        isOpen={!!temporadaTarget}
-        onClose={() => setTemporadaTarget(null)}
-        title={`Nueva Temporada — ${temporadaTarget?.nombre || ''}`}
-      >
-        <form onSubmit={handleSubmitTemporada} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unidad</label>
-              <select
-                required
-                value={tUnidadId}
-                onChange={(e) => setTUnidadId(e.target.value)}
-                className={`${inputClass} uppercase`}
-              >
-                <option value="" disabled>Seleccionar...</option>
-                {unidades.map((u) => <option key={u.id} value={u.id}>{unidadEmoji(u.tipo)} {u.tipo} #{u.numero}</option>)}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Temporada</label>
-              <p className={`${inputClass} text-gray-300`}>{temporadaActiva?.nombre || '—'}</p>
-            </div>
-          </div>
-          {puedeBonificar && (
-            <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-              <label htmlFor="temporada-existente-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
-                Unidad bonificada
-              </label>
-              <input
-                id="temporada-existente-bonificada"
-                type="checkbox"
-                checked={tBonificada}
-                onChange={(e) => setTBonificada(e.target.checked)}
-                className="accent-cyan-400 w-4 h-4 cursor-pointer"
-              />
-            </div>
-          )}
-          <MoneyInput
-            label="Monto Total"
-            value={tBonificada ? 0 : tValorTotal}
-            onChange={setTValorTotal}
-            required={!tBonificada}
-            disabled={tBonificada}
-            max={100_000_000}
-            hint={tBonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
-          />
-          <TextInput as="textarea" label="Notas de la reserva" rows={3} value={tNotas} onChange={setTNotas} maxLength={500} />
-          <button
-            type="submit"
-            disabled={savingTemporada}
-            className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
-          >
-            {savingTemporada ? 'Guardando...' : 'Crear Reserva de Temporada'}
           </button>
         </form>
       </Modal>
@@ -934,6 +1088,49 @@ export default function Clientes() {
         reserva={pagoCelda?.reserva}
       />
 
+      {/* Agrupar reservas sueltas bajo un precio unificado (caso Ana Lescano) */}
+      <Modal
+        isOpen={!!agruparCliente}
+        onClose={() => setAgruparCliente(null)}
+        title={`Agrupar Reservas — ${agruparCliente?.nombre || ''}`}
+      >
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+              Elegí 2 o más períodos para unificar bajo un solo precio total
+            </p>
+            <div className="space-y-2">
+              {(reservasPorCliente[agruparCliente?.id] || [])
+                .filter((r) => !r.grupo_id && r.estado !== 'cancelada')
+                .map((r) => (
+                  <label key={r.id} className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl text-xs cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agruparSeleccion.has(r.id)}
+                      onChange={() => handleToggleSeleccionGrupo(r.id)}
+                      className="accent-cyan-400 w-4 h-4"
+                    />
+                    <span className="text-gray-300">
+                      {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero} ·{' '}
+                      {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
+                    </span>
+                  </label>
+                ))}
+            </div>
+          </div>
+          <MoneyInput label="Precio Total del Grupo" value={agruparPrecioTotal} onChange={setAgruparPrecioTotal} max={100_000_000} required />
+          <TextInput label="Temporada (opcional)" value={agruparTemporada} onChange={setAgruparTemporada} maxLength={40} />
+          <button
+            type="button"
+            disabled={agruparSeleccion.size < 2 || !agruparPrecioTotal || savingGrupo}
+            onClick={handleCrearGrupo}
+            className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+          >
+            {savingGrupo ? 'Agrupando...' : 'Agrupar y Definir Precio'}
+          </button>
+        </div>
+      </Modal>
+
       <ConfirmDeleteModal
         isOpen={!!clienteAEliminar}
         onClose={() => setClienteAEliminar(null)}
@@ -942,6 +1139,8 @@ export default function Clientes() {
         identificador={clienteAEliminar?.nombre || ''}
         detalle="Sus reservas no se borran: quedan sin cliente asociado."
       />
+
+      <ScrollToTopButton />
     </div>
   )
 }

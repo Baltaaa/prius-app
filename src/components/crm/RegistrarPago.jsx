@@ -10,6 +10,7 @@ import Modal from './Modal'
 import MoneyInput from '../inputs/MoneyInput'
 import IntegerInput from '../inputs/IntegerInput'
 import DateInput from '../inputs/DateInput'
+import BrandSelect from '../ui/BrandSelect'
 import { useDialog } from '../../context/DialogProvider'
 import { CheckCircle2, ChevronDown, Wallet } from 'lucide-react'
 
@@ -20,8 +21,6 @@ const chipClass = (active) =>
   `px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
     active ? 'bg-[#FDE047] text-black border-[#FDE047]' : 'bg-white/5 text-gray-300 border-white/10 hover:text-white'
   }`
-
-const LAST_PV_KEY = 'prius_ultimo_punto_venta'
 
 // Componente compartido de cobro (Tarea 4): Clientes, Reservas y el modal de
 // unidad del Plano abren este mismo bottom sheet/drawer para registrar un
@@ -45,10 +44,7 @@ export default function RegistrarPago({
 
   const [comprobanteAbierto, setComprobanteAbierto] = useState(false)
   const [comprobanteTipo, setComprobanteTipo] = useState('factura_b')
-  const [puntoVenta, setPuntoVenta] = useState(() => {
-    const saved = localStorage.getItem(LAST_PV_KEY)
-    return saved ? Number(saved) : null
-  })
+  const [puntoVenta, setPuntoVenta] = useState(1)
   const [numero, setNumero] = useState(null)
   const [fechaComprobante, setFechaComprobante] = useState(() => new Date().toISOString().split('T')[0])
   const [mismoComprobanteDe, setMismoComprobanteDe] = useState('')
@@ -77,6 +73,7 @@ export default function RegistrarPago({
     setConceptoTouched(false)
     setComprobanteAbierto(false)
     setComprobanteTipo(comprobanteTipoDefault(cliente?.condicion_iva))
+    setPuntoVenta(1)
     setNumero('')
     setFechaComprobante(new Date().toISOString().split('T')[0])
     setMismoComprobanteDe('')
@@ -147,7 +144,6 @@ export default function RegistrarPago({
         reservaId: reservaId || null, referencia, comprobante: construirComprobantePayload(),
         permitirExcedente, fecha: fechaPago,
       })
-      if (puntoVenta) localStorage.setItem(LAST_PV_KEY, String(puntoVenta))
       setExito({ monto, historico: esHistorico })
       onSuccess?.(pago)
     } catch (err) {
@@ -255,14 +251,17 @@ export default function RegistrarPago({
         {reservasOptions.length > 1 || allowSinReserva ? (
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Reserva</label>
-            <select value={reservaId} onChange={(e) => setReservaId(e.target.value)} className={`${inputClass} uppercase`}>
-              {allowSinReserva && <option value="" className="bg-[#0a0d14]">Sin reserva — cobro directo al cliente</option>}
-              {reservasOptions.map((r) => (
-                <option key={r.id} value={r.id} className="bg-[#0a0d14]">
-                  {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero} — saldo {formatPesos(r.saldo)}
-                </option>
-              ))}
-            </select>
+            <BrandSelect
+              value={reservaId}
+              onChange={setReservaId}
+              options={[
+                ...(allowSinReserva ? [{ value: '', label: 'Sin reserva — cobro directo al cliente' }] : []),
+                ...reservasOptions.map((r) => ({
+                  value: r.id,
+                  label: `${unidadEmoji(r.unidades?.tipo)} ${r.unidades?.tipo} #${r.unidades?.numero} — saldo ${formatPesos(r.saldo)}`,
+                })),
+              ]}
+            />
           </div>
         ) : reservaSeleccionada ? (
           <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
@@ -324,15 +323,11 @@ export default function RegistrarPago({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tipo</label>
-            <select
+            <BrandSelect
               value={tipoPago}
-              onChange={(e) => { setTipoPago(e.target.value); setTipoPagoTouched(true) }}
-              className={`${inputClass} uppercase`}
-            >
-              {Object.entries(TIPO_PAGO_LABEL).map(([value, label]) => (
-                <option key={value} value={value} className="bg-[#0a0d14]">{label}</option>
-              ))}
-            </select>
+              onChange={(v) => { setTipoPago(v); setTipoPagoTouched(true) }}
+              options={Object.entries(TIPO_PAGO_LABEL).map(([value, label]) => ({ value, label }))}
+            />
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Concepto</label>
@@ -360,18 +355,17 @@ export default function RegistrarPago({
               {pagosConComprobante.length > 0 && (
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mismo comprobante que otro pago</label>
-                  <select
+                  <BrandSelect
                     value={mismoComprobanteDe}
-                    onChange={(e) => setMismoComprobanteDe(e.target.value)}
-                    className={`${inputClass} uppercase`}
-                  >
-                    <option value="" className="bg-[#0a0d14]">No — es un comprobante nuevo</option>
-                    {pagosConComprobante.map((p) => (
-                      <option key={p.id} value={p.comprobante_id} className="bg-[#0a0d14]">
-                        Cuota {p.nro_cuota} — {formatPesos(p.monto)}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setMismoComprobanteDe}
+                    options={[
+                      { value: '', label: 'No — es un comprobante nuevo' },
+                      ...pagosConComprobante.map((p) => ({
+                        value: p.comprobante_id,
+                        label: `Cuota ${p.nro_cuota} — ${formatPesos(p.monto)}`,
+                      })),
+                    ]}
+                  />
                 </div>
               )}
               {!mismoComprobanteDe && (
