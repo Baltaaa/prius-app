@@ -4,6 +4,7 @@ import { useClientes } from '../../hooks/useClientes'
 import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
+import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
 import { cuitValido, parseDNI, parseUnidadQuery } from '../../lib/parse'
 import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
@@ -301,37 +302,41 @@ export default function Clientes() {
     }
   }
 
-  // Deep-link desde la búsqueda global del TopBar: /app/clientes?id=<uuid>
-  // abre directo la fila expandida de ese cliente (en vez de un modal) y la
-  // centra en el viewport — el directorio está ordenado alfabéticamente con
-  // cientos de clientes, así que la fila casi nunca está a la vista (bug
-  // detectado en auditoría: buscar "gloria bianco" navegaba a Clientes pero
-  // dejaba a Adriana Aguero arriba de todo, sin scrollear). El scroll va acá
-  // adentro, no en un efecto separado atado a `expandedId`: si el cliente
-  // buscado ya estaba expandido de una búsqueda anterior, `expandedId` no
-  // cambia de valor y un efecto con esa dependencia nunca se dispararía la
-  // segunda vez. setTimeout (no requestAnimationFrame: una pestaña sin foco
-  // puede pausarlo indefinidamente) espera al próximo tick, ya con la fila
-  // recién expandida pintada en el DOM.
-  useEffect(() => {
-    const id = searchParams.get('id')
-    if (!id || loading) return
-    const cliente = clientes.find((c) => c.id === id)
-    if (cliente) {
+  // Click manual en una fila (no deep-link): al expandir, centra la fila en
+  // el viewport con scroll suave — si el click la colapsa, no hay que
+  // scrollear a ningún lado. Misma carrera que el deep-link de abajo (el
+  // contenido expandido sigue creciendo unos ms por el fetch de pagos), pero
+  // acá sí vale la pena el 'smooth' porque la fila ya está a la vista o cerca
+  // — no es el salto a mitad de un directorio sin virtualizar.
+  const handleToggleExpand = (clienteId, wasExpanded) => {
+    setExpandedId(wasExpanded ? null : clienteId)
+    if (wasExpanded) return
+    setTimeout(() => {
+      document.querySelector(`[data-cliente-id="${clienteId}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 150)
+  }
+
+  // Deep-link vía linkToCliente() (Tarea 1, oct 2026): desde la búsqueda
+  // global del TopBar, Notificaciones, Historial, etc. — abre directo la
+  // fila expandida de ese cliente y la centra en el viewport (el directorio
+  // está ordenado alfabéticamente con cientos de clientes, así que la fila
+  // casi nunca está a la vista de entrada). Con `?pago=<uuid>` resalta esa
+  // cuota puntual en vez de la fila completa — así "Ver pago" desde
+  // Notificaciones cae exactamente en la celda referida, no solo en el
+  // cliente.
+  useDeepLinkTarget({
+    params: ['id', 'pago', 'reserva'],
+    ready: !loading,
+    resolve: ({ id, pago, reserva }) => {
+      const cliente = clientes.find((c) => c.id === id)
+      if (!cliente) return null
       setExpandedId(cliente.id)
-      // Directorio sin virtualizar (234 filas): expandir una fila más abajo
-      // en la lista dispara su propio contenido (reservas, PagosGrid con
-      // fetch de pagos) que sigue creciendo unos ms después del expand —
-      // un scrollIntoView smooth disparado antes de que asiente esa altura
-      // final termina a mitad de camino. 150ms de margen + salto directo
-      // (sin animación) evita esa carrera.
-      setTimeout(() => {
-        document.querySelector(`[data-cliente-id="${cliente.id}"]`)
-          ?.scrollIntoView({ behavior: 'auto', block: 'center' })
-      }, 150)
-    }
-    setSearchParams({}, { replace: true })
-  }, [searchParams, clientes, loading])
+      if (pago) return `pago-${pago}`
+      if (reserva) return `reserva-${reserva}`
+      return cliente.id
+    },
+  })
 
   // Deep-link desde "Asignar cliente de temporada" en el modal de unidad del
   // Plano: /app/clientes?unidad=<uuid>&tipo=temporada — abre el alta de
@@ -560,6 +565,7 @@ export default function Clientes() {
               <div
                 key={cliente.id}
                 data-cliente-id={cliente.id}
+                data-deeplink-id={cliente.id}
                 className={`glass-card rounded-xl overflow-hidden border transition-all ${isExpanded ? 'border-cyan-400/40' : 'border-white/10'}`}
               >
                 {/* Toda la caja es clickeable para expandir/colapsar. Mobile
@@ -569,7 +575,7 @@ export default function Clientes() {
                     hijos vuelvan a la misma fila flex-wrap de siempre, sin
                     duplicar el layout de desktop. */}
                 <div
-                  onClick={() => setExpandedId(isExpanded ? null : cliente.id)}
+                  onClick={() => handleToggleExpand(cliente.id, isExpanded)}
                   className="w-full text-left px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-6 gap-y-2 cursor-pointer hover:bg-white/5 transition-all"
                 >
                   <div className="flex items-center gap-3 sm:contents">
@@ -861,18 +867,19 @@ export default function Clientes() {
                       ) : (
                         <div className="space-y-4">
                           {reservasSueltas.map((r) => (
-                            <PagosGrid
-                              key={r.id}
-                              reserva={r}
-                              pagos={todosPagos.filter((p) => p.reserva_id === r.id)}
-                              onCellClick={(reserva, pago) =>
-                                setPagoCelda({ reserva: { ...reserva, clientes: cliente }, pago })
-                              }
-                              onDefinirPrecio={(reserva) => {
-                                setConfirmarValorTotal(0)
-                                setConfirmarReserva({ reserva, cliente })
-                              }}
-                            />
+                            <div key={r.id} data-deeplink-id={`reserva-${r.id}`}>
+                              <PagosGrid
+                                reserva={r}
+                                pagos={todosPagos.filter((p) => p.reserva_id === r.id)}
+                                onCellClick={(reserva, pago) =>
+                                  setPagoCelda({ reserva: { ...reserva, clientes: cliente }, pago })
+                                }
+                                onDefinirPrecio={(reserva) => {
+                                  setConfirmarValorTotal(0)
+                                  setConfirmarReserva({ reserva, cliente })
+                                }}
+                              />
+                            </div>
                           ))}
                         </div>
                       )}

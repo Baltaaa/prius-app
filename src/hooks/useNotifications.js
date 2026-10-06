@@ -34,6 +34,9 @@ export function useNotifications() {
       ...checkinsHoy.map((r) => ({
         id: `checkin-${r.id}`,
         reservaId: r.id,
+        clienteId: r.cliente_id,
+        unidadId: r.unidad_id,
+        tipoAlquiler: r.tipo_alquiler,
         type: 'checkin',
         urgente: true,
         titulo: r.clientes?.nombre || 'Cliente s/n',
@@ -42,6 +45,7 @@ export function useNotifications() {
       ...saldosPendientes.map((r) => ({
         id: `saldo-${r.id}`,
         reservaId: r.id,
+        clienteId: r.cliente_id,
         type: 'saldo',
         urgente: !!r.fecha_inicio && r.fecha_inicio <= todayStr,
         titulo: r.clientes?.nombre || 'Cliente s/n',

@@ -6,6 +6,7 @@ import {
 import { useData } from '../../context/DataProvider'
 import { useHistorial } from '../../hooks/useHistorial'
 import { formatFechaLarga, formatHora } from '../../lib/format'
+import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
 
 // Historial unificado (ítem 2, oct 2026): un solo componente para la Línea
 // de tiempo global (Actividad.jsx), la temporada de una unidad
@@ -85,10 +86,13 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
     const after = evento.datos?.after || {}
     const before = evento.datos?.before || {}
     const clienteId = after.cliente_id || before.cliente_id
-    if (evento.tabla === 'reservas') return navigate(`/app/reservas?id=${evento.registro_id}`)
-    if (evento.tabla === 'clientes') return navigate(`/app/clientes?id=${evento.registro_id}`)
-    if ((evento.tabla === 'pagos' || evento.tabla === 'comprobantes') && clienteId) {
-      return navigate(`/app/clientes?id=${clienteId}`)
+    if (evento.tabla === 'reservas') return navigate(linkToReserva(evento.registro_id))
+    if (evento.tabla === 'clientes') return navigate(linkToCliente(evento.registro_id))
+    if (evento.tabla === 'pagos' && clienteId) {
+      return navigate(linkToCliente(clienteId, { pagoId: evento.registro_id }))
+    }
+    if (evento.tabla === 'comprobantes' && clienteId) {
+      return navigate(linkToCliente(clienteId))
     }
   }
 

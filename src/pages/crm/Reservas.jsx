@@ -11,6 +11,8 @@ import { coSocios, estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } fro
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
+import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
+import { linkToCliente } from '../../lib/deepLinks'
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
 import RegistrarPago from '../../components/crm/RegistrarPago'
@@ -258,15 +260,27 @@ export default function Reservas() {
     }
   }
 
-  // Deep-link desde la búsqueda global del TopBar: /app/reservas?id=<uuid>
-  // abre directo el modal de edición de esa reserva.
-  useEffect(() => {
-    const id = searchParams.get('id')
-    if (!id || resLoading || cliLoading) return
-    const res = reservas.find((r) => r.id === id)
-    if (res) handleOpenEdit(res)
-    setSearchParams({}, { replace: true })
-  }, [searchParams, reservas, resLoading, cliLoading])
+  // Deep-link vía linkToReserva() (Tarea 1, oct 2026): abre directo el modal
+  // de edición de esa reserva — el modal mismo es el destino, no hace falta
+  // resaltar ninguna fila. Bug encontrado en la auditoría de navegación
+  // (Tarea 9): este modal solo sabe editar período/día (la sección "periodo"
+  // / "dia" del form); una reserva de temporada abierta acá se guardaría con
+  // fecha_inicio/fecha_fin en null. Temporada vive en Clientes — redirige
+  // para allá en vez de abrir el modal equivocado.
+  useDeepLinkTarget({
+    params: ['id'],
+    ready: !resLoading && !cliLoading,
+    resolve: ({ id }) => {
+      const res = reservas.find((r) => r.id === id)
+      if (!res) return null
+      if (res.tipo_alquiler === 'temporada') {
+        navigate(linkToCliente(res.cliente_id, { reservaId: id }))
+        return true
+      }
+      handleOpenEdit(res)
+      return true
+    },
+  })
 
   // Deep-link desde "Nueva reserva por período o día" en el modal de unidad
   // del Plano: /app/reservas?unidad=<uuid>&tipo=periodo|dia — abre el alta
@@ -502,7 +516,7 @@ export default function Reservas() {
             return (
               <tr
                 key={res.id}
-                onClick={() => navigate(`/app/clientes?id=${res.cliente_id}`)}
+                onClick={() => navigate(linkToCliente(res.cliente_id))}
                 className="hover:bg-white/5 transition-all group cursor-pointer"
               >
                 <td className="px-6 py-5 text-gray-300 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
@@ -591,7 +605,7 @@ export default function Reservas() {
         renderMobileCard={(res) => {
           if (res.tipo_alquiler === 'temporada') {
             return (
-              <div onClick={() => navigate(`/app/clientes?id=${res.cliente_id}`)} className="cursor-pointer -m-5 p-5">
+              <div onClick={() => navigate(linkToCliente(res.cliente_id))} className="cursor-pointer -m-5 p-5">
                 <div className="flex justify-between items-start gap-3">
                   <div className="min-w-0">
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>

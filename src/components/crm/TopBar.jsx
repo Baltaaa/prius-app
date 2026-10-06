@@ -8,6 +8,7 @@ import { useDebounced } from '../../hooks/useDebounced'
 import { unidadEmoji, normalizeText } from '../../lib/format'
 import { parseDNI, parseUnidadQuery } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
+import { linkToCliente, linkToReserva, linkToPlano } from '../../lib/deepLinks'
 import SearchInput from '../inputs/SearchInput'
 import {
   Search, Bell, User, LogOut, ChevronDown, X, Wallet, Calendar, AlertCircle,
@@ -154,12 +155,12 @@ export default function TopBar() {
   const closeSearch = () => setSearchValue('')
 
   const goToCliente = (cliente) => {
-    navigate(`/app/clientes?id=${cliente.id}`)
+    navigate(linkToCliente(cliente.id))
     closeSearch()
   }
 
   const goToReserva = (reserva) => {
-    navigate(`/app/reservas?id=${reserva.id}`)
+    navigate(linkToReserva(reserva.id))
     closeSearch()
   }
 
@@ -289,17 +290,24 @@ export default function TopBar() {
                   ) : (
                     notifItems.slice(0, 5).map((item) => {
                       const Icon = NOTIF_ICON[item.type] || Bell
-                      // checkin/saldo referencian una reserva puntual (ver
-                      // useNotifications) — clickear salta directo a esa
-                      // reserva, mismo patrón que un resultado de búsqueda.
-                      // "Caja pendiente" no tiene reserva asociada: queda inerte.
-                      const Tag = item.reservaId ? 'button' : 'div'
+                      // Mismo destino por tipo que Notificaciones.jsx
+                      // (Tarea 2): saldo -> Clientes con la reserva
+                      // resaltada, checkin -> Plano del día con la unidad
+                      // resaltada. "Caja pendiente" no tiene destino: queda
+                      // inerte.
+                      const destino =
+                        item.type === 'saldo' && item.clienteId
+                          ? linkToCliente(item.clienteId, { reservaId: item.reservaId })
+                          : item.type === 'checkin'
+                            ? linkToPlano(new Date().toISOString().split('T')[0], item.unidadId)
+                            : null
+                      const Tag = destino ? 'button' : 'div'
                       return (
                         <Tag
                           key={item.id}
-                          type={item.reservaId ? 'button' : undefined}
-                          onClick={item.reservaId ? () => { navigate(`/app/reservas?id=${item.reservaId}`); setShowNotifications(false) } : undefined}
-                          className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-all ${item.reservaId ? 'hover:bg-white/10 cursor-pointer' : 'hover:bg-white/5'}`}
+                          type={destino ? 'button' : undefined}
+                          onClick={destino ? () => { navigate(destino); setShowNotifications(false) } : undefined}
+                          className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-all ${destino ? 'hover:bg-white/10 cursor-pointer' : 'hover:bg-white/5'}`}
                         >
                           <Icon size={16} className="text-[#FDE047] mt-0.5 shrink-0" />
                           <div className="min-w-0">

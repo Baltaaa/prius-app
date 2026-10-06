@@ -140,6 +140,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
             return (
               <button
                 key={pago.id}
+                data-deeplink-id={`pago-${pago.id}`}
                 type="button"
                 onClick={() => onCellClick(reserva, pago)}
                 className={`${cellBase} ${

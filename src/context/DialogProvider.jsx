@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AlertTriangle, Info } from 'lucide-react'
 
@@ -12,6 +12,19 @@ const DialogContext = createContext(null)
 
 export function DialogProvider({ children }) {
   const [dialog, setDialog] = useState(null)
+  const [toasts, setToasts] = useState([])
+  const toastIdRef = useRef(0)
+
+  // Toast discreto, no bloqueante (Tarea 1, oct 2026) — para avisos chicos
+  // como "no se encontró el registro" de un deep-link, donde el modal de
+  // alert() de arriba sería demasiado intrusivo. Se apila abajo a la
+  // derecha y se auto-descarta a los 4s, sin necesidad de que el usuario
+  // haga nada.
+  const toast = useCallback((message) => {
+    const id = ++toastIdRef.current
+    setToasts((prev) => [...prev, { id, message }])
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000)
+  }, [])
 
   const confirm = useCallback((message, opts = {}) => {
     return new Promise((resolve) => {
@@ -33,8 +46,21 @@ export function DialogProvider({ children }) {
   const isDanger = dialog?.tone === 'danger' || dialog?.tone === 'error'
 
   return (
-    <DialogContext.Provider value={{ confirm, alert }}>
+    <DialogContext.Provider value={{ confirm, alert, toast }}>
       {children}
+      {toasts.length > 0 && createPortal(
+        <div className="fixed bottom-4 right-4 z-[1100] flex flex-col gap-2 w-[calc(100%-2rem)] max-w-sm">
+          {toasts.map((t) => (
+            <div
+              key={t.id}
+              className="glass-card rounded-xl border border-white/10 shadow-2xl px-4 py-3 text-sm text-gray-200 animate-premium-fade"
+            >
+              {t.message}
+            </div>
+          ))}
+        </div>,
+        document.body,
+      )}
       {dialog && createPortal(
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200"

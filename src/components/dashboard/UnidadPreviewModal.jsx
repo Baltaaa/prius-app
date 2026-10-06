@@ -8,6 +8,7 @@ import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from "../..
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 import Historial from "../crm/Historial"
+import { linkToCliente, linkToReserva } from "../../lib/deepLinks"
 
 const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
 
@@ -53,8 +54,8 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
         ? formatFecha(reserva.fecha)
         : `${formatFecha(reserva.fecha_inicio)} — ${formatFecha(reserva.fecha_fin)}`
 
-  const irAClientes = () => navigate(`/app/clientes?id=${reserva.cliente_id}`)
-  const irAReserva = () => navigate(`/app/reservas?id=${reserva.id}`)
+  const irAClientes = () => navigate(linkToCliente(reserva.cliente_id, { reservaId: reserva.id }))
+  const irAReserva = () => navigate(linkToReserva(reserva.id))
   const nuevaReservaAcotada = () => navigate(`/app/reservas?unidad=${unit.dbId}&tipo=periodo`)
   // Historial completo: Reservas.jsx solo lista período/día (la cola
   // operativa) — las de tipo_alquiler='temporada' de esta unidad no van a

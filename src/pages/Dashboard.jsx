@@ -18,6 +18,7 @@ import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import { useData } from "../context/DataProvider"
 import { coSocios } from "../lib/reservas"
 import DateInput from "../components/inputs/DateInput"
+import { useDeepLinkTarget } from "../hooks/useDeepLinkTarget"
 
 // El plano de playa solo dibuja carpas y sombrillas. Cabinas y lockers están
 // dentro del complejo y se manejan en su propia sección del CRM.
@@ -172,6 +173,23 @@ export default function Dashboard() {
   }, [unidades, reservaPorUnidad])
 
   const selectedUnit = selectedUnitId ? units[selectedUnitId] : null
+
+  // Deep-link vía linkToPlano() (Tarea 1, oct 2026): mueve el plano a la
+  // fecha pedida y resalta la unidad referida (ej. desde Notificaciones o
+  // el día de un mes en Ocupación). `unidades`/`reservas` ya están en
+  // memoria por el DataProvider -> `!loading` alcanza como señal de "listo".
+  useDeepLinkTarget({
+    params: ['fecha', 'unidad'],
+    ready: !loading,
+    resolve: ({ fecha, unidad }) => {
+      if (fecha) setSelectedDate(fecha)
+      if (!unidad) return true
+      const match = Object.values(units).find((u) => u.dbId === unidad)
+      if (!match) return null
+      setSelectedUnitId(match.id)
+      return unidad
+    },
+  })
 
   // Unidades libres AHORA (sin reserva de temporada vigente) — destino
   // posible para "Mover a otra unidad" (ítem 5).

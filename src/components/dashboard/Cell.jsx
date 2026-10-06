@@ -55,6 +55,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
     >
       {numberSide === "left" && numberLabel}
       <button
+        data-deeplink-id={unit?.dbId}
         onClick={() => onClick(unit)}
         className={`w-6 h-4.5 md:w-7 md:h-5 text-[9px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative ${styles} ${opacityClass} ${highlightClass}`}
       >

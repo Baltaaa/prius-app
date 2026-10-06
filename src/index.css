@@ -119,3 +119,21 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-premium-fade { animation: none; }
 }
+
+/*
+  Resaltado de destino de deep-link (useDeepLinkTarget, oct 2026): borde
+  #F2CA50 de 2px que se desvanece solo, sin sombra (Quiet Luxury). border en
+  vez de outline para no competir con el que ya usan las tarjetas con focus.
+*/
+@keyframes deep-link-highlight {
+  from { border-color: #F2CA50; }
+  to   { border-color: transparent; }
+}
+.deep-link-highlight {
+  animation: deep-link-highlight 2.5s ease-out forwards;
+  border-width: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deep-link-highlight { animation: none; }
+}

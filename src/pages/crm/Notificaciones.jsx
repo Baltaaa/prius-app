@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNotifications } from '../../hooks/useNotifications'
+import { linkToCliente, linkToPlano } from '../../lib/deepLinks'
 import { AlertCircle, Calendar, Wallet, Check, CheckCheck, Bell } from 'lucide-react'
 
 const TIPO_META = {
   caja: { icon: Wallet, color: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', accion: 'Ir a Caja' },
-  checkin: { icon: Calendar, color: 'text-sky-400', bg: 'bg-sky-400/10', border: 'border-sky-400/20', accion: 'Ver la reserva' },
-  saldo: { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-400/10', border: 'border-red-400/20', accion: 'Ver pago' },
+  checkin: { icon: Calendar, color: 'text-sky-400', bg: 'bg-sky-400/10', border: 'border-sky-400/20', accion: 'Ver en el Plano' },
+  saldo: { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-400/10', border: 'border-red-400/20', accion: 'Registrar pago' },
 }
 
 const SWIPE_THRESHOLD = 80
@@ -52,7 +53,7 @@ function NotificacionItem({ item, onAccion, onLeida }) {
         <p className="text-sm font-bold text-white uppercase tracking-tight">{item.titulo}</p>
         <p className="text-xs text-gray-400 mt-0.5">{item.detalle}</p>
         <div className="flex items-center gap-4 mt-2">
-          {meta.accion && item.reservaId && (
+          {meta.accion && (item.reservaId || item.type === 'caja') && (
             <button
               type="button"
               onClick={() => onAccion(item)}
@@ -98,9 +99,19 @@ export default function Notificaciones() {
     return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Cargando notificaciones...</span></div>
   }
 
+  // Destino correcto por tipo (Tarea 2, oct 2026): "saldo" va a Clientes con
+  // esa reserva resaltada (ahí vive RegistrarPago, nunca desde Caja — ver
+  // CLAUDE.md); "checkin" va al Plano del día con la unidad resaltada, no a
+  // Reservas (la mayoría de las llegadas son de temporada, que ni siquiera
+  // vive en esa pantalla).
   const handleAccion = (item) => {
     if (item.type === 'caja') return navigate('/app/caja')
-    if (item.reservaId) return navigate(`/app/reservas?id=${item.reservaId}`)
+    if (item.type === 'saldo' && item.clienteId) {
+      return navigate(linkToCliente(item.clienteId, { reservaId: item.reservaId }))
+    }
+    if (item.type === 'checkin') {
+      return navigate(linkToPlano(new Date().toISOString().split('T')[0], item.unidadId))
+    }
   }
 
   const sinLeer = [...urgentes, ...informativas].filter((i) => !i.leida)
