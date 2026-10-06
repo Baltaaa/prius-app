@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History,
 } from 'lucide-react'
 import { useData } from '../../context/DataProvider'
 import { useHistorial } from '../../hooks/useHistorial'
-import { formatFechaLarga, formatHora } from '../../lib/format'
+import { formatFechaLarga, formatHora, formatPesos } from '../../lib/format'
 import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
+import DateInput from '../inputs/DateInput'
+import SearchInput from '../inputs/SearchInput'
 
 // Historial unificado (ítem 2, oct 2026): un solo componente para la Línea
 // de tiempo global (Actividad.jsx), la temporada de una unidad
@@ -47,6 +49,29 @@ const FILTROS = [
   { key: 'notas', label: 'Notas' },
 ]
 
+const todayStr = () => new Date().toISOString().split('T')[0]
+const addDays = (s, n) => {
+  const [y, m, d] = s.split('-').map(Number)
+  const dt = new Date(Date.UTC(y, m - 1, d))
+  dt.setUTCDate(dt.getUTCDate() + n)
+  return dt.toISOString().split('T')[0]
+}
+
+// Tipos que cuentan como "modificación" / "cancelación" en los KPIs del
+// período (Tarea 7) — mismo criterio de agrupación que ya usan los chips
+// de filtro (`filtro` en TIPO_EVENTO_META), no una lista nueva.
+const TIPOS_MODIFICACION = ['reserva_editada', 'pago_editado', 'comprobante_editado', 'cambio_unidad']
+const TIPOS_CANCELACION = ['reserva_cancelada', 'reserva_eliminada', 'anulacion', 'gasto_anulado', 'pago_eliminado', 'comprobante_eliminado', 'cliente_eliminado']
+
+// "Hoy" / "Ayer" / "Lunes 12 de octubre" para el encabezado sticky de cada
+// grupo de día (Tarea 7) — formatFechaLarga da el nombre completo, acá solo
+// se decide cuándo reemplazarlo por el relativo.
+function etiquetaFecha(fecha) {
+  if (fecha === todayStr()) return 'Hoy'
+  if (fecha === addDays(todayStr(), -1)) return 'Ayer'
+  return formatFechaLarga(fecha)
+}
+
 function metaDe(evento) {
   return TIPO_EVENTO_META[evento.tipo_evento] || { icon: Activity, label: evento.descripcion, color: 'text-gray-400', filtro: 'otros' }
 }
@@ -60,12 +85,59 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
   const { eventos: eventosGlobales, loading: loadingGlobal } = useData()
   const { items: itemsEntidad, loading: loadingEntidad, hasMore, loadMore } = useHistorial(tipo, id)
 
+  // Rango de fechas + búsqueda libre, persistidos en la URL (Tarea 7) —
+  // solo tienen sentido en la vista global de la página /app/historial, no
+  // en el uso compacto embebido en la ficha de un cliente/reserva/unidad
+  // (ahí el "período" ya está acotado a esa entidad).
+  const mostrarFiltrosGlobales = tipo === 'global' && !compact
+  const [searchParams, setSearchParams] = useSearchParams()
+  const desde = mostrarFiltrosGlobales ? (searchParams.get('hDesde') || addDays(todayStr(), -7)) : null
+  const hasta = mostrarFiltrosGlobales ? (searchParams.get('hHasta') || todayStr()) : null
+  const q = mostrarFiltrosGlobales ? (searchParams.get('hq') || '') : ''
+  const setRango = (key, value, fallback) => setSearchParams((prev) => {
+    const next = new URLSearchParams(prev)
+    value === fallback ? next.delete(key) : next.set(key, value)
+    return next
+  }, { replace: true })
+
   const todos = tipo === 'global' ? eventosGlobales : itemsEntidad
   const loading = tipo === 'global' ? loadingGlobal : loadingEntidad
 
+  // Período elegido: fecha + búsqueda libre, antes de separar por tipo —
+  // los KPIs de abajo reflejan todo el período sin importar qué chip de
+  // tipo esté activo.
+  const delPeriodo = useMemo(() => {
+    if (!mostrarFiltrosGlobales) return todos
+    const term = q.trim().toLowerCase()
+    return todos.filter((e) => {
+      const fecha = e.fecha_ref || ''
+      if (desde && fecha && fecha < desde) return false
+      if (hasta && fecha && fecha > hasta) return false
+      if (term && !e.descripcion?.toLowerCase().includes(term)) return false
+      return true
+    })
+  }, [todos, mostrarFiltrosGlobales, desde, hasta, q])
+
+  const kpis = useMemo(() => {
+    if (!mostrarFiltrosGlobales) return null
+    let movimientos = 0
+    let cobrado = 0
+    let reservasNuevas = 0
+    let modificaciones = 0
+    let cancelaciones = 0
+    for (const e of delPeriodo) {
+      movimientos++
+      if (e.tipo_evento === 'pago') cobrado += Number(e.datos?.after?.monto || 0)
+      if (e.tipo_evento === 'reserva_alta') reservasNuevas++
+      if (TIPOS_MODIFICACION.includes(e.tipo_evento)) modificaciones++
+      if (TIPOS_CANCELACION.includes(e.tipo_evento)) cancelaciones++
+    }
+    return { movimientos, cobrado, reservasNuevas, modificaciones, cancelaciones }
+  }, [delPeriodo, mostrarFiltrosGlobales])
+
   const filtrados = useMemo(
-    () => (filtro === 'todos' ? todos : todos.filter((e) => metaDe(e).filtro === filtro)),
-    [todos, filtro],
+    () => (filtro === 'todos' ? delPeriodo : delPeriodo.filter((e) => metaDe(e).filtro === filtro)),
+    [delPeriodo, filtro],
   )
 
   const grupos = useMemo(() => {
@@ -102,6 +174,42 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
 
   return (
     <div className="space-y-6">
+      {mostrarFiltrosGlobales && (
+        <>
+          <div className="flex flex-wrap items-center gap-3">
+            <DateInput value={desde} onChange={(v) => setRango('hDesde', v || addDays(todayStr(), -7), addDays(todayStr(), -7))} className="w-40" />
+            <span className="text-gray-600 text-xs">→</span>
+            <DateInput value={hasta} onChange={(v) => setRango('hHasta', v || todayStr(), todayStr())} min={desde} className="w-40" />
+            <SearchInput value={q} onChange={(v) => setRango('hq', v, '')} placeholder="Buscar en el historial..." className="flex-1 min-w-[160px]" />
+          </div>
+
+          {kpis && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="glass-card rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Movimientos</p>
+                <p className="text-xl font-bold text-white mt-1">{kpis.movimientos}</p>
+              </div>
+              <div className="glass-card rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cobrado</p>
+                <p className="text-xl font-bold text-green-400 mt-1">{formatPesos(kpis.cobrado)}</p>
+              </div>
+              <div className="glass-card rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Reservas nuevas</p>
+                <p className="text-xl font-bold text-[#FDE047] mt-1">{kpis.reservasNuevas}</p>
+              </div>
+              <div className="glass-card rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Modificaciones</p>
+                <p className="text-xl font-bold text-white mt-1">{kpis.modificaciones}</p>
+              </div>
+              <div className="glass-card rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cancelaciones</p>
+                <p className="text-xl font-bold text-red-400 mt-1">{kpis.cancelaciones}</p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {!compact && (
         <div className="flex flex-wrap gap-2">
           {FILTROS.map((f) => (
@@ -127,8 +235,8 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
         <div className="space-y-6">
           {grupos.map(([fecha, items]) => (
             <div key={fecha}>
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#FDE047] mb-3 capitalize">
-                {fecha === 'sin-fecha' ? 'Sin fecha' : formatFechaLarga(fecha)}
+              <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] text-[#FDE047] mb-3 capitalize ${mostrarFiltrosGlobales ? 'sticky top-0 bg-[#0a0d14] py-2 z-10' : ''}`}>
+                {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
               </h3>
               <div className="glass-card rounded-2xl glass-card-inner divide-y divide-white/5">
                 {items.map((e) => {

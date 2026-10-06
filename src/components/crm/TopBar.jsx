@@ -58,7 +58,7 @@ const SECTION_TITLES = [
     icon: Inbox, iconBg: 'bg-orange-400/10', iconBorder: 'border-orange-400/20', iconColor: 'text-orange-400',
   },
   {
-    path: '/app/actividad', name: 'Línea de Tiempo', subtitle: 'Toda acción sobre reservas, pagos, clientes y unidades.',
+    path: '/app/historial', name: 'Historial', subtitle: 'Toda acción sobre reservas, pagos, clientes y unidades.',
     icon: Activity, iconBg: 'bg-teal-400/10', iconBorder: 'border-teal-400/20', iconColor: 'text-teal-400',
   },
   {

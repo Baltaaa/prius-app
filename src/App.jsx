@@ -71,7 +71,11 @@ export default function App() {
 
               {/* Módulos Nuevos */}
               <Route path="ocupacion" element={<Ocupacion />} />
-              <Route path="actividad" element={<Actividad />} />
+              {/* "Línea de Tiempo" se renombró a "Historial" (Tarea 7, oct
+                  2026) — la ruta vieja /actividad queda redirigiendo para no
+                  romper links guardados. */}
+              <Route path="historial" element={<Actividad />} />
+              <Route path="actividad" element={<Navigate to="/app/historial" replace />} />
               <Route path="notificaciones" element={<Notificaciones />} />
               <Route path="comprobantes" element={<Comprobantes />} />
               <Route path="perfil" element={<Perfil />} />

@@ -8,9 +8,9 @@ import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Vista de ocupación en un rango de fechas — distinta del Plano (que solo
-// muestra el estado de HOY/una fecha puntual). No confundir con "Línea de
-// Tiempo" (/app/actividad, log de auditoría de la tabla eventos): esto es
-// un calendario visual de reservas, no un log.
+// muestra el estado de HOY/una fecha puntual). No confundir con "Historial"
+// (/app/historial, log de auditoría de la tabla eventos — antes "Línea de
+// Tiempo"): esto es un calendario visual de reservas, no un log.
 //
 // Rediseño Tarea 6 (oct 2026): dos vistas (Semana: Gantt por unidad, Mes:
 // heatmap de % ocupación + KPIs), colores por tipo_alquiler compartidos

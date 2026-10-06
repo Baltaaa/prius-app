@@ -48,7 +48,7 @@ export default function Sidebar() {
   const additionalNav = [
     { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
     { name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare },
-    { name: 'Línea de Tiempo', path: '/app/actividad', icon: Activity },
+    { name: 'Historial', path: '/app/historial', icon: Activity },
     { name: 'Notificaciones', path: '/app/notificaciones', icon: Bell, badge: notificationsCount },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },
     { name: 'Perfil y Tarifas', path: '/app/perfil', icon: UserCheck }
