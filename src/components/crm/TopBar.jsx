@@ -291,16 +291,21 @@ export default function TopBar() {
                     notifItems.slice(0, 5).map((item) => {
                       const Icon = NOTIF_ICON[item.type] || Bell
                       // Mismo destino por tipo que Notificaciones.jsx
-                      // (Tarea 2): saldo -> Clientes con la reserva
-                      // resaltada, checkin -> Plano del día con la unidad
-                      // resaltada. "Caja pendiente" no tiene destino: queda
-                      // inerte.
+                      // (Tarea 2/8): saldo/pendiente_confirmacion -> Clientes
+                      // con la reserva resaltada, checkin(_mañana) -> Plano
+                      // con la unidad resaltada, reserva_nueva/modificada/
+                      // cancelación -> la reserva. "Caja pendiente" no tiene
+                      // destino: queda inerte.
                       const destino =
-                        item.type === 'saldo' && item.clienteId
+                        (item.type === 'saldo' || item.type === 'pendiente_confirmacion') && item.clienteId
                           ? linkToCliente(item.clienteId, { reservaId: item.reservaId })
                           : item.type === 'checkin'
                             ? linkToPlano(new Date().toISOString().split('T')[0], item.unidadId)
-                            : null
+                            : item.type === 'checkin_mañana'
+                              ? linkToPlano(undefined, item.unidadId)
+                              : (item.type === 'reserva_nueva' || item.type === 'reserva_modificada' || item.type === 'cancelacion') && item.reservaId
+                                ? linkToReserva(item.reservaId)
+                                : null
                       const Tag = destino ? 'button' : 'div'
                       return (
                         <Tag
