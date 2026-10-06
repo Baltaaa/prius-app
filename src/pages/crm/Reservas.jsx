@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from '../../lib/format'
+import { formatPesos, formatPesosVisible, formatFecha, formatRangoFechas, unidadEmoji } from '../../lib/format'
 import { parseUnidadQuery } from '../../lib/parse'
 import SearchInput from '../../components/inputs/SearchInput'
 import DateInput from '../../components/inputs/DateInput'
@@ -53,11 +53,23 @@ const FILTROS_TIPO = [
   { value: 'dia', label: 'Solo Día' },
 ]
 
-// Fecha de llegada de una reserva operativa: fecha_inicio para período, fecha para día.
-const fechaLlegada = (r) => (r.tipo_alquiler === 'dia' ? r.fecha : r.fecha_inicio) || r.created_at
+// Fecha de llegada real de una reserva: fecha_inicio para período, fecha
+// para día. Temporada no tiene fecha propia (ver CLAUDE.md "Reservas vs
+// Clientes") — se resuelve contra `temporadas` vía temporada_id, mismo
+// patrón que `rangoEfectivo` de Ocupacion.jsx. Bug encontrado en la
+// auditoría (Tarea 4): antes caía a `r.created_at` para temporada, que es
+// la fecha de alta/migración de la fila, no una llegada real — 139 de 145
+// reservas son de temporada, así que el filtro "Llegada desde/hasta"
+// terminaba comparando casi siempre contra el dato equivocado.
+const resolverFechaLlegada = (r, temporadasPorId) => {
+  if (r.tipo_alquiler === 'dia') return r.fecha || null
+  if (r.tipo_alquiler === 'periodo') return r.fecha_inicio || null
+  if (r.tipo_alquiler === 'temporada') return temporadasPorId?.[r.temporada_id]?.fecha_inicio || null
+  return null
+}
 
 export default function Reservas() {
-  const { reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva, deleteReserva, cancelarReserva } = useReservas()
+  const { reservas, unidades, temporadas, temporadaActiva, loading: resLoading, createReserva, updateReserva, deleteReserva, cancelarReserva } = useReservas()
   const { loading: cliLoading } = useClientes()
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -68,10 +80,6 @@ export default function Reservas() {
   const [editingReserva, setEditingReserva] = useState(null)
   const [pagoReserva, setPagoReserva] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filtroEstado, setFiltroEstado] = useState('todos')
-  const [filtroTipo, setFiltroTipo] = useState('todos')
-  const [desde, setDesde] = useState('')
-  const [hasta, setHasta] = useState('')
   const [showFiltros, setShowFiltros] = useState(false)
   const [filtroUnidadId, setFiltroUnidadId] = useState(null) // deep-link "Ver todas" desde el modal de unidad del Plano
 
@@ -292,7 +300,12 @@ export default function Reservas() {
     handleOpenCreate()
     setUnidadId(unidad)
     if (tipo === 'periodo' || tipo === 'dia') setTipoAlquiler(tipo)
-    setSearchParams({}, { replace: true })
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('unidad')
+      next.delete('tipo')
+      return next
+    }, { replace: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, resLoading, cliLoading])
 
@@ -303,10 +316,54 @@ export default function Reservas() {
     const unidad = searchParams.get('filtroUnidad')
     if (!unidad) return
     setFiltroUnidadId(unidad)
-    setSearchParams({}, { replace: true })
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('filtroUnidad')
+      return next
+    }, { replace: true })
   }, [searchParams, setSearchParams])
 
   const debouncedSearch = useDebounced(searchTerm)
+
+  // Filtros de llegada/estado/tipo persistidos en la URL (Tarea 4, oct
+  // 2026): searchParams es la única fuente de verdad (no un useState en
+  // paralelo) — así recargar la página y el botón atrás del navegador
+  // funcionan solos, sin efectos de sincronización en los dos sentidos.
+  const filtroEstado = searchParams.get('filtroEstado') || 'todos'
+  const filtroTipo = searchParams.get('filtroTipo') || 'todos'
+  const desde = searchParams.get('desde') || ''
+  const hasta = searchParams.get('hasta') || ''
+  const setFiltroParam = (key, value, defaultValue = 'todos') =>
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (!value || value === defaultValue) next.delete(key)
+      else next.set(key, value)
+      return next
+    }, { replace: true })
+  const setFiltroEstado = (v) => setFiltroParam('filtroEstado', v)
+  const setFiltroTipo = (v) => setFiltroParam('filtroTipo', v)
+  const setDesde = (v) => setFiltroParam('desde', v, '')
+  const setHasta = (v) => setFiltroParam('hasta', v, '')
+  const limpiarFiltros = () =>
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('filtroEstado')
+      next.delete('filtroTipo')
+      next.delete('desde')
+      next.delete('hasta')
+      return next
+    }, { replace: true })
+
+  // Rango inválido (desde > hasta): se avisa inline y no se filtra por
+  // fecha — mejor mostrar todo que mostrar una lista vacía engañosa.
+  const rangoFechaInvalido = !!(desde && hasta && desde > hasta)
+
+  const temporadasPorId = useMemo(() => {
+    const map = {}
+    for (const t of temporadas) map[t.id] = t
+    return map
+  }, [temporadas])
+  const fechaLlegada = useMemo(() => (r) => resolverFechaLlegada(r, temporadasPorId), [temporadasPorId])
 
   // Cola operativa: solo período/día. La temporada completa vive en Clientes
   // (directorio maestro), no acá — ver CLAUDE.md.
@@ -339,13 +396,15 @@ export default function Reservas() {
         const matchesTipo = filtroTipo === 'todos' || r.tipo_alquiler === filtroTipo
         const matchesUnidad = !filtroUnidadId || r.unidad_id === filtroUnidadId
         const llegada = fechaLlegada(r)
-        const matchesDesde = !desde || (llegada && llegada >= desde)
-        const matchesHasta = !hasta || (llegada && llegada <= hasta)
+        // Rango inválido (desde > hasta): no se filtra por fecha, se avisa
+        // inline más abajo — ver `rangoFechaInvalido`.
+        const matchesDesde = rangoFechaInvalido || !desde || (llegada && llegada >= desde)
+        const matchesHasta = rangoFechaInvalido || !hasta || (llegada && llegada <= hasta)
         return matchesSearch && matchesEstado && matchesTipo && matchesUnidad && matchesDesde && matchesHasta
       })
       // Llegadas más recientes primero.
       .sort((a, b) => (fechaLlegada(b) || '').localeCompare(fechaLlegada(a) || ''))
-  }, [reservasOperativas, temporadasDeUnidadFiltrada, debouncedSearch, filtroEstado, filtroTipo, filtroUnidadId, desde, hasta])
+  }, [reservasOperativas, temporadasDeUnidadFiltrada, debouncedSearch, filtroEstado, filtroTipo, filtroUnidadId, desde, hasta, rangoFechaInvalido, fechaLlegada])
 
   const filtrosActivos = filtroEstado !== 'todos' || filtroTipo !== 'todos' || desde || hasta
 
@@ -440,8 +499,22 @@ export default function Reservas() {
           className="flex-1 min-w-[160px]"
           inputClassName="focus:border-[#FDE047]/50 py-3"
         />
-        <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-40" />
-        <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-40" />
+        <div className="flex items-center gap-1">
+          <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-40" />
+          {desde && (
+            <button type="button" onClick={() => setDesde('')} className="p-2 text-gray-500 hover:text-white transition-all" title="Limpiar 'Llegada desde'">
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-1">
+          <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-40" />
+          {hasta && (
+            <button type="button" onClick={() => setHasta('')} className="p-2 text-gray-500 hover:text-white transition-all" title="Limpiar 'Llegada hasta'">
+              <X size={14} />
+            </button>
+          )}
+        </div>
         <div className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
@@ -480,6 +553,14 @@ export default function Reservas() {
                     </button>
                   ))}
                 </div>
+                {filtrosActivos && (
+                  <button
+                    onClick={() => { limpiarFiltros(); setShowFiltros(false) }}
+                    className="w-full text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-red-400 hover:bg-red-500/10 rounded-lg border-t border-white/10 pt-3"
+                  >
+                    Limpiar todos los filtros
+                  </button>
+                )}
               </div>
             </>
           )}
@@ -492,14 +573,31 @@ export default function Reservas() {
         </button>
       </div>
 
-      {unidadFiltrada && (
-        <button
-          onClick={() => setFiltroUnidadId(null)}
-          className="inline-flex items-center gap-2 bg-[#FDE047]/10 border border-[#FDE047]/30 text-[#FDE047] px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-[#FDE047]/20 transition-all"
-          title="Quitar filtro de unidad"
-        >
-          {unidadEmoji(unidadFiltrada.tipo)} {unidadFiltrada.tipo} #{unidadFiltrada.numero} <X size={12} />
-        </button>
+      <div className="flex flex-wrap gap-2">
+        {unidadFiltrada && (
+          <button
+            onClick={() => setFiltroUnidadId(null)}
+            className="inline-flex items-center gap-2 bg-[#FDE047]/10 border border-[#FDE047]/30 text-[#FDE047] px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-[#FDE047]/20 transition-all"
+            title="Quitar filtro de unidad"
+          >
+            {unidadEmoji(unidadFiltrada.tipo)} {unidadFiltrada.tipo} #{unidadFiltrada.numero} <X size={12} />
+          </button>
+        )}
+        {(desde || hasta) && !rangoFechaInvalido && (
+          <button
+            onClick={() => { setDesde(''); setHasta('') }}
+            className="inline-flex items-center gap-2 bg-cyan-400/10 border border-cyan-400/30 text-cyan-300 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-cyan-400/20 transition-all"
+            title="Quitar filtro de llegada"
+          >
+            Llegada {desde && hasta ? formatRangoFechas(desde, hasta, true) : desde ? `desde ${formatFecha(desde)}` : `hasta ${formatFecha(hasta)}`}
+            <X size={12} />
+          </button>
+        )}
+      </div>
+      {rangoFechaInvalido && (
+        <p className="text-xs font-bold text-red-400 uppercase tracking-widest">
+          "Llegada desde" no puede ser posterior a "Llegada hasta" — corregí el rango para filtrar por fecha.
+        </p>
       )}
 
       {/* Table Section */}

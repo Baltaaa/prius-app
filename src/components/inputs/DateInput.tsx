@@ -69,6 +69,7 @@ export default function DateInput({
   const [abierto, setAbierto] = useState(false)
   const [pos, setPos] = useState<Pos | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
+  const popoverRef = useRef<HTMLDivElement | null>(null)
   const autoId = useRef(`date-${Math.random().toString(36).slice(2, 9)}`).current
   const inputId = id || autoId
 
@@ -100,10 +101,21 @@ export default function DateInput({
   // Click afuera cierra — solo en modo tipeable. En calendarOnly el backdrop
   // a pantalla completa es el único cierre "implícito" (más visible/explícito
   // que un simple outside-click, que acá se evita a propósito).
+  //
+  // Bug (Tarea 4, oct 2026): el calendario se renderiza en un portal a
+  // document.body (ver arriba), fuera del subárbol de `wrapRef` — un click
+  // en CUALQUIER parte de adentro (cambiar de mes, un día deshabilitado,
+  // el propio panel) hacía `wrapRef.current.contains(e.target)` === false y
+  // cerraba el popover al toque, antes de que el click llegara a
+  // DayPicker. Hay que chequear también contra `popoverRef`, que sí
+  // envuelve el contenido del portal.
   useEffect(() => {
     if (!abierto || calendarOnly) return
     const onDocClick = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setAbierto(false)
+      const target = e.target as Node
+      if (wrapRef.current?.contains(target)) return
+      if (popoverRef.current?.contains(target)) return
+      setAbierto(false)
     }
     document.addEventListener('mousedown', onDocClick)
     return () => document.removeEventListener('mousedown', onDocClick)
@@ -189,6 +201,7 @@ export default function DateInput({
             <div className="fixed inset-0 z-[1000] bg-black/60" onClick={() => setAbierto(false)} />
           )}
           <div
+            ref={popoverRef}
             className="fixed z-[1001] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0
                        bg-[#111520] border border-white/10 rounded-2xl shadow-2xl p-2 dp-dark"
             style={window.innerWidth >= 640 ? { top: pos.top, left: pos.left, minWidth: pos.width } : undefined}

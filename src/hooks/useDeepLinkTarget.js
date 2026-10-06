@@ -38,7 +38,14 @@ export function useDeepLinkTarget({ params, ready, resolve }) {
     for (const p of params) values[p] = searchParams.get(p) || undefined
 
     const targetId = resolve(values)
-    setSearchParams({}, { replace: true })
+    // Solo borra SUS params, no toca otros que la pantalla persista ahí
+    // (filtros, tab activa — Tarea 4/6/7) ni los deja pisar por lo que
+    // venga después en la misma sesión de navegación.
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      for (const p of params) next.delete(p)
+      return next
+    }, { replace: true })
 
     if (!targetId) {
       toast('No se encontró el registro.')
