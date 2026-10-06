@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useCaja } from '../../hooks/useCaja'
 import { useData } from '../../context/DataProvider'
 import { supabase } from '../../lib/supabase'
@@ -50,9 +51,25 @@ export default function Caja() {
   const { pagos } = useData()
   const { alert } = useDialog()
 
-  const [selectedDate, setSelectedDate] = useState(todayStr())
+  // Fecha y tab en la URL (Tarea 9, oct 2026) — antes recargar la página a
+  // mitad de revisar un día pasado o la pestaña "Facturas" volvía todo a
+  // hoy/Movimientos sin avisar; una caja que se consulta a diario se presta
+  // a recargar en el medio.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedDate = searchParams.get('fecha') || todayStr()
+  const tab = searchParams.get('tab') || 'movimientos'
+  const setSelectedDate = (updater) => setSearchParams((prev) => {
+    const next = new URLSearchParams(prev)
+    const valor = typeof updater === 'function' ? updater(selectedDate) : updater
+    valor === todayStr() ? next.delete('fecha') : next.set('fecha', valor)
+    return next
+  }, { replace: true })
+  const setTab = (v) => setSearchParams((prev) => {
+    const next = new URLSearchParams(prev)
+    v === 'movimientos' ? next.delete('tab') : next.set('tab', v)
+    return next
+  }, { replace: true })
   const [filtroMedio, setFiltroMedio] = useState('todos')
-  const [tab, setTab] = useState('movimientos')
   const [montoApertura, setMontoApertura] = useState(null)
   const [abriendo, setAbriendo] = useState(false)
   const [mostrarHistorial, setMostrarHistorial] = useState(false)

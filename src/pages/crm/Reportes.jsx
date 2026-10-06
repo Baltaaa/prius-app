@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { Download, BarChart3 } from 'lucide-react'
 import KpiCard from '../../components/crm/KpiCard'
 import BrandSelect from '../../components/ui/BrandSelect'
 import { formatPesos, unidadEmoji } from '../../lib/format'
+import { linkToCliente } from '../../lib/deepLinks'
 
 const OPCIONES_TEMPORADA = [
   { value: 'all', label: 'Todas las temporadas' },
@@ -11,6 +13,7 @@ const OPCIONES_TEMPORADA = [
 ]
 
 export default function Reportes() {
+  const navigate = useNavigate()
   const { reservas, loading } = useReservas()
   const [temporadaFilter, setTemporadaFilter] = useState('2025-2026')
 
@@ -85,13 +88,18 @@ export default function Reportes() {
         {/* Mobile: tarjetas */}
         <div className="sm:hidden space-y-3">
           {activeReservas.map(res => (
-            <div key={res.id} className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between gap-3">
+            <button
+              type="button"
+              key={res.id}
+              onClick={() => navigate(linkToCliente(res.cliente_id, { reservaId: res.id }))}
+              className="w-full text-left p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between gap-3 hover:bg-white/10 transition-all"
+            >
               <div className="min-w-0">
                 <p className="font-bold uppercase text-white truncate">{res.clientes?.nombre}</p>
                 <p className="text-xs text-gray-400 uppercase mt-0.5">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</p>
               </div>
               <p className="font-bold text-[#FDE047] shrink-0">{formatPesos(res.valor_total)}</p>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -107,7 +115,11 @@ export default function Reportes() {
           </thead>
           <tbody className="divide-y divide-white/5 text-sm text-gray-300">
             {activeReservas.map(res => (
-              <tr key={res.id} className="hover:bg-white/5 transition-all">
+              <tr
+                key={res.id}
+                onClick={() => navigate(linkToCliente(res.cliente_id, { reservaId: res.id }))}
+                className="hover:bg-white/5 transition-all cursor-pointer"
+              >
                 <td className="px-6 py-4 font-bold uppercase text-white">{res.clientes?.nombre}</td>
                 <td className="px-6 py-4 uppercase font-medium">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
                 <td className="px-6 py-4 text-right font-bold text-[#FDE047]">{formatPesos(res.valor_total)}</td>

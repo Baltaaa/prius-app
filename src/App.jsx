@@ -22,6 +22,7 @@ const Leads = lazy(() => import('./pages/crm/Leads'))
 const Notificaciones = lazy(() => import('./pages/crm/Notificaciones'))
 const Comprobantes = lazy(() => import('./pages/crm/Comprobantes'))
 const Perfil = lazy(() => import('./pages/crm/Perfil'))
+const NotFound = lazy(() => import('./pages/crm/NotFound'))
 
 export default function App() {
   return (
@@ -79,9 +80,15 @@ export default function App() {
               <Route path="notificaciones" element={<Notificaciones />} />
               <Route path="comprobantes" element={<Comprobantes />} />
               <Route path="perfil" element={<Perfil />} />
+
+              {/* 404 real dentro del shell del CRM (sidebar/topbar
+                  intactos) — antes cualquier ruta desconocida bajo /app
+                  redirigía en silencio a Home sin avisar. */}
+              <Route path="*" element={<NotFound />} />
             </Route>
 
-            {/* Fallback */}
+            {/* Fuera de /app (no logueado o ruta top-level inexistente):
+                sin sidebar, vuelve directo al Home. */}
             <Route path="*" element={<Navigate to="/app/home" replace />} />
           </Routes>
         </Suspense>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useData } from '../../context/DataProvider'
+import { linkToCliente } from '../../lib/deepLinks'
 import { formatPesos, formatFecha, formatFechaHora, unidadEmoji, formatComprobante } from '../../lib/format'
 import {
   formatMedioPago, TIPO_PAGO_LABEL, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL,
@@ -26,6 +28,7 @@ const chipClass = (active) =>
 // motivo. Se abre desde Caja, Clientes o Reservas — un solo componente, no
 // se duplica esta lógica en cada pantalla.
 export default function DetallePago({ isOpen, onClose, pago, reserva }) {
+  const navigate = useNavigate()
   const { completarComprobante, anularPago, editarComprobante } = useData()
   const { alert } = useDialog()
   const puedeEditarComprobante = usePermiso('editar_comprobante')
@@ -118,6 +121,19 @@ export default function DetallePago({ isOpen, onClose, pago, reserva }) {
           <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
             <p className="text-sm font-bold text-white uppercase">{unidadLabel}</p>
           </div>
+        )}
+
+        {/* Abierto desde Caja (Tarea 9, oct 2026): la fila de movimiento no
+            tenía ningún link al cliente, solo texto plano — acá sí hay
+            cliente_id en el pago sin importar desde dónde se abrió. */}
+        {pago.cliente_id && (
+          <button
+            type="button"
+            onClick={() => { onClose?.(); navigate(linkToCliente(pago.cliente_id, { pagoId: pago.id })) }}
+            className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:underline"
+          >
+            Ver cliente →
+          </button>
         )}
 
         {pago.estado === 'anulado' && (
