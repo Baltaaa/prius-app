@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom'
 import { usePagos } from '../../hooks/usePagos'
 import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { coSocios, pagoSinVerificar, estadoBadgeStatus } from '../../lib/reservas'
-import { HelpCircle } from 'lucide-react'
+import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
+import { HelpCircle, ArrowRight } from 'lucide-react'
 import Modal from './Modal'
 import MontoReserva from './MontoReserva'
 import SaldoReserva from './SaldoReserva'
@@ -15,8 +17,20 @@ const TIPO_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 // perdía de vista cuál reserva quería ver). No reutiliza UnitModal: ese es un
 // formulario de alta/edición del Plano, no un detalle con historial de pagos.
 export default function ReservaDetalleModal({ reserva, onClose }) {
+  const navigate = useNavigate()
   const { pagos } = usePagos(reserva?.id)
   if (!reserva) return null
+
+  // Temporada vive en Clientes (directorio maestro), período/día en
+  // Reservas (cola operativa) — ver CLAUDE.md "Reservas vs Clientes".
+  const verCompleta = () => {
+    onClose?.()
+    navigate(
+      reserva.tipo_alquiler === 'temporada'
+        ? linkToCliente(reserva.cliente_id, { reservaId: reserva.id })
+        : linkToReserva(reserva.id),
+    )
+  }
 
   const socios = coSocios(reserva)
   const esPeriodo = reserva.tipo_alquiler === 'periodo'
@@ -117,6 +131,14 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
             </div>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={verCompleta}
+          className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-white/5 text-[#FDE047] border border-[#FDE047]/30 hover:bg-[#FDE047]/10 transition-all flex items-center justify-center gap-2"
+        >
+          Ver reserva completa <ArrowRight size={14} />
+        </button>
       </div>
     </Modal>
   )

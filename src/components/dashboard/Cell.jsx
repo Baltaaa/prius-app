@@ -1,6 +1,7 @@
 import { memo, useState } from "react"
 import { Hourglass } from "lucide-react"
 import { STATUS } from "./constants"
+import { COLOR_TIPO_ALQUILER } from "../../lib/colors"
 
 // 184 celdas montadas a la vez en el Plano. React.memo evita re-renderizarlas
 // todas cuando cambia el zoom o se abre un modal, y `transition-colors` en vez
@@ -27,11 +28,11 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
   const styles = isPendienteConfirmacion
     ? "bg-white text-black border-white"
     : isTemporada
-      ? "bg-[#FDE047] text-black border-[#FDE047]"
+      ? `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.text} ${COLOR_TIPO_ALQUILER.temporada.border}`
       : isPeriodo
-        ? "bg-slate-600 text-white border-slate-500"
+        ? `${COLOR_TIPO_ALQUILER.periodo.bg} ${COLOR_TIPO_ALQUILER.periodo.text} ${COLOR_TIPO_ALQUILER.periodo.border}`
         : isDia
-          ? "bg-gray-300 text-black border-gray-300"
+          ? `${COLOR_TIPO_ALQUILER.dia.bg} ${COLOR_TIPO_ALQUILER.dia.text} ${COLOR_TIPO_ALQUILER.dia.border}`
           : "bg-white/5 text-white/20 border-white/10 hover:border-white/30"
 
   const opacityClass = isDimmed ? "opacity-20" : "opacity-100"

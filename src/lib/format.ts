@@ -17,6 +17,7 @@ const pesosFmt = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 })
 const dateLargaFmt = new Intl.DateTimeFormat('es-AR', {
   timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
 })
+const mesAnioFmt = new Intl.DateTimeFormat('es-AR', { timeZone: TZ, month: 'long', year: 'numeric' })
 
 // Node/ICU en algunas combinaciones "day:2-digit, month:2-digit" sueltas
 // (sin date style completo) resuelve silenciosamente a "numeric" y pierde el
@@ -87,6 +88,14 @@ export function formatFechaHora(d: string | Date | null | undefined): string {
 export function formatFechaLarga(d: string | Date | null | undefined): string {
   const f = aFechaSegura(d)
   return f ? dateLargaFmt.format(f) : ''
+}
+
+/** "Octubre 2026" — título del mes para la vista mensual de Ocupación. */
+export function formatMesAnio(d: string | Date | null | undefined): string {
+  const f = aFechaSegura(d)
+  if (!f) return ''
+  const s = mesAnioFmt.format(f)
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 export function formatHora(d: string | Date | null | undefined): string {
