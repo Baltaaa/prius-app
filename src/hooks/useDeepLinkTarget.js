@@ -1,9 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useDialog } from '../context/DialogProvider'
-
-const HIGHLIGHT_CLASS = 'deep-link-highlight'
-const HIGHLIGHT_MS = 2500
+import { scrollAndHighlight } from '../lib/highlight'
 
 /**
  * Consume los query params de un deep-link (builders en `lib/deepLinks.ts`)
@@ -51,13 +49,7 @@ export function useDeepLinkTarget({ params, ready, resolve }) {
     // 150ms: mismo margen que ya usaba el deep-link de Clientes para dejar
     // asentado el contenido recién expandido (fetch de pagos, etc.) antes
     // de medir dónde scrollear.
-    setTimeout(() => {
-      const el = document.querySelector(`[data-deeplink-id="${targetId}"]`)
-      if (!el) return
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      el.classList.add(HIGHLIGHT_CLASS)
-      setTimeout(() => el.classList.remove(HIGHLIGHT_CLASS), HIGHLIGHT_MS)
-    }, 150)
+    scrollAndHighlight(targetId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, searchParams])
 }

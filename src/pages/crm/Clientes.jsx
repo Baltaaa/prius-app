@@ -6,7 +6,8 @@ import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
-import { cuitValido, parseDNI, parseUnidadQuery } from '../../lib/parse'
+import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
+import { scrollAndHighlight } from '../../lib/highlight'
 import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
 import {
   coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus,
@@ -353,6 +354,24 @@ export default function Clientes() {
   }, [searchParams, loading])
 
   const debouncedSearch = useDebounced(searchTerm, 250)
+
+  // Comprobante que matcheó la búsqueda para cada cliente (Tarea 3, oct
+  // 2026) — se muestra como una línea extra bajo el nombre y permite
+  // saltar directo a esa cuota. Normalizado (sin guiones/espacios/ceros a
+  // la izquierda) para que "1234", "0001-00001234" y "00001234" encuentren
+  // el mismo comprobante — match parcial, no exacto.
+  const comprobanteMatchPorCliente = useMemo(() => {
+    const termNorm = normalizarNumeroComprobante(debouncedSearch)
+    if (termNorm.length < 2) return {}
+    const map = {}
+    for (const p of todosPagos) {
+      if (map[p.cliente_id]) continue
+      const c = (p.comprobantes || []).find((c) => normalizarNumeroComprobante(c.numero).includes(termNorm))
+      if (c) map[p.cliente_id] = { pago: p, comprobante: c }
+    }
+    return map
+  }, [todosPagos, debouncedSearch])
+
   const filteredClientes = useMemo(() => {
     const term = debouncedSearch.trim().toLowerCase()
     if (term.length < 2) return clientes
@@ -363,13 +382,14 @@ export default function Clientes() {
       if (c.apellido && c.apellido.toLowerCase().includes(term)) return true
       if (c.cuit && c.cuit.includes(debouncedSearch)) return true
       if (dniTerm.length >= 7 && c.dni && c.dni.includes(dniTerm)) return true
+      if (comprobanteMatchPorCliente[c.id]) return true
       if (unidadQuery) {
         return reservas.some((r) => r.cliente_id === c.id && r.unidades?.numero === unidadQuery.numero
           && (!unidadQuery.tipo || r.unidades?.tipo === unidadQuery.tipo))
       }
       return false
     })
-  }, [clientes, debouncedSearch, reservas])
+  }, [clientes, debouncedSearch, reservas, comprobanteMatchPorCliente])
 
   // TODAS las reservas de cada cliente (histórico completo: activas y
   // canceladas, cualquier tipo_alquiler) — a diferencia de Reservas.jsx, acá
@@ -589,6 +609,24 @@ export default function Clientes() {
                         <Phone size={11} className="text-gray-600 shrink-0" />
                         {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-gray-500">Sin cargar</span>}
                       </p>
+                      {/* Línea extra cuando el match de búsqueda fue por
+                          número de comprobante, no por nombre (Tarea 3, oct
+                          2026) — salta directo a esa cuota resaltada. */}
+                      {comprobanteMatchPorCliente[cliente.id] && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setExpandedId(cliente.id)
+                            scrollAndHighlight(`pago-${comprobanteMatchPorCliente[cliente.id].pago.id}`)
+                          }}
+                          className="text-[10px] text-[#FDE047] font-bold mt-1 hover:underline truncate block"
+                        >
+                          Comprobante {formatComprobante(comprobanteMatchPorCliente[cliente.id].comprobante.tipo, comprobanteMatchPorCliente[cliente.id].comprobante.numero)}
+                          {formatPesosVisible(comprobanteMatchPorCliente[cliente.id].pago.monto) ? ` · ${formatPesosVisible(comprobanteMatchPorCliente[cliente.id].pago.monto)}` : ''}
+                          {comprobanteMatchPorCliente[cliente.id].comprobante.fecha ? ` · ${formatFecha(comprobanteMatchPorCliente[cliente.id].comprobante.fecha)}` : ''}
+                        </button>
+                      )}
                     </div>
                     <div
                       className="flex items-baseline gap-2 flex-wrap min-w-[90px]"

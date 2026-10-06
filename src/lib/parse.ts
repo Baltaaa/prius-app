@@ -128,6 +128,16 @@ export function normalizarCodigoReserva(raw: string | null | undefined): string 
   return limpio.startsWith('PRIUS-') ? limpio : `PRIUS-${limpio}`
 }
 
+/**
+ * Normaliza un número de comprobante para buscarlo sin importar cómo se
+ * tipeó: saca todo lo que no sea dígito (guiones, espacios) y los ceros a
+ * la izquierda — "1234", "0001-00001234" y "00001234" terminan en el mismo
+ * "1234" (Tarea 3, buscador de Clientes por factura/comprobante).
+ */
+export function normalizarNumeroComprobante(raw: string | null | undefined): string {
+  return String(raw ?? '').replace(/\D/g, '').replace(/^0+(?=\d)/, '')
+}
+
 const CUIT_PREFIJOS_VALIDOS = new Set([20, 23, 24, 25, 26, 27, 30, 33, 34])
 
 /** Dígito verificador módulo 11 + prefijo válido (20/23/24/25/26/27/30/33/34). */
