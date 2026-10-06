@@ -23,7 +23,28 @@ import MontoReserva from '../../components/crm/MontoReserva'
 import ReservaCalendar from '../../components/crm/ReservaCalendar'
 import Historial from '../../components/crm/Historial'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
-import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, X, Lock, Unlock } from 'lucide-react'
+import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, X, Lock, Unlock, ChevronDown } from 'lucide-react'
+
+// Título chico de sección dentro del modal de reserva (Tarea 5, oct 2026) —
+// mismo patrón repetido en ambas columnas, separador en vez de mayúscula de
+// borde de color (Glass Dark no usa #E5E5E5 literal, ver CLAUDE.md).
+function SeccionTitulo({ children }) {
+  return (
+    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] border-b border-white/10 pb-2">
+      {children}
+    </p>
+  )
+}
+
+// Noches/días de una reserva período/día, para el resumen fijo del modal —
+// solo display, no se guarda ni valida nada con este número.
+function diasEntre(desdeIso, hastaIso) {
+  if (!desdeIso || !hastaIso) return null
+  const [y1, m1, d1] = desdeIso.split('-').map(Number)
+  const [y2, m2, d2] = hastaIso.split('-').map(Number)
+  const ms = new Date(y2, m2 - 1, d2) - new Date(y1, m1 - 1, d1)
+  return Math.round(ms / 86400000) + 1
+}
 
 // Identificador legible para el gate de tipeo del ConfirmDeleteModal —
 // reservas.codigo no existe en el schema (queda para el sistema de reservas
@@ -78,6 +99,7 @@ export default function Reservas() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingReserva, setEditingReserva] = useState(null)
+  const [masOpcionesAbierto, setMasOpcionesAbierto] = useState(false) // "Más opciones" del modal de reserva (Tarea 5): notas + historial, cerrado por defecto
   const [pagoReserva, setPagoReserva] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showFiltros, setShowFiltros] = useState(false)
@@ -118,10 +140,12 @@ export default function Reservas() {
   const handleOpenCreate = () => {
     setEditingReserva(null)
     resetForm()
+    setMasOpcionesAbierto(false)
     setIsModalOpen(true)
   }
 
   const handleOpenEdit = (res) => {
+    setMasOpcionesAbierto(false)
     setEditingReserva(res)
     setClienteId(res.cliente_id || '')
     setUnidadId(res.unidad_id || '')
@@ -787,197 +811,274 @@ export default function Reservas() {
       />
 
       {/* Modal Form */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingReserva ? 'Editar Reserva' : 'Nueva Reserva'}>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Cliente</label>
-            <ClienteSelector
-              value={clienteId}
-              onChange={(id) => setClienteId(id)}
-            />
-          </div>
-
-          {editingReserva && (
-            <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-              <div className="flex items-center gap-2 text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                {bloqueada ? <Lock size={14} className="text-red-400" /> : <Unlock size={14} className="text-gray-500" />}
-                {bloqueada ? 'Fecha y unidad bloqueadas' : 'Fecha y unidad editables'}
-              </div>
+      {/* Rediseño Tarea 5 (oct 2026): solo JSX/layout — mismo state, mismos
+          handlers, mismo orden de escritura que antes. Dos columnas en
+          desktop (cliente/unidad/fechas a la izquierda, precio/resumen a la
+          derecha) para que entre completo en 1366x768 sin scroll o con
+          scroll interno mínimo; el submit real sigue siendo el <form>, el
+          botón vive en el footer sticky del Modal vía el atributo HTML
+          `form` (mismo handleSubmit, nada cambia de la lógica). */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingReserva ? 'Editar Reserva' : 'Nueva Reserva'}
+        maxWidthClass="sm:max-w-4xl"
+        footer={
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Total</p>
+              <p className="text-lg font-bold text-white">{formatPesos(bonificada ? 0 : valorTotal)}</p>
+            </div>
+            <div className="flex gap-3">
               <button
                 type="button"
-                onClick={handleToggleBloqueada}
-                className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                  bloqueada ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-white/5 text-gray-400 hover:text-white'
-                }`}
+                onClick={() => setIsModalOpen(false)}
+                className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
               >
-                {bloqueada ? 'Desbloquear' : 'Bloquear'}
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                form="form-reserva"
+                className="px-6 py-3 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+              >
+                {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
               </button>
             </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unidad</label>
-              <BrandSelect
-                value={unidadId}
-                onChange={setUnidadId}
-                disabled={bloqueada}
-                options={opcionesUnidad}
-                invalid={conflictoFechas}
-                searchable
-                searchPlaceholder="Buscar unidad..."
-              />
-              {/* Unidades con temporada activa no aparecen en la lista; las de
-                  período/día que se solapan con las fechas elegidas quedan
-                  afuera también, salvo la ya seleccionada (se avisa acá). */}
-              {conflictoFechas && (
-                <p className="text-[10px] text-red-400 uppercase tracking-widest font-bold">
-                  Ocupada en esas fechas por otra reserva — elegí otra unidad o cambiá las fechas.
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Temporada</label>
-              {/* Ya no es un input editable (Frente 2): la asigna sola el
-                  trigger fn_reserva_asigna_temporada tomando la que tenga
-                  estado='activa' — acá solo se informa cuál es. Al editar
-                  una reserva vieja se muestra la que ya tenía, no la activa
-                  de hoy (editar no debe migrarla de temporada). */}
-              <p className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-gray-300 text-sm font-bold">
-                {editingReserva?.temporada || temporadaActiva?.nombre || '—'}
-              </p>
-            </div>
           </div>
+        }
+      >
+        <form id="form-reserva" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Columna izquierda: quién, dónde, cuándo */}
+          <div className="space-y-5">
+            <SeccionTitulo>Cliente y unidad</SeccionTitulo>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tipo de alquiler</label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { key: 'periodo', label: 'Período' },
-                { key: 'dia', label: 'Día' },
-              ].map((t) => (
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Cliente</label>
+              <ClienteSelector
+                value={clienteId}
+                onChange={(id) => setClienteId(id)}
+              />
+            </div>
+
+            {editingReserva && (
+              <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center gap-2 text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                  {bloqueada ? <Lock size={14} className="text-red-400" /> : <Unlock size={14} className="text-gray-500" />}
+                  {bloqueada ? 'Fecha y unidad bloqueadas' : 'Fecha y unidad editables'}
+                </div>
                 <button
-                  key={t.key}
                   type="button"
-                  disabled={bloqueada}
-                  onClick={() => setTipoAlquiler(t.key)}
-                  className={`py-3 rounded-xl text-[9px] font-bold uppercase tracking-widest border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                    tipoAlquiler === t.key
-                      ? 'bg-[#FDE047] text-black border-[#FDE047]'
-                      : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                  onClick={handleToggleBloqueada}
+                  className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
+                    bloqueada ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-white/5 text-gray-400 hover:text-white'
                   }`}
                 >
-                  {t.label}
+                  {bloqueada ? 'Desbloquear' : 'Bloquear'}
                 </button>
-              ))}
-            </div>
-            <p className="text-[9px] text-gray-500 uppercase tracking-widest">
-              Temporada completa se carga desde el Directorio de Clientes.
-            </p>
-          </div>
-
-          {tipoAlquiler === 'periodo' && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fechas (Inicio — Fin)</label>
-                <span className="text-xs font-bold text-[#FDE047]">
-                  {fechaInicio || '—'} → {fechaFin || '—'}
-                </span>
               </div>
-              {!unidadId && (
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
-              )}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-center">
-                <ReservaCalendar
-                  mode="range"
-                  value={{ desde: fechaInicio, hasta: fechaFin }}
-                  onChange={({ desde, hasta }) => {
-                    setFechaInicio(desde)
-                    setFechaFin(hasta)
-                  }}
-                  rangosOcupados={rangosOcupados}
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unidad</label>
+                <BrandSelect
+                  value={unidadId}
+                  onChange={setUnidadId}
                   disabled={bloqueada}
+                  options={opcionesUnidad}
+                  invalid={conflictoFechas}
+                  searchable
+                  searchPlaceholder="Buscar unidad..."
                 />
+                {conflictoFechas && (
+                  <p className="text-[10px] text-red-400 uppercase tracking-widest font-bold">
+                    Ocupada en esas fechas — elegí otra unidad o cambiá las fechas.
+                  </p>
+                )}
               </div>
-            </div>
-          )}
-
-          {tipoAlquiler === 'dia' && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha</label>
-                <span className="text-xs font-bold text-[#FDE047]">{fecha || '—'}</span>
-              </div>
-              {!unidadId && (
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
-              )}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-center">
-                <ReservaCalendar mode="single" value={fecha} onChange={setFecha} rangosOcupados={rangosOcupados} disabled={bloqueada} />
-              </div>
-            </div>
-          )}
-
-          {puedeBonificar && (
-            <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-              <label htmlFor="reserva-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
-                Unidad bonificada
-              </label>
-              <input
-                id="reserva-bonificada"
-                type="checkbox"
-                checked={bonificada}
-                onChange={(e) => setBonificada(e.target.checked)}
-                className="accent-cyan-400 w-4 h-4 cursor-pointer"
-              />
-            </div>
-          )}
-
-          <MoneyInput
-            label="Monto Total"
-            value={bonificada ? 0 : valorTotal}
-            onChange={setValorTotal}
-            required
-            disabled={bonificada}
-            max={100_000_000}
-            hint={bonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
-          />
-
-          {/* Saldo y estado de pago ya no se cargan a mano: los recalcula el
-              trigger fn_reserva_recalcula_saldo / fn_pago_actualiza_saldo a
-              partir de valor_total/bonificada y los pagos registrados en
-              `pagos`. */}
-          {editingReserva && (
-            <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
-              <div>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Saldo Pendiente</p>
-                <p className={`text-lg font-bold ${Number(editingReserva.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                  {estaSaldada(editingReserva) ? 'Unidad saldada' : formatPesos(editingReserva.saldo)}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Temporada</label>
+                <p className="w-full h-9 flex items-center bg-white/5 border border-white/10 rounded-xl px-4 text-gray-300 text-sm font-bold truncate">
+                  {editingReserva?.temporada || temporadaActiva?.nombre || '—'}
                 </p>
               </div>
-              <StatusBadge status={estadoBadgeStatus(editingReserva)} />
             </div>
-          )}
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Notas</label>
-            <textarea
-              rows={3}
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none resize-none"
-            />
+            <SeccionTitulo>Fechas</SeccionTitulo>
+
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { key: 'periodo', label: 'Período' },
+                  { key: 'dia', label: 'Día' },
+                ].map((t) => (
+                  <button
+                    key={t.key}
+                    type="button"
+                    disabled={bloqueada}
+                    onClick={() => setTipoAlquiler(t.key)}
+                    className={`h-9 rounded-xl text-[9px] font-bold uppercase tracking-widest border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                      tipoAlquiler === t.key
+                        ? 'bg-[#FDE047] text-black border-[#FDE047]'
+                        : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[9px] text-gray-500 uppercase tracking-widest">
+                Temporada completa se carga desde el Directorio de Clientes.
+              </p>
+            </div>
+
+            {tipoAlquiler === 'periodo' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fechas (Inicio — Fin)</label>
+                  <span className="text-xs font-bold text-[#FDE047]">
+                    {fechaInicio || '—'} → {fechaFin || '—'}
+                  </span>
+                </div>
+                {!unidadId && (
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
+                )}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-center">
+                  <ReservaCalendar
+                    mode="range"
+                    value={{ desde: fechaInicio, hasta: fechaFin }}
+                    onChange={({ desde, hasta }) => {
+                      setFechaInicio(desde)
+                      setFechaFin(hasta)
+                    }}
+                    rangosOcupados={rangosOcupados}
+                    disabled={bloqueada}
+                  />
+                </div>
+              </div>
+            )}
+
+            {tipoAlquiler === 'dia' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha</label>
+                  <span className="text-xs font-bold text-[#FDE047]">{fecha || '—'}</span>
+                </div>
+                {!unidadId && (
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
+                )}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-center">
+                  <ReservaCalendar mode="single" value={fecha} onChange={setFecha} rangosOcupados={rangosOcupados} disabled={bloqueada} />
+                </div>
+              </div>
+            )}
           </div>
 
-          {editingReserva && (
-            <div>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Historial</p>
-              <Historial tipo="reserva" id={editingReserva.id} compact />
-            </div>
-          )}
+          {/* Columna derecha: precio, resumen, extras */}
+          <div className="space-y-5">
+            <SeccionTitulo>Precio y pago</SeccionTitulo>
 
-          <button type="submit" className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl">
-            {editingReserva ? 'Guardar Cambios' : 'Confirmar Operación'}
-          </button>
+            {puedeBonificar && (
+              <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+                <label htmlFor="reserva-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
+                  Unidad bonificada
+                </label>
+                <input
+                  id="reserva-bonificada"
+                  type="checkbox"
+                  checked={bonificada}
+                  onChange={(e) => setBonificada(e.target.checked)}
+                  className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                />
+              </div>
+            )}
+
+            <MoneyInput
+              label="Monto Total"
+              value={bonificada ? 0 : valorTotal}
+              onChange={setValorTotal}
+              required
+              disabled={bonificada}
+              max={100_000_000}
+              hint={bonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
+            />
+
+            {/* Saldo y estado de pago ya no se cargan a mano: los recalcula el
+                trigger fn_reserva_recalcula_saldo / fn_pago_actualiza_saldo a
+                partir de valor_total/bonificada y los pagos registrados en
+                `pagos`. */}
+            {editingReserva && (
+              <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                <div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Saldo Pendiente</p>
+                  <p className={`text-lg font-bold ${Number(editingReserva.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                    {estaSaldada(editingReserva) ? 'Unidad saldada' : formatPesos(editingReserva.saldo)}
+                  </p>
+                </div>
+                <StatusBadge status={estadoBadgeStatus(editingReserva)} />
+              </div>
+            )}
+
+            {/* Resumen fijo: unidad, fechas, noches/días, total, saldo —
+                todo lo que ya se eligió a la izquierda, de un vistazo antes
+                de confirmar. */}
+            <div className="p-4 bg-white/5 border border-[#FDE047]/20 rounded-xl space-y-2">
+              <p className="text-[9px] font-bold text-[#FDE047] uppercase tracking-[0.2em]">Resumen</p>
+              <div className="grid grid-cols-2 gap-y-1.5 text-xs">
+                <span className="text-gray-500 uppercase tracking-widest">Unidad</span>
+                <span className="text-white font-bold text-right truncate">
+                  {opcionesUnidad.find((o) => o.value === unidadId)?.label || '—'}
+                </span>
+                <span className="text-gray-500 uppercase tracking-widest">Fechas</span>
+                <span className="text-white font-bold text-right truncate">
+                  {tipoAlquiler === 'dia' ? (fecha ? formatFecha(fecha) : '—') : (fechaInicio && fechaFin ? formatRangoFechas(fechaInicio, fechaFin) : '—')}
+                </span>
+                <span className="text-gray-500 uppercase tracking-widest">{tipoAlquiler === 'dia' ? 'Días' : 'Noches'}</span>
+                <span className="text-white font-bold text-right">
+                  {tipoAlquiler === 'dia' ? (fecha ? 1 : '—') : (diasEntre(fechaInicio, fechaFin) ?? '—')}
+                </span>
+                <span className="text-gray-500 uppercase tracking-widest">Total</span>
+                <span className="text-white font-bold text-right">{formatPesos(bonificada ? 0 : valorTotal)}</span>
+                <span className="text-gray-500 uppercase tracking-widest">Saldo</span>
+                <span className={`font-bold text-right ${editingReserva && Number(editingReserva.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                  {editingReserva ? (estaSaldada(editingReserva) ? 'Saldado' : formatPesos(editingReserva.saldo)) : '—'}
+                </span>
+              </div>
+            </div>
+
+            {/* Más opciones: notas + historial, cerrado por defecto — uso
+                poco frecuente, no debería ocupar espacio arriba del fold. */}
+            <div className="border border-white/10 rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setMasOpcionesAbierto((v) => !v)}
+                className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-white transition-all"
+              >
+                Más opciones
+                <ChevronDown size={14} className={`transition-transform ${masOpcionesAbierto ? 'rotate-180' : ''}`} />
+              </button>
+              {masOpcionesAbierto && (
+                <div className="px-4 pb-4 space-y-4 border-t border-white/10 pt-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Notas</label>
+                    <textarea
+                      rows={3}
+                      value={notas}
+                      onChange={(e) => setNotas(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none resize-none"
+                    />
+                  </div>
+                  {editingReserva && (
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Historial</p>
+                      <Historial tipo="reserva" id={editingReserva.id} compact />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </form>
       </Modal>
 

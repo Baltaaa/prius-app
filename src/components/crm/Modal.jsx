@@ -6,7 +6,12 @@ import { X } from 'lucide-react'
 // de contenedores con `transform` (animate-premium-fade), y un `position: fixed`
 // adentro de un ancestro con transform queda atrapado en ese recuadro en vez de
 // cubrir el viewport. El portal lo saca de ahí y el overlay tapa/blurea todo.
-export default function Modal({ isOpen, onClose, title, children }) {
+// `maxWidthClass`/`footer` (oct 2026, Tarea 5): opt-in, default igual al
+// comportamiento de siempre — así los demás modales de la app (Clientes,
+// RegistrarPago, etc.) no cambian un píxel. `footer`, si se pasa, queda
+// sticky abajo (fuera del body con scroll), para modales anchos con mucho
+// contenido como "Nueva reserva".
+export default function Modal({ isOpen, onClose, title, children, maxWidthClass = 'sm:max-w-lg', footer }) {
   useEffect(() => {
     if (!isOpen) return
     const onKey = (e) => e.key === 'Escape' && onClose?.()
@@ -30,7 +35,7 @@ export default function Modal({ isOpen, onClose, title, children }) {
       onClick={onClose}
     >
       <div
-        className="glass-card w-full sm:max-w-lg max-h-[92vh] sm:max-h-[90vh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-white/10 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200"
+        className={`glass-card w-full ${maxWidthClass} max-h-[92vh] sm:max-h-[90dvh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-white/10 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Gesto de cierre (mobile) */}
@@ -51,6 +56,12 @@ export default function Modal({ isOpen, onClose, title, children }) {
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
           {children}
         </div>
+
+        {footer && (
+          <div className="shrink-0 border-t border-white/10 bg-white/5 p-4 sm:p-6">
+            {footer}
+          </div>
+        )}
       </div>
     </div>,
     document.body,
