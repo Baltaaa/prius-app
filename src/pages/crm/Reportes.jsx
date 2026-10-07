@@ -6,6 +6,9 @@ import KpiCard from '../../components/crm/KpiCard'
 import BrandSelect from '../../components/ui/BrandSelect'
 import { formatPesos, unidadEmoji } from '../../lib/format'
 import { linkToCliente } from '../../lib/deepLinks'
+import { isFeatureEnabled } from '../../lib/features'
+import ClienteDrawer from '../../components/crm/ClienteDrawer'
+import RegistrarPago from '../../components/crm/RegistrarPago'
 
 const OPCIONES_TEMPORADA = [
   { value: 'all', label: 'Todas las temporadas' },
@@ -16,6 +19,13 @@ export default function Reportes() {
   const navigate = useNavigate()
   const { reservas, loading } = useReservas()
   const [temporadaFilter, setTemporadaFilter] = useState('2025-2026')
+  // [feat-3] drawer de cliente en vez de navegar directo a Clientes.
+  const [drawerClienteId, setDrawerClienteId] = useState(null)
+  const [pagoCliente, setPagoCliente] = useState(null)
+  const drawerFeatureOn = isFeatureEnabled('feat-3-drawer-cliente')
+  const abrirCliente = (res) => drawerFeatureOn
+    ? setDrawerClienteId(res.cliente_id)
+    : navigate(linkToCliente(res.cliente_id, { reservaId: res.id }))
 
   const activeReservas = useMemo(
     () => reservas.filter(r => temporadaFilter === 'all' || r.temporada === temporadaFilter),
@@ -91,7 +101,7 @@ export default function Reportes() {
             <button
               type="button"
               key={res.id}
-              onClick={() => navigate(linkToCliente(res.cliente_id, { reservaId: res.id }))}
+              onClick={() => abrirCliente(res)}
               className="w-full text-left p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between gap-3 hover:bg-white/10 transition-all"
             >
               <div className="min-w-0">
@@ -117,7 +127,7 @@ export default function Reportes() {
             {activeReservas.map(res => (
               <tr
                 key={res.id}
-                onClick={() => navigate(linkToCliente(res.cliente_id, { reservaId: res.id }))}
+                onClick={() => abrirCliente(res)}
                 className="hover:bg-white/5 transition-all cursor-pointer"
               >
                 <td className="px-6 py-4 font-bold uppercase text-white">{res.clientes?.nombre}</td>
@@ -129,6 +139,20 @@ export default function Reportes() {
         </table>
         </div>
       </div>
+
+      {drawerFeatureOn && (
+        <ClienteDrawer
+          clienteId={drawerClienteId}
+          onClose={() => setDrawerClienteId(null)}
+          onRegistrarPago={(cliente) => setPagoCliente(cliente)}
+        />
+      )}
+      <RegistrarPago
+        isOpen={!!pagoCliente}
+        onClose={() => setPagoCliente(null)}
+        cliente={pagoCliente}
+        reservasOptions={pagoCliente ? activeReservas.filter((r) => r.cliente_id === pagoCliente.id && !r.bonificada) : []}
+      />
     </div>
   )
 }
