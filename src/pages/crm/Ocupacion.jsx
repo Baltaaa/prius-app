@@ -5,6 +5,8 @@ import { unidadEmoji, formatFecha, formatRangoFechas, formatMesAnio } from '../.
 import { COLOR_TIPO_ALQUILER, colorReserva } from '../../lib/colors'
 import { linkToPlano } from '../../lib/deepLinks'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
+import DateInput from '../../components/inputs/DateInput'
+import { isFeatureEnabled } from '../../lib/features'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Vista de ocupación en un rango de fechas — distinta del Plano (que solo
@@ -247,6 +249,11 @@ export default function Ocupacion() {
           <button onClick={irHoy} className="px-3 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-300 transition-all">
             Hoy
           </button>
+          {/* [feat-5] "Ir a fecha": salta directo al día/semana/mes elegido
+              sin tener que ir clickeando anterior/siguiente. */}
+          {isFeatureEnabled('feat-5-ir-a-fecha') && (
+            <DateInput value={anchor} onChange={(v) => v && setAnchor(v)} className="w-36" />
+          )}
           <span className="text-sm font-bold text-white capitalize px-2">{tituloRango}</span>
         </div>
 
