@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
 import { useLeads, waLink } from '../../hooks/useLeads'
 import { formatFechaHora } from '../../lib/format'
 import { Mail, Phone, Check, X, RotateCcw, Inbox } from 'lucide-react'
@@ -35,7 +36,9 @@ const fmt = formatFechaHora
 
 export default function Leads() {
   const { leads, loading, sinContactar, updateLead } = useLeads()
-  const [filtro, setFiltro] = useState('todos')
+  // [feat-8] filtro "Sin contactar/Todos" persistido en la URL (apagable
+  // en lib/features.ts).
+  const [filtro, setFiltro] = useFeatureUrlState('feat-8-leads-filtro-url', 'estado', 'todos')
 
   const visibles = useMemo(() => {
     if (filtro === 'todos') return leads
