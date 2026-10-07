@@ -8,10 +8,18 @@ import { pagoSinVerificar, tienePagoSinVerificar } from '../../lib/reservas'
 import MontoReserva from '../../components/crm/MontoReserva'
 import SaldoReserva from '../../components/crm/SaldoReserva'
 import { Printer, FileText, CheckCircle, HelpCircle } from 'lucide-react'
+import { usePreferenciaUsuario } from '../../hooks/usePreferenciaUsuario'
+import { isFeatureEnabled } from '../../lib/features'
 
 export default function Comprobantes() {
   const { reservas, loading } = useReservas()
-  const [selectedReservaId, setSelectedReservaId] = useState('')
+  // [feat-9] recuerda la última reserva elegida, por usuario, sin
+  // localStorage (preferencias_usuario) — si la feature está apagada,
+  // vuelve a ser un useState local que arranca vacío cada vez.
+  const [selectedReservaIdPref, setSelectedReservaIdPref] = usePreferenciaUsuario('comprobantes_ultima_reserva', '')
+  const [selectedReservaIdLocal, setSelectedReservaIdLocal] = useState('')
+  const selectedReservaId = isFeatureEnabled('feat-9-comprobantes-recordar-config') ? selectedReservaIdPref : selectedReservaIdLocal
+  const setSelectedReservaId = isFeatureEnabled('feat-9-comprobantes-recordar-config') ? setSelectedReservaIdPref : setSelectedReservaIdLocal
 
   const selectedReserva = reservas.find(r => r.id === selectedReservaId) || reservas[0]
   // Reutiliza el módulo Comprobantes para listar los pagos/comprobantes ya
