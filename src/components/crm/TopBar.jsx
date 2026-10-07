@@ -1,15 +1,16 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
-import { unidadEmoji, normalizeText } from '../../lib/format'
-import { parseDNI, parseUnidadQuery } from '../../lib/parse'
+import { unidadEmoji, normalizeText, formatComprobante } from '../../lib/format'
+import { parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToPlano } from '../../lib/deepLinks'
 import { useOverlay } from '../../context/OverlayProvider'
+import { isFeatureEnabled } from '../../lib/features'
 import SearchInput from '../inputs/SearchInput'
 import {
   Search, Bell, User, LogOut, ChevronDown, X, Wallet, Calendar, AlertCircle,
@@ -96,8 +97,10 @@ export default function TopBar() {
   // abre una búsqueda a pantalla completa, para no competir por espacio con
   // título/avatar en 360px.
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const searchInputRef = useRef(null)
+  const searchFeatureOn = isFeatureEnabled('feat-1-search-global-mejorado')
   const { items: notifItems, count: notifCount } = useNotifications()
-  const { clientes, reservas } = useData()
+  const { clientes, reservas, unidades, pagos } = useData()
   const { perfil, rol, signOut } = useAuth()
 
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
@@ -152,9 +155,68 @@ export default function TopBar() {
       .slice(0, 5)
   }, [reservas, term, unidadQuery, activo])
 
+  // [feat-1] unidades por número ("18", "c.19", "sombrilla 14") — antes el
+  // search global solo encontraba una unidad indirectamente, si tenía una
+  // reserva activa que matcheara. Ahora la unidad aparece aunque esté
+  // libre, y lleva al Plano.
+  const unidadMatches = useMemo(() => {
+    if (!searchFeatureOn || !unidadQuery) return []
+    return (unidades || [])
+      .filter((u) => u.numero === unidadQuery.numero && (!unidadQuery.tipo || u.tipo === unidadQuery.tipo))
+      .slice(0, 5)
+  }, [unidades, unidadQuery])
+
+  // [feat-1] comprobantes — mismo normalizarNumeroComprobante() que ya usa
+  // el buscador de Clientes (Tarea 3), acá a nivel global.
+  const comprobanteMatches = useMemo(() => {
+    const termNorm = normalizarNumeroComprobante(debouncedSearch)
+    if (!searchFeatureOn || termNorm.length < 2) return []
+    const out = []
+    for (const p of pagos || []) {
+      for (const c of p.comprobantes || []) {
+        if (normalizarNumeroComprobante(c.numero).includes(termNorm)) {
+          out.push({ pago: p, comprobante: c })
+          if (out.length >= 5) return out
+        }
+      }
+    }
+    return out
+  }, [pagos, debouncedSearch])
+
   const showDropdown = searchValue.trim().length > 0
   const closeSearch = () => setSearchValue('')
   const closeMobileSearch = () => { setMobileSearchOpen(false); closeSearch() }
+
+  // [feat-1] navegación con flechas + Enter sobre la lista combinada de
+  // resultados (clientes, unidades, reservas, comprobantes, en ese orden
+  // — mismo orden en que se muestran). Ctrl/Cmd+K enfoca el buscador
+  // desde cualquier pantalla.
+  const resultadosFlat = useMemo(() => [
+    ...clienteMatches.map((x) => ({ tipo: 'cliente', data: x })),
+    ...unidadMatches.map((x) => ({ tipo: 'unidad', data: x })),
+    ...reservaMatches.map((x) => ({ tipo: 'reserva', data: x })),
+    ...comprobanteMatches.map((x) => ({ tipo: 'comprobante', data: x })),
+  ], [clienteMatches, unidadMatches, reservaMatches, comprobanteMatches])
+  const [activeIdx, setActiveIdx] = useState(-1)
+  useEffect(() => { setActiveIdx(-1) }, [debouncedSearch])
+
+  const irAResultado = (r) => {
+    if (!r) return
+    if (r.tipo === 'cliente') return goToCliente(r.data)
+    if (r.tipo === 'reserva') return goToReserva(r.data)
+    if (r.tipo === 'unidad') { navigate(linkToPlano(undefined, r.data.id)); closeSearch(); setMobileSearchOpen(false) }
+    if (r.tipo === 'comprobante') {
+      navigate(linkToCliente(r.data.pago.cliente_id, { pagoId: r.data.pago.id }))
+      closeSearch(); setMobileSearchOpen(false)
+    }
+  }
+
+  const handleSearchKeyDown = (e) => {
+    if (!showDropdown || resultadosFlat.length === 0) return
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx((i) => Math.min(resultadosFlat.length - 1, i + 1)) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx((i) => Math.max(0, i - 1)) }
+    else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); irAResultado(resultadosFlat[activeIdx]) }
+  }
 
   // Overlay manager (Tarea 1, oct 2026): un solo mecanismo central —
   // abrir cualquiera de estos tres cierra los otros dos solo, sin cross-calls
@@ -167,6 +229,23 @@ export default function TopBar() {
   // Pantalla completa, sin "afuera" — se registra solo para Escape y para
   // que abrirla cierre cualquier otro overlay que hubiera quedado abierto.
   const mobileSearchOverlay = useOverlay({ id: 'topbar-mobile-search', isOpen: mobileSearchOpen, onRequestClose: closeMobileSearch })
+
+  // [feat-1] Ctrl/Cmd+K enfoca el buscador desde cualquier pantalla —
+  // desktop enfoca el input inline, mobile abre la búsqueda a pantalla
+  // completa (no hay dónde enfocar si no está montada).
+  useEffect(() => {
+    if (!searchFeatureOn) return
+    const onKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        if (window.matchMedia('(max-width: 639px)').matches) setMobileSearchOpen(true)
+        else searchInputRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchFeatureOn])
 
   const goToCliente = (cliente) => {
     navigate(linkToCliente(cliente.id))
@@ -207,16 +286,18 @@ export default function TopBar() {
           bloque debajo del header) — no compite por espacio con título/avatar. */}
       <div ref={searchOverlay.bind} className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 max-w-[calc(100%-2rem)] z-10">
         <SearchInput
+          ref={searchInputRef}
           value={searchValue}
           onChange={setSearchValue}
-          placeholder="Buscar cliente, reserva o unidad..."
+          onKeyDown={handleSearchKeyDown}
+          placeholder="Buscar cliente, reserva, unidad o comprobante..."
         />
 
         {showDropdown && (
             <div className="absolute left-0 right-0 mt-2 glass-popover rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto">
               {!activo ? (
                 <p className="px-4 py-6 text-center text-xs text-gray-500">Seguí escribiendo (mínimo 2 caracteres)...</p>
-              ) : clienteMatches.length === 0 && reservaMatches.length === 0 ? (
+              ) : resultadosFlat.length === 0 ? (
                 <p className="px-4 py-6 text-center text-xs text-gray-500">Sin resultados para "{searchValue}"</p>
               ) : (
                 <>
@@ -236,8 +317,23 @@ export default function TopBar() {
                     </div>
                   )}
 
+                  {unidadMatches.length > 0 && (
+                    <div className="border-t border-white/10">
+                      <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Unidades</p>
+                      {unidadMatches.map((u) => (
+                        <button
+                          key={u.id}
+                          onClick={() => irAResultado({ tipo: 'unidad', data: u })}
+                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors uppercase text-xs font-bold text-white"
+                        >
+                          {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   {reservaMatches.length > 0 && (
-                    <div className={clienteMatches.length > 0 ? 'border-t border-white/10' : ''}>
+                    <div className="border-t border-white/10">
                       <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Reservas</p>
                       {reservaMatches.map((reserva) => (
                         <button
@@ -252,6 +348,21 @@ export default function TopBar() {
                             </span>
                           </span>
                           <StatusBadge status={estadoBadgeStatus(reserva)} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {comprobanteMatches.length > 0 && (
+                    <div className="border-t border-white/10">
+                      <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Comprobantes</p>
+                      {comprobanteMatches.map(({ pago, comprobante }) => (
+                        <button
+                          key={comprobante.id}
+                          onClick={() => irAResultado({ tipo: 'comprobante', data: { pago, comprobante } })}
+                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-xs font-bold text-white"
+                        >
+                          {formatComprobante(comprobante.tipo, comprobante.numero)}
                         </button>
                       ))}
                     </div>
@@ -388,7 +499,7 @@ export default function TopBar() {
             <SearchInput
               value={searchValue}
               onChange={setSearchValue}
-              placeholder="Buscar cliente, reserva o unidad..."
+              placeholder="Buscar cliente, reserva, unidad o comprobante..."
               autoFocus
               className="flex-1 min-w-0"
             />
@@ -404,7 +515,7 @@ export default function TopBar() {
               <p className="px-6 py-8 text-center text-xs text-gray-500">Escribí para buscar un cliente, una reserva o una unidad (ej. "carpa 19").</p>
             ) : !activo ? (
               <p className="px-6 py-8 text-center text-xs text-gray-500">Seguí escribiendo (mínimo 2 caracteres)...</p>
-            ) : clienteMatches.length === 0 && reservaMatches.length === 0 ? (
+            ) : resultadosFlat.length === 0 ? (
               <p className="px-6 py-8 text-center text-xs text-gray-500">Sin resultados para "{searchValue}"</p>
             ) : (
               <>
@@ -419,6 +530,20 @@ export default function TopBar() {
                       >
                         <p className="text-sm font-bold text-white truncate">{cliente.nombre}</p>
                         {cliente.telefono && <p className="text-xs text-gray-500">{cliente.telefono}</p>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {unidadMatches.length > 0 && (
+                  <div>
+                    <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Unidades</p>
+                    {unidadMatches.map((u) => (
+                      <button
+                        key={u.id}
+                        onClick={() => { irAResultado({ tipo: 'unidad', data: u }); setMobileSearchOpen(false) }}
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-white/10 transition-colors border-b border-white/5 uppercase text-sm font-bold text-white"
+                      >
+                        {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
                       </button>
                     ))}
                   </div>
@@ -439,6 +564,20 @@ export default function TopBar() {
                           </span>
                         </span>
                         <StatusBadge status={estadoBadgeStatus(reserva)} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {comprobanteMatches.length > 0 && (
+                  <div>
+                    <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Comprobantes</p>
+                    {comprobanteMatches.map(({ pago, comprobante }) => (
+                      <button
+                        key={comprobante.id}
+                        onClick={() => { irAResultado({ tipo: 'comprobante', data: { pago, comprobante } }); setMobileSearchOpen(false) }}
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-white/10 transition-colors border-b border-white/5 text-sm font-bold text-white"
+                      >
+                        {formatComprobante(comprobante.tipo, comprobante.numero)}
                       </button>
                     ))}
                   </div>

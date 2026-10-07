@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import { Search, X } from 'lucide-react'
 
 /**
@@ -15,13 +16,22 @@ export interface SearchInputProps {
   autoFocus?: boolean
   className?: string
   inputClassName?: string
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
-export default function SearchInput({ value, onChange, placeholder = 'Buscar...', autoFocus, className = '', inputClassName = '' }: SearchInputProps) {
+// forwardRef (Tarea 6, feat-1, oct 2026): Ctrl/Cmd+K necesita poder enfocar
+// el input desde TopBar.jsx sin tocar al resto de las pantallas que usan
+// este mismo componente — ref/onKeyDown son opcionales, default sin pasar
+// ninguno de los dos deja el comportamiento exactamente igual que antes.
+const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput(
+  { value, onChange, placeholder = 'Buscar...', autoFocus, className = '', inputClassName = '', onKeyDown },
+  ref,
+) {
   return (
     <div className={`relative ${className}`}>
       <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
       <input
+        ref={ref}
         type="text"
         inputMode="search"
         enterKeyHint="search"
@@ -29,6 +39,7 @@ export default function SearchInput({ value, onChange, placeholder = 'Buscar...'
         autoComplete="off"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         className={`w-full pl-10 pr-10 min-h-[44px] py-2 bg-white/5 border border-white/10 focus:border-white/30 outline-none text-sm rounded-lg text-white placeholder-gray-500 transition-all ${inputClassName}`}
       />
@@ -44,4 +55,6 @@ export default function SearchInput({ value, onChange, placeholder = 'Buscar...'
       )}
     </div>
   )
-}
+})
+
+export default SearchInput
