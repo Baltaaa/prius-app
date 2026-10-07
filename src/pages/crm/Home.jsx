@@ -6,9 +6,12 @@ import { useCaja } from '../../hooks/useCaja'
 import KpiCard from '../../components/crm/KpiCard'
 import StatusBadge from '../../components/crm/StatusBadge'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
-import { Calendar, Wallet, Users, AlertCircle, ArrowRight } from 'lucide-react'
+import { Calendar, Wallet, Users, AlertCircle, ArrowRight, Clock } from 'lucide-react'
 import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
 import { estadoBadgeStatus } from '../../lib/reservas'
+import { useRecientes } from '../../hooks/useRecientes'
+import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
+import { isFeatureEnabled } from '../../lib/features'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -16,6 +19,8 @@ export default function Home() {
   const { clientes, loading: cliLoading } = useClientes()
   const { cajaHoy, historialCajas, loading: cajaLoading } = useCaja()
   const [detalleReserva, setDetalleReserva] = useState(null)
+  const recientesFeatureOn = isFeatureEnabled('feat-4-recientes-home')
+  const { items: recientes } = useRecientes(5)
 
   const unidadesOcupadasCount = unidades.filter(u => u.estado === 'ocupada' || u.estado === 'reservada').length
   const totalCajaHoy = cajaHoy ? cajaHoy.total_cobros : 0
@@ -173,6 +178,32 @@ export default function Home() {
           </>
         )}
       </div>
+
+      {/* [feat-4] Recientes: últimos clientes/reservas que abrió este
+          usuario, por usuario y entre dispositivos (vistas_recientes, sin
+          localStorage). */}
+      {recientesFeatureOn && recientes.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 flex items-center gap-2">
+            <Clock size={14} /> Recientes
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {recientes.map((r) => (
+              <button
+                key={`${r.tipo}-${r.id}`}
+                onClick={() => navigate(r.tipo === 'cliente' ? linkToCliente(r.id) : linkToReserva(r.id))}
+                className="glass-card px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-white/10 transition-all flex items-center gap-2"
+              >
+                {r.tipo === 'cliente' ? (
+                  <>{r.cliente?.nombre || 'Cliente'}</>
+                ) : (
+                  <>{r.reserva?.clientes?.nombre || 'S/N'} · {unidadEmoji(r.reserva?.unidades?.tipo)} #{r.reserva?.unidades?.numero}</>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <ReservaDetalleModal reserva={detalleReserva} onClose={() => setDetalleReserva(null)} />
     </div>

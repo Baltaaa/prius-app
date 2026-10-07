@@ -13,6 +13,7 @@ import { usePermiso } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
+import { registrarVisto } from '../../hooks/useRecientes'
 import { linkToCliente } from '../../lib/deepLinks'
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
@@ -159,6 +160,7 @@ export default function Reservas() {
   }
 
   const handleOpenEdit = (res) => {
+    registrarVisto('reserva', res.id) // [feat-4]
     setMasOpcionesAbierto(false)
     setEditingReserva(res)
     setClienteId(res.cliente_id || '')

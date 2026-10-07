@@ -11,6 +11,7 @@ import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } f
 import { scrollAndHighlight } from '../../lib/highlight'
 import { linkToNuevaReservaCliente } from '../../lib/deepLinks'
 import { isFeatureEnabled } from '../../lib/features'
+import { registrarVisto } from '../../hooks/useRecientes'
 import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
 import {
   coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus,
@@ -317,6 +318,7 @@ export default function Clientes() {
   const handleToggleExpand = (clienteId, wasExpanded) => {
     setExpandedId(wasExpanded ? null : clienteId)
     if (wasExpanded) return
+    registrarVisto('cliente', clienteId) // [feat-4]
     setTimeout(() => {
       document.querySelector(`[data-cliente-id="${clienteId}"]`)
         ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
