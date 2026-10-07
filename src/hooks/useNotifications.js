@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useData } from '../context/DataProvider'
-import { useNotificacionesLeidas } from './useNotificacionesLeidas'
+import { useNotificacionesLeidas } from '../context/NotificacionesLeidasProvider'
 import { formatPesos } from '../lib/format'
 
 const todayStr = () => new Date().toISOString().split('T')[0]

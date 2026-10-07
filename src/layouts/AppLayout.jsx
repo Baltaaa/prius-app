@@ -5,6 +5,7 @@ import TopBar from '../components/crm/TopBar'
 import BottomNav from '../components/crm/BottomNav'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
+import { NotificacionesLeidasProvider } from '../context/NotificacionesLeidasProvider'
 
 // Mobile-first (sept 2026): el Sidebar con drawer quedó solo para desktop —
 // en mobile la navegación completa vive en BottomNav (5 ítems + "Más"), así
@@ -13,6 +14,7 @@ export default function AppLayout() {
   return (
     <DialogProvider>
       <DataProvider>
+        <NotificacionesLeidasProvider>
         <div className="h-screen w-screen flex text-white overflow-hidden">
           {/* Sidebar: solo desktop (oculto por completo en mobile, ver Sidebar.jsx) */}
           <Sidebar />
@@ -36,6 +38,7 @@ export default function AppLayout() {
 
           <BottomNav />
         </div>
+        </NotificacionesLeidasProvider>
       </DataProvider>
     </DialogProvider>
   )
