@@ -11,15 +11,24 @@
  * poner ese atributo en la fila/tarjeta correspondiente.
  */
 
-export function linkToCliente(clienteId: string, opts?: { pagoId?: string; reservaId?: string }): string {
+export function linkToCliente(clienteId: string, opts?: { pagoId?: string; reservaId?: string; accion?: 'pagar' }): string {
   const params = new URLSearchParams({ id: clienteId })
   if (opts?.pagoId) params.set('pago', opts.pagoId)
   if (opts?.reservaId) params.set('reserva', opts.reservaId)
+  // [feat-2] accion=pagar: además de resaltar, abre directo RegistrarPago
+  // para ese cliente — usado desde la notificación de saldo pendiente.
+  if (opts?.accion) params.set('accion', opts.accion)
   return `/app/clientes?${params.toString()}`
 }
 
 export function linkToReserva(reservaId: string): string {
   return `/app/reservas?id=${reservaId}`
+}
+
+// [feat-2] "Nueva reserva" con el cliente ya precargado — usado desde la
+// fila de un cliente en Clientes.jsx.
+export function linkToNuevaReservaCliente(clienteId: string): string {
+  return `/app/reservas?cliente=${clienteId}`
 }
 
 export function linkToPlano(fecha?: string | null, unidadId?: string | null): string {

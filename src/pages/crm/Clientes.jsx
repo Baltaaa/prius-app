@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useClientes } from '../../hooks/useClientes'
 import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
@@ -9,6 +9,8 @@ import { useOverlay } from '../../context/OverlayProvider'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
+import { linkToNuevaReservaCliente } from '../../lib/deepLinks'
+import { isFeatureEnabled } from '../../lib/features'
 import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
 import {
   coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus,
@@ -32,7 +34,7 @@ import SearchInput from '../../components/inputs/SearchInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import StatusBadge from '../../components/crm/StatusBadge'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
-import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, CircleDollarSign, Filter, Check } from 'lucide-react'
+import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, CircleDollarSign, Filter, Check, CalendarPlus } from 'lucide-react'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
 // reserva de período/día activa hoy — temporada actual, temporadas pasadas,
@@ -104,6 +106,7 @@ const precioSinDefinir = (reservasCliente) => {
 }
 
 export default function Clientes() {
+  const navigate = useNavigate()
   const { clientes, loading, createCliente, updateCliente, deleteCliente } = useClientes()
   const {
     reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva, crearGrupoReservas,
@@ -329,12 +332,23 @@ export default function Clientes() {
   // Notificaciones cae exactamente en la celda referida, no solo en el
   // cliente.
   useDeepLinkTarget({
-    params: ['id', 'pago', 'reserva'],
+    params: ['id', 'pago', 'reserva', 'accion'],
     ready: !loading,
-    resolve: ({ id, pago, reserva }) => {
+    resolve: ({ id, pago, reserva, accion }) => {
       const cliente = clientes.find((c) => c.id === id)
       if (!cliente) return null
       setExpandedId(cliente.id)
+      // [feat-2] accion=pagar (desde la notificación de saldo pendiente):
+      // abre directo RegistrarPago para esa reserva, no solo resalta.
+      if (accion === 'pagar') {
+        const reservaObj = reserva
+          ? (reservasPorCliente[cliente.id] || []).find((r) => r.id === reserva)
+          : (reservasPorCliente[cliente.id] || []).find((r) => r.estado !== 'cancelada' && !r.bonificada && Number(r.saldo) > 0)
+        if (reservaObj) {
+          setPagoCelda({ reserva: { ...reservaObj, clientes: cliente }, pago: null })
+          return true
+        }
+      }
       if (pago) return `pago-${pago}`
       if (reserva) return `reserva-${reserva}`
       return cliente.id
@@ -682,6 +696,17 @@ export default function Clientes() {
                       >
                         <Wallet size={16} />
                       </button>
+                      {/* [feat-2] acción rápida: nueva reserva con este
+                          cliente ya precargado. */}
+                      {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
+                        <button
+                          onClick={() => navigate(linkToNuevaReservaCliente(cliente.id))}
+                          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-cyan-400 transition-all"
+                          title="Nueva reserva"
+                        >
+                          <CalendarPlus size={16} />
+                        </button>
+                      )}
                       <button onClick={() => handleOpenEdit(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-[#FDE047] transition-all" title="Editar">
                         <Edit2 size={16} />
                       </button>

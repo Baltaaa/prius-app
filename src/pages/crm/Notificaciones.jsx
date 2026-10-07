@@ -130,7 +130,13 @@ export default function Notificaciones() {
   // auto-corrige si hace falta).
   const handleAccion = (item) => {
     if (item.type === 'caja') return navigate('/app/caja')
-    if ((item.type === 'saldo' || item.type === 'pendiente_confirmacion') && item.clienteId) {
+    // [feat-2] saldo pendiente va directo al formulario de pago (no solo
+    // resaltado) — pendiente_confirmacion no, esa es "Confirmar temporada",
+    // un flujo distinto.
+    if (item.type === 'saldo' && item.clienteId) {
+      return navigate(linkToCliente(item.clienteId, { reservaId: item.reservaId, accion: 'pagar' }))
+    }
+    if (item.type === 'pendiente_confirmacion' && item.clienteId) {
       return navigate(linkToCliente(item.clienteId, { reservaId: item.reservaId }))
     }
     if (item.type === 'checkin' || item.type === 'checkin_mañana') {

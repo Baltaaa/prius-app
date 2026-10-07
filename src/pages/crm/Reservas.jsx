@@ -356,6 +356,22 @@ export default function Reservas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, resLoading, cliLoading])
 
+  // [feat-2] Deep-link desde "Nueva reserva" en la fila de un cliente
+  // (Clientes.jsx): /app/reservas?cliente=<uuid> — abre el alta con el
+  // cliente ya elegido.
+  useEffect(() => {
+    const cliente = searchParams.get('cliente')
+    if (!cliente || searchParams.get('id') || searchParams.get('unidad') || resLoading || cliLoading) return
+    handleOpenCreate()
+    setClienteId(cliente)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('cliente')
+      return next
+    }, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, resLoading, cliLoading])
+
   // Deep-link "Ver todas" desde el Historial de la temporada del modal de
   // unidad del Plano: /app/reservas?filtroUnidad=<uuid> — filtra la cola por
   // esa unidad (solo período/día; temporada vive en Clientes).

@@ -415,7 +415,9 @@ export default function TopBar() {
                       // cancelación -> la reserva. "Caja pendiente" no tiene
                       // destino: queda inerte.
                       const destino =
-                        (item.type === 'saldo' || item.type === 'pendiente_confirmacion') && item.clienteId
+                        item.type === 'saldo' && item.clienteId
+                          ? linkToCliente(item.clienteId, { reservaId: item.reservaId, accion: 'pagar' })
+                          : item.type === 'pendiente_confirmacion' && item.clienteId
                           ? linkToCliente(item.clienteId, { reservaId: item.reservaId })
                           : item.type === 'checkin'
                             ? linkToPlano(new Date().toISOString().split('T')[0], item.unidadId)
