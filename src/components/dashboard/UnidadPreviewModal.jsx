@@ -1,5 +1,6 @@
-import { useEffect } from "react"
+import { useEffect, useId } from "react"
 import { createPortal } from "react-dom"
+import { useOverlay } from "../../context/OverlayProvider"
 import { useNavigate } from "react-router-dom"
 import { X, Umbrella, Home, Users, ArrowRight, MapPin } from "lucide-react"
 import { usePagos } from "../../hooks/usePagos"
@@ -22,16 +23,14 @@ const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
 // Realtime que usa el Plano — no hace fetch propio, así que se actualiza
 // solo si la reserva cambia con el modal abierto.
 export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, onClose, onAsignarTemporada, onMoverUnidad }) {
+  const overlayId = useId()
+  const { bind } = useOverlay({ id: `unidad-preview-${overlayId}`, isOpen: !!unit, onRequestClose: () => onClose?.() })
+
   useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && onClose?.()
-    document.addEventListener("keydown", onKey)
     const prev = document.body.style.overflow
     document.body.style.overflow = "hidden"
-    return () => {
-      document.removeEventListener("keydown", onKey)
-      document.body.style.overflow = prev
-    }
-  }, [onClose])
+    return () => { document.body.style.overflow = prev }
+  }, [])
 
   const navigate = useNavigate()
   const reserva = unit?.reserva || null
@@ -65,9 +64,10 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
   return createPortal(
     <div
       className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
-      onClick={onClose}
+      onClick={() => onClose?.()}
     >
       <div
+        ref={bind}
         className="glass-card w-full sm:max-w-lg max-h-[92vh] sm:max-h-[85vh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-white/10 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >

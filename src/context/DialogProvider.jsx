@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AlertTriangle, Info } from 'lucide-react'
+import { useOverlay, useOverlayTop } from './OverlayProvider'
 
 // Reemplazo propio de window.confirm/window.alert: los diálogos nativos
 // congelan la pestaña completa (ni siquiera se puede sacar un screenshot
@@ -43,6 +44,23 @@ export function DialogProvider({ children }) {
     setDialog(null)
   }
 
+  // Click afuera + Escape vía el mecanismo central (Tarea 1, oct 2026) —
+  // antes no tenía Escape. Sin trigger DOM (se dispara desde código, no de
+  // un click visible): se ancla como hijo de lo que estuviera abierto en
+  // ese momento (ej. el Modal que llamó a confirm() al intentar cerrarse
+  // con cambios sin guardar) vía `parentId` explícito — así clickear
+  // afuera de este diálogo no intenta cerrar también al padre.
+  const peekTop = useOverlayTop()
+  const parentIdRef = useRef(null)
+  if (dialog && parentIdRef.current === null) parentIdRef.current = peekTop()
+  if (!dialog) parentIdRef.current = null
+  const { bind } = useOverlay({
+    id: 'app-dialog',
+    isOpen: !!dialog,
+    onRequestClose: () => close(dialog?.mode === 'confirm' ? false : undefined),
+    parentId: parentIdRef.current || undefined,
+  })
+
   const isDanger = dialog?.tone === 'danger' || dialog?.tone === 'error'
 
   return (
@@ -67,6 +85,7 @@ export function DialogProvider({ children }) {
           onClick={() => close(dialog.mode === 'confirm' ? false : undefined)}
         >
           <div
+            ref={bind}
             className="glass-card w-full max-w-sm rounded-2xl border border-white/10 shadow-2xl p-6 space-y-5"
             onClick={(e) => e.stopPropagation()}
           >

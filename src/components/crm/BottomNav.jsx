@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
+import { useOverlay } from '../../context/OverlayProvider'
 import {
   Home, Map, CalendarDays, Users, MoreHorizontal, X, Wallet, BarChart2,
   DoorClosed, Inbox, GanttChartSquare, Activity, Bell, FileText, UserCheck, LogOut,
@@ -24,6 +25,7 @@ const ITEMS = [
 export default function BottomNav() {
   const navigate = useNavigate()
   const [showMore, setShowMore] = useState(false)
+  const { bind: bindMore } = useOverlay({ id: 'bottomnav-mas', isOpen: showMore, onRequestClose: () => setShowMore(false) })
   const { count: notificationsCount } = useNotifications()
   const { sinContactar: leadsSinContactar } = useLeads()
   const { signOut, permiso } = useAuth()
@@ -87,6 +89,7 @@ export default function BottomNav() {
           onClick={() => setShowMore(false)}
         >
           <div
+            ref={bindMore}
             className="w-full max-h-[85vh] bg-[#0a0d14] border-t border-white/10 rounded-t-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
             onClick={(e) => e.stopPropagation()}
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}

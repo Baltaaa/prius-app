@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
@@ -12,6 +12,7 @@ import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
+import { useOverlay } from '../../context/OverlayProvider'
 import { linkToCliente } from '../../lib/deepLinks'
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
@@ -105,6 +106,7 @@ export default function Reservas() {
   const [pagoReserva, setPagoReserva] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showFiltros, setShowFiltros] = useState(false)
+  const filtrosOverlay = useOverlay({ id: 'reservas-filtros', isOpen: showFiltros, onRequestClose: () => setShowFiltros(false) })
   const [filtroUnidadId, setFiltroUnidadId] = useState(null) // deep-link "Ver todas" desde el modal de unidad del Plano
 
   // Form state
@@ -139,11 +141,21 @@ export default function Reservas() {
     setBonificada(false)
   }
 
+  // Snapshot del form al abrir (Tarea 1, oct 2026) — para que el Modal
+  // pueda preguntar "¿hay cambios sin guardar?" antes de cerrar por click
+  // afuera o Escape. Se compara contra los valores actuales en `isDirty`.
+  const formSnapshotRef = useRef('')
+  const snapshotForm = (f) => JSON.stringify(f)
+
   const handleOpenCreate = () => {
     setEditingReserva(null)
     resetForm()
     setMasOpcionesAbierto(false)
     setIsModalOpen(true)
+    formSnapshotRef.current = snapshotForm({
+      clienteId: '', unidadId: '', tipoAlquiler: 'periodo', fechaInicio: '', fechaFin: '',
+      fecha: '', valorTotal: 0, notas: '', bloqueada: false, bonificada: false,
+    })
   }
 
   const handleOpenEdit = (res) => {
@@ -160,7 +172,16 @@ export default function Reservas() {
     setBloqueada(res.bloqueada || false)
     setBonificada(res.bonificada || false)
     setIsModalOpen(true)
+    formSnapshotRef.current = snapshotForm({
+      clienteId: res.cliente_id || '', unidadId: res.unidad_id || '', tipoAlquiler: res.tipo_alquiler || 'periodo',
+      fechaInicio: res.fecha_inicio || '', fechaFin: res.fecha_fin || '', fecha: res.fecha || '',
+      valorTotal: res.valor_total ?? 0, notas: res.notas || '', bloqueada: res.bloqueada || false, bonificada: res.bonificada || false,
+    })
   }
+
+  const isFormDirty = () => snapshotForm({
+    clienteId, unidadId, tipoAlquiler, fechaInicio, fechaFin, fecha, valorTotal, notas, bloqueada, bonificada,
+  }) !== formSnapshotRef.current
 
   const handleToggleBloqueada = async () => {
     if (!editingReserva) return
@@ -541,7 +562,7 @@ export default function Reservas() {
             </button>
           )}
         </div>
-        <div className="relative">
+        <div ref={filtrosOverlay.bind} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
             className={`glass-card px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-[#FDE047]' : 'text-gray-400 hover:text-white'}`}
@@ -550,8 +571,6 @@ export default function Reservas() {
           </button>
 
           {showFiltros && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowFiltros(false)} />
               <div className="absolute right-0 mt-2 w-56 glass-card rounded-xl overflow-hidden z-50 p-3 space-y-3">
                 <div>
                   <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1 px-1">Estado de pago</p>
@@ -588,7 +607,6 @@ export default function Reservas() {
                   </button>
                 )}
               </div>
-            </>
           )}
         </div>
         <button
@@ -824,6 +842,7 @@ export default function Reservas() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingReserva ? 'Editar Reserva' : 'Nueva Reserva'}
+        isDirty={isFormDirty}
         maxWidthClass="sm:max-w-4xl"
         footer={
           <div className="flex items-center justify-between gap-4">

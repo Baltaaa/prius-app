@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AlertTriangle, X } from 'lucide-react'
+import { useOverlay } from '../../context/OverlayProvider'
 
 // Confirmación reforzada para cualquier borrado de dato raíz (reservas,
 // clientes, unidades): a diferencia de useDialog().confirm() (un simple
@@ -18,6 +19,12 @@ import { AlertTriangle, X } from 'lucide-react'
 export default function ConfirmDeleteModal({ isOpen, onClose, onConfirm, tipo, identificador, detalle, accion = 'eliminar' }) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const overlayId = useId()
+  const { bind } = useOverlay({
+    id: `confirmdelete-${overlayId}`,
+    isOpen,
+    onRequestClose: () => !loading && onClose?.(),
+  })
 
   useEffect(() => {
     if (isOpen) setInput('')
@@ -25,15 +32,10 @@ export default function ConfirmDeleteModal({ isOpen, onClose, onConfirm, tipo, i
 
   useEffect(() => {
     if (!isOpen) return
-    const onKey = (e) => e.key === 'Escape' && !loading && onClose?.()
-    document.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prev
-    }
-  }, [isOpen, onClose, loading])
+    return () => { document.body.style.overflow = prev }
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -55,6 +57,7 @@ export default function ConfirmDeleteModal({ isOpen, onClose, onConfirm, tipo, i
       onClick={() => !loading && onClose?.()}
     >
       <div
+        ref={bind}
         className="glass-card w-full max-w-sm rounded-2xl border border-red-500/20 shadow-2xl p-6 space-y-5"
         onClick={(e) => e.stopPropagation()}
       >

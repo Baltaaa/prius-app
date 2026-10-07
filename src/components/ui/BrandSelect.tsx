@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronDown, Search, Check } from 'lucide-react'
 import { normalizeText } from '../../lib/format'
+import { useOverlay } from '../../context/OverlayProvider'
 
 export type BrandSelectOption = {
   value: string
@@ -47,6 +48,14 @@ export default function BrandSelect({
   const triggerRef = useRef<HTMLButtonElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
+  const overlayId = useId()
+  // Overlay manager (Tarea 1, oct 2026) — crítico cuando este select vive
+  // adentro de un Modal (ej. "Unidad" en Nueva/Editar Reserva): sin esto,
+  // el panel portado a document.body no cuenta como "adentro" del Modal y
+  // clickear una opción cerraría el Modal entero (mismo bug que ya
+  // arreglamos en DateInput.tsx, generalizado por el manager).
+  const { bind } = useOverlay({ id: `brandselect-${overlayId}`, isOpen: open, onRequestClose: () => setOpen(false) })
+  const bindTrigger = (el: HTMLButtonElement | null) => { triggerRef.current = el; bind(el) }
 
   useEffect(() => {
     const mql = window.matchMedia('(max-width: 767px)')
@@ -210,7 +219,7 @@ export default function BrandSelect({
   return (
     <div className="relative">
       <button
-        ref={triggerRef}
+        ref={bindTrigger}
         type="button"
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : handleOpen())}
@@ -228,6 +237,7 @@ export default function BrandSelect({
           <>
             <div className="fixed inset-0 z-[1000]" onClick={() => setOpen(false)} />
             <div
+              ref={bind}
               onKeyDown={handleKeyDown}
               style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width }}
               className="z-[1001] bg-[#0a0d14] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
@@ -258,6 +268,7 @@ export default function BrandSelect({
             onClick={() => setOpen(false)}
           >
             <div
+              ref={bind}
               onClick={(e) => e.stopPropagation()}
               onKeyDown={handleKeyDown}
               className="w-full max-h-[80vh] bg-[#0a0d14] border-t border-white/10 rounded-t-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"

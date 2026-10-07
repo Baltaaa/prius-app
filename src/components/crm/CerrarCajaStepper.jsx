@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ChevronLeft, Check } from 'lucide-react'
 import { formatPesos } from '../../lib/format'
@@ -6,6 +6,8 @@ import MoneyInput from '../inputs/MoneyInput'
 import IntegerInput from '../inputs/IntegerInput'
 import DateInput from '../inputs/DateInput'
 import TextInput from '../inputs/TextInput'
+import { useOverlay } from '../../context/OverlayProvider'
+import { useDialog } from '../../context/DialogProvider'
 
 const PASOS = ['Arqueo', 'Cierre Z', 'Confirmación']
 
@@ -34,6 +36,23 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
+  // Overlay central + "¿Descartar cambios?" (Tarea 1, oct 2026) — antes no
+  // tenía backdrop-click ni Escape, solo la X. Es un formulario de plata
+  // (cierre de caja): cerrarlo por accidente a mitad de un arqueo es
+  // justo el caso que la confirmación de la Tarea 1 quiere evitar.
+  const overlayId = useId()
+  const { confirm } = useDialog()
+  const isDirty = () =>
+    paso > 0 || Number(efectivoContado) !== Number(efectivoEsperado || 0) || observaciones.trim() !== '' || tieneZ
+  const requestClose = async () => {
+    if (isDirty()) {
+      const ok = await confirm('Tenés cambios sin guardar. ¿Descartarlos?', { title: 'Descartar cambios' })
+      if (!ok) return
+    }
+    onClose()
+  }
+  const { bind } = useOverlay({ id: `cerrar-caja-${overlayId}`, isOpen, onRequestClose: requestClose })
+
   if (!isOpen) return null
 
   const diferencia = Number(efectivoContado) - Number(efectivoEsperado || 0)
@@ -56,8 +75,11 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] bg-[#0a0d14] sm:bg-black/70 sm:backdrop-blur-md sm:flex sm:items-center sm:justify-center sm:p-4">
-      <div className="h-full sm:h-auto sm:max-h-[90vh] w-full sm:max-w-lg glass-card sm:rounded-2xl flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-[999] bg-[#0a0d14] sm:bg-black/70 sm:backdrop-blur-md sm:flex sm:items-center sm:justify-center sm:p-4"
+      onClick={requestClose}
+    >
+      <div ref={bind} onClick={(e) => e.stopPropagation()} className="h-full sm:h-auto sm:max-h-[90vh] w-full sm:max-w-lg glass-card sm:rounded-2xl flex flex-col overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5 shrink-0">
           <div className="flex items-center gap-3">
             {paso > 0 && (
@@ -70,7 +92,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
               <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Paso {paso + 1} de 3 — {PASOS[paso]}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-white/50 hover:text-white">
+          <button onClick={requestClose} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-white/50 hover:text-white">
             <X size={20} />
           </button>
         </div>

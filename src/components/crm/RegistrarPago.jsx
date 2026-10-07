@@ -244,8 +244,14 @@ export default function RegistrarPago({
     )
   }
 
+  // Dirty check (Tarea 1, oct 2026): "¿escribió algo?" alcanza acá — no hay
+  // un valor inicial distinto de 0/vacío para comparar, a diferencia de
+  // Reservas.jsx que puede estar editando una reserva ya cargada.
+  const esFormularioDirty = () =>
+    Number(monto) > 0 || referencia.trim() !== '' || concepto.trim() !== '' || comprobanteAbierto
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Registrar Pago">
+    <Modal isOpen={isOpen} onClose={onClose} isDirty={esFormularioDirty} title="Registrar Pago">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 1. Reserva */}
         {reservasOptions.length > 1 || allowSinReserva ? (

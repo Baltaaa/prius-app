@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { DayPicker } from 'react-day-picker'
 import { es } from 'date-fns/locale'
@@ -6,6 +6,7 @@ import { CalendarDays } from 'lucide-react'
 import 'react-day-picker/style.css'
 import { formatFecha } from '../../lib/format'
 import { parseFecha } from '../../lib/parse'
+import { useOverlay } from '../../context/OverlayProvider'
 
 /**
  * Único input permitido para fechas en toda la app. Nunca un
@@ -72,6 +73,7 @@ export default function DateInput({
   const popoverRef = useRef<HTMLDivElement | null>(null)
   const autoId = useRef(`date-${Math.random().toString(36).slice(2, 9)}`).current
   const inputId = id || autoId
+  const overlayId = useId()
 
   useEffect(() => setTexto(value ? formatFecha(value) : ''), [value])
 
@@ -98,41 +100,20 @@ export default function DateInput({
     }
   }, [abierto, medirPosicion])
 
-  // Click afuera cierra — solo en modo tipeable. En calendarOnly el backdrop
-  // a pantalla completa es el único cierre "implícito" (más visible/explícito
-  // que un simple outside-click, que acá se evita a propósito).
-  //
-  // Bug (Tarea 4, oct 2026): el calendario se renderiza en un portal a
-  // document.body (ver arriba), fuera del subárbol de `wrapRef` — un click
-  // en CUALQUIER parte de adentro (cambiar de mes, un día deshabilitado,
-  // el propio panel) hacía `wrapRef.current.contains(e.target)` === false y
-  // cerraba el popover al toque, antes de que el click llegara a
-  // DayPicker. Hay que chequear también contra `popoverRef`, que sí
-  // envuelve el contenido del portal.
-  useEffect(() => {
-    if (!abierto || calendarOnly) return
-    const onDocClick = (e: MouseEvent) => {
-      const target = e.target as Node
-      if (wrapRef.current?.contains(target)) return
-      if (popoverRef.current?.contains(target)) return
-      setAbierto(false)
-    }
-    document.addEventListener('mousedown', onDocClick)
-    return () => document.removeEventListener('mousedown', onDocClick)
-  }, [abierto, calendarOnly])
-
-  // onKeyDown en vez de un listener en document: así el Escape se frena acá
-  // (stopPropagation) y no sigue de largo hasta el listener de Modal.jsx,
-  // que también escucha Escape en document y cerraría el modal entero. Los
-  // portals de React burbujean por el árbol de React, no por el DOM físico,
-  // así que esto también agarra el Escape apretado adentro del calendario
-  // (otro <div> montado en document.body).
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (abierto && e.key === 'Escape') {
-      e.stopPropagation()
-      setAbierto(false)
-    }
-  }
+  // Click afuera + Escape cierra, vía el mecanismo central (Tarea 1, oct
+  // 2026) — antes era un mousedown propio chequeando wrapRef/popoverRef a
+  // mano (el bug original que arreglamos en Tarea 4: el calendario vive en
+  // un portal, fuera del subárbol de wrapRef). El overlay manager ya
+  // generaliza ese chequeo multi-nodo para cualquier overlay, y detecta
+  // solo que este DateInput está anidado cuando se abre adentro de un
+  // Modal — no hace falta un stopPropagation manual del Escape.
+  const { bind } = useOverlay({
+    id: `dateinput-${overlayId}`,
+    isOpen: abierto,
+    onRequestClose: () => setAbierto(false),
+  })
+  const bindWrap = useCallback((el: HTMLDivElement | null) => { wrapRef.current = el; bind(el) }, [bind])
+  const bindPopover = useCallback((el: HTMLDivElement | null) => { popoverRef.current = el; bind(el) }, [bind])
 
   const handleTextBlur = () => {
     if (calendarOnly) return
@@ -156,13 +137,13 @@ export default function DateInput({
   ]
 
   return (
-    <div className={className} onKeyDown={handleKeyDown}>
+    <div className={className}>
       {label && (
         <label htmlFor={inputId} className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">
           {label}{required && <span className="text-red-400 ml-0.5">*</span>}
         </label>
       )}
-      <div className="relative" ref={wrapRef}>
+      <div className="relative" ref={bindWrap}>
         <input
           id={inputId}
           type="text"
@@ -198,10 +179,10 @@ export default function DateInput({
       {abierto && pos && createPortal(
         <>
           {calendarOnly && (
-            <div className="fixed inset-0 z-[1000] bg-black/60" onClick={() => setAbierto(false)} />
+            <div ref={bind} className="fixed inset-0 z-[1000] bg-black/60" onClick={() => setAbierto(false)} />
           )}
           <div
-            ref={popoverRef}
+            ref={bindPopover}
             className="fixed z-[1001] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0
                        bg-[#111520] border border-white/10 rounded-2xl shadow-2xl p-2 dp-dark"
             style={window.innerWidth >= 640 ? { top: pos.top, left: pos.left, minWidth: pos.width } : undefined}

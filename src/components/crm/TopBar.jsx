@@ -9,6 +9,7 @@ import { unidadEmoji, normalizeText } from '../../lib/format'
 import { parseDNI, parseUnidadQuery } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToPlano } from '../../lib/deepLinks'
+import { useOverlay } from '../../context/OverlayProvider'
 import SearchInput from '../inputs/SearchInput'
 import {
   Search, Bell, User, LogOut, ChevronDown, X, Wallet, Calendar, AlertCircle,
@@ -153,6 +154,19 @@ export default function TopBar() {
 
   const showDropdown = searchValue.trim().length > 0
   const closeSearch = () => setSearchValue('')
+  const closeMobileSearch = () => { setMobileSearchOpen(false); closeSearch() }
+
+  // Overlay manager (Tarea 1, oct 2026): un solo mecanismo central —
+  // abrir cualquiera de estos tres cierra los otros dos solo, sin cross-calls
+  // copiados (antes `setShowNotifications`/`setShowProfileMenu` se pisaban
+  // a mano entre sí). `bind` se adjunta al trigger y al panel de cada uno;
+  // un click en cualquiera de los dos cuenta como "adentro".
+  const searchOverlay = useOverlay({ id: 'topbar-search', isOpen: showDropdown, onRequestClose: closeSearch })
+  const notifOverlay = useOverlay({ id: 'topbar-notif', isOpen: showNotifications, onRequestClose: () => setShowNotifications(false) })
+  const profileOverlay = useOverlay({ id: 'topbar-profile', isOpen: showProfileMenu, onRequestClose: () => setShowProfileMenu(false) })
+  // Pantalla completa, sin "afuera" — se registra solo para Escape y para
+  // que abrirla cierre cualquier otro overlay que hubiera quedado abierto.
+  const mobileSearchOverlay = useOverlay({ id: 'topbar-mobile-search', isOpen: mobileSearchOpen, onRequestClose: closeMobileSearch })
 
   const goToCliente = (cliente) => {
     navigate(linkToCliente(cliente.id))
@@ -191,7 +205,7 @@ export default function TopBar() {
           de notificaciones/perfil) para que no se corra al cambiar de
           sección. En mobile pasa a un ícono que abre pantalla completa (ver
           bloque debajo del header) — no compite por espacio con título/avatar. */}
-      <div className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 max-w-[calc(100%-2rem)] z-10">
+      <div ref={searchOverlay.bind} className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 max-w-[calc(100%-2rem)] z-10">
         <SearchInput
           value={searchValue}
           onChange={setSearchValue}
@@ -199,9 +213,6 @@ export default function TopBar() {
         />
 
         {showDropdown && (
-          <>
-            {/* Backdrop: cierra el dropdown al tocar afuera */}
-            <div className="fixed inset-0 z-40" onClick={closeSearch} />
             <div className="absolute left-0 right-0 mt-2 glass-popover rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto">
               {!activo ? (
                 <p className="px-4 py-6 text-center text-xs text-gray-500">Seguí escribiendo (mínimo 2 caracteres)...</p>
@@ -248,7 +259,6 @@ export default function TopBar() {
                 </>
               )}
             </div>
-          </>
         )}
       </div>
 
@@ -261,9 +271,9 @@ export default function TopBar() {
           <Search size={20} />
         </button>
         {/* Notifications */}
-        <div className="relative">
+        <div ref={notifOverlay.bind} className="relative">
           <button
-            onClick={() => { setShowNotifications((v) => !v); setShowProfileMenu(false) }}
+            onClick={() => setShowNotifications((v) => !v)}
             className="text-gray-400 hover:text-white relative p-2 rounded-lg hover:bg-white/5 transition-all"
           >
             <Bell size={20} />
@@ -273,9 +283,6 @@ export default function TopBar() {
           </button>
 
           {showNotifications && (
-            <>
-              {/* Backdrop: cierra el panel al tocar afuera (clave en mobile) */}
-              <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
               <div className="absolute right-0 mt-3 w-80 max-w-[90vw] glass-popover rounded-xl overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
                   <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Notificaciones</p>
@@ -332,14 +339,13 @@ export default function TopBar() {
                   Ver todas
                 </button>
               </div>
-            </>
           )}
         </div>
 
         {/* Profile */}
-        <div className="relative">
+        <div ref={profileOverlay.bind} className="relative">
           <button
-            onClick={() => { setShowProfileMenu(!showProfileMenu); setShowNotifications(false) }}
+            onClick={() => setShowProfileMenu((v) => !v)}
             className="flex items-center gap-3 p-1 hover:bg-white/5 rounded-lg transition-all"
           >
             <div className="w-8 h-8 bg-[#FDE047] text-black rounded flex items-center justify-center font-bold text-sm">
@@ -377,7 +383,7 @@ export default function TopBar() {
       {/* Búsqueda mobile a pantalla completa (Tarea 4.2) — mismos resultados
           que el buscador de desktop, reutiliza clienteMatches/reservaMatches. */}
       {mobileSearchOpen && createPortal(
-        <div className="sm:hidden fixed inset-0 z-[997] bg-[#05070c] flex flex-col">
+        <div ref={mobileSearchOverlay.bind} className="sm:hidden fixed inset-0 z-[997] bg-[#05070c] flex flex-col">
           <div className="flex items-center gap-3 px-4 h-20 border-b border-white/5 shrink-0">
             <SearchInput
               value={searchValue}
@@ -387,7 +393,7 @@ export default function TopBar() {
               className="flex-1 min-w-0"
             />
             <button
-              onClick={() => { setMobileSearchOpen(false); closeSearch() }}
+              onClick={closeMobileSearch}
               className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-white shrink-0"
             >
               <X size={20} />

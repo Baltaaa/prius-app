@@ -6,12 +6,14 @@ import BottomNav from '../components/crm/BottomNav'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
 import { NotificacionesLeidasProvider } from '../context/NotificacionesLeidasProvider'
+import { OverlayProvider } from '../context/OverlayProvider'
 
 // Mobile-first (sept 2026): el Sidebar con drawer quedó solo para desktop —
 // en mobile la navegación completa vive en BottomNav (5 ítems + "Más"), así
 // que no hace falta abrir/cerrar nada acá arriba.
 export default function AppLayout() {
   return (
+    <OverlayProvider>
     <DialogProvider>
       <DataProvider>
         <NotificacionesLeidasProvider>
@@ -41,5 +43,6 @@ export default function AppLayout() {
         </NotificacionesLeidasProvider>
       </DataProvider>
     </DialogProvider>
+    </OverlayProvider>
   )
 }

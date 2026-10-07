@@ -5,6 +5,7 @@ import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
+import { useOverlay } from '../../context/OverlayProvider'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
@@ -123,6 +124,7 @@ export default function Clientes() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('todos')
   const [showFiltros, setShowFiltros] = useState(false)
+  const filtrosOverlay = useOverlay({ id: 'clientes-filtros', isOpen: showFiltros, onRequestClose: () => setShowFiltros(false) })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCliente, setEditingCliente] = useState(null)
   const [pagoCliente, setPagoCliente] = useState(null)
@@ -497,7 +499,7 @@ export default function Clientes() {
           className="flex-1 max-w-md"
           inputClassName="focus:border-cyan-400/50 py-3"
         />
-        <div className="relative">
+        <div ref={filtrosOverlay.bind} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
             className={`glass-card px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-[#FDE047]' : 'text-gray-400 hover:text-white'}`}
@@ -505,8 +507,6 @@ export default function Clientes() {
             <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
           </button>
           {showFiltros && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowFiltros(false)} />
               <div className="absolute left-0 mt-2 w-48 glass-card rounded-xl overflow-hidden z-50 p-3">
                 {FILTROS_ESTADO_CLIENTE.map((f) => (
                   <button
@@ -519,7 +519,6 @@ export default function Clientes() {
                   </button>
                 ))}
               </div>
-            </>
           )}
         </div>
         <button
