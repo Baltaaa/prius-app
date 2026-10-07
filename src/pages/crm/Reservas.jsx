@@ -36,8 +36,10 @@ function SeccionTitulo({ children }) {
   )
 }
 
-// Noches/días de una reserva período/día, para el resumen fijo del modal —
-// solo display, no se guarda ni valida nada con este número.
+// Días (inclusivos) de una reserva período/día, para el resumen fijo del
+// modal — solo display, no se guarda ni valida nada con este número. 27/12
+// al 09/01 son 14 días, no 13: por eso el +1 de abajo (balneario, no hotel
+// — nunca "noches", Tarea 2 oct 2026).
 function diasEntre(desdeIso, hastaIso) {
   if (!desdeIso || !hastaIso) return null
   const [y1, m1, d1] = desdeIso.split('-').map(Number)
@@ -1020,9 +1022,10 @@ export default function Reservas() {
               </div>
             )}
 
-            {/* Resumen fijo: unidad, fechas, noches/días, total, saldo —
-                todo lo que ya se eligió a la izquierda, de un vistazo antes
-                de confirmar. */}
+            {/* Resumen fijo: unidad, fechas, días, total, saldo — todo lo
+                que ya se eligió a la izquierda, de un vistazo antes de
+                confirmar. Balneario, no hotel: siempre "días" (Tarea 2,
+                oct 2026), nunca "noches". */}
             <div className="p-4 bg-white/5 border border-[#FDE047]/20 rounded-xl space-y-2">
               <p className="text-[9px] font-bold text-[#FDE047] uppercase tracking-[0.2em]">Resumen</p>
               <div className="grid grid-cols-2 gap-y-1.5 text-xs">
@@ -1034,7 +1037,7 @@ export default function Reservas() {
                 <span className="text-white font-bold text-right truncate">
                   {tipoAlquiler === 'dia' ? (fecha ? formatFecha(fecha) : '—') : (fechaInicio && fechaFin ? formatRangoFechas(fechaInicio, fechaFin) : '—')}
                 </span>
-                <span className="text-gray-500 uppercase tracking-widest">{tipoAlquiler === 'dia' ? 'Días' : 'Noches'}</span>
+                <span className="text-gray-500 uppercase tracking-widest">Días</span>
                 <span className="text-white font-bold text-right">
                   {tipoAlquiler === 'dia' ? (fecha ? 1 : '—') : (diasEntre(fechaInicio, fechaFin) ?? '—')}
                 </span>
