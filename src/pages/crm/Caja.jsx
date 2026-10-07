@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useCaja } from '../../hooks/useCaja'
+import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
 import { useData } from '../../context/DataProvider'
 import { supabase } from '../../lib/supabase'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
@@ -69,7 +70,9 @@ export default function Caja() {
     v === 'movimientos' ? next.delete('tab') : next.set('tab', v)
     return next
   }, { replace: true })
-  const [filtroMedio, setFiltroMedio] = useState('todos')
+  // [feat-7] filtro de medio de pago persistido en la URL (apagable en
+  // lib/features.ts — si se apaga, vuelve a ser un useState local).
+  const [filtroMedio, setFiltroMedio] = useFeatureUrlState('feat-7-caja-filtro-medio-url', 'medio', 'todos')
   const [montoApertura, setMontoApertura] = useState(null)
   const [abriendo, setAbriendo] = useState(false)
   const [mostrarHistorial, setMostrarHistorial] = useState(false)
