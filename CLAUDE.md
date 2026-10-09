@@ -226,7 +226,9 @@ Tiene que sentirse como una app nativa, no una web responsive achicada. Diseño 
 - Modales → bottom sheet: `Modal.jsx` y `UnidadPreviewModal.jsx` en mobile son bottom sheet de altura completa con gesto de cierre arriba; en desktop centrados. `Modal.jsx` acepta `maxWidthClass`/`footer` opcionales (default = comportamiento de siempre) para modales anchos con footer sticky, como "Nueva reserva".
 - FAB para la acción principal de una pantalla (ej. "Registrar gasto" en Caja).
 - Tamaño táctil mínimo: 44×44px en todo lo clickeable. Nada que dependa solo de `:hover`.
-- Plano: pinch-to-zoom táctil sobre el estado `zoom` que usan los botones +/-/reset. Ocupación: swipe horizontal para cambiar de semana/mes. Notificaciones: swipe para marcar como leída.
+- Plano (hotfix mobile, oct 2026): un solo modo de interacción para cualquier tamaño — fit-to-container, el plano entra encuadrado al abrir, pinch con dos dedos centrado en el punto medio entre los dedos, arrastre con un dedo, botón "Encuadrar" vuelve a la vista completa. Nunca un modo aparte de "scroll nativo + zoom simple" para mobile — mobile y desktop alimentan el mismo estado de transform (ver `src/components/plano/PlanoViewport.jsx`). Ocupación: swipe horizontal para cambiar de semana/mes. Notificaciones: swipe para marcar como leída.
+
+Verificación obligatoria: todo cambio de UI se verifica con Playwright (channel 'chrome', proyectos mobile-360, mobile-390 y desktop-1440) antes del commit. Las capturas de referencia del Plano (`pnpm run test:visual`) no pueden cambiar sin intención explícita. El estándar es app nativa (APK/SaaS), no web responsive: el plano entra encuadrado, el zoom y el arrastre son solo del plano y nunca de la página, y nada queda tapado por el BottomNav ni por las safe areas.
 
 Layout del plano de carpas: 6 hileras y 3 pasillos. Hilera 1–25 sola (número izq). Pasillo A. Bloque 26–50 (número izq) + 51–75 (número der) espalda con espalda. Pasillo B (central, acceso, más ancho). Bloque 76–98 (número izq) + 99–121 (número der). Pasillo C. Hilera 122–144 (número der). Números siempre por fuera de los bloques. Sector Sombrillas: layout fijo. La numeración de carpas y sombrillas es la real del balneario y nunca se altera.
 
@@ -235,11 +237,11 @@ Desde oct 2026 esta posición vive también en la base (`unidades.fila`/`orden`,
 Plano portable (oct 2026, Fase 4A): el dibujo del plano vive en `src/components/plano/`.
 - `planoLayout.js`: estructura visual (bloques, pasillos, lado del número, sector sombrillas) indexada por fila/orden.
 - `PlanoGrid.jsx`: dibuja según el layout, con `renderCelda` por prop.
-- `PlanoViewport.jsx`: zoom pinch y botones.
+- `PlanoViewport.jsx`: fit-to-container único para cualquier tamaño (hotfix mobile oct 2026, ver "Mobile-first" arriba) — zoom por botón/Ctrl+rueda/pinch y arrastre por drag/un dedo, `touch-action: none` porque todo el gesto lo calcula el JS del padre. Controlado 100% por props, sin estado propio.
 - `CeldaPublica.jsx`: variante de la landing, con candado para bloqueada, dorado para seleccionada, acento suave para sugerida y sin colores por tipo_alquiler.
 - Regla de portabilidad: esa carpeta solo importa react, lucide-react y archivos propios, porque beachFlow tiene una copia exacta. Todo cambio se hace en priusApp y se vuelve a copiar (ver `PORTABILIDAD.md`).
 - `Cell.jsx` sigue siendo la celda del CRM y Dashboard conserva toda la lógica.
-- Las capturas de Playwright del Plano son la referencia visual: todo cambio que las altere tiene que ser intencional.
+- Las capturas de Playwright del Plano son la referencia visual (`pnpm run test:visual`, proyectos mobile-360/mobile-390/desktop-1440): todo cambio que las altere tiene que ser intencional.
 - `/app/dev/plano-publico` (superadmin, flag 'plano_publico_preview') prueba la variante pública con la RPC real.
 
 ### Instalable como app
@@ -299,7 +301,8 @@ Playwright (`@playwright/test`, devDependency) — `npm run test:e2e`. Credencia
 - Historial: filtro explícito por unidad/cliente en la UI (el hook ya acepta esos params, falta el selector).
 - Drawer de cliente (feat-3): integrado como referencia en Reportes.jsx; falta repetir la integración en Home/Caja (resto de las pantallas con nombre de cliente en texto plano).
 - Long-press en el Plano (feat-6, mobile): no se construyó — el tap ya abre `UnidadPreviewModal` con las mismas acciones (ver reserva, nueva reserva, registrar pago vía ficha de cliente) que pedía el gesto, así que un long-press aparte sería una interacción redundante, no una mejora real.
-- QA e2e con Playwright armado (`npm run test:e2e`) pero nunca corrido — falta cargar `E2E_USER_EMAIL`/`E2E_USER_PASSWORD` de una cuenta de prueba en `.env.local`.
+- QA e2e con Playwright corriendo (oct 2026, hotfix mobile): `channel: 'chrome'` usa el Chrome ya instalado (el Chromium propio de Playwright no se puede descargar en macOS 13) y `process.loadEnvFile('.env.local')` en `playwright.config.ts` carga las credenciales al proceso de Playwright, no solo al dev server de Vite — causa real de que "nunca hubiera corrido" antes. `pnpm run test:e2e` (flujo completo, desktop-1440) y `pnpm run test:visual` (regresión visual del Plano, los tres proyectos) verificados funcionando.
+- Barrido mobile (360px) del resto del CRM pendiente de arreglar (hecho solo el reporte, oct 2026): en Clientes, los íconos de acción de cada tarjeta (billetera/comprobante/editar/anular/eliminar) se cortan contra el borde derecho de la pantalla — el más urgente de los encontrados. El título de página en `TopBar.jsx` se trunca a dos o tres letras en casi todas las pantallas ("Dashbo…", "Cola de …", "Directo…", "Caja Di…", "Notifica…") — patrón sistemático, probablemente vale la pena resolverlo una sola vez ahí en vez de pantalla por pantalla. En Reservas, el placeholder del buscador y las etiquetas "Llegada desde"/"Llegada hasta" quedan apretados contra sus íconos. Recepción no se pudo capturar en el barrido (quedó en el loader de "Verificando credenciales" al sacar la foto) — repetir con más espera antes de confirmar o descartar.
 - Pago online (Mercado Pago) y facturación ARCA para reservas web: pedido anticipado por el cliente para dentro de unos meses — el sistema de reservas públicas queda preparado (ver ese bloque). Antes de implementar: elegir pasarela por comisiones (MP Checkout Pro vs Payway vs Mobbex) y conseguir CUIT, certificado y punto de venta electrónico.
 - Reservas públicas: fases 4 a 7 del roadmap (landing, entrega de QR, bandeja de leads, recordatorios/seña online) — fase 3 (Recepción) ya hecha.
 - `fn_reserva_vigente` — bug preexistente corregido en Fase 1 (era IMMUTABLE usando CURRENT_DATE, pasó a STABLE).
