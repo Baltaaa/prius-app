@@ -230,7 +230,17 @@ Tiene que sentirse como una app nativa, no una web responsive achicada. Diseño 
 
 Layout del plano de carpas: 6 hileras y 3 pasillos. Hilera 1–25 sola (número izq). Pasillo A. Bloque 26–50 (número izq) + 51–75 (número der) espalda con espalda. Pasillo B (central, acceso, más ancho). Bloque 76–98 (número izq) + 99–121 (número der). Pasillo C. Hilera 122–144 (número der). Números siempre por fuera de los bloques. Sector Sombrillas: layout fijo. La numeración de carpas y sombrillas es la real del balneario y nunca se altera.
 
-Desde oct 2026 esta posición vive también en la base (`unidades.fila`/`orden`, poblada en Fase 1 de reservas públicas) como fuente única para el CRM y la landing — el componente del plano del CRM (`Dashboard.jsx`/`PlanoImpresion.jsx`) no se tocó, sigue dibujando con sus rangos fijos de siempre. Mapeo aplicado: carpas fila 1=1-25, fila 2=26-50, fila 3=51-75, fila 4=76-98, fila 5=99-121, fila 6=122-144 (orden = número relativo al inicio de cada fila, ascendente izq→der, verificado contra el JSX real — ninguna hilera se dibuja invertida ni desplazada). Sombrillas en 4 filas (7 a 10), dos columnas lado a lado con hueco en el medio: fila 7 = sombrillas 1-5 (orden 1-5) y 21-25 (orden 7-11), fila 8 = 6-10 y 26-30, fila 9 = 11-15 y 31-35, fila 10 = 16-20 y 36-40. "Vecina contigua" = misma fila y `abs(orden)=1`; una unidad del otro lado de un pasillo nunca es contigua.
+Desde oct 2026 esta posición vive también en la base (`unidades.fila`/`orden`, poblada en Fase 1 de reservas públicas) como fuente única para el CRM y la landing. Mapeo aplicado: carpas fila 1=1-25, fila 2=26-50, fila 3=51-75, fila 4=76-98, fila 5=99-121, fila 6=122-144 (orden = número relativo al inicio de cada fila, ascendente izq→der, verificado contra el JSX real y contra la base, 184/184 — ninguna hilera se dibuja invertida ni desplazada). Sombrillas en 4 filas (7 a 10), dos columnas lado a lado con hueco en el medio: fila 7 = sombrillas 1-5 (orden 1-5) y 21-25 (orden 7-11), fila 8 = 6-10 y 26-30, fila 9 = 11-15 y 31-35, fila 10 = 16-20 y 36-40. "Vecina contigua" = misma fila y `abs(orden)=1`; una unidad del otro lado de un pasillo nunca es contigua.
+
+Plano portable (oct 2026, Fase 4A): el dibujo del plano vive en `src/components/plano/`.
+- `planoLayout.js`: estructura visual (bloques, pasillos, lado del número, sector sombrillas) indexada por fila/orden.
+- `PlanoGrid.jsx`: dibuja según el layout, con `renderCelda` por prop.
+- `PlanoViewport.jsx`: zoom pinch y botones.
+- `CeldaPublica.jsx`: variante de la landing, con candado para bloqueada, dorado para seleccionada, acento suave para sugerida y sin colores por tipo_alquiler.
+- Regla de portabilidad: esa carpeta solo importa react, lucide-react y archivos propios, porque beachFlow tiene una copia exacta. Todo cambio se hace en priusApp y se vuelve a copiar (ver `PORTABILIDAD.md`).
+- `Cell.jsx` sigue siendo la celda del CRM y Dashboard conserva toda la lógica.
+- Las capturas de Playwright del Plano son la referencia visual: todo cambio que las altere tiene que ser intencional.
+- `/app/dev/plano-publico` (superadmin, flag 'plano_publico_preview') prueba la variante pública con la RPC real.
 
 ### Instalable como app
 `public/manifest.webmanifest` + meta tags iOS en `index.html` para agregar a pantalla de inicio sin barra del navegador. Sin service worker ni cache offline a propósito: la app depende de Realtime, cachear una vista vieja sería peor que no tener nada.
