@@ -12,7 +12,8 @@ CRM a medida que reemplaza el flujo manual en Excel del balneario: plano de play
 
 ## Stack técnico
 React 19 + TypeScript + Vite, Tailwind CSS v3, React Router DOM v7, Supabase (auth, DB, Edge Functions, Realtime), shadcn/ui + lucide-react. react-hook-form + zod (formularios y validación), date-fns (fechas, locale es), libphonenumber-js (teléfonos), vitest (tests). Deploy en Cloudflare Pages.
-Gestor de paquetes: pnpm (lo usa Cloudflare con frozen-lockfile). Nunca npm install: desincroniza pnpm-lock.yaml y rompe el deploy.
+Gestor de paquetes: pnpm (Cloudflare usa frozen-lockfile). Nunca npm install.
+ESLint con rules-of-hooks como error: correr pnpm run lint antes de cada commit.
 
 ## Roles
 - superadmin (permiso total): Chelo, Marcelo Madotta, Balta.

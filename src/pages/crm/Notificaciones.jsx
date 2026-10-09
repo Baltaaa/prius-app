@@ -118,6 +118,14 @@ export default function Notificaciones() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('todas')
 
+  // Todos los hooks van antes de cualquier return condicional (regla de los
+  // hooks) — con `loading` cortando acá abajo, estos useMemo quedaban
+  // después del return y React tiraba "Rendered more hooks than during the
+  // previous render" en cuanto `loading` pasaba de true a false.
+  const activaTab = TABS.find((t) => t.key === tab) || TABS[0]
+  const urgentesTab = useMemo(() => urgentes.filter((i) => activaTab.match(i.type)), [urgentes, activaTab])
+  const informativasTab = useMemo(() => informativas.filter((i) => activaTab.match(i.type)), [informativas, activaTab])
+
   if (loading) {
     return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Cargando notificaciones...</span></div>
   }
@@ -147,10 +155,6 @@ export default function Notificaciones() {
       if (item.reservaId) return navigate(linkToReserva(item.reservaId))
     }
   }
-
-  const activaTab = TABS.find((t) => t.key === tab) || TABS[0]
-  const urgentesTab = useMemo(() => urgentes.filter((i) => activaTab.match(i.type)), [urgentes, activaTab])
-  const informativasTab = useMemo(() => informativas.filter((i) => activaTab.match(i.type)), [informativas, activaTab])
 
   const sinLeer = [...urgentes, ...informativas].filter((i) => !i.leida)
 
