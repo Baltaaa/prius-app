@@ -43,6 +43,7 @@ export function DataProvider({ children }) {
   const [leads, setLeads] = useState([])
   const [pagos, setPagos] = useState([])
   const [temporadas, setTemporadas] = useState([])
+  const [codigosReserva, setCodigosReserva] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -160,12 +161,23 @@ export function DataProvider({ children }) {
     setTemporadas(data || [])
   }, [])
 
+  // Fase 3 (Recepción): códigos PRIUS-XXXXXX que agrupan las 1-2 unidades de
+  // una reserva web (ver CLAUDE.md "Sistema de reservas públicas"). Mismo
+  // patrón de carga en memoria que el resto de las tablas.
+  const fetchCodigosReserva = useCallback(async () => {
+    const { data } = await supabase
+      .from('codigos_reserva')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setCodigosReserva(data || [])
+  }, [])
+
   const refetchAll = useCallback(async () => {
     setLoading(true)
     try {
       await Promise.all([
         fetchUnidades(), fetchReservas(), fetchClientes(), fetchCaja(), fetchEventos(), fetchLeads(), fetchPagos(),
-        fetchTodosGastos(), fetchIngresosCaja(), fetchTemporadas(),
+        fetchTodosGastos(), fetchIngresosCaja(), fetchTemporadas(), fetchCodigosReserva(),
       ])
       setError(null)
     } catch (err) {
@@ -174,7 +186,7 @@ export function DataProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos, fetchTodosGastos, fetchIngresosCaja, fetchTemporadas])
+  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos, fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva])
 
   useEffect(() => { refetchAll() }, [refetchAll])
 
@@ -202,6 +214,8 @@ export function DataProvider({ children }) {
         () => debouncedRefetch('eventos', fetchEventos))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pagos' },
         () => { debouncedRefetch('pagos', fetchPagos); debouncedRefetch('ingresosCaja', fetchIngresosCaja); debouncedRefetch('caja', fetchCaja) })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'codigos_reserva' },
+        () => debouncedRefetch('codigosReserva', fetchCodigosReserva))
       .subscribe()
 
     // `leads` va en su propio canal: un binding postgres_changes sobre una tabla
@@ -219,7 +233,7 @@ export function DataProvider({ children }) {
       supabase.removeChannel(channel)
       supabase.removeChannel(leadsChannel)
     }
-  }, [debouncedRefetch, fetchReservas, fetchUnidades, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos, fetchTodosGastos, fetchIngresosCaja])
+  }, [debouncedRefetch, fetchReservas, fetchUnidades, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos, fetchTodosGastos, fetchIngresosCaja, fetchCodigosReserva])
 
   // ---- Mutaciones (optimistas; realtime concilia el resto) ----
 
@@ -439,26 +453,53 @@ export function DataProvider({ children }) {
     return data[0]
   }, [fetchLeads])
 
+  // Fase 3 (Recepción): un código agrupa 1-2 reservas del mismo cliente web
+  // (ver `codigo` en `reservas` y `codigos_reserva`). Filtra en memoria sobre
+  // los datos ya cargados, mismo patrón que el resto de los buscadores del
+  // CRM (search global, Clientes por comprobante — ver CLAUDE.md
+  // "Búsqueda"), nunca un query nuevo a la base.
+  const buscarPorCodigo = useCallback((codigo) => {
+    if (!codigo) return null
+    const codigoRow = codigosReserva.find((c) => c.codigo === codigo)
+    if (!codigoRow) return null
+    const reservasDelCodigo = reservas.filter((r) => r.codigo === codigo)
+    return { codigoRow, reservas: reservasDelCodigo }
+  }, [codigosReserva, reservas])
+
+  // RPC transaccional de Recepción (cobro + check-in + ajuste de precio por
+  // método distinto al previsto) — ver migración fase3_02_recepcion_cobrar.
+  const recepcionCobrar = useCallback(async ({ codigo, medio, cobrar, hacerCheckin, ajustarPrecio }) => {
+    const { data, error } = await supabase.rpc('recepcion_cobrar', {
+      p_codigo: codigo, p_medio: medio, p_cobrar: !!cobrar,
+      p_hacer_checkin: !!hacerCheckin, p_ajustar_precio: !!ajustarPrecio,
+    })
+    if (error) throw error
+    await Promise.all([fetchReservas(), fetchPagos(), fetchCaja(), fetchCodigosReserva()])
+    return data
+  }, [fetchReservas, fetchPagos, fetchCaja, fetchCodigosReserva])
+
   const temporadaActiva = useMemo(() => temporadas.find((t) => t.estado === 'activa') || null, [temporadas])
 
   const value = useMemo(() => ({
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
-    eventos, leads, pagos, temporadas, temporadaActiva, loading, error,
+    eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error,
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
     updateLead, registrarPago, anularPago, completarComprobante, editarComprobante,
+    buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
-    fetchTodosGastos, fetchIngresosCaja, fetchTemporadas,
+    fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
   }), [
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
-    eventos, leads, pagos, temporadas, temporadaActiva, loading, error,
+    eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error,
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
     updateLead, registrarPago, anularPago, completarComprobante, editarComprobante,
+    buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
-    fetchTodosGastos, fetchIngresosCaja, fetchTemporadas,
+    fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
   ])
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

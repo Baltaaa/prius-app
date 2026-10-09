@@ -7,6 +7,7 @@ import { linkToPlano } from '../../lib/deepLinks'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
 import DateInput from '../../components/inputs/DateInput'
 import { isFeatureEnabled } from '../../lib/features'
+import { reservaActiva } from '../../lib/reservas'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Vista de ocupación en un rango de fechas — distinta del Plano (que solo
@@ -170,7 +171,7 @@ export default function Ocupacion() {
     const mIni = diasMes[0]
     const mFin = diasMes[diasMes.length - 1]
     for (const r of reservas) {
-      if (r.estado === 'cancelada' || !unidadIds.has(r.unidad_id)) continue
+      if (!reservaActiva(r) || !unidadIds.has(r.unidad_id)) continue
       const rango = rangoEfectivo(r, temporadasPorId)
       if (!rango) continue
       const [rIni, rFin] = rango
@@ -334,7 +335,7 @@ export default function Ocupacion() {
                 <div className="flex-1 relative h-6">
                   {marcas.map((m) => {
                     const ocupadasDia = unidadesFiltradas.filter((u) =>
-                      (barrasPorUnidad[u.id] || []).some((b) => b.reserva.estado !== 'cancelada' && m.left >= b.left && m.left < b.left + b.width),
+                      (barrasPorUnidad[u.id] || []).some((b) => reservaActiva(b.reserva) && m.left >= b.left && m.left < b.left + b.width),
                     ).length
                     const pct = Math.round((ocupadasDia / totalUnidadesFiltradas) * 100)
                     return (

@@ -9,7 +9,7 @@ import { useOverlay } from '../../context/OverlayProvider'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
-import { linkToNuevaReservaCliente } from '../../lib/deepLinks'
+import { linkToNuevaReservaCliente, linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { isFeatureEnabled } from '../../lib/features'
 import { registrarVisto } from '../../hooks/useRecientes'
 import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
@@ -35,7 +35,7 @@ import SearchInput from '../../components/inputs/SearchInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import StatusBadge from '../../components/crm/StatusBadge'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
-import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, CircleDollarSign, Filter, Check, CalendarPlus } from 'lucide-react'
+import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, CircleDollarSign, Filter, Check, CalendarPlus, Receipt } from 'lucide-react'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
 // reserva de período/día activa hoy — temporada actual, temporadas pasadas,
@@ -874,6 +874,14 @@ export default function Clientes() {
                                   {r.estado === 'cancelada' && <span className="text-red-400 font-bold uppercase">Cancelada</span>}
                                   <div className="flex-1" />
                                   <StatusBadge status={estadoBadgeStatus(r)} />
+                                  {estadoBadgeStatus(r) === 'preconfirmada' && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); navigate(linkToRecepcion(r.codigo)) }}
+                                      className="text-[10px] font-bold uppercase tracking-widest text-sky-400 hover:text-sky-300 transition-all"
+                                    >
+                                      Hacer check-in
+                                    </button>
+                                  )}
                                   {r.estado !== 'cancelada' && !r.bonificada && esPendienteConfirmacion(r) && (
                                     <button
                                       onClick={(e) => {
@@ -895,6 +903,14 @@ export default function Clientes() {
                                       className="text-[10px] font-bold uppercase tracking-widest text-green-400 hover:text-green-300 transition-all"
                                     >
                                       Registrar pago
+                                    </button>
+                                  )}
+                                  {r.estado !== 'cancelada' && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); navigate(linkToComprobante(r.id)) }}
+                                      className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-white hover:text-gray-300 transition-all"
+                                    >
+                                      <Receipt size={11} /> Comprobante
                                     </button>
                                   )}
                                 </div>

@@ -9,7 +9,7 @@ import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from "../..
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 import Historial from "../crm/Historial"
-import { linkToCliente, linkToReserva } from "../../lib/deepLinks"
+import { linkToCliente, linkToReserva, linkToRecepcion } from "../../lib/deepLinks"
 
 const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
 
@@ -161,6 +161,21 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                   <p className="text-[11px] text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
                     <Users size={12} className="shrink-0" /> Co-socios: {socios.map((s) => s.nombre).join(", ")}
                   </p>
+                )}
+                {/* Fase 3 (Recepción): acceso directo desde el Plano a la
+                    reserva web de esta unidad — check-in/cobro vive ahí. */}
+                {reserva.origen === "web" && reserva.codigo && (
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 bg-sky-500/5 border border-sky-500/20 rounded-lg">
+                    <p className="text-[11px] text-sky-300 uppercase tracking-widest truncate">
+                      Reserva web · {reserva.codigo} · {estadoBadgeStatus(reserva) === "preconfirmada" ? "Preconfirmada" : estadoBadgeStatus(reserva) === "vencida" ? "Vencida" : "Confirmada"}
+                    </p>
+                    <button
+                      onClick={() => navigate(linkToRecepcion(reserva.codigo))}
+                      className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-sky-400 hover:text-sky-300 transition-all"
+                    >
+                      Ir a Recepción
+                    </button>
+                  </div>
                 )}
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>

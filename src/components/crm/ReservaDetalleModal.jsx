@@ -3,8 +3,8 @@ import { usePagos } from '../../hooks/usePagos'
 import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { coSocios, pagoSinVerificar, estadoBadgeStatus } from '../../lib/reservas'
-import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
-import { HelpCircle, ArrowRight } from 'lucide-react'
+import { linkToCliente, linkToReserva, linkToComprobante } from '../../lib/deepLinks'
+import { HelpCircle, ArrowRight, Receipt } from 'lucide-react'
 import Modal from './Modal'
 import MontoReserva from './MontoReserva'
 import SaldoReserva from './SaldoReserva'
@@ -132,13 +132,22 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={verCompleta}
-          className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-white/5 text-[#FDE047] border border-[#FDE047]/30 hover:bg-[#FDE047]/10 transition-all flex items-center justify-center gap-2"
-        >
-          Ver reserva completa <ArrowRight size={14} />
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => { onClose?.(); navigate(linkToComprobante(reserva.id)) }}
+            className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-white/5 text-white border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+          >
+            <Receipt size={14} /> Emitir comprobante
+          </button>
+          <button
+            type="button"
+            onClick={verCompleta}
+            className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-white/5 text-[#FDE047] border border-[#FDE047]/30 hover:bg-[#FDE047]/10 transition-all flex items-center justify-center gap-2"
+          >
+            Ver reserva completa <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
     </Modal>
   )

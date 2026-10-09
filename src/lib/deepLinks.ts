@@ -47,6 +47,21 @@ export function linkToOcupacion(vista?: 'semana' | 'mes', fecha?: string | null)
   return qs ? `/app/ocupacion?${qs}` : '/app/ocupacion'
 }
 
+export function linkToComprobante(reservaId: string): string {
+  return `/app/comprobantes?reserva=${reservaId}`
+}
+
+// Fase 3 (Recepción): con código, sobrevive a un refresh y se puede
+// compartir/escanear directo a una reserva puntual. `scan`: abre directo en
+// modo escaneo (ícono QR del TopBar, D1) en vez del estado inicial normal.
+export function linkToRecepcion(codigo?: string | null, opts?: { scan?: boolean }): string {
+  const params = new URLSearchParams()
+  if (codigo) params.set('codigo', codigo)
+  if (opts?.scan) params.set('scan', '1')
+  const qs = params.toString()
+  return qs ? `/app/recepcion?${qs}` : '/app/recepcion'
+}
+
 export function linkToHistorial(filtros?: Record<string, string | undefined>): string {
   const params = new URLSearchParams()
   for (const [k, v] of Object.entries(filtros || {})) {

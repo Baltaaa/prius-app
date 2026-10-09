@@ -7,8 +7,9 @@ import { useAuth } from '../../context/AuthProvider'
 import { useOverlay } from '../../context/OverlayProvider'
 import {
   Home, Map, CalendarDays, Users, MoreHorizontal, X, Wallet, BarChart2,
-  DoorClosed, Inbox, GanttChartSquare, Activity, Bell, FileText, UserCheck, LogOut,
+  DoorClosed, Inbox, GanttChartSquare, Activity, Bell, FileText, UserCheck, LogOut, QrCode,
 } from 'lucide-react'
+import { isFeatureEnabled } from '../../lib/features'
 
 // Bottom nav fijo de 5 ítems para mobile (sept 2026) — reemplaza al drawer
 // del Sidebar en pantallas chicas (el Sidebar completo queda solo para
@@ -34,6 +35,7 @@ export default function BottomNav() {
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
     ...(permiso('reportes_globales') ? [{ name: 'Reportes', path: '/app/reportes', icon: BarChart2 }] : []),
     { name: 'Cabinas y Lockers', path: '/app/cabinas-lockers', icon: DoorClosed, comingSoon: true },
+    ...(isFeatureEnabled('recepcion') ? [{ name: 'Recepción', path: '/app/recepcion', icon: QrCode }] : []),
     { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
     { name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare },
     { name: 'Historial', path: '/app/historial', icon: Activity },

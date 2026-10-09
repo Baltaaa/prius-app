@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   parsePesos, parseDNI, parseCUIT, parseTelefono, parseFecha,
-  normalizarNombre, normalizarEmail, normalizarCodigoReserva, cuitValido, dniValido, parseUnidadQuery,
+  normalizarNombre, normalizarEmail, normalizarCodigoReserva, codigoReservaValido, cuitValido, dniValido, parseUnidadQuery,
 } from './parse'
 
 describe('parsePesos', () => {
@@ -74,6 +74,36 @@ describe('normalizarEmail / normalizarCodigoReserva', () => {
   it('código de reserva mayúsculas + prefijo', () => {
     expect(normalizarCodigoReserva('a3x9k2')).toBe('PRIUS-A3X9K2')
     expect(normalizarCodigoReserva('prius-a3x9k2')).toBe('PRIUS-A3X9K2')
+  })
+})
+
+describe('normalizarCodigoReserva / codigoReservaValido', () => {
+  it('acepta la URL completa del QR y extrae el código', () => {
+    expect(normalizarCodigoReserva('https://priusplayagrande.com.ar/r/PRIUS-A3X9K2')).toBe('PRIUS-A3X9K2')
+  })
+  it('acepta la URL en minúsculas', () => {
+    expect(normalizarCodigoReserva('https://priusplayagrande.com.ar/r/a3x9k2')).toBe('PRIUS-A3X9K2')
+  })
+  it('acepta el código sin prefijo', () => {
+    expect(normalizarCodigoReserva('a3x9k2')).toBe('PRIUS-A3X9K2')
+  })
+  it('acepta el código con prefijo y espacios', () => {
+    expect(normalizarCodigoReserva('  prius-a3x9k2  ')).toBe('PRIUS-A3X9K2')
+  })
+  it('vacío o null da string vacío', () => {
+    expect(normalizarCodigoReserva('')).toBe('')
+    expect(normalizarCodigoReserva(null)).toBe('')
+  })
+  it('valida el formato contra el alfabeto real (sin 0/O/1/I)', () => {
+    expect(codigoReservaValido('PRIUS-A3X9K2')).toBe(true)
+    expect(codigoReservaValido('a3x9k2')).toBe(true)
+    expect(codigoReservaValido('https://priusplayagrande.com.ar/r/PRIUS-A3X9K2')).toBe(true)
+  })
+  it('rechaza formato inválido', () => {
+    expect(codigoReservaValido('PRIUS-A3X9K')).toBe(false) // corto
+    expect(codigoReservaValido('PRIUS-A3X9K0')).toBe(false) // 0 no está en el alfabeto
+    expect(codigoReservaValido('PRIUS-A3X9KI')).toBe(false) // I no está en el alfabeto
+    expect(codigoReservaValido('')).toBe(false)
   })
 })
 

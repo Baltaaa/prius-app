@@ -28,3 +28,4 @@ dist
 .env.local
 .vite
 .dyad/
+qa/

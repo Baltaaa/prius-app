@@ -8,14 +8,14 @@ import { useDebounced } from '../../hooks/useDebounced'
 import { unidadEmoji, normalizeText, formatComprobante } from '../../lib/format'
 import { parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
-import { linkToCliente, linkToReserva, linkToPlano } from '../../lib/deepLinks'
+import { linkToCliente, linkToReserva, linkToPlano, linkToRecepcion } from '../../lib/deepLinks'
 import { useOverlay } from '../../context/OverlayProvider'
 import { isFeatureEnabled } from '../../lib/features'
 import SearchInput from '../inputs/SearchInput'
 import {
   Search, Bell, User, LogOut, ChevronDown, X, Wallet, Calendar, AlertCircle,
   LayoutDashboard, Map, CalendarClock, Users, BarChart2, Inbox,
-  Activity, FileText, UserCheck, DoorClosed,
+  Activity, FileText, UserCheck, DoorClosed, QrCode,
 } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 
@@ -374,6 +374,17 @@ export default function TopBar() {
       </div>
 
       <div className="flex items-center gap-1 sm:gap-6 shrink-0 ml-auto">
+        {/* Fase 3 (Recepción, D1): acceso directo al escáner de QR desde
+            cualquier pantalla, desktop y mobile. */}
+        {isFeatureEnabled('recepcion') && (
+          <button
+            onClick={() => navigate(linkToRecepcion(null, { scan: true }))}
+            className="text-gray-400 hover:text-white p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
+            title="Recepción — escanear QR"
+          >
+            <QrCode size={20} />
+          </button>
+        )}
         {/* Búsqueda (mobile): ícono que abre pantalla completa */}
         <button
           onClick={() => setMobileSearchOpen(true)}

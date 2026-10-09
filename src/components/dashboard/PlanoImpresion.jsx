@@ -4,7 +4,8 @@ import {
   PLANO_PASILLO_CENTRAL,
   PLANO_BLOQUE_GAP,
 } from "./constants"
-import { formatFechaCorta } from "../../lib/format"
+import { formatFechaCorta, formatPesos } from "../../lib/format"
+import { resumenDiaClima } from "../../lib/clima"
 
 // Hoja A4 diaria para los carperos — reemplaza la planilla Excel que se
 // llevaba a la playa. Es de SOLO LECTURA: lee `units` (ya armado por
@@ -72,7 +73,41 @@ function buildListado(units) {
   return { carpas: porTipo("carpa"), sombrillas: porTipo("sombrilla") }
 }
 
-export default function PlanoImpresion({ units, selectedDate }) {
+// Línea compacta de stats + clima para el encabezado de la hoja A4 (PASO 4,
+// oct 2026) — mismos números que `PlanoStatsBar` en pantalla (mismo `stats`,
+// calculado una sola vez en Dashboard.jsx), en blanco y negro legible. Si no
+// hay pronóstico para `selectedDate`, simplemente no agrega la parte de clima.
+function pctTexto(pct) {
+  return `${Math.round((pct || 0) * 100)}%`
+}
+
+function PIStatsLine({ stats, clima }) {
+  if (!stats) return null
+  const resumenClima = resumenDiaClima(clima)
+  return (
+    <div className="pi-stats">
+      <span>Ocupación {pctTexto(stats.ocupacion.pct)} ({stats.ocupacion.count}/{stats.ocupacion.total})</span>
+      <span>Carpas {pctTexto(stats.carpas.pct)}</span>
+      <span>Sombrillas {pctTexto(stats.sombrillas.pct)}</span>
+      <span>T/P/D {stats.mix.temporada}/{stats.mix.periodo}/{stats.mix.dia}</span>
+      <span>
+        Pendientes {stats.pendientes.count}
+        {stats.pendientes.saldo > 0 ? ` (${formatPesos(stats.pendientes.saldo)})` : ""}
+      </span>
+      <span>Libres {stats.libres.count}</span>
+      <span>Ingresos {stats.ingresosDelDia != null ? formatPesos(stats.ingresosDelDia) : "—"}</span>
+      {resumenClima && (
+        <span>
+          Clima {Math.round(resumenClima.actual.temperatura)}° · viento {Math.round(resumenClima.actual.viento)} km/h ·
+          {" "}ráfaga {Math.round(resumenClima.rafagaMax)} km/h
+          {resumenClima.actual.olaAltura != null ? ` · ola ${Number(resumenClima.actual.olaAltura).toFixed(1)} m` : ""}
+        </span>
+      )}
+    </div>
+  )
+}
+
+export default function PlanoImpresion({ units, selectedDate, stats, clima }) {
   const carpaLetter = (n) => LETRA[units[`C${n}`]?.tipoAlquiler] || ""
   const sombrillaLetter = (n) => LETRA[units[`S${n}`]?.tipoAlquiler] || ""
   const { carpas: listadoCarpas, sombrillas: listadoSombrillas } = buildListado(units)
@@ -99,7 +134,10 @@ export default function PlanoImpresion({ units, selectedDate }) {
           }
           .plano-impresion * { color: #000; box-shadow: none !important; }
 
-          .pi-fecha { font-size: 11pt; font-weight: 700; margin-bottom: 3mm; }
+          .pi-fecha { font-size: 11pt; font-weight: 700; margin-bottom: 1.5mm; }
+          .pi-stats { display: flex; flex-wrap: wrap; gap: 2.5mm; font-size: 6.5pt; font-weight: 600; margin-bottom: 3mm; padding-bottom: 2mm; border-bottom: 0.2mm solid #999; }
+          .pi-stats span::after { content: "·"; margin-left: 2.5mm; font-weight: 400; color: #999; }
+          .pi-stats span:last-child::after { content: ""; }
 
           .pi-header { display: grid; align-items: stretch; margin-bottom: 3mm; height: 8mm; }
           .pi-header > div { border: 0.3mm solid #000; display: flex; align-items: center; justify-content: center; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
@@ -130,6 +168,7 @@ export default function PlanoImpresion({ units, selectedDate }) {
       `}</style>
 
       <div className="pi-fecha">{formatFechaLarga(selectedDate)}</div>
+      <PIStatsLine stats={stats} clima={clima} />
 
       <div className="pi-header" style={{ gridTemplateColumns }}>
         <div className="pi-header-recreacion" style={{ gridColumn: "1 / 6" }}>Recreación</div>

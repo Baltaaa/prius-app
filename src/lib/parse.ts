@@ -121,11 +121,31 @@ export function emailValido(raw: string | null | undefined): boolean {
   return email.length === 0 || EMAIL_REGEX.test(email)
 }
 
-/** Mayúsculas, sin espacios, agrega "PRIUS-" si falta. */
+// Alfabeto de generar_codigo_reserva() en Postgres — sin 0/O/1/I para no
+// confundir al tipear o leer un QR a mano.
+const CODIGO_RESERVA_REGEX = /^PRIUS-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/
+
+/**
+ * Normaliza un código de reserva PRIUS-XXXXXX tipeado a mano, pegado desde
+ * la URL del QR (https://priusplayagrande.com.ar/r/PRIUS-XXXXXX) o leído sin
+ * el prefijo (A3X9K2). Mayúsculas, sin espacios, agrega "PRIUS-" si falta.
+ */
 export function normalizarCodigoReserva(raw: string | null | undefined): string {
-  const limpio = String(raw ?? '').trim().toUpperCase().replace(/\s+/g, '')
+  let limpio = String(raw ?? '').trim()
+  if (!limpio) return ''
+  // Si es una URL (o tiene barras), el código es el último segmento del path.
+  const partes = limpio.split('/').filter(Boolean)
+  if (partes.length > 1 || /^https?:/i.test(limpio)) {
+    limpio = partes[partes.length - 1] || limpio
+  }
+  limpio = limpio.toUpperCase().replace(/\s+/g, '')
   if (!limpio) return ''
   return limpio.startsWith('PRIUS-') ? limpio : `PRIUS-${limpio}`
+}
+
+/** Formato válido de código de reserva — mismo alfabeto que generar_codigo_reserva() en la base. */
+export function codigoReservaValido(raw: string | null | undefined): boolean {
+  return CODIGO_RESERVA_REGEX.test(normalizarCodigoReserva(raw))
 }
 
 /**

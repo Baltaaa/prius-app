@@ -19,6 +19,10 @@ export const PERMISOS: Record<string, Rol[]> = {
   editar_unidades: ['superadmin'],
   gestion_usuarios: ['superadmin'],
   editar_comprobante: ['superadmin'],
+  // Recepción (Fase 3 reservas públicas, D9): check-in sin cobrar con saldo
+  // pendiente es la única acción de Recepción restringida — el cobro normal
+  // es operación diaria (ver `recepcion_cobrar` abajo).
+  'recepcion.checkin_sin_cobro': ['superadmin'],
 
   // Operación diaria — explícitas para que quede documentada la matriz
   // completa, aunque el default ya las permitiría para admin.
@@ -32,6 +36,7 @@ export const PERMISOS: Record<string, Rol[]> = {
   comprobantes: ['superadmin', 'admin'],
   imprimir_exportar_caja: ['superadmin', 'admin'],
   historial_cajas: ['superadmin', 'admin'],
+  'recepcion.cobrar': ['superadmin', 'admin'],
 }
 
 /** Clave no registrada en la matriz → solo superadmin (default seguro). */

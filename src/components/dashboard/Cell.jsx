@@ -1,5 +1,5 @@
 import { memo, useState } from "react"
-import { Hourglass } from "lucide-react"
+import { Hourglass, Clock } from "lucide-react"
 import { STATUS } from "./constants"
 import { COLOR_TIPO_ALQUILER } from "../../lib/colors"
 
@@ -58,7 +58,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
       <button
         data-deeplink-id={unit?.dbId}
         onClick={() => onClick(unit)}
-        className={`w-6 h-4.5 md:w-7 md:h-5 text-[9px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative ${styles} ${opacityClass} ${highlightClass}`}
+        className={`w-6 h-4.5 md:w-7 md:h-5 text-[9px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative ${styles} ${opacityClass} ${highlightClass} ${unit?.esPreconfirmadaWeb ? "border-dashed" : ""}`}
       >
         <span className="leading-none">
           {isPendienteConfirmacion && <Hourglass size={9} />}
@@ -68,6 +68,11 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
         </span>
         {unit?.isPaid && isOcupada && (
           <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
+        )}
+        {/* D5 (Fase 3 Recepción): reserva web preconfirmada vigente — mismo
+            borde punteado de arriba + reloj, nunca color nuevo. */}
+        {unit?.esPreconfirmadaWeb && (
+          <Clock size={7} className="absolute -bottom-0.5 -right-0.5 text-current opacity-80" />
         )}
       </button>
       {numberSide === "right" && numberLabel}

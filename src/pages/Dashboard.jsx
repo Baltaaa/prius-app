@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { supabase } from "../lib/supabase"
-import { Printer, Plus, Minus, Maximize, ChevronLeft, ChevronRight } from "lucide-react"
+import { Printer, Plus, Minus, Scan, Expand, Shrink, ChevronLeft, ChevronRight } from "lucide-react"
 
 import {
   STATUS,
@@ -15,10 +16,16 @@ import AsignarUnidadModal from "../components/dashboard/AsignarUnidadModal"
 import MoverUnidadDialog from "../components/dashboard/MoverUnidadDialog"
 import Cell from "../components/dashboard/Cell"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
+import PlanoStatsBar, {
+  OcupacionCard, CarpasCard, SombrillasCard, LibresCard, MixCard, PendientesCard, IngresosCard, ClimaCard, EstadoLegend,
+} from "../components/dashboard/PlanoStatsBar"
 import { useData } from "../context/DataProvider"
-import { coSocios } from "../lib/reservas"
+import { coSocios, reservaActiva } from "../lib/reservas"
+import { calcularPlanoStats } from "../lib/planoStats"
 import DateInput from "../components/inputs/DateInput"
 import { useDeepLinkTarget } from "../hooks/useDeepLinkTarget"
+import { useOverlay } from "../context/OverlayProvider"
+import { useClima } from "../hooks/useClima"
 
 // El plano de playa solo dibuja carpas y sombrillas. Cabinas y lockers están
 // dentro del complejo y se manejan en su propia sección del CRM.
@@ -38,7 +45,7 @@ const shiftDate = (fecha, delta) => {
 }
 
 export default function Dashboard() {
-  const { unidades, reservas, loading, temporadaActiva } = useData()
+  const { unidades, reservas, loading, temporadaActiva, cajaHoy, historialCajas, pagos } = useData()
 
   // Se guarda el ID, no una copia de `units[...]`: así el modal de preview
   // sigue leyendo el objeto vivo del useMemo de abajo en cada render y se
@@ -50,6 +57,198 @@ export default function Dashboard() {
   const [zoom, setZoom] = useState(0.95)
   const MIN_ZOOM = 0.5
   const MAX_ZOOM = 1.5
+
+  // Modal de pantalla completa del plano (90% del viewport en desktop, 100%
+  // en mobile) — reusa el mismo `zoom`/`selectedDate`/etc. del Dashboard, así
+  // que abrir/cerrar no pierde ningún estado. Un solo árbol de ~184 <Cell>
+  // montado a la vez (nunca los dos juntos) para no duplicar el ref de
+  // `mapSlideRef` ni el trabajo de render.
+  const [fullscreenOpen, setFullscreenOpen] = useState(false)
+  const { bind: bindFullscreen } = useOverlay({
+    id: "plano-fullscreen",
+    isOpen: fullscreenOpen,
+    onRequestClose: () => setFullscreenOpen(false),
+  })
+  useEffect(() => {
+    if (!fullscreenOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => { document.body.style.overflow = prev }
+  }, [fullscreenOpen])
+
+  // Layout de rieles (oct 2026): a partir de 768px el mapa deja de ser un
+  // scroll nativo con pinch táctil y pasa a un modo "fit al contenedor" con
+  // zoom por botón/ctrl+rueda y pan por drag — el gesto táctil de una mano
+  // sigue intacto por debajo de 768px (ver `handleTouchMove` más abajo, sin
+  // tocar). Mismo patrón que `BrandSelect.tsx` para detectar el breakpoint
+  // (matchMedia, no un resize listener manual).
+  const [isFitMode, setIsFitMode] = useState(() => window.matchMedia('(min-width: 768px)').matches)
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 768px)')
+    const update = () => setIsFitMode(mql.matches)
+    update()
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
+
+  // --- Fit al contenedor (desktop/tablet, isFitMode) -----------------------
+  // Bug real que esto corrige: la medición vieja corría en un `useEffect`
+  // sin `loading` como dependencia, así que si el mapa todavía no existía en
+  // el DOM (`loading=true` muestra "Cargando plano…" en vez del mapa) el
+  // observer nunca se enganchaba — `fitScale` se quedaba en su valor inicial
+  // (1), cortando la franja de arriba (Recreación/Acceso/Pileta) y además
+  // bloqueando el zoom-out (el piso del zoom ERA ese fitScale mal calculado).
+  //
+  // Estructura (sin flex-centering ni transform-origin center, a propósito):
+  // `viewportRef` = contenedor, `overflow:hidden; position:relative`.
+  // `contentRef`  = capa transformada, `position:absolute; top:0; left:0;
+  // transform-origin:0 0`, con el plano en su tamaño intrínseco adentro —
+  // medir su offsetWidth/offsetHeight es seguro en cualquier momento (CSS
+  // transform nunca cambia el layout size del propio elemento).
+  const viewportRef = useRef(null)
+  const contentRef = useRef(null)
+  const sizesRef = useRef({ contW: 0, contH: 0, contentW: 0, contentH: 0 })
+  const userInteractedRef = useRef(false) // ref (no solo state) para que el closure del ResizeObserver siempre lea el valor actual, no uno viejo capturado al montar
+  const dragRef = useRef({ dragging: false, startX: 0, startY: 0, startX0: 0, startY0: 0 })
+
+  const [fitScale, setFitScale] = useState(1)
+  const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 })
+  const [ready, setReady] = useState(false) // oculto hasta la primera medición válida — nunca se ve un frame cortado
+  const [, setUserInteractedState] = useState(false) // solo para que el botón "Encuadrar" pueda reflejar el estado si hiciera falta
+  const [isDragging, setIsDragging] = useState(false)
+
+  const round1 = (n) => Math.round(n * 10) / 10
+  const PLANO_PAD = 24
+  const computeFit = (contW, contH, contentW, contentH) =>
+    Math.min((contW - PLANO_PAD * 2) / contentW, (contH - PLANO_PAD * 2) / contentH)
+  const centeredPos = (contW, contH, contentW, contentH, scale) => ({
+    x: (contW - contentW * scale) / 2,
+    y: (contH - contentH * scale) / 2,
+  })
+  const clampScale = (s) => Math.min(3, Math.max(fitScale * 0.5, s))
+  // Si el plano escalado entra en el eje, se fuerza centrado (no hay nada
+  // para desplazar ahí); si lo excede, se limita para que nunca salga
+  // completamente de vista (un borde como mucho llega a pegarse al del
+  // contenedor, nunca más allá).
+  const clampPan = (x, y, scale) => {
+    const { contW, contH, contentW, contentH } = sizesRef.current
+    const scaledW = contentW * scale
+    const scaledH = contentH * scale
+    const cx = scaledW <= contW ? (contW - scaledW) / 2 : Math.min(0, Math.max(contW - scaledW, x))
+    const cy = scaledH <= contH ? (contH - scaledH) / 2 : Math.min(0, Math.max(contH - scaledH, y))
+    return { x: cx, y: cy }
+  }
+  const markUserInteracted = () => {
+    if (userInteractedRef.current) return
+    userInteractedRef.current = true
+    setUserInteractedState(true)
+  }
+
+  // useLayoutEffect (no useEffect): mide y aplica el encuadre ANTES del
+  // primer paint visible, así `ready` nunca llega a pintarse en falso. Vuelve
+  // a correr cuando `loading` pasa a false (el mapa recién ahí existe en el
+  // DOM) y cuando cambia `fullscreenOpen` (el nodo real del viewport es otro).
+  useLayoutEffect(() => {
+    if (!isFitMode) return
+    const viewport = viewportRef.current
+    const content = contentRef.current
+    if (!viewport || !content) return
+
+    const aplicarEncuadre = () => {
+      const contW = viewport.clientWidth
+      const contH = viewport.clientHeight
+      const contentW = content.offsetWidth
+      const contentH = content.offsetHeight
+      if (!contW || !contH || !contentW || !contentH) return
+      sizesRef.current = { contW, contH, contentW, contentH }
+      const fit = computeFit(contW, contH, contentW, contentH)
+      setFitScale(fit)
+      if (!userInteractedRef.current) {
+        setTransform({ scale: fit, ...centeredPos(contW, contH, contentW, contentH, fit) })
+      }
+      setReady(true)
+    }
+
+    aplicarEncuadre()
+    // Observa contenedor Y contenido (fuentes/datos/unidades pueden cambiar
+    // el tamaño intrínseco del plano después del primer render).
+    const ro = new ResizeObserver(aplicarEncuadre)
+    ro.observe(viewport)
+    ro.observe(content)
+    return () => ro.disconnect()
+  }, [isFitMode, fullscreenOpen, loading])
+
+  const handleEncuadrar = () => {
+    userInteractedRef.current = false
+    setUserInteractedState(false)
+    const { contW, contH, contentW, contentH } = sizesRef.current
+    const fit = computeFit(contW, contH, contentW, contentH)
+    setFitScale(fit)
+    setTransform({ scale: fit, ...centeredPos(contW, contH, contentW, contentH, fit) })
+  }
+
+  // Zoom manteniendo fijo el punto (px, py) EN COORDENADAS DEL CONTENEDOR —
+  // los botones +/- usan el centro del contenedor, ctrl+rueda usa el cursor.
+  const zoomAt = (px, py, targetScale) => {
+    markUserInteracted()
+    setTransform((prev) => {
+      const scale = clampScale(targetScale)
+      const contentX = (px - prev.x) / prev.scale
+      const contentY = (py - prev.y) / prev.scale
+      const nx = px - contentX * scale
+      const ny = py - contentY * scale
+      const { x, y } = clampPan(nx, ny, scale)
+      return { scale, x, y }
+    })
+  }
+
+  // Pan por drag del mouse — solo si el plano escalado excede el contenedor
+  // en algún eje (si entero ya entra, no hay nada para desplazar). Listeners
+  // en `window` (no en el propio contenedor) para seguir recibiendo
+  // `mousemove` aunque el cursor salga del viewport mientras se arrastra.
+  const handleMapMouseDown = (e) => {
+    if (!isFitMode) return
+    const { contW, contH, contentW, contentH } = sizesRef.current
+    if (contentW * transform.scale <= contW && contentH * transform.scale <= contH) return
+    dragRef.current = { dragging: true, startX: e.clientX, startY: e.clientY, startX0: transform.x, startY0: transform.y }
+    setIsDragging(true)
+  }
+  useEffect(() => {
+    if (!isFitMode) return
+    const onMove = (e) => {
+      if (!dragRef.current.dragging) return
+      const dx = e.clientX - dragRef.current.startX
+      const dy = e.clientY - dragRef.current.startY
+      setTransform((prev) => {
+        const { x, y } = clampPan(dragRef.current.startX0 + dx, dragRef.current.startY0 + dy, prev.scale)
+        return { ...prev, x, y }
+      })
+    }
+    const onUp = () => {
+      if (!dragRef.current.dragging) return
+      dragRef.current.dragging = false
+      setIsDragging(false)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [isFitMode])
+
+  // Ctrl+rueda para zoom (desktop/tablet), relativo a la posición del cursor
+  // sobre el contenedor — sin Ctrl, la rueda no hace nada especial (el
+  // contenedor no tiene scroll nativo en este modo).
+  const handleMapWheel = (e) => {
+    if (!isFitMode || !e.ctrlKey) return
+    e.preventDefault()
+    const rect = viewportRef.current.getBoundingClientRect()
+    const px = e.clientX - rect.left
+    const py = e.clientY - rect.top
+    const delta = e.deltaY > 0 ? -0.2 : 0.2
+    zoomAt(px, py, round1(transform.scale + delta))
+  }
 
   // Pinch-to-zoom táctil (Tarea 4.6, mobile-first): mismo estado `zoom` que
   // ya usan los botones +/-/reset, solo se le suma otra forma de tocarlo. No
@@ -121,7 +320,7 @@ export default function Dashboard() {
   const reservaPorUnidad = useMemo(() => {
     const map = {}
     for (const r of reservas) {
-      if (!r.unidad_id || r.estado === "cancelada") continue
+      if (!r.unidad_id || !reservaActiva(r)) continue
       const vigente =
         r.tipo_alquiler === "temporada" ||
         (r.tipo_alquiler === "dia" && r.fecha === selectedDate) ||
@@ -163,6 +362,11 @@ export default function Dashboard() {
         notes: r?.notas || "",
         isPaid: r?.estado_pago === "pagado",
         isTemporada: r?.tipo_alquiler === "temporada",
+        // D5 (Fase 3 Recepción): reserva web preconfirmada vigente — borde
+        // punteado + reloj en la celda, sin tocar los colores de tipo_alquiler.
+        // `r` ya pasó por reservaActiva() en reservaPorUnidad, así que acá solo
+        // hace falta distinguir el origen.
+        esPreconfirmadaWeb: r?.origen === "web" && r?.preconfirmada === true,
         // Fila cruda de `reservas` (con clientes/unidades/reserva_clientes
         // embebidos por el select del DataProvider) — el preview del modal la
         // usa directo en vez de reconstruir un objeto plano a mano.
@@ -171,6 +375,52 @@ export default function Dashboard() {
     }
     return map
   }, [unidades, reservaPorUnidad])
+
+  // Caja de la fecha elegida (no siempre "hoy"): `cajaHoy` solo cubre el día
+  // de hoy, `historialCajas` trae las últimas 30 por fecha — entre las dos
+  // alcanza para el chip de "Ingresos del día" sin ninguna query nueva. Si
+  // la fecha no está en ninguna de las dos, `calcularPlanoStats` ya resuelve
+  // "—" (ver `lib/planoStats.js`).
+  const cajaDelDia = useMemo(
+    () => (selectedDate === todayStr() ? cajaHoy : (historialCajas.find((c) => c.fecha === selectedDate) || null)),
+    [cajaHoy, historialCajas, selectedDate],
+  )
+
+  const planoStats = useMemo(
+    () => calcularPlanoStats({ units, pagos, cajaDelDia, selectedDate }),
+    [units, pagos, cajaDelDia, selectedDate],
+  )
+
+  // Mismo hook que usa PlanoStatsBar — el cache de `useClima` es por fecha a
+  // nivel módulo, así que esta segunda llamada (para la hoja A4) no dispara
+  // un fetch extra salvo que todavía no se haya pedido esa fecha.
+  const { clima: climaDelDia } = useClima(selectedDate)
+
+  // Filtro visual de PlanoStatsBar: qué chip está "activo" ahora, y el set de
+  // unidades que corresponde resaltar. Puramente de presentación — no toca
+  // ningún dato, solo decide `isHighlighted`/`isDimmed` en cada <Cell>.
+  const [statsFiltro, setStatsFiltro] = useState(null)
+  const toggleStatsFiltro = useCallback((key) => {
+    setStatsFiltro((prev) => (prev === key ? null : key))
+  }, [])
+  const highlightedUnitIds = useMemo(() => {
+    if (!statsFiltro) return null
+    const porFiltro = {
+      ocupacion: planoStats.ocupacion.unitIds,
+      carpas: planoStats.carpas.unitIds,
+      sombrillas: planoStats.sombrillas.unitIds,
+      temporada: planoStats.mixUnitIds.temporada,
+      periodo: planoStats.mixUnitIds.periodo,
+      dia: planoStats.mixUnitIds.dia,
+      pendientes: planoStats.pendientes.unitIds,
+      libres: planoStats.libres.unitIds,
+    }
+    return new Set(porFiltro[statsFiltro] || [])
+  }, [statsFiltro, planoStats])
+  const cellHighlight = useCallback((unit) => {
+    if (!highlightedUnitIds || !unit) return {}
+    return highlightedUnitIds.has(unit.dbId) ? { isHighlighted: true } : { isDimmed: true }
+  }, [highlightedUnitIds])
 
   const selectedUnit = selectedUnitId ? units[selectedUnitId] : null
 
@@ -203,20 +453,43 @@ export default function Dashboard() {
     if (unit) setSelectedUnitId(unit.id)
   }, [])
 
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.1, 1.5))
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.1, 0.5))
-  const handleResetZoom = () => setZoom(0.95)
+  // Mobile (<768px, sin cambios): pasos de 0.1, rango 0.5–1.5, igual que
+  // siempre. Desktop/tablet (>=768px, fit-to-container): pasos de 0.2, techo
+  // 3, piso = fitScale*0.5 (se puede alejar por debajo del encuadre), zoom
+  // relativo al centro del contenedor (el punto central queda fijo).
+  const handleZoomIn = () => {
+    if (isFitMode) {
+      const { contW, contH } = sizesRef.current
+      zoomAt(contW / 2, contH / 2, round1(transform.scale + 0.2))
+    } else setZoom((prev) => Math.min(prev + 0.1, 1.5))
+  }
+  const handleZoomOut = () => {
+    if (isFitMode) {
+      const { contW, contH } = sizesRef.current
+      zoomAt(contW / 2, contH / 2, round1(transform.scale - 0.2))
+    } else setZoom((prev) => Math.max(prev - 0.1, 0.5))
+  }
 
   const getCarpa = (num) => units[`C${num}`]
   const getSombrilla = (num) => units[`S${num}`]
 
-  return (
-    <div className="h-full flex flex-col animate-premium-fade overflow-hidden">
-    <div className="no-print flex-1 flex flex-col space-y-4 overflow-hidden pb-4">
-      {/* Toolbar: navegación por fecha (izquierda) + vista/impresión (derecha),
-          todo en una sola fila para liberar alto vertical para el mapa. El
-          título grande vive ahora en el TopBar. */}
-      <div className="flex flex-wrap justify-between items-center gap-3 shrink-0">
+  // Un solo nodo cumple el doble rol de "ref de la animación de slide al
+  // cambiar de fecha" y "ref del viewport para medir fitScale" — nunca dos
+  // elementos distintos, porque solo hay UNO montado a la vez (ver abajo).
+  const setMapViewportRef = (node) => { mapSlideRef.current = node; viewportRef.current = node }
+
+  // Grid de 3 áreas (toolbar/stats/map en mobile+tablet <1280px; left/map/
+  // right en desktop >=1280px) + workspace del mapa (zoom + mapa) — un solo
+  // cuerpo reusado inline y adentro del modal de pantalla completa, para no
+  // duplicar el layout de las ~184 <Cell>. `fullscreen` solo cambia el botón
+  // de maximizar/minimizar: el resto del árbol es idéntico a propósito
+  // (WYSIWYG entre vista normal y pantalla completa). La impresión A4 no
+  // vive acá — sale de `PlanoImpresion` por fuera de `.no-print`, sin tocar.
+  const renderPlanoBody = (fullscreen) => (
+    <div className="plano-layout flex-1 min-h-0">
+      {/* Toolbar compacto: mobile + tablet (<1280px) — navegación de fecha
+          (izquierda) + Imprimir A4 (derecha), igual que siempre. */}
+      <div className="plano-area-toolbar flex flex-wrap justify-between items-center gap-3 shrink-0">
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => goToDate(shiftDate(selectedDate, -1))}
@@ -248,8 +521,69 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Workspace Area */}
-      <div className="flex-1 min-h-0 glass-card rounded-3xl glass-card-inner relative overflow-hidden flex flex-col">
+      {/* Stats compacto: mismo PlanoStatsBar de siempre, carrusel horizontal
+          con snap en mobile, fila con scroll horizontal en tablet. */}
+      <div className="plano-area-stats shrink-0">
+        <PlanoStatsBar
+          stats={planoStats}
+          selectedDate={selectedDate}
+          filtro={statsFiltro}
+          onToggleFiltro={toggleStatsFiltro}
+          loading={loading}
+        />
+      </div>
+
+      {/* Riel izquierdo: solo desktop >=1280px (oculto por CSS en el resto,
+          ver <style> más abajo). Mismas tarjetas que el stats compacto,
+          reusadas vía los named exports de PlanoStatsBar.jsx — ninguna
+          lógica/dato nuevo, solo otra disposición y ancho. */}
+      <div className="plano-area-left">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => goToDate(shiftDate(selectedDate, -1))}
+            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all shrink-0"
+            title="Día anterior"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} className="flex-1 min-w-0" />
+          <button
+            onClick={() => goToDate(shiftDate(selectedDate, 1))}
+            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all shrink-0"
+            title="Día siguiente"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+        {!esHoy && (
+          <button
+            onClick={() => goToDate(todayStr())}
+            className="self-start text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300 transition-all"
+          >
+            Volver a hoy
+          </button>
+        )}
+
+        {!loading && planoStats && (
+          <>
+            <OcupacionCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} size="lg" className="w-full" />
+            <div className="grid grid-cols-2 gap-2.5">
+              <CarpasCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+              <SombrillasCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+            </div>
+            <LibresCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+            <MixCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+          </>
+        )}
+
+        <div className="flex-1" />
+        <EstadoLegend />
+      </div>
+
+      {/* Workspace del mapa — único árbol, siempre presente (ver CSS: en
+          <1280px ocupa toda la fila "map"; en >=1280px queda entre los dos
+          rieles). */}
+      <div className="plano-area-map glass-card rounded-3xl glass-card-inner relative overflow-hidden flex flex-col">
         {loading ? (
           <div className="flex-1 flex items-center justify-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">
             Cargando plano…
@@ -263,27 +597,60 @@ export default function Dashboard() {
               <button onClick={handleZoomOut} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
                 <Minus size={20} />
               </button>
-              <button onClick={handleResetZoom} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all">
-                <Maximize size={18} />
-              </button>
+              {isFitMode && (
+                <button onClick={handleEncuadrar} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Encuadrar">
+                  <Scan size={18} />
+                </button>
+              )}
+              {fullscreen ? (
+                <button onClick={() => setFullscreenOpen(false)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Cerrar pantalla completa">
+                  <Shrink size={18} />
+                </button>
+              ) : (
+                <button onClick={() => setFullscreenOpen(true)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Ver en pantalla completa">
+                  <Expand size={18} />
+                </button>
+              )}
             </div>
 
             <div
-              ref={mapSlideRef}
+              ref={setMapViewportRef}
               onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              // touch-action: pan-x/pan-y deja el scroll de una mano nativo
-              // (mover el mapa) pero saca el pinch-zoom nativo del navegador
+              onTouchStart={!isFitMode ? handleTouchStart : undefined}
+              onTouchMove={!isFitMode ? handleTouchMove : undefined}
+              onTouchEnd={!isFitMode ? handleTouchEnd : undefined}
+              onMouseDown={isFitMode ? handleMapMouseDown : undefined}
+              onWheel={isFitMode ? handleMapWheel : undefined}
+              // touch-action: pan-x/pan-y (mobile, <768px) deja el scroll de
+              // una mano nativo pero saca el pinch-zoom nativo del navegador
               // de encima — el pinch de dos dedos lo maneja el JS de arriba
-              // sobre el mismo `zoom` que ya usan los botones +/-/reset.
-              style={{ touchAction: 'pan-x pan-y' }}
-              className="flex-1 overflow-auto p-4 sm:p-12 flex justify-center items-start"
+              // sobre el mismo `zoom` que ya usan los botones +/-/encuadrar.
+              // En fit-mode (>=768px): SIN flex-centering — el centrado lo
+              // calcula `aplicarEncuadre()` a mano (x/y explícitos), nunca el
+              // navegador. `visibility: hidden` hasta la primera medición
+              // válida (`ready`): sin esto se llega a ver un frame con el
+              // plano sin escalar (cortado arriba) antes de que el
+              // useLayoutEffect corra — justo el bug que se está arreglando.
+              style={!isFitMode ? { touchAction: 'pan-x pan-y' } : { visibility: ready ? 'visible' : 'hidden' }}
+              className={isFitMode
+                ? "flex-1 min-h-0 overflow-hidden relative"
+                : "flex-1 overflow-auto p-4 sm:p-12 flex justify-center items-start"
+              }
             >
               <div
-                className="transition-transform duration-200 origin-top flex flex-col items-center"
-                style={{ transform: `scale(${zoom})` }}
+                ref={contentRef}
+                className={isFitMode ? "absolute top-0 left-0 flex flex-col items-center" : "transition-transform duration-200 origin-top flex flex-col items-center"}
+                style={isFitMode
+                  ? {
+                      transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+                      transformOrigin: '0 0',
+                      transition: isDragging ? 'none' : 'transform 150ms ease-out',
+                      cursor: (sizesRef.current.contentW * transform.scale > sizesRef.current.contW || sizesRef.current.contentH * transform.scale > sizesRef.current.contH)
+                        ? (isDragging ? 'grabbing' : 'grab')
+                        : 'default',
+                    }
+                  : { transform: `scale(${zoom})` }
+                }
               >
                 {/*
                   Layout definido con el dueño (sept 2026, ver CLAUDE.md):
@@ -320,7 +687,7 @@ export default function Dashboard() {
                   {/* Hilera 1-25, número a la izquierda */}
                   <div className="flex flex-col gap-1">
                     {range(1, 25).map(num => (
-                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" />
+                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" {...cellHighlight(getCarpa(num))} />
                     ))}
                   </div>
 
@@ -331,12 +698,12 @@ export default function Dashboard() {
                   <div className="flex items-end" style={{ gap: PLANO_BLOQUE_GAP }}>
                     <div className="flex flex-col gap-1">
                       {range(26, 50).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" />
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" {...cellHighlight(getCarpa(num))} />
                       ))}
                     </div>
                     <div className="flex flex-col gap-1">
                       {range(51, 75).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" />
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" {...cellHighlight(getCarpa(num))} />
                       ))}
                     </div>
                   </div>
@@ -348,12 +715,12 @@ export default function Dashboard() {
                   <div className="flex items-end" style={{ gap: PLANO_BLOQUE_GAP }}>
                     <div className="flex flex-col gap-1">
                       {range(76, 98).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" />
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" {...cellHighlight(getCarpa(num))} />
                       ))}
                     </div>
                     <div className="flex flex-col gap-1">
                       {range(99, 121).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" />
+                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" {...cellHighlight(getCarpa(num))} />
                       ))}
                     </div>
                   </div>
@@ -364,7 +731,7 @@ export default function Dashboard() {
                   {/* Hilera 122-144, número a la derecha */}
                   <div className="flex flex-col gap-1">
                     {range(122, 144).map(num => (
-                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" />
+                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" {...cellHighlight(getCarpa(num))} />
                     ))}
                   </div>
                 </div>
@@ -384,7 +751,7 @@ export default function Dashboard() {
                         {starts.map(start => (
                           <div key={start} className="flex gap-1">
                             {[0, 1, 2, 3, 4].map(off => (
-                              <Cell key={start + off} number={start + off} unit={getSombrilla(start + off)} onClick={handleUnitClick} />
+                              <Cell key={start + off} number={start + off} unit={getSombrilla(start + off)} onClick={handleUnitClick} {...cellHighlight(getSombrilla(start + off))} />
                             ))}
                           </div>
                         ))}
@@ -401,6 +768,49 @@ export default function Dashboard() {
           </>
         )}
       </div>
+
+      {/* Riel derecho: solo desktop >=1280px — Imprimir A4 como acción
+          primaria + las tres tarjetas restantes, mismos componentes que el
+          stats compacto. */}
+      <div className="plano-area-right">
+        <button
+          onClick={() => window.print()}
+          className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-[#FDE047] hover:bg-yellow-300 text-black transition-all flex items-center justify-center gap-2"
+        >
+          <Printer size={16} /> Imprimir A4
+        </button>
+
+        {!loading && planoStats && (
+          <>
+            <PendientesCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+            <IngresosCard stats={planoStats} className="w-full" />
+            <ClimaCard selectedDate={selectedDate} className="w-full" />
+          </>
+        )}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="h-full flex flex-col animate-premium-fade overflow-hidden">
+    <div className="no-print flex-1 flex flex-col space-y-4 overflow-hidden pb-4">
+      {!fullscreenOpen && renderPlanoBody(false)}
+
+      {fullscreenOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-200"
+          onClick={() => setFullscreenOpen(false)}
+        >
+          <div
+            ref={bindFullscreen}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full h-full sm:w-[90vw] sm:h-[90vh] glass-card sm:rounded-3xl overflow-hidden border border-white/10 shadow-2xl flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
+          >
+            {renderPlanoBody(true)}
+          </div>
+        </div>,
+        document.body,
+      )}
 
       {selectedUnit && (
         <UnidadPreviewModal
@@ -430,9 +840,44 @@ export default function Dashboard() {
     </div>
 
     {/* Hoja A4 de impresión: oculta en pantalla, única cosa visible al imprimir. */}
-    {!loading && <PlanoImpresion units={units} selectedDate={selectedDate} />}
+    {!loading && <PlanoImpresion units={units} selectedDate={selectedDate} stats={planoStats} clima={climaDelDia} />}
 
       <style>{`
+        /* Grid de 3 áreas del Plano (oct 2026) — mobile/tablet (<1280px):
+           toolbar + stats arriba, mapa abajo, una sola columna. Desktop
+           (>=1280px): riel izquierdo 280px / mapa flexible / riel derecho
+           280px, en una sola fila. Nunca afecta la impresión — @media print
+           no toca estas clases, y PlanoImpresion.jsx vive fuera de
+           .no-print con su propio layout de siempre. */
+        .plano-layout {
+          display: grid;
+          grid-template-areas: "toolbar" "stats" "map";
+          grid-template-columns: 1fr;
+          grid-template-rows: auto auto 1fr;
+          gap: 16px;
+          min-height: 0;
+        }
+        .plano-area-toolbar { grid-area: toolbar; }
+        .plano-area-stats { grid-area: stats; }
+        .plano-area-map { grid-area: map; min-height: 0; min-width: 0; }
+        .plano-area-left, .plano-area-right { display: none; }
+        @media (min-width: 1280px) {
+          .plano-layout {
+            grid-template-areas: "left map right";
+            grid-template-columns: 280px 1fr 280px;
+            grid-template-rows: 1fr;
+            gap: 24px;
+          }
+          .plano-area-toolbar, .plano-area-stats { display: none; }
+          .plano-area-left, .plano-area-right {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+            overflow-y: auto;
+          }
+        }
+
         @media print {
           @page { size: A4 portrait; margin: 8mm; }
           html, body { background: white !important; color: black !important; }

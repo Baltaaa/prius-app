@@ -22,6 +22,7 @@ const Leads = lazy(() => import('./pages/crm/Leads'))
 const Notificaciones = lazy(() => import('./pages/crm/Notificaciones'))
 const Comprobantes = lazy(() => import('./pages/crm/Comprobantes'))
 const Perfil = lazy(() => import('./pages/crm/Perfil'))
+const Recepcion = lazy(() => import('./pages/Recepcion'))
 const NotFound = lazy(() => import('./pages/crm/NotFound'))
 
 export default function App() {
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="home" element={<Home />} />
               <Route path="plano" element={<Dashboard />} />
               <Route path="cabinas-lockers" element={<CabinasLockers />} />
+              <Route path="recepcion" element={<Recepcion />} />
               <Route path="reservas" element={<Reservas />} />
               <Route path="clientes" element={<Clientes />} />
               <Route path="caja" element={<Caja />} />

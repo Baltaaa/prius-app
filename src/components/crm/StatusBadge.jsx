@@ -30,6 +30,19 @@ export default function StatusBadge({ status }) {
     bonificada: {
       bg: 'bg-cyan-50 text-cyan-700 border-cyan-200',
       label: 'Bonificada'
+    },
+    // Fase 3 (Recepción, D7): reserva web sin compromiso todavía — reemplaza
+    // al badge de estado_pago mientras esté vigente, mismo mecanismo que
+    // "Bonificada" (ver lib/reservas.js `estadoBadgeStatus`).
+    preconfirmada: {
+      bg: 'bg-sky-50 text-sky-700 border-sky-200',
+      label: 'Preconfirmada'
+    },
+    // Venció por vence_at sin check-in — la unidad ya se liberó, sin acción
+    // primaria posible (nunca convive con otro badge de esa misma reserva).
+    vencida: {
+      bg: 'bg-neutral-100 text-neutral-500 border-neutral-300',
+      label: 'Vencida'
     }
   }
 

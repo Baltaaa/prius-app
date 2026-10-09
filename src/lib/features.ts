@@ -20,6 +20,8 @@ export const FEATURES = {
   'feat-7-caja-filtro-medio-url': true,
   'feat-8-leads-filtro-url': true,
   'feat-9-comprobantes-recordar-config': true,
+  // Fase 3 reservas públicas: Recepción (check-in + cobro por QR/código).
+  recepcion: true,
 } as const
 
 export type FeatureKey = keyof typeof FEATURES

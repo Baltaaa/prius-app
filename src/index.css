@@ -104,6 +104,13 @@ body {
   background: var(--prius-accent);
 }
 
+/* Scroll horizontal sin barra visible (PlanoStatsBar, tiras de chips) —
+   `scrollbar-width: none` ya cubre Firefox vía inline style, esto cubre
+   WebKit/Chromium, que no tiene equivalente en utilidades de Tailwind. */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /*
   Entrada suave de las vistas. One-shot (no infinite): solo anima opacity y
   transform, ambas compuestas por GPU, así no genera trabajo de layout.

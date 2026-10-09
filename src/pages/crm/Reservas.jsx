@@ -14,7 +14,7 @@ import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
 import { registrarVisto } from '../../hooks/useRecientes'
-import { linkToCliente } from '../../lib/deepLinks'
+import { linkToCliente, linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
 import RegistrarPago from '../../components/crm/RegistrarPago'
@@ -25,7 +25,7 @@ import MontoReserva from '../../components/crm/MontoReserva'
 import ReservaCalendar from '../../components/crm/ReservaCalendar'
 import Historial from '../../components/crm/Historial'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
-import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, X, Lock, Unlock, ChevronDown } from 'lucide-react'
+import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, X, Lock, Unlock, ChevronDown, Receipt, QrCode } from 'lucide-react'
 
 // Título chico de sección dentro del modal de reserva (Tarea 5, oct 2026) —
 // mismo patrón repetido en ambas columnas, separador en vez de mayúscula de
@@ -738,6 +738,15 @@ export default function Reservas() {
               </td>
               <td className="px-6 py-5">
                 <div className="flex gap-2">
+                  {estadoBadgeStatus(res) === 'preconfirmada' && (
+                    <button
+                      onClick={() => navigate(linkToRecepcion(res.codigo))}
+                      className="p-2 hover:bg-white/10 rounded-lg text-sky-400 transition-all"
+                      title="Hacer check-in"
+                    >
+                      <QrCode size={16} />
+                    </button>
+                  )}
                   {!res.bonificada && (
                     <button
                       onClick={() => setPagoReserva(res)}
@@ -748,6 +757,9 @@ export default function Reservas() {
                       <Wallet size={16} />
                     </button>
                   )}
+                  <button onClick={() => navigate(linkToComprobante(res.id))} className="p-2 hover:bg-white/10 rounded-lg text-white transition-all" title="Emitir comprobante">
+                    <Receipt size={16} />
+                  </button>
                   <button onClick={() => handleOpenEdit(res)} className="p-2 hover:bg-white/10 rounded-lg text-[#FDE047] transition-all">
                     <Edit2 size={16} />
                   </button>
@@ -823,6 +835,15 @@ export default function Reservas() {
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  {estadoBadgeStatus(res) === 'preconfirmada' && (
+                    <button
+                      onClick={() => navigate(linkToRecepcion(res.codigo))}
+                      className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-sky-400 transition-all"
+                      title="Hacer check-in"
+                    >
+                      <QrCode size={16} />
+                    </button>
+                  )}
                   {!res.bonificada && (
                     <button
                       onClick={() => setPagoReserva(res)}
@@ -832,6 +853,9 @@ export default function Reservas() {
                       <Wallet size={16} />
                     </button>
                   )}
+                  <button onClick={() => navigate(linkToComprobante(res.id))} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-white transition-all">
+                    <Receipt size={16} />
+                  </button>
                   <button onClick={() => handleOpenEdit(res)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-[#FDE047] transition-all">
                     <Edit2 size={16} />
                   </button>

@@ -17,8 +17,10 @@ import {
   Activity,
   Inbox,
   GanttChartSquare,
-  DoorClosed
+  DoorClosed,
+  QrCode
 } from 'lucide-react'
+import { isFeatureEnabled } from '../../lib/features'
 
 // Mobile-first (sept 2026): en pantallas chicas la navegación vive en
 // BottomNav.jsx (5 ítems + "Más") — este Sidebar queda oculto por completo
@@ -39,6 +41,7 @@ export default function Sidebar() {
     { name: 'Dashboard', path: '/app/home', icon: LayoutDashboard },
     { name: 'Plano de Playa', path: '/app/plano', icon: Map },
     { name: 'Cabinas y Lockers', path: '/app/cabinas-lockers', icon: DoorClosed, comingSoon: true },
+    ...(isFeatureEnabled('recepcion') ? [{ name: 'Recepción', path: '/app/recepcion', icon: QrCode }] : []),
     { name: 'Reservas', path: '/app/reservas', icon: CalendarDays },
     { name: 'Clientes', path: '/app/clientes', icon: Users },
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },

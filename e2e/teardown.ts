@@ -5,6 +5,12 @@
 // de prueba (.env.local) — nunca con más permisos que los que ya tiene
 // esa cuenta en la app real.
 //
+// Fase 2 (oct 2026) — reservas públicas: suma el borrado de los
+// `codigos_reserva` que quedan huérfanos al borrar las reservas de
+// clientes E2E TEST (la FK reservas.codigo no tiene cascade), y de los
+// `leads` con nombre que empieza con el mismo prefijo (los que entran por
+// la Edge Function lead-reserva, no por el form de contacto de n8n).
+//
 // Uso: npx tsx e2e/teardown.ts   (o node --import tsx si no hay tsx global)
 import { readFileSync, existsSync } from 'fs'
 import { createClient } from '@supabase/supabase-js'
@@ -34,18 +40,27 @@ export default async function teardown() {
   const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
   if (authError) throw authError
 
+  // Leads de la Fase 2 (lead-reserva) pueden quedar sin cliente asociado
+  // (form abandonado, sin disponibilidad): se borran solos por nombre, antes
+  // de cualquier early-return por "no hay clientes E2E".
+  const { data: leadsE2E, error: errLeads } = await supabase
+    .from('leads').delete().ilike('nombre', `${PREFIJO}%`).select('id')
+  if (errLeads) throw errLeads
+  console.log(`Leads E2E borrados: ${(leadsE2E || []).length}`)
+
   const { data: clientes, error: errClientes } = await supabase
     .from('clientes').select('id').ilike('nombre', `${PREFIJO}%`)
   if (errClientes) throw errClientes
   const clienteIds = (clientes || []).map((c) => c.id)
   console.log(`Clientes E2E encontrados: ${clienteIds.length}`)
   if (clienteIds.length === 0) {
-    console.log('Nada para borrar.')
+    console.log('Nada más para borrar.')
     return
   }
 
-  const { data: reservas } = await supabase.from('reservas').select('id').in('cliente_id', clienteIds)
+  const { data: reservas } = await supabase.from('reservas').select('id, codigo').in('cliente_id', clienteIds)
   const reservaIds = (reservas || []).map((r) => r.id)
+  const codigosReserva = [...new Set((reservas || []).map((r) => r.codigo).filter(Boolean))]
   console.log(`Reservas E2E: ${reservaIds.length}`)
 
   const { data: pagos } = reservaIds.length
@@ -61,6 +76,10 @@ export default async function teardown() {
   }
   if (reservaIds.length) {
     await supabase.from('reservas').delete().in('id', reservaIds)
+  }
+  if (codigosReserva.length) {
+    await supabase.from('codigos_reserva').delete().in('codigo', codigosReserva)
+    console.log(`Códigos de reserva E2E: ${codigosReserva.length}`)
   }
   await supabase.from('eventos').delete().or(`cliente_id.in.(${clienteIds.join(',')}),registro_id.in.(${clienteIds.join(',')}${reservaIds.length ? ',' + reservaIds.join(',') : ''})`)
   await supabase.from('vistas_recientes').delete().in('entidad_id', [...clienteIds, ...reservaIds])

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useId } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { DayPicker } from 'react-day-picker'
 import { es } from 'date-fns/locale'
@@ -19,6 +19,9 @@ import { useOverlay } from '../../context/OverlayProvider'
  * — así nunca queda recortado por un contenedor con scroll/overflow-hidden
  * (ej. el acordeón "Cargar comprobante ahora" de RegistrarPago.jsx), y
  * siempre queda por encima de cualquier modal (Modal.jsx usa z-[999]).
+ * Se abre hacia abajo del campo por default y flipea hacia arriba (detección
+ * de colisión manual, padding 16px) cuando no entra abajo pero sí arriba —
+ * en mobile (<640px) sigue centrado en el viewport, sin flip.
  *
  * `calendarOnly` (opt-in, default false — no cambia el comportamiento de los
  * demás usos): el input queda readOnly (no se tipea), se abre tocando
@@ -60,7 +63,9 @@ function dateToIso(d: Date | undefined): string | null {
   return `${y}-${m}-${dia}`
 }
 
-type Pos = { top: number; left: number; width: number }
+type Pos = { top: number; left: number; width: number; anchorTop: number }
+
+const COLLISION_PADDING = 16
 
 export default function DateInput({
   label, hint, error, value, onChange, onBlur, min, max, disabledRanges, required, disabled,
@@ -80,8 +85,26 @@ export default function DateInput({
   const medirPosicion = useCallback(() => {
     const rect = wrapRef.current?.getBoundingClientRect()
     if (!rect) return
-    setPos({ top: rect.bottom + 8, left: rect.left, width: rect.width })
+    setPos({ top: rect.bottom + 8, left: rect.left, width: rect.width, anchorTop: rect.top })
   }, [])
+
+  // Detección de colisión (equivalente a avoidCollisions/collisionPadding de
+  // Radix Popover, sin agregar esa dependencia): mide el popover ya
+  // renderizado y, si no entra hacia abajo pero sí hacia arriba del campo,
+  // lo flipea — así nunca queda tapado por el borde del modal con scroll
+  // interno (Modal.jsx) ni fuera del viewport.
+  useLayoutEffect(() => {
+    if (!abierto || !pos || !popoverRef.current) return
+    if (window.innerWidth < 640) return // mobile: centrado en viewport, no aplica
+    const altura = popoverRef.current.getBoundingClientRect().height
+    const excedeAbajo = pos.top + altura > window.innerHeight - COLLISION_PADDING
+    const espacioArriba = pos.anchorTop - COLLISION_PADDING
+    if (!excedeAbajo || espacioArriba < altura) return // entra abajo, o tampoco entra arriba: no flipear
+    const topDeseado = pos.anchorTop - altura - 8
+    if (Math.abs(topDeseado - pos.top) > 1) {
+      setPos((p) => (p ? { ...p, top: topDeseado } : p))
+    }
+  }, [abierto, pos])
 
   const abrir = useCallback(() => {
     if (disabled) return

@@ -29,7 +29,19 @@ export const esPendienteConfirmacion = (reserva) => reserva?.estado_pago === 'pe
 // estado_pago='pagado' en cuanto bonificada=true, así que en teoría nunca
 // convive con parcial/pendiente/pendiente_confirmacion, pero este helper es
 // el que blindaría la UI si algo quedara desincronizado.
-export const estadoBadgeStatus = (reserva) => (reserva?.bonificada ? 'bonificada' : reserva?.estado_pago)
+//
+// Fase 3 (Recepción, D7): una reserva web preconfirmada reemplaza TAMBIÉN al
+// badge de estado_pago mientras esté vigente ("Preconfirmada" — su acción
+// primaria es "Hacer check-in"); si venció por `vence_at` sin check-in, el
+// badge es "Vencida", sin acción. D6 asegura que una reserva saldada ya no
+// llega acá con preconfirmada=true, así que no compite con "Pagado".
+export function estadoBadgeStatus(reserva) {
+  if (reserva?.bonificada) return 'bonificada'
+  if (reserva?.origen === 'web' && reserva?.preconfirmada) {
+    return reservaActiva(reserva) ? 'preconfirmada' : 'vencida'
+  }
+  return reserva?.estado_pago
+}
 
 // Una reserva está "saldada" solo si el precio existe y coincide con lo
 // cobrado. pendiente_confirmacion nunca cuenta como saldada — el precio ni
@@ -130,7 +142,7 @@ export function rangosOcupadosPorUnidad(reservas, unidadId, excludeReservaId) {
   if (!unidadId) return []
   return (reservas || [])
     .filter((r) => {
-      if (r.unidad_id !== unidadId || r.estado !== 'activa') return false
+      if (r.unidad_id !== unidadId || !reservaActiva(r)) return false
       if (excludeReservaId && r.id === excludeReservaId) return false
       return r.tipo_alquiler === 'periodo' || r.tipo_alquiler === 'dia'
     })
@@ -140,6 +152,19 @@ export function rangosOcupadosPorUnidad(reservas, unidadId, excludeReservaId) {
       return { desde, hasta }
     })
     .filter((rango) => rango.desde && rango.hasta)
+}
+
+// Espejo de reserva_activa() en Postgres — mantener sincronizado. Único
+// criterio de "esta reserva ocupa la unidad" en el front (Plano, Ocupación,
+// impresión, selector de fecha): una reserva preconfirmada (web, sin
+// compromiso) deja de ocupar en cuanto pasa su `vence_at`, aunque su
+// `estado` todavía diga "activa" (el vencimiento lazy del lado del servidor
+// solo corre sobre las unidades que una reserva nueva está pidiendo).
+export function reservaActiva(reserva, ahora = new Date()) {
+  if (!reserva || reserva.estado !== 'activa') return false
+  if (!reserva.preconfirmada) return true
+  if (!reserva.vence_at) return true
+  return ahora < new Date(reserva.vence_at)
 }
 
 // Co-socios de una reserva: personas vinculadas a la misma unidad además del
