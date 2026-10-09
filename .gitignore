@@ -29,3 +29,10 @@ dist
 .vite
 .dyad/
 qa/
+
+# Playwright: resultados de corridas efímeras — las capturas de referencia
+# (*-snapshots/, ver e2e/plano-visual.spec.ts) SÍ se commitean, son los
+# baselines contra los que se comparan.
+test-results/
+playwright-report/
+blob-report/

@@ -46,9 +46,6 @@ export default function Dashboard() {
   const [selectedUnitId, setSelectedUnitId] = useState(null)
   const [asignarUnit, setAsignarUnit] = useState(null) // unidad libre a asignar, o null
   const [moverTarget, setMoverTarget] = useState(null) // { reserva, unit } a mover, o null
-  const [zoom, setZoom] = useState(0.95)
-  const MIN_ZOOM = 0.5
-  const MAX_ZOOM = 1.5
 
   // Modal de pantalla completa del plano (90% del viewport en desktop, 100%
   // en mobile) — reusa el mismo `zoom`/`selectedDate`/etc. del Dashboard, así
@@ -68,22 +65,15 @@ export default function Dashboard() {
     return () => { document.body.style.overflow = prev }
   }, [fullscreenOpen])
 
-  // Layout de rieles (oct 2026): a partir de 768px el mapa deja de ser un
-  // scroll nativo con pinch táctil y pasa a un modo "fit al contenedor" con
-  // zoom por botón/ctrl+rueda y pan por drag — el gesto táctil de una mano
-  // sigue intacto por debajo de 768px (ver `handleTouchMove` más abajo, sin
-  // tocar). Mismo patrón que `BrandSelect.tsx` para detectar el breakpoint
-  // (matchMedia, no un resize listener manual).
-  const [isFitMode, setIsFitMode] = useState(() => window.matchMedia('(min-width: 768px)').matches)
-  useEffect(() => {
-    const mql = window.matchMedia('(min-width: 768px)')
-    const update = () => setIsFitMode(mql.matches)
-    update()
-    mql.addEventListener('change', update)
-    return () => mql.removeEventListener('change', update)
-  }, [])
-
-  // --- Fit al contenedor (desktop/tablet, isFitMode) -----------------------
+  // --- Fit al contenedor (mobile y desktop, Fase 4A hotfix oct 2026) -------
+  // Antes: por debajo de 768px el mapa usaba un modo aparte (scroll nativo +
+  // zoom simple por escala, sin encuadre). Bug real que eso causaba en
+  // mobile: el plano nunca entraba encuadrado al abrir (quedaba más ancho
+  // que la pantalla, forzando scroll horizontal de TODA la página, no solo
+  // del mapa) — ver CLAUDE.md "Plano portable". Ahora un solo modo para
+  // cualquier tamaño: fit-to-container con zoom relativo al punto tocado/
+  // clickeado y pan por drag — mouse (desktop) y touch (mobile) alimentan
+  // exactamente el mismo estado `transform`, nunca dos sistemas en paralelo.
   // Bug real que esto corrige: la medición vieja corría en un `useEffect`
   // sin `loading` como dependencia, así que si el mapa todavía no existía en
   // el DOM (`loading=true` muestra "Cargando plano…" en vez del mapa) el
@@ -141,7 +131,6 @@ export default function Dashboard() {
   // a correr cuando `loading` pasa a false (el mapa recién ahí existe en el
   // DOM) y cuando cambia `fullscreenOpen` (el nodo real del viewport es otro).
   useLayoutEffect(() => {
-    if (!isFitMode) return
     const viewport = viewportRef.current
     const content = contentRef.current
     if (!viewport || !content) return
@@ -168,7 +157,7 @@ export default function Dashboard() {
     ro.observe(viewport)
     ro.observe(content)
     return () => ro.disconnect()
-  }, [isFitMode, fullscreenOpen, loading])
+  }, [fullscreenOpen, loading])
 
   const handleEncuadrar = () => {
     userInteractedRef.current = false
@@ -199,14 +188,12 @@ export default function Dashboard() {
   // en `window` (no en el propio contenedor) para seguir recibiendo
   // `mousemove` aunque el cursor salga del viewport mientras se arrastra.
   const handleMapMouseDown = (e) => {
-    if (!isFitMode) return
     const { contW, contH, contentW, contentH } = sizesRef.current
     if (contentW * transform.scale <= contW && contentH * transform.scale <= contH) return
     dragRef.current = { dragging: true, startX: e.clientX, startY: e.clientY, startX0: transform.x, startY0: transform.y }
     setIsDragging(true)
   }
   useEffect(() => {
-    if (!isFitMode) return
     const onMove = (e) => {
       if (!dragRef.current.dragging) return
       const dx = e.clientX - dragRef.current.startX
@@ -227,13 +214,13 @@ export default function Dashboard() {
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }
-  }, [isFitMode])
+  }, [])
 
   // Ctrl+rueda para zoom (desktop/tablet), relativo a la posición del cursor
   // sobre el contenedor — sin Ctrl, la rueda no hace nada especial (el
   // contenedor no tiene scroll nativo en este modo).
   const handleMapWheel = (e) => {
-    if (!isFitMode || !e.ctrlKey) return
+    if (!e.ctrlKey) return
     e.preventDefault()
     const rect = viewportRef.current.getBoundingClientRect()
     const px = e.clientX - rect.left
@@ -242,32 +229,64 @@ export default function Dashboard() {
     zoomAt(px, py, round1(transform.scale + delta))
   }
 
-  // Pinch-to-zoom táctil (Tarea 4.6, mobile-first): mismo estado `zoom` que
-  // ya usan los botones +/-/reset, solo se le suma otra forma de tocarlo. No
-  // toca ningún estado de reservas/unidades — es puramente gestual sobre el
-  // `transform: scale()` que ya existía. El pan de una sola mano sigue
-  // siendo el scroll nativo del contenedor `overflow-auto` (no hace falta
-  // reimplementarlo). refs (no state) para no re-renderizar en cada
-  // touchmove — solo `zoom` dispara render, vía setZoom.
-  const pinchRef = useRef({ active: false, startDist: 0, startZoom: 1 })
-  const touchDistance = (touches) => {
-    const [a, b] = touches
-    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
-  }
+  // Táctil (mobile, Fase 4A hotfix): un dedo arrastra (mismo pan por drag
+  // que el mouse, con touch.clientX/Y en vez de e.clientX/Y); dos dedos
+  // pinchean, con el zoom centrado en el punto medio entre los dos toques —
+  // se recalcula en cada touchmove con el midpoint ACTUAL (no uno fijo al
+  // empezar), así el zoom "sigue" a los dedos mientras se mueven, igual que
+  // una app nativa. Reusa `zoomAt`/`clampPan`, el mismo camino que ya usan
+  // los botones y Ctrl+rueda — nunca un estado de escala en paralelo.
+  const touchPinchRef = useRef({ active: false, startDist: 0, startScale: 1 })
+  const touchDistance = (touches) => Math.hypot(
+    touches[0].clientX - touches[1].clientX,
+    touches[0].clientY - touches[1].clientY,
+  )
+  const touchMidpoint = (touches, rect) => ({
+    x: (touches[0].clientX + touches[1].clientX) / 2 - rect.left,
+    y: (touches[0].clientY + touches[1].clientY) / 2 - rect.top,
+  })
   const handleTouchStart = (e) => {
     if (e.touches.length === 2) {
-      pinchRef.current = { active: true, startDist: touchDistance(e.touches), startZoom: zoom }
+      touchPinchRef.current = { active: true, startDist: touchDistance(e.touches), startScale: transform.scale }
+      dragRef.current.dragging = false
+      setIsDragging(false)
+      return
+    }
+    if (e.touches.length === 1) {
+      const { contW, contH, contentW, contentH } = sizesRef.current
+      if (contentW * transform.scale <= contW && contentH * transform.scale <= contH) return
+      const t = e.touches[0]
+      dragRef.current = { dragging: true, startX: t.clientX, startY: t.clientY, startX0: transform.x, startY0: transform.y }
+      setIsDragging(true)
     }
   }
   const handleTouchMove = (e) => {
-    if (!pinchRef.current.active || e.touches.length !== 2) return
-    e.preventDefault()
-    const dist = touchDistance(e.touches)
-    const ratio = dist / pinchRef.current.startDist
-    setZoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, pinchRef.current.startZoom * ratio)))
+    if (touchPinchRef.current.active && e.touches.length === 2) {
+      e.preventDefault()
+      const rect = viewportRef.current.getBoundingClientRect()
+      const dist = touchDistance(e.touches)
+      const ratio = dist / touchPinchRef.current.startDist
+      const { x, y } = touchMidpoint(e.touches, rect)
+      zoomAt(x, y, round1(touchPinchRef.current.startScale * ratio))
+      return
+    }
+    if (dragRef.current.dragging && e.touches.length === 1) {
+      e.preventDefault()
+      const t = e.touches[0]
+      const dx = t.clientX - dragRef.current.startX
+      const dy = t.clientY - dragRef.current.startY
+      setTransform((prev) => {
+        const { x, y } = clampPan(dragRef.current.startX0 + dx, dragRef.current.startY0 + dy, prev.scale)
+        return { ...prev, x, y }
+      })
+    }
   }
   const handleTouchEnd = (e) => {
-    if (e.touches.length < 2) pinchRef.current.active = false
+    if (e.touches.length < 2) touchPinchRef.current.active = false
+    if (e.touches.length === 0) {
+      dragRef.current.dragging = false
+      setIsDragging(false)
+    }
   }
   const [selectedDate, setSelectedDate] = useState(todayStr())
   const esHoy = selectedDate === todayStr()
@@ -445,21 +464,16 @@ export default function Dashboard() {
     if (unit) setSelectedUnitId(unit.id)
   }, [])
 
-  // Mobile (<768px, sin cambios): pasos de 0.1, rango 0.5–1.5, igual que
-  // siempre. Desktop/tablet (>=768px, fit-to-container): pasos de 0.2, techo
-  // 3, piso = fitScale*0.5 (se puede alejar por debajo del encuadre), zoom
-  // relativo al centro del contenedor (el punto central queda fijo).
+  // Pasos de 0.2, techo 3, piso = fitScale*0.5 (se puede alejar por debajo
+  // del encuadre), zoom relativo al centro del contenedor (el punto central
+  // queda fijo) — mismo comportamiento en mobile y desktop.
   const handleZoomIn = () => {
-    if (isFitMode) {
-      const { contW, contH } = sizesRef.current
-      zoomAt(contW / 2, contH / 2, round1(transform.scale + 0.2))
-    } else setZoom((prev) => Math.min(prev + 0.1, 1.5))
+    const { contW, contH } = sizesRef.current
+    zoomAt(contW / 2, contH / 2, round1(transform.scale + 0.2))
   }
   const handleZoomOut = () => {
-    if (isFitMode) {
-      const { contW, contH } = sizesRef.current
-      zoomAt(contW / 2, contH / 2, round1(transform.scale - 0.2))
-    } else setZoom((prev) => Math.max(prev - 0.1, 0.5))
+    const { contW, contH } = sizesRef.current
+    zoomAt(contW / 2, contH / 2, round1(transform.scale - 0.2))
   }
 
   // Puente entre PlanoGrid (portable, no sabe nada de reservas) y Cell
@@ -600,8 +614,6 @@ export default function Dashboard() {
         ) : (
           <>
             <PlanoViewport
-              isFitMode={isFitMode}
-              zoom={zoom}
               transform={transform}
               ready={ready}
               isDragging={isDragging}
@@ -668,7 +680,7 @@ export default function Dashboard() {
           <div
             ref={bindFullscreen}
             onClick={(e) => e.stopPropagation()}
-            className="w-full h-full sm:w-[90vw] sm:h-[90vh] glass-card sm:rounded-3xl overflow-hidden border border-white/10 shadow-2xl flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
+            className="plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90vh] glass-card sm:rounded-3xl overflow-hidden border border-white/10 shadow-2xl flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
           >
             {renderPlanoBody(true)}
           </div>
@@ -721,8 +733,18 @@ export default function Dashboard() {
           gap: 16px;
           min-height: 0;
         }
-        .plano-area-toolbar { grid-area: toolbar; }
-        .plano-area-stats { grid-area: stats; }
+        /* min-width: 0 en las tres áreas de la columna única (menos de
+           1280px de ancho): una columna 1fr de grid es en realidad
+           minmax(auto, 1fr) — su tamaño mínimo es el máximo de los
+           min-content de TODOS los items que comparten esa columna, no
+           solo el que de hecho desborda. Sin esto en .plano-area-stats, la
+           tira horizontal de PlanoStatsBar (varias tarjetas en fila,
+           pensada para hacer scroll-x) empujaba el ancho de toda la
+           columna, y con ella el plano, mucho más allá del viewport en
+           mobile (bug real: el plano se veía roto/vacío en 360/390px,
+           Fase 4A hotfix). */
+        .plano-area-toolbar { grid-area: toolbar; min-width: 0; }
+        .plano-area-stats { grid-area: stats; min-width: 0; }
         .plano-area-map { grid-area: map; min-height: 0; min-width: 0; }
         .plano-area-left, .plano-area-right { display: none; }
         @media (min-width: 1280px) {
@@ -739,6 +761,21 @@ export default function Dashboard() {
             gap: 12px;
             min-height: 0;
             overflow-y: auto;
+          }
+        }
+
+        /* Pantalla completa del plano en mobile (<640px, donde el modal ya
+           es w-full h-full, borde a borde): reserva las safe areas del
+           dispositivo (notch arriba, home indicator abajo) sumadas al
+           padding de siempre (p-4), para que los botones de zoom y el de
+           salir nunca queden debajo de ellas. Desktop (sm:, >=640px) no se
+           toca — ahí el modal ya no llega a los bordes reales de pantalla. */
+        @media (max-width: 639.98px) {
+          .plano-fullscreen-sheet {
+            padding-top: calc(1rem + env(safe-area-inset-top));
+            padding-right: calc(1rem + env(safe-area-inset-right));
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+            padding-left: calc(1rem + env(safe-area-inset-left));
           }
         }
 

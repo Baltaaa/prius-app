@@ -297,7 +297,6 @@ export default function PlanoPublicoPreview() {
             </div>
           ) : (
             <PlanoViewport
-              isFitMode
               transform={transform}
               ready={ready}
               isDragging={isDragging}

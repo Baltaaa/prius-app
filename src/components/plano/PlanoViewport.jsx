@@ -1,22 +1,21 @@
 import { Plus, Minus, Scan } from "lucide-react"
 
-// Contenedor con zoom del Plano, extraído tal cual de Dashboard.jsx (Fase
-// 4A, oct 2026). Totalmente controlado por props — no guarda ningún estado
-// propio — así que si quien lo monta se desmonta y vuelve a montar (ver
-// Dashboard.jsx: el modal de pantalla completa monta una instancia nueva)
-// el zoom/pan no se resetea: ese estado vive en el padre, no acá.
+// Contenedor con zoom del Plano (Fase 4A, hotfix mobile oct 2026). Un solo
+// modo de interacción para cualquier tamaño de pantalla — fit-to-container,
+// con pan por drag (mouse o un dedo) y zoom relativo al punto tocado/
+// clickeado (Ctrl+rueda en desktop, pellizco con dos dedos en mobile) —
+// nunca un modo "scroll nativo + escala simple" aparte: mobile y desktop
+// alimentan exactamente el mismo estado `transform` del padre.
 //
-// Dos modos, elegidos por `isFitMode` (igual que hoy):
-//   - Mobile (<768px): pinch-to-zoom táctil + botones +/-, `touchAction:
-//     pan-x pan-y`, scroll nativo para el pan, `transform: scale(zoom)`.
-//   - Desktop/tablet (>=768px, fit-to-container): pan por drag de mouse +
-//     Ctrl+rueda, botón extra "Encuadrar", `transform: translate(x,y)
-//     scale(scale)` con el centrado calculado a mano por el padre.
-// Quien lo usa decide cuál corre pasando los handlers correspondientes
-// (los que no aplican al modo activo, se pasan `undefined`).
+// Totalmente controlado por props — no guarda ningún estado propio — así
+// que si quien lo monta se desmonta y vuelve a montar (ver Dashboard.jsx:
+// el modal de pantalla completa monta una instancia nueva) el zoom/pan no
+// se resetea: ese estado vive en el padre, no acá.
+//
+// `touch-action: none` en el contenedor: todo el gesto (pan de un dedo,
+// pinch de dos) lo calcula el JS del padre vía los handlers — ninguna
+// gestión nativa del navegador (scroll, zoom de página) debe interferir.
 export default function PlanoViewport({
-  isFitMode,
-  zoom,
   transform,
   ready,
   isDragging,
@@ -44,42 +43,36 @@ export default function PlanoViewport({
         <button onClick={onZoomOut} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
           <Minus size={20} />
         </button>
-        {isFitMode && (
-          <button onClick={onEncuadrar} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Encuadrar">
-            <Scan size={18} />
-          </button>
-        )}
+        <button onClick={onEncuadrar} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Encuadrar">
+          <Scan size={18} />
+        </button>
         {extraButtons}
       </div>
 
       <div
         ref={viewportRef}
         onAnimationEnd={onAnimationEnd}
-        onTouchStart={!isFitMode ? onTouchStart : undefined}
-        onTouchMove={!isFitMode ? onTouchMove : undefined}
-        onTouchEnd={!isFitMode ? onTouchEnd : undefined}
-        onMouseDown={isFitMode ? onMapMouseDown : undefined}
-        onWheel={isFitMode ? onMapWheel : undefined}
-        style={!isFitMode ? { touchAction: "pan-x pan-y" } : { visibility: ready ? "visible" : "hidden" }}
-        className={
-          isFitMode
-            ? "flex-1 min-h-0 overflow-hidden relative"
-            : "flex-1 overflow-auto p-4 sm:p-12 flex justify-center items-start"
-        }
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMapMouseDown}
+        onWheel={onMapWheel}
+        // visibility: hidden hasta la primera medición válida (`ready`):
+        // sin esto se llega a ver un frame con el plano sin escalar (cortado
+        // arriba, o más ancho que el viewport) antes de que el
+        // useLayoutEffect del padre corra.
+        style={{ touchAction: "none", visibility: ready ? "visible" : "hidden" }}
+        className="flex-1 min-h-0 overflow-hidden relative"
       >
         <div
           ref={contentRef}
-          className={isFitMode ? "absolute top-0 left-0 flex flex-col items-center" : "transition-transform duration-200 origin-top flex flex-col items-center"}
-          style={
-            isFitMode
-              ? {
-                  transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
-                  transformOrigin: "0 0",
-                  transition: isDragging ? "none" : "transform 150ms ease-out",
-                  cursor: canPan ? (isDragging ? "grabbing" : "grab") : "default",
-                }
-              : { transform: `scale(${zoom})` }
-          }
+          className="absolute top-0 left-0 flex flex-col items-center"
+          style={{
+            transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+            transformOrigin: "0 0",
+            transition: isDragging ? "none" : "transform 150ms ease-out",
+            cursor: canPan ? (isDragging ? "grabbing" : "grab") : "default",
+          }}
         >
           {children}
         </div>
