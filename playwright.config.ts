@@ -54,7 +54,7 @@ export default defineConfig({
       // Solo el spec visual del Plano corre en los proyectos mobile — el
       // flujo de e2e/reservas.spec.ts crea datos reales contra Supabase y
       // no tiene sentido triplicarlo por tamaño de pantalla.
-      testMatch: /plano-visual\.spec\.ts/,
+      testMatch: /plano(-publico)?-visual\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 360, height: 780 },
@@ -65,7 +65,7 @@ export default defineConfig({
     },
     {
       name: 'mobile-390',
-      testMatch: /plano-visual\.spec\.ts/,
+      testMatch: /plano(-publico)?-visual\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 390, height: 844 },

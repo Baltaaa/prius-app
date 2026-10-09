@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:e2e:teardown": "tsx e2e/teardown.ts"
+    "test:e2e:teardown": "tsx e2e/teardown.ts",
+    "test:visual": "playwright test e2e/plano-visual.spec.ts e2e/plano-publico-visual.spec.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
