@@ -1,21 +1,16 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { supabase } from "../lib/supabase"
-import { Printer, Plus, Minus, Scan, Expand, Shrink, ChevronLeft, ChevronRight } from "lucide-react"
+import { Printer, Expand, Shrink, ChevronLeft, ChevronRight } from "lucide-react"
 
-import {
-  STATUS,
-  PLANO_COL_WIDTH,
-  PLANO_PASILLO_LATERAL,
-  PLANO_PASILLO_CENTRAL,
-  PLANO_BLOQUE_GAP,
-  PLANO_SECTOR_WIDTH,
-} from "../components/dashboard/constants"
+import { STATUS } from "../components/dashboard/constants"
 import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
 import AsignarUnidadModal from "../components/dashboard/AsignarUnidadModal"
 import MoverUnidadDialog from "../components/dashboard/MoverUnidadDialog"
 import Cell from "../components/dashboard/Cell"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
+import PlanoGrid from "../components/plano/PlanoGrid"
+import PlanoViewport from "../components/plano/PlanoViewport"
 import PlanoStatsBar, {
   OcupacionCard, CarpasCard, SombrillasCard, LibresCard, MixCard, PendientesCard, IngresosCard, ClimaCard, EstadoLegend,
 } from "../components/dashboard/PlanoStatsBar"
@@ -32,9 +27,6 @@ import { useClima } from "../hooks/useClima"
 const PREFIJO = { carpa: "C", sombrilla: "S" }
 
 const todayStr = () => new Date().toISOString().split("T")[0]
-
-// Rango inclusivo de números de unidad, reutilizado por cada hilera del plano.
-const range = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => start + i)
 
 // Mismo helper que Caja.jsx: suma/resta un día a una fecha yyyy-mm-dd sin
 // líos de timezone.
@@ -470,8 +462,25 @@ export default function Dashboard() {
     } else setZoom((prev) => Math.max(prev - 0.1, 0.5))
   }
 
-  const getCarpa = (num) => units[`C${num}`]
-  const getSombrilla = (num) => units[`S${num}`]
+  // Puente entre PlanoGrid (portable, no sabe nada de reservas) y Cell
+  // (CRM): recibe el slot que arma PlanoGrid ({numero, tipo, numberSide, ...}
+  // desde planoLayout.js, más los campos de la fila cruda de `unidades` si
+  // existe) y busca la versión enriquecida con estado/reserva en `units`
+  // para pasársela a <Cell>, igual que hacían getCarpa/getSombrilla antes.
+  const renderCelda = useCallback((slot) => {
+    const prefijo = PREFIJO[slot.tipo]
+    const unit = prefijo ? units[`${prefijo}${slot.numero}`] : null
+    return (
+      <Cell
+        key={`${slot.tipo}-${slot.numero}`}
+        number={slot.numero}
+        unit={unit}
+        onClick={handleUnitClick}
+        numberSide={slot.numberSide}
+        {...cellHighlight(unit)}
+      />
+    )
+  }, [units, handleUnitClick, cellHighlight])
 
   // Un solo nodo cumple el doble rol de "ref de la animación de slide al
   // cambiar de fecha" y "ref del viewport para medir fitScale" — nunca dos
@@ -590,19 +599,25 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
-            <div className="absolute top-6 right-6 z-20 flex flex-col gap-2">
-              <button onClick={handleZoomIn} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
-                <Plus size={20} />
-              </button>
-              <button onClick={handleZoomOut} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-[#FDE047] hover:text-black transition-all">
-                <Minus size={20} />
-              </button>
-              {isFitMode && (
-                <button onClick={handleEncuadrar} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Encuadrar">
-                  <Scan size={18} />
-                </button>
-              )}
-              {fullscreen ? (
+            <PlanoViewport
+              isFitMode={isFitMode}
+              zoom={zoom}
+              transform={transform}
+              ready={ready}
+              isDragging={isDragging}
+              canPan={sizesRef.current.contentW * transform.scale > sizesRef.current.contW || sizesRef.current.contentH * transform.scale > sizesRef.current.contH}
+              onZoomIn={handleZoomIn}
+              onZoomOut={handleZoomOut}
+              onEncuadrar={handleEncuadrar}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onMapMouseDown={handleMapMouseDown}
+              onMapWheel={handleMapWheel}
+              onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
+              viewportRef={setMapViewportRef}
+              contentRef={contentRef}
+              extraButtons={fullscreen ? (
                 <button onClick={() => setFullscreenOpen(false)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Cerrar pantalla completa">
                   <Shrink size={18} />
                 </button>
@@ -611,160 +626,9 @@ export default function Dashboard() {
                   <Expand size={18} />
                 </button>
               )}
-            </div>
-
-            <div
-              ref={setMapViewportRef}
-              onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
-              onTouchStart={!isFitMode ? handleTouchStart : undefined}
-              onTouchMove={!isFitMode ? handleTouchMove : undefined}
-              onTouchEnd={!isFitMode ? handleTouchEnd : undefined}
-              onMouseDown={isFitMode ? handleMapMouseDown : undefined}
-              onWheel={isFitMode ? handleMapWheel : undefined}
-              // touch-action: pan-x/pan-y (mobile, <768px) deja el scroll de
-              // una mano nativo pero saca el pinch-zoom nativo del navegador
-              // de encima — el pinch de dos dedos lo maneja el JS de arriba
-              // sobre el mismo `zoom` que ya usan los botones +/-/encuadrar.
-              // En fit-mode (>=768px): SIN flex-centering — el centrado lo
-              // calcula `aplicarEncuadre()` a mano (x/y explícitos), nunca el
-              // navegador. `visibility: hidden` hasta la primera medición
-              // válida (`ready`): sin esto se llega a ver un frame con el
-              // plano sin escalar (cortado arriba) antes de que el
-              // useLayoutEffect corra — justo el bug que se está arreglando.
-              style={!isFitMode ? { touchAction: 'pan-x pan-y' } : { visibility: ready ? 'visible' : 'hidden' }}
-              className={isFitMode
-                ? "flex-1 min-h-0 overflow-hidden relative"
-                : "flex-1 overflow-auto p-4 sm:p-12 flex justify-center items-start"
-              }
             >
-              <div
-                ref={contentRef}
-                className={isFitMode ? "absolute top-0 left-0 flex flex-col items-center" : "transition-transform duration-200 origin-top flex flex-col items-center"}
-                style={isFitMode
-                  ? {
-                      transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
-                      transformOrigin: '0 0',
-                      transition: isDragging ? 'none' : 'transform 150ms ease-out',
-                      cursor: (sizesRef.current.contentW * transform.scale > sizesRef.current.contW || sizesRef.current.contentH * transform.scale > sizesRef.current.contH)
-                        ? (isDragging ? 'grabbing' : 'grab')
-                        : 'default',
-                    }
-                  : { transform: `scale(${zoom})` }
-                }
-              >
-                {/*
-                  Layout definido con el dueño (sept 2026, ver CLAUDE.md):
-                  1 hilera sola (1-25) + pasillo A + bloque doble espalda-con-
-                  espalda (26-50/51-75) + pasillo B (central, ancho, alineado
-                  con Acceso) + bloque doble (76-98/99-121) + pasillo C +
-                  1 hilera sola (122-144). Anchos en PLANO_* (constants.js),
-                  único lugar con estos valores — también los usa
-                  PlanoImpresion.jsx (como fr) para la hoja A4.
-                */}
-
-                {/* Row Superior Unificada */}
-                <div className="flex justify-center gap-0 items-start mb-6">
-                  {/* Recreación: sector izquierdo completo (hilera + pasillo A + bloque doble) */}
-                  <div style={{ width: PLANO_SECTOR_WIDTH }} className="h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-                    Recreación
-                  </div>
-
-                  {/* Acceso: mismo ancho que el Pasillo B, centrado con él */}
-                  <div style={{ width: PLANO_PASILLO_CENTRAL }} className="h-[50px] flex items-center justify-center border-y border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-white">
-                    Acceso
-                  </div>
-
-                  {/* Pileta: sector derecho completo, bajando para ocupar el espacio físico */}
-                  <div style={{ width: PLANO_SECTOR_WIDTH }} className="h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
-                    <div className="absolute inset-0 bg-sky-400/5" />
-                    <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
-                    <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
-                  </div>
-                </div>
-
-                {/* Contenedor de Carpas */}
-                <div className="flex justify-center items-end pb-12">
-                  {/* Hilera 1-25, número a la izquierda */}
-                  <div className="flex flex-col gap-1">
-                    {range(1, 25).map(num => (
-                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" {...cellHighlight(getCarpa(num))} />
-                    ))}
-                  </div>
-
-                  {/* Pasillo A */}
-                  <div style={{ width: PLANO_PASILLO_LATERAL }} />
-
-                  {/* Bloque doble 26-50 (izq) + 51-75 (der), espalda con espalda */}
-                  <div className="flex items-end" style={{ gap: PLANO_BLOQUE_GAP }}>
-                    <div className="flex flex-col gap-1">
-                      {range(26, 50).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" {...cellHighlight(getCarpa(num))} />
-                      ))}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      {range(51, 75).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" {...cellHighlight(getCarpa(num))} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Pasillo B, central, más ancho, alineado con Acceso */}
-                  <div style={{ width: PLANO_PASILLO_CENTRAL }} />
-
-                  {/* Bloque doble 76-98 (izq) + 99-121 (der), espalda con espalda */}
-                  <div className="flex items-end" style={{ gap: PLANO_BLOQUE_GAP }}>
-                    <div className="flex flex-col gap-1">
-                      {range(76, 98).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="left" {...cellHighlight(getCarpa(num))} />
-                      ))}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      {range(99, 121).map(num => (
-                        <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" {...cellHighlight(getCarpa(num))} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Pasillo C */}
-                  <div style={{ width: PLANO_PASILLO_LATERAL }} />
-
-                  {/* Hilera 122-144, número a la derecha */}
-                  <div className="flex flex-col gap-1">
-                    {range(122, 144).map(num => (
-                      <Cell key={num} number={num} unit={getCarpa(num)} onClick={handleUnitClick} numberSide="right" {...cellHighlight(getCarpa(num))} />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Sector Sombrillas */}
-                <div className="mt-16 flex flex-col items-center">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="h-[1px] w-12 bg-white/10" />
-                    <span className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-500">⛱️ Sector Sombrillas</span>
-                    <div className="h-[1px] w-12 bg-white/10" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-20">
-                    {[
-                      [1, 6, 11, 16], [21, 26, 31, 36]
-                    ].map((starts, colIdx) => (
-                      <div key={colIdx} className="space-y-1">
-                        {starts.map(start => (
-                          <div key={start} className="flex gap-1">
-                            {[0, 1, 2, 3, 4].map(off => (
-                              <Cell key={start + off} number={start + off} unit={getSombrilla(start + off)} onClick={handleUnitClick} {...cellHighlight(getSombrilla(start + off))} />
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-16 w-full bg-white/5 border border-white/5 py-5 text-center text-gray-600 font-black text-[11px] tracking-[1em] uppercase rounded-2xl">
-                  Océano Atlántico
-                </div>
-              </div>
-            </div>
+              <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+            </PlanoViewport>
           </>
         )}
       </div>
