@@ -22,6 +22,11 @@ export const FEATURES = {
   'feat-9-comprobantes-recordar-config': true,
   // Fase 3 reservas públicas: Recepción (check-in + cobro por QR/código).
   recepcion: true,
+  // Fase 4A reservas públicas: vista previa de la variante pública del
+  // plano dentro del CRM (/app/dev/plano-publico, solo superadmin) —
+  // prueba disponibilidad_publica()/buscar_unidad_vecina() con datos
+  // reales antes de llevar el plano portable a la landing.
+  plano_publico_preview: true,
 } as const
 
 export type FeatureKey = keyof typeof FEATURES

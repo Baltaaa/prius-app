@@ -23,6 +23,9 @@ export const PERMISOS: Record<string, Rol[]> = {
   // pendiente es la única acción de Recepción restringida — el cobro normal
   // es operación diaria (ver `recepcion_cobrar` abajo).
   'recepcion.checkin_sin_cobro': ['superadmin'],
+  // Fase 4A (oct 2026): vista previa interna de la variante pública del
+  // plano — herramienta de desarrollo, no para uso operativo diario.
+  plano_publico_preview: ['superadmin'],
 
   // Operación diaria — explícitas para que quede documentada la matriz
   // completa, aunque el default ya las permitiría para admin.

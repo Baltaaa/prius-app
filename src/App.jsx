@@ -23,6 +23,7 @@ const Notificaciones = lazy(() => import('./pages/crm/Notificaciones'))
 const Comprobantes = lazy(() => import('./pages/crm/Comprobantes'))
 const Perfil = lazy(() => import('./pages/crm/Perfil'))
 const Recepcion = lazy(() => import('./pages/Recepcion'))
+const PlanoPublicoPreview = lazy(() => import('./pages/dev/PlanoPublicoPreview'))
 const NotFound = lazy(() => import('./pages/crm/NotFound'))
 
 export default function App() {
@@ -82,6 +83,18 @@ export default function App() {
               <Route path="notificaciones" element={<Notificaciones />} />
               <Route path="comprobantes" element={<Comprobantes />} />
               <Route path="perfil" element={<Perfil />} />
+
+              {/* Fase 4A, Tarea 5 (oct 2026): vista previa interna de la
+                  variante pública del plano — herramienta de desarrollo,
+                  solo superadmin (ver lib/permisos.ts). */}
+              <Route
+                path="dev/plano-publico"
+                element={
+                  <PrivateRoute clave="plano_publico_preview">
+                    <PlanoPublicoPreview />
+                  </PrivateRoute>
+                }
+              />
 
               {/* 404 real dentro del shell del CRM (sidebar/topbar
                   intactos) — antes cualquier ruta desconocida bajo /app
