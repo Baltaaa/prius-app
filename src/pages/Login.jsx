@@ -1,12 +1,17 @@
-import { useState, useEffect } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useState, useEffect, useRef } from "react"
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { Eye, EyeOff, Loader2, Mail, Lock, ArrowUpRight, AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react"
+import { useAuth } from "../context/AuthProvider"
+import { markActivity } from "../lib/activity"
+import { LOGIN_MAX_ATTEMPTS, LOGIN_LOCKOUT_MS } from "../config/session"
+import { Eye, EyeOff, Loader2, AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react"
 import GlobalLoader from "../components/ui/GlobalLoader"
 
 export default function Login({ modo }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const { session, perfil, loading: authLoading } = useAuth()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -15,6 +20,37 @@ export default function Login({ modo }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [isSuccess, setIsSuccess] = useState(false)
+  // Tarea 2 (fix doble login): el submit solo marca la intención de navegar;
+  // la navegación real la decide el efecto de abajo, recién cuando el
+  // contexto de auth (session + perfil) terminó de resolver. Navegar antes
+  // -> PrivateRoute ve perfil=null y hace signOut (ese era el bug).
+  const [awaitingContext, setAwaitingContext] = useState(false)
+
+  // Tarea 4d: bloqueo client-side tras intentos fallidos, complementa el
+  // rate limit nativo de Supabase (no lo reemplaza).
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const [lockedUntil, setLockedUntil] = useState(null)
+  const [lockCountdown, setLockCountdown] = useState(0)
+  const lockTimerRef = useRef(null)
+
+  // Tarea 5: aviso de Bloq Mayús en el campo de contraseña.
+  const [capsLockOn, setCapsLockOn] = useState(false)
+  const handlePasswordKeyEvent = (e) => {
+    if (typeof e.getModifierState === "function") {
+      setCapsLockOn(e.getModifierState("CapsLock"))
+    }
+  }
+
+  const motivo = searchParams.get("motivo")
+
+  // Ya hay sesión activa (y perfil resuelto) -> no tiene sentido ver el
+  // login. Se apoya en el contexto único de auth, no en una segunda lectura
+  // de getSession() independiente.
+  useEffect(() => {
+    if (!authLoading && session && perfil) {
+      navigate(location.state?.from || "/app/home", { replace: true })
+    }
+  }, [authLoading, session, perfil, navigate, location.state])
 
   // Recuperación de contraseña
   const [mode, setMode] = useState(modo === "recover" ? "recover" : "login") // "login" | "recover"
@@ -22,13 +58,35 @@ export default function Login({ modo }) {
   const [recoverStatus, setRecoverStatus] = useState("idle") // idle | sending | sent | error
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate(location.state?.from || "/app/home", { replace: true })
-    })
-  }, [navigate, location.state])
+    if (!awaitingContext) return
+    if (!authLoading && session && perfil) {
+      navigate(location.state?.from || "/app/home", { replace: true })
+    }
+  }, [awaitingContext, authLoading, session, perfil, navigate, location.state])
+
+  useEffect(() => {
+    if (!lockedUntil) return
+    const tick = () => {
+      const remaining = Math.ceil((lockedUntil - Date.now()) / 1000)
+      if (remaining <= 0) {
+        setLockedUntil(null)
+        setLockCountdown(0)
+        setFailedAttempts(0)
+        clearInterval(lockTimerRef.current)
+      } else {
+        setLockCountdown(remaining)
+      }
+    }
+    tick()
+    lockTimerRef.current = setInterval(tick, 1000)
+    return () => clearInterval(lockTimerRef.current)
+  }, [lockedUntil])
+
+  const isLocked = lockedUntil !== null && lockCountdown > 0
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (isLocked) return
     setError("")
     setIsLoading(true)
 
@@ -39,16 +97,25 @@ export default function Login({ modo }) {
       })
 
       if (signInError) {
+        // Mensaje genérico a propósito: nunca revelar si el email existe.
         setError("Email o contraseña incorrectos.")
         setIsLoading(false)
+        const next = failedAttempts + 1
+        setFailedAttempts(next)
+        if (next >= LOGIN_MAX_ATTEMPTS) {
+          setLockedUntil(Date.now() + LOGIN_LOCKOUT_MS)
+        }
         return
       }
 
       if (data?.user) {
+        setFailedAttempts(0)
+        // Se marca ANTES de navegar (Tarea 3): si no, useInactivityLogout
+        // podría leer un prius_last_activity viejo/ausente apenas se monta
+        // el layout autenticado y reintroducir un cierre de sesión espurio.
+        markActivity()
         setIsSuccess(true)
-        setTimeout(() => {
-          navigate(location.state?.from || "/app/home", { replace: true })
-        }, 1200)
+        setAwaitingContext(true)
       }
     } catch (err) {
       setError("Error de conexión.")
@@ -73,17 +140,25 @@ export default function Login({ modo }) {
     }
   }
 
+  // Tarea 5 (oct 2026): rediseño visual puro — mismo fondo, misma lógica de
+  // arriba (handleSubmit/handleRecover/estado), solo cambia el JSX/estilos.
+  // Desktop: card blanca centrada. Mobile: bottom sheet blanco anclado abajo
+  // sobre el fondo, como app nativa.
+  const inputBase =
+    "w-full h-12 px-4 rounded-md border border-[#E5E5E5] bg-white text-black placeholder:text-black/30 outline-none transition-colors motion-reduce:transition-none focus:border-[#F2CA50] focus:ring-2 focus:ring-[#F2CA50]/30"
+  const labelBase = "block text-xs font-semibold text-black/60 mb-1.5"
+
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-end bg-[#0a0d14] font-sans overflow-hidden px-6 md:px-24 selection:bg-[#FDE047] selection:text-black">
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-black font-sans selection:bg-[#F2CA50] selection:text-black">
       {isSuccess && <GlobalLoader message="Iniciando sesión segura" />}
 
       {/*
-        Fondo estático. Antes: JPEG de 5405×3601 (~3.5 MB, ~78 MP = ~300 MB de
-        bitmap en RAM) con animación `scale()` infinita de 20s Y un `backdrop-blur-2xl`
-        + `backdrop-grayscale` encima -> el navegador recomponía un blur de radio
-        gigante sobre una imagen en movimiento en cada frame. Esa era la causa del lag.
-        Ahora: imagen de 1600px / 250 KB, sin animación, overlays con gradientes
-        (baratos, se pintan una vez) y tarjeta con fondo sólido.
+        Fondo estático (sin cambios respecto al diseño anterior). Antes: JPEG
+        de 5405×3601 (~3.5 MB, ~78 MP = ~300 MB de bitmap en RAM) con
+        animación `scale()` infinita de 20s Y un `backdrop-blur-2xl` +
+        `backdrop-grayscale` encima -> el navegador recomponía un blur de
+        radio gigante sobre una imagen en movimiento en cada frame. Ahora:
+        imagen de 1600px / 250 KB, sin animación, overlays con gradientes.
       */}
       <div className="absolute inset-0 z-0">
         <img
@@ -93,175 +168,243 @@ export default function Login({ modo }) {
           decoding="async"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0d14]/50 via-[#0a0d14]/20 to-[#0a0d14]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d14] via-transparent to-[#0a0d14]/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/40" />
       </div>
 
-      {/* Card Container (Right Aligned) */}
-      <main className="relative z-20 w-full max-w-[480px] animate-premium-fade">
-        <div className="bg-[#0a0d14]/90 rounded-[40px] p-10 border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] overflow-hidden relative group">
-          {/* Subtle Inner Glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent pointer-events-none" />
-          
-          {/* Header Brand */}
-          <div className="flex items-center mb-12 relative z-10">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center p-2">
-              <img src="/images/prius-icon.png" alt="P" className="w-full h-full object-contain shadow-[0_0_20px_rgba(253,224,71,0.15)] rounded-full" />
-            </div>
-            <div className="flex items-center gap-2">
-               <span className="text-xl font-display font-extrabold text-white">Prius<span className="text-[#FDE047] font-semibold">App</span></span>
-               
+      {/* Wordmark (mobile) + card/sheet comparten una sola columna flex de
+          altura completa -- si el wordmark viviera fuera de <main> como
+          hermano con su propia altura, se sumaría a los 100dvh de <main> y
+          empujaría el botón fuera de la pantalla (bug real, visto en la
+          captura de 360px). */}
+      <div className="relative z-10 h-full flex flex-col">
+        {/* Visible en mobile (donde no hay card con logo propio arriba);
+            oculto en desktop (el wordmark vive dentro de la card blanca). */}
+        <div className="md:hidden shrink-0 flex items-center gap-2 px-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
+          <img src="/images/prius-icon.png" alt="" className="w-8 h-8 object-contain" />
+          <div className="leading-tight">
+            <p className="text-white font-display font-extrabold text-lg tracking-tight">Prius</p>
+            <p className="text-white/70 text-[10px] font-semibold uppercase tracking-[0.2em] -mt-0.5">Playa Grande</p>
+          </div>
+        </div>
+
+        {/* Mobile: bottom sheet anclado abajo. Desktop: card centrada. */}
+        <main className="flex-1 min-h-0 flex flex-col justify-end md:items-center md:justify-center">
+        <div
+          className="w-full md:max-w-[420px] bg-white rounded-t-3xl md:rounded-lg border-t md:border border-[#E5E5E5] shadow-[0_-8px_30px_rgba(0,0,0,0.25)] md:shadow-[0_8px_30px_rgba(0,0,0,0.12)] px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-10 animate-premium-fade"
+        >
+          {/* Gesto visual de bottom sheet (mobile) */}
+          <div className="md:hidden flex justify-center mb-4">
+            <div className="w-10 h-1 rounded-full bg-black/10" />
+          </div>
+
+          {/* Wordmark desktop (oculto en mobile, ya está sobre el fondo) */}
+          <div className="hidden md:flex items-center gap-3 mb-8">
+            <img src="/images/prius-icon.png" alt="" className="w-9 h-9 object-contain" />
+            <div className="leading-tight">
+              <p className="text-black font-display font-extrabold text-lg tracking-tight">
+                Prius <span className="font-semibold text-black/60">Playa Grande</span>
+              </p>
+              <p className="text-black/40 text-[11px] font-medium">Panel de gestión</p>
             </div>
           </div>
 
           {mode === "login" ? (
-            <div className="space-y-8 relative z-10">
-              <div>
-                <h1 className="text-5xl font-display font-extrabold text-white tracking-tight mb-2">Iniciar sesión</h1>
-                <p className="text-white/50 text-sm font-medium">Acceso exclusivo para el equipo Prius.</p>
+            <div className="space-y-5">
+              <div className="md:hidden">
+                <h1 className="text-2xl font-display font-extrabold text-black tracking-tight">Iniciar sesión</h1>
+                <p className="text-black/50 text-sm mt-1">Acceso exclusivo para el equipo Prius.</p>
+              </div>
+              <div className="hidden md:block">
+                <h1 className="text-xl font-display font-extrabold text-black tracking-tight">Iniciar sesión</h1>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-4">
-                  <div className="relative group">
-                    <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-[#FDE047] transition-colors" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="CORREO ELECTRÓNICO"
-                      style={{ fontSize: 16 }}
-                      className="w-full h-16 pl-14 pr-4 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
-                    />
-                  </div>
+              <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                <div>
+                  <label htmlFor="login-email" className={labelBase}>Email</label>
+                  <input
+                    id="login-email"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="username"
+                    enterKeyHint="next"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="tu@email.com"
+                    style={{ fontSize: 16 }}
+                    className={inputBase}
+                  />
+                </div>
 
-                  <div className="relative group">
-                    <Lock size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-[#FDE047] transition-colors" />
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label htmlFor="login-password" className={labelBase + " mb-0"}>Contraseña</label>
+                    <button
+                      type="button"
+                      onClick={() => setMode("recover")}
+                      className="text-xs font-semibold text-black/50 hover:text-black transition-colors motion-reduce:transition-none underline underline-offset-2"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  </div>
+                  <div className="relative">
                     <input
+                      id="login-password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      enterKeyHint="go"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      onKeyUp={handlePasswordKeyEvent}
+                      onKeyDown={handlePasswordKeyEvent}
                       required
-                      placeholder="CONTRASEÑA"
+                      placeholder="••••••••"
                       style={{ fontSize: 16 }}
-                      className="w-full h-16 pl-14 pr-14 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
+                      className={inputBase + " pr-11"}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40 hover:text-black transition-colors motion-reduce:transition-none p-1"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {capsLockOn && (
+                    <p className="text-xs text-amber-700 mt-1.5 flex items-center gap-1" aria-live="polite">
+                      <AlertCircle size={12} /> Bloq Mayús activado
+                    </p>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] font-bold text-white/40">
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-white/60 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={remember}
-                      onChange={(e) => setRemember(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#FDE047] focus:ring-0 accent-[#FDE047]"
-                    />
-                    <span className="uppercase tracking-widest">Recordar equipo</span>
-                  </label>
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-black/60 select-none">
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    className="w-4 h-4 rounded border-[#E5E5E5] text-[#F2CA50] focus:ring-[#F2CA50]/40 accent-[#F2CA50]"
+                  />
+                  Recordar equipo en este dispositivo
+                </label>
 
-                  <button
-                    type="button"
-                    onClick={() => setMode("recover")}
-                    className="hover:text-[#FDE047] transition-colors uppercase tracking-widest underline underline-offset-4"
-                  >
-                    Recuperar clave
-                  </button>
+                <div aria-live="polite" className="space-y-3">
+                  {motivo === "inactividad" && !error && !isLocked && (
+                    <div className="p-3 bg-black/[0.03] border border-[#E5E5E5] rounded-md flex items-center gap-2.5">
+                      <AlertCircle size={16} className="text-black/40 shrink-0" />
+                      <span className="text-xs font-medium text-black/60">
+                        Cerramos tu sesión por inactividad. Volvé a ingresar para continuar.
+                      </span>
+                    </div>
+                  )}
+
+                  {isLocked && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2.5">
+                      <AlertCircle size={16} className="text-red-600 shrink-0" />
+                      <span className="text-xs font-semibold text-red-700">
+                        Demasiados intentos. Probá de nuevo en {lockCountdown}s.
+                      </span>
+                    </div>
+                  )}
+
+                  {error && !isLocked && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
+                      <AlertCircle size={16} className="text-red-600 shrink-0" />
+                      <span className="text-xs font-semibold text-red-700">{error}</span>
+                    </div>
+                  )}
                 </div>
-
-                {error && (
-                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-                    <AlertCircle size={16} className="text-red-400 shrink-0" />
-                    <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">{error}</span>
-                  </div>
-                )}
 
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="w-full h-16 bg-[#FDE047] hover:bg-yellow-300 active:scale-[0.98] text-black font-black text-xs uppercase tracking-[0.2em] rounded-full transition-all shadow-xl shadow-yellow-400/10 flex items-center justify-center gap-3 disabled:opacity-50"
+                  disabled={isLoading || awaitingContext || isLocked}
+                  className="w-full h-12 bg-[#F2CA50] hover:bg-[#E5BF45] active:scale-[0.98] text-black font-bold text-sm rounded-md transition-all duration-150 motion-reduce:transition-none motion-reduce:active:scale-100 flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100"
                 >
-                  {isLoading ? (
-                    <Loader2 size={20} className="animate-spin" />
-                  ) : (
+                  {isLoading || awaitingContext ? (
                     <>
-                      INGRESAR AL PANEL <ArrowUpRight size={20} />
+                      <Loader2 size={18} className="animate-spin motion-reduce:animate-none" /> Ingresando…
                     </>
+                  ) : isLocked ? (
+                    `Bloqueado (${lockCountdown}s)`
+                  ) : (
+                    "Ingresar"
                   )}
                 </button>
               </form>
             </div>
           ) : (
-            <div className="space-y-8 relative z-10">
+            <div className="space-y-5">
               <div>
-                <h2 className="text-3xl font-display font-extrabold text-white tracking-tight mb-2">Recuperar cuenta</h2>
-                <p className="text-white/50 text-sm">Enviaremos un enlace seguro a tu email.</p>
+                <h2 className="text-xl font-display font-extrabold text-black tracking-tight">Recuperar cuenta</h2>
+                <p className="text-black/50 text-sm mt-1">Te enviamos un enlace seguro a tu email.</p>
               </div>
 
               {recoverStatus === "sent" ? (
-                <div className="p-8 bg-green-500/5 border border-green-500/20 rounded-[32px] space-y-4">
-                  <div className="flex items-center gap-2 text-green-400 font-bold text-xs uppercase tracking-widest">
+                <div className="p-5 bg-green-50 border border-green-200 rounded-md space-y-3">
+                  <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
                     <CheckCircle2 size={16} />
                     <span>Correo enviado con éxito</span>
                   </div>
-                  <p className="text-white/60 text-xs leading-relaxed uppercase font-semibold">Revisá tu casilla para continuar con la restauración.</p>
+                  <p className="text-green-700/80 text-xs leading-relaxed">Revisá tu casilla para continuar con la restauración.</p>
                   <button
                     onClick={() => setMode("login")}
-                    className="text-[10px] font-bold text-[#FDE047] uppercase tracking-widest underline underline-offset-4 pt-2 block"
+                    className="text-xs font-semibold text-black underline underline-offset-2"
                   >
                     Volver al login
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleRecover} className="space-y-6">
-                  <div className="relative group">
-                    <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-[#FDE047] transition-colors" />
+                <form onSubmit={handleRecover} noValidate className="space-y-4">
+                  <div>
+                    <label htmlFor="recover-email" className={labelBase}>Email</label>
                     <input
+                      id="recover-email"
                       type="email"
+                      inputMode="email"
+                      autoComplete="username"
+                      enterKeyHint="go"
                       value={recoverEmail}
                       onChange={(e) => setRecoverEmail(e.target.value)}
                       required
-                      placeholder="CORREO ELECTRÓNICO"
+                      placeholder="tu@email.com"
                       style={{ fontSize: 16 }}
-                      className="w-full h-16 pl-14 pr-4 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white font-bold tracking-widest uppercase focus:border-[#FDE047]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/20"
+                      className={inputBase}
                     />
                   </div>
+
+                  {recoverStatus === "error" && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2.5" aria-live="polite">
+                      <AlertCircle size={16} className="text-red-600 shrink-0" />
+                      <span className="text-xs font-semibold text-red-700">No pudimos enviar el correo. Probá de nuevo.</span>
+                    </div>
+                  )}
 
                   <button
                     type="submit"
                     disabled={recoverStatus === "sending"}
-                    className="w-full h-16 bg-[#FDE047] hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-[0.15em] rounded-full transition-all flex items-center justify-center gap-2"
+                    className="w-full h-12 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-sm rounded-md transition-all duration-150 motion-reduce:transition-none flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    {recoverStatus === "sending" ? <Loader2 size={20} className="animate-spin" /> : "ENVIAR INSTRUCCIONES"}
+                    {recoverStatus === "sending" ? <Loader2 size={18} className="animate-spin motion-reduce:animate-none" /> : "Enviar instrucciones"}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setMode("login")}
-                    className="w-full text-center text-[10px] font-bold text-white/30 hover:text-white uppercase tracking-widest flex items-center justify-center gap-2"
+                    className="w-full text-center text-xs font-semibold text-black/50 hover:text-black transition-colors motion-reduce:transition-none flex items-center justify-center gap-1.5"
                   >
-                    <ArrowLeft size={16} /> Volver
+                    <ArrowLeft size={14} /> Volver
                   </button>
                 </form>
               )}
             </div>
           )}
-        </div>
-      </main>
 
-      <footer className="absolute bottom-10 left-0 right-0 z-10 text-center px-4">
-        <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.6em]">
-          PRIUSAPP &bull; BALNEARIO PLAYA GRANDE &bull; SISTEMA AUTORIZADO
-        </p>
-      </footer>
+          <p className="hidden md:block text-center text-[11px] text-black/30 font-medium mt-8">
+            Prius Playa Grande · Mar del Plata
+          </p>
+        </div>
+        </main>
+      </div>
     </div>
   )
 }

@@ -43,6 +43,12 @@ export function AuthProvider({ children }) {
         setLoading(false)
         return
       }
+      // Bug del doble login (oct 2026): este evento llega con `perfil` todavía
+      // desactualizado (del usuario anterior o null en un login nuevo). Sin
+      // volver a poner loading=true acá, PrivateRoute podía renderizar con
+      // loading=false + perfil todavía null y tratarlo como "sin acceso"
+      // -> signOut() -> rebote a /login en el primer intento.
+      setLoading(true)
       setTimeout(() => {
         fetchPerfil(session?.user?.id).then(() => setLoading(false))
       }, 0)

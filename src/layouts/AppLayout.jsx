@@ -3,20 +3,32 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from '../components/crm/Sidebar'
 import TopBar from '../components/crm/TopBar'
 import BottomNav from '../components/crm/BottomNav'
+import InactivityWarningModal from '../components/crm/InactivityWarningModal'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
 import { NotificacionesLeidasProvider } from '../context/NotificacionesLeidasProvider'
 import { OverlayProvider } from '../context/OverlayProvider'
+import { useInactivityLogout } from '../hooks/useInactivityLogout'
 
 // Mobile-first (sept 2026): el Sidebar con drawer quedó solo para desktop —
 // en mobile la navegación completa vive en BottomNav (5 ítems + "Más"), así
 // que no hace falta abrir/cerrar nada acá arriba.
 export default function AppLayout() {
+  // Tarea 3 (oct 2026): única instancia del hook de inactividad, montada
+  // acá porque este layout solo se renderiza para el CRM autenticado.
+  const { warning, secondsLeft, continuar, cerrarSesion } = useInactivityLogout()
+
   return (
     <OverlayProvider>
     <DialogProvider>
       <DataProvider>
         <NotificacionesLeidasProvider>
+        <InactivityWarningModal
+          open={warning}
+          secondsLeft={secondsLeft}
+          onContinuar={continuar}
+          onCerrarSesion={cerrarSesion}
+        />
         <div className="h-screen w-screen flex text-white overflow-hidden">
           {/* Sidebar: solo desktop (oculto por completo en mobile, ver Sidebar.jsx) */}
           <Sidebar />

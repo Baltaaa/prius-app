@@ -1,6 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthProvider'
 import GlobalLoader from './ui/GlobalLoader'
+import { getLastActivity } from '../lib/activity'
+import { INACTIVITY_TIMEOUT_MS } from '../config/session'
 
 // Ruta protegida (Tarea 4): sin sesión -> /login (guarda la ruta para volver
 // después). Con sesión pero sin perfil activo -> cierra sesión y avisa. Con
@@ -14,6 +16,14 @@ export default function PrivateRoute({ children, clave }) {
 
   if (!session) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  }
+
+  // Tarea 3: sesión persistida (pestaña cerrada y reabierta horas después) —
+  // se corta ACÁ, antes de montar el CRM, nunca dentro de él.
+  const lastActivity = getLastActivity()
+  if (lastActivity !== null && Date.now() - lastActivity > INACTIVITY_TIMEOUT_MS) {
+    signOut()
+    return <Navigate to="/login?motivo=inactividad" replace />
   }
 
   if (!perfil || !activo) {
