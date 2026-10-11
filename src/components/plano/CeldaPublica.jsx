@@ -28,7 +28,7 @@ function CeldaPublica({ numero, estado = "libre", onClick, numberSide = "left" }
 
   const numberLabel = (
     <span
-      className={`w-6 md:w-7 text-[11px] md:text-xs font-bold tabular-nums text-white/70 ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
+      className={`w-7 md:w-8 text-xs md:text-sm font-bold tabular-nums text-white/80 ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
     >
       {numero}
     </span>

@@ -160,23 +160,23 @@ export function ClimaCard({ selectedDate, className }) {
  * solo un recordatorio visual de qué significa cada marca del plano. */
 export function EstadoLegend() {
   const item = (swatchClass, label, children) => (
-    <div className="flex items-center gap-3">
-      <div className={`w-6 h-5 rounded-sm border flex items-center justify-center shrink-0 relative ${swatchClass}`}>{children}</div>
-      <span className="text-[13px] text-gray-300">{label}</span>
+    <div className="flex items-center gap-3.5">
+      <div className={`w-9 h-8 rounded-md border flex items-center justify-center shrink-0 relative ${swatchClass}`}>{children}</div>
+      <span className="text-sm text-gray-300">{label}</span>
     </div>
   )
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 space-y-3">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 space-y-3.5">
       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Referencias</p>
-      {item(`${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada (T / P / D)', <span className="text-[11px] font-bold text-black">T</span>)}
-      {item('bg-white border-white', 'Pendiente de confirmar', <Hourglass size={11} className="text-black" />)}
+      {item(`${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada (T / P / D)', <span className="text-sm font-bold text-black">T</span>)}
+      {item('bg-white border-white', 'Pendiente de confirmar', <Hourglass size={15} className="text-black" />)}
       {item('bg-white/5 border-white/20', 'Libre')}
       {item(
         `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`,
         'Saldada (punto verde)',
         <>
-          <span className="text-[11px] font-bold text-black">T</span>
-          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-green-400" />
+          <span className="text-sm font-bold text-black">T</span>
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-400" />
         </>
       )}
     </div>
