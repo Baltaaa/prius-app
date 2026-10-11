@@ -68,7 +68,7 @@ Dentro del modal "Nueva reserva" (`src/pages/crm/Reservas.jsx`, `src/components/
 
 ## Clientes
 
-Bloqueante, de pantalla — `src/pages/crm/Clientes.jsx` (panel expandido de la ficha): con un email largo, el valor se superpone visualmente con la columna CUIT de al lado — confirmado en captura (`mobile-360__ficha-cliente.png`), el grid de 2 columnas no trunca ni envuelve el texto del email antes de invadir la columna vecina.
+RESUELTO — `src/pages/crm/Clientes.jsx` (panel expandido de la ficha): el bloque de Email pasa a `col-span-2 md:col-span-1` (fila completa en el grid de 2 columnas de mobile, vuelve a una columna en el de 4 de desktop) + `break-all` como resguardo. Era bloqueante: con un email largo, el valor se superponía visualmente con la columna CUIT de al lado — confirmado en captura (`mobile-360__ficha-cliente.png`), el grid de 2 columnas no truncaba ni envolvía el texto del email antes de invadir la columna vecina.
 
 Bloqueante parcial, del shell compartido — `src/components/crm/ScrollToTopButton.jsx`: el botón flotante naranja se superpone, a diferencia del BottomNav, por encima de contenido clickeable real — en la captura tapa los íconos de acción (editar/eliminar) de la tarjeta de cliente de más abajo y, en la ficha expandida, los botones "Comprobante"/"Confirmar temporada". A diferencia del caso del BottomNav, acá el hit-test confirmó que SÍ gana por z-index sobre esos botones reales.
 
