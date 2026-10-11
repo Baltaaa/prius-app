@@ -29,12 +29,17 @@ export default function AppLayout() {
           onContinuar={continuar}
           onCerrarSesion={cerrarSesion}
         />
-        <div className="h-screen w-screen flex text-white overflow-hidden">
+        {/* h-dvh en vez de h-screen (100vh): en iOS Safari con la barra de
+            direcciones visible, 100vh mide más que el alto visible real —
+            con h-dvh el shell siempre ocupa exactamente lo que se ve,
+            el BottomNav fijo y el contenido final de cada pantalla quedan
+            dentro del área visible desde el primer render. */}
+        <div className="h-dvh w-screen flex text-white overflow-hidden">
           {/* Sidebar: solo desktop (oculto por completo en mobile, ver Sidebar.jsx) */}
           <Sidebar />
 
           {/* Main Workspace Area */}
-          <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden relative">
+          <div className="flex-1 flex flex-col h-dvh min-w-0 overflow-hidden relative">
             <TopBar />
 
             {/* Content View with internal vertical scroll. Padding horizontal

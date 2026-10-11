@@ -36,6 +36,14 @@ export default {
         'margin-mobile': '20px',
         'gutter': '24px',
       },
+      // `h-dvh`/`min-h-dvh` (Fase 1 mobile, oct 2026): Tailwind v3 no trae la
+      // unidad `dvh` nativa — `h-screen` (100vh) en iOS Safari mide más que
+      // lo visible cuando la barra de direcciones está presente, dejando
+      // contenido por detrás de ella hasta que el usuario scrollea. El
+      // fallback a 100vh para navegadores sin soporte de `dvh` vive en
+      // index.css (@supports not (height: 100dvh)).
+      height: { dvh: '100dvh' },
+      minHeight: { dvh: '100dvh' },
     },
   },
   plugins: [],

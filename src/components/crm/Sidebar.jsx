@@ -58,7 +58,7 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="no-print hidden md:flex w-64 h-screen bg-[#0a0d14] border-r border-white/10 flex-col justify-between shrink-0 sticky top-0 left-0 z-30">
+    <aside className="no-print hidden md:flex w-64 h-dvh bg-[#0a0d14] border-r border-white/10 flex-col justify-between shrink-0 sticky top-0 left-0 z-30">
       <div className="flex flex-col overflow-hidden">
         {/* Brand Header */}
         <div className="h-20 flex items-center px-4 border-b border-white/5 gap-2">

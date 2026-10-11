@@ -144,3 +144,36 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .deep-link-highlight { animation: none; }
 }
+
+/*
+  Fallback de `h-dvh`/`min-h-dvh` (Fase 1 mobile, oct 2026) para navegadores
+  sin soporte de la unidad `dvh` — Tailwind ya emite `height: 100dvh` /
+  `min-height: 100dvh` vía tailwind.config.js; acá solo se pisa con 100vh
+  cuando el navegador no entiende `dvh`, para que nunca quede sin altura.
+*/
+@supports not (height: 100dvh) {
+  .h-dvh { height: 100vh; }
+  .min-h-dvh { min-height: 100vh; }
+}
+
+/*
+  Sensación nativa (Fase 1 mobile, oct 2026), solo para el shell del CRM —
+  no afecta la landing pública (beachFlow es otro repo).
+*/
+html, body {
+  /* La página entera no "rebota" en los extremos; los contenedores internos
+     con su propio scroll (#app-main-scroll, Modal.jsx, bottom sheets) siguen
+     scrolleando y rebotando normalmente — overscroll-behavior no es heredable
+     entre un contenedor y sus hijos con scroll propio. */
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+button, a {
+  /* Sin el flash gris al tocar (Android) ni el delay de 300ms de "doble tap
+     para zoom" en los botones/links — PlanoViewport.jsx sigue con su propio
+     `touch-action: none` inline (mayor prioridad que esta clase) para que el
+     pan/pinch del plano no se vea afectado. */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
