@@ -5,7 +5,7 @@ import { enumerarCarpas, enumerarSombrillas } from './planoLayout'
 // independiente de planoLayout.js a propósito — así el test detecta un error
 // de transcripción en el layout, no solo que el layout sea consistente con
 // sigo mismo. Verificado además 1:1 contra unidades.fila/orden real (Tarea 1).
-function filaOrdenEsperadoCarpa(numero) {
+function filaOrdenEsperadoCarpa(numero: number) {
   if (numero >= 1 && numero <= 25) return { fila: 1, orden: numero }
   if (numero >= 26 && numero <= 50) return { fila: 2, orden: numero - 25 }
   if (numero >= 51 && numero <= 75) return { fila: 3, orden: numero - 50 }
@@ -15,7 +15,7 @@ function filaOrdenEsperadoCarpa(numero) {
   return null
 }
 
-function filaOrdenEsperadoSombrilla(numero) {
+function filaOrdenEsperadoSombrilla(numero: number) {
   if (numero >= 1 && numero <= 5) return { fila: 7, orden: numero }
   if (numero >= 21 && numero <= 25) return { fila: 7, orden: numero - 21 + 7 }
   if (numero >= 6 && numero <= 10) return { fila: 8, orden: numero - 5 }

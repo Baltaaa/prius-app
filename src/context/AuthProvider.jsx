@@ -58,14 +58,13 @@ export function AuthProvider({ children }) {
         setLoading(false)
         return
       }
-      // "Inicio de sesión" (Tarea 2): solo en un SIGNED_IN real, nunca en
-      // INITIAL_SESSION (restauración de sesión persistida al refrescar) ni
-      // en TOKEN_REFRESHED — si no, se loguearía un "login" en cada
-      // recarga de página. No se awaita: no puede demorar el fetch de
-      // perfil ni la navegación del login.
-      if (event === 'SIGNED_IN') {
-        logAuthEvent('login')
-      }
+      // "Inicio de sesión" (Tarea 2) NO se loguea acá a propósito: Supabase
+      // puede emitir SIGNED_IN también al recargar la página con una sesión
+      // persistida (confirmado en QA, oct 2026 — no es solo INITIAL_SESSION),
+      // así que este evento no alcanza para distinguir un login real de un
+      // refresh. Se loguea desde Login.jsx, justo después de un
+      // signInWithPassword exitoso — el único punto que sabe con certeza
+      // que hubo un submit real (ver `logLoginEvent` expuesto abajo).
 
       // Bug del doble login (oct 2026): este evento llega con `perfil` todavía
       // desactualizado (del usuario anterior o null en un login nuevo). Sin
@@ -96,11 +95,15 @@ export function AuthProvider({ children }) {
 
   const refetchPerfil = useCallback(() => fetchPerfil(session?.user?.id), [fetchPerfil, session])
 
+  // Expuesto para que Login.jsx lo llame justo después de un
+  // signInWithPassword exitoso — ver comentario arriba en onAuthStateChange.
+  const logLoginEvent = useCallback(() => { logAuthEvent('login') }, [])
+
   const activo = perfil?.activo === true
   const rol = activo ? perfil.rol : null
 
   const value = {
-    session, perfil, loading, signOut, refetchPerfil,
+    session, perfil, loading, signOut, refetchPerfil, logLoginEvent,
     activo, rol,
     permiso: (clave) => tienePermiso(rol, clave),
   }

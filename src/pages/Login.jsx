@@ -11,7 +11,7 @@ export default function Login({ modo }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
-  const { session, perfil, loading: authLoading } = useAuth()
+  const { session, perfil, loading: authLoading, logLoginEvent } = useAuth()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -125,6 +125,12 @@ export default function Login({ modo }) {
         // podría leer un prius_last_activity viejo/ausente apenas se monta
         // el layout autenticado y reintroducir un cierre de sesión espurio.
         markActivity()
+        // "Inicio de sesión" en Historial: se dispara ACÁ, no reactivamente
+        // en AuthProvider al evento SIGNED_IN — Supabase puede emitir ese
+        // mismo evento también al recargar la página con sesión persistida
+        // (confirmado en QA, oct 2026), así que solo este punto (submit
+        // exitoso) distingue un login real de un refresh. Fire-and-forget.
+        logLoginEvent()
         setIsSuccess(true)
         setAwaitingContext(true)
       }

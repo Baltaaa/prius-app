@@ -138,7 +138,7 @@ export function OverlayProvider({ children }) {
  * contenido en portal) — un click en cualquiera de ellos no cuenta como
  * "afuera".
  */
-export function useOverlay({ id, isOpen, onRequestClose, parentId }) {
+export function useOverlay({ id, isOpen, onRequestClose, parentId = undefined }) {
   const ctx = useContext(OverlayContext)
   if (!ctx) throw new Error('useOverlay debe usarse dentro de <OverlayProvider>')
   const nodesRef = useRef(new Set())
