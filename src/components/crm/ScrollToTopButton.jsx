@@ -6,8 +6,12 @@ import { ArrowUp } from 'lucide-react'
 // AppLayout.jsx (#app-main-scroll), no window: ese <main>, no el documento,
 // es el contenedor con scroll real en esta app (ver AppLayout.jsx). Aparece
 // recién después de SHOW_AFTER px para no competir con el header en
-// pantallas cortas de contenido. En mobile se levanta por encima del
-// BottomNav fijo (56px + safe-area).
+// pantallas cortas de contenido.
+//
+// Solo desktop (Fase 1 mobile, oct 2026): en mobile tapaba íconos/botones
+// reales por encima del contenido (ver docs/auditoria-mobile.md, hallazgo en
+// Clientes). El equivalente mobile es tocar en el BottomNav la pestaña que
+// ya está activa (ver BottomNav.jsx) — patrón nativo de iOS/Android.
 //
 // Portal a document.body: el root de cada página (ej. "animate-premium-fade"
 // en Clientes.jsx) tiene su propia animación con `transform`, que crea un
@@ -43,9 +47,8 @@ export default function ScrollToTopButton() {
       type="button"
       onClick={handleClick}
       aria-label="Volver arriba"
-      className={`fixed right-4 md:right-8 md:bottom-6 z-40 w-11 h-11 rounded-full bg-[#F2CA50] text-black
-                  flex items-center justify-center transition-opacity duration-300
-                  bottom-[calc(56px+env(safe-area-inset-bottom)+16px)]
+      className={`hidden md:flex fixed right-8 bottom-6 z-40 w-11 h-11 rounded-full bg-[#F2CA50] text-black
+                  items-center justify-center transition-opacity duration-300
                   ${visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
     >
       <ArrowUp size={20} />

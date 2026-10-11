@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useLeads } from '../../hooks/useLeads'
@@ -23,8 +23,21 @@ const ITEMS = [
   { name: 'Clientes', path: '/app/clientes', icon: Users },
 ]
 
+// Volver arriba nativo (Fase 1 mobile, oct 2026): tocar en el BottomNav la
+// pestaña que ya está activa scrollea suave al principio de #app-main-scroll
+// (mismo contenedor que escuchaba ScrollToTopButton.jsx, ahora solo
+// desktop) — patrón estándar de iOS/Android, sin agregar un botón flotante
+// que tape contenido en mobile.
+function scrollMainToTop() {
+  const el = document.getElementById('app-main-scroll')
+  if (!el) return
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  el.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
+}
+
 export default function BottomNav() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [showMore, setShowMore] = useState(false)
   const { bind: bindMore } = useOverlay({ id: 'bottomnav-mas', isOpen: showMore, onRequestClose: () => setShowMore(false) })
   const { count: notificationsCount } = useNotifications()
@@ -59,8 +72,9 @@ export default function BottomNav() {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[9px] font-bold uppercase tracking-wider transition-all ${
+              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[11px] font-bold uppercase tracking-wider transition-all ${
                 isActive ? 'text-[#FDE047]' : 'text-gray-500'
               }`
             }
@@ -71,12 +85,12 @@ export default function BottomNav() {
         ))}
         <button
           onClick={() => setShowMore(true)}
-          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[9px] font-bold uppercase tracking-wider text-gray-500 transition-all"
+          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[11px] font-bold uppercase tracking-wider text-gray-500 transition-all"
         >
           <span className="relative">
             <MoreHorizontal size={20} />
             {notificationsCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#FDE047] text-black text-[8px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-[#FDE047] text-black text-[10px] font-bold flex items-center justify-center">
                 {notificationsCount > 9 ? '9+' : notificationsCount}
               </span>
             )}
@@ -125,10 +139,10 @@ export default function BottomNav() {
                     <span className="truncate">{item.name}</span>
                   </div>
                   {item.comingSoon && (
-                    <span className="shrink-0 px-1.5 py-0.5 text-[8px] font-bold bg-white/10 text-gray-400 rounded uppercase tracking-wider">Pronto</span>
+                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-white/10 text-gray-400 rounded uppercase tracking-wider">Pronto</span>
                   )}
                   {!item.comingSoon && item.badge > 0 && (
-                    <span className="shrink-0 px-1.5 py-0.5 text-[9px] font-bold bg-[#FDE047] text-black rounded-full">{item.badge}</span>
+                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-[#FDE047] text-black rounded-full">{item.badge}</span>
                   )}
                 </NavLink>
               ))}
