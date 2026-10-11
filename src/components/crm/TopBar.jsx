@@ -26,29 +26,35 @@ const NOTIF_ICON = { caja: Wallet, checkin: Calendar, saldo: AlertCircle }
 // cada página). Sincronizado con las rutas del Sidebar (mismo listado que
 // mainNav + additionalNav en Sidebar.jsx). Los subtítulos son el texto que
 // antes estaba debajo del <h1> grande de cada página.
+// `shortName` (Fase 1 mobile, oct 2026): versión corta del título para <768px
+// — en 360px los 3-4 botones de la derecha (QR, búsqueda, notificaciones,
+// perfil) le dejan al bloque del título muy poco ancho real, y el `name`
+// completo terminaba truncado a 2-3 letras ("Directo…", "Notifica…"). Debajo
+// de md se usa `shortName` (o `name` si no hace falta acortarlo); en desktop
+// siempre el `name` completo, sin cambios.
 const SECTION_TITLES = [
   {
-    path: '/app/home', name: 'Dashboard', subtitle: 'Resumen de métricas y actividades principales en tiempo real.',
+    path: '/app/home', name: 'Dashboard', shortName: 'Inicio', subtitle: 'Resumen de métricas y actividades principales en tiempo real.',
     icon: LayoutDashboard, iconBg: 'bg-[#FDE047]/10', iconBorder: 'border-[#FDE047]/20', iconColor: 'text-[#FDE047]',
   },
   {
-    path: '/app/plano', name: 'Plano de Playa', subtitle: 'Gestión de Unidades Prius Playa Grande',
+    path: '/app/plano', name: 'Plano de Playa', shortName: 'Plano', subtitle: 'Gestión de Unidades Prius Playa Grande',
     icon: Map, iconBg: 'bg-sky-400/10', iconBorder: 'border-sky-400/20', iconColor: 'text-sky-400',
   },
   {
-    path: '/app/cabinas-lockers', name: 'Cabinas y Lockers', subtitle: 'Sección en desarrollo — solo lectura.',
+    path: '/app/cabinas-lockers', name: 'Cabinas y Lockers', shortName: 'Cabinas', subtitle: 'Sección en desarrollo — solo lectura.',
     icon: DoorClosed, iconBg: 'bg-white/10', iconBorder: 'border-white/20', iconColor: 'text-gray-300',
   },
   {
-    path: '/app/reservas', name: 'Cola de Reservas', subtitle: 'Alquileres por período y día, ordenados por llegada.',
+    path: '/app/reservas', name: 'Cola de Reservas', shortName: 'Reservas', subtitle: 'Alquileres por período y día, ordenados por llegada.',
     icon: CalendarClock, iconBg: 'bg-[#FDE047]/10', iconBorder: 'border-[#FDE047]/20', iconColor: 'text-[#FDE047]',
   },
   {
-    path: '/app/clientes', name: 'Directorio de Clientes', subtitle: 'Historial completo: temporadas y alquileres pasados.',
+    path: '/app/clientes', name: 'Directorio de Clientes', shortName: 'Clientes', subtitle: 'Historial completo: temporadas y alquileres pasados.',
     icon: Users, iconBg: 'bg-cyan-400/10', iconBorder: 'border-cyan-400/20', iconColor: 'text-cyan-400',
   },
   {
-    path: '/app/caja', name: 'Caja Diaria', subtitle: 'Arqueo, historial y cruce automático con pagos.',
+    path: '/app/caja', name: 'Caja Diaria', shortName: 'Caja', subtitle: 'Arqueo, historial y cruce automático con pagos.',
     icon: Wallet, iconBg: 'bg-green-400/10', iconBorder: 'border-green-400/20', iconColor: 'text-green-400',
   },
   {
@@ -64,7 +70,7 @@ const SECTION_TITLES = [
     icon: Activity, iconBg: 'bg-teal-400/10', iconBorder: 'border-teal-400/20', iconColor: 'text-teal-400',
   },
   {
-    path: '/app/notificaciones', name: 'Notificaciones', subtitle: 'Alertas de sistema, saldos y operaciones diarias.',
+    path: '/app/notificaciones', name: 'Notificaciones', shortName: 'Avisos', subtitle: 'Alertas de sistema, saldos y operaciones diarias.',
     icon: Bell, iconBg: 'bg-amber-400/10', iconBorder: 'border-amber-400/20', iconColor: 'text-amber-400',
   },
   {
@@ -72,12 +78,12 @@ const SECTION_TITLES = [
     icon: FileText, iconBg: 'bg-violet-400/10', iconBorder: 'border-violet-400/20', iconColor: 'text-violet-400',
   },
   {
-    path: '/app/perfil', name: 'Perfil y Tarifas', subtitle: 'Configuración de cuenta y valores de temporada.',
+    path: '/app/perfil', name: 'Perfil y Tarifas', shortName: 'Perfil', subtitle: 'Configuración de cuenta y valores de temporada.',
     icon: UserCheck, iconBg: 'bg-pink-400/10', iconBorder: 'border-pink-400/20', iconColor: 'text-pink-400',
   },
 ]
 
-const DEFAULT_SECTION = { name: 'Balneario Playa Grande', subtitle: '', icon: LayoutDashboard, iconBg: 'bg-white/5', iconBorder: 'border-white/10', iconColor: 'text-gray-400' }
+const DEFAULT_SECTION = { name: 'Balneario Playa Grande', shortName: 'Prius', subtitle: '', icon: LayoutDashboard, iconBg: 'bg-white/5', iconBorder: 'border-white/10', iconColor: 'text-gray-400' }
 
 function useSection(pathname) {
   return SECTION_TITLES.find((s) => pathname.startsWith(s.path)) || DEFAULT_SECTION
@@ -265,13 +271,16 @@ export default function TopBar() {
           contra este espacio. Título + subtítulo + ícono de color: antes
           vivían repetidos como bloque grande en cada página, ahora viven acá
           una sola vez. */}
-      <div className="flex items-center gap-3 shrink-0 min-w-0 flex-1 sm:flex-none sm:w-64 md:w-80">
+      <div className="flex items-center gap-3 min-w-0 flex-1 sm:flex-none sm:w-64 md:w-80">
         <div className="flex items-center gap-3 min-w-0">
           <div className={`w-10 h-10 rounded-xl ${section.iconBg} border ${section.iconBorder} flex items-center justify-center shrink-0`}>
             <SectionIcon size={18} className={section.iconColor} />
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm font-display font-extrabold text-white tracking-tight truncate">{section.name}</h1>
+            <h1 className="text-sm font-display font-extrabold text-white tracking-tight truncate">
+              <span className="md:hidden">{section.shortName || section.name}</span>
+              <span className="hidden md:inline">{section.name}</span>
+            </h1>
             {section.subtitle && (
               <p className="hidden sm:block text-[9px] text-gray-500 font-semibold uppercase tracking-wider truncate">{section.subtitle}</p>
             )}
@@ -303,7 +312,7 @@ export default function TopBar() {
                 <>
                   {clienteMatches.length > 0 && (
                     <div>
-                      <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Clientes</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Clientes</p>
                       {clienteMatches.map((cliente) => (
                         <button
                           key={cliente.id}
@@ -319,7 +328,7 @@ export default function TopBar() {
 
                   {unidadMatches.length > 0 && (
                     <div className="border-t border-white/10">
-                      <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Unidades</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Unidades</p>
                       {unidadMatches.map((u) => (
                         <button
                           key={u.id}
@@ -334,7 +343,7 @@ export default function TopBar() {
 
                   {reservaMatches.length > 0 && (
                     <div className="border-t border-white/10">
-                      <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Reservas</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Reservas</p>
                       {reservaMatches.map((reserva) => (
                         <button
                           key={reserva.id}
@@ -355,7 +364,7 @@ export default function TopBar() {
 
                   {comprobanteMatches.length > 0 && (
                     <div className="border-t border-white/10">
-                      <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Comprobantes</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Comprobantes</p>
                       {comprobanteMatches.map(({ pago, comprobante }) => (
                         <button
                           key={comprobante.id}
@@ -396,7 +405,7 @@ export default function TopBar() {
         <div ref={notifOverlay.bind} className="relative">
           <button
             onClick={() => setShowNotifications((v) => !v)}
-            className="text-gray-400 hover:text-white relative p-2 rounded-lg hover:bg-white/5 transition-all"
+            className="text-gray-400 hover:text-white relative p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
           >
             <Bell size={20} />
             {notifCount > 0 && (
@@ -407,9 +416,9 @@ export default function TopBar() {
           {showNotifications && (
               <div className="absolute right-0 mt-3 w-80 max-w-[90vw] glass-popover rounded-xl overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Notificaciones</p>
+                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Notificaciones</p>
                   {notifCount > 0 && (
-                    <span className="text-[10px] font-bold text-black bg-[#FDE047] rounded-full px-2 py-0.5">{notifCount}</span>
+                    <span className="text-[11px] font-bold text-black bg-[#FDE047] rounded-full px-2 py-0.5">{notifCount}</span>
                   )}
                 </div>
 
@@ -458,7 +467,7 @@ export default function TopBar() {
 
                 <button
                   onClick={() => { navigate('/app/notificaciones'); setShowNotifications(false) }}
-                  className="w-full text-center px-4 py-3 text-[10px] font-bold text-[#FDE047] uppercase tracking-widest hover:bg-white/5 transition-all border-t border-white/10"
+                  className="w-full text-center px-4 py-3 text-[11px] font-bold text-[#FDE047] uppercase tracking-widest hover:bg-white/5 transition-all border-t border-white/10"
                 >
                   Ver todas
                 </button>
@@ -470,7 +479,7 @@ export default function TopBar() {
         <div ref={profileOverlay.bind} className="relative">
           <button
             onClick={() => setShowProfileMenu((v) => !v)}
-            className="flex items-center gap-3 p-1 hover:bg-white/5 rounded-lg transition-all"
+            className="flex items-center gap-3 p-1 min-h-[44px] hover:bg-white/5 rounded-lg transition-all"
           >
             <div className="w-8 h-8 bg-[#FDE047] text-black rounded flex items-center justify-center font-bold text-sm">
               {nombreMostrado.charAt(0).toUpperCase()}
@@ -484,7 +493,7 @@ export default function TopBar() {
           {showProfileMenu && (
             <div className="absolute right-0 mt-3 w-56 glass-popover rounded-xl overflow-hidden z-50 p-1">
               <div className="px-4 py-3 border-b border-white/10">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{rolLabel}</p>
+                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{rolLabel}</p>
                 <p className="text-xs font-medium text-white truncate">{nombreMostrado}</p>
               </div>
               <button
@@ -534,7 +543,7 @@ export default function TopBar() {
               <>
                 {clienteMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Clientes</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Clientes</p>
                     {clienteMatches.map((cliente) => (
                       <button
                         key={cliente.id}
@@ -549,7 +558,7 @@ export default function TopBar() {
                 )}
                 {unidadMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Unidades</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Unidades</p>
                     {unidadMatches.map((u) => (
                       <button
                         key={u.id}
@@ -563,7 +572,7 @@ export default function TopBar() {
                 )}
                 {reservaMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Reservas</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Reservas</p>
                     {reservaMatches.map((reserva) => (
                       <button
                         key={reserva.id}
@@ -583,7 +592,7 @@ export default function TopBar() {
                 )}
                 {comprobanteMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Comprobantes</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Comprobantes</p>
                     {comprobanteMatches.map(({ pago, comprobante }) => (
                       <button
                         key={comprobante.id}
