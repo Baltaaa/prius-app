@@ -726,9 +726,9 @@ export default function Clientes() {
                         unidad quedan arriba) — evita la duplicación
                         detectada en auditoría. */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
+                      <div className="col-span-2 md:col-span-1">
                         <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><Mail size={11} /> Email</p>
-                        <p className="text-sm text-white mt-1 lowercase">{cliente.mail || <span className="text-gray-500 normal-case">Sin cargar</span>}</p>
+                        <p className="text-sm text-white mt-1 lowercase break-all">{cliente.mail || <span className="text-gray-500 normal-case">Sin cargar</span>}</p>
                       </div>
                       <div>
                         <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> CUIT</p>
