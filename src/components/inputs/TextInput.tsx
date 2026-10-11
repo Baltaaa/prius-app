@@ -55,7 +55,7 @@ export default function TextInput({
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">
+        <label htmlFor={inputId} className="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2">
           {label}{required && <span className="text-red-400 ml-0.5">*</span>}
         </label>
       )}

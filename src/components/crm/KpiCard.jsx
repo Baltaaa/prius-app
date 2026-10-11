@@ -18,13 +18,13 @@ export default function KpiCard({ title, value, subtitle, icon: Icon, highlight,
         </div>
         {/* Nunca en dos líneas: en mobile el título achica en vez de envolver
             (2 columnas dejan poco ancho — ver CLAUDE.md "Mobile-first"). */}
-        <span className="text-[9px] sm:text-[11px] font-medium text-gray-300 uppercase tracking-wider truncate min-w-0">{title}</span>
+        <span className="text-[11px] font-medium text-gray-300 uppercase tracking-wider truncate min-w-0">{title}</span>
       </div>
 
       <div className="relative z-10 min-w-0">
         <div className="text-xl sm:text-3xl font-bold text-[#FDE047] tracking-tight truncate">{value}</div>
         {subtitle && (
-          <p className="text-[10px] sm:text-[11px] text-gray-500 mt-1 font-medium truncate">
+          <p className="text-[11px] text-gray-500 mt-1 font-medium truncate">
             {subtitle}
           </p>
         )}

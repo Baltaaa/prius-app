@@ -49,7 +49,7 @@ export default function StatusBadge({ status }) {
   const current = config[status?.toLowerCase()] || { bg: 'bg-neutral-100 text-neutral-700 border-neutral-200', label: status }
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase border ${current.bg}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase border ${current.bg}`}>
       {current.label}
     </span>
   )
