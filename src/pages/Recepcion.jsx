@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   QrCode, Search, CheckCircle2, AlertTriangle, Clock, Receipt, Wallet, Users as UsersIcon,
@@ -13,8 +13,24 @@ import { MEDIO_PAGO_LABEL, ERROR_CAJA_CERRADA } from '../lib/pagos'
 import { linkToComprobante } from '../lib/deepLinks'
 import StatusBadge from '../components/crm/StatusBadge'
 import MoneyInput from '../components/inputs/MoneyInput'
-import EscanearQR from '../components/recepcion/EscanearQR'
 import { supabase } from '../lib/supabase'
+
+// Lazy (Fase 1 mobile, oct 2026): EscanearQR importa `html5-qrcode`, que por
+// sí solo pesa ~105KB gzip — antes se importaba eager acá arriba, así que
+// se descargaba apenas se entraba a /app/recepcion aunque el flujo más común
+// en el mostrador es tipear el código a mano. Ahora el chunk recién se pide
+// cuando `scannerOpen` pasa a true (ver el render condicional más abajo); el
+// ingreso manual no espera nada de esto.
+const EscanearQR = lazy(() => import('../components/recepcion/EscanearQR'))
+
+function EscanearQRFallback() {
+  return (
+    <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center gap-3">
+      <div className="w-8 h-8 border-2 border-white/20 border-t-[#FDE047] rounded-full animate-spin" />
+      <p className="text-sm text-gray-400">Abriendo cámara…</p>
+    </div>
+  )
+}
 
 const chipClass = (active) =>
   `px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
@@ -213,7 +229,11 @@ export default function Recepcion() {
 
   return (
     <div className="space-y-6 animate-premium-fade">
-      <EscanearQR isOpen={scannerOpen} onClose={() => setScannerOpen(false)} onScan={handleScan} />
+      {scannerOpen && (
+        <Suspense fallback={<EscanearQRFallback />}>
+          <EscanearQR isOpen={scannerOpen} onClose={() => setScannerOpen(false)} onScan={handleScan} />
+        </Suspense>
+      )}
 
       <div className="flex items-center gap-3">
         <QrCode className="text-[#FDE047]" size={22} />
