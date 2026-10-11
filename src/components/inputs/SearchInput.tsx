@@ -47,7 +47,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(function Sear
         <button
           type="button"
           onClick={() => onChange('')}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-500 hover:text-white transition-colors"
+          className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-white transition-colors"
           aria-label="Limpiar búsqueda"
         >
           <X size={14} />

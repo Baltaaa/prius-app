@@ -162,7 +162,7 @@ export default function DateInput({
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">
+        <label htmlFor={inputId} className="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2">
           {label}{required && <span className="text-red-400 ml-0.5">*</span>}
         </label>
       )}
@@ -192,7 +192,7 @@ export default function DateInput({
           tabIndex={-1}
           disabled={disabled}
           onClick={() => (abierto ? setAbierto(false) : abrir())}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-[#FDE047] transition-colors"
+          className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-[#FDE047] transition-colors"
         >
           <CalendarDays size={18} />
         </button>
@@ -233,6 +233,7 @@ export default function DateInput({
         .dp-dark .rdp-disabled { opacity: 0.3; text-decoration: line-through; }
         .dp-dark .rdp-weekday { color: rgba(255,255,255,0.4); }
         .dp-dark .rdp-caption_label, .dp-dark .rdp-nav button { color: #fff; }
+        .dp-dark .rdp-button_previous, .dp-dark .rdp-button_next { min-width: 44px; min-height: 44px; }
       `}</style>
     </div>
   )

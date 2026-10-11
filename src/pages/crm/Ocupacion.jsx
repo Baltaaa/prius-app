@@ -241,10 +241,10 @@ export default function Ocupacion() {
               </button>
             ))}
           </div>
-          <button onClick={irAnterior} className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all" title="Anterior">
+          <button onClick={irAnterior} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all" title="Anterior">
             <ChevronLeft size={16} />
           </button>
-          <button onClick={irSiguiente} className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all" title="Siguiente">
+          <button onClick={irSiguiente} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all" title="Siguiente">
             <ChevronRight size={16} />
           </button>
           <button onClick={irHoy} className="px-3 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-300 transition-all">

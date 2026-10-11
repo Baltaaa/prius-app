@@ -34,9 +34,9 @@ const classNames = {
   month_caption: 'col-start-2 row-start-1 flex items-center justify-center h-9',
   caption_label: 'text-xs font-bold uppercase tracking-widest text-white',
   button_previous:
-    'col-start-1 row-start-1 justify-self-start p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none',
+    'col-start-1 row-start-1 justify-self-start min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none',
   button_next:
-    'col-start-3 row-start-1 justify-self-end p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none',
+    'col-start-3 row-start-1 justify-self-end min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none',
   month_grid: 'col-span-3 row-start-2 w-full border-collapse mt-2',
   weekdays: 'flex',
   weekday: 'w-9 h-9 text-[10px] font-bold uppercase tracking-widest text-gray-500 flex items-center justify-center',

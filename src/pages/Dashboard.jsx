@@ -516,7 +516,7 @@ export default function Dashboard() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => goToDate(shiftDate(selectedDate, -1))}
-            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
             title="Día anterior"
           >
             <ChevronLeft size={16} />
@@ -524,7 +524,7 @@ export default function Dashboard() {
           <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} className="w-36" />
           <button
             onClick={() => goToDate(shiftDate(selectedDate, 1))}
-            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
             title="Día siguiente"
           >
             <ChevronRight size={16} />
@@ -564,7 +564,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => goToDate(shiftDate(selectedDate, -1))}
-            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all shrink-0"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all shrink-0"
             title="Día anterior"
           >
             <ChevronLeft size={16} />
@@ -572,7 +572,7 @@ export default function Dashboard() {
           <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} className="flex-1 min-w-0" />
           <button
             onClick={() => goToDate(shiftDate(selectedDate, 1))}
-            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all shrink-0"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all shrink-0"
             title="Día siguiente"
           >
             <ChevronRight size={16} />
