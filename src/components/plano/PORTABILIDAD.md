@@ -75,7 +75,7 @@ sigue pasando a `PlanoGrid` como `renderCelda` desde `Dashboard.jsx`.
 
 ## Desvío conocido
 
-`Cell.jsx` dibuja cada celda en `w-6 h-4.5 md:w-7 md:h-5` (24×18 / 28×20px)
+`Cell.jsx` dibuja cada celda en `w-6 h-[18px] md:w-7 md:h-5` (24×18 / 28×20px)
 para que las ~184 entren en pantalla sin scroll excesivo — por debajo del
 mínimo táctil de 44×44 que pide el resto del CRM (ver CLAUDE.md
 "Mobile-first"). `CeldaPublica.jsx` usa ese mismo tamaño a propósito, para

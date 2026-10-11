@@ -7,7 +7,7 @@
 //
 // Cada posición se identifica por (fila, orden), igual que en la base.
 
-export const PLANO_COL_WIDTH = 52        // columna (número + casilla), desktop
+export const PLANO_COL_WIDTH = 56        // columna (número 28 + casilla 28), desktop
 export const PLANO_PASILLO_LATERAL = 96  // pasillos A y C (~3.4 anchos de casilla)
 export const PLANO_PASILLO_CENTRAL = 150 // pasillo B, central, alineado con Acceso
 export const PLANO_BLOQUE_GAP = 2        // gap espalda-con-espalda en un bloque doble

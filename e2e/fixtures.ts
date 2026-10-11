@@ -15,9 +15,13 @@ export async function login(page) {
     throw new Error('Faltan E2E_USER_EMAIL / E2E_USER_PASSWORD en .env.local — ver .env.local.example.')
   }
   await page.goto('/login')
-  await page.getByPlaceholder('CORREO ELECTRÓNICO').fill(EMAIL)
-  await page.getByPlaceholder('CONTRASEÑA').fill(PASSWORD)
-  await page.getByRole('button', { name: /ingresar al panel/i }).click()
+  // Selectores alineados al rediseño del login (oct 2026, Tarea 5) — labels
+  // reales en vez de placeholders en mayúscula, botón "Ingresar" sin más
+  // texto. Desactualizado desde ese rediseño, nunca se había vuelto a
+  // correr test:visual hasta ahora.
+  await page.getByLabel('Email').fill(EMAIL)
+  await page.getByRole('textbox', { name: 'Contraseña' }).fill(PASSWORD)
+  await page.getByRole('button', { name: /^ingresar$/i }).click()
   await expect(page).toHaveURL(/\/app\/home/, { timeout: 15_000 })
 }
 

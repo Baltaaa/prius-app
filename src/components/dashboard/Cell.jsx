@@ -42,7 +42,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
 
   const numberLabel = (
     <span
-      className={`w-5 md:w-6 text-[9px] font-bold text-white/30 ${numberSide === "right" ? "text-left pl-1.5" : "text-right pr-1.5"}`}
+      className={`w-6 md:w-7 text-[11px] md:text-xs font-bold tabular-nums text-white/70 ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
     >
       {number}
     </span>
@@ -58,10 +58,10 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
       <button
         data-deeplink-id={unit?.dbId}
         onClick={() => onClick(unit)}
-        className={`w-6 h-4.5 md:w-7 md:h-5 text-[9px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative ${styles} ${opacityClass} ${highlightClass} ${unit?.esPreconfirmadaWeb ? "border-dashed" : ""}`}
+        className={`w-6 h-[18px] md:w-7 md:h-5 text-[10px] md:text-[11px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative ${styles} ${opacityClass} ${highlightClass} ${unit?.esPreconfirmadaWeb ? "border-dashed" : ""}`}
       >
         <span className="leading-none">
-          {isPendienteConfirmacion && <Hourglass size={9} />}
+          {isPendienteConfirmacion && <Hourglass size={11} />}
           {isTemporada && "T"}
           {isPeriodo && "P"}
           {isDia && "D"}

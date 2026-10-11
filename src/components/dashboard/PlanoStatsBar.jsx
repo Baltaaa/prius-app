@@ -87,27 +87,33 @@ export function LibresCard({ stats, filtro, onToggleFiltro, className = 'w-[100p
   )
 }
 
-export function MixCard({ stats, filtro, onToggleFiltro, className = 'w-[172px]' }) {
+export function MixCard({ stats, filtro, onToggleFiltro, className = 'w-[220px]' }) {
   return (
     <StatCard icon={Layers} label="Mix de alquiler" className={className}>
-      <div className="flex items-center gap-3">
+      <div className="grid grid-cols-3 gap-1.5">
         {[
           ['temporada', 'T', stats.mix.temporada],
           ['periodo', 'P', stats.mix.periodo],
           ['dia', 'D', stats.mix.dia],
-        ].map(([key, letra, valor]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => onToggleFiltro(key)}
-            className={`flex items-center gap-1.5 text-sm font-bold tabular-nums transition-colors ${
-              filtro === key ? 'text-[#F2CA50]' : 'text-white hover:text-[#F2CA50]'
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLOR_TIPO_ALQUILER[key]?.swatch }} />
-            {letra} {valor}
-          </button>
-        ))}
+        ].map(([key, letra, valor]) => {
+          const active = filtro === key
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onToggleFiltro(key)}
+              className={`flex flex-col items-center justify-center gap-1 min-h-[44px] rounded-lg border px-2.5 py-2 transition-colors ${
+                active ? 'border-[#F2CA50]/50 bg-[#F2CA50]/10' : 'border-white/10 bg-white/5 hover:border-white/20'
+              }`}
+            >
+              <span className="flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLOR_TIPO_ALQUILER[key]?.swatch }} />
+                <span className="text-[11px] uppercase text-gray-400">{letra}</span>
+              </span>
+              <span className={`text-xl font-bold tabular-nums leading-none ${active ? 'text-[#F2CA50]' : 'text-white'}`}>{valor}</span>
+            </button>
+          )
+        })}
       </div>
     </StatCard>
   )
@@ -154,22 +160,25 @@ export function ClimaCard({ selectedDate, className }) {
  * solo un recordatorio visual de qué significa cada marca del plano. */
 export function EstadoLegend() {
   const item = (swatchClass, label, children) => (
-    <div className="flex items-center gap-2.5">
-      <div className={`w-4.5 h-4.5 rounded-sm border flex items-center justify-center shrink-0 ${swatchClass}`}>{children}</div>
-      <span className="text-[11px] text-gray-400">{label}</span>
+    <div className="flex items-center gap-3">
+      <div className={`w-6 h-5 rounded-sm border flex items-center justify-center shrink-0 relative ${swatchClass}`}>{children}</div>
+      <span className="text-[13px] text-gray-300">{label}</span>
     </div>
   )
   return (
-    <div className="space-y-2 pt-1">
-      {item(`${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada (T/P/D)', <span className="text-[8px] font-bold text-black">T</span>)}
-      {item('bg-white border-white', 'Pendiente de confirmar', <Hourglass size={9} className="text-black" />)}
-      {item('bg-white/5 border-white/10', 'Libre')}
-      <div className="flex items-center gap-2.5">
-        <div className="w-4.5 h-4.5 rounded-sm border border-white/10 bg-white/5 flex items-center justify-center shrink-0 relative">
-          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-green-400" />
-        </div>
-        <span className="text-[11px] text-gray-400">Saldada (punto verde)</span>
-      </div>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 space-y-3">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Referencias</p>
+      {item(`${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada (T / P / D)', <span className="text-[11px] font-bold text-black">T</span>)}
+      {item('bg-white border-white', 'Pendiente de confirmar', <Hourglass size={11} className="text-black" />)}
+      {item('bg-white/5 border-white/20', 'Libre')}
+      {item(
+        `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`,
+        'Saldada (punto verde)',
+        <>
+          <span className="text-[11px] font-bold text-black">T</span>
+          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-green-400" />
+        </>
+      )}
     </div>
   )
 }
