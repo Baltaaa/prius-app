@@ -128,7 +128,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
         </label>
       )}
       <div className="relative">
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold pointer-events-none select-none">$</span>
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-base md:text-sm font-bold pointer-events-none select-none">$</span>
         <input
           ref={setRef}
           id={inputId}
@@ -147,7 +147,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
           placeholder={placeholder}
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
-          className={`w-full min-h-[44px] pl-8 pr-4 py-3 bg-white/5 border rounded-xl text-white text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
+          className={`w-full min-h-[44px] pl-8 pr-4 py-3 bg-white/5 border rounded-xl text-white text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
             error ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-[#FDE047]/50'
           }`}
         />

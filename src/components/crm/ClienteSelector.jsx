@@ -133,7 +133,7 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
           setShowDropdown(true)
           e.target.select()
         }}
-        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none uppercase font-bold"
+        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-[#FDE047]/50 outline-none uppercase font-bold"
       />
       {showDropdown && (
         <>

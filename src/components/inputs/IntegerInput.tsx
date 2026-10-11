@@ -78,7 +78,7 @@ const IntegerInput = forwardRef<HTMLInputElement, IntegerInputProps>(function In
         onBlur={handleBlur}
         placeholder={placeholder}
         aria-invalid={!!error}
-        className={`w-full min-h-[44px] px-4 py-3 bg-white/5 border rounded-xl text-white text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
+        className={`w-full min-h-[44px] px-4 py-3 bg-white/5 border rounded-xl text-white text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
           error ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-[#FDE047]/50'
         }`}
       />

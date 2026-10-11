@@ -41,7 +41,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(function Sear
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={onKeyDown}
         placeholder={placeholder}
-        className={`w-full pl-10 pr-10 min-h-[44px] py-2 bg-white/5 border border-white/10 focus:border-white/30 outline-none text-sm rounded-lg text-white placeholder-gray-500 transition-all ${inputClassName}`}
+        className={`w-full pl-10 pr-10 min-h-[44px] py-2 bg-white/5 border border-white/10 focus:border-white/30 outline-none text-base md:text-sm rounded-lg text-white placeholder-gray-500 transition-all ${inputClassName}`}
       />
       {value && (
         <button

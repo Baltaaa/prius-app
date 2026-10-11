@@ -239,7 +239,7 @@ export default function Recepcion() {
                 onChange={(e) => setInputManual(e.target.value.toUpperCase())}
                 onKeyDown={(e) => { if (e.key === 'Enter') cargarCodigo(inputManual) }}
                 placeholder="Ej: PRIUS-A3X9K2"
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold uppercase tracking-wider focus:border-[#FDE047]/50 outline-none"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm font-bold uppercase tracking-wider focus:border-[#FDE047]/50 outline-none"
               />
               <button
                 onClick={() => cargarCodigo(inputManual)}

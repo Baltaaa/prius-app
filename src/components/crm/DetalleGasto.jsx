@@ -8,7 +8,7 @@ import Modal from './Modal'
 import { AlertTriangle } from 'lucide-react'
 
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold resize-none'
+  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-[#FDE047]/50 outline-none font-bold resize-none'
 
 // Detalle de un gasto ya registrado (Tarea 5) — mismo patrón que DetallePago:
 // ver datos y anular con motivo obligatorio (solo si la caja sigue abierta).

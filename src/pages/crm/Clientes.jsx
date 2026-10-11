@@ -50,7 +50,7 @@ import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, Circle
 // pantallas no se confundan a simple vista, dentro de la misma paleta Glass
 // Dark ya estandarizada.
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-400/50 outline-none font-bold'
+  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-cyan-400/50 outline-none font-bold'
 
 const TIPO_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 

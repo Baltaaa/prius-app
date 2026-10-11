@@ -169,7 +169,7 @@ export default function BrandSelect({
     }
   }
 
-  const triggerClass = `w-full min-h-[44px] flex items-center justify-between gap-2 bg-white/5 border rounded-xl px-4 py-3 text-sm text-left outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+  const triggerClass = `w-full min-h-[44px] flex items-center justify-between gap-2 bg-white/5 border rounded-xl px-4 py-3 text-base md:text-sm text-left outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
     error || invalid ? 'border-red-500/50' : open ? 'border-[#FDE047]/50' : 'border-white/10'
   } ${className}`
 
@@ -251,7 +251,7 @@ export default function BrandSelect({
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full bg-transparent text-sm text-white outline-none placeholder:text-gray-600"
+                    className="w-full bg-transparent text-base md:text-sm text-white outline-none placeholder:text-gray-600"
                   />
                 </div>
               )}
@@ -285,7 +285,7 @@ export default function BrandSelect({
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full bg-transparent text-sm text-white outline-none placeholder:text-gray-600"
+                    className="w-full bg-transparent text-base md:text-sm text-white outline-none placeholder:text-gray-600"
                   />
                 </div>
               )}

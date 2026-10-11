@@ -473,7 +473,7 @@ export default function Caja() {
               <textarea
                 rows={2} value={motivoReapertura} onChange={(e) => setMotivoReapertura(e.target.value)}
                 placeholder="Motivo de la reapertura (obligatorio)"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-[#FDE047]/50 resize-none"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm outline-none focus:border-[#FDE047]/50 resize-none"
               />
               <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all">
                 Confirmar reapertura

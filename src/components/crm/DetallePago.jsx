@@ -16,7 +16,7 @@ import { usePermiso } from '../../context/AuthProvider'
 import { FileText, AlertTriangle, Pencil } from 'lucide-react'
 
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none font-bold'
+  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-[#FDE047]/50 outline-none font-bold'
 
 const chipClass = (active) =>
   `px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${

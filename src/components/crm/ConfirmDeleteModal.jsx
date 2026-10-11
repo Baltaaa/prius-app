@@ -91,7 +91,7 @@ export default function ConfirmDeleteModal({ isOpen, onClose, onConfirm, tipo, i
           onChange={(e) => setInput(e.target.value)}
           disabled={loading}
           autoFocus
-          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-red-500/50 outline-none text-sm text-white placeholder-white/20"
+          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-red-500/50 outline-none text-base md:text-sm text-white placeholder-white/20"
           placeholder={identificador}
         />
 

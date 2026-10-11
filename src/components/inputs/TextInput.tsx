@@ -47,7 +47,7 @@ export default function TextInput({
     placeholder,
     onBlur: handleBlur,
     'aria-invalid': !!error,
-    className: `w-full min-h-[44px] px-4 py-3 bg-white/5 border rounded-xl text-white text-sm outline-none transition-all disabled:opacity-50 resize-none ${
+    className: `w-full min-h-[44px] px-4 py-3 bg-white/5 border rounded-xl text-white text-base md:text-sm outline-none transition-all disabled:opacity-50 resize-none ${
       error ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-[#FDE047]/50'
     }`,
   }
