@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus,
+  CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff,
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
 import { formatFecha, formatFechaLarga, formatHora, formatPesos } from '../../lib/format'
@@ -50,6 +50,10 @@ const TIPO_EVENTO_META = {
   temporada_update: { icon: CalendarDays, label: 'Temporada editada', color: 'text-[#FDE047]', filtro: 'otros' },
   temporada_delete: { icon: CalendarDays, label: 'Temporada eliminada', color: 'text-red-400', filtro: 'otros' },
   migracion_historica: { icon: History, label: 'Migración histórica', color: 'text-gray-500', filtro: 'otros' },
+  // Seguimiento (oct 2026, Tarea 2): eventos de auth, vía fn_registrar_evento_auth.
+  login: { icon: LogIn, label: 'Inicio de sesión', color: 'text-green-400', filtro: 'otros' },
+  logout: { icon: LogOut, label: 'Cierre de sesión', color: 'text-gray-400', filtro: 'otros' },
+  logout_inactividad: { icon: ShieldOff, label: 'Cierre por inactividad', color: 'text-amber-400', filtro: 'otros' },
 }
 
 const FILTROS = [

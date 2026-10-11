@@ -27,7 +27,7 @@ export function useInactivityLogout() {
     setWarning(false)
     broadcastLogout()
     try { supabase.removeAllChannels() } catch { /* noop */ }
-    await signOut()
+    await signOut('logout_inactividad')
     navigate('/login?motivo=inactividad', { replace: true })
   }, [signOut, navigate])
 
@@ -78,7 +78,13 @@ export function useInactivityLogout() {
     const unsubscribeChannel = subscribeActivityChannel((e) => {
       if (e.data?.type === 'logout') {
         expirar()
-      } else if (e.data?.type === 'activity' && !warning) {
+      } else if (e.data?.type === 'activity') {
+        // A diferencia de `onActivity` (eventos locales, silenciados acá
+        // mientras el aviso está abierto a propósito), la actividad real en
+        // OTRA pestaña sí tiene que renovar y cerrar el aviso de esta: es
+        // evidencia de que la persona sigue frente al dispositivo (bug
+        // real de QA, oct 2026 — el aviso quedaba abierto en la pestaña
+        // idle aunque la otra ya hubiera renovado el timestamp).
         check()
       }
     })

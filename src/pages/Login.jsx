@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { useAuth } from "../context/AuthProvider"
-import { markActivity } from "../lib/activity"
+import { markActivity, consumeLogoutMotivo } from "../lib/activity"
 import { LOGIN_MAX_ATTEMPTS, LOGIN_LOCKOUT_MS } from "../config/session"
 import { Eye, EyeOff, Loader2, AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react"
 import GlobalLoader from "../components/ui/GlobalLoader"
@@ -41,16 +41,27 @@ export default function Login({ modo }) {
     }
   }
 
-  const motivo = searchParams.get("motivo")
+  // sessionStorage es la fuente confiable (seguimiento, oct 2026): el
+  // query string compite con el propio redirect de PrivateRoute cuando la
+  // sesión expira (carrera real, ver useInactivityLogout.js) y a veces se
+  // pierde. Se lee una sola vez al montar (lazy initializer), con el query
+  // como fallback por si sessionStorage no está disponible.
+  const [motivo] = useState(() => consumeLogoutMotivo() || searchParams.get("motivo"))
 
   // Ya hay sesión activa (y perfil resuelto) -> no tiene sentido ver el
   // login. Se apoya en el contexto único de auth, no en una segunda lectura
   // de getSession() independiente.
+  // `!motivo`: si llegamos acá por un logout forzado (PrivateRoute nos
+  // mandó por inactividad), `signOut()` puede seguir en vuelo (es async) y
+  // `session` todavía verse verdadero por un instante — sin este freno este
+  // efecto rebotaba de vuelta a Home antes de que signOut() terminara,
+  // generando un ping-pong que terminaba perdiendo el motivo/banner (bug
+  // real de QA, oct 2026, caso "pestaña reabierta después del timeout").
   useEffect(() => {
-    if (!authLoading && session && perfil) {
+    if (!authLoading && session && perfil && !motivo) {
       navigate(location.state?.from || "/app/home", { replace: true })
     }
-  }, [authLoading, session, perfil, navigate, location.state])
+  }, [authLoading, session, perfil, motivo, navigate, location.state])
 
   // Recuperación de contraseña
   const [mode, setMode] = useState(modo === "recover" ? "recover" : "login") // "login" | "recover"
@@ -164,7 +175,7 @@ export default function Login({ modo }) {
         <img
           src="/images/hero-login-opt.jpg"
           alt="Prius Playa Grande"
-          fetchpriority="high"
+          fetchPriority="high"
           decoding="async"
           className="w-full h-full object-cover"
         />

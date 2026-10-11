@@ -22,7 +22,7 @@ export default function PrivateRoute({ children, clave }) {
   // se corta ACÁ, antes de montar el CRM, nunca dentro de él.
   const lastActivity = getLastActivity()
   if (lastActivity !== null && Date.now() - lastActivity > INACTIVITY_TIMEOUT_MS) {
-    signOut()
+    signOut('logout_inactividad')
     return <Navigate to="/login?motivo=inactividad" replace />
   }
 

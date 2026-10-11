@@ -1,8 +1,23 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { tienePermiso } from '../lib/permisos'
+import { setLogoutMotivo } from '../lib/activity'
 
 const AuthContext = createContext(null)
+
+// Seguimiento (oct 2026, Tarea 2): único lugar que escribe "Inicio de
+// sesión"/"Cierre de sesión"/"Cierre por inactividad" en `eventos`, vía la
+// RPC `fn_registrar_evento_auth` (nunca un insert directo — mismo patrón
+// que el resto de la app). Fire-and-forget con try/catch propio: un fallo
+// acá nunca bloquea ni demora el login/logout real.
+async function logAuthEvent(tipoEvento) {
+  try {
+    await supabase.rpc('fn_registrar_evento_auth', { p_tipo_evento: tipoEvento })
+  } catch {
+    // No bloquea el flujo de auth — el Historial puede perder una fila,
+    // pero el login/logout tiene que funcionar igual.
+  }
+}
 
 // Fuente única de sesión + perfil (rol/activo/debe_cambiar_password) de
 // toda la app — Tarea 4 (guía Roles/Login). `loading` cubre el momento
@@ -43,6 +58,15 @@ export function AuthProvider({ children }) {
         setLoading(false)
         return
       }
+      // "Inicio de sesión" (Tarea 2): solo en un SIGNED_IN real, nunca en
+      // INITIAL_SESSION (restauración de sesión persistida al refrescar) ni
+      // en TOKEN_REFRESHED — si no, se loguearía un "login" en cada
+      // recarga de página. No se awaita: no puede demorar el fetch de
+      // perfil ni la navegación del login.
+      if (event === 'SIGNED_IN') {
+        logAuthEvent('login')
+      }
+
       // Bug del doble login (oct 2026): este evento llega con `perfil` todavía
       // desactualizado (del usuario anterior o null en un login nuevo). Sin
       // volver a poner loading=true acá, PrivateRoute podía renderizar con
@@ -57,7 +81,14 @@ export function AuthProvider({ children }) {
     return () => { activo = false; subscription.unsubscribe() }
   }, [fetchPerfil])
 
-  const signOut = useCallback(async () => {
+  // `motivo`: 'logout' (default, botón manual) | 'logout_inactividad' (cierre
+  // automático por inactividad). Único lugar de la app que cierra sesión —
+  // el evento de Historial se inserta ACÁ, antes de invalidar la sesión
+  // (si no, auth.uid() ya no resuelve del lado del servidor y se pierde el
+  // usuario real del evento).
+  const signOut = useCallback(async (motivo = 'logout') => {
+    if (motivo === 'logout_inactividad') setLogoutMotivo('inactividad')
+    await logAuthEvent(motivo)
     await supabase.auth.signOut()
     setSession(null)
     setPerfil(null)
