@@ -4,8 +4,11 @@ import { useReservas } from '../../hooks/useReservas'
 import { Download, BarChart3 } from 'lucide-react'
 import KpiCard from '../../components/crm/KpiCard'
 import BrandSelect from '../../components/ui/BrandSelect'
-import { formatPesos, unidadEmoji } from '../../lib/format'
+import { formatPesos, unidadEmoji, formatFecha } from '../../lib/format'
 import { linkToCliente } from '../../lib/deepLinks'
+import { crearDocumentoCsv } from '../../lib/export/csvBuilder'
+import { descargarCsv, nombreArchivoCsv } from '../../lib/export/descargarCsv'
+import { formatMontoCsv, etiqueta, unidadNotacionCsv } from '../../lib/export/formatos'
 import { isFeatureEnabled } from '../../lib/features'
 import ClienteDrawer from '../../components/crm/ClienteDrawer'
 import RegistrarPago from '../../components/crm/RegistrarPago'
@@ -32,30 +35,32 @@ export default function Reportes() {
     [reservas, temporadaFilter]
   )
 
+  // Migrado al estándar único de exportación CSV (oct 2026, ver
+  // src/lib/export/) — mismo builder que usa Caja, reemplaza al CSV a mano
+  // de antes (coma, sin BOM real, etiquetas técnicas).
   const handleExportCSV = () => {
-    const headers = ['Cliente', 'CUIT', 'Unidad', 'Temporada', 'Monto Total', 'Saldo', 'Estado Pago']
-    const rows = activeReservas.map(r => [
+    const filas = activeReservas.map((r) => [
       r.clientes?.nombre || '',
       r.clientes?.cuit || '',
-      `${r.unidades?.tipo || ''} #${r.unidades?.numero || ''}`,
+      unidadNotacionCsv(r.unidades?.tipo, r.unidades?.numero),
       r.temporada || '',
-      r.valor_total || 0,
-      r.saldo || 0,
-      r.estado_pago || '',
+      formatMontoCsv(r.valor_total),
+      formatMontoCsv(r.saldo),
+      etiqueta('estado_pago', r.estado_pago),
     ])
-    const csv = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n')
-
-    const blob = new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `reporte-reservas-${temporadaFilter}.csv`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    const csv = crearDocumentoCsv({
+      titulo: 'Reporte de reservas',
+      metadatos: [
+        ['Temporada', temporadaFilter === 'all' ? 'Todas' : temporadaFilter],
+        ['Exportado el', formatFecha(new Date())],
+      ],
+      secciones: [{
+        titulo: 'Reservas',
+        columnas: ['Cliente', 'CUIT', 'Unidad', 'Temporada', 'Monto total', 'Saldo', 'Estado de pago'],
+        filas,
+      }],
+    })
+    descargarCsv(csv, nombreArchivoCsv('reportes', new Date().toISOString().split('T')[0], temporadaFilter))
   }
 
   // Las reservas bonificadas (valor_total=0 forzado por la base) no aportan

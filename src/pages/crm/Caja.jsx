@@ -10,14 +10,15 @@ import DateInput from '../../components/inputs/DateInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 
 const MAX_MONTO_INICIAL = 10_000_000
-import { CATEGORIA_GASTO_LABEL, formatHora, descargarCajaCSV } from '../../lib/caja'
+import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
+import { descargarCierreCaja } from '../../lib/export/cajaCsv'
 import {
   Plus, Wallet, ChevronLeft, ChevronRight, Banknote,
   ArrowUpRight, ArrowDownRight, Printer, Download, Lock, History, AlertTriangle, X,
 } from 'lucide-react'
 import { formatPesos, formatFecha } from '../../lib/format'
 import { useDialog } from '../../context/DialogProvider'
-import { usePermiso } from '../../context/AuthProvider'
+import { usePermiso, useAuth } from '../../context/AuthProvider'
 import RegistrarGasto from '../../components/crm/RegistrarGasto'
 import DetalleGasto from '../../components/crm/DetalleGasto'
 import DetallePago from '../../components/crm/DetallePago'
@@ -73,6 +74,7 @@ export default function Caja() {
   // [feat-7] filtro de medio de pago persistido en la URL (apagable en
   // lib/features.ts — si se apaga, vuelve a ser un useState local).
   const [filtroMedio, setFiltroMedio] = useFeatureUrlState('feat-7-caja-filtro-medio-url', 'medio', 'todos')
+  const { perfil } = useAuth()
   const [montoApertura, setMontoApertura] = useState(null)
   const [abriendo, setAbriendo] = useState(false)
   const [mostrarHistorial, setMostrarHistorial] = useState(false)
@@ -453,7 +455,7 @@ export default function Caja() {
             <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 text-xs font-bold uppercase tracking-widest transition-all">
               <Printer size={14} /> Imprimir A4
             </button>
-            <button onClick={() => resumen && descargarCajaCSV(resumen)} disabled={!resumen} className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40">
+            <button onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })} disabled={!resumen} className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40">
               <Download size={14} /> Exportar CSV
             </button>
             <div className="flex-1" />
