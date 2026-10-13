@@ -119,6 +119,35 @@ export function MixCard({ stats, filtro, onToggleFiltro, className = 'w-[220px]'
   )
 }
 
+/** Variante de una sola fila ("T 139 · P 0 · D 0" con punto de color, sin
+ * botones de 44px) — para el riel del Plano, que no tiene alto para la
+ * grilla de 3 botones de `MixCard`. Mismos datos/colores, mismo filtro. */
+export function MixCardCompacto({ stats, filtro, onToggleFiltro, className = '' }) {
+  return (
+    <div className={`rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 flex items-center justify-between gap-1 ${className}`}>
+      {[
+        ['temporada', 'T', stats.mix.temporada],
+        ['periodo', 'P', stats.mix.periodo],
+        ['dia', 'D', stats.mix.dia],
+      ].map(([key, letra, valor]) => {
+        const active = filtro === key
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onToggleFiltro(key)}
+            className={`flex items-center gap-1.5 px-1.5 py-1 rounded-lg min-h-[32px] transition-colors ${active ? 'bg-[#F2CA50]/10' : 'hover:bg-white/5'}`}
+          >
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLOR_TIPO_ALQUILER[key]?.swatch }} />
+            <span className="text-[10px] uppercase text-gray-500">{letra}</span>
+            <span className={`text-sm font-bold tabular-nums leading-none ${active ? 'text-[#F2CA50]' : 'text-white'}`}>{valor}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function PendientesCard({ stats, filtro, onToggleFiltro, className = 'w-[152px]' }) {
   return (
     <StatCard icon={AlertCircle} label="Pendientes" active={filtro === 'pendientes'} onClick={() => onToggleFiltro('pendientes')} className={className}>
@@ -157,28 +186,34 @@ export function ClimaCard({ selectedDate, className }) {
 
 /** Leyenda compacta de estados de unidad (riel izquierdo, desktop) — mismos
  * 4 estados y mismos estilos que `Cell.jsx`, sin reimplementar esa lógica:
- * solo un recordatorio visual de qué significa cada marca del plano. */
+ * solo un recordatorio visual de qué significa cada marca del plano.
+ * Grilla de 2 columnas, un ítem por línea — antes era una lista vertical de
+ * 4 filas con íconos de 36px que, sumada al resto del riel, era la causa
+ * principal del scroll del panel (oct 2026). */
 export function EstadoLegend() {
-  const item = (swatchClass, label, children) => (
-    <div className="flex items-center gap-3.5">
-      <div className={`w-9 h-8 rounded-md border flex items-center justify-center shrink-0 relative ${swatchClass}`}>{children}</div>
-      <span className="text-sm text-gray-300">{label}</span>
+  const item = (key, swatchClass, label, children) => (
+    <div key={key} className="flex items-center gap-2 min-w-0">
+      <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 relative ${swatchClass}`}>{children}</div>
+      <span className="text-[11px] text-gray-300 truncate">{label}</span>
     </div>
   )
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 space-y-3.5">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Referencias</p>
-      {item(`${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada (T / P / D)', <span className="text-sm font-bold text-black">T</span>)}
-      {item('bg-white border-white', 'Pendiente de confirmar', <Hourglass size={15} className="text-black" />)}
-      {item('bg-white/5 border-white/20', 'Libre')}
-      {item(
-        `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`,
-        'Saldada (punto verde)',
-        <>
-          <span className="text-sm font-bold text-black">T</span>
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-400" />
-        </>
-      )}
+    <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+      <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-2">Referencias</p>
+      <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
+        {item('t', `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada', <span className="text-[10px] font-bold text-black">T</span>)}
+        {item('r', 'bg-white border-white', 'Sin confirmar', <Hourglass size={10} className="text-black" />)}
+        {item('libre', 'bg-white/5 border-white/20', 'Libre')}
+        {item(
+          'saldada',
+          `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`,
+          'Saldada',
+          <>
+            <span className="text-[10px] font-bold text-black">T</span>
+            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-green-400" />
+          </>
+        )}
+      </div>
     </div>
   )
 }

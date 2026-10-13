@@ -7,8 +7,22 @@ import { resumenDiaClima } from '../../lib/clima'
 // sobrio (ámbar, nunca rojo chillón) cuando el viento o la ráfaga pico del
 // día superan `UMBRAL_RAFAGA_ALERTA_KMH`.
 export default function ClimaChip({ clima, loading, onClick, className = 'w-[172px]' }) {
+  // Bug real (oct 2026): este chip pega a una Edge Function por red (nunca
+  // instantáneo como el resto de las tarjetas, que leen de `useData()` ya
+  // en memoria) — el esqueleto de acá no tenía ícono ni label, así que
+  // durante ese rato se veía como una tarjeta vacía/rota, no "cargando".
   if (loading) {
-    return <div className={`shrink-0 h-[84px] rounded-2xl bg-white/5 animate-pulse ${className}`} />
+    return (
+      <div className={`shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 animate-pulse ${className}`}>
+        <div className="flex items-center gap-2 mb-2.5">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center border border-white/10 bg-white/5 shrink-0">
+            <Cloud size={14} className="text-gray-600" />
+          </div>
+          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Clima</p>
+        </div>
+        <div className="h-6 w-16 rounded bg-white/10" />
+      </div>
+    )
   }
 
   const resumen = resumenDiaClima(clima)

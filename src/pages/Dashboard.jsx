@@ -12,11 +12,11 @@ import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import PlanoGrid from "../components/plano/PlanoGrid"
 import PlanoViewport from "../components/plano/PlanoViewport"
 import PlanoStatsBar, {
-  OcupacionCard, CarpasCard, SombrillasCard, LibresCard, MixCard, PendientesCard, IngresosCard, ClimaCard, EstadoLegend,
+  OcupacionCard, CarpasCard, SombrillasCard, LibresCard, MixCardCompacto, PendientesCard, IngresosCard, ClimaCard, EstadoLegend,
 } from "../components/dashboard/PlanoStatsBar"
 import { useData } from "../context/DataProvider"
-import { coSocios, reservaActiva } from "../lib/reservas"
 import { calcularPlanoStats } from "../lib/planoStats"
+import { buildUnitsMap } from "../lib/planoUnits"
 import DateInput from "../components/inputs/DateInput"
 import { useDeepLinkTarget } from "../hooks/useDeepLinkTarget"
 import { useOverlay } from "../context/OverlayProvider"
@@ -324,68 +324,14 @@ export default function Dashboard() {
     })
   }, [])
 
-  // Reserva vigente en `selectedDate` (hoy por defecto) por unidad. La celda
-  // se pinta según su tipo_alquiler (T/P/D); si no hay reserva vigente ese
-  // día, la unidad va libre. Un abonado de temporada completa cubre
-  // cualquier fecha dentro de la temporada, sin importar cuál se elija.
-  const reservaPorUnidad = useMemo(() => {
-    const map = {}
-    for (const r of reservas) {
-      if (!r.unidad_id || !reservaActiva(r)) continue
-      const vigente =
-        r.tipo_alquiler === "temporada" ||
-        (r.tipo_alquiler === "dia" && r.fecha === selectedDate) ||
-        (r.tipo_alquiler === "periodo" && r.fecha_inicio <= selectedDate && selectedDate <= r.fecha_fin)
-      if (vigente) map[r.unidad_id] = r
-    }
-    return map
-  }, [reservas, selectedDate])
-
-  const units = useMemo(() => {
-    const map = {}
-    for (const u of unidades) {
-      const px = PREFIJO[u.tipo]
-      if (!px) continue
-      const r = reservaPorUnidad[u.id]
-      const status = !r
-        ? STATUS.LIBRE
-        : r.estado_pago === "pendiente_confirmacion"
-          ? STATUS.PENDIENTE_CONFIRMACION
-          : r.tipo_alquiler === "temporada"
-            ? STATUS.TEMPORADA
-            : r.tipo_alquiler === "dia"
-              ? STATUS.DIA
-              : STATUS.PERIODO
-      map[`${px}${u.numero}`] = {
-        id: `${px}${u.numero}`,
-        dbId: u.id,
-        reservaId: r?.id || null,
-        number: u.numero,
-        type: u.tipo,
-        status,
-        tipoAlquiler: r?.tipo_alquiler || null,
-        clientName: r?.clientes?.nombre || "",
-        clientPhone: r?.clientes?.telefono || "",
-        clientEmail: r?.clientes?.mail || "",
-        coSocios: r ? coSocios(r).map((c) => c.nombre) : [],
-        startDate: r?.fecha_inicio || r?.fecha || "",
-        endDate: r?.fecha_fin || r?.fecha || "",
-        notes: r?.notas || "",
-        isPaid: r?.estado_pago === "pagado",
-        isTemporada: r?.tipo_alquiler === "temporada",
-        // D5 (Fase 3 Recepción): reserva web preconfirmada vigente — borde
-        // punteado + reloj en la celda, sin tocar los colores de tipo_alquiler.
-        // `r` ya pasó por reservaActiva() en reservaPorUnidad, así que acá solo
-        // hace falta distinguir el origen.
-        esPreconfirmadaWeb: r?.origen === "web" && r?.preconfirmada === true,
-        // Fila cruda de `reservas` (con clientes/unidades/reserva_clientes
-        // embebidos por el select del DataProvider) — el preview del modal la
-        // usa directo en vez de reconstruir un objeto plano a mano.
-        reserva: r || null,
-      }
-    }
-    return map
-  }, [unidades, reservaPorUnidad])
+  // Mapa de unidades con estado derivado para `selectedDate` — extraído a
+  // `lib/planoUnits.js` (oct 2026) para que el Dashboard real
+  // (`pages/crm/Home.jsx`) calcule sus KPIs de ocupación con el mismo
+  // criterio exacto, sin duplicar la regla. Mismo resultado que antes.
+  const units = useMemo(
+    () => buildUnitsMap(unidades, reservas, selectedDate),
+    [unidades, reservas, selectedDate],
+  )
 
   // Caja de la fecha elegida (no siempre "hoy"): `cajaHoy` solo cubre el día
   // de hoy, `historialCajas` trae las últimas 30 por fecha — entre las dos
@@ -587,15 +533,19 @@ export default function Dashboard() {
           </button>
         )}
 
+        {/* Compactado oct 2026 (sin scroll en el panel, ver CLAUDE.md "Panel
+            de stats del Plano"): Ocupación en tamaño chico (no `size="lg"`),
+            Carpas/Sombrillas/Libres en una sola fila de 3, Mix en una fila
+            inline en vez de la grilla de 3 botones de 44px. */}
         {!loading && planoStats && (
           <>
-            <OcupacionCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} size="lg" className="w-full" />
-            <div className="grid grid-cols-2 gap-2.5">
+            <OcupacionCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+            <div className="grid grid-cols-3 gap-2">
               <CarpasCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
               <SombrillasCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+              <LibresCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
             </div>
-            <LibresCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
-            <MixCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+            <MixCardCompacto stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
           </>
         )}
 
@@ -716,7 +666,8 @@ export default function Dashboard() {
     </div>
 
     {/* Hoja A4 de impresión: oculta en pantalla, única cosa visible al imprimir. */}
-    {!loading && <PlanoImpresion units={units} selectedDate={selectedDate} stats={planoStats} clima={climaDelDia} />}
+    {/* clima ya no se imprime (Tarea 4, oct 2026: cero datos que no sean del plano físico) — climaDelDia sigue viva para PlanoStatsBar en pantalla. */}
+    {!loading && <PlanoImpresion units={units} selectedDate={selectedDate} stats={planoStats} />}
 
       <style>{`
         /* Grid de 3 áreas del Plano (oct 2026) — mobile/tablet (<1280px):
@@ -755,13 +706,45 @@ export default function Dashboard() {
             gap: 24px;
           }
           .plano-area-toolbar, .plano-area-stats { display: none; }
+          /* Sin scroll nunca acá (oct 2026) — antes tenía overflow-y:auto y
+             "Referencias" quedaba cortado fuera del viewport en pantallas
+             de hasta 1080px de alto. La columna mide el alto disponible
+             real (grid-template-rows:1fr de .plano-layout) y las tarjetas
+             de arriba ya se compactaron lo suficiente para entrar sin
+             recortar nada (nunca overflow:hidden tampoco). */
           .plano-area-left, .plano-area-right {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             min-height: 0;
-            overflow-y: auto;
           }
+        }
+        /* Variante más compacta para pantallas de poca altura (ej. 1366x768,
+           1280x720 con la barra del navegador real descontada) — mismo
+           contenido, menos aire. Nunca toca el tamaño de las casillas del
+           plano en sí, solo el riel de stats. */
+        @media (min-width: 1280px) and (max-height: 820px) {
+          /* OJO: esto es un template literal de JS — un solo backslash antes
+             de un punto o corchete escapado de un selector de clase Tailwind
+             se come la barra ANTES de llegar al navegador (no es un escape
+             válido de JS, así que lo descarta) y el selector queda roto.
+             Hace falta backslash doble acá para que el navegador reciba
+             el backslash real que necesita CSS. */
+          .plano-area-left, .plano-area-right { gap: 6px; }
+          .plano-area-left :is(.rounded-2xl, .rounded-xl) { padding: 0.5rem !important; }
+          .plano-area-left .mb-2\\.5 { margin-bottom: 0.25rem !important; }
+          .plano-area-left .mt-2\\.5 { margin-top: 0.25rem !important; }
+          .plano-area-left .mt-0\\.5 { margin-top: 0 !important; }
+          .plano-area-left .w-7.h-7 { width: 1.25rem !important; height: 1.25rem !important; }
+          .plano-area-left p.text-2xl { font-size: 1.05rem !important; }
+          .plano-area-left p.text-\\[10px\\] { font-size: 9px !important; }
+          .plano-area-left .space-y-3\\.5 { row-gap: 0.25rem !important; }
+          .plano-area-left .gap-y-1\\.5 { row-gap: 0.15rem !important; }
+          .plano-area-left .mb-3\\.5 { margin-bottom: 0.15rem !important; }
+          .plano-area-left .p-2\\.5 { padding: 0.4rem !important; }
+          .plano-area-left .min-h-\\[44px\\] { min-height: 34px !important; }
+          .plano-area-left .px-2\\.5 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+          .plano-area-left .p-3 { padding: 0.5rem !important; }
         }
 
         /* Pantalla completa del plano en mobile (<640px, donde el modal ya
