@@ -37,3 +37,7 @@ qa/
 test-results/
 playwright-report/
 blob-report/
+
+# Supabase CLI: estado local de la máquina (proyecto linkeado, versión del
+# CLI), no es parte del código ni se comparte entre devs.
+supabase/.temp/
