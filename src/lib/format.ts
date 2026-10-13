@@ -195,6 +195,20 @@ export function unidadEmoji(tipo: string): string {
   return UNIDAD_EMOJI[tipo] || ''
 }
 
+/** "hace 5 min" / "hace 2 h" / "hace 3 d" — notificaciones recientes; más allá de 7 días cae a formatFecha. */
+export function formatTiempoRelativo(d: string | Date | null | undefined): string {
+  const f = aFechaSegura(d)
+  if (!f) return ''
+  const diffMin = Math.floor((Date.now() - f.getTime()) / 60000)
+  if (diffMin < 1) return 'ahora'
+  if (diffMin < 60) return `hace ${diffMin} min`
+  const diffH = Math.floor(diffMin / 60)
+  if (diffH < 24) return `hace ${diffH} h`
+  const diffD = Math.floor(diffH / 24)
+  if (diffD < 7) return `hace ${diffD} d`
+  return formatFecha(f)
+}
+
 /** "PRIUS-A3X9K2" — normaliza mayúsculas/prefijo si ya viene bien formado. */
 export function formatCodigoReserva(codigo: string | null | undefined): string {
   return String(codigo ?? '').toUpperCase()

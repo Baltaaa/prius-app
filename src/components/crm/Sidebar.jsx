@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useNotifications } from '../../hooks/useNotifications'
+import { useNotificaciones } from '../../context/NotificacionesProvider'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
 import {
@@ -28,7 +28,10 @@ import { isFeatureEnabled } from '../../lib/features'
 // misma navegación de dos formas distintas en mobile.
 export default function Sidebar() {
   const navigate = useNavigate()
-  const { count: notificationsCount } = useNotifications()
+  // Badge: pendientes abiertas + novedades sin leer (ver CLAUDE.md
+  // "Notificaciones") — mismo cómputo que usa el badge de la campana.
+  const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
+  const notificationsCount = countPendientes + countNovedadesNoLeidas
   const { sinContactar: leadsSinContactar } = useLeads()
   const { signOut, permiso } = useAuth()
 

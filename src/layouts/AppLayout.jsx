@@ -6,7 +6,7 @@ import BottomNav from '../components/crm/BottomNav'
 import InactivityWarningModal from '../components/crm/InactivityWarningModal'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
-import { NotificacionesLeidasProvider } from '../context/NotificacionesLeidasProvider'
+import { NotificacionesProvider } from '../context/NotificacionesProvider'
 import { OverlayProvider } from '../context/OverlayProvider'
 import { useInactivityLogout } from '../hooks/useInactivityLogout'
 
@@ -22,7 +22,7 @@ export default function AppLayout() {
     <OverlayProvider>
     <DialogProvider>
       <DataProvider>
-        <NotificacionesLeidasProvider>
+        <NotificacionesProvider>
         <InactivityWarningModal
           open={warning}
           secondsLeft={secondsLeft}
@@ -57,7 +57,7 @@ export default function AppLayout() {
 
           <BottomNav />
         </div>
-        </NotificacionesLeidasProvider>
+        </NotificacionesProvider>
       </DataProvider>
     </DialogProvider>
     </OverlayProvider>

@@ -11,12 +11,14 @@
  * poner ese atributo en la fila/tarjeta correspondiente.
  */
 
-export function linkToCliente(clienteId: string, opts?: { pagoId?: string; reservaId?: string; accion?: 'pagar' }): string {
+export function linkToCliente(clienteId: string, opts?: { pagoId?: string; reservaId?: string; accion?: 'pagar' | 'cargar_monto' }): string {
   const params = new URLSearchParams({ id: clienteId })
   if (opts?.pagoId) params.set('pago', opts.pagoId)
   if (opts?.reservaId) params.set('reserva', opts.reservaId)
   // [feat-2] accion=pagar: además de resaltar, abre directo RegistrarPago
   // para ese cliente — usado desde la notificación de saldo pendiente.
+  // accion=cargar_monto (oct 2026): abre DetallePago con el campo de monto
+  // ya en edición — usado desde la notificación pago_sin_monto.
   if (opts?.accion) params.set('accion', opts.accion)
   return `/app/clientes?${params.toString()}`
 }
@@ -60,6 +62,11 @@ export function linkToRecepcion(codigo?: string | null, opts?: { scan?: boolean 
   if (opts?.scan) params.set('scan', '1')
   const qs = params.toString()
   return qs ? `/app/recepcion?${qs}` : '/app/recepcion'
+}
+
+// Bandeja de notificaciones (oct 2026): destino del tipo `lead_nuevo`.
+export function linkToLead(leadId: string): string {
+  return `/app/leads?id=${leadId}`
 }
 
 export function linkToHistorial(filtros?: Record<string, string | undefined>): string {

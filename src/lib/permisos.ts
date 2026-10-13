@@ -19,6 +19,9 @@ export const PERMISOS: Record<string, Rol[]> = {
   editar_unidades: ['superadmin'],
   gestion_usuarios: ['superadmin'],
   editar_comprobante: ['superadmin'],
+  // Cargar el monto real de un pago migrado que llegó con monto null (nunca
+  // "corregir" uno ya verificado) — oct 2026, pendiente pago_sin_monto.
+  editar_monto_pago: ['superadmin', 'admin'],
   // Recepción (Fase 3 reservas públicas, D9): check-in sin cobrar con saldo
   // pendiente es la única acción de Recepción restringida — el cobro normal
   // es operación diaria (ver `recepcion_cobrar` abajo).

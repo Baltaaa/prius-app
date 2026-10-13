@@ -351,6 +351,18 @@ export default function Clientes() {
           return true
         }
       }
+      // accion=cargar_monto (oct 2026, notificación pago_sin_monto): abre
+      // DetallePago directo con el campo de monto ya en edición.
+      if (accion === 'cargar_monto' && pago) {
+        const pagoObj = todosPagos.find((p) => p.id === pago)
+        if (pagoObj) {
+          const reservaObj = pagoObj.reserva_id
+            ? (reservasPorCliente[cliente.id] || []).find((r) => r.id === pagoObj.reserva_id)
+            : null
+          setPagoCelda({ reserva: reservaObj ? { ...reservaObj, clientes: cliente } : null, pago: pagoObj, autoAbrirMonto: true })
+          return true
+        }
+      }
       if (pago) return `pago-${pago}`
       if (reserva) return `reserva-${reserva}`
       return cliente.id
@@ -1173,6 +1185,7 @@ export default function Clientes() {
         onClose={() => setPagoCelda(null)}
         pago={pagoCelda?.pago ? todosPagos.find((p) => p.id === pagoCelda.pago.id) || pagoCelda.pago : null}
         reserva={pagoCelda?.reserva}
+        autoAbrirMonto={!!pagoCelda?.autoAbrirMonto}
       />
 
       {/* Agrupar reservas sueltas bajo un precio unificado (caso Ana Lescano) */}

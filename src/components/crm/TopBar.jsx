@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useNotifications } from '../../hooks/useNotifications'
+import { useNotificaciones } from '../../context/NotificacionesProvider'
+import NotificacionesBandeja from './NotificacionesBandeja'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
@@ -13,13 +14,11 @@ import { useOverlay } from '../../context/OverlayProvider'
 import { isFeatureEnabled } from '../../lib/features'
 import SearchInput from '../inputs/SearchInput'
 import {
-  Search, Bell, User, LogOut, ChevronDown, X, Wallet, Calendar, AlertCircle,
+  Search, Bell, User, LogOut, ChevronDown, X, Wallet,
   LayoutDashboard, Map, CalendarClock, Users, BarChart2, Inbox,
   Activity, FileText, UserCheck, DoorClosed, QrCode,
 } from 'lucide-react'
 import StatusBadge from './StatusBadge'
-
-const NOTIF_ICON = { caja: Wallet, checkin: Calendar, saldo: AlertCircle }
 
 // Título + subtítulo + ícono de cada sección, unificados acá (antes vivían
 // duplicados: sidebar, este label chico, y de nuevo como bloque grande en
@@ -105,7 +104,7 @@ export default function TopBar() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const searchInputRef = useRef(null)
   const searchFeatureOn = isFeatureEnabled('feat-1-search-global-mejorado')
-  const { items: notifItems, count: notifCount } = useNotifications()
+  const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
   const { clientes, reservas, unidades, pagos } = useData()
   const { perfil, rol, signOut } = useAuth()
 
@@ -401,79 +400,50 @@ export default function TopBar() {
         >
           <Search size={20} />
         </button>
-        {/* Notifications */}
+        {/* Notificaciones (oct 2026, modelo "bandeja de pendientes") — punto
+            dorado si hay pendientes abiertas, número neutro si solo hay
+            novedades sin leer (ver CLAUDE.md "Notificaciones"). Desktop:
+            popover anclado acá mismo. Mobile: hoja a pantalla completa
+            (mismo patrón que la búsqueda mobile, más abajo). */}
         <div ref={notifOverlay.bind} className="relative">
           <button
             onClick={() => setShowNotifications((v) => !v)}
             className="text-gray-400 hover:text-white relative p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
           >
             <Bell size={20} />
-            {notifCount > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#FDE047] rounded-full border-2 border-[#0a0d14]" />
-            )}
+            {countPendientes > 0 ? (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#F2CA50] rounded-full border-2 border-[#0a0d14]" />
+            ) : countNovedadesNoLeidas > 0 ? (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold flex items-center justify-center">
+                {countNovedadesNoLeidas > 9 ? '9+' : countNovedadesNoLeidas}
+              </span>
+            ) : null}
           </button>
 
           {showNotifications && (
-              <div className="absolute right-0 mt-3 w-80 max-w-[90vw] glass-popover rounded-xl overflow-hidden z-50">
-                <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Notificaciones</p>
-                  {notifCount > 0 && (
-                    <span className="text-[11px] font-bold text-black bg-[#FDE047] rounded-full px-2 py-0.5">{notifCount}</span>
-                  )}
-                </div>
-
-                <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
-                  {notifItems.length === 0 ? (
-                    <p className="px-4 py-6 text-center text-xs text-gray-500">Sin novedades por ahora.</p>
-                  ) : (
-                    notifItems.slice(0, 5).map((item) => {
-                      const Icon = NOTIF_ICON[item.type] || Bell
-                      // Mismo destino por tipo que Notificaciones.jsx
-                      // (Tarea 2/8): saldo/pendiente_confirmacion -> Clientes
-                      // con la reserva resaltada, checkin(_mañana) -> Plano
-                      // con la unidad resaltada, reserva_nueva/modificada/
-                      // cancelación -> la reserva. "Caja pendiente" no tiene
-                      // destino: queda inerte.
-                      const destino =
-                        item.type === 'saldo' && item.clienteId
-                          ? linkToCliente(item.clienteId, { reservaId: item.reservaId, accion: 'pagar' })
-                          : item.type === 'pendiente_confirmacion' && item.clienteId
-                          ? linkToCliente(item.clienteId, { reservaId: item.reservaId })
-                          : item.type === 'checkin'
-                            ? linkToPlano(new Date().toISOString().split('T')[0], item.unidadId)
-                            : item.type === 'checkin_mañana'
-                              ? linkToPlano(undefined, item.unidadId)
-                              : (item.type === 'reserva_nueva' || item.type === 'reserva_modificada' || item.type === 'cancelacion') && item.reservaId
-                                ? linkToReserva(item.reservaId)
-                                : null
-                      const Tag = destino ? 'button' : 'div'
-                      return (
-                        <Tag
-                          key={item.id}
-                          type={destino ? 'button' : undefined}
-                          onClick={destino ? () => { navigate(destino); setShowNotifications(false) } : undefined}
-                          className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-all ${destino ? 'hover:bg-white/10 cursor-pointer' : 'hover:bg-white/5'}`}
-                        >
-                          <Icon size={16} className="text-[#FDE047] mt-0.5 shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-white truncate">{item.titulo}</p>
-                            <p className="text-[11px] text-gray-400 mt-0.5">{item.detalle}</p>
-                          </div>
-                        </Tag>
-                      )
-                    })
-                  )}
-                </div>
-
-                <button
-                  onClick={() => { navigate('/app/notificaciones'); setShowNotifications(false) }}
-                  className="w-full text-center px-4 py-3 text-[11px] font-bold text-[#FDE047] uppercase tracking-widest hover:bg-white/5 transition-all border-t border-white/10"
-                >
-                  Ver todas
-                </button>
-              </div>
+            <div className="hidden sm:block absolute right-0 mt-3 w-[380px] max-w-[90vw] max-h-[70vh] glass-popover rounded-xl overflow-hidden z-50">
+              <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
+            </div>
           )}
         </div>
+
+        {showNotifications && createPortal(
+          <div ref={notifOverlay.bind} className="sm:hidden fixed inset-0 z-[997] bg-[#05070c] flex flex-col">
+            <div className="flex items-center justify-between px-4 h-20 border-b border-white/5 shrink-0">
+              <h1 className="text-sm font-bold uppercase tracking-widest text-white">Notificaciones</h1>
+              <button
+                onClick={() => setShowNotifications(false)}
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
+            </div>
+          </div>,
+          document.body,
+        )}
 
         {/* Profile */}
         <div ref={profileOverlay.bind} className="relative">

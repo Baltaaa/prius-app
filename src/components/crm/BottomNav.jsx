@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
-import { useNotifications } from '../../hooks/useNotifications'
+import { useNotificaciones } from '../../context/NotificacionesProvider'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
 import { useOverlay } from '../../context/OverlayProvider'
@@ -40,7 +40,8 @@ export default function BottomNav() {
   const location = useLocation()
   const [showMore, setShowMore] = useState(false)
   const { bind: bindMore } = useOverlay({ id: 'bottomnav-mas', isOpen: showMore, onRequestClose: () => setShowMore(false) })
-  const { count: notificationsCount } = useNotifications()
+  const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
+  const notificationsCount = countPendientes + countNovedadesNoLeidas
   const { sinContactar: leadsSinContactar } = useLeads()
   const { signOut, permiso } = useAuth()
 

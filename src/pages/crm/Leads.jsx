@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
+import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useLeads, waLink } from '../../hooks/useLeads'
 import { formatFechaHora } from '../../lib/format'
 import { Mail, Phone, Check, X, RotateCcw, Inbox } from 'lucide-react'
@@ -39,6 +40,15 @@ export default function Leads() {
   // [feat-8] filtro "Sin contactar/Todos" persistido en la URL (apagable
   // en lib/features.ts).
   const [filtro, setFiltro] = useFeatureUrlState('feat-8-leads-filtro-url', 'estado', 'todos')
+
+  // Deep link desde la notificación lead_nuevo (linkToLead): resalta la
+  // tarjeta del lead. Si el filtro activo la esconde, no hace falta tocarlo
+  // — "Todo" siempre la muestra y es el default.
+  useDeepLinkTarget({
+    params: ['id'],
+    ready: !loading,
+    resolve: ({ id }) => (leads.some((l) => l.id === id) ? id : null),
+  })
 
   const visibles = useMemo(() => {
     if (filtro === 'todos') return leads
@@ -103,6 +113,7 @@ export default function Leads() {
           return (
             <div
               key={lead.id}
+              data-deeplink-id={lead.id}
               className={`glass-card rounded-2xl p-4 sm:p-5 md:p-6 ${
                 estado === 'nuevo' ? 'border-l-2 border-[#FDE047]' : ''
               }`}

@@ -434,6 +434,18 @@ export function DataProvider({ children }) {
   // existente. El RPC valida rol server-side (solo superadmin) y no toca
   // caja_diaria ni pagos.monto — queda auditado solo en `eventos`, vía el
   // trigger de fn_log_evento sobre `comprobantes`.
+  // Oct 2026 (bandeja de pendientes, pago_sin_monto): carga el monto real
+  // de un pago migrado que llegó con monto null — solo cuando hoy es null,
+  // el RPC lo valida server-side. Dispara los mismos triggers que cualquier
+  // UPDATE de pagos (recalcula saldo de la reserva, resuelve la pendiente).
+  const editarMontoPago = useCallback(async (pagoId, monto) => {
+    const { data, error } = await supabase.rpc('editar_monto_pago', { p_pago_id: pagoId, p_monto: Number(monto) })
+    if (error) throw error
+    await fetchPagos()
+    await fetchReservas()
+    return data
+  }, [fetchPagos, fetchReservas])
+
   const editarComprobante = useCallback(async (comprobanteId, monto, fecha) => {
     const { data, error } = await supabase.rpc('editar_comprobante', {
       p_comprobante_id: comprobanteId, p_monto: monto, p_fecha: fecha || null,
@@ -486,7 +498,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante,
+    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
@@ -496,7 +508,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante,
+    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
