@@ -1,61 +1,127 @@
-import React, { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
-import { useClientes } from '../../hooks/useClientes'
 import { useCaja } from '../../hooks/useCaja'
-import KpiCard from '../../components/crm/KpiCard'
-import StatusBadge from '../../components/crm/StatusBadge'
-import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
-import { Calendar, Wallet, Users, AlertCircle, ArrowRight, Clock } from 'lucide-react'
-import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
-import { estadoBadgeStatus } from '../../lib/reservas'
-import { useRecientes } from '../../hooks/useRecientes'
-import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
+import { useLeads } from '../../hooks/useLeads'
+import { useNotificaciones } from '../../context/NotificacionesProvider'
+import { useHistorial } from '../../hooks/useHistorial'
+import { useData } from '../../context/DataProvider'
+import { useAuth, usePermiso } from '../../context/AuthProvider'
+import { supabase } from '../../lib/supabase'
+import { calcularPlanoStats } from '../../lib/planoStats'
+import { buildUnitsMap } from '../../lib/planoUnits'
+import { formatPesos, formatFechaLarga, formatHora } from '../../lib/format'
+import { linkToPlano, linkToReserva, linkToCliente } from '../../lib/deepLinks'
 import { isFeatureEnabled } from '../../lib/features'
+import ClimaHero from '../../components/dashboard/ClimaHero'
+import {
+  Activity, Tent, Umbrella, DoorOpen, Layers, Hourglass, Wallet, AlertCircle,
+  Lock, Unlock, TrendingUp, Inbox, Bell, Clock, QrCode, ArrowRight,
+} from 'lucide-react'
+
+const todayStr = () => new Date().toISOString().split('T')[0]
+
+/** Tarjeta de KPI del Dashboard — número grande, label chico en mayúscula,
+ * barra de progreso fina opcional. Clickeable cuando se pasa `onClick`
+ * (lleva al módulo correspondiente, filtrado cuando aplica). Mismo lenguaje
+ * visual que el resto de la app (glass-card, acento #FDE047). */
+function DashCard({ icon: Icon, label, value, sub, progress, accent, onClick, className = '' }) {
+  const Tag = onClick ? 'button' : 'div'
+  return (
+    <Tag
+      type={onClick ? 'button' : undefined}
+      onClick={onClick}
+      className={`glass-card rounded-2xl p-4 text-left transition-all min-w-0 ${onClick ? 'hover:bg-white/[0.07] cursor-pointer' : ''} ${className}`}
+    >
+      <div className="flex items-center gap-2 mb-2.5">
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border shrink-0 ${accent ? 'border-[#FDE047]/30 bg-[#FDE047]/10' : 'border-white/10 bg-white/5'}`}>
+          <Icon size={14} className={accent ? 'text-[#FDE047]' : 'text-gray-400'} />
+        </div>
+        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{label}</p>
+      </div>
+      <p className="text-2xl font-bold text-white tabular-nums leading-none truncate">{value}</p>
+      {sub != null && <p className="text-[10px] text-gray-500 tabular-nums mt-1 truncate">{sub}</p>}
+      {progress != null && (
+        <div className="mt-2.5 h-[3px] rounded-full bg-white/10 overflow-hidden">
+          <div className="h-full rounded-full bg-[#FDE047]" style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }} />
+        </div>
+      )}
+    </Tag>
+  )
+}
+
+function SeccionTitulo({ children }) {
+  return <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-3">{children}</h2>
+}
 
 export default function Home() {
   const navigate = useNavigate()
+  const { perfil } = useAuth()
+  const puedeVerReportes = usePermiso('reportes_globales')
+  const recepcionOn = isFeatureEnabled('recepcion')
+
   const { reservas, unidades, loading: resLoading } = useReservas()
-  const { clientes, loading: cliLoading } = useClientes()
-  const { cajaHoy, historialCajas, loading: cajaLoading } = useCaja()
-  const [detalleReserva, setDetalleReserva] = useState(null)
-  const recientesFeatureOn = isFeatureEnabled('feat-4-recientes-home')
-  const { items: recientes } = useRecientes(5)
+  const { pagos, temporadas } = useData()
+  const { cajaHoy, loading: cajaLoading } = useCaja()
+  const { sinContactar: leadsSinContactar, loading: leadsLoading } = useLeads()
+  const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
+  const { items: historialItems, loading: historialLoading } = useHistorial('global', null, null, null)
 
-  const unidadesOcupadasCount = unidades.filter(u => u.estado === 'ocupada' || u.estado === 'reservada').length
-  const totalCajaHoy = cajaHoy ? cajaHoy.total_cobros : 0
-  const reservasConSaldoCount = reservas.filter(r => Number(r.saldo) > 0).length
-  const clientesCount = clientes.length
+  const hoy = useMemo(() => todayStr(), [])
 
-  // Caja Diaria: % contra el mejor día de cobros registrado en el historial
-  // (nunca un techo inventado — si no hay historial más allá de hoy, no hay
-  // referencia honesta y la barra queda oculta).
-  const mejorDiaCaja = useMemo(
-    () => Math.max(0, ...historialCajas.filter(c => c.fecha !== cajaHoy?.fecha).map(c => Number(c.total_cobros) || 0)),
-    [historialCajas, cajaHoy],
+  // Estado de caja con usuario — `caja_diaria.abierta_por/cerrada_por` son
+  // uuid; no hay ningún hook que ya resuelva nombres de perfil (solo el
+  // propio, vía useAuth). Un select liviano (4 filas) a `perfiles`, no una
+  // tabla/trigger/RPC nueva — mismo criterio que cualquier lectura puntual.
+  const [perfilesPorId, setPerfilesPorId] = useState({})
+  useEffect(() => {
+    let activo = true
+    supabase.from('perfiles').select('user_id, nombre').then(({ data }) => {
+      if (!activo || !data) return
+      setPerfilesPorId(Object.fromEntries(data.map((p) => [p.user_id, p.nombre])))
+    })
+    return () => { activo = false }
+  }, [])
+
+  // Mismo cálculo exacto que usa el Plano para "hoy" (lib/planoUnits.js +
+  // lib/planoStats.js) — nunca se reinventa el criterio de ocupación/mix.
+  const units = useMemo(() => buildUnitsMap(unidades, reservas, hoy), [unidades, reservas, hoy])
+  const stats = useMemo(
+    () => calcularPlanoStats({ units, pagos, cajaDelDia: cajaHoy, selectedDate: hoy }),
+    [units, pagos, cajaHoy, hoy],
   )
 
-  // Saldos Pendientes: % del total facturado (valor_total de reservas activas)
-  // que sigue sin cobrarse — nunca un número de reservas suelto sin contexto.
-  const { totalFacturado, totalPendiente } = useMemo(() => {
+  // Llegadas de hoy: reservas (no canceladas) cuya fecha de inicio real es
+  // hoy — temporada resuelve la fecha contra `temporadas` (no tiene fecha
+  // propia), mismo criterio que ya usa el resto de la app (ver
+  // CLAUDE.md "Historial"/notificaciones viejas).
+  const temporadasPorId = useMemo(() => Object.fromEntries((temporadas || []).map((t) => [t.id, t])), [temporadas])
+  const llegadasHoy = useMemo(() => reservas.filter((r) => {
+    if (r.estado === 'cancelada') return false
+    if (r.tipo_alquiler === 'dia') return r.fecha === hoy
+    if (r.tipo_alquiler === 'periodo') return r.fecha_inicio === hoy
+    if (r.tipo_alquiler === 'temporada') return temporadasPorId[r.temporada_id]?.fecha_inicio === hoy
+    return false
+  }), [reservas, hoy, temporadasPorId])
+
+  // Facturación/deuda (mismo cálculo que Reportes.jsx, sin query nueva —
+  // reusa `reservas` ya cargadas) — dato de dinero agregado de todo el CRM:
+  // mismo gate de permiso que ya tiene la pantalla de Reportes.
+  const { facturacionBruta, deudaExterna, totalCobrado } = useMemo(() => {
     let facturado = 0, pendiente = 0
     for (const r of reservas) {
-      if (r.estado === 'cancelada') continue
+      if (r.estado === 'cancelada' || r.bonificada) continue
       facturado += Number(r.valor_total) || 0
       pendiente += Number(r.saldo) || 0
     }
-    return { totalFacturado: facturado, totalPendiente: pendiente }
+    return { facturacionBruta: facturado, deudaExterna: pendiente, totalCobrado: facturado - pendiente }
   }, [reservas])
 
-  // Solo reservas reales de la cola operativa (mismo criterio que Reservas.jsx:
-  // TIPOS_OPERATIVOS = ['periodo', 'dia']). Las altas de temporada cargadas
-  // desde Clientes son filas de `reservas` pero no aparecen en /app/reservas,
-  // así que "Ver Detalle" nunca las va a encontrar ahí — se excluyen acá.
-  const recentReservas = reservas
-    .filter((r) => r.tipo_alquiler === 'periodo' || r.tipo_alquiler === 'dia')
-    .slice(0, 5)
+  const ultimosMovimientos = (historialItems || []).slice(0, 5)
 
-  if (resLoading || cliLoading || cajaLoading) {
+  const loading = resLoading || cajaLoading
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <span className="text-sm font-semibold text-gray-500 animate-pulse uppercase tracking-widest">Sincronizando PriusAdmin...</span>
@@ -63,149 +129,107 @@ export default function Home() {
     )
   }
 
+  const nombreUsuario = perfil?.nombre || perfil?.usuario || 'Usuario'
+  const primerNombre = nombreUsuario.split(' ')[0]
+
   return (
-    <div className="space-y-10 animate-premium-fade">
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        <KpiCard
-          title="Ocupación Total"
-          value={`${unidadesOcupadasCount} / ${unidades.length}`}
-          subtitle="🏠 Carpas y ⛱️ sombrillas alquiladas"
-          icon={Calendar}
-          highlight
-          progress={unidades.length > 0 ? { value: unidadesOcupadasCount, max: unidades.length } : null}
-        />
-        <KpiCard
-          title="Caja Diaria"
-          value={formatPesos(totalCajaHoy)}
-          subtitle={cajaHoy ? 'Cobros registrados hoy' : 'Caja sin iniciar'}
-          icon={Wallet}
-          progress={mejorDiaCaja > 0 ? { value: totalCajaHoy, max: mejorDiaCaja } : null}
-        />
-        <KpiCard
-          title="Saldos Pendientes"
-          value={reservasConSaldoCount}
-          subtitle="Cuentas con saldo deudor"
-          icon={AlertCircle}
-          progress={totalFacturado > 0 ? { value: totalPendiente, max: totalFacturado } : null}
-        />
-        <KpiCard
-          title="Base de Clientes"
-          value={clientesCount}
-          subtitle="Clientes registrados"
-          icon={Users}
-        />
+    <div className="space-y-8 animate-premium-fade">
+      {/* Fila 1: saludo + clima */}
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Hola, {primerNombre}</h1>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">{formatFechaLarga(hoy)}</p>
+        </div>
+        <ClimaHero fecha={hoy} />
       </div>
 
-      {/* Table Section — tabla en desktop, tarjetas en mobile (Tarea 4.3) */}
-      <div className="glass-card p-4 sm:p-8 rounded-2xl glass-card-inner">
-        <div className="flex justify-between items-center mb-4 sm:mb-8 gap-3">
-          <h2 className="text-xs sm:text-sm font-bold tracking-[0.15em] sm:tracking-[0.2em] text-white uppercase truncate">Últimas reservas</h2>
-          <button
+      {/* Fila 2: operación del día */}
+      <div>
+        <SeccionTitulo>Operación de hoy</SeccionTitulo>
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+          <DashCard icon={Activity} label="Ocupación" value={`${Math.round(stats.ocupacion.pct * 100)}%`} sub={`${stats.ocupacion.count}/${stats.ocupacion.total} unidades`} progress={stats.ocupacion.pct} accent onClick={() => navigate(linkToPlano())} />
+          <DashCard icon={Tent} label="Carpas" value={`${Math.round(stats.carpas.pct * 100)}%`} sub={`${stats.carpas.count}/${stats.carpas.total}`} progress={stats.carpas.pct} onClick={() => navigate(linkToPlano())} />
+          <DashCard icon={Umbrella} label="Sombrillas" value={`${Math.round(stats.sombrillas.pct * 100)}%`} sub={`${stats.sombrillas.count}/${stats.sombrillas.total}`} progress={stats.sombrillas.pct} onClick={() => navigate(linkToPlano())} />
+          <DashCard icon={DoorOpen} label="Libres hoy" value={stats.libres.count} onClick={() => navigate(linkToPlano())} />
+          <DashCard icon={Layers} label="Mix T/P/D" value={`${stats.mix.temporada}/${stats.mix.periodo}/${stats.mix.dia}`} onClick={() => navigate(linkToPlano())} />
+          <DashCard icon={Hourglass} label="Sin confirmar" value={stats.pendientes.sinVerificar ? `${stats.pendientes.count}+` : stats.pendientes.count} onClick={() => navigate(linkToPlano())} />
+        </div>
+      </div>
+
+      {/* Fila 3: dinero y caja */}
+      <div>
+        <SeccionTitulo>Caja y dinero</SeccionTitulo>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <DashCard
+            icon={cajaHoy ? Unlock : Lock}
+            label="Caja"
+            value={cajaHoy ? 'Abierta' : 'Sin iniciar'}
+            sub={cajaHoy ? `Desde ${formatHora(cajaHoy.abierta_at)} · ${perfilesPorId[cajaHoy.abierta_por] || '—'}` : 'Tocá para abrirla'}
+            accent={!!cajaHoy}
+            onClick={() => navigate('/app/caja')}
+          />
+          <DashCard icon={Wallet} label="Ingresos del día" value={stats.ingresosDelDia != null ? formatPesos(stats.ingresosDelDia) : '—'} onClick={() => navigate('/app/caja')} />
+          <DashCard
+            icon={AlertCircle}
+            label="Pendientes de cobro"
+            value={stats.pendientes.count}
+            sub={stats.pendientes.saldo > 0 ? formatPesos(stats.pendientes.saldo) : null}
             onClick={() => navigate('/app/reservas')}
-            className="shrink-0 bg-[#FDE047] hover:bg-yellow-300 text-black text-[10px] sm:text-xs px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg transition-all flex items-center gap-2 font-bold uppercase tracking-wider"
-          >
-            Ver todas <ArrowRight size={14} />
-          </button>
+          />
+          {puedeVerReportes && (
+            <DashCard icon={TrendingUp} label="Deuda externa" value={formatPesos(deudaExterna)} sub={`Cobrado ${formatPesos(totalCobrado)} de ${formatPesos(facturacionBruta)}`} onClick={() => navigate('/app/reportes')} />
+          )}
+        </div>
+      </div>
+
+      {/* Fila 4: actividad */}
+      <div>
+        <SeccionTitulo>Actividad</SeccionTitulo>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <DashCard icon={Inbox} label="Leads sin contactar" value={leadsLoading ? '—' : leadsSinContactar} onClick={() => navigate('/app/leads?estado=nuevo')} />
+          <DashCard icon={Bell} label="Notificaciones" value={countPendientes + countNovedadesNoLeidas} sub={countPendientes > 0 ? `${countPendientes} pendientes` : 'Al día'} accent={countPendientes > 0} onClick={() => navigate('/app/notificaciones')} />
+          {recepcionOn && (
+            <DashCard icon={QrCode} label="Llegan hoy" value={llegadasHoy.length} onClick={() => navigate('/app/recepcion')} />
+          )}
         </div>
 
-        {recentReservas.length === 0 ? (
-          <p className="py-12 text-center text-gray-500 italic text-sm">No se han registrado reservas recientemente.</p>
-        ) : (
-          <>
-            {/* Mobile: tarjetas */}
-            <div className="md:hidden space-y-3">
-              {recentReservas.map((res) => (
+        <div className="glass-card rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
+              <Clock size={13} /> Últimos movimientos
+            </p>
+            <button onClick={() => navigate('/app/historial')} className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300 flex items-center gap-1">
+              Ver todo <ArrowRight size={12} />
+            </button>
+          </div>
+          {historialLoading ? (
+            <p className="text-xs text-gray-500 uppercase tracking-widest animate-pulse py-4 text-center">Cargando...</p>
+          ) : ultimosMovimientos.length === 0 ? (
+            <p className="text-xs text-gray-500 py-4 text-center">Sin movimientos recientes.</p>
+          ) : (
+            <div className="divide-y divide-white/5">
+              {ultimosMovimientos.map((ev) => (
                 <button
-                  key={res.id}
-                  onClick={() => setDetalleReserva(res)}
-                  className="w-full text-left p-4 min-h-[44px] bg-white/5 border border-white/10 rounded-xl flex flex-col gap-2 hover:bg-white/10 transition-all"
+                  key={ev.id}
+                  onClick={() => {
+                    if (ev.tabla === 'reservas' && ev.registro_id) navigate(linkToReserva(ev.registro_id))
+                    else if (ev.cliente_id) navigate(linkToCliente(ev.cliente_id))
+                  }}
+                  className="w-full flex items-center justify-between gap-3 py-3 text-left hover:bg-white/5 rounded-lg px-2 -mx-2 transition-all"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatFecha(res.created_at)}</p>
-                      <p className="font-bold text-white uppercase truncate">{res.clientes?.nombre || 'CLIENTE S/N'}</p>
-                      <p className="text-xs text-gray-400 uppercase mt-0.5">
-                        {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero ?? 'N/A'}
-                      </p>
-                    </div>
-                    <StatusBadge status={estadoBadgeStatus(res)} />
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-white truncate">{ev.descripcion}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5 truncate">
+                      {ev.actor_nombre || 'Sistema'}{ev.cliente_nombre ? ` · ${ev.cliente_nombre}` : ''}
+                    </p>
                   </div>
+                  <span className="text-[10px] text-gray-600 tabular-nums shrink-0">{formatHora(ev.ts)}</span>
                 </button>
               ))}
             </div>
-
-            {/* Desktop: tabla */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-white/10 text-[10px] text-gray-500 uppercase tracking-[0.15em] font-bold">
-                    <th className="pb-4 px-6">FECHA</th>
-                    <th className="pb-4 px-6">CLIENTE</th>
-                    <th className="pb-4 px-6">SERVICIO</th>
-                    <th className="pb-4 px-6">ESTADO</th>
-                    <th className="pb-4 px-6 text-right">ACCIÓN</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm text-gray-300 divide-y divide-white/5">
-                  {recentReservas.map((res) => (
-                    <tr key={res.id} className="hover:bg-white/5 transition-colors group">
-                      <td className="py-6 px-6 font-medium text-gray-400">
-                        {formatFecha(res.created_at)}
-                      </td>
-                      <td className="py-6 px-6 font-bold text-white uppercase tracking-tight">
-                        {res.clientes?.nombre || 'CLIENTE S/N'}
-                      </td>
-                      <td className="py-6 px-6 uppercase">
-                        {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo || 'Unidad'} #{res.unidades?.numero ?? 'N/A'}
-                      </td>
-                      <td className="py-6 px-6">
-                        <StatusBadge status={estadoBadgeStatus(res)} />
-                      </td>
-                      <td className="py-6 px-6 text-right">
-                        <button
-                          onClick={() => setDetalleReserva(res)}
-                          className="text-[#FDE047] hover:text-white font-bold text-xs uppercase underline-offset-4 hover:underline transition-all"
-                        >
-                          Ver Detalle
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* [feat-4] Recientes: últimos clientes/reservas que abrió este
-          usuario, por usuario y entre dispositivos (vistas_recientes, sin
-          localStorage). */}
-      {recientesFeatureOn && recientes.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 flex items-center gap-2">
-            <Clock size={14} /> Recientes
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {recientes.map((r) => (
-              <button
-                key={`${r.tipo}-${r.id}`}
-                onClick={() => navigate(r.tipo === 'cliente' ? linkToCliente(r.id) : linkToReserva(r.id))}
-                className="glass-card px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-white/10 transition-all flex items-center gap-2"
-              >
-                {r.tipo === 'cliente' ? (
-                  <>{r.cliente?.nombre || 'Cliente'}</>
-                ) : (
-                  <>{r.reserva?.clientes?.nombre || 'S/N'} · {unidadEmoji(r.reserva?.unidades?.tipo)} #{r.reserva?.unidades?.numero}</>
-                )}
-              </button>
-            ))}
-          </div>
+          )}
         </div>
-      )}
-
-      <ReservaDetalleModal reserva={detalleReserva} onClose={() => setDetalleReserva(null)} />
+      </div>
     </div>
   )
 }
