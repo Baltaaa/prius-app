@@ -6,7 +6,7 @@ import { useClima } from '../../hooks/useClima'
 import ClimaChip from './ClimaChip'
 import ClimaPanel from './ClimaPanel'
 
-const pct = (n) => `${Math.round((n || 0) * 100)}%`
+export const pct = (n) => `${Math.round((n || 0) * 100)}%`
 
 /**
  * Tarjeta de stat — mismo lenguaje visual que `KpiCard.jsx` (ícono en caja
@@ -84,6 +84,46 @@ export function LibresCard({ stats, filtro, onToggleFiltro, className = 'w-[100p
     <StatCard icon={DoorOpen} label="Libres hoy" active={filtro === 'libres'} onClick={() => onToggleFiltro('libres')} className={className}>
       <p className="text-2xl font-bold text-white tabular-nums leading-none">{stats.libres.count}</p>
     </StatCard>
+  )
+}
+
+/** Fila horizontal de stat — ícono chico + label completo (nunca truncado)
+ * a la izquierda, valor + subtexto a la derecha, barra de progreso fina
+ * abajo (opcional, se omite si `progress` es null — ej. Libres hoy, que no
+ * tiene porcentaje). Mismo lenguaje visual que `StatCard` (borde, radio,
+ * fondo) pero apilable a ancho completo sin perder el label — pensada para
+ * Carpas/Sombrillas/Libres hoy en el riel izquierdo del Plano (oct 2026),
+ * que antes iban en una fila de 3 mini-cards angostas. */
+export function StatRowCard({ icon: Icon, label, value, sub, progress, active, onClick, className = '' }) {
+  const interactivo = typeof onClick === 'function'
+  const Tag = interactivo ? 'button' : 'div'
+  return (
+    <Tag
+      type={interactivo ? 'button' : undefined}
+      onClick={onClick}
+      className={`w-full min-w-0 rounded-2xl border text-left transition-all px-3.5 py-3 ${
+        active ? 'border-[#F2CA50]/50 bg-[#F2CA50]/10' : 'border-white/10 bg-white/[0.04]'
+      } ${interactivo ? 'hover:border-white/20 hover:bg-white/[0.07] cursor-pointer' : ''} ${className}`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0 shrink">
+          <Icon size={16} className={`shrink-0 ${active ? 'text-[#F2CA50]' : 'text-gray-400'}`} />
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">{label}</span>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-xl font-bold text-white tabular-nums leading-none">{value}</p>
+          {sub != null && <p className="text-[10px] text-gray-500 tabular-nums mt-0.5 whitespace-nowrap">{sub}</p>}
+        </div>
+      </div>
+      {progress != null && (
+        <div className="mt-2.5 h-[3px] rounded-full bg-white/10 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-[#F2CA50] transition-all"
+            style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }}
+          />
+        </div>
+      )}
+    </Tag>
   )
 }
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { supabase } from "../lib/supabase"
-import { Printer, Expand, Shrink, ChevronLeft, ChevronRight } from "lucide-react"
+import { Printer, Expand, Shrink, ChevronLeft, ChevronRight, Tent, Umbrella, DoorOpen } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
@@ -12,7 +12,7 @@ import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import PlanoGrid from "../components/plano/PlanoGrid"
 import PlanoViewport from "../components/plano/PlanoViewport"
 import PlanoStatsBar, {
-  OcupacionCard, CarpasCard, SombrillasCard, LibresCard, MixCardCompacto, PendientesCard, IngresosCard, ClimaCard, EstadoLegend,
+  OcupacionCard, StatRowCard, MixCardCompacto, PendientesCard, IngresosCard, ClimaCard, EstadoLegend, pct,
 } from "../components/dashboard/PlanoStatsBar"
 import { useData } from "../context/DataProvider"
 import { calcularPlanoStats } from "../lib/planoStats"
@@ -535,21 +535,49 @@ export default function Dashboard() {
 
         {/* Compactado oct 2026 (sin scroll en el panel, ver CLAUDE.md "Panel
             de stats del Plano"): Ocupación en tamaño chico (no `size="lg"`),
-            Carpas/Sombrillas/Libres en una sola fila de 3, Mix en una fila
-            inline en vez de la grilla de 3 botones de 44px. */}
+            Mix en una fila inline en vez de la grilla de 3 botones de 44px.
+            Carpas/Sombrillas/Libres hoy apiladas como filas horizontales
+            (StatRowCard, ver PlanoStatsBar.jsx) en vez de una fila de 3
+            mini-cards angostas — el ancho de 280px no alcanzaba para el
+            label completo sin truncarlo (ajuste oct 2026). */}
         {!loading && planoStats && (
           <>
             <OcupacionCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
-            <div className="grid grid-cols-3 gap-2">
-              <CarpasCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
-              <SombrillasCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
-              <LibresCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
+            <div className="flex flex-col gap-2">
+              <StatRowCard
+                icon={Tent}
+                label="Carpas"
+                value={pct(planoStats.carpas.pct)}
+                sub={`${planoStats.carpas.count}/${planoStats.carpas.total}`}
+                progress={planoStats.carpas.pct}
+                active={statsFiltro === 'carpas'}
+                onClick={() => toggleStatsFiltro('carpas')}
+              />
+              <StatRowCard
+                icon={Umbrella}
+                label="Sombrillas"
+                value={pct(planoStats.sombrillas.pct)}
+                sub={`${planoStats.sombrillas.count}/${planoStats.sombrillas.total}`}
+                progress={planoStats.sombrillas.pct}
+                active={statsFiltro === 'sombrillas'}
+                onClick={() => toggleStatsFiltro('sombrillas')}
+              />
+              <StatRowCard
+                icon={DoorOpen}
+                label="Libres hoy"
+                value={planoStats.libres.count}
+                active={statsFiltro === 'libres'}
+                onClick={() => toggleStatsFiltro('libres')}
+              />
             </div>
             <MixCardCompacto stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
           </>
         )}
 
-        <div className="flex-1" />
+        {/* Referencias va pegada a Mix, con el mismo gap que el resto (sin
+            margin-top:auto / flex-1 empujándola al fondo, oct 2026) — si
+            sobra alto, el sobrante queda abajo de Referencias, no en el
+            medio del panel. */}
         <EstadoLegend />
       </div>
 
@@ -717,6 +745,15 @@ export default function Dashboard() {
             flex-direction: column;
             gap: 10px;
             min-height: 0;
+            /* min-width:0 (oct 2026): .plano-area-left/right son items de
+               .plano-layout (grid con columnas fijas 280px) y a la vez
+               contenedores flex por su cuenta — un grid item tiene
+               min-width:auto por default, así que si su contenido pedía más
+               de 280px (el ancho de las cards de adentro) el item se salía
+               del track fijo en vez de achicarse, y el borde derecho del
+               riel (flecha ">", Ocupación, Libres) quedaba cortado fuera
+               del contenedor. Esto, no overflow:hidden, es el fix real. */
+            min-width: 0;
           }
         }
         /* Variante más compacta para pantallas de poca altura (ej. 1366x768,
