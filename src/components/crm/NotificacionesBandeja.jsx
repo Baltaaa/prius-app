@@ -13,7 +13,8 @@ import {
 const TIPO_META = {
   lead_nuevo: { icon: Inbox, color: 'text-orange-400', accion: 'Contactar lead', plural: 'leads nuevos' },
   comprobante_sin_vincular: { icon: FileText, color: 'text-violet-400', accion: 'Vincular comprobante', plural: 'comprobantes sin vincular' },
-  pago_sin_monto: { icon: AlertCircle, color: 'text-red-400', accion: 'Cargar monto', plural: 'pagos sin monto' },
+  pago_sin_monto: { icon: AlertCircle, color: 'text-red-400', accion: 'Cargar recibos', plural: 'reservas con recibos sin monto' },
+  reserva_sin_precio: { icon: AlertCircle, color: 'text-amber-400', accion: 'Asignar precio', plural: 'reservas sin precio' },
   caja_sin_cerrar: { icon: Wallet, color: 'text-amber-400', accion: 'Cerrar caja', plural: 'cajas sin cerrar' },
   saldo_pendiente_checkin: { icon: Clock, color: 'text-red-400', accion: 'Ver reserva', plural: 'saldos pendientes' },
   reserva_creada: { icon: CalendarPlus, color: 'text-[#FDE047]', accion: 'Ver reserva', plural: 'reservas creadas' },

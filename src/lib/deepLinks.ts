@@ -11,14 +11,25 @@
  * poner ese atributo en la fila/tarjeta correspondiente.
  */
 
-export function linkToCliente(clienteId: string, opts?: { pagoId?: string; reservaId?: string; accion?: 'pagar' | 'cargar_monto' }): string {
+export function linkToCliente(
+  clienteId: string,
+  opts?: { pagoId?: string; reservaId?: string; accion?: 'pagar' | 'cargar_monto' | 'cargar_recibos' | 'asignar_precio' },
+): string {
   const params = new URLSearchParams({ id: clienteId })
   if (opts?.pagoId) params.set('pago', opts.pagoId)
   if (opts?.reservaId) params.set('reserva', opts.reservaId)
   // [feat-2] accion=pagar: además de resaltar, abre directo RegistrarPago
   // para ese cliente — usado desde la notificación de saldo pendiente.
   // accion=cargar_monto (oct 2026): abre DetallePago con el campo de monto
-  // ya en edición — usado desde la notificación pago_sin_monto.
+  // ya en edición — usado desde la notificación pago_sin_monto (un pago
+  // puntual, ej. click directo en una celda de PagosGrid).
+  // accion=cargar_recibos (oct 2026): recorre en secuencia TODOS los
+  // recibos sin monto de `reservaId` ("Recibo 1 de N" → ... ), vía el mismo
+  // form de RegistrarPago en modo edición — usado desde la notificación
+  // "Recibos sin monto asignado (N)" (una sola por reserva, nunca por recibo).
+  // accion=asignar_precio (oct 2026): abre "Definir precio" directo para
+  // `reservaId` — usado desde la notificación "Asignar monto total de
+  // unidad" (reserva real sin precio cargado y sin pagos).
   if (opts?.accion) params.set('accion', opts.accion)
   return `/app/clientes?${params.toString()}`
 }

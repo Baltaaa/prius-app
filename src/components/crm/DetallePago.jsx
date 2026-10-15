@@ -27,9 +27,9 @@ const chipClass = (active) =>
 // RegistrarPago. Permite completar/corregir el comprobante y anular con
 // motivo. Se abre desde Caja, Clientes o Reservas — un solo componente, no
 // se duplica esta lógica en cada pantalla.
-export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirMonto = false }) {
+export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirMonto = false, onEditarMonto }) {
   const navigate = useNavigate()
-  const { completarComprobante, anularPago, editarComprobante, editarMontoPago } = useData()
+  const { completarComprobante, anularPago, editarComprobante } = useData()
   const { alert } = useDialog()
   const puedeEditarComprobante = usePermiso('editar_comprobante')
   const puedeEditarMontoPago = usePermiso('editar_monto_pago')
@@ -45,15 +45,16 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
   const [editMonto, setEditMonto] = useState(null)
   const [editFecha, setEditFecha] = useState('')
 
-  // Oct 2026 (pendiente pago_sin_monto): cargar el monto real de un pago
-  // migrado que llegó null. `autoAbrirMonto` (desde la notificación,
-  // accion=cargar_monto) abre este form ya expandido, sin un segundo click.
-  const [cargandoMonto, setCargandoMonto] = useState(false)
-  const [montoNuevo, setMontoNuevo] = useState(null)
-
   const [anulando, setAnulando] = useState(false)
   const [motivo, setMotivo] = useState('')
 
+  // Oct 2026 (pendiente pago_sin_monto, "Cargar monto con datos completos"):
+  // ya no hay un mini-form propio acá — "Cargar monto" delega en el padre
+  // (`onEditarMonto`), que abre RegistrarPago en modo edición (mismo form
+  // completo de monto/medio/tipo/fecha/comprobante, UPDATE sobre este pago).
+  // `autoAbrirMonto` (desde la notificación, accion=cargar_monto/
+  // cargar_recibos) dispara ese mismo callback apenas se monta, sin
+  // esperar un segundo click.
   useEffect(() => {
     if (!isOpen) return
     setCargandoComprobante(false)
@@ -63,8 +64,9 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
     setNumero(null)
     setFecha(new Date().toISOString().split('T')[0])
     setEditandoId(null)
-    setCargandoMonto(autoAbrirMonto && pagoSinVerificar(pago) && pago?.estado !== 'anulado' && puedeEditarMontoPago)
-    setMontoNuevo(null)
+    if (autoAbrirMonto && pagoSinVerificar(pago) && pago?.estado !== 'anulado' && puedeEditarMontoPago) {
+      onEditarMonto?.(pago)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, pago?.id])
 
@@ -98,19 +100,6 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
       setEditandoId(null)
     } catch (err) {
       await alert(err.message || 'No se pudo editar el comprobante.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleGuardarMonto = async () => {
-    if (!montoNuevo || montoNuevo <= 0) return
-    setSaving(true)
-    try {
-      await editarMontoPago(pago.id, montoNuevo)
-      setCargandoMonto(false)
-    } catch (err) {
-      await alert(err.message || 'No se pudo cargar el monto.')
     } finally {
       setSaving(false)
     }
@@ -173,34 +162,20 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto</p>
-            {pagoSinVerificar(pago) && cargandoMonto ? (
-              <div className="mt-2 space-y-2 max-w-xs">
-                <MoneyInput value={montoNuevo} onChange={setMontoNuevo} max={100_000_000} />
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setCargandoMonto(false)} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-white/5 text-gray-300 border border-white/10">
-                    Cancelar
-                  </button>
-                  <button type="button" disabled={saving || !montoNuevo} onClick={handleGuardarMonto} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-[#FDE047] text-black disabled:opacity-50">
-                    Guardar
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3 mt-1">
-                <p className={`text-lg font-bold ${pago.estado === 'anulado' ? 'text-gray-500 line-through' : pagoSinVerificar(pago) ? 'text-red-400' : 'text-green-400'}`}>
-                  {pagoSinVerificar(pago) ? 'Monto nulo' : formatPesos(pago.monto)}
-                </p>
-                {pagoSinVerificar(pago) && pago.estado !== 'anulado' && puedeEditarMontoPago && (
-                  <button
-                    type="button"
-                    onClick={() => setCargandoMonto(true)}
-                    className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300"
-                  >
-                    Cargar monto
-                  </button>
-                )}
-              </div>
-            )}
+            <div className="flex items-center gap-3 mt-1">
+              <p className={`text-lg font-bold ${pago.estado === 'anulado' ? 'text-gray-500 line-through' : pagoSinVerificar(pago) ? 'text-red-400' : 'text-green-400'}`}>
+                {pagoSinVerificar(pago) ? 'Monto nulo' : formatPesos(pago.monto)}
+              </p>
+              {pagoSinVerificar(pago) && pago.estado !== 'anulado' && puedeEditarMontoPago && (
+                <button
+                  type="button"
+                  onClick={() => onEditarMonto?.(pago)}
+                  className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300"
+                >
+                  Cargar monto
+                </button>
+              )}
+            </div>
           </div>
           <div>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Medio de Pago</p>

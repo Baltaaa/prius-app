@@ -15,7 +15,7 @@ import { registrarVisto } from '../../hooks/useRecientes'
 import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
 import {
   coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus,
-  esGrupo, reservasDelGrupo, saldoGrupo, estadoPagoGrupo,
+  esGrupo, reservasDelGrupo, saldoGrupo, estadoPagoGrupo, pagoSinVerificar,
 } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
@@ -363,6 +363,37 @@ export default function Clientes() {
           return true
         }
       }
+      // accion=cargar_recibos (oct 2026, notificación "Recibos sin monto
+      // asignado (N)"): recorre en secuencia TODOS los recibos sin monto de
+      // esa reserva, en orden cronológico — "Recibo 1 de N" → guardar →
+      // "Recibo 2 de N" — con el mismo form de RegistrarPago en edición.
+      if (accion === 'cargar_recibos' && reserva) {
+        const reservaObj = (reservasPorCliente[cliente.id] || []).find((r) => r.id === reserva)
+        const pagosSinMonto = todosPagos
+          .filter((p) => p.reserva_id === reserva && p.estado !== 'anulado' && pagoSinVerificar(p))
+          .sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora))
+        if (reservaObj && pagosSinMonto.length > 0) {
+          setPagoCelda({
+            reserva: { ...reservaObj, clientes: cliente },
+            pago: pagosSinMonto[0],
+            editando: true,
+            secuencia: { pagos: pagosSinMonto, idx: 0 },
+          })
+          return true
+        }
+      }
+      // accion=asignar_precio (oct 2026, notificación "Asignar monto total
+      // de unidad"): abre directo "Definir precio" para esa reserva — mismo
+      // modal que ya usa PagosGrid ("Definir precio") y el botón de la fila
+      // de RESERVAS, sin crear uno nuevo.
+      if (accion === 'asignar_precio' && reserva) {
+        const reservaObj = (reservasPorCliente[cliente.id] || []).find((r) => r.id === reserva)
+        if (reservaObj) {
+          setConfirmarValorTotal(0)
+          setConfirmarReserva({ reserva: reservaObj, cliente })
+          return true
+        }
+      }
       if (pago) return `pago-${pago}`
       if (reserva) return `reserva-${reserva}`
       return cliente.id
@@ -597,12 +628,13 @@ export default function Clientes() {
             // UN solo bloque (precio_total/pagado/saldo arriba, períodos y
             // pagos abajo) en vez de una fila + PagosGrid por período.
             const reservasSueltas = reservasCliente.filter((r) => !r.grupo_id)
-            // Ítem 4: cuántos comprobantes de este cliente todavía no tienen
-            // monto cargado (muchos vienen así de la migración del Excel).
+            // Ítem 4: cuántos pagos de este cliente todavía no tienen monto
+            // cargado (muchos vienen así de la migración del Excel) — vía
+            // `pagoSinVerificar` (fuente única: `pagos.monto`, no
+            // `comprobantes.monto_total`, que no tiene ningún trigger que lo
+            // mantenga sincronizado).
             const comprobantesPendientesCliente = todosPagos
-              .filter((p) => p.cliente_id === cliente.id)
-              .flatMap((p) => p.comprobantes || [])
-              .filter((c) => c.monto_total == null).length
+              .filter((p) => p.cliente_id === cliente.id && p.estado !== 'anulado' && pagoSinVerificar(p)).length
             const gruposCliente = {}
             for (const r of reservasCliente) {
               if (r.grupo_id) (gruposCliente[r.grupo_id] ||= []).push(r)
@@ -689,9 +721,19 @@ export default function Clientes() {
                         // Si la reserva que manda el badge ya está pagada o
                         // bonificada, ese "sin verificar" agregado no es una
                         // deuda real — nunca se muestra $0 acá, así que no se
-                        // muestra nada (ver CLAUDE.md "Nunca $0").
+                        // muestra nada (ver CLAUDE.md "Nunca $0"). Oct 2026:
+                        // "Saldo sin verificar" (antes "Monto nulo") +
+                        // cuántos comprobantes de este cliente no tienen
+                        // monto cargado — nunca se asume saldo $0 ni total.
                         saldoHeaderSaldado ? null : (
-                          <span className="text-red-400 text-[9px] font-bold uppercase tracking-widest whitespace-nowrap">Monto nulo</span>
+                          <span className="block text-red-400 text-[9px] font-bold uppercase tracking-widest">
+                            Saldo sin verificar
+                            {comprobantesPendientesCliente > 0 && (
+                              <span className="block text-gray-500 font-normal normal-case tracking-normal">
+                                {comprobantesPendientesCliente} comprobante{comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
+                              </span>
+                            )}
+                          </span>
                         )
                       ) : sinPrecio ? (
                         <span className="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
@@ -794,7 +836,7 @@ export default function Clientes() {
                             <div>
                               <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Saldo</p>
                               <p className={`text-sm font-bold mt-1 ${saldo === null ? 'text-red-400' : saldo > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                                {saldo === null ? 'Monto nulo' : saldo > 0 ? formatPesosVisible(saldo) : 'Unidad saldada'}
+                                {saldo === null ? 'Saldo sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Unidad saldada'}
                               </p>
                             </div>
                           </div>
@@ -871,6 +913,12 @@ export default function Clientes() {
                         <div className="space-y-2">
                           {reservasSueltas.map((r) => {
                             const socios = coSocios(r)
+                            // Oct 2026: el badge de estado de esta fila se
+                            // sacó (queda solo el de la cabecera del
+                            // cliente, al lado del nombre) — `badge` se
+                            // sigue calculando porque algunas acciones de
+                            // abajo (check-in) dependen de su valor.
+                            const badge = estadoBadgeStatus(r)
                             const fechas =
                               r.tipo_alquiler === 'temporada'
                                 ? r.temporada
@@ -885,8 +933,7 @@ export default function Clientes() {
                                   <span className="text-gray-500">{fechas}</span>
                                   {r.estado === 'cancelada' && <span className="text-red-400 font-bold uppercase">Cancelada</span>}
                                   <div className="flex-1" />
-                                  <StatusBadge status={estadoBadgeStatus(r)} />
-                                  {estadoBadgeStatus(r) === 'preconfirmada' && (
+                                  {badge === 'preconfirmada' && (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); navigate(linkToRecepcion(r.codigo)) }}
                                       className="text-[10px] font-bold uppercase tracking-widest text-sky-400 hover:text-sky-300 transition-all"
@@ -1171,21 +1218,44 @@ export default function Clientes() {
 
       {/* Disparado desde una celda de PagosGrid: reserva ya fija. Si la celda
           tenía un pago cargado, se abre en modo consulta (DetallePago); si
-          era la celda "+ Cargar", se abre el alta (RegistrarPago). */}
+          era la celda "+ Cargar", se abre el alta (RegistrarPago). Oct 2026
+          (`editando`): "Cargar monto" desde DetallePago reusa esta MISMA
+          instancia en modo edición (UPDATE, nunca alta nueva) — con
+          `secuencia` activa (notificación "Recibos sin monto asignado (N)"),
+          recorre los recibos sin monto de la reserva uno por uno. */}
       <RegistrarPago
-        isOpen={!!pagoCelda && !pagoCelda.pago}
+        isOpen={!!pagoCelda && (!pagoCelda.pago || pagoCelda.editando)}
         onClose={() => setPagoCelda(null)}
         cliente={pagoCelda?.reserva?.clientes}
         reservasOptions={pagoCelda ? [pagoCelda.reserva] : []}
         initialReservaId={pagoCelda?.reserva?.id || ''}
         allowSinReserva={false}
+        editingPago={pagoCelda?.editando ? (todosPagos.find((p) => p.id === pagoCelda.pago.id) || pagoCelda.pago) : null}
+        tituloOverride={
+          pagoCelda?.secuencia
+            ? `Recibo ${pagoCelda.secuencia.idx + 1} de ${pagoCelda.secuencia.pagos.length}`
+            : pagoCelda?.editando ? 'Cargar monto' : undefined
+        }
+        onSuccess={() => {
+          setPagoCelda((prev) => {
+            if (!prev) return null
+            const sec = prev.secuencia
+            if (!sec) return null
+            if (sec.idx + 1 < sec.pagos.length) {
+              const nextIdx = sec.idx + 1
+              return { ...prev, pago: sec.pagos[nextIdx], secuencia: { ...sec, idx: nextIdx } }
+            }
+            return { ...prev, secuencia: null }
+          })
+        }}
       />
       <DetallePago
-        isOpen={!!pagoCelda && !!pagoCelda.pago}
+        isOpen={!!pagoCelda && !!pagoCelda.pago && !pagoCelda.editando}
         onClose={() => setPagoCelda(null)}
         pago={pagoCelda?.pago ? todosPagos.find((p) => p.id === pagoCelda.pago.id) || pagoCelda.pago : null}
         reserva={pagoCelda?.reserva}
         autoAbrirMonto={!!pagoCelda?.autoAbrirMonto}
+        onEditarMonto={(pago) => setPagoCelda((prev) => (prev ? { ...prev, pago, editando: true, secuencia: null } : null))}
       />
 
       {/* Agrupar reservas sueltas bajo un precio unificado (caso Ana Lescano) */}

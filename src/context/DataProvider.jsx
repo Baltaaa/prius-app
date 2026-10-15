@@ -446,6 +446,25 @@ export function DataProvider({ children }) {
     return data
   }, [fetchPagos, fetchReservas])
 
+  // Oct 2026 (modal "Pago N.º X" → Cargar monto con datos completos):
+  // UPDATE sobre un pago ya existente (monto, medio, tipo, fecha original
+  // del recibo y comprobante asociado), nunca INSERT — reemplaza el flujo
+  // angosto de `editarMontoPago` (solo monto) para el caso de recibos sin
+  // monto. `fetchCaja`/`fetchIngresosCaja` porque la fecha elegida puede
+  // imputar el movimiento a la caja de hoy (si no es histórica).
+  const editarPagoCompleto = useCallback(async (pagoId, { monto, medio, tipoPago, fecha, comprobante }) => {
+    const { data, error } = await supabase.rpc('fn_editar_pago_completo', {
+      p_pago_id: pagoId, p_monto: Number(monto), p_medio: medio, p_tipo_pago: tipoPago,
+      p_fecha: fecha, p_comprobante: comprobante,
+    })
+    if (error) throw error
+    await fetchPagos()
+    await fetchReservas()
+    await fetchCaja()
+    await fetchIngresosCaja()
+    return data
+  }, [fetchPagos, fetchReservas, fetchCaja, fetchIngresosCaja])
+
   const editarComprobante = useCallback(async (comprobanteId, monto, fecha) => {
     const { data, error } = await supabase.rpc('editar_comprobante', {
       p_comprobante_id: comprobanteId, p_monto: monto, p_fecha: fecha || null,
@@ -498,7 +517,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago,
+    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarPagoCompleto,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
@@ -508,7 +527,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago,
+    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarPagoCompleto,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
