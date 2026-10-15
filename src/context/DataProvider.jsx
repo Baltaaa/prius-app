@@ -313,6 +313,13 @@ export function DataProvider({ children }) {
     return data[0]
   }, [])
 
+  // Antes de borrar: trigger trg_cliente_libera_unidad_al_borrar (oct 2026)
+  // cancela cualquier reserva activa de la que este cliente sea titular
+  // (estado='cancelada', libera la unidad vía el mismo trigger de siempre)
+  // — si no, reservas.cliente_id quedaba en null por el ON DELETE SET NULL
+  // pero la reserva seguía 'activa', ocupando la unidad para siempre sin
+  // cliente. Pagos reales (pagos.cliente_id es NO ACTION) siguen bloqueando
+  // el borrado — eso es a propósito, nunca se pierde historial de dinero.
   const deleteCliente = useCallback(async (id) => {
     const { error } = await supabase.from('clientes').delete().eq('id', id)
     if (error) throw error

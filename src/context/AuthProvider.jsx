@@ -58,6 +58,18 @@ export function AuthProvider({ children }) {
         setLoading(false)
         return
       }
+      // Bug real (oct 2026): acá se ponía loading=true para CUALQUIER evento
+      // que no fuera SIGNED_OUT — incluido TOKEN_REFRESHED, que Supabase
+      // dispara solo con volver a la pestaña/ventana (foco), sin que cambie
+      // el usuario ni su perfil. Como PrivateRoute desmonta toda la app
+      // (`if (loading) return <GlobalLoader/>`) mientras loading es true, un
+      // simple cambio de pestaña remontaba el CRM entero y perdía cualquier
+      // estado sin guardar (modal abierto, formulario a medio completar).
+      // Ahora solo SIGNED_IN dispara el loader: cubre tanto un login real
+      // como el caso confirmado en QA de recargar la página con una sesión
+      // persistida (Supabase emite SIGNED_IN ahí, no solo INITIAL_SESSION).
+      if (event !== 'SIGNED_IN') return
+
       // "Inicio de sesión" (Tarea 2) NO se loguea acá a propósito: Supabase
       // puede emitir SIGNED_IN también al recargar la página con una sesión
       // persistida (confirmado en QA, oct 2026 — no es solo INITIAL_SESSION),

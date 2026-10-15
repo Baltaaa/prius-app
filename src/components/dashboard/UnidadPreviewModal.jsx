@@ -4,6 +4,8 @@ import { useOverlay } from "../../context/OverlayProvider"
 import { useNavigate } from "react-router-dom"
 import { X, Umbrella, Home, Users, ArrowRight, MapPin } from "lucide-react"
 import { usePagos } from "../../hooks/usePagos"
+import { useReservas } from "../../hooks/useReservas"
+import { useDialog } from "../../context/DialogProvider"
 import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib/reservas"
 import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from "../../lib/format"
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
@@ -35,6 +37,8 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
   const navigate = useNavigate()
   const reserva = unit?.reserva || null
   const { pagos } = usePagos(reserva?.id)
+  const { updateReserva, cancelarReserva } = useReservas()
+  const { alert, confirm } = useDialog()
 
   if (!unit) return null
 
@@ -60,6 +64,38 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
   // operativa) — las de tipo_alquiler='temporada' de esta unidad no van a
   // aparecer ahí, viven en Clientes (ver CLAUDE.md "Reservas vs Clientes").
   const verHistorialCompleto = () => navigate(`/app/reservas?filtroUnidad=${unit.dbId}`)
+
+  // Liberar unidad (oct 2026): desvincula al cliente de esta reserva de
+  // temporada para poder traspasar la unidad a otro cliente sin salir del
+  // Plano — soft delete (estado='cancelada'), mismo mecanismo que "Cancelar
+  // reserva" de Reservas.jsx/Clientes.jsx, nunca borra la fila ni sus pagos.
+  const handleLiberarUnidad = async () => {
+    if (!reserva) return
+    if (reserva.bloqueada) {
+      const okDesbloquear = await confirm(
+        'Esta reserva está bloqueada. Hay que desbloquearla primero para poder continuar. ¿Desbloquear?',
+        { title: 'Desbloquear reserva' },
+      )
+      if (!okDesbloquear) return
+      try {
+        await updateReserva(reserva.id, { bloqueada: false })
+      } catch (err) {
+        await alert('No se pudo desbloquear la reserva.')
+        return
+      }
+    }
+    const ok = await confirm(
+      `Se va a liberar ${unidadEmoji(unit.type)} ${unit.type} #${unit.number} y desvincular a este cliente de la reserva. La reserva pasa a "cancelada" (no se borra, queda en el historial) y la unidad queda disponible para asignar a otro cliente. ¿Confirmar?`,
+      { title: 'Liberar unidad' },
+    )
+    if (!ok) return
+    try {
+      await cancelarReserva(reserva.id)
+      onClose?.()
+    } catch (err) {
+      await alert('No se pudo liberar la unidad.')
+    }
+  }
 
   return createPortal(
     <div
@@ -227,6 +263,12 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                         Mover a otra unidad
                       </button>
                     )}
+                    <button
+                      onClick={handleLiberarUnidad}
+                      className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-amber-400 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+                    >
+                      Liberar unidad
+                    </button>
                   </>
                 ) : (
                   <>

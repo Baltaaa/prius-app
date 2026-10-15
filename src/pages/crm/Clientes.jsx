@@ -110,7 +110,7 @@ export default function Clientes() {
   const navigate = useNavigate()
   const { clientes, loading, createCliente, updateCliente, deleteCliente } = useClientes()
   const {
-    reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva, crearGrupoReservas,
+    reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva, cancelarReserva, crearGrupoReservas,
   } = useReservas()
   const { pagos: todosPagos } = usePagos() // sin reservaId: historial completo, filtrado acá por cliente
 
@@ -124,7 +124,7 @@ export default function Clientes() {
   )
   const puedeBonificar = usePermiso('bonificar')
   const [searchParams, setSearchParams] = useSearchParams()
-  const { alert } = useDialog()
+  const { alert, confirm } = useDialog()
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('todos')
   const [showFiltros, setShowFiltros] = useState(false)
@@ -264,6 +264,39 @@ export default function Clientes() {
   const [agruparPrecioTotal, setAgruparPrecioTotal] = useState(0)
   const [agruparTemporada, setAgruparTemporada] = useState('')
   const [savingGrupo, setSavingGrupo] = useState(false)
+
+  // Liberar unidad (oct 2026): desvincula al cliente de esta reserva/unidad
+  // para poder traspasarla a otro cliente — mismo mecanismo que "Cancelar
+  // reserva" en Reservas.jsx (soft delete, estado='cancelada'), que ahí solo
+  // cubre período/día; acá cubre también temporada, que es donde vive el
+  // caso real de traspaso. Si está bloqueada, primero hay que desbloquear
+  // (mismo flujo que Reservas.jsx `asegurarDesbloqueada`).
+  const handleLiberarUnidad = async (r) => {
+    if (r.bloqueada) {
+      const okDesbloquear = await confirm(
+        'Esta reserva está bloqueada. Hay que desbloquearla primero para poder continuar. ¿Desbloquear?',
+        { title: 'Desbloquear reserva' },
+      )
+      if (!okDesbloquear) return
+      try {
+        await updateReserva(r.id, { bloqueada: false })
+      } catch (err) {
+        await alert('No se pudo desbloquear la reserva.')
+        return
+      }
+    }
+    const unidadLabel = r.unidades ? `${r.unidades.tipo} #${r.unidades.numero}` : 'la unidad'
+    const ok = await confirm(
+      `Se va a liberar ${unidadLabel} y desvincular a este cliente de la reserva. La reserva pasa a "cancelada" (no se borra, queda en el historial) y la unidad queda disponible para asignar a otro cliente. ¿Confirmar?`,
+      { title: 'Liberar unidad' },
+    )
+    if (!ok) return
+    try {
+      await cancelarReserva(r.id)
+    } catch (err) {
+      await alert('No se pudo liberar la unidad.')
+    }
+  }
 
   const handleAbrirAgrupar = (cliente) => {
     setAgruparCliente(cliente)
@@ -970,6 +1003,14 @@ export default function Clientes() {
                                       className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-white hover:text-gray-300 transition-all"
                                     >
                                       <Receipt size={11} /> Comprobante
+                                    </button>
+                                  )}
+                                  {r.estado !== 'cancelada' && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleLiberarUnidad(r) }}
+                                      className="text-[10px] font-bold uppercase tracking-widest text-amber-400 hover:text-amber-300 transition-all"
+                                    >
+                                      Liberar unidad
                                     </button>
                                   )}
                                 </div>
