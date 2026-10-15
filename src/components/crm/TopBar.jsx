@@ -90,6 +90,46 @@ function useSection(pathname) {
 
 const normalize = normalizeText
 
+// Apertura/cierre por hover en desktop (oct 2026) — Notificaciones y menú de
+// usuario abren al pasar el mouse (delay chico, evita aperturas accidentales
+// al pasar de largo) y cierran con un delay mayor que se cancela si el
+// puntero vuelve a entrar a tiempo — al trigger O al panel, da igual: ambos
+// viven en el mismo contenedor con estos handlers, así que moverse de uno a
+// otro nunca cuenta como "salir". Nunca se usa en touch (`enabled=false`
+// cuando no hay hover real, `matchMedia('(hover: hover) and (pointer: fine)')`
+// en el llamador) — ahí se sigue abriendo por tap, como siempre.
+function useHoverDropdown(isOpen, setIsOpen, enabled) {
+  const openTimer = useRef(null)
+  const closeTimer = useRef(null)
+
+  useEffect(() => () => {
+    if (openTimer.current) clearTimeout(openTimer.current)
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+  }, [])
+
+  const onPointerEnter = (e) => {
+    if (!enabled || e.pointerType !== 'mouse') return
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null }
+    if (isOpen || openTimer.current) return
+    openTimer.current = setTimeout(() => {
+      openTimer.current = null
+      setIsOpen(true)
+    }, 80)
+  }
+
+  const onPointerLeave = (e) => {
+    if (!enabled || e.pointerType !== 'mouse') return
+    if (openTimer.current) { clearTimeout(openTimer.current); openTimer.current = null }
+    if (closeTimer.current) return
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null
+      setIsOpen(false)
+    }, 150)
+  }
+
+  return { onPointerEnter, onPointerLeave }
+}
+
 export default function TopBar() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -111,7 +151,30 @@ export default function TopBar() {
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
   const rolLabel = rol === 'superadmin' ? 'Superadmin' : rol === 'admin' ? 'Admin' : ''
 
+  // Hover solo en dispositivos con mouse real — en touch (incluso tablets
+  // grandes) se mantiene el comportamiento de siempre por tap (oct 2026).
+  const [supportsHover] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  )
+  // Mismo breakpoint que ya usa BottomNav/Sidebar para mobile vs desktop
+  // (md:hidden / hidden md:flex, 768px) — gatea el ícono de escanear QR, que
+  // en desktop no debe ni montarse (oct 2026).
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  )
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(mql.matches)
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
+  const notifTriggerRef = useRef(null)
+  const profileTriggerRef = useRef(null)
+  const notifHover = useHoverDropdown(showNotifications, setShowNotifications, supportsHover)
+  const profileHover = useHoverDropdown(showProfileMenu, setShowProfileMenu, supportsHover)
+
   const handleLogout = async () => {
+    setShowProfileMenu(false)
     await signOut()
     navigate('/login')
   }
@@ -382,9 +445,11 @@ export default function TopBar() {
       </div>
 
       <div className="flex items-center gap-1 sm:gap-6 shrink-0 ml-auto">
-        {/* Fase 3 (Recepción, D1): acceso directo al escáner de QR desde
-            cualquier pantalla, desktop y mobile. */}
-        {isFeatureEnabled('recepcion') && (
+        {/* Fase 3 (Recepción, D1): acceso directo al escáner de QR — solo
+            mobile (oct 2026), mismo breakpoint que BottomNav/Sidebar. No se
+            monta en desktop (no solo oculto por CSS): sin uso en escritorio
+            y evita dejar en el DOM un botón que dispara cámara. */}
+        {isFeatureEnabled('recepcion') && isMobile && (
           <button
             onClick={() => navigate(linkToRecepcion(null, { scan: true }))}
             className="text-gray-400 hover:text-white p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
@@ -405,9 +470,24 @@ export default function TopBar() {
             novedades sin leer (ver CLAUDE.md "Notificaciones"). Desktop:
             popover anclado acá mismo. Mobile: hoja a pantalla completa
             (mismo patrón que la búsqueda mobile, más abajo). */}
-        <div ref={notifOverlay.bind} className="relative">
+        <div
+          ref={notifOverlay.bind}
+          className="relative"
+          onPointerEnter={notifHover.onPointerEnter}
+          onPointerLeave={notifHover.onPointerLeave}
+          onFocus={() => setShowNotifications(true)}
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setShowNotifications(false) }}
+          onKeyDown={(e) => {
+            if (e.key !== 'Escape') return
+            setShowNotifications(false)
+            notifTriggerRef.current?.focus()
+          }}
+        >
           <button
-            onClick={() => setShowNotifications((v) => !v)}
+            ref={notifTriggerRef}
+            onClick={() => { if (!supportsHover) setShowNotifications((v) => !v) }}
+            aria-haspopup="menu"
+            aria-expanded={showNotifications}
             className="text-gray-400 hover:text-white relative p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
           >
             <Bell size={20} />
@@ -421,8 +501,18 @@ export default function TopBar() {
           </button>
 
           {showNotifications && (
-            <div className="hidden sm:block absolute right-0 mt-3 w-[380px] max-w-[90vw] max-h-[70vh] glass-popover rounded-xl overflow-hidden z-50">
-              <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
+            // `top-full pt-3` en vez de `mt-3` en el panel (oct 2026): el
+            // padding queda DENTRO del contenedor con los handlers de hover,
+            // así el hueco visual entre el ícono y el panel sigue siendo
+            // parte del "territorio" hovereable (sin esto, mover el mouse en
+            // línea recta del ícono al panel pasaba por una franja que no
+            // era descendiente de este contenedor y cerraba el panel antes
+            // de llegar). El glass-popover real queda en el div de adentro,
+            // que no se mueve ni cambia de tamaño — mismo look de siempre.
+            <div className="hidden sm:block absolute right-0 top-full pt-3 w-[380px] max-w-[90vw] z-50">
+              <div className="max-h-[70vh] glass-popover rounded-xl overflow-hidden">
+                <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
+              </div>
             </div>
           )}
         </div>
@@ -446,9 +536,24 @@ export default function TopBar() {
         )}
 
         {/* Profile */}
-        <div ref={profileOverlay.bind} className="relative">
+        <div
+          ref={profileOverlay.bind}
+          className="relative"
+          onPointerEnter={profileHover.onPointerEnter}
+          onPointerLeave={profileHover.onPointerLeave}
+          onFocus={() => setShowProfileMenu(true)}
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setShowProfileMenu(false) }}
+          onKeyDown={(e) => {
+            if (e.key !== 'Escape') return
+            setShowProfileMenu(false)
+            profileTriggerRef.current?.focus()
+          }}
+        >
           <button
-            onClick={() => setShowProfileMenu((v) => !v)}
+            ref={profileTriggerRef}
+            onClick={() => { if (!supportsHover) setShowProfileMenu((v) => !v) }}
+            aria-haspopup="menu"
+            aria-expanded={showProfileMenu}
             className="flex items-center gap-3 p-1 min-h-[44px] hover:bg-white/5 rounded-lg transition-all"
           >
             <div className="w-8 h-8 bg-[#FDE047] text-black rounded flex items-center justify-center font-bold text-sm">
@@ -461,23 +566,28 @@ export default function TopBar() {
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-3 w-56 glass-popover rounded-xl overflow-hidden z-50 p-1">
-              <div className="px-4 py-3 border-b border-white/10">
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{rolLabel}</p>
-                <p className="text-xs font-medium text-white truncate">{nombreMostrado}</p>
+            // Mismo patrón que Notificaciones: padding-top en vez de margin,
+            // para que el hueco visual quede adentro del territorio
+            // hovereable (ver comentario arriba).
+            <div className="absolute right-0 top-full pt-3 w-56 z-50">
+              <div className="glass-popover rounded-xl overflow-hidden p-1">
+                <div className="px-4 py-3 border-b border-white/10">
+                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{rolLabel}</p>
+                  <p className="text-xs font-medium text-white truncate">{nombreMostrado}</p>
+                </div>
+                <button
+                  onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
+                  className="w-full text-left px-4 py-2.5 text-xs text-gray-300 hover:bg-white/10 flex items-center gap-2 rounded-lg"
+                >
+                  <User size={14} /> Perfil
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-400/10 flex items-center gap-2 rounded-lg"
+                >
+                  <LogOut size={14} /> Cerrar Sesión
+                </button>
               </div>
-              <button
-                onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
-                className="w-full text-left px-4 py-2.5 text-xs text-gray-300 hover:bg-white/10 flex items-center gap-2 rounded-lg"
-              >
-                <User size={14} /> Perfil
-              </button>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-400/10 flex items-center gap-2 rounded-lg"
-              >
-                <LogOut size={14} /> Cerrar Sesión
-              </button>
             </div>
           )}
         </div>
