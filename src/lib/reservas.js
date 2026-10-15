@@ -57,11 +57,32 @@ export function estaSaldada(reserva) {
   return Number(reserva.saldo) <= 0
 }
 
+// ¿Este pago representa un pago REAL (y no una fila vacía del import)? Una
+// fila de `pagos` con monto null Y sin ningún comprobante vinculado (9 casos
+// detectados, oct 2026 — ej. Natalia Duhalde) es un artefacto de la
+// migración del excel, no un pago — nunca cuenta para "hay un pago" ni
+// dispara el aviso de monto sin verificar (espejo de `fn_pago_es_real` en
+// Postgres, mantener sincronizado). Depende de que `pago.comprobantes`
+// venga embebido (como ya lo trae `fetchPagos` en DataProvider.jsx).
+export function esPagoReal(pago) {
+  if (!pago) return false
+  if (pago.monto != null) return true
+  return (pago.comprobantes || []).some((c) => c.estado !== 'anulado')
+}
+
+// ¿Alguno de los pagos de esta reserva es un pago real? (ver `esPagoReal`) —
+// "SIN PAGO" (ningún pago/comprobante registrado) vs "PAGO PARCIAL" (al
+// menos uno, con o sin monto) se decide acá, nunca mirando `estado_pago`
+// a mano en una pantalla puntual.
+export const tieneAlgunPagoReal = (pagosDeReserva) => (pagosDeReserva || []).some(esPagoReal)
+
 // ¿El monto de este pago es confiable? En la migración histórica, un pago con
 // comprobante cargado pero sin poder leer el importe real quedó con
 // `monto = null` y `monto_pendiente_verificacion = true` — sabemos que el
-// cliente pagó algo, pero no cuánto.
-export const pagoSinVerificar = (pago) => pago?.monto == null || pago?.monto_pendiente_verificacion === true
+// cliente pagó algo, pero no cuánto. Una fila fantasma (ver `esPagoReal`) no
+// cuenta como "sin verificar": no es que no sepamos el monto, es que no hay
+// pago.
+export const pagoSinVerificar = (pago) => esPagoReal(pago) && (pago?.monto == null || pago?.monto_pendiente_verificacion === true)
 
 // ¿Alguno de los pagos de esta reserva tiene un monto sin verificar? Recibe
 // los pagos de ESA reserva puntual (no vienen embebidos en `reservas`, hay
