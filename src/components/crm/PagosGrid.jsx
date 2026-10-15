@@ -6,8 +6,10 @@ import { CreditCard, Hourglass, Gift } from 'lucide-react'
 // Clientes.jsx): mismo concepto — un pago con comprobante cargado pero sin
 // poder leer el importe real — pero con label más corto, rojo y en una sola
 // línea, para que quepa cómodo dentro de una celda angosta de la grilla.
-const MontoNulo = () => (
-  <span className="text-red-400 text-[8px] font-bold uppercase tracking-widest whitespace-nowrap">Monto nulo</span>
+// `texto` (oct 2026): la celda de Saldo usa "Saldo sin verificar" en vez de
+// "Monto nulo" — mismo componente, dos textos según el contexto.
+const MontoNulo = ({ texto = 'Monto nulo' }) => (
+  <span className="text-red-400 text-[8px] font-bold uppercase tracking-widest whitespace-nowrap">{texto}</span>
 )
 
 // Grilla de pagos por reserva, estilo el cuadro que ya usa el administrador
@@ -89,16 +91,13 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
   const cuotas = [...pagos].sort((a, b) => (a.nro_cuota || 0) - (b.nro_cuota || 0))
   const nextCuota = cuotas.length + 1
 
-  // "Saldada" acá es una regla propia de la grilla (Tarea 4), distinta de
-  // saldoNumerico/estaSaldada usados en el resto de la app: no vuelve `null`
-  // ante un monto sin verificar, porque lo que importa para cerrar/bloquear
-  // la grilla es si YA se cubrió el total con lo que sí se conoce, no si cada
-  // cuota individual está verificada.
-  // Un pago anulado no cuenta para el total cubierto — "nada se borra, se
-  // anula con motivo" (CLAUDE.md), pero tampoco debe seguir pesando como si
-  // estuviera vigente.
-  const montosConocidos = cuotas.reduce((acc, p) => acc + (p.estado !== 'anulado' && p.monto != null ? Number(p.monto) : 0), 0)
-  const saldada = reserva.estado_pago === 'pagado' || montosConocidos >= Number(reserva.valor_total || 0)
+  // "Saldada" = estado_pago ya calculado en la base (fuente única, oct
+  // 2026 — ver fn_pago_actualiza_saldo/fn_reserva_recalcula_saldo): mientras
+  // quede un comprobante sin monto, la reserva sigue en PARCIAL aunque los
+  // montos ya conocidos alcancen el total — no se puede confirmar saldada
+  // con un recibo todavía sin verificar (antes esta grilla tenía su propia
+  // regla paralela que SÍ cerraba en ese caso, duplicando el cálculo).
+  const saldada = reserva.estado_pago === 'pagado'
 
   // Saldo mostrado: sigue siendo el real (saldoNumerico, nunca reserva.saldo
   // suelto) — `null` cuando hay algún pago sin verificar y la reserva todavía
@@ -190,7 +189,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
             saldada ? 'text-green-400' : saldoCalculado === null ? 'text-gray-400' : 'text-red-400'
           }`}>
             <span className="text-[8px] text-gray-500 uppercase tracking-widest">Saldo</span>
-            {saldada ? 'Unidad saldada' : saldoCalculado === null ? <MontoNulo /> : formatPesosVisible(saldoCalculado)}
+            {saldada ? 'Unidad saldada' : saldoCalculado === null ? <MontoNulo texto="Saldo sin verificar" /> : formatPesosVisible(saldoCalculado)}
           </div>
         </div>
       </div>

@@ -1,6 +1,14 @@
 import { formatMedioPago } from './pagos'
 import { montoInfo, saldoNumerico, pagoSinVerificar, tienePagoSinVerificar, esPendienteConfirmacion } from './reservas'
 
+// Cuántos de los pagos vigentes de esta reserva son "sin verificar" (monto
+// null con comprobante real vinculado, ver `pagoSinVerificar`/`esPagoReal`)
+// — el comprobante muestra este número en vez de fingir que el monto
+// abonado es $0 (oct 2026, caso Sara Azcárate: 2 recibos sin monto).
+function contarPagosSinVerificar(vigentes) {
+  return (vigentes || []).filter(pagoSinVerificar).length
+}
+
 // Numeración actual: slice del uuid de la reserva (REC-DBC079A1), igual que
 // antes del rediseño — la numeración correlativa por temporada (REC-2627-
 // 000123, generada en Postgres) queda propuesta en SQL para el PASO 4, sin
@@ -63,6 +71,7 @@ export function armarDatosComprobante({ reserva, pagos, perfil, tipo = 'estado_c
     montoTotalSinVerificar: pendiente,
     montoTotal: pendiente ? null : Number(valorTotal || 0),
     montoAbonado: abonado,
+    comprobantesSinMontoCount: contarPagosSinVerificar(vigentes),
     saldo,
     pagos: vigentes.map(mapPago),
     pagoUnico: pagoUnico ? mapPago(pagoUnico) : null,

@@ -77,7 +77,12 @@ export default function ComprobanteDocumento({ datos, modo = 'color', tipo = 'es
 
   const UnidadIcon = UNIDAD_ICON[datos.unidad.tipo] || null
   const unidadLabel = UNIDAD_LABEL[datos.unidad.tipo] || datos.unidad.tipo || 'Unidad'
-  const saldoPendiente = Number(datos.saldo) > 0
+  // Oct 2026: `datos.saldo === null` (pagos sin verificar) nunca es lo mismo
+  // que "saldada" — `Number(null) > 0` da `false`, así que antes esto
+  // mostraba "Unidad saldada" sobre una reserva que en realidad no se sabe
+  // si está saldada (bug real, caso Sara Azcárate).
+  const saldoDesconocido = datos.saldo === null
+  const saldoPendiente = !saldoDesconocido && Number(datos.saldo) > 0
   const pagosAMostrar = tipo === 'recibo' && datos.pagoUnico ? [datos.pagoUnico] : datos.pagos
 
   return (
@@ -152,13 +157,17 @@ export default function ComprobanteDocumento({ datos, modo = 'color', tipo = 'es
             )}
             <div className="cd-linea">
               <span className="cd-linea-label">Monto Abonado</span>
-              <span className="cd-linea-valor cd-abonado">{formatMonto(datos.montoAbonado)}</span>
+              <span className="cd-linea-valor cd-abonado">
+                {datos.montoAbonado == null
+                  ? `Sin verificar (${datos.comprobantesSinMontoCount} comprobante${datos.comprobantesSinMontoCount === 1 ? '' : 's'} sin monto)`
+                  : formatMonto(datos.montoAbonado)}
+              </span>
             </div>
           </div>
-          <div className={`cd-saldo-row ${saldoPendiente ? 'cd-pendiente' : 'cd-saldada'}`}>
+          <div className={`cd-saldo-row ${saldoDesconocido ? '' : saldoPendiente ? 'cd-pendiente' : 'cd-saldada'}`}>
             <span className="cd-saldo-label">Saldo Pendiente</span>
-            <span className={`cd-saldo-valor ${saldoPendiente ? 'cd-pendiente' : 'cd-saldada'}`}>
-              {saldoPendiente ? formatMonto(datos.saldo) : 'Unidad saldada'}
+            <span className={`cd-saldo-valor ${saldoDesconocido ? '' : saldoPendiente ? 'cd-pendiente' : 'cd-saldada'}`}>
+              {saldoDesconocido ? 'Saldo sin verificar' : saldoPendiente ? formatMonto(datos.saldo) : 'Unidad saldada'}
             </span>
           </div>
 

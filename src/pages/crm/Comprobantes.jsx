@@ -8,7 +8,7 @@ import { usePreferenciaUsuario } from '../../hooks/usePreferenciaUsuario'
 import { isFeatureEnabled } from '../../lib/features'
 import { formatFecha, formatPesos } from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
-import { pagoSinVerificar } from '../../lib/reservas'
+import { pagoSinVerificar, tieneAlgunPagoReal } from '../../lib/reservas'
 import { numeroComprobante, armarDatosComprobante, validarComprobante } from '../../lib/comprobante'
 import { imprimirDocumento } from '../../lib/imprimirDocumento'
 import ComprobanteDocumento from '../../components/crm/ComprobanteDocumento'
@@ -46,31 +46,51 @@ export default function Comprobantes() {
     try { localStorage.setItem(MODO_KEY, modo) } catch { /* localStorage no disponible (modo privado, etc.) */ }
   }, [modo])
 
+  // Oct 2026: el selector solo lista reservas con al menos un pago real
+  // registrado (ver `tieneAlgunPagoReal`) — una reserva SIN PAGO (ej.
+  // Gustavo Martini, carpa #118, $0 abonado) no tiene nada que mostrar acá:
+  // ni comprobante propio ni historial de pagos, así que no tiene sentido
+  // ofrecerla. `todosPagos` (sin filtrar por reserva) viene de usePagos()
+  // sin argumento, mismo dato ya cargado en DataProvider, sin query nueva.
+  const { pagos: todosPagos } = usePagos()
+  const pagosPorReserva = useMemo(() => {
+    const map = {}
+    for (const p of todosPagos) {
+      if (!p.reserva_id) continue
+      ;(map[p.reserva_id] ||= []).push(p)
+    }
+    return map
+  }, [todosPagos])
+  const reservasConPagos = useMemo(
+    () => reservas.filter((r) => tieneAlgunPagoReal(pagosPorReserva[r.id])),
+    [reservas, pagosPorReserva],
+  )
+
   // Deep link /app/comprobantes?reserva=<id> (PASO 5) — preselecciona la
   // reserva una sola vez; no pisa una selección posterior del usuario.
   useEffect(() => {
     const reservaParam = searchParams.get('reserva')
-    if (reservaParam && reservas.some((r) => r.id === reservaParam)) {
+    if (reservaParam && reservasConPagos.some((r) => r.id === reservaParam)) {
       setSelectedReservaId(reservaParam)
       const next = new URLSearchParams(searchParams)
       next.delete('reserva')
       setSearchParams(next, { replace: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reservas])
+  }, [reservasConPagos])
 
-  const selectedReserva = reservas.find((r) => r.id === selectedReservaId) || reservas[0]
+  const selectedReserva = reservasConPagos.find((r) => r.id === selectedReservaId) || reservasConPagos[0]
   // Pagos vía usePagos -> selector sobre DataProvider, ya suscripto a
   // Realtime para toda la app: si entra un pago nuevo de esta reserva, la
   // vista se actualiza sola, sin query propia.
   const { pagos: pagosReserva } = usePagos(selectedReserva?.id)
 
   const opcionesReserva = useMemo(
-    () => reservas.map((r) => ({
+    () => reservasConPagos.map((r) => ({
       value: r.id,
       label: `${r.clientes?.nombre || 'S/N'} — ${UNIDAD_LABEL[r.unidades?.tipo] || r.unidades?.tipo} #${r.unidades?.numero} — DNI/CUIT ${r.clientes?.dni || r.clientes?.cuit || 's/d'} — ${numeroComprobante(r)}`,
     })),
-    [reservas],
+    [reservasConPagos],
   )
 
   const datosEstadoCuenta = useMemo(
