@@ -26,13 +26,23 @@ import { scrollAndHighlight } from '../lib/highlight'
 export function useDeepLinkTarget({ params, ready, resolve }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { toast } = useDialog()
-  const consumedRef = useRef(false)
+  // Firma de la última combinación de params ya resuelta (antes era un
+  // booleano "ya se consumió" que quedaba en true para siempre apenas se
+  // montaba la pantalla — si ya estabas en /app/clientes y un segundo
+  // deep-link a OTRO cliente llegaba sin desmontar el componente, no pasaba
+  // nada. Ahora se compara contra la combinación puntual de valores: un
+  // link nuevo (id distinto, o el mismo con otra acción) sí dispara de
+  // nuevo; los mismos params repetidos, o la URL ya limpia después de
+  // consumirlos, no.
+  const lastConsumedRef = useRef('')
 
   useEffect(() => {
-    if (!ready || consumedRef.current) return
+    if (!ready) return
     const hasAny = params.some((p) => searchParams.get(p))
     if (!hasAny) return
-    consumedRef.current = true
+    const signature = params.map((p) => `${p}=${searchParams.get(p) || ''}`).join('&')
+    if (signature === lastConsumedRef.current) return
+    lastConsumedRef.current = signature
 
     const values = {}
     for (const p of params) values[p] = searchParams.get(p) || undefined

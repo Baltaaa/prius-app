@@ -205,10 +205,15 @@ export default function TopBar() {
       .slice(0, 5)
   }, [clientes, term, dniTerm, activo])
 
+  // Solo período/día: una reserva de temporada no vive en /app/reservas (esa
+  // cola solo muestra período/día, ver CLAUDE.md "Reservas vs Clientes") —
+  // antes aparecía igual acá, duplicada con su cliente en el grupo CLIENTES,
+  // y al clickearla navegaba a una fila que no existe en esa pantalla.
   const reservaMatches = useMemo(() => {
     if (!activo) return []
     return reservas
       .filter((r) => {
+        if (r.tipo_alquiler === 'temporada') return false
         const nombre = r.clientes?.nombre
         const telefono = r.clientes?.telefono
         if (term.length >= 2) {
