@@ -477,14 +477,18 @@ export default function Recepcion() {
                 </div>
               )}
 
-              {cajaCerrada && (
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-3">
-                  <p className="text-sm text-gray-300 flex items-center gap-2"><Wallet size={16} className="text-[#FDE047]" /> No hay caja abierta hoy.</p>
+              {/* Oct 2026: antes solo aparecía reactivo, después de que el
+                  cobro fallara con P0003 — ahora es proactivo, se ve apenas
+                  se abre la reserva si no hay caja hoy, sin esperar a que
+                  el usuario intente cobrar primero. */}
+              {(cajaCerrada || !cajaHoy) && (
+                <div className="p-4 bg-[#FDE047]/5 border border-[#FDE047]/20 rounded-xl space-y-3">
+                  <p className="text-sm text-gray-300 flex items-center gap-2"><Wallet size={16} className="text-[#FDE047] shrink-0" /> No hay caja abierta hoy — hace falta para cobrar.</p>
                   <MoneyInput label="Monto inicial de caja" value={montoApertura} onChange={setMontoApertura} max={10_000_000} />
                   <button
                     disabled={abriendoCaja}
                     onClick={() => handleAbrirCajaYReintentar({ cobrar: true, hacerCheckin: todasHoy })}
-                    className="w-full py-3 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
+                    className="w-full py-3 min-h-[44px] bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
                   >
                     {abriendoCaja ? 'Abriendo...' : 'Abrir caja y cobrar'}
                   </button>

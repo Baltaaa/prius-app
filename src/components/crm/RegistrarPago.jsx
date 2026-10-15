@@ -7,6 +7,7 @@ import {
   sugerirTipoPago, comprobanteTipoDefault, ERROR_CAJA_CERRADA, ERROR_EXCEDE_SALDO, esPagoHistorico,
 } from '../../lib/pagos'
 import Modal from './Modal'
+import AvisoCajaCerrada from './AvisoCajaCerrada'
 import MoneyInput from '../inputs/MoneyInput'
 import IntegerInput from '../inputs/IntegerInput'
 import DateInput from '../inputs/DateInput'
@@ -37,7 +38,7 @@ export default function RegistrarPago({
   // notificaciones (ver Clientes.jsx) sin tocar el título por default.
   editingPago = null, tituloOverride = null,
 }) {
-  const { iniciarCaja, registrarPago, editarPagoCompleto } = useData()
+  const { cajaHoy, iniciarCaja, registrarPago, editarPagoCompleto } = useData()
   const { alert, confirm } = useDialog()
 
   const [reservaId, setReservaId] = useState(initialReservaId)
@@ -316,6 +317,12 @@ export default function RegistrarPago({
   return (
     <Modal isOpen={isOpen} onClose={onClose} isDirty={esFormularioDirty} title={tituloOverride || 'Registrar Pago'}>
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Oct 2026: aviso proactivo, no solo reactivo al error P0003 al
+            enviar — se ve apenas se abre el form, antes de cargar nada. Un
+            pago con fecha histórica (comprobante con fecha anterior al
+            1/10) nunca lo necesita, por eso se oculta solo si corresponde. */}
+        {!cajaHoy && !esHistorico && <AvisoCajaCerrada />}
+
         {/* 1. Reserva */}
         {reservasOptions.length > 1 || allowSinReserva ? (
           <div className="space-y-2">
