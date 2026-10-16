@@ -340,8 +340,10 @@ export function DataProvider({ children }) {
   // anular_pago/completar_comprobante), que validan y devuelven la fila ya
   // actualizada. El refetch puntual evita depender del round-trip de
   // Realtime en la misma pestaña que hizo la escritura.
-  const iniciarCaja = useCallback(async (montoInicial) => {
-    const { data, error } = await supabase.rpc('abrir_caja', { p_monto_inicial: Number(montoInicial) || 0 })
+  // Caja diaria (oct 2026): siempre arranca en 0, no se pregunta monto
+  // inicial — la caja se auto-crea sola en el primer cobro/gasto del día.
+  const iniciarCaja = useCallback(async () => {
+    const { data, error } = await supabase.rpc('abrir_caja')
     if (error) throw error
     setCajaHoy(data)
     setHistorialCajas((prev) => [data, ...prev.filter((c) => c.id !== data.id)])

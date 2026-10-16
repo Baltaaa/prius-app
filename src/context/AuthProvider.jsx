@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { tienePermiso } from '../lib/permisos'
 import { setLogoutMotivo } from '../lib/activity'
@@ -27,6 +27,13 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [perfil, setPerfil] = useState(null)
   const [loading, setLoading] = useState(true)
+  // Regla anti-remount (oct 2026): último user.id visto, para distinguir un
+  // login real de la re-emisión de SIGNED_IN que supabase-js dispara al
+  // recuperar el foco de la pestaña con la MISMA sesión (confirmado en QA:
+  // volver de otra pestaña/app con un modal a medio llenar perdía todo
+  // porque esto se trataba como login nuevo). Ref, no state: no debe
+  // disparar un render propio ni entrar en deps de efectos.
+  const lastUserIdRef = useRef(null)
 
   const fetchPerfil = useCallback(async (userId) => {
     if (!userId) { setPerfil(null); return }
@@ -40,6 +47,7 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!activo) return
       setSession(session)
+      lastUserIdRef.current = session?.user?.id ?? null
       await fetchPerfil(session?.user?.id)
       if (activo) setLoading(false)
     })
@@ -54,6 +62,7 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
       if (event === 'SIGNED_OUT') {
+        lastUserIdRef.current = null
         setPerfil(null)
         setLoading(false)
         return
@@ -69,6 +78,19 @@ export function AuthProvider({ children }) {
       // como el caso confirmado en QA de recargar la página con una sesión
       // persistida (Supabase emite SIGNED_IN ahí, no solo INITIAL_SESSION).
       if (event !== 'SIGNED_IN') return
+
+      // Regla anti-remount (oct 2026): un SIGNED_IN del MISMO usuario que ya
+      // estaba logueado no es un login real — es la re-emisión que
+      // supabase-js dispara al recuperar el foco de la pestaña (revalida el
+      // token contra localStorage/el lock interno). Sin este freno,
+      // `setLoading(true)` de más abajo desmontaba `PrivateRoute` ->
+      // `AppLayout` -> `DataProvider` entero con solo cambiar de pestaña y
+      // volver, perdiendo cualquier modal o formulario a medio llenar (bug
+      // real reportado: Nueva Reserva, Registrar Pago). Actualizar la
+      // sesión (por si el token cambió) sin tocar loading/perfil.
+      const nuevoUserId = session?.user?.id ?? null
+      if (nuevoUserId && nuevoUserId === lastUserIdRef.current) return
+      lastUserIdRef.current = nuevoUserId
 
       // "Inicio de sesión" (Tarea 2) NO se loguea acá a propósito: Supabase
       // puede emitir SIGNED_IN también al recargar la página con una sesión

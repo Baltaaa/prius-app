@@ -8,6 +8,7 @@ import DateInput from '../inputs/DateInput'
 import TextInput from '../inputs/TextInput'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useDialog } from '../../context/DialogProvider'
+import LoadingButton from '../ui/LoadingButton'
 
 const PASOS = ['Arqueo', 'Cierre Z', 'Confirmación']
 
@@ -206,14 +207,14 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
               Continuar
             </button>
           ) : (
-            <button
-              type="button"
-              disabled={saving}
+            <LoadingButton
+              loading={saving}
+              loadingText="Cerrando..."
               onClick={handleConfirmar}
-              className="w-full py-4 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+              className="w-full py-4 bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
             >
-              {saving ? 'Cerrando...' : 'Cerrar Caja'}
-            </button>
+              Cerrar Caja
+            </LoadingButton>
           )}
         </div>
       </div>

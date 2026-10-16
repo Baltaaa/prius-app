@@ -5,11 +5,9 @@ import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
 import { useData } from '../../context/DataProvider'
 import { supabase } from '../../lib/supabase'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
-import MoneyInput from '../../components/inputs/MoneyInput'
 import DateInput from '../../components/inputs/DateInput'
 import BrandSelect from '../../components/ui/BrandSelect'
-
-const MAX_MONTO_INICIAL = 10_000_000
+import LoadingButton from '../../components/ui/LoadingButton'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 import { descargarCierreCaja } from '../../lib/export/cajaCsv'
 import {
@@ -75,7 +73,6 @@ export default function Caja() {
   // lib/features.ts — si se apaga, vuelve a ser un useState local).
   const [filtroMedio, setFiltroMedio] = useFeatureUrlState('feat-7-caja-filtro-medio-url', 'medio', 'todos')
   const { perfil } = useAuth()
-  const [montoApertura, setMontoApertura] = useState(null)
   const [abriendo, setAbriendo] = useState(false)
   const [mostrarHistorial, setMostrarHistorial] = useState(false)
   const [mostrarGasto, setMostrarGasto] = useState(false)
@@ -133,17 +130,14 @@ export default function Caja() {
 
   const efectivoEsperadoPreview = resumen?.arqueo?.esperado ?? 0
 
-  const errorMontoApertura =
-    montoApertura != null && montoApertura > MAX_MONTO_INICIAL
-      ? `El monto inicial no puede superar ${formatPesos(MAX_MONTO_INICIAL)}`
-      : null
-
+  // Caja diaria (oct 2026): empieza siempre en 0, no se pregunta monto
+  // inicial — la caja se auto-crea sola en el primer cobro/gasto del día.
+  // Este botón solo marca explícitamente abierta_por/abierta_at para un día
+  // sin ningún movimiento todavía.
   const handleAbrirCaja = async () => {
-    if (errorMontoApertura) return
     setAbriendo(true)
     try {
-      await iniciarCaja(montoApertura || 0)
-      setMontoApertura(null)
+      await iniciarCaja()
     } catch (err) {
       await alert(err.message || 'No se pudo abrir la caja.')
     } finally {
@@ -244,22 +238,16 @@ export default function Caja() {
               <Wallet className="w-10 h-10 text-[#FDE047]" />
             </div>
             <h2 className="text-xl font-bold text-white uppercase tracking-wider">Caja no iniciada</h2>
-            <p className="text-gray-400 text-sm max-w-md mx-auto">Abrí la caja del día para empezar a registrar cobros y gastos.</p>
-            <div className="max-w-xs mx-auto space-y-4 text-left">
-              <MoneyInput
-                label="Monto inicial"
-                value={montoApertura}
-                onChange={setMontoApertura}
-                error={errorMontoApertura}
-                max={MAX_MONTO_INICIAL}
-              />
-              <button
+            <p className="text-gray-400 text-sm max-w-md mx-auto">Abrí la caja del día para empezar a registrar cobros y gastos. Siempre arranca en $0.</p>
+            <div className="max-w-xs mx-auto">
+              <LoadingButton
                 onClick={handleAbrirCaja}
-                disabled={abriendo || !!errorMontoApertura}
-                className="w-full bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl transition-all"
+                loading={abriendo}
+                loadingText="Abriendo..."
+                className="w-full bg-[#FDE047] hover:bg-yellow-300 text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl"
               >
-                {abriendo ? 'Abriendo...' : 'Abrir Caja de Hoy'}
-              </button>
+                Abrir Caja de Hoy
+              </LoadingButton>
             </div>
           </div>
         ) : (

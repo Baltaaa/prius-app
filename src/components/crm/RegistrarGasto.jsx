@@ -7,6 +7,7 @@ import TextInput from '../inputs/TextInput'
 import SelectChips from '../inputs/SelectChips'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import { CATEGORIA_GASTO_LABEL } from '../../lib/caja'
+import LoadingButton from '../ui/LoadingButton'
 
 const MEDIO_OPTIONS = Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => ({ value, label }))
 const CATEGORIA_OPTIONS = Object.entries(CATEGORIA_GASTO_LABEL).map(([value, label]) => ({ value, label }))
@@ -72,13 +73,15 @@ export default function RegistrarGasto({ isOpen, onClose }) {
           <TextInput label="Comprobante (opcional)" value={comprobanteProveedor} onChange={setComprobanteProveedor} maxLength={80} />
         </div>
 
-        <button
+        <LoadingButton
           type="submit"
-          disabled={saving || !conceptoValido || !montoValido}
-          className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+          loading={saving}
+          loadingText="Registrando..."
+          disabled={!conceptoValido || !montoValido}
+          className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
         >
-          {saving ? 'Registrando...' : 'Registrar Gasto'}
-        </button>
+          Registrar Gasto
+        </LoadingButton>
       </form>
     </Modal>
   )

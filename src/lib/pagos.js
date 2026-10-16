@@ -41,6 +41,38 @@ export function sugerirTipoPago(monto, saldo, pagado) {
   return pagado > 0 ? 'parcial' : 'sena'
 }
 
+// Tipo de pago automático (oct 2026, Registrar Pago sin selects manuales):
+// el usuario ya no elige Tipo — se calcula solo con el saldo de la reserva.
+// Reglas exactas (ningún "Seña" acá, a diferencia de sugerirTipoPago arriba,
+// que sigue usándose donde el tipo se puede tocar a mano):
+//   monto == costo total y no había pagos previos -> "Pago total"
+//   monto == saldo pendiente y había pagos previos -> "Saldo"
+//   monto <  saldo pendiente -> "Pago parcial"
+//   monto >  saldo pendiente -> null (no se permite, lo valida el que llama)
+// Sin reserva seleccionada (cobro directo al cliente) o saldo sin verificar
+// (recibo histórico con monto null): siempre "Pago parcial", sin bloquear.
+export function calcularTipoPagoAutomatico({ monto, saldo, costoTotal, huboPagosPrevios, saldoDesconocido, sinReserva }) {
+  if (sinReserva || saldoDesconocido) return 'parcial'
+  const m = Number(monto) || 0
+  const s = Number(saldo) || 0
+  const t = Number(costoTotal) || 0
+  if (m <= 0) return 'parcial'
+  if (!huboPagosPrevios && m === t && t > 0) return 'total'
+  if (huboPagosPrevios && m === s && s > 0) return 'saldo'
+  if (m < s) return 'parcial'
+  return null
+}
+
+// Concepto armado solo (oct 2026): "{Tipo} · {emoji} {tipo unidad} #{N} ·
+// {temporada}" con reserva, "{Tipo} · {cliente}" sin ella. Único lugar que
+// lo construye — ya no es un input editable en RegistrarPago.
+export function construirConceptoAutomatico({ tipoLabel, unidadLabel, temporadaOTipo, clienteNombre }) {
+  if (unidadLabel) {
+    return `${tipoLabel} · ${unidadLabel} · ${temporadaOTipo || ''}`.replace(/\s+·\s*$/, '')
+  }
+  return `${tipoLabel} · ${clienteNombre || ''}`.replace(/\s+·\s*$/, '')
+}
+
 export const COMPROBANTE_TIPO_LABEL = {
   factura_a: 'Factura A',
   factura_b: 'Factura B',

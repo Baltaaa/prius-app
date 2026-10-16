@@ -96,13 +96,25 @@ export default function DateInput({
   useLayoutEffect(() => {
     if (!abierto || !pos || !popoverRef.current) return
     if (window.innerWidth < 640) return // mobile: centrado en viewport, no aplica
-    const altura = popoverRef.current.getBoundingClientRect().height
+    const rect = popoverRef.current.getBoundingClientRect()
+    const altura = rect.height
+
     const excedeAbajo = pos.top + altura > window.innerHeight - COLLISION_PADDING
     const espacioArriba = pos.anchorTop - COLLISION_PADDING
-    if (!excedeAbajo || espacioArriba < altura) return // entra abajo, o tampoco entra arriba: no flipear
-    const topDeseado = pos.anchorTop - altura - 8
-    if (Math.abs(topDeseado - pos.top) > 1) {
-      setPos((p) => (p ? { ...p, top: topDeseado } : p))
+    const nuevoTop = (!excedeAbajo || espacioArriba < altura) ? pos.top : pos.anchorTop - altura - 8
+
+    // Bug real (oct 2026, Tarea 4.6): el calendario es casi siempre más
+    // ancho que el input (minWidth: pos.width solo pone un piso) — con el
+    // campo cerca del borde derecho de un modal angosto (ej. RegistrarPago),
+    // el popover se dibujaba `left: pos.left` sin chequear que entrara,
+    // quedando cortado o directamente fuera del viewport. Se clampea entre
+    // el padding izquierdo y derecho del viewport.
+    const ancho = rect.width
+    const maxLeft = window.innerWidth - COLLISION_PADDING - ancho
+    const nuevoLeft = Math.max(COLLISION_PADDING, Math.min(pos.left, maxLeft))
+
+    if (Math.abs(nuevoTop - pos.top) > 1 || Math.abs(nuevoLeft - pos.left) > 1) {
+      setPos((p) => (p ? { ...p, top: nuevoTop, left: nuevoLeft } : p))
     }
   }, [abierto, pos])
 
