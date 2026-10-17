@@ -18,7 +18,7 @@ export default function AppFooter() {
         <div className="flex items-center gap-2">
           <span>Mar del Plata · Buenos Aires</span>
           <span>•</span>
-          <span className="tracking-widest">VER. {APP_VERSION}</span>
+          <span className="tracking-widest">{APP_VERSION}</span>
         </div>
       </footer>
 
@@ -27,7 +27,7 @@ export default function AppFooter() {
           <Umbrella size={18} />
           <span className="text-body-sm">Prius Playa Grande · Sector Carpas y Balneario</span>
         </div>
-        <span className="text-[10px] uppercase tracking-wider text-prius-slate shrink-0 ml-2">VER. {APP_VERSION}</span>
+        <span className="text-[10px] uppercase tracking-wider text-prius-slate shrink-0 ml-2">{APP_VERSION}</span>
       </div>
     </>
   )

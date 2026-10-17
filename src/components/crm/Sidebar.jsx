@@ -162,7 +162,7 @@ export default function Sidebar() {
             <LogOut size={14} />
             Cerrar sesión
           </button>
-          <span className="w-2 h-2 rounded-full bg-prius-success" title={`Versión ${APP_VERSION}`} />
+          <span className="w-2 h-2 rounded-full bg-prius-success" title={APP_VERSION} />
         </div>
       </div>
     </aside>
