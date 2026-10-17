@@ -553,7 +553,7 @@ export default function Reservas() {
   }
 
   return (
-    <div className="space-y-10 animate-premium-fade">
+    <div className="space-y-10 animate-premium-fade font-ui">
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
       <div className="flex flex-wrap gap-4 items-center">

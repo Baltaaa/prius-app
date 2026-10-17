@@ -478,7 +478,7 @@ export default function Dashboard() {
           {!esHoy && (
             <button
               onClick={() => goToDate(todayStr())}
-              className="text-label-md text-gold hover:text-black transition-colors px-2"
+              className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-black transition-colors px-2"
             >
               Volver a hoy
             </button>
@@ -486,7 +486,7 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => window.print()} className="card-light px-4 py-2 rounded-xl text-label-md text-prius-slate hover:bg-prius-subtle transition-colors flex items-center gap-2"><Printer size={14} /> Imprimir A4</button>
+          <button onClick={() => window.print()} className="card-light px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest text-prius-slate hover:bg-prius-subtle transition-colors flex items-center gap-2"><Printer size={14} /> Imprimir A4</button>
         </div>
       </div>
 
@@ -527,7 +527,7 @@ export default function Dashboard() {
         {!esHoy && (
           <button
             onClick={() => goToDate(todayStr())}
-            className="self-start text-label-md text-gold hover:text-black transition-colors"
+            className="self-start text-[10px] font-bold uppercase tracking-widest text-gold hover:text-black transition-colors"
           >
             Volver a hoy
           </button>
@@ -586,7 +586,7 @@ export default function Dashboard() {
           rieles). */}
       <div className="plano-area-map card-light rounded-3xl card-light-inner relative overflow-hidden flex flex-col">
         {loading ? (
-          <div className="flex-1 flex items-center justify-center text-prius-muted text-label-md">
+          <div className="flex-1 flex items-center justify-center text-prius-muted text-[10px] font-bold uppercase tracking-widest">
             Cargando plano…
           </div>
         ) : (
@@ -629,7 +629,7 @@ export default function Dashboard() {
       <div className="plano-area-right">
         <button
           onClick={() => window.print()}
-          className="w-full py-3 rounded-xl text-label-lg bg-gold hover:bg-gold-hover text-black transition-colors flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold hover:bg-gold-hover text-black transition-colors flex items-center justify-center gap-2"
         >
           <Printer size={16} /> Imprimir A4
         </button>
@@ -646,7 +646,7 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="h-full flex flex-col animate-premium-fade overflow-hidden">
+    <div className="h-full flex flex-col animate-premium-fade overflow-hidden font-ui">
     <div className="no-print flex-1 flex flex-col space-y-4 overflow-hidden pb-4">
       {!fullscreenOpen && renderPlanoBody(false)}
 
