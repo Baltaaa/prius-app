@@ -84,7 +84,7 @@ export default function ClimaHero({ fecha }) {
         {proximasHoras.length > 0 && (
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
             {proximasHoras.map((h) => (
-              <div key={h.hora} className="shrink-0 w-12 text-center px-1 py-2 bg-white/[0.04] border border-hairline rounded-lg">
+              <div key={h.hora} className="shrink-0 w-12 text-center px-1 py-2 bg-prius-subtle border border-hairline rounded-lg">
                 <p className="text-[9px] font-bold text-prius-muted">{h.hora.slice(0, 2)}h</p>
                 <p className="text-xs font-bold text-black mt-0.5 tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
               </div>
@@ -104,7 +104,7 @@ export default function ClimaHero({ fecha }) {
             href={WINDGURU_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-gold text-black hover:bg-yellow-300 transition-all flex items-center justify-center gap-1.5"
+            className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-gold text-black hover:bg-gold-hover transition-colors flex items-center justify-center gap-1.5"
           >
             Windguru <ExternalLink size={12} />
           </a>
