@@ -347,7 +347,7 @@ export default function Ocupacion() {
                 </div>
               </div>
 
-              <div className="divide-y divide-white/5">
+              <div className="divide-y divide-hairline">
                 {unidadesFiltradas.map((u) => {
                   const barras = barrasPorUnidad[u.id] || []
                   return (

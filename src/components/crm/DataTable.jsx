@@ -40,7 +40,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-sm text-prius-slate">
+            <tbody className="divide-y divide-hairline text-sm text-prius-slate">
               {data.map((row, i) => renderRow(row, i))}
             </tbody>
           </table>

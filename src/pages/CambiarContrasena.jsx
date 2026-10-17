@@ -98,7 +98,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="relative">
-            <Lock size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30" />
+            <Lock size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-prius-muted" />
             <input
               type={show ? 'text' : 'password'}
               value={password}
@@ -109,7 +109,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
               style={{ fontSize: 16 }}
               className="w-full h-14 pl-14 pr-14 bg-white/[0.03] border border-hairline rounded-full outline-none text-black focus:border-gold/50"
             />
-            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 hover:text-black">
+            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-5 top-1/2 -translate-y-1/2 text-prius-muted hover:text-black">
               {show ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
@@ -129,7 +129,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
             {REQS.map((r) => {
               const ok = r.test(password)
               return (
-                <div key={r.key} className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider ${ok ? 'text-prius-success' : 'text-white/30'}`}>
+                <div key={r.key} className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider ${ok ? 'text-prius-success' : 'text-prius-muted'}`}>
                   {ok ? <Check size={12} /> : <X size={12} />} {r.label}
                 </div>
               )
@@ -147,7 +147,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
           </button>
 
           {!modoRecuperacion && (
-            <button type="button" onClick={signOut} className="w-full text-center text-[10px] font-bold text-white/30 hover:text-black uppercase tracking-widest">
+            <button type="button" onClick={signOut} className="w-full text-center text-[10px] font-bold text-prius-muted hover:text-black uppercase tracking-widest">
               Cerrar sesión
             </button>
           )}

@@ -128,7 +128,7 @@ export default function Reportes() {
               <th className="px-6 py-4 text-right">Monto</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5 text-sm text-prius-slate">
+          <tbody className="divide-y divide-hairline text-sm text-prius-slate">
             {activeReservas.map(res => (
               <tr
                 key={res.id}

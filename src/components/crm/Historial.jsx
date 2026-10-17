@@ -275,7 +275,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
               <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] text-gold mb-3 capitalize ${mostrarFiltrosGlobales ? 'sticky top-0 bg-white py-2 z-10' : ''}`}>
                 {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
               </h3>
-              <div className="card-light rounded-2xl card-light-inner divide-y divide-white/5">
+              <div className="card-light rounded-2xl card-light-inner divide-y divide-hairline">
                 {items.map((e) => {
                   const meta = metaDe(e)
                   const Icon = meta.icon

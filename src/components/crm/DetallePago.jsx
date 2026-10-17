@@ -228,7 +228,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
           </div>
 
           {comprobantes.length > 0 && (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-hairline">
               {comprobantes.map((c) => (
                 <div key={c.id} className="px-4 py-3 flex items-center justify-between gap-3">
                   {editandoId === c.id ? (
