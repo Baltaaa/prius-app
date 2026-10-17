@@ -1,22 +1,23 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { supabase } from "../lib/supabase"
-import { Printer, Expand, Shrink, ChevronLeft, ChevronRight, Tent, Umbrella, DoorOpen } from "lucide-react"
+import { Printer, Expand, Shrink, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Clock, Layers } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
+import UnidadDetallePanel from "../components/dashboard/UnidadDetallePanel"
+import PlanoMobile from "../components/dashboard/PlanoMobile"
 import AsignarUnidadModal from "../components/dashboard/AsignarUnidadModal"
 import MoverUnidadDialog from "../components/dashboard/MoverUnidadDialog"
 import Cell from "../components/dashboard/Cell"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import PlanoGrid from "../components/plano/PlanoGrid"
 import PlanoViewport from "../components/plano/PlanoViewport"
-import PlanoStatsBar, {
-  OcupacionCard, StatRowCard, MixCardCompacto, PendientesCard, IngresosCard, ClimaCard, EstadoLegend, pct,
-} from "../components/dashboard/PlanoStatsBar"
+import { pct } from "../components/dashboard/PlanoStatsBar"
 import { useData } from "../context/DataProvider"
 import { calcularPlanoStats } from "../lib/planoStats"
 import { buildUnitsMap } from "../lib/planoUnits"
+import { formatPesos } from "../lib/format"
 import DateInput from "../components/inputs/DateInput"
 import { useDeepLinkTarget } from "../hooks/useDeepLinkTarget"
 import { useOverlay } from "../context/OverlayProvider"
@@ -37,7 +38,7 @@ const shiftDate = (fecha, delta) => {
 }
 
 export default function Dashboard() {
-  const { unidades, reservas, loading, temporadaActiva, cajaHoy, historialCajas, pagos } = useData()
+  const { unidades, reservas, loading, temporadaActiva, cajaHoy, historialCajas, pagos, realtimeConectado } = useData()
 
   // Se guarda el ID, no una copia de `units[...]`: así el modal de preview
   // sigue leyendo el objeto vivo del useMemo de abajo en cada render y se
@@ -381,6 +382,27 @@ export default function Dashboard() {
 
   const selectedUnit = selectedUnitId ? units[selectedUnitId] : null
 
+  // Handlers compartidos entre el panel lateral fijo (desktop, ≥1024px) y la
+  // hoja inferior (tablet/mobile) — una sola definición, los dos consumen
+  // exactamente los mismos.
+  const handleCerrarDetalle = () => setSelectedUnitId(null)
+  const handleAsignarTemporada = (unit) => { setSelectedUnitId(null); setAsignarUnit(unit) }
+  const handleMoverUnidadClick = (reserva, unit) => { setSelectedUnitId(null); setMoverTarget({ reserva, unit }) }
+
+  // Mismo breakpoint que el resto del shell (BottomNav/Sidebar, 768px) — por
+  // debajo de eso se monta PlanoMobile.jsx (componente nuevo y separado del
+  // layout desktop/tablet de acá, ver rediseño oct 2026) en vez del body de
+  // franja superior + panel lateral.
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  )
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(mql.matches)
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
+
   // Deep-link vía linkToPlano() (Tarea 1, oct 2026): mueve el plano a la
   // fecha pedida y resalta la unidad referida (ej. desde Notificaciones o
   // el día de un mes en Ocupación). `unidades`/`reservas` ya están en
@@ -454,196 +476,222 @@ export default function Dashboard() {
   // de maximizar/minimizar: el resto del árbol es idéntico a propósito
   // (WYSIWYG entre vista normal y pantalla completa). La impresión A4 no
   // vive acá — sale de `PlanoImpresion` por fuera de `.no-print`, sin tocar.
-  const renderPlanoBody = (fullscreen) => (
-    <div className="plano-layout flex-1 min-h-0">
-      {/* Toolbar compacto: mobile + tablet (<1280px) — navegación de fecha
-          (izquierda) + Imprimir A4 (derecha), igual que siempre. */}
-      <div className="plano-area-toolbar flex flex-wrap justify-between items-center gap-3 shrink-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => goToDate(shiftDate(selectedDate, -1))}
-            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-hairline border border-hairline rounded-xl text-prius-slate transition-colors"
-            title="Día anterior"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} className="w-36" />
-          <button
-            onClick={() => goToDate(shiftDate(selectedDate, 1))}
-            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-hairline border border-hairline rounded-xl text-prius-slate transition-colors"
-            title="Día siguiente"
-          >
-            <ChevronRight size={16} />
-          </button>
-          {!esHoy && (
-            <button
-              onClick={() => goToDate(todayStr())}
-              className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-black transition-colors px-2"
-            >
-              Volver a hoy
-            </button>
-          )}
-        </div>
+  const canPanAhora = sizesRef.current.contentW * transform.scale > sizesRef.current.contW || sizesRef.current.contentH * transform.scale > sizesRef.current.contH
 
-        <div className="flex items-center gap-3">
-          <button onClick={() => window.print()} className="card-light px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest text-prius-slate hover:bg-prius-subtle transition-colors flex items-center gap-2"><Printer size={14} /> Imprimir A4</button>
-        </div>
-      </div>
-
-      {/* Stats compacto: mismo PlanoStatsBar de siempre, carrusel horizontal
-          con snap en mobile, fila con scroll horizontal en tablet. */}
-      <div className="plano-area-stats shrink-0">
-        <PlanoStatsBar
-          stats={planoStats}
-          selectedDate={selectedDate}
-          filtro={statsFiltro}
-          onToggleFiltro={toggleStatsFiltro}
-          loading={loading}
-        />
-      </div>
-
-      {/* Riel izquierdo: solo desktop >=1280px (oculto por CSS en el resto,
-          ver <style> más abajo). Mismas tarjetas que el stats compacto,
-          reusadas vía los named exports de PlanoStatsBar.jsx — ninguna
-          lógica/dato nuevo, solo otra disposición y ancho. */}
-      <div className="plano-area-left">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => goToDate(shiftDate(selectedDate, -1))}
-            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-hairline border border-hairline rounded-xl text-prius-slate transition-colors shrink-0"
-            title="Día anterior"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} className="flex-1 min-w-0" />
-          <button
-            onClick={() => goToDate(shiftDate(selectedDate, 1))}
-            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-hairline border border-hairline rounded-xl text-prius-slate transition-colors shrink-0"
-            title="Día siguiente"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
-        {!esHoy && (
-          <button
-            onClick={() => goToDate(todayStr())}
-            className="self-start text-[10px] font-bold uppercase tracking-widest text-gold hover:text-black transition-colors"
-          >
-            Volver a hoy
-          </button>
-        )}
-
-        {/* Compactado oct 2026 (sin scroll en el panel, ver CLAUDE.md "Panel
-            de stats del Plano"): Ocupación en tamaño chico (no `size="lg"`),
-            Mix en una fila inline en vez de la grilla de 3 botones de 44px.
-            Carpas/Sombrillas/Libres hoy apiladas como filas horizontales
-            (StatRowCard, ver PlanoStatsBar.jsx) en vez de una fila de 3
-            mini-cards angostas — el ancho de 280px no alcanzaba para el
-            label completo sin truncarlo (ajuste oct 2026). */}
-        {!loading && planoStats && (
-          <>
-            <OcupacionCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
-            <div className="flex flex-col gap-2">
-              <StatRowCard
-                icon={Tent}
-                label="Carpas"
-                value={pct(planoStats.carpas.pct)}
-                sub={`${planoStats.carpas.count}/${planoStats.carpas.total}`}
-                progress={planoStats.carpas.pct}
-                active={statsFiltro === 'carpas'}
-                onClick={() => toggleStatsFiltro('carpas')}
-              />
-              <StatRowCard
-                icon={Umbrella}
-                label="Sombrillas"
-                value={pct(planoStats.sombrillas.pct)}
-                sub={`${planoStats.sombrillas.count}/${planoStats.sombrillas.total}`}
-                progress={planoStats.sombrillas.pct}
-                active={statsFiltro === 'sombrillas'}
-                onClick={() => toggleStatsFiltro('sombrillas')}
-              />
-              <StatRowCard
-                icon={DoorOpen}
-                label="Libres hoy"
-                value={planoStats.libres.count}
-                active={statsFiltro === 'libres'}
-                onClick={() => toggleStatsFiltro('libres')}
-              />
-            </div>
-            <MixCardCompacto stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
-          </>
-        )}
-
-        {/* Referencias va pegada a Mix, con el mismo gap que el resto (sin
-            margin-top:auto / flex-1 empujándola al fondo, oct 2026) — si
-            sobra alto, el sobrante queda abajo de Referencias, no en el
-            medio del panel. */}
-        <EstadoLegend />
-      </div>
-
-      {/* Workspace del mapa — único árbol, siempre presente (ver CSS: en
-          <1280px ocupa toda la fila "map"; en >=1280px queda entre los dos
-          rieles). */}
-      <div className="plano-area-map card-light rounded-3xl card-light-inner relative overflow-hidden flex flex-col">
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center text-prius-muted text-[10px] font-bold uppercase tracking-widest">
-            Cargando plano…
-          </div>
-        ) : (
-          <>
-            <PlanoViewport
-              transform={transform}
-              ready={ready}
-              isDragging={isDragging}
-              canPan={sizesRef.current.contentW * transform.scale > sizesRef.current.contW || sizesRef.current.contentH * transform.scale > sizesRef.current.contH}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onEncuadrar={handleEncuadrar}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onMapMouseDown={handleMapMouseDown}
-              onMapWheel={handleMapWheel}
-              onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
-              viewportRef={setMapViewportRef}
-              contentRef={contentRef}
-              extraButtons={fullscreen ? (
-                <button onClick={() => setFullscreenOpen(false)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Cerrar pantalla completa">
-                  <Shrink size={18} />
-                </button>
-              ) : (
-                <button onClick={() => setFullscreenOpen(true)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Ver en pantalla completa">
-                  <Expand size={18} />
-                </button>
-              )}
-            >
-              <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
-            </PlanoViewport>
-          </>
-        )}
-      </div>
-
-      {/* Riel derecho: solo desktop >=1280px — Imprimir A4 como acción
-          primaria + las tres tarjetas restantes, mismos componentes que el
-          stats compacto. */}
-      <div className="plano-area-right">
-        <button
-          onClick={() => window.print()}
-          className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold hover:bg-gold-hover text-black transition-colors flex items-center justify-center gap-2"
-        >
-          <Printer size={16} /> Imprimir A4
+  const renderPlanoBody = (fullscreen) => {
+    const extraButtonsViewport = (
+      fullscreen ? (
+        <button onClick={() => setFullscreenOpen(false)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Cerrar pantalla completa">
+          <Shrink size={18} />
         </button>
+      ) : (
+        <button onClick={() => setFullscreenOpen(true)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Ver en pantalla completa">
+          <Expand size={18} />
+        </button>
+      )
+    )
+    // Mobile (<768px): componente nuevo y separado (mock 02-plano-mobile) —
+    // nunca comparte JSX con el layout desktop/tablet de acá abajo, solo los
+    // mismos datos/handlers ya calculados en este componente.
+    if (isMobile) {
+      return (
+        <PlanoMobile
+          selectedDate={selectedDate}
+          esHoy={esHoy}
+          onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
+          onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
+          onHoy={() => goToDate(todayStr())}
+          onDateChange={goToDate}
+          planoStats={planoStats}
+          loading={loading}
+          statsFiltro={statsFiltro}
+          onToggleFiltro={toggleStatsFiltro}
+          transform={transform}
+          ready={ready}
+          isDragging={isDragging}
+          canPan={canPanAhora}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onEncuadrar={handleEncuadrar}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMapMouseDown={handleMapMouseDown}
+          onMapWheel={handleMapWheel}
+          onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
+          viewportRef={setMapViewportRef}
+          contentRef={contentRef}
+          fullscreen={fullscreen}
+          onToggleFullscreen={() => setFullscreenOpen(!fullscreen)}
+          unidades={unidades}
+          renderCelda={renderCelda}
+        />
+      )
+    }
 
-        {!loading && planoStats && (
-          <>
-            <PendientesCard stats={planoStats} filtro={statsFiltro} onToggleFiltro={toggleStatsFiltro} className="w-full" />
-            <IngresosCard stats={planoStats} className="w-full" />
-            <ClimaCard selectedDate={selectedDate} className="w-full" />
-          </>
-        )}
+    // Desktop/tablet (≥768px, mock 02-plano-desktop / 02-plano-tablet):
+    // misma franja superior para los dos, grilla de KPIs/filtros responsive
+    // (flex en desktop, grid-cols-3 + scroll-x en tablet vía Tailwind). El
+    // panel lateral fijo (UnidadDetallePanel) solo se ve en ≥1024px —
+    // tablet sigue usando la hoja inferior (UnidadPreviewModal) para el
+    // detalle, como pide la tarea.
+    const diaSemana = new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-AR', { weekday: 'short' }).toUpperCase().replace('.', '')
+
+    return (
+      <div className="flex-1 min-h-0 flex flex-col gap-4">
+        {/* Franja superior */}
+        <div className="card-light rounded-2xl p-3 md:p-space-md flex flex-col gap-3 shrink-0">
+          <div className="flex items-center gap-3 flex-wrap xl:flex-nowrap">
+            {/* Selector de fecha */}
+            <div className="flex items-center gap-1 bg-prius-subtle p-1 rounded-xl shrink-0">
+              <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-9 h-9 flex items-center justify-center rounded-lg bg-white text-prius-slate hover:bg-hairline transition-colors" title="Día anterior">
+                <ChevronLeft size={16} />
+              </button>
+              <div className="flex items-center gap-1.5 px-1">
+                {/* calendarOnly: mismo DateInput/calendario de siempre, con el
+                    look del mock (texto + día de semana) en vez del input
+                    con borde por defecto — "el mismo selector y handler". */}
+                <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} calendarOnly className="w-[106px]" />
+                <span className="text-label-md text-prius-slate uppercase shrink-0">{diaSemana}</span>
+                {!esHoy && (
+                  <button onClick={() => goToDate(todayStr())} className="text-label-md text-gold hover:text-black font-bold uppercase ml-1 shrink-0">Hoy</button>
+                )}
+              </div>
+              <button onClick={() => goToDate(shiftDate(selectedDate, 1))} className="w-9 h-9 flex items-center justify-center rounded-lg bg-white text-prius-slate hover:bg-hairline transition-colors" title="Día siguiente">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
+            {/* 3 KPIs reales: Ocupadas / Libres / Pendientes */}
+            {planoStats && (
+              <div className="grid grid-cols-3 md:flex gap-2 flex-1 md:max-w-2xl">
+                <button onClick={() => toggleStatsFiltro('ocupacion')} className={`flex-1 min-w-0 md:min-w-[170px] p-2.5 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'ocupacion' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
+                  <span className="w-9 h-9 shrink-0 rounded-lg bg-black text-white flex items-center justify-center"><CalendarDays size={16} /></span>
+                  <span className="min-w-0">
+                    <span className="block text-label-md text-prius-slate uppercase truncate">Ocupadas</span>
+                    <span className="flex items-baseline gap-1.5">
+                      <span className="text-headline-sm text-black tabular-nums">{planoStats.ocupacion.count}</span>
+                      <span className="text-body-sm text-prius-slate">{pct(planoStats.ocupacion.pct)}</span>
+                    </span>
+                  </span>
+                </button>
+                <button onClick={() => toggleStatsFiltro('libres')} className={`flex-1 min-w-0 md:min-w-[170px] p-2.5 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'libres' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
+                  <span className="w-9 h-9 shrink-0 rounded-lg bg-green-100 text-prius-success flex items-center justify-center"><CheckCircle2 size={16} /></span>
+                  <span className="min-w-0">
+                    <span className="block text-label-md text-prius-slate uppercase truncate">Libres</span>
+                    <span className="flex items-baseline gap-1.5">
+                      <span className="text-headline-sm text-black tabular-nums">{planoStats.libres.count}</span>
+                      <span className="text-body-sm text-prius-success font-semibold">{pct(planoStats.libres.count / Math.max(1, planoStats.ocupacion.total))}</span>
+                    </span>
+                  </span>
+                </button>
+                <button onClick={() => toggleStatsFiltro('pendientes')} className={`flex-1 min-w-0 md:min-w-[210px] p-2.5 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'pendientes' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
+                  <span className="w-9 h-9 shrink-0 rounded-lg bg-gold text-black flex items-center justify-center"><Clock size={16} /></span>
+                  <span className="min-w-0">
+                    <span className="block text-label-md text-prius-slate uppercase truncate">Pendientes ({planoStats.pendientes.count})</span>
+                    <span className="block text-headline-sm text-black tabular-nums truncate">{planoStats.pendientes.saldo > 0 ? formatPesos(planoStats.pendientes.saldo) : '—'}</span>
+                  </span>
+                </button>
+              </div>
+            )}
+
+            <button onClick={() => window.print()} className="h-11 px-4 bg-prius-surface hover:bg-hairline text-black rounded-xl flex items-center gap-2 text-title-md shrink-0 transition-colors">
+              <Printer size={16} /> <span className="hidden sm:inline">Imprimir A4</span>
+            </button>
+          </div>
+
+          {/* Filtros: tipo + estado + leyenda */}
+          <div className="flex items-center gap-3 overflow-x-auto md:flex-wrap pb-0.5 md:pb-0 scrollbar-none">
+            <div className="flex items-center bg-prius-subtle p-1 rounded-full gap-1 shrink-0">
+              {[['todo', 'Todo', planoStats?.ocupacion.total], ['carpas', 'Carpas', planoStats?.carpas.total], ['sombrillas', 'Sombrillas', planoStats?.sombrillas.total]].map(([key, label, total]) => (
+                <button
+                  key={key}
+                  onClick={() => key === 'todo' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
+                  className={`px-3.5 py-1 rounded-full text-label-lg whitespace-nowrap transition-colors ${
+                    (key === 'todo' ? !statsFiltro : statsFiltro === key) ? 'bg-black text-white' : 'text-prius-slate hover:text-black'
+                  }`}
+                >
+                  {label}{total != null ? ` (${total})` : ''}
+                </button>
+              ))}
+            </div>
+            <div className="w-px h-5 bg-hairline shrink-0 hidden sm:block" />
+            <div className="flex items-center gap-1.5 shrink-0">
+              {[['todas', 'Todas', null], ['libres', 'Libres', planoStats?.libres.count], ['ocupacion', 'Ocupadas', planoStats?.ocupacion.count], ['pendientes', 'Pendientes', planoStats?.pendientes.count]].map(([key, label, count]) => (
+                <button
+                  key={key}
+                  onClick={() => key === 'todas' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
+                  className={`h-8 px-3 rounded-full text-label-md uppercase whitespace-nowrap transition-colors ${
+                    (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-gold text-black' : 'bg-prius-surface text-black hover:bg-hairline'
+                  }`}
+                >
+                  {label}{count != null ? ` (${count})` : ''}
+                </button>
+              ))}
+            </div>
+            <div className="hidden lg:flex items-center gap-4 bg-prius-subtle px-3 py-1.5 rounded-xl ml-auto shrink-0">
+              <span className="flex items-center gap-1.5 text-body-sm text-prius-slate"><span className="w-3.5 h-3.5 rounded bg-white border border-hairline" />Libre</span>
+              <span className="flex items-center gap-1.5 text-body-sm text-prius-slate"><span className="w-3.5 h-3.5 rounded bg-black" />Alquilada</span>
+              <span className="flex items-center gap-1.5 text-body-sm text-prius-slate"><span className="w-3.5 h-3.5 rounded bg-gold flex items-center justify-center text-[8px] font-bold text-black">T</span>Pendiente de pago</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Workspace: grid (sin tocar) + panel lateral fijo (desktop) */}
+        <div className="flex-1 min-h-0 flex gap-4">
+          <section className="flex-1 card-light rounded-2xl card-light-inner relative overflow-hidden flex flex-col">
+            <div className="px-4 md:px-space-lg pt-3 md:pt-space-md flex items-center justify-between gap-2 shrink-0">
+              <span className="flex items-center gap-2 text-prius-slate">
+                <Layers size={16} />
+                <span className="text-label-lg uppercase tracking-wider">Pasillo A · Pasillo B · Pasillo C</span>
+              </span>
+              {realtimeConectado && (
+                <span className="hidden sm:inline-flex items-center gap-1.5 bg-prius-subtle px-3 py-1 rounded-full text-prius-slate">
+                  <span className="w-2 h-2 rounded-full bg-prius-success" />
+                  <span className="text-label-md uppercase">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
+                </span>
+              )}
+            </div>
+            {loading ? (
+              <div className="flex-1 flex items-center justify-center text-prius-muted text-[10px] font-bold uppercase tracking-widest">
+                Cargando plano…
+              </div>
+            ) : (
+              <PlanoViewport
+                transform={transform}
+                ready={ready}
+                isDragging={isDragging}
+                canPan={canPanAhora}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onEncuadrar={handleEncuadrar}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onMapMouseDown={handleMapMouseDown}
+                onMapWheel={handleMapWheel}
+                onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
+                viewportRef={setMapViewportRef}
+                contentRef={contentRef}
+                extraButtons={extraButtonsViewport}
+              >
+                <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+              </PlanoViewport>
+            )}
+          </section>
+
+          <UnidadDetallePanel
+            unit={selectedUnit}
+            reservas={reservas}
+            temporadaActiva={temporadaActiva}
+            onClose={handleCerrarDetalle}
+            onAsignarTemporada={handleAsignarTemporada}
+            onMoverUnidad={handleMoverUnidadClick}
+          />
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="h-full flex flex-col animate-premium-fade overflow-hidden font-ui">
@@ -671,9 +719,9 @@ export default function Dashboard() {
           unit={selectedUnit}
           reservas={reservas}
           temporadaActiva={temporadaActiva}
-          onClose={() => setSelectedUnitId(null)}
-          onAsignarTemporada={(unit) => { setSelectedUnitId(null); setAsignarUnit(unit) }}
-          onMoverUnidad={(reserva, unit) => { setSelectedUnitId(null); setMoverTarget({ reserva, unit }) }}
+          onClose={handleCerrarDetalle}
+          onAsignarTemporada={handleAsignarTemporada}
+          onMoverUnidad={handleMoverUnidadClick}
         />
       )}
 
@@ -698,92 +746,6 @@ export default function Dashboard() {
     {!loading && <PlanoImpresion units={units} selectedDate={selectedDate} stats={planoStats} />}
 
       <style>{`
-        /* Grid de 3 áreas del Plano (oct 2026) — mobile/tablet (<1280px):
-           toolbar + stats arriba, mapa abajo, una sola columna. Desktop
-           (>=1280px): riel izquierdo 280px / mapa flexible / riel derecho
-           280px, en una sola fila. Nunca afecta la impresión — @media print
-           no toca estas clases, y PlanoImpresion.jsx vive fuera de
-           .no-print con su propio layout de siempre. */
-        .plano-layout {
-          display: grid;
-          grid-template-areas: "toolbar" "stats" "map";
-          grid-template-columns: 1fr;
-          grid-template-rows: auto auto 1fr;
-          gap: 16px;
-          min-height: 0;
-        }
-        /* min-width: 0 en las tres áreas de la columna única (menos de
-           1280px de ancho): una columna 1fr de grid es en realidad
-           minmax(auto, 1fr) — su tamaño mínimo es el máximo de los
-           min-content de TODOS los items que comparten esa columna, no
-           solo el que de hecho desborda. Sin esto en .plano-area-stats, la
-           tira horizontal de PlanoStatsBar (varias tarjetas en fila,
-           pensada para hacer scroll-x) empujaba el ancho de toda la
-           columna, y con ella el plano, mucho más allá del viewport en
-           mobile (bug real: el plano se veía roto/vacío en 360/390px,
-           Fase 4A hotfix). */
-        .plano-area-toolbar { grid-area: toolbar; min-width: 0; }
-        .plano-area-stats { grid-area: stats; min-width: 0; }
-        .plano-area-map { grid-area: map; min-height: 0; min-width: 0; }
-        .plano-area-left, .plano-area-right { display: none; }
-        @media (min-width: 1280px) {
-          .plano-layout {
-            grid-template-areas: "left map right";
-            grid-template-columns: 280px 1fr 280px;
-            grid-template-rows: 1fr;
-            gap: 24px;
-          }
-          .plano-area-toolbar, .plano-area-stats { display: none; }
-          /* Sin scroll nunca acá (oct 2026) — antes tenía overflow-y:auto y
-             "Referencias" quedaba cortado fuera del viewport en pantallas
-             de hasta 1080px de alto. La columna mide el alto disponible
-             real (grid-template-rows:1fr de .plano-layout) y las tarjetas
-             de arriba ya se compactaron lo suficiente para entrar sin
-             recortar nada (nunca overflow:hidden tampoco). */
-          .plano-area-left, .plano-area-right {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            min-height: 0;
-            /* min-width:0 (oct 2026): .plano-area-left/right son items de
-               .plano-layout (grid con columnas fijas 280px) y a la vez
-               contenedores flex por su cuenta — un grid item tiene
-               min-width:auto por default, así que si su contenido pedía más
-               de 280px (el ancho de las cards de adentro) el item se salía
-               del track fijo en vez de achicarse, y el borde derecho del
-               riel (flecha ">", Ocupación, Libres) quedaba cortado fuera
-               del contenedor. Esto, no overflow:hidden, es el fix real. */
-            min-width: 0;
-          }
-        }
-        /* Variante más compacta para pantallas de poca altura (ej. 1366x768,
-           1280x720 con la barra del navegador real descontada) — mismo
-           contenido, menos aire. Nunca toca el tamaño de las casillas del
-           plano en sí, solo el riel de stats. */
-        @media (min-width: 1280px) and (max-height: 820px) {
-          /* OJO: esto es un template literal de JS — un solo backslash antes
-             de un punto o corchete escapado de un selector de clase Tailwind
-             se come la barra ANTES de llegar al navegador (no es un escape
-             válido de JS, así que lo descarta) y el selector queda roto.
-             Hace falta backslash doble acá para que el navegador reciba
-             el backslash real que necesita CSS. */
-          .plano-area-left, .plano-area-right { gap: 6px; }
-          .plano-area-left :is(.rounded-2xl, .rounded-xl) { padding: 0.5rem !important; }
-          .plano-area-left .mb-2\\.5 { margin-bottom: 0.25rem !important; }
-          .plano-area-left .mt-2\\.5 { margin-top: 0.25rem !important; }
-          .plano-area-left .mt-0\\.5 { margin-top: 0 !important; }
-          .plano-area-left .w-7.h-7 { width: 1.25rem !important; height: 1.25rem !important; }
-          .plano-area-left p.text-2xl { font-size: 1.05rem !important; }
-          .plano-area-left p.text-\\[10px\\] { font-size: 9px !important; }
-          .plano-area-left .space-y-3\\.5 { row-gap: 0.25rem !important; }
-          .plano-area-left .gap-y-1\\.5 { row-gap: 0.15rem !important; }
-          .plano-area-left .mb-3\\.5 { margin-bottom: 0.15rem !important; }
-          .plano-area-left .p-2\\.5 { padding: 0.4rem !important; }
-          .plano-area-left .min-h-\\[44px\\] { min-height: 34px !important; }
-          .plano-area-left .px-2\\.5 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-          .plano-area-left .p-3 { padding: 0.5rem !important; }
-        }
-
         /* Pantalla completa del plano en mobile (<640px, donde el modal ya
            es w-full h-full, borde a borde): reserva las safe areas del
            dispositivo (notch arriba, home indicator abajo) sumadas al
