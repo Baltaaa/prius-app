@@ -1,6 +1,6 @@
 import { formatPesosVisible, unidadEmoji, formatComprobante } from '../../lib/format'
 import { esPendienteConfirmacion, pagoSinVerificar, saldoNumerico } from '../../lib/reservas'
-import { CreditCard, Hourglass, Gift } from 'lucide-react'
+import { CreditCard, Hourglass, Gift, Pencil } from 'lucide-react'
 
 // "Monto nulo" (sep 2026, reemplaza "Sin verificar" acá y en el header de
 // Clientes.jsx): mismo concepto — un pago con comprobante cargado pero sin
@@ -27,7 +27,7 @@ const MontoNulo = ({ texto = 'Monto nulo' }) => (
 // muestra una celda por cada pago ya registrado y, si la reserva no está
 // saldada, una única celda "+ Cargar" después del último pago — al
 // registrarlo, esa celda se corre un lugar más.
-export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio }) {
+export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio, onEditarPrecio }) {
   // Unidad bonificada (sep 2026): sin cargo, no admite pagos — bloqueado a
   // nivel base (trigger trg_pago_bloquea_bonificada). No tiene sentido
   // mostrar ninguna grilla ni "Definir precio" acá.
@@ -120,9 +120,23 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
               guard de más arriba corta antes si no lo es), pero se aplica el
               mismo helper acá para no formatear montos a mano. */}
           {formatPesosVisible(reserva.valor_total) && (
-            <div className={`${cellBase} bg-prius-subtle border border-hairline text-black`}>
+            <div className={`${cellBase} relative bg-prius-subtle border border-hairline text-black`}>
               <span className="text-[8px] text-prius-muted uppercase tracking-widest">Precio Venta</span>
               {formatPesosVisible(reserva.valor_total)}
+              {/* Corrige un monto mal cargado (ej. error de tipeo del
+                  administrador) — nunca "registra" un pago nuevo, solo
+                  ajusta el total de la reserva. Detrás del permiso
+                  `ajustes_precio` (solo superadmin), oct 2026. */}
+              {onEditarPrecio && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onEditarPrecio(reserva) }}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white border border-hairline flex items-center justify-center text-prius-slate hover:text-black hover:border-black transition-colors"
+                  title="Editar monto total"
+                >
+                  <Pencil size={10} />
+                </button>
+              )}
             </div>
           )}
 

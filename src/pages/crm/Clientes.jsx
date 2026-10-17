@@ -123,6 +123,10 @@ export default function Clientes() {
     [unidades],
   )
   const puedeBonificar = usePermiso('bonificar')
+  // Corregir un monto mal cargado (ej. error de tipeo del administrador) —
+  // mismo modal/flujo de "Definir precio", solo que pre-llenado con el valor
+  // actual. Detrás de `ajustes_precio` (solo superadmin, oct 2026).
+  const puedeAjustarPrecio = usePermiso('ajustes_precio')
   const [searchParams, setSearchParams] = useSearchParams()
   const { alert, confirm } = useDialog()
   const [searchTerm, setSearchTerm] = useState('')
@@ -1058,6 +1062,10 @@ export default function Clientes() {
                                   setConfirmarValorTotal(0)
                                   setConfirmarReserva({ reserva, cliente })
                                 }}
+                                onEditarPrecio={puedeAjustarPrecio ? (reserva) => {
+                                  setConfirmarValorTotal(Number(reserva.valor_total) || 0)
+                                  setConfirmarReserva({ reserva, cliente })
+                                } : undefined}
                               />
                             </div>
                           ))}
@@ -1227,7 +1235,13 @@ export default function Clientes() {
       <Modal
         isOpen={!!confirmarReserva}
         onClose={() => setConfirmarReserva(null)}
-        title={confirmarReserva?.reserva && esPendienteConfirmacion(confirmarReserva.reserva) ? 'Confirmar Temporada' : 'Definir Precio'}
+        title={
+          confirmarReserva?.reserva && esPendienteConfirmacion(confirmarReserva.reserva)
+            ? 'Confirmar Temporada'
+            : Number(confirmarReserva?.reserva?.valor_total) > 0
+              ? 'Editar Monto'
+              : 'Definir Precio'
+        }
       >
         <form onSubmit={handleSubmitConfirmarReserva} className="space-y-6">
           <div>
