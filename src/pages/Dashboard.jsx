@@ -462,7 +462,7 @@ export default function Dashboard() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => goToDate(shiftDate(selectedDate, -1))}
-            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-hairline border border-hairline rounded-xl text-prius-slate transition-colors"
             title="Día anterior"
           >
             <ChevronLeft size={16} />
@@ -470,7 +470,7 @@ export default function Dashboard() {
           <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} className="w-36" />
           <button
             onClick={() => goToDate(shiftDate(selectedDate, 1))}
-            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-hairline border border-hairline rounded-xl text-prius-slate transition-colors"
             title="Día siguiente"
           >
             <ChevronRight size={16} />
@@ -478,7 +478,7 @@ export default function Dashboard() {
           {!esHoy && (
             <button
               onClick={() => goToDate(todayStr())}
-              className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300 transition-all px-2"
+              className="text-label-md text-gold hover:text-black transition-colors px-2"
             >
               Volver a hoy
             </button>
@@ -486,7 +486,7 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => window.print()} className="glass-card px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"><Printer size={14} /> Imprimir A4</button>
+          <button onClick={() => window.print()} className="card-light px-4 py-2 rounded-xl text-label-md text-prius-slate hover:bg-prius-subtle transition-colors flex items-center gap-2"><Printer size={14} /> Imprimir A4</button>
         </div>
       </div>
 
@@ -510,7 +510,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => goToDate(shiftDate(selectedDate, -1))}
-            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all shrink-0"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-hairline border border-hairline rounded-xl text-prius-slate transition-colors shrink-0"
             title="Día anterior"
           >
             <ChevronLeft size={16} />
@@ -518,7 +518,7 @@ export default function Dashboard() {
           <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} className="flex-1 min-w-0" />
           <button
             onClick={() => goToDate(shiftDate(selectedDate, 1))}
-            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all shrink-0"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-hairline border border-hairline rounded-xl text-prius-slate transition-colors shrink-0"
             title="Día siguiente"
           >
             <ChevronRight size={16} />
@@ -527,7 +527,7 @@ export default function Dashboard() {
         {!esHoy && (
           <button
             onClick={() => goToDate(todayStr())}
-            className="self-start text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300 transition-all"
+            className="self-start text-label-md text-gold hover:text-black transition-colors"
           >
             Volver a hoy
           </button>
@@ -584,9 +584,9 @@ export default function Dashboard() {
       {/* Workspace del mapa — único árbol, siempre presente (ver CSS: en
           <1280px ocupa toda la fila "map"; en >=1280px queda entre los dos
           rieles). */}
-      <div className="plano-area-map glass-card rounded-3xl glass-card-inner relative overflow-hidden flex flex-col">
+      <div className="plano-area-map card-light rounded-3xl card-light-inner relative overflow-hidden flex flex-col">
         {loading ? (
-          <div className="flex-1 flex items-center justify-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+          <div className="flex-1 flex items-center justify-center text-prius-muted text-label-md">
             Cargando plano…
           </div>
         ) : (
@@ -629,7 +629,7 @@ export default function Dashboard() {
       <div className="plano-area-right">
         <button
           onClick={() => window.print()}
-          className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-[#FDE047] hover:bg-yellow-300 text-black transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-xl text-label-lg bg-gold hover:bg-gold-hover text-black transition-colors flex items-center justify-center gap-2"
         >
           <Printer size={16} /> Imprimir A4
         </button>
@@ -658,7 +658,7 @@ export default function Dashboard() {
           <div
             ref={bindFullscreen}
             onClick={(e) => e.stopPropagation()}
-            className="plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90vh] glass-card sm:rounded-3xl overflow-hidden border border-white/10 shadow-2xl flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
+            className="plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90vh] card-light sm:rounded-3xl overflow-hidden border border-hairline flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
           >
             {renderPlanoBody(true)}
           </div>
