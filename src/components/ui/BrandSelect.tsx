@@ -169,8 +169,8 @@ export default function BrandSelect({
     }
   }
 
-  const triggerClass = `w-full min-h-[44px] flex items-center justify-between gap-2 bg-white/5 border rounded-xl px-4 py-3 text-base md:text-sm text-left outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-    error || invalid ? 'border-red-500/50' : open ? 'border-[#FDE047]/50' : 'border-white/10'
+  const triggerClass = `w-full min-h-[44px] flex items-center justify-between gap-2 bg-white border rounded-xl px-4 py-3 text-base md:text-sm text-left outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+    error || invalid ? 'border-prius-error' : open ? 'border-black' : 'border-hairline'
   } ${className}`
 
   let flatIdx = -1
@@ -178,12 +178,12 @@ export default function BrandSelect({
   const renderList = () => (
     <div ref={listRef} className="overflow-y-auto scrollbar-thin" style={{ maxHeight: isMobile ? undefined : 320 }}>
       {filtered.length === 0 ? (
-        <p className="px-4 py-3 text-xs text-gray-500 uppercase tracking-widest">Sin resultados</p>
+        <p className="px-4 py-3 text-xs text-prius-muted uppercase tracking-widest">Sin resultados</p>
       ) : (
         groups.map(([group, opts]) => (
           <div key={group || '_'}>
             {group && (
-              <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest">{group}</p>
+              <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-prius-muted uppercase tracking-widest">{group}</p>
             )}
             {opts.map((o) => {
               flatIdx += 1
@@ -198,15 +198,12 @@ export default function BrandSelect({
                   disabled={o.disabled}
                   onMouseEnter={() => setHighlight(idx)}
                   onClick={() => selectAt(idx)}
-                  // Hover/activo: fondo sutil blanco, NUNCA rojo (eso era el
-                  // menú nativo del sistema operativo pintando su propio
-                  // estado, no algo que este componente controle).
-                  className={`w-full flex items-center justify-between gap-2 text-left px-4 py-2.5 text-sm font-bold transition-all min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed ${
-                    isSelected ? 'text-[#F2CA50]' : 'text-white'
-                  } ${isHighlighted ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                  className={`w-full flex items-center justify-between gap-2 text-left px-4 py-2.5 text-sm font-medium transition-all min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed text-black ${
+                    isHighlighted ? 'bg-prius-subtle' : 'hover:bg-prius-subtle'
+                  }`}
                 >
                   <span className="truncate">{o.label}</span>
-                  {isSelected && <Check size={14} className="shrink-0 text-[#F2CA50]" />}
+                  {isSelected && <Check size={14} className="shrink-0 text-gold" />}
                 </button>
               )
             })}
@@ -226,10 +223,10 @@ export default function BrandSelect({
         onKeyDown={handleKeyDown}
         className={triggerClass}
       >
-        <span className={`truncate uppercase font-bold ${selected ? 'text-white' : 'text-gray-500'}`}>
+        <span className={`truncate font-medium ${selected ? 'text-black' : 'text-prius-muted'}`}>
           {selected ? selected.label : placeholder}
         </span>
-        <ChevronDown size={16} className={`shrink-0 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={16} className={`shrink-0 text-prius-slate transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && !isMobile && coords &&
@@ -240,18 +237,18 @@ export default function BrandSelect({
               ref={bind}
               onKeyDown={handleKeyDown}
               style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width }}
-              className="z-[1001] bg-[#0a0d14] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+              className="z-[1001] bg-white border border-hairline rounded-xl overflow-hidden"
             >
               {showSearch && (
-                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10">
-                  <Search size={14} className="text-gray-500 shrink-0" />
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-hairline">
+                  <Search size={14} className="text-prius-muted shrink-0" />
                   <input
                     ref={searchRef}
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full bg-transparent text-base md:text-sm text-white outline-none placeholder:text-gray-600"
+                    className="w-full bg-transparent text-base md:text-sm text-black outline-none placeholder:text-prius-muted"
                   />
                 </div>
               )}
@@ -264,28 +261,28 @@ export default function BrandSelect({
       {open && isMobile &&
         createPortal(
           <div
-            className="fixed inset-0 z-[1000] flex items-end bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
+            className="fixed inset-0 z-[1000] flex items-end bg-black/40 animate-in fade-in duration-200"
             onClick={() => setOpen(false)}
           >
             <div
               ref={bind}
               onClick={(e) => e.stopPropagation()}
               onKeyDown={handleKeyDown}
-              className="w-full max-h-[80vh] bg-[#0a0d14] border-t border-white/10 rounded-t-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
+              className="w-full max-h-[80vh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
             >
               <div className="flex justify-center pt-3 pb-1 shrink-0">
-                <div className="w-10 h-1 rounded-full bg-white/20" />
+                <div className="w-10 h-1 rounded-full bg-hairline" />
               </div>
               {showSearch && (
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 shrink-0">
-                  <Search size={14} className="text-gray-500 shrink-0" />
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-hairline shrink-0">
+                  <Search size={14} className="text-prius-muted shrink-0" />
                   <input
                     ref={searchRef}
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full bg-transparent text-base md:text-sm text-white outline-none placeholder:text-gray-600"
+                    className="w-full bg-transparent text-base md:text-sm text-black outline-none placeholder:text-prius-muted"
                   />
                 </div>
               )}
@@ -295,7 +292,7 @@ export default function BrandSelect({
           document.body,
         )}
 
-      {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
+      {error && <p className="mt-1.5 text-[11px] text-prius-error">{error}</p>}
     </div>
   )
 }
