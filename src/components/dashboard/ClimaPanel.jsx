@@ -9,13 +9,13 @@ const WINDGURU_URL = `https://www.windguru.cz/${WINDGURU_SPOT_ID}`
 
 function MiniStat({ icon: Icon, label, value, sub, alerta }) {
   return (
-    <div className={`rounded-2xl border p-4 ${alerta ? 'border-amber-500/40 bg-amber-500/[0.08]' : 'border-white/10 bg-white/[0.04]'}`}>
+    <div className={`rounded-2xl border p-4 ${alerta ? 'border-amber-500/40 bg-amber-500/[0.08]' : 'border-hairline bg-white/[0.04]'}`}>
       <div className="flex items-center gap-2 mb-2">
-        <Icon size={14} className={alerta ? 'text-amber-300' : 'text-gray-400'} />
-        <p className={`text-[9px] font-bold uppercase tracking-widest ${alerta ? 'text-amber-300' : 'text-gray-500'}`}>{label}</p>
+        <Icon size={14} className={alerta ? 'text-amber-300' : 'text-prius-slate'} />
+        <p className={`text-[9px] font-bold uppercase tracking-widest ${alerta ? 'text-amber-300' : 'text-prius-muted'}`}>{label}</p>
       </div>
-      <p className="text-xl font-bold text-white tabular-nums leading-none">{value}</p>
-      {sub && <p className="text-[10px] text-gray-500 tabular-nums mt-1">{sub}</p>}
+      <p className="text-xl font-bold text-black tabular-nums leading-none">{value}</p>
+      {sub && <p className="text-[10px] text-prius-muted tabular-nums mt-1">{sub}</p>}
     </div>
   )
 }
@@ -72,33 +72,33 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Clima del día" maxWidthClass="sm:max-w-2xl">
-      <p className="text-xs text-gray-400 -mt-2">{formatFecha(selectedDate)} · Mar del Plata, Base Naval</p>
+      <p className="text-xs text-prius-slate -mt-2">{formatFecha(selectedDate)} · Mar del Plata, Base Naval</p>
 
       {loading ? (
         <div className="space-y-4">
-          <div className="h-24 rounded-2xl bg-white/5 animate-pulse" />
+          <div className="h-24 rounded-2xl bg-prius-subtle animate-pulse" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 rounded-2xl bg-white/5 animate-pulse" />)}
+            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 rounded-2xl bg-prius-subtle animate-pulse" />)}
           </div>
         </div>
       ) : !resumen ? (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center">
-          <Cloud size={28} className="mx-auto text-gray-500 mb-3" />
-          <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Sin pronóstico para esta fecha</p>
-          <p className="text-xs text-gray-500 mt-1">Open-Meteo solo cubre hoy + 14 días.</p>
+        <div className="rounded-2xl border border-hairline bg-white/[0.04] p-8 text-center">
+          <Cloud size={28} className="mx-auto text-prius-muted mb-3" />
+          <p className="text-sm font-bold text-prius-slate uppercase tracking-widest">Sin pronóstico para esta fecha</p>
+          <p className="text-xs text-prius-muted mt-1">Open-Meteo solo cubre hoy + 14 días.</p>
         </div>
       ) : (
         <>
           {/* Hero */}
-          <div className={`rounded-2xl border p-6 flex items-center gap-5 ${alerta ? 'border-amber-500/40 bg-amber-500/[0.08]' : 'border-white/10 bg-white/[0.04]'}`}>
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border shrink-0 ${alerta ? 'border-amber-500/40 bg-amber-500/10' : 'border-white/10 bg-white/5'}`}>
+          <div className={`rounded-2xl border p-6 flex items-center gap-5 ${alerta ? 'border-amber-500/40 bg-amber-500/[0.08]' : 'border-hairline bg-white/[0.04]'}`}>
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border shrink-0 ${alerta ? 'border-amber-500/40 bg-amber-500/10' : 'border-hairline bg-prius-subtle'}`}>
               <IconoHero size={30} className={alerta ? 'text-amber-300' : 'text-[#F2CA50]'} />
             </div>
             <div className="min-w-0">
-              <p className="text-4xl font-bold text-white tabular-nums leading-none">
+              <p className="text-4xl font-bold text-black tabular-nums leading-none">
                 {resumen.actual.temperatura != null ? Math.round(resumen.actual.temperatura) : '--'}°
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-prius-slate mt-1">
                 Sensación {resumen.actual.sensacion != null ? Math.round(resumen.actual.sensacion) : '--'}°
               </p>
               {alerta && (
@@ -126,17 +126,17 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
 
           {/* Hora por hora */}
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Hora por hora</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Hora por hora</p>
             <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1">
               {horas.map((h) => (
-                <div key={h.hora} className="shrink-0 w-[72px] text-center px-2 py-3 bg-white/[0.04] border border-white/10 rounded-xl">
-                  <p className="text-[10px] font-bold text-gray-500">{h.hora}</p>
-                  <p className="text-base font-bold text-white mt-1 tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
-                  <p className="text-[10px] text-gray-400 mt-1 tabular-nums flex items-center justify-center gap-1">
+                <div key={h.hora} className="shrink-0 w-[72px] text-center px-2 py-3 bg-white/[0.04] border border-hairline rounded-xl">
+                  <p className="text-[10px] font-bold text-prius-muted">{h.hora}</p>
+                  <p className="text-base font-bold text-black mt-1 tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
+                  <p className="text-[10px] text-prius-slate mt-1 tabular-nums flex items-center justify-center gap-1">
                     <Wind size={10} /> {h.viento != null ? Math.round(h.viento) : '--'}
                   </p>
                   {h.olaAltura != null && (
-                    <p className="text-[10px] text-gray-500 mt-0.5 tabular-nums flex items-center justify-center gap-1">
+                    <p className="text-[10px] text-prius-muted mt-0.5 tabular-nums flex items-center justify-center gap-1">
                       <Waves size={10} /> {Number(h.olaAltura).toFixed(1)}
                     </p>
                   )}
@@ -149,10 +149,10 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
 
       {/* Windguru */}
       <div className="space-y-2">
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Windguru — Mar del Plata, Base Naval</p>
-        <div ref={widgetContainerRef} className="min-h-[140px] rounded-2xl overflow-hidden bg-white/[0.04] border border-white/10" />
+        <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Windguru — Mar del Plata, Base Naval</p>
+        <div ref={widgetContainerRef} className="min-h-[140px] rounded-2xl overflow-hidden bg-white/[0.04] border border-hairline" />
         {widgetEstado === 'error' && (
-          <p className="text-xs text-gray-500">No se pudo cargar el widget de Windguru — usá el link de abajo.</p>
+          <p className="text-xs text-prius-muted">No se pudo cargar el widget de Windguru — usá el link de abajo.</p>
         )}
       </div>
 
@@ -160,7 +160,7 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
         href={WINDGURU_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-[#FDE047] hover:bg-yellow-300 text-black transition-all flex items-center justify-center gap-2"
+        className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold hover:bg-yellow-300 text-black transition-all flex items-center justify-center gap-2"
       >
         Ver en Windguru <ExternalLink size={14} />
       </a>

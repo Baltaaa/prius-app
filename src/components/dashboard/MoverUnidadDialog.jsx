@@ -51,18 +51,18 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Mover Cliente de Temporada">
       <form onSubmit={handleConfirmar} className="space-y-6">
-        <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2 text-xs">
-          <p><span className="text-gray-500 uppercase tracking-widest">Cliente:</span> <span className="text-white font-bold">{reserva.clientes?.nombre || 'S/N'}</span></p>
-          <p><span className="text-gray-500 uppercase tracking-widest">Origen:</span> <span className="text-white">{unidadEmoji(unidadOrigen.type)} {unidadOrigen.type} #{unidadOrigen.number}</span></p>
+        <div className="p-4 bg-prius-subtle border border-hairline rounded-xl space-y-2 text-xs">
+          <p><span className="text-prius-muted uppercase tracking-widest">Cliente:</span> <span className="text-black font-bold">{reserva.clientes?.nombre || 'S/N'}</span></p>
+          <p><span className="text-prius-muted uppercase tracking-widest">Origen:</span> <span className="text-black">{unidadEmoji(unidadOrigen.type)} {unidadOrigen.type} #{unidadOrigen.number}</span></p>
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unidad destino</label>
+          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad destino</label>
           <BrandSelect value={unidadDestinoId} onChange={setUnidadDestinoId} options={opcionesCombo} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-red-400 uppercase tracking-widest">
+          <label className="text-[10px] font-bold text-prius-error uppercase tracking-widest">
             Confirmá con tu contraseña de superadmin
           </label>
           <input
@@ -70,11 +70,11 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full min-h-[44px] px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-red-500/50"
+            className="w-full min-h-[44px] px-4 py-3 bg-prius-subtle border border-hairline rounded-xl text-black text-sm outline-none focus:border-red-500/50"
           />
         </div>
 
-        {error && <p className="text-[11px] text-red-400">{error}</p>}
+        {error && <p className="text-[11px] text-prius-error">{error}</p>}
 
         <button
           type="submit"

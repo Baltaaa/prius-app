@@ -8,21 +8,21 @@ import { esPendienteConfirmacion, saldoNumerico } from '../../lib/reservas'
 // derivar el número siempre de estado_pago + pagos reales.
 export default function SaldoReserva({ reserva, pagos = [], className = '' }) {
   if (esPendienteConfirmacion(reserva)) {
-    return <span className={`text-gray-400 font-bold ${className}`}>Sin confirmar</span>
+    return <span className={`text-prius-slate font-bold ${className}`}>Sin confirmar</span>
   }
 
   const saldo = saldoNumerico(reserva, pagos)
 
   if (saldo === null) {
     return (
-      <span className={`inline-flex items-center gap-1.5 text-gray-500 font-bold text-xs uppercase tracking-widest ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 text-prius-muted font-bold text-xs uppercase tracking-widest ${className}`}>
         <HelpCircle size={13} /> Sin verificar
       </span>
     )
   }
 
   return (
-    <span className={`font-bold ${saldo > 0 ? 'text-red-400' : 'text-green-400'} ${className}`}>
+    <span className={`font-bold ${saldo > 0 ? 'text-prius-error' : 'text-prius-success'} ${className}`}>
       {saldo > 0 ? formatPesos(saldo) : 'Unidad saldada'}
     </span>
   )

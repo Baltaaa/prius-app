@@ -50,12 +50,12 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Cliente</label>
+          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Cliente</label>
           <ClienteSelector value={clienteId} onChange={(id) => setClienteId(id)} autoFocus />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Temporada</label>
-          <p className="text-sm text-white">{temporadaActiva?.nombre || '—'}</p>
+          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Temporada</label>
+          <p className="text-sm text-black">{temporadaActiva?.nombre || '—'}</p>
         </div>
         <MoneyInput
           label="Monto Total"
@@ -65,14 +65,14 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
           max={100_000_000}
           hint={bonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
         />
-        <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+        <label className="flex items-center gap-2 text-xs text-prius-slate cursor-pointer">
           <input type="checkbox" checked={bonificada} onChange={(e) => setBonificada(e.target.checked)} className="accent-cyan-400 w-4 h-4" />
           Unidad bonificada
         </label>
         <button
           type="submit"
           disabled={!clienteId || saving}
-          className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+          className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
         >
           {saving ? 'Asignando...' : 'Asignar Unidad'}
         </button>

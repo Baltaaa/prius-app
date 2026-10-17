@@ -8,7 +8,7 @@ import Modal from './Modal'
 import { AlertTriangle } from 'lucide-react'
 
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-[#FDE047]/50 outline-none font-bold resize-none'
+  'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-gold/50 outline-none font-bold resize-none'
 
 // Detalle de un gasto ya registrado (Tarea 5) — mismo patrón que DetallePago:
 // ver datos y anular con motivo obligatorio (solo si la caja sigue abierta).
@@ -45,61 +45,61 @@ export default function DetalleGasto({ isOpen, onClose, gasto }) {
       <div className="space-y-6">
         {gasto.estado === 'anulado' && (
           <div className="flex items-start gap-3 p-4 bg-red-500/5 border border-red-500/20 rounded-xl">
-            <AlertTriangle className="text-red-400 shrink-0 mt-0.5" size={18} />
+            <AlertTriangle className="text-prius-error shrink-0 mt-0.5" size={18} />
             <div>
-              <p className="text-sm font-bold text-red-400 uppercase tracking-widest">Gasto anulado</p>
-              <p className="text-xs text-gray-400 mt-1">{gasto.anulado_motivo}</p>
+              <p className="text-sm font-bold text-prius-error uppercase tracking-widest">Gasto anulado</p>
+              <p className="text-xs text-prius-slate mt-1">{gasto.anulado_motivo}</p>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Concepto</p>
-            <p className="text-sm font-bold text-white mt-1">{gasto.descripcion}</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Concepto</p>
+            <p className="text-sm font-bold text-black mt-1">{gasto.descripcion}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto</p>
-            <p className={`text-lg font-bold mt-1 ${gasto.estado === 'anulado' ? 'text-gray-500 line-through' : 'text-red-400'}`}>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Monto</p>
+            <p className={`text-lg font-bold mt-1 ${gasto.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-prius-error'}`}>
               {formatPesos(gasto.monto)}
             </p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Categoría</p>
-            <p className="text-sm text-white mt-1">{CATEGORIA_GASTO_LABEL[gasto.categoria] || gasto.categoria}</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Categoría</p>
+            <p className="text-sm text-black mt-1">{CATEGORIA_GASTO_LABEL[gasto.categoria] || gasto.categoria}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Medio de pago</p>
-            <p className="text-sm text-white mt-1">{MEDIO_PAGO_LABEL[gasto.medio_pago] || gasto.medio_pago}</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de pago</p>
+            <p className="text-sm text-black mt-1">{MEDIO_PAGO_LABEL[gasto.medio_pago] || gasto.medio_pago}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha</p>
-            <p className="text-sm text-white mt-1">{formatFecha(gasto.created_at)}</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Fecha</p>
+            <p className="text-sm text-black mt-1">{formatFecha(gasto.created_at)}</p>
           </div>
           {gasto.proveedor && (
             <div className="col-span-2">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Proveedor</p>
-              <p className="text-sm text-white mt-1">{gasto.proveedor}</p>
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Proveedor</p>
+              <p className="text-sm text-black mt-1">{gasto.proveedor}</p>
             </div>
           )}
         </div>
 
         {gasto.estado === 'vigente' && (
-          <div className="border-t border-white/5 pt-6">
+          <div className="border-t border-hairline pt-6">
             {!anulando ? (
               <button
                 type="button"
                 onClick={() => setAnulando(true)}
-                className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-red-400 border border-red-500/20 hover:bg-red-500/5 transition-all"
+                className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-error border border-red-500/20 hover:bg-red-500/5 transition-all"
               >
                 Anular gasto
               </button>
             ) : (
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Motivo de la anulación (obligatorio)</label>
+                <label className="text-[10px] font-bold text-prius-error uppercase tracking-widest">Motivo de la anulación (obligatorio)</label>
                 <textarea rows={2} value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ej. Se cargó dos veces" className={inputClass} />
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => { setAnulando(false); setMotivo('') }} className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-white/5 text-gray-300 border border-white/10">
+                  <button type="button" onClick={() => { setAnulando(false); setMotivo('') }} className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-prius-subtle text-prius-slate border border-hairline">
                     Volver
                   </button>
                   <button

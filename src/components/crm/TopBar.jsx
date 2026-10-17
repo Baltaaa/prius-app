@@ -34,7 +34,7 @@ import StatusBadge from './StatusBadge'
 const SECTION_TITLES = [
   {
     path: '/app/home', name: 'Dashboard', shortName: 'Inicio', subtitle: 'Resumen de métricas y actividades principales en tiempo real.',
-    icon: LayoutDashboard, iconBg: 'bg-[#FDE047]/10', iconBorder: 'border-[#FDE047]/20', iconColor: 'text-[#FDE047]',
+    icon: LayoutDashboard, iconBg: 'bg-gold/10', iconBorder: 'border-gold/20', iconColor: 'text-gold',
   },
   {
     path: '/app/plano', name: 'Plano de Playa', shortName: 'Plano', subtitle: 'Gestión de Unidades Prius Playa Grande',
@@ -42,11 +42,11 @@ const SECTION_TITLES = [
   },
   {
     path: '/app/cabinas-lockers', name: 'Cabinas y Lockers', shortName: 'Cabinas', subtitle: 'Sección en desarrollo — solo lectura.',
-    icon: DoorClosed, iconBg: 'bg-white/10', iconBorder: 'border-white/20', iconColor: 'text-gray-300',
+    icon: DoorClosed, iconBg: 'bg-prius-subtle', iconBorder: 'border-hairline', iconColor: 'text-prius-slate',
   },
   {
     path: '/app/reservas', name: 'Cola de Reservas', shortName: 'Reservas', subtitle: 'Alquileres por período y día, ordenados por llegada.',
-    icon: CalendarClock, iconBg: 'bg-[#FDE047]/10', iconBorder: 'border-[#FDE047]/20', iconColor: 'text-[#FDE047]',
+    icon: CalendarClock, iconBg: 'bg-gold/10', iconBorder: 'border-gold/20', iconColor: 'text-gold',
   },
   {
     path: '/app/clientes', name: 'Directorio de Clientes', shortName: 'Clientes', subtitle: 'Historial completo: temporadas y alquileres pasados.',
@@ -54,7 +54,7 @@ const SECTION_TITLES = [
   },
   {
     path: '/app/caja', name: 'Caja Diaria', shortName: 'Caja', subtitle: 'Arqueo, historial y cruce automático con pagos.',
-    icon: Wallet, iconBg: 'bg-green-400/10', iconBorder: 'border-green-400/20', iconColor: 'text-green-400',
+    icon: Wallet, iconBg: 'bg-green-400/10', iconBorder: 'border-green-400/20', iconColor: 'text-prius-success',
   },
   {
     path: '/app/reportes', name: 'Reportes', subtitle: 'Métricas avanzadas de facturación y ocupación.',
@@ -82,7 +82,7 @@ const SECTION_TITLES = [
   },
 ]
 
-const DEFAULT_SECTION = { name: 'Balneario Playa Grande', shortName: 'Prius', subtitle: '', icon: LayoutDashboard, iconBg: 'bg-white/5', iconBorder: 'border-white/10', iconColor: 'text-gray-400' }
+const DEFAULT_SECTION = { name: 'Balneario Playa Grande', shortName: 'Prius', subtitle: '', icon: LayoutDashboard, iconBg: 'bg-prius-subtle', iconBorder: 'border-hairline', iconColor: 'text-prius-slate' }
 
 function useSection(pathname) {
   return SECTION_TITLES.find((s) => pathname.startsWith(s.path)) || DEFAULT_SECTION
@@ -331,7 +331,7 @@ export default function TopBar() {
   }
 
   return (
-    <header className="no-print relative h-20 flex items-center gap-3 px-4 sm:px-6 md:px-8 border-b border-white/5 sticky top-0 z-20 shrink-0">
+    <header className="no-print relative h-20 flex items-center gap-3 px-4 sm:px-6 md:px-8 bg-white border-b border-hairline sticky top-0 z-20 shrink-0">
       {/* Ancho fijo: el título de sección cambia de largo (Dashboard vs
           Perfil y Tarifas) pero no puede correr la barra de búsqueda, que se
           centra contra el nav completo (ver div absoluto más abajo), no
@@ -344,12 +344,12 @@ export default function TopBar() {
             <SectionIcon size={18} className={section.iconColor} />
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm font-display font-extrabold text-white tracking-tight truncate">
+            <h1 className="text-sm font-display font-extrabold text-black tracking-tight truncate">
               <span className="md:hidden">{section.shortName || section.name}</span>
               <span className="hidden md:inline">{section.name}</span>
             </h1>
             {section.subtitle && (
-              <p className="hidden sm:block text-[9px] text-gray-500 font-semibold uppercase tracking-wider truncate">{section.subtitle}</p>
+              <p className="hidden sm:block text-[9px] text-prius-muted font-semibold uppercase tracking-wider truncate">{section.subtitle}</p>
             )}
           </div>
         </div>
@@ -370,37 +370,37 @@ export default function TopBar() {
         />
 
         {showDropdown && (
-            <div className="absolute left-0 right-0 mt-2 glass-popover rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto">
+            <div className="absolute left-0 right-0 mt-2 popover-light rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto">
               {!activo ? (
-                <p className="px-4 py-6 text-center text-xs text-gray-500">Seguí escribiendo (mínimo 2 caracteres)...</p>
+                <p className="px-4 py-6 text-center text-xs text-prius-muted">Seguí escribiendo (mínimo 2 caracteres)...</p>
               ) : resultadosFlat.length === 0 ? (
-                <p className="px-4 py-6 text-center text-xs text-gray-500">Sin resultados para "{searchValue}"</p>
+                <p className="px-4 py-6 text-center text-xs text-prius-muted">Sin resultados para "{searchValue}"</p>
               ) : (
                 <>
                   {clienteMatches.length > 0 && (
                     <div>
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Clientes</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-prius-muted uppercase tracking-wider">Clientes</p>
                       {clienteMatches.map((cliente) => (
                         <button
                           key={cliente.id}
                           onClick={() => goToCliente(cliente)}
-                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors"
+                          className="w-full text-left px-4 py-2.5 hover:bg-prius-subtle transition-colors"
                         >
-                          <p className="text-xs font-bold text-white truncate">{cliente.nombre}</p>
-                          {cliente.telefono && <p className="text-[11px] text-gray-500">{cliente.telefono}</p>}
+                          <p className="text-xs font-bold text-black truncate">{cliente.nombre}</p>
+                          {cliente.telefono && <p className="text-[11px] text-prius-muted">{cliente.telefono}</p>}
                         </button>
                       ))}
                     </div>
                   )}
 
                   {unidadMatches.length > 0 && (
-                    <div className="border-t border-white/10">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Unidades</p>
+                    <div className="border-t border-hairline">
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-prius-muted uppercase tracking-wider">Unidades</p>
                       {unidadMatches.map((u) => (
                         <button
                           key={u.id}
                           onClick={() => irAResultado({ tipo: 'unidad', data: u })}
-                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors uppercase text-xs font-bold text-white"
+                          className="w-full text-left px-4 py-2.5 hover:bg-prius-subtle transition-colors uppercase text-xs font-bold text-black"
                         >
                           {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
                         </button>
@@ -409,17 +409,17 @@ export default function TopBar() {
                   )}
 
                   {reservaMatches.length > 0 && (
-                    <div className="border-t border-white/10">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Reservas</p>
+                    <div className="border-t border-hairline">
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-prius-muted uppercase tracking-wider">Reservas</p>
                       {reservaMatches.map((reserva) => (
                         <button
                           key={reserva.id}
                           onClick={() => goToReserva(reserva)}
-                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors flex items-center justify-between gap-3"
+                          className="w-full text-left px-4 py-2.5 hover:bg-prius-subtle transition-colors flex items-center justify-between gap-3"
                         >
                           <span className="min-w-0">
-                            <span className="block text-xs font-bold text-white truncate">{reserva.clientes?.nombre || 'S/N'}</span>
-                            <span className="block text-[11px] text-gray-500 uppercase truncate">
+                            <span className="block text-xs font-bold text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
+                            <span className="block text-[11px] text-prius-muted uppercase truncate">
                               {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}
                             </span>
                           </span>
@@ -430,13 +430,13 @@ export default function TopBar() {
                   )}
 
                   {comprobanteMatches.length > 0 && (
-                    <div className="border-t border-white/10">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Comprobantes</p>
+                    <div className="border-t border-hairline">
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-prius-muted uppercase tracking-wider">Comprobantes</p>
                       {comprobanteMatches.map(({ pago, comprobante }) => (
                         <button
                           key={comprobante.id}
                           onClick={() => irAResultado({ tipo: 'comprobante', data: { pago, comprobante } })}
-                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-xs font-bold text-white"
+                          className="w-full text-left px-4 py-2.5 hover:bg-prius-subtle transition-colors text-xs font-bold text-black"
                         >
                           {formatComprobante(comprobante.tipo, comprobante.numero)}
                         </button>
@@ -457,7 +457,7 @@ export default function TopBar() {
         {isFeatureEnabled('recepcion') && isMobile && (
           <button
             onClick={() => navigate(linkToRecepcion(null, { scan: true }))}
-            className="text-gray-400 hover:text-white p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
+            className="text-prius-slate hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-prius-subtle transition-all"
             title="Recepción — escanear QR"
           >
             <QrCode size={20} />
@@ -466,7 +466,7 @@ export default function TopBar() {
         {/* Búsqueda (mobile): ícono que abre pantalla completa */}
         <button
           onClick={() => setMobileSearchOpen(true)}
-          className="sm:hidden text-gray-400 hover:text-white p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
+          className="sm:hidden text-prius-slate hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-prius-subtle transition-all"
         >
           <Search size={20} />
         </button>
@@ -493,13 +493,13 @@ export default function TopBar() {
             onClick={() => { if (!supportsHover) setShowNotifications((v) => !v) }}
             aria-haspopup="menu"
             aria-expanded={showNotifications}
-            className="text-gray-400 hover:text-white relative p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-all"
+            className="text-prius-slate hover:text-black relative p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-prius-subtle transition-all"
           >
             <Bell size={20} />
             {countPendientes > 0 ? (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#F2CA50] rounded-full border-2 border-[#0a0d14]" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-gold rounded-full border-2 border-white" />
             ) : countNovedadesNoLeidas > 0 ? (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-prius-subtle text-black text-[10px] font-bold flex items-center justify-center">
                 {countNovedadesNoLeidas > 9 ? '9+' : countNovedadesNoLeidas}
               </span>
             ) : null}
@@ -512,10 +512,10 @@ export default function TopBar() {
             // parte del "territorio" hovereable (sin esto, mover el mouse en
             // línea recta del ícono al panel pasaba por una franja que no
             // era descendiente de este contenedor y cerraba el panel antes
-            // de llegar). El glass-popover real queda en el div de adentro,
+            // de llegar). El popover-light real queda en el div de adentro,
             // que no se mueve ni cambia de tamaño — mismo look de siempre.
             <div className="hidden sm:block absolute right-0 top-full pt-3 w-[380px] max-w-[90vw] z-50">
-              <div className="max-h-[70vh] glass-popover rounded-xl overflow-hidden">
+              <div className="max-h-[70vh] popover-light rounded-xl overflow-hidden">
                 <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
               </div>
             </div>
@@ -523,12 +523,12 @@ export default function TopBar() {
         </div>
 
         {showNotifications && createPortal(
-          <div ref={notifOverlay.bind} className="sm:hidden fixed inset-0 z-[997] bg-[#05070c] flex flex-col">
-            <div className="flex items-center justify-between px-4 h-20 border-b border-white/5 shrink-0">
-              <h1 className="text-sm font-bold uppercase tracking-widest text-white">Notificaciones</h1>
+          <div ref={notifOverlay.bind} className="sm:hidden fixed inset-0 z-[997] bg-white flex flex-col">
+            <div className="flex items-center justify-between px-4 h-20 border-b border-hairline shrink-0">
+              <h1 className="text-sm font-bold uppercase tracking-widest text-black">Notificaciones</h1>
               <button
                 onClick={() => setShowNotifications(false)}
-                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-white"
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-slate hover:text-black"
               >
                 <X size={20} />
               </button>
@@ -559,15 +559,15 @@ export default function TopBar() {
             onClick={() => { if (!supportsHover) setShowProfileMenu((v) => !v) }}
             aria-haspopup="menu"
             aria-expanded={showProfileMenu}
-            className="flex items-center gap-3 p-1 min-h-[44px] hover:bg-white/5 rounded-lg transition-all"
+            className="flex items-center gap-3 p-1 min-h-[44px] hover:bg-prius-subtle rounded-lg transition-all"
           >
-            <div className="w-8 h-8 bg-[#FDE047] text-black rounded flex items-center justify-center font-bold text-sm">
+            <div className="w-8 h-8 bg-gold text-black rounded flex items-center justify-center font-bold text-sm">
               {nombreMostrado.charAt(0).toUpperCase()}
             </div>
-            <span className="text-sm font-medium text-white hidden sm:block">
+            <span className="text-sm font-medium text-black hidden sm:block">
               {nombreMostrado}
             </span>
-            <ChevronDown size={14} className="text-gray-500" />
+            <ChevronDown size={14} className="text-prius-muted" />
           </button>
 
           {showProfileMenu && (
@@ -575,20 +575,20 @@ export default function TopBar() {
             // para que el hueco visual quede adentro del territorio
             // hovereable (ver comentario arriba).
             <div className="absolute right-0 top-full pt-3 w-56 z-50">
-              <div className="glass-popover rounded-xl overflow-hidden p-1">
-                <div className="px-4 py-3 border-b border-white/10">
-                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{rolLabel}</p>
-                  <p className="text-xs font-medium text-white truncate">{nombreMostrado}</p>
+              <div className="popover-light rounded-xl overflow-hidden p-1">
+                <div className="px-4 py-3 border-b border-hairline">
+                  <p className="text-[11px] font-bold text-prius-muted uppercase tracking-wider">{rolLabel}</p>
+                  <p className="text-xs font-medium text-black truncate">{nombreMostrado}</p>
                 </div>
                 <button
                   onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
-                  className="w-full text-left px-4 py-2.5 text-xs text-gray-300 hover:bg-white/10 flex items-center gap-2 rounded-lg"
+                  className="w-full text-left px-4 py-2.5 text-xs text-prius-slate hover:bg-prius-subtle flex items-center gap-2 rounded-lg"
                 >
                   <User size={14} /> Perfil
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-400/10 flex items-center gap-2 rounded-lg"
+                  className="w-full text-left px-4 py-2.5 text-xs text-prius-error hover:bg-red-400/10 flex items-center gap-2 rounded-lg"
                 >
                   <LogOut size={14} /> Cerrar Sesión
                 </button>
@@ -601,8 +601,8 @@ export default function TopBar() {
       {/* Búsqueda mobile a pantalla completa (Tarea 4.2) — mismos resultados
           que el buscador de desktop, reutiliza clienteMatches/reservaMatches. */}
       {mobileSearchOpen && createPortal(
-        <div ref={mobileSearchOverlay.bind} className="sm:hidden fixed inset-0 z-[997] bg-[#05070c] flex flex-col">
-          <div className="flex items-center gap-3 px-4 h-20 border-b border-white/5 shrink-0">
+        <div ref={mobileSearchOverlay.bind} className="sm:hidden fixed inset-0 z-[997] bg-white flex flex-col">
+          <div className="flex items-center gap-3 px-4 h-20 border-b border-hairline shrink-0">
             <SearchInput
               value={searchValue}
               onChange={setSearchValue}
@@ -612,43 +612,43 @@ export default function TopBar() {
             />
             <button
               onClick={closeMobileSearch}
-              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-white shrink-0"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-slate hover:text-black shrink-0"
             >
               <X size={20} />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto">
             {!showDropdown ? (
-              <p className="px-6 py-8 text-center text-xs text-gray-500">Escribí para buscar un cliente, una reserva o una unidad (ej. "carpa 19").</p>
+              <p className="px-6 py-8 text-center text-xs text-prius-muted">Escribí para buscar un cliente, una reserva o una unidad (ej. "carpa 19").</p>
             ) : !activo ? (
-              <p className="px-6 py-8 text-center text-xs text-gray-500">Seguí escribiendo (mínimo 2 caracteres)...</p>
+              <p className="px-6 py-8 text-center text-xs text-prius-muted">Seguí escribiendo (mínimo 2 caracteres)...</p>
             ) : resultadosFlat.length === 0 ? (
-              <p className="px-6 py-8 text-center text-xs text-gray-500">Sin resultados para "{searchValue}"</p>
+              <p className="px-6 py-8 text-center text-xs text-prius-muted">Sin resultados para "{searchValue}"</p>
             ) : (
               <>
                 {clienteMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Clientes</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-prius-muted uppercase tracking-wider">Clientes</p>
                     {clienteMatches.map((cliente) => (
                       <button
                         key={cliente.id}
                         onClick={() => { goToCliente(cliente); setMobileSearchOpen(false) }}
-                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-white/10 transition-colors border-b border-white/5"
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-prius-subtle transition-colors border-b border-hairline"
                       >
-                        <p className="text-sm font-bold text-white truncate">{cliente.nombre}</p>
-                        {cliente.telefono && <p className="text-xs text-gray-500">{cliente.telefono}</p>}
+                        <p className="text-sm font-bold text-black truncate">{cliente.nombre}</p>
+                        {cliente.telefono && <p className="text-xs text-prius-muted">{cliente.telefono}</p>}
                       </button>
                     ))}
                   </div>
                 )}
                 {unidadMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Unidades</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-prius-muted uppercase tracking-wider">Unidades</p>
                     {unidadMatches.map((u) => (
                       <button
                         key={u.id}
                         onClick={() => { irAResultado({ tipo: 'unidad', data: u }); setMobileSearchOpen(false) }}
-                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-white/10 transition-colors border-b border-white/5 uppercase text-sm font-bold text-white"
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-prius-subtle transition-colors border-b border-hairline uppercase text-sm font-bold text-black"
                       >
                         {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
                       </button>
@@ -657,16 +657,16 @@ export default function TopBar() {
                 )}
                 {reservaMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Reservas</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-prius-muted uppercase tracking-wider">Reservas</p>
                     {reservaMatches.map((reserva) => (
                       <button
                         key={reserva.id}
                         onClick={() => { goToReserva(reserva); setMobileSearchOpen(false) }}
-                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-white/10 transition-colors border-b border-white/5 flex items-center justify-between gap-3"
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-prius-subtle transition-colors border-b border-hairline flex items-center justify-between gap-3"
                       >
                         <span className="min-w-0">
-                          <span className="block text-sm font-bold text-white truncate">{reserva.clientes?.nombre || 'S/N'}</span>
-                          <span className="block text-xs text-gray-500 uppercase truncate">
+                          <span className="block text-sm font-bold text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
+                          <span className="block text-xs text-prius-muted uppercase truncate">
                             {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}
                           </span>
                         </span>
@@ -677,12 +677,12 @@ export default function TopBar() {
                 )}
                 {comprobanteMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Comprobantes</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-prius-muted uppercase tracking-wider">Comprobantes</p>
                     {comprobanteMatches.map(({ pago, comprobante }) => (
                       <button
                         key={comprobante.id}
                         onClick={() => { irAResultado({ tipo: 'comprobante', data: { pago, comprobante } }); setMobileSearchOpen(false) }}
-                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-white/10 transition-colors border-b border-white/5 text-sm font-bold text-white"
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-prius-subtle transition-colors border-b border-hairline text-sm font-bold text-black"
                       >
                         {formatComprobante(comprobante.tipo, comprobante.numero)}
                       </button>

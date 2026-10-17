@@ -31,9 +31,9 @@ const FILTROS = [
 ]
 
 const ESTADO_META = {
-  nuevo: { label: 'Nuevo', cls: 'bg-[#FDE047] text-black' },
-  contactado: { label: 'Contactado', cls: 'bg-green-400/15 text-green-400 border border-green-400/20' },
-  descartado: { label: 'Descartado', cls: 'bg-white/5 text-gray-500 border border-white/10' },
+  nuevo: { label: 'Nuevo', cls: 'bg-gold text-black' },
+  contactado: { label: 'Contactado', cls: 'bg-green-400/15 text-prius-success border border-green-400/20' },
+  descartado: { label: 'Descartado', cls: 'bg-prius-subtle text-prius-muted border border-hairline' },
 }
 
 const fmt = formatFechaHora
@@ -86,7 +86,7 @@ export default function Leads() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Cargando leads...</span>
+        <span className="text-sm font-semibold text-prius-muted uppercase animate-pulse">Cargando leads...</span>
       </div>
     )
   }
@@ -101,8 +101,8 @@ export default function Leads() {
               onClick={() => setFiltro(f.key)}
               className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${
                 filtro === f.key
-                  ? 'bg-[#FDE047] text-black border-[#FDE047]'
-                  : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                  ? 'bg-gold text-black border-gold'
+                  : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
               }`}
             >
               {f.label}
@@ -110,14 +110,14 @@ export default function Leads() {
           ))}
         </div>
         {sinContactar > 0 && (
-          <p className="text-sm text-gray-400">
-            <span className="text-[#FDE047] font-semibold">{sinContactar} sin contactar</span>
+          <p className="text-sm text-prius-slate">
+            <span className="text-gold font-semibold">{sinContactar} sin contactar</span>
           </p>
         )}
       </div>
 
       {visibles.length === 0 && (
-        <div className="glass-card rounded-3xl p-12 text-center text-gray-600 uppercase text-xs tracking-widest flex flex-col items-center gap-3">
+        <div className="card-light rounded-3xl p-12 text-center text-prius-muted uppercase text-xs tracking-widest flex flex-col items-center gap-3">
           <Inbox size={28} className="opacity-40" />
           Sin leads en esta vista
         </div>
@@ -132,36 +132,36 @@ export default function Leads() {
             <div
               key={lead.id}
               data-deeplink-id={lead.id}
-              className={`glass-card rounded-2xl p-4 sm:p-5 md:p-6 ${
-                estado === 'nuevo' ? 'border-l-2 border-[#FDE047]' : ''
+              className={`card-light rounded-2xl p-4 sm:p-5 md:p-6 ${
+                estado === 'nuevo' ? 'border-l-2 border-gold' : ''
               }`}
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   {estado === 'nuevo' && (
-                    <span className="w-2 h-2 rounded-full bg-[#FDE047] shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-gold shrink-0" />
                   )}
-                  <h3 className="text-base font-bold text-white break-words">{lead.nombre}</h3>
+                  <h3 className="text-base font-bold text-black break-words">{lead.nombre}</h3>
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${meta.cls}`}>
                     {meta.label}
                   </span>
                 </div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-gray-600 mt-1">
+                <p className="text-[10px] uppercase tracking-widest font-bold text-prius-muted mt-1">
                   {lead.asunto} · {fmt(lead.created_at)}
                   {lead.origen ? ` · ${lead.origen}` : ''}
                 </p>
               </div>
 
               {lead.mensaje && (
-                <p className="text-sm text-gray-300 mt-3 whitespace-pre-wrap break-words">{lead.mensaje}</p>
+                <p className="text-sm text-prius-slate mt-3 whitespace-pre-wrap break-words">{lead.mensaje}</p>
               )}
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 text-xs text-gray-400">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 text-xs text-prius-slate">
                 <span className="inline-flex items-center gap-1.5 break-all">
-                  <Phone size={12} className="text-gray-600 shrink-0" /> {lead.telefono}
+                  <Phone size={12} className="text-prius-muted shrink-0" /> {lead.telefono}
                 </span>
-                <a href={`mailto:${lead.email}`} className="inline-flex items-center gap-1.5 hover:text-white break-all">
-                  <Mail size={12} className="text-gray-600 shrink-0" /> {lead.email}
+                <a href={`mailto:${lead.email}`} className="inline-flex items-center gap-1.5 hover:text-black break-all">
+                  <Mail size={12} className="text-prius-muted shrink-0" /> {lead.email}
                 </a>
               </div>
 
@@ -179,7 +179,7 @@ export default function Leads() {
                   {estado !== 'contactado' && (
                     <button
                       onClick={() => setEstado(lead, 'contactado')}
-                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-white/5 text-gray-300 border border-white/10 hover:text-white transition-colors"
+                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-prius-subtle text-prius-slate border border-hairline hover:text-black transition-colors"
                     >
                       <Check size={14} /> Marcar contactado
                     </button>
@@ -188,7 +188,7 @@ export default function Leads() {
                   {estado !== 'descartado' ? (
                     <button
                       onClick={() => setEstado(lead, 'descartado')}
-                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-white/5 text-gray-500 border border-white/10 hover:text-white transition-colors"
+                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-prius-subtle text-prius-muted border border-hairline hover:text-black transition-colors"
                     >
                       <X size={14} /> Descartar
                     </button>
@@ -196,14 +196,14 @@ export default function Leads() {
                     <>
                       <button
                         onClick={() => setEstado(lead, 'nuevo')}
-                        className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-white/5 text-gray-400 border border-white/10 hover:text-white transition-colors"
+                        className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-prius-subtle text-prius-slate border border-hairline hover:text-black transition-colors"
                       >
                         <RotateCcw size={14} /> Reabrir
                       </button>
                       {puedeEliminar && (
                         <button
                           onClick={() => setLeadAEliminar(lead)}
-                          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-red-500/10 text-prius-error border border-red-500/20 hover:bg-red-500/20 transition-colors"
                         >
                           <Trash2 size={14} /> Eliminar
                         </button>

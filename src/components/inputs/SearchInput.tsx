@@ -29,7 +29,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(function Sear
 ) {
   return (
     <div className={`relative ${className}`}>
-      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-prius-muted pointer-events-none" />
       <input
         ref={ref}
         type="text"
@@ -41,13 +41,13 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(function Sear
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={onKeyDown}
         placeholder={placeholder}
-        className={`w-full pl-10 pr-10 min-h-[44px] py-2 bg-white/5 border border-white/10 focus:border-white/30 outline-none text-base md:text-sm rounded-lg text-white placeholder-gray-500 transition-all ${inputClassName}`}
+        className={`w-full pl-10 pr-10 min-h-[44px] py-2 bg-prius-subtle border border-hairline focus:border-hairline outline-none text-base md:text-sm rounded-lg text-black placeholder-gray-500 transition-all ${inputClassName}`}
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange('')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-white transition-colors"
+          className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-muted hover:text-black transition-colors"
           aria-label="Limpiar búsqueda"
         >
           <X size={14} />

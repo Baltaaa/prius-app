@@ -16,7 +16,7 @@ export default function MontoReserva({ reserva, className = '' }) {
   // que sí tiene un monto real sin repartir.
   if (esPendienteConfirmacion(reserva)) {
     return (
-      <span className={`inline-flex items-center gap-1.5 text-gray-500 font-bold text-xs uppercase tracking-widest ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 text-prius-muted font-bold text-xs uppercase tracking-widest ${className}`}>
         <Hourglass size={13} /> Sin confirmar
       </span>
     )
@@ -25,11 +25,11 @@ export default function MontoReserva({ reserva, className = '' }) {
   if (pendiente) {
     return (
       <span className={`inline-flex flex-col ${className}`}>
-        <span className="inline-flex items-center gap-1.5 text-gray-500 font-bold text-xs uppercase tracking-widest">
+        <span className="inline-flex items-center gap-1.5 text-prius-muted font-bold text-xs uppercase tracking-widest">
           <HelpCircle size={13} /> Sin verificar
         </span>
         {montoGrupoReferencia != null && (
-          <span className="text-[10px] text-gray-600 normal-case font-normal">
+          <span className="text-[10px] text-prius-muted normal-case font-normal">
             Grupo: {formatPesos(montoGrupoReferencia)}
           </span>
         )}

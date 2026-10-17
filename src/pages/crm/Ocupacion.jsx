@@ -215,7 +215,7 @@ export default function Ocupacion() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-gray-500 animate-pulse uppercase tracking-widest">Cargando ocupación...</span>
+        <span className="text-sm font-semibold text-prius-muted animate-pulse uppercase tracking-widest">Cargando ocupación...</span>
       </div>
     )
   }
@@ -228,26 +228,26 @@ export default function Ocupacion() {
         onPointerUp={handlePointerUp}
       >
         <div className="flex items-center gap-2">
-          <div className="glass-card p-1 rounded-xl flex">
+          <div className="card-light p-1 rounded-xl flex">
             {['semana', 'mes'].map((v) => (
               <button
                 key={v}
                 onClick={() => setVista(v)}
                 className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
-                  vista === v ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'
+                  vista === v ? 'bg-gold text-black' : 'text-prius-slate hover:text-black'
                 }`}
               >
                 {v === 'semana' ? 'Semana' : 'Mes'}
               </button>
             ))}
           </div>
-          <button onClick={irAnterior} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all" title="Anterior">
+          <button onClick={irAnterior} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all" title="Anterior">
             <ChevronLeft size={16} />
           </button>
-          <button onClick={irSiguiente} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all" title="Siguiente">
+          <button onClick={irSiguiente} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all" title="Siguiente">
             <ChevronRight size={16} />
           </button>
-          <button onClick={irHoy} className="px-3 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-300 transition-all">
+          <button onClick={irHoy} className="px-3 py-2.5 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-[10px] font-bold uppercase tracking-widest text-prius-slate transition-all">
             Hoy
           </button>
           {/* [feat-5] "Ir a fecha": salta directo al día/semana/mes elegido
@@ -255,16 +255,16 @@ export default function Ocupacion() {
           {isFeatureEnabled('feat-5-ir-a-fecha') && (
             <DateInput value={anchor} onChange={(v) => v && setAnchor(v)} className="w-36" />
           )}
-          <span className="text-sm font-bold text-white capitalize px-2">{tituloRango}</span>
+          <span className="text-sm font-bold text-black capitalize px-2">{tituloRango}</span>
         </div>
 
-        <div className="glass-card p-1 rounded-xl flex flex-wrap">
+        <div className="card-light p-1 rounded-xl flex flex-wrap">
           {FILTROS_TIPO.map((t) => (
             <button
               key={t}
               onClick={() => setTipoFiltro(t)}
               className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                tipoFiltro === t ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:text-white'
+                tipoFiltro === t ? 'bg-gold text-black' : 'text-prius-slate hover:text-black'
               }`}
             >
               {t === 'todos' ? 'Todas' : TIPO_LABEL[t]}
@@ -276,7 +276,7 @@ export default function Ocupacion() {
       {/* Leyenda fija y compacta — pendiente_confirmacion con contorno
           rayado del mismo color (no un color nuevo), bonificada con un
           punto sutil. */}
-      <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-gray-500">
+      <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-prius-muted">
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ background: COLOR_TIPO_ALQUILER.temporada.swatch }} /> Temporada</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ background: COLOR_TIPO_ALQUILER.periodo.swatch }} /> Período</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ background: COLOR_TIPO_ALQUILER.dia.swatch }} /> Día</span>
@@ -287,40 +287,40 @@ export default function Ocupacion() {
 
       {vista === 'mes' && kpisMes && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="glass-card rounded-2xl p-4">
-            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Ocupación promedio</p>
-            <p className="text-xl font-bold text-white mt-1">{kpisMes.promedio.toFixed(0)}%</p>
+          <div className="card-light rounded-2xl p-4">
+            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Ocupación promedio</p>
+            <p className="text-xl font-bold text-black mt-1">{kpisMes.promedio.toFixed(0)}%</p>
           </div>
-          <div className="glass-card rounded-2xl p-4">
-            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Día pico</p>
-            <p className="text-xl font-bold text-white mt-1">{formatFecha(kpisMes.diaPico)} <span className="text-xs text-gray-400">({kpisMes.pctDiaPico.toFixed(0)}%)</span></p>
+          <div className="card-light rounded-2xl p-4">
+            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Día pico</p>
+            <p className="text-xl font-bold text-black mt-1">{formatFecha(kpisMes.diaPico)} <span className="text-xs text-prius-slate">({kpisMes.pctDiaPico.toFixed(0)}%)</span></p>
           </div>
-          <div className="glass-card rounded-2xl p-4">
-            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Unidades libres hoy</p>
-            <p className="text-xl font-bold text-white mt-1">{kpisMes.libresHoy}</p>
+          <div className="card-light rounded-2xl p-4">
+            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Unidades libres hoy</p>
+            <p className="text-xl font-bold text-black mt-1">{kpisMes.libresHoy}</p>
           </div>
-          <div className="glass-card rounded-2xl p-4">
-            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Hoy por tipo</p>
-            <p className="text-xs font-bold text-white mt-1 space-x-2">
+          <div className="card-light rounded-2xl p-4">
+            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Hoy por tipo</p>
+            <p className="text-xs font-bold text-black mt-1 space-x-2">
               <span style={{ color: COLOR_TIPO_ALQUILER.temporada.swatch }}>T {kpisMes.porTipoHoy.temporada}</span>
               <span style={{ color: COLOR_TIPO_ALQUILER.periodo.swatch }}>P {kpisMes.porTipoHoy.periodo}</span>
-              <span className="text-gray-300">D {kpisMes.porTipoHoy.dia}</span>
+              <span className="text-prius-slate">D {kpisMes.porTipoHoy.dia}</span>
             </p>
           </div>
         </div>
       )}
 
       {vista === 'semana' ? (
-        <div className="glass-card rounded-3xl glass-card-inner overflow-hidden">
+        <div className="card-light rounded-3xl card-light-inner overflow-hidden">
           <div className="overflow-x-auto">
             <div className="min-w-[900px]">
-              <div className="flex border-b border-white/10 sticky top-0 bg-[#0a0d14] z-10">
-                <div className="w-36 shrink-0 px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-gray-500">Unidad</div>
+              <div className="flex border-b border-hairline sticky top-0 bg-white z-10">
+                <div className="w-36 shrink-0 px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-prius-muted">Unidad</div>
                 <div className="flex-1 relative h-9">
                   {marcas.map((m) => (
                     <div
                       key={m.dia}
-                      className="absolute top-0 h-full border-l border-white/5 pl-1.5 text-[9px] text-gray-500 font-bold flex items-center"
+                      className="absolute top-0 h-full border-l border-hairline pl-1.5 text-[9px] text-prius-muted font-bold flex items-center"
                       style={{ left: `${m.left}%` }}
                     >
                       {formatFecha(m.dia).slice(0, 5)}
@@ -330,8 +330,8 @@ export default function Ocupacion() {
               </div>
 
               {/* Fila de % de ocupación por día, arriba de las filas de unidad. */}
-              <div className="flex border-b border-white/5 bg-white/[0.02]">
-                <div className="w-36 shrink-0 px-4 py-2 text-[9px] font-bold uppercase tracking-widest text-gray-600">% ocupación</div>
+              <div className="flex border-b border-hairline bg-white/[0.02]">
+                <div className="w-36 shrink-0 px-4 py-2 text-[9px] font-bold uppercase tracking-widest text-prius-muted">% ocupación</div>
                 <div className="flex-1 relative h-6">
                   {marcas.map((m) => {
                     const ocupadasDia = unidadesFiltradas.filter((u) =>
@@ -339,7 +339,7 @@ export default function Ocupacion() {
                     ).length
                     const pct = Math.round((ocupadasDia / totalUnidadesFiltradas) * 100)
                     return (
-                      <div key={m.dia} className="absolute top-0 h-full flex items-center text-[9px] font-bold text-gray-500" style={{ left: `${m.left}%` }}>
+                      <div key={m.dia} className="absolute top-0 h-full flex items-center text-[9px] font-bold text-prius-muted" style={{ left: `${m.left}%` }}>
                         <span className="pl-1.5">{pct}%</span>
                       </div>
                     )
@@ -351,16 +351,16 @@ export default function Ocupacion() {
                 {unidadesFiltradas.map((u) => {
                   const barras = barrasPorUnidad[u.id] || []
                   return (
-                    <div key={u.id} className="flex items-stretch hover:bg-white/5 transition-all">
-                      <div className="w-36 shrink-0 px-4 py-2.5 flex items-center gap-1.5 text-xs font-bold text-gray-300 uppercase">
+                    <div key={u.id} className="flex items-stretch hover:bg-prius-subtle transition-all">
+                      <div className="w-36 shrink-0 px-4 py-2.5 flex items-center gap-1.5 text-xs font-bold text-prius-slate uppercase">
                         {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
                       </div>
                       <div className="flex-1 relative h-9 my-auto">
                         {marcas.map((m) => (
-                          <div key={m.dia} className="absolute top-0 h-full border-l border-white/5" style={{ left: `${m.left}%` }} />
+                          <div key={m.dia} className="absolute top-0 h-full border-l border-hairline" style={{ left: `${m.left}%` }} />
                         ))}
                         {hoyOffsetSemana !== null && (
-                          <div className="absolute top-0 h-full border-l-2 border-[#FDE047]/60 z-10" style={{ left: `${hoyOffsetSemana}%` }} />
+                          <div className="absolute top-0 h-full border-l-2 border-gold/60 z-10" style={{ left: `${hoyOffsetSemana}%` }} />
                         )}
                         {barras.map((b, i) => (
                           <button
@@ -382,17 +382,17 @@ export default function Ocupacion() {
                   )
                 })}
                 {unidadesFiltradas.length === 0 && (
-                  <div className="px-8 py-10 text-center text-gray-600 uppercase text-xs tracking-widest">Sin unidades para este filtro.</div>
+                  <div className="px-8 py-10 text-center text-prius-muted uppercase text-xs tracking-widest">Sin unidades para este filtro.</div>
                 )}
               </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="glass-card rounded-3xl glass-card-inner p-4">
+        <div className="card-light rounded-3xl card-light-inner p-4">
           <div className="grid grid-cols-7 gap-2">
             {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => (
-              <div key={d} className="text-center text-[9px] font-bold uppercase tracking-widest text-gray-500">{d}</div>
+              <div key={d} className="text-center text-[9px] font-bold uppercase tracking-widest text-prius-muted">{d}</div>
             ))}
             {/* Relleno para que el día 1 caiga en su columna real de la semana (lunes=0). */}
             {Array.from({ length: (new Date(`${diasMes[0]}T12:00:00Z`).getUTCDay() + 6) % 7 }).map((_, i) => (
@@ -407,14 +407,14 @@ export default function Ocupacion() {
                   key={d}
                   type="button"
                   onClick={() => navigate(linkToPlano(d))}
-                  className={`aspect-square rounded-xl border p-2 flex flex-col items-center justify-between text-center transition-all hover:border-[#FDE047]/40 ${
-                    esHoy ? 'border-[#FDE047] bg-[#FDE047]/5' : 'border-white/10 bg-white/[0.02]'
+                  className={`aspect-square rounded-xl border p-2 flex flex-col items-center justify-between text-center transition-all hover:border-gold/40 ${
+                    esHoy ? 'border-gold bg-gold/5' : 'border-hairline bg-white/[0.02]'
                   }`}
                   title={`${formatFecha(d)} — ${pct}% ocupado`}
                 >
-                  <span className={`text-xs font-bold ${esHoy ? 'text-[#FDE047]' : 'text-gray-300'}`}>{Number(d.slice(-2))}</span>
-                  <span className="text-[10px] font-bold text-white">{pct}%</span>
-                  <div className="flex w-full h-1.5 rounded-full overflow-hidden bg-white/5">
+                  <span className={`text-xs font-bold ${esHoy ? 'text-gold' : 'text-prius-slate'}`}>{Number(d.slice(-2))}</span>
+                  <span className="text-[10px] font-bold text-black">{pct}%</span>
+                  <div className="flex w-full h-1.5 rounded-full overflow-hidden bg-prius-subtle">
                     {(['temporada', 'periodo', 'dia']).map((tipo) => {
                       const n = bucket.porTipo[tipo] || 0
                       if (!n) return null

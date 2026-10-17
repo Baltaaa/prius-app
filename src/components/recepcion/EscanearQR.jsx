@@ -49,10 +49,10 @@ export default function EscanearQR({ isOpen, onClose, onScan }) {
     <div className="fixed inset-0 z-[999] bg-black flex flex-col animate-in fade-in duration-200">
       <div ref={bind} className="flex-1 flex flex-col">
         <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] shrink-0">
-          <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-[#FDE047]">Escanear QR</h2>
+          <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-gold">Escanear QR</h2>
           <button
             onClick={() => onClose?.()}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-all"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-prius-slate hover:text-black transition-all"
           >
             <X size={20} />
           </button>
@@ -61,8 +61,8 @@ export default function EscanearQR({ isOpen, onClose, onScan }) {
         <div className="flex-1 flex items-center justify-center px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {permisoDenegado ? (
             <div className="text-center space-y-3 max-w-sm">
-              <CameraOff className="mx-auto text-gray-500" size={32} />
-              <p className="text-sm text-gray-300">
+              <CameraOff className="mx-auto text-prius-muted" size={32} />
+              <p className="text-sm text-prius-slate">
                 No pudimos acceder a la cámara. Revisá los permisos del navegador, o tipeá el código a mano.
               </p>
             </div>

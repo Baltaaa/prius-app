@@ -17,42 +17,42 @@ import BrandSelect from '../ui/BrandSelect'
 // useHistorial.js) — global pagina de a 20 con filtros, el resto contra la
 // RPC historial_entidad.
 const TIPO_EVENTO_META = {
-  reserva_alta: { icon: CalendarDays, label: 'Reserva nueva', color: 'text-[#FDE047]', filtro: 'reservas' },
-  reserva_editada: { icon: CalendarDays, label: 'Reserva editada', color: 'text-[#FDE047]', filtro: 'reservas' },
-  reserva_cancelada: { icon: Ban, label: 'Reserva cancelada', color: 'text-red-400', filtro: 'reservas' },
-  reserva_eliminada: { icon: Ban, label: 'Reserva eliminada', color: 'text-red-400', filtro: 'reservas' },
+  reserva_alta: { icon: CalendarDays, label: 'Reserva nueva', color: 'text-gold', filtro: 'reservas' },
+  reserva_editada: { icon: CalendarDays, label: 'Reserva editada', color: 'text-gold', filtro: 'reservas' },
+  reserva_cancelada: { icon: Ban, label: 'Reserva cancelada', color: 'text-prius-error', filtro: 'reservas' },
+  reserva_eliminada: { icon: Ban, label: 'Reserva eliminada', color: 'text-prius-error', filtro: 'reservas' },
   cambio_unidad: { icon: MapPin, label: 'Cambio de unidad', color: 'text-purple-400', filtro: 'cambios_unidad' },
   nota: { icon: StickyNote, label: 'Nota', color: 'text-sky-400', filtro: 'notas' },
-  pago: { icon: Wallet, label: 'Pago registrado', color: 'text-green-400', filtro: 'pagos' },
-  pago_editado: { icon: Wallet, label: 'Pago editado', color: 'text-green-400', filtro: 'pagos' },
-  pago_eliminado: { icon: Wallet, label: 'Pago eliminado', color: 'text-red-400', filtro: 'pagos' },
-  anulacion: { icon: Ban, label: 'Anulación', color: 'text-red-400', filtro: 'anulaciones' },
-  gasto_anulado: { icon: Ban, label: 'Gasto anulado', color: 'text-red-400', filtro: 'anulaciones' },
+  pago: { icon: Wallet, label: 'Pago registrado', color: 'text-prius-success', filtro: 'pagos' },
+  pago_editado: { icon: Wallet, label: 'Pago editado', color: 'text-prius-success', filtro: 'pagos' },
+  pago_eliminado: { icon: Wallet, label: 'Pago eliminado', color: 'text-prius-error', filtro: 'pagos' },
+  anulacion: { icon: Ban, label: 'Anulación', color: 'text-prius-error', filtro: 'anulaciones' },
+  gasto_anulado: { icon: Ban, label: 'Gasto anulado', color: 'text-prius-error', filtro: 'anulaciones' },
   comprobante: { icon: Receipt, label: 'Comprobante cargado', color: 'text-amber-400', filtro: 'comprobantes' },
   comprobante_editado: { icon: Receipt, label: 'Comprobante editado', color: 'text-amber-400', filtro: 'comprobantes' },
-  comprobante_eliminado: { icon: Receipt, label: 'Comprobante eliminado', color: 'text-red-400', filtro: 'comprobantes' },
+  comprobante_eliminado: { icon: Receipt, label: 'Comprobante eliminado', color: 'text-prius-error', filtro: 'comprobantes' },
   cliente_alta: { icon: Users, label: 'Cliente nuevo', color: 'text-sky-400', filtro: 'otros' },
   cliente_editado: { icon: Users, label: 'Cliente editado', color: 'text-sky-400', filtro: 'otros' },
-  cliente_eliminado: { icon: Users, label: 'Cliente eliminado', color: 'text-red-400', filtro: 'otros' },
+  cliente_eliminado: { icon: Users, label: 'Cliente eliminado', color: 'text-prius-error', filtro: 'otros' },
   unidad_estado: { icon: MapPin, label: 'Unidad', color: 'text-purple-400', filtro: 'otros' },
-  gasto: { icon: Receipt, label: 'Gasto registrado', color: 'text-red-400', filtro: 'otros' },
-  gasto_editado: { icon: Receipt, label: 'Gasto editado', color: 'text-red-400', filtro: 'otros' },
+  gasto: { icon: Receipt, label: 'Gasto registrado', color: 'text-prius-error', filtro: 'otros' },
+  gasto_editado: { icon: Receipt, label: 'Gasto editado', color: 'text-prius-error', filtro: 'otros' },
   // Tarea 4 (oct 2026): tablas nuevas cubiertas por el trigger.
   co_socio_agregado: { icon: UserPlus, label: 'Co-socio agregado', color: 'text-sky-400', filtro: 'otros' },
-  co_socio_quitado: { icon: UserPlus, label: 'Co-socio quitado', color: 'text-red-400', filtro: 'otros' },
-  caja_apertura: { icon: Lock, label: 'Caja abierta', color: 'text-green-400', filtro: 'caja' },
+  co_socio_quitado: { icon: UserPlus, label: 'Co-socio quitado', color: 'text-prius-error', filtro: 'otros' },
+  caja_apertura: { icon: Lock, label: 'Caja abierta', color: 'text-prius-success', filtro: 'caja' },
   caja_cierre: { icon: Lock, label: 'Caja cerrada', color: 'text-amber-400', filtro: 'caja' },
-  caja_reapertura: { icon: Lock, label: 'Caja reabierta', color: 'text-red-400', filtro: 'caja' },
-  caja_editada: { icon: Lock, label: 'Caja editada', color: 'text-gray-400', filtro: 'caja' },
+  caja_reapertura: { icon: Lock, label: 'Caja reabierta', color: 'text-prius-error', filtro: 'caja' },
+  caja_editada: { icon: Lock, label: 'Caja editada', color: 'text-prius-slate', filtro: 'caja' },
   lead_nuevo: { icon: Inbox, label: 'Lead nuevo', color: 'text-orange-400', filtro: 'otros' },
   lead_editado: { icon: Inbox, label: 'Lead editado', color: 'text-orange-400', filtro: 'otros' },
-  temporada_insert: { icon: CalendarDays, label: 'Temporada nueva', color: 'text-[#FDE047]', filtro: 'otros' },
-  temporada_update: { icon: CalendarDays, label: 'Temporada editada', color: 'text-[#FDE047]', filtro: 'otros' },
-  temporada_delete: { icon: CalendarDays, label: 'Temporada eliminada', color: 'text-red-400', filtro: 'otros' },
-  migracion_historica: { icon: History, label: 'Migración histórica', color: 'text-gray-500', filtro: 'otros' },
+  temporada_insert: { icon: CalendarDays, label: 'Temporada nueva', color: 'text-gold', filtro: 'otros' },
+  temporada_update: { icon: CalendarDays, label: 'Temporada editada', color: 'text-gold', filtro: 'otros' },
+  temporada_delete: { icon: CalendarDays, label: 'Temporada eliminada', color: 'text-prius-error', filtro: 'otros' },
+  migracion_historica: { icon: History, label: 'Migración histórica', color: 'text-prius-muted', filtro: 'otros' },
   // Seguimiento (oct 2026, Tarea 2): eventos de auth, vía fn_registrar_evento_auth.
-  login: { icon: LogIn, label: 'Inicio de sesión', color: 'text-green-400', filtro: 'otros' },
-  logout: { icon: LogOut, label: 'Cierre de sesión', color: 'text-gray-400', filtro: 'otros' },
+  login: { icon: LogIn, label: 'Inicio de sesión', color: 'text-prius-success', filtro: 'otros' },
+  logout: { icon: LogOut, label: 'Cierre de sesión', color: 'text-prius-slate', filtro: 'otros' },
   logout_inactividad: { icon: ShieldOff, label: 'Cierre por inactividad', color: 'text-amber-400', filtro: 'otros' },
 }
 
@@ -85,7 +85,7 @@ function etiquetaFecha(fecha) {
 }
 
 function metaDe(evento) {
-  return TIPO_EVENTO_META[evento.tipo_evento] || { icon: Activity, label: evento.descripcion, color: 'text-gray-400', filtro: 'otros' }
+  return TIPO_EVENTO_META[evento.tipo_evento] || { icon: Activity, label: evento.descripcion, color: 'text-prius-slate', filtro: 'otros' }
 }
 
 // Campos cuyo cambio vale la pena mostrar como "antes → después" (Tarea 4)
@@ -205,7 +205,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
   }
 
   if (loading && todos.length === 0) {
-    return <p className="text-xs text-gray-500 uppercase tracking-widest animate-pulse">Cargando historial...</p>
+    return <p className="text-xs text-prius-muted uppercase tracking-widest animate-pulse">Cargando historial...</p>
   }
 
   return (
@@ -214,7 +214,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
         <>
           <div className="flex flex-wrap items-center gap-3">
             <DateInput value={desde} onChange={(v) => setRango('hDesde', v || addDays(todayStr(), -7), addDays(todayStr(), -7))} className="w-40" />
-            <span className="text-gray-600 text-xs">→</span>
+            <span className="text-prius-muted text-xs">→</span>
             <DateInput value={hasta} onChange={(v) => setRango('hHasta', v || todayStr(), todayStr())} min={desde} className="w-40" />
             <BrandSelect value={usuarioFiltro} onChange={(v) => setRango('hUsuario', v, '')} options={opcionesUsuario} className="w-48" />
             <SearchInput value={q} onChange={(v) => setRango('hq', v, '')} placeholder="Buscar en el historial..." className="flex-1 min-w-[160px]" />
@@ -222,25 +222,25 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
 
           {kpis && (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              <div className="glass-card rounded-2xl p-4">
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Movimientos</p>
-                <p className="text-xl font-bold text-white mt-1">{kpis.movimientos}</p>
+              <div className="card-light rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Movimientos</p>
+                <p className="text-xl font-bold text-black mt-1">{kpis.movimientos}</p>
               </div>
-              <div className="glass-card rounded-2xl p-4">
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cobrado</p>
-                <p className="text-xl font-bold text-green-400 mt-1">{formatPesos(kpis.cobrado)}</p>
+              <div className="card-light rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Cobrado</p>
+                <p className="text-xl font-bold text-prius-success mt-1">{formatPesos(kpis.cobrado)}</p>
               </div>
-              <div className="glass-card rounded-2xl p-4">
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Reservas nuevas</p>
-                <p className="text-xl font-bold text-[#FDE047] mt-1">{kpis.reservasNuevas}</p>
+              <div className="card-light rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Reservas nuevas</p>
+                <p className="text-xl font-bold text-gold mt-1">{kpis.reservasNuevas}</p>
               </div>
-              <div className="glass-card rounded-2xl p-4">
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Modificaciones</p>
-                <p className="text-xl font-bold text-white mt-1">{kpis.modificaciones}</p>
+              <div className="card-light rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Modificaciones</p>
+                <p className="text-xl font-bold text-black mt-1">{kpis.modificaciones}</p>
               </div>
-              <div className="glass-card rounded-2xl p-4">
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cancelaciones</p>
-                <p className="text-xl font-bold text-red-400 mt-1">{kpis.cancelaciones}</p>
+              <div className="card-light rounded-2xl p-4">
+                <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Cancelaciones</p>
+                <p className="text-xl font-bold text-prius-error mt-1">{kpis.cancelaciones}</p>
               </div>
             </div>
           )}
@@ -254,7 +254,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
               key={f.key}
               onClick={() => setFiltro(f.key)}
               className={`px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all min-h-[36px] ${
-                filtro === f.key ? 'bg-[#FDE047] text-black border-[#FDE047]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                filtro === f.key ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
               }`}
             >
               {f.label}
@@ -264,7 +264,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
       )}
 
       {grupos.length === 0 ? (
-        <div className="glass-card rounded-2xl p-8 text-center text-gray-600 uppercase text-xs tracking-widest flex flex-col items-center gap-3">
+        <div className="card-light rounded-2xl p-8 text-center text-prius-muted uppercase text-xs tracking-widest flex flex-col items-center gap-3">
           <History size={24} className="opacity-40" />
           Sin eventos todavía
         </div>
@@ -272,10 +272,10 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
         <div className="space-y-6">
           {grupos.map(([fecha, items]) => (
             <div key={fecha}>
-              <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] text-[#FDE047] mb-3 capitalize ${mostrarFiltrosGlobales ? 'sticky top-0 bg-[#0a0d14] py-2 z-10' : ''}`}>
+              <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] text-gold mb-3 capitalize ${mostrarFiltrosGlobales ? 'sticky top-0 bg-white py-2 z-10' : ''}`}>
                 {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
               </h3>
-              <div className="glass-card rounded-2xl glass-card-inner divide-y divide-white/5">
+              <div className="card-light rounded-2xl card-light-inner divide-y divide-white/5">
                 {items.map((e) => {
                   const meta = metaDe(e)
                   const Icon = meta.icon
@@ -295,21 +295,21 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
                       key={e.id}
                       type={clickable ? 'button' : undefined}
                       onClick={clickable ? () => handleClick(e) : undefined}
-                      className={`w-full flex items-start gap-4 px-4 py-3 text-left ${clickable ? 'hover:bg-white/5 transition-all' : ''}`}
+                      className={`w-full flex items-start gap-4 px-4 py-3 text-left ${clickable ? 'hover:bg-prius-subtle transition-all' : ''}`}
                     >
                       <div className={`mt-0.5 shrink-0 ${meta.color}`}><Icon size={16} /></div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-200 flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-white">{actor}</span> {e.descripcion}
-                          {e.cliente_nombre && <span className="text-gray-400">· {e.cliente_nombre}</span>}
+                        <p className="text-sm text-prius-slate flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-black">{actor}</span> {e.descripcion}
+                          {e.cliente_nombre && <span className="text-prius-slate">· {e.cliente_nombre}</span>}
                           {esHistorico && (
-                            <span className="text-[9px] font-bold uppercase tracking-widest text-gray-500 bg-white/5 border border-white/10 rounded-full px-2 py-0.5">
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-prius-muted bg-prius-subtle border border-hairline rounded-full px-2 py-0.5">
                               Histórico
                             </span>
                           )}
                         </p>
                         {diff && <p className="text-xs text-cyan-300 mt-1">{diff}</p>}
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-gray-600 mt-1">
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-prius-muted mt-1">
                           {meta.label} · {formatHora(e.ts)}
                         </p>
                       </div>
@@ -327,7 +327,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
           type="button"
           onClick={loadMore}
           disabled={loading}
-          className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 disabled:opacity-50 transition-all"
+          className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-prius-subtle text-prius-slate border border-hairline hover:bg-prius-subtle disabled:opacity-50 transition-all"
         >
           {loading ? 'Cargando...' : 'Cargar más'}
         </button>

@@ -25,35 +25,35 @@ export default function Perfil() {
   return (
     <div className="space-y-10 animate-premium-fade">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glass-card p-8 rounded-3xl glass-card-inner space-y-8">
-          <div className="flex items-center gap-6 border-b border-white/5 pb-8">
-            <div className="w-16 h-16 bg-[#FDE047] text-black rounded-2xl flex items-center justify-center font-bold text-2xl shadow-[0_0_20px_rgba(253,224,71,0.2)]">
+        <div className="card-light p-8 rounded-3xl card-light-inner space-y-8">
+          <div className="flex items-center gap-6 border-b border-hairline pb-8">
+            <div className="w-16 h-16 bg-gold text-black rounded-2xl flex items-center justify-center font-bold text-2xl shadow-[0_0_20px_rgba(253,224,71,0.2)]">
               {userEmail.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight uppercase">{userEmail.split('@')[0]}</h2>
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mt-1">Administración General</p>
+              <h2 className="text-xl font-bold text-black tracking-tight uppercase">{userEmail.split('@')[0]}</h2>
+              <p className="text-prius-muted text-xs font-semibold uppercase tracking-wider mt-1">Administración General</p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="flex justify-between py-3 border-b border-white/5">
-              <span className="text-gray-500 text-xs font-bold uppercase tracking-widest">Email</span>
-              <span className="text-white text-sm font-medium">{userEmail}</span>
+            <div className="flex justify-between py-3 border-b border-hairline">
+              <span className="text-prius-muted text-xs font-bold uppercase tracking-widest">Email</span>
+              <span className="text-black text-sm font-medium">{userEmail}</span>
             </div>
-            <div className="flex justify-between py-3 border-b border-white/5">
-              <span className="text-gray-500 text-xs font-bold uppercase tracking-widest">Seguridad</span>
-              <span className="text-green-400 text-xs font-bold uppercase flex items-center gap-1">
+            <div className="flex justify-between py-3 border-b border-hairline">
+              <span className="text-prius-muted text-xs font-bold uppercase tracking-widest">Seguridad</span>
+              <span className="text-prius-success text-xs font-bold uppercase flex items-center gap-1">
                 <Shield size={12} /> Protegida
               </span>
             </div>
           </div>
         </div>
 
-        <div className="glass-card p-8 rounded-3xl glass-card-inner space-y-8">
-          <div className="flex items-center gap-3 border-b border-white/5 pb-8">
-            <DollarSign className="text-[#FDE047]" size={20} />
-            <h2 className="text-sm font-bold uppercase tracking-widest text-white">Tarifas Base</h2>
+        <div className="card-light p-8 rounded-3xl card-light-inner space-y-8">
+          <div className="flex items-center gap-3 border-b border-hairline pb-8">
+            <DollarSign className="text-gold" size={20} />
+            <h2 className="text-sm font-bold uppercase tracking-widest text-black">Tarifas Base</h2>
           </div>
 
           <div className="space-y-6">
@@ -61,7 +61,7 @@ export default function Perfil() {
             <MoneyInput label="⛱️ Precio Base Sombrilla" value={tarifaSombrilla} onChange={setTarifaSombrilla} max={100_000_000} />
             <button
               onClick={handleGuardarTarifas}
-              className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl flex items-center justify-center gap-2"
+              className="w-full py-4 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl flex items-center justify-center gap-2"
             >
               {saved ? <><Check size={16} /> Guardado</> : <><Save size={16} /> Actualizar Tarifas</>}
             </button>

@@ -26,15 +26,15 @@ const EscanearQR = lazy(() => import('../components/recepcion/EscanearQR'))
 function EscanearQRFallback() {
   return (
     <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center gap-3">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-[#FDE047] rounded-full animate-spin" />
-      <p className="text-sm text-gray-400">Abriendo cámara…</p>
+      <div className="w-8 h-8 border-2 border-hairline border-t-[#FDE047] rounded-full animate-spin" />
+      <p className="text-sm text-prius-slate">Abriendo cámara…</p>
     </div>
   )
 }
 
 const chipClass = (active) =>
   `px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
-    active ? 'bg-[#FDE047] text-black border-[#FDE047]' : 'bg-white/5 text-gray-300 border-white/10 hover:text-white'
+    active ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
   }`
 
 // Mismo +1 inclusivo que Reservas.jsx (balneario, no hotel — ver CLAUDE.md).
@@ -236,8 +236,8 @@ export default function Recepcion() {
       )}
 
       <div className="flex items-center gap-3">
-        <QrCode className="text-[#FDE047]" size={22} />
-        <h1 className="text-lg font-bold text-white uppercase tracking-wider">Recepción</h1>
+        <QrCode className="text-gold" size={22} />
+        <h1 className="text-lg font-bold text-black uppercase tracking-wider">Recepción</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -245,13 +245,13 @@ export default function Recepcion() {
         <div className="space-y-4">
           <button
             onClick={() => setScannerOpen(true)}
-            className="w-full py-6 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-2xl font-bold text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl"
+            className="w-full py-6 bg-gold hover:bg-yellow-300 text-black rounded-2xl font-bold text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl"
           >
             <QrCode size={22} /> Escanear QR
           </button>
 
-          <div className="glass-card p-4 rounded-2xl space-y-3">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Código de reserva</label>
+          <div className="card-light p-4 rounded-2xl space-y-3">
+            <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Código de reserva</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -259,37 +259,37 @@ export default function Recepcion() {
                 onChange={(e) => setInputManual(e.target.value.toUpperCase())}
                 onKeyDown={(e) => { if (e.key === 'Enter') cargarCodigo(inputManual) }}
                 placeholder="Ej: PRIUS-A3X9K2"
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm font-bold uppercase tracking-wider focus:border-[#FDE047]/50 outline-none"
+                className="flex-1 bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm font-bold uppercase tracking-wider focus:border-gold/50 outline-none"
               />
               <button
                 onClick={() => cargarCodigo(inputManual)}
-                className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white transition-all"
+                className="px-4 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-black transition-all"
               >
                 <Search size={18} />
               </button>
             </div>
-            {errorBusqueda && <p className="text-[11px] text-red-400">{errorBusqueda}</p>}
+            {errorBusqueda && <p className="text-[11px] text-prius-error">{errorBusqueda}</p>}
           </div>
 
-          <div className="glass-card p-4 rounded-2xl space-y-3">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Llegan hoy</p>
+          <div className="card-light p-4 rounded-2xl space-y-3">
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Llegan hoy</p>
             {lleganHoy.length === 0 ? (
-              <p className="text-xs text-gray-500">Nadie con reserva web pendiente de check-in hoy.</p>
+              <p className="text-xs text-prius-muted">Nadie con reserva web pendiente de check-in hoy.</p>
             ) : (
               <div className="space-y-2">
                 {lleganHoy.map((item) => (
                   <button
                     key={item.codigo}
                     onClick={() => cargarCodigo(item.codigo)}
-                    className="w-full flex items-center justify-between gap-3 px-3 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-left transition-all"
+                    className="w-full flex items-center justify-between gap-3 px-3 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-left transition-all"
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-white uppercase truncate">{item.titular}</p>
-                      <p className="text-[10px] text-gray-500 uppercase tracking-widest">
+                      <p className="text-xs font-bold text-black uppercase truncate">{item.titular}</p>
+                      <p className="text-[10px] text-prius-muted uppercase tracking-widest">
                         {item.codigo} · {item.reservas.map((r) => `${unidadEmoji(r.unidades?.tipo)} #${r.unidades?.numero}`).join(' ')}
                       </p>
                     </div>
-                    {item.saldo > 0 && <span className="shrink-0 text-xs font-bold text-red-400">{formatPesos(item.saldo)}</span>}
+                    {item.saldo > 0 && <span className="shrink-0 text-xs font-bold text-prius-error">{formatPesos(item.saldo)}</span>}
                   </button>
                 ))}
               </div>
@@ -300,15 +300,15 @@ export default function Recepcion() {
         {/* Columna derecha: tarjeta de la reserva cargada */}
         <div>
           {!codigoUrl ? (
-            <div className="glass-card p-8 rounded-2xl text-center text-gray-500 text-sm">
+            <div className="card-light p-8 rounded-2xl text-center text-prius-muted text-sm">
               Escaneá un QR o cargá un código para empezar.
             </div>
           ) : exito ? (
-            <div className="glass-card p-8 rounded-2xl text-center space-y-4">
-              <CheckCircle2 className="mx-auto text-green-400" size={40} />
+            <div className="card-light p-8 rounded-2xl text-center space-y-4">
+              <CheckCircle2 className="mx-auto text-prius-success" size={40} />
               <div>
-                <p className="text-lg font-bold text-white">Listo — {exito.unidadesLabel}</p>
-                {exito.total > 0 && <p className="text-sm text-gray-400 mt-1">Cobrado: {formatPesos(exito.total)}</p>}
+                <p className="text-lg font-bold text-black">Listo — {exito.unidadesLabel}</p>
+                {exito.total > 0 && <p className="text-sm text-prius-slate mt-1">Cobrado: {formatPesos(exito.total)}</p>}
               </div>
               {exito.pagos.length > 0 && (
                 <div className="space-y-1">
@@ -316,7 +316,7 @@ export default function Recepcion() {
                     <button
                       key={p.pago_id}
                       onClick={() => navigate(linkToComprobante(p.reserva_id))}
-                      className="text-[11px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300 transition-all flex items-center gap-1 mx-auto"
+                      className="text-[11px] font-bold uppercase tracking-widest text-gold hover:text-yellow-300 transition-all flex items-center gap-1 mx-auto"
                     >
                       <Receipt size={12} /> Cargar comprobante
                     </button>
@@ -325,31 +325,31 @@ export default function Recepcion() {
               )}
               <button
                 onClick={volverAlInicio}
-                className="w-full py-3.5 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
+                className="w-full py-3.5 bg-gold hover:bg-yellow-300 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
               >
                 Siguiente cliente
               </button>
             </div>
           ) : !grupo || !primera ? (
-            <div className="glass-card p-8 rounded-2xl text-center text-gray-500 text-sm">
+            <div className="card-light p-8 rounded-2xl text-center text-prius-muted text-sm">
               No encontramos ese código de reserva.
             </div>
           ) : (
-            <div className="glass-card p-6 rounded-2xl space-y-5">
+            <div className="card-light p-6 rounded-2xl space-y-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{codigoRow.codigo}</p>
-                  <h2 className="text-base font-bold text-white uppercase truncate">
+                  <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">{codigoRow.codigo}</p>
+                  <h2 className="text-base font-bold text-black uppercase truncate">
                     {primera.clientes?.nombre} {primera.clientes?.apellido}
                   </h2>
-                  <p className="text-xs text-gray-400">{formatTelefono(primera.clientes?.telefono)}</p>
+                  <p className="text-xs text-prius-slate">{formatTelefono(primera.clientes?.telefono)}</p>
                 </div>
                 <StatusBadge status={badgeStatus} />
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 {reservasGrupo.map((r) => (
-                  <span key={r.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-white">
+                  <span key={r.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-prius-subtle border border-hairline rounded-lg text-xs text-black">
                     {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}
                   </span>
                 ))}
@@ -358,55 +358,55 @@ export default function Recepcion() {
                 <p className="text-[11px] text-amber-400 flex items-center gap-1.5"><AlertTriangle size={12} /> Las unidades no están juntas.</p>
               )}
               {coSocios(primera).length > 0 && (
-                <p className="text-[11px] text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                <p className="text-[11px] text-prius-slate uppercase tracking-widest flex items-center gap-1.5">
                   <UsersIcon size={12} /> Co-socios: {coSocios(primera).map((s) => s.nombre).join(', ')}
                 </p>
               )}
 
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Fechas</p>
-                  <p className="text-white mt-0.5">
+                  <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Fechas</p>
+                  <p className="text-black mt-0.5">
                     {primera.tipo_alquiler === 'dia' ? formatFecha(primera.fecha) : formatRangoFechas(primera.fecha_inicio, primera.fecha_fin)}
                     {' · '}{diasEntre(primera.fecha_inicio || primera.fecha, primera.fecha_fin || primera.fecha)} días
                   </p>
                 </div>
                 <div>
-                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Personas</p>
-                  <p className="text-white mt-0.5">{reservasGrupo.reduce((acc, r) => acc + (r.cantidad_personas || 0), 0)}</p>
+                  <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Personas</p>
+                  <p className="text-black mt-0.5">{reservasGrupo.reduce((acc, r) => acc + (r.cantidad_personas || 0), 0)}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-center">
-                  <p className="text-[9px] text-gray-500 uppercase tracking-widest">Total</p>
-                  <p className="text-sm font-bold text-white mt-1">{formatPesosVisible(totalGrupo)}</p>
+                <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+                  <p className="text-[9px] text-prius-muted uppercase tracking-widest">Total</p>
+                  <p className="text-sm font-bold text-black mt-1">{formatPesosVisible(totalGrupo)}</p>
                 </div>
-                <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-center">
-                  <p className="text-[9px] text-gray-500 uppercase tracking-widest">Pagado</p>
-                  <p className="text-sm font-bold text-green-400 mt-1">{formatPesosVisible(pagadoGrupo)}</p>
+                <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+                  <p className="text-[9px] text-prius-muted uppercase tracking-widest">Pagado</p>
+                  <p className="text-sm font-bold text-prius-success mt-1">{formatPesosVisible(pagadoGrupo)}</p>
                 </div>
-                <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-center">
-                  <p className="text-[9px] text-gray-500 uppercase tracking-widest">Saldo</p>
-                  <p className="text-sm font-bold text-[#FDE047] mt-1">{formatPesosVisible(saldoGrupo)}</p>
+                <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+                  <p className="text-[9px] text-prius-muted uppercase tracking-widest">Saldo</p>
+                  <p className="text-sm font-bold text-gold mt-1">{formatPesosVisible(saldoGrupo)}</p>
                 </div>
               </div>
 
               {!vencida && !yaCheckin && (
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Medio de pago</label>
+                  <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de pago</label>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => (
                       <button key={value} type="button" onClick={() => setMedio(value)} className={chipClass(medio === value)}>{label}</button>
                     ))}
                   </div>
                   {medio !== codigoRow.metodo_pago_previsto && (
-                    <div className="p-3 bg-[#FDE047]/5 border border-[#FDE047]/20 rounded-xl space-y-2">
-                      <p className="text-xs text-gray-300">
+                    <div className="p-3 bg-gold/5 border border-gold/20 rounded-xl space-y-2">
+                      <p className="text-xs text-prius-slate">
                         Reservó con {MEDIO_PAGO_LABEL[codigoRow.metodo_pago_previsto]}: {formatPesos(totalGrupo)}
                         {' · '}En {MEDIO_PAGO_LABEL[medio]}: {precioAjustado != null ? formatPesos(precioAjustado) : '—'}
                       </p>
-                      <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-prius-slate cursor-pointer">
                         <input type="checkbox" checked={ajustarPrecio} onChange={(e) => setAjustarPrecio(e.target.checked)} className="accent-[#FDE047]" />
                         Se cobra el precio de {MEDIO_PAGO_LABEL[medio]}
                       </label>
@@ -416,7 +416,7 @@ export default function Recepcion() {
               )}
 
               {errorCobro && (
-                <p className="text-[11px] text-red-400 flex items-center gap-1.5">
+                <p className="text-[11px] text-prius-error flex items-center gap-1.5">
                   <AlertTriangle size={12} /> {errorCobro.mensaje || MENSAJE_ERROR[errorCobro.error] || 'No se pudo completar la operación.'}
                 </p>
               )}
@@ -426,14 +426,14 @@ export default function Recepcion() {
                   <p className="text-sm text-amber-400 flex items-center gap-2"><AlertTriangle size={16} /> Reserva vencida — la unidad se liberó.</p>
                   <button
                     onClick={crearReservaNueva}
-                    className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
+                    className="w-full py-3.5 bg-prius-subtle hover:bg-prius-subtle border border-hairline text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
                   >
                     Crear reserva nueva
                   </button>
                 </div>
               ) : yaCheckin ? (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                  <p className="text-xs text-prius-slate flex items-center gap-1.5">
                     <Clock size={13} /> Check-in hecho el {formatFechaHora(codigoRow.checkin_at)}
                     {checkinPorNombre ? ` por ${checkinPorNombre}` : ''}
                   </p>
@@ -441,7 +441,7 @@ export default function Recepcion() {
                     <button
                       disabled={saving}
                       onClick={() => ejecutarCobro({ cobrar: true, hacerCheckin: false })}
-                      className="w-full py-3.5 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
+                      className="w-full py-3.5 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
                     >
                       {saving ? 'Registrando...' : `Registrar pago ${formatPesos(saldoGrupo)}`}
                     </button>
@@ -452,7 +452,7 @@ export default function Recepcion() {
                   <button
                     disabled={saving}
                     onClick={() => ejecutarCobro({ cobrar: true, hacerCheckin: todasHoy })}
-                    className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-sm transition-all shadow-xl"
+                    className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-sm transition-all shadow-xl"
                   >
                     {saving
                       ? 'Procesando...'
@@ -461,7 +461,7 @@ export default function Recepcion() {
                         : `Cobrar por adelantado ${formatPesos(precioAjustado && ajustarPrecio ? precioAjustado : saldoGrupo)}`}
                   </button>
                   {!todasHoy && (
-                    <p className="text-[11px] text-gray-500 flex items-center gap-1.5">
+                    <p className="text-[11px] text-prius-muted flex items-center gap-1.5">
                       <Clock size={12} /> Llega el {primera.tipo_alquiler === 'dia' ? formatFecha(primera.fecha) : formatFecha(primera.fecha_inicio)}
                     </p>
                   )}
@@ -469,7 +469,7 @@ export default function Recepcion() {
                     <button
                       disabled={saving}
                       onClick={handleCheckinSinCobrar}
-                      className="w-full py-2.5 text-[11px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all"
+                      className="w-full py-2.5 text-[11px] font-bold uppercase tracking-widest text-prius-slate hover:text-black transition-all"
                     >
                       Check-in sin cobrar
                     </button>
@@ -482,13 +482,13 @@ export default function Recepcion() {
                   se abre la reserva si no hay caja hoy, sin esperar a que
                   el usuario intente cobrar primero. */}
               {(cajaCerrada || !cajaHoy) && (
-                <div className="p-4 bg-[#FDE047]/5 border border-[#FDE047]/20 rounded-xl space-y-3">
-                  <p className="text-sm text-gray-300 flex items-center gap-2"><Wallet size={16} className="text-[#FDE047] shrink-0" /> No hay caja abierta hoy — hace falta para cobrar.</p>
+                <div className="p-4 bg-gold/5 border border-gold/20 rounded-xl space-y-3">
+                  <p className="text-sm text-prius-slate flex items-center gap-2"><Wallet size={16} className="text-gold shrink-0" /> No hay caja abierta hoy — hace falta para cobrar.</p>
                   <MoneyInput label="Monto inicial de caja" value={montoApertura} onChange={setMontoApertura} max={10_000_000} />
                   <button
                     disabled={abriendoCaja}
                     onClick={() => handleAbrirCajaYReintentar({ cobrar: true, hacerCheckin: todasHoy })}
-                    className="w-full py-3 min-h-[44px] bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
+                    className="w-full py-3 min-h-[44px] bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
                   >
                     {abriendoCaja ? 'Abriendo...' : 'Abrir caja y cobrar'}
                   </button>

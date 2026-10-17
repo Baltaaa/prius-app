@@ -4,7 +4,7 @@
 
 
 :root {
-  --prius-accent: #FDE047;
+  --prius-accent: #F2CA50;
   --prius-dark: #111520;
   --prius-darker: #0a0d14;
 }
@@ -15,13 +15,12 @@
   box-sizing: border-box;
 }
 
+/* Rediseño "Playa Privada" (oct 2026): fondo blanco plano, sin gradiente ni
+   glassmorphism — reemplaza el tema "Glass Dark" anterior. */
 body {
-  font-family: 'Montserrat', sans-serif;
-  background-color: var(--prius-darker);
-  /* Gradiente estático pintado una sola vez, sin blur encima */
-  background: radial-gradient(circle at top right, #1a2a44, #0a0d14 60%);
-  background-attachment: fixed;
-  color: white;
+  font-family: 'Inter', 'Montserrat', sans-serif;
+  background-color: #FFFFFF;
+  color: #000000;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
@@ -69,6 +68,28 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+/*
+  Rediseño "Playa Privada" (oct 2026): reemplazo plano de .glass-card/
+  .glass-popover para toda pantalla migrada — blanco sólido, borde hairline
+  1px, sin sombra ni blur (regla de diseño: cero sombras/gradientes).
+  .glass-card/.glass-tooltip de arriba quedan intactas a propósito: las sigue
+  usando PlanoViewport.jsx y Cell.jsx (archivos del Plano, prohibido tocarlos
+  ni siquiera indirectamente vía CSS compartido).
+*/
+.card-light {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+}
+
+.card-light-inner {
+  background: transparent;
+}
+
+.popover-light {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
 }
 
 /*

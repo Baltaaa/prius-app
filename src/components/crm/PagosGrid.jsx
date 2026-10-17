@@ -9,7 +9,7 @@ import { CreditCard, Hourglass, Gift } from 'lucide-react'
 // `texto` (oct 2026): la celda de Saldo usa "Saldo sin verificar" en vez de
 // "Monto nulo" — mismo componente, dos textos según el contexto.
 const MontoNulo = ({ texto = 'Monto nulo' }) => (
-  <span className="text-red-400 text-[8px] font-bold uppercase tracking-widest whitespace-nowrap">{texto}</span>
+  <span className="text-prius-error text-[8px] font-bold uppercase tracking-widest whitespace-nowrap">{texto}</span>
 )
 
 // Grilla de pagos por reserva, estilo el cuadro que ya usa el administrador
@@ -34,7 +34,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
   if (reserva.bonificada) {
     return (
       <div className="space-y-1">
-        <div className="flex items-center gap-2 text-[10px] text-gray-500 uppercase tracking-widest">
+        <div className="flex items-center gap-2 text-[10px] text-prius-muted uppercase tracking-widest">
           <span className="text-cyan-400 font-bold">{reserva.temporada}</span>
           <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}</span>
         </div>
@@ -54,12 +54,12 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
   if (esPendienteConfirmacion(reserva)) {
     return (
       <div className="space-y-1">
-        <div className="flex items-center gap-2 text-[10px] text-gray-500 uppercase tracking-widest">
+        <div className="flex items-center gap-2 text-[10px] text-prius-muted uppercase tracking-widest">
           <span className="text-cyan-400 font-bold">{reserva.temporada}</span>
           <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}</span>
         </div>
-        <div className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-dashed border-white/15 rounded-lg text-xs text-gray-400">
-          <Hourglass size={14} className="text-gray-500 shrink-0" />
+        <div className="flex items-center gap-2 px-4 py-3 bg-prius-subtle border border-dashed border-hairline rounded-lg text-xs text-prius-slate">
+          <Hourglass size={14} className="text-prius-muted shrink-0" />
           Cliente de la temporada pasada, sin confirmar ni pagar nada todavía — no hay precio definido para cargar pagos.
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
   // (badge único) ya se ve en la tarjeta de arriba, este bloque no lo repite.
   if (!(Number(reserva.valor_total) > 0)) {
     return (
-      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-white/5 border border-dashed border-white/15 rounded-lg text-xs text-gray-400">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-prius-subtle border border-dashed border-hairline rounded-lg text-xs text-prius-slate">
         <span>Todavía no hay precio definido para esta reserva.</span>
         {onDefinirPrecio && (
           <button
@@ -108,7 +108,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center gap-2 text-[10px] text-gray-500 uppercase tracking-widest">
+      <div className="flex items-center gap-2 text-[10px] text-prius-muted uppercase tracking-widest">
         <span className="text-cyan-400 font-bold">{reserva.temporada}</span>
         <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}</span>
       </div>
@@ -120,8 +120,8 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
               guard de más arriba corta antes si no lo es), pero se aplica el
               mismo helper acá para no formatear montos a mano. */}
           {formatPesosVisible(reserva.valor_total) && (
-            <div className={`${cellBase} bg-white/5 border border-white/10 text-white`}>
-              <span className="text-[8px] text-gray-500 uppercase tracking-widest">Precio Venta</span>
+            <div className={`${cellBase} bg-prius-subtle border border-hairline text-black`}>
+              <span className="text-[8px] text-prius-muted uppercase tracking-widest">Precio Venta</span>
               {formatPesosVisible(reserva.valor_total)}
             </div>
           )}
@@ -144,23 +144,23 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
                 onClick={() => onCellClick(reserva, pago)}
                 className={`${cellBase} ${
                   anulado
-                    ? 'bg-white/5 border border-white/10 text-gray-600 line-through cursor-pointer hover:bg-white/10'
+                    ? 'bg-prius-subtle border border-hairline text-prius-muted line-through cursor-pointer hover:bg-prius-subtle'
                     : saldada
-                      ? 'bg-white/5 border border-white/10 text-gray-300 cursor-pointer hover:bg-white/10'
+                      ? 'bg-prius-subtle border border-hairline text-prius-slate cursor-pointer hover:bg-prius-subtle'
                       : sinVerificar
-                        ? 'bg-gray-500/10 border border-gray-500/30 text-gray-400 hover:bg-gray-500/20 cursor-pointer'
-                        : 'bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 cursor-pointer'
+                        ? 'bg-gray-500/10 border border-gray-500/30 text-prius-slate hover:bg-gray-500/20 cursor-pointer'
+                        : 'bg-green-500/10 border border-green-500/30 text-prius-success hover:bg-green-500/20 cursor-pointer'
                 }`}
                 title={anulado ? `Pago anulado — ${pago.anulado_motivo || 'sin motivo'}` : 'Ver detalle del pago'}
               >
-                <span className="text-[8px] text-gray-500 uppercase tracking-widest">Cuota {pago.nro_cuota}</span>
+                <span className="text-[8px] text-prius-muted uppercase tracking-widest">Cuota {pago.nro_cuota}</span>
                 {sinVerificar ? <MontoNulo /> : formatPesosVisible(pago.monto)}
                 {pago.medio === 'tarjeta_credito' && pago.cuotas_tarjeta && (
-                  <span className="flex items-center gap-0.5 text-[8px] text-[#FDE047] font-bold">
+                  <span className="flex items-center gap-0.5 text-[8px] text-gold font-bold">
                     <CreditCard size={10} /> {pago.cuotas_tarjeta}x
                   </span>
                 )}
-                <span className="text-[8px] text-gray-500 font-normal normal-case tracking-normal">
+                <span className="text-[8px] text-prius-muted font-normal normal-case tracking-normal">
                   {pago.comprobantes?.length > 0
                     ? pago.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
                     : 'Sin comprobante'}
@@ -178,17 +178,17 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
               className={`${cellBase} border border-dashed border-cyan-400/50 text-cyan-400 hover:bg-cyan-400/10 cursor-pointer`}
               title="Cargar pago"
             >
-              <span className="text-[8px] text-gray-500 uppercase tracking-widest">Cuota {nextCuota}</span>
+              <span className="text-[8px] text-prius-muted uppercase tracking-widest">Cuota {nextCuota}</span>
               + Cargar
             </button>
           )}
 
           {/* Saldo — informativo, no clickeable. Saldada => "Unidad saldada"
               (nunca "$0" liso); si no, el monto solo se muestra si es > 0. */}
-          <div className={`${cellBase} bg-white/5 border border-white/10 ${
-            saldada ? 'text-green-400' : saldoCalculado === null ? 'text-gray-400' : 'text-red-400'
+          <div className={`${cellBase} bg-prius-subtle border border-hairline ${
+            saldada ? 'text-prius-success' : saldoCalculado === null ? 'text-prius-slate' : 'text-prius-error'
           }`}>
-            <span className="text-[8px] text-gray-500 uppercase tracking-widest">Saldo</span>
+            <span className="text-[8px] text-prius-muted uppercase tracking-widest">Saldo</span>
             {saldada ? 'Unidad saldada' : saldoCalculado === null ? <MontoNulo texto="Saldo sin verificar" /> : formatPesosVisible(saldoCalculado)}
           </div>
         </div>

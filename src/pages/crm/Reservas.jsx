@@ -32,7 +32,7 @@ import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, Mon
 // borde de color (Glass Dark no usa #E5E5E5 literal, ver CLAUDE.md).
 function SeccionTitulo({ children }) {
   return (
-    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] border-b border-white/10 pb-2">
+    <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">
       {children}
     </p>
   )
@@ -547,7 +547,7 @@ export default function Reservas() {
   if (resLoading || cliLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-gray-500 animate-pulse uppercase tracking-widest">Cargando Reservas...</span>
+        <span className="text-sm font-semibold text-prius-muted animate-pulse uppercase tracking-widest">Cargando Reservas...</span>
       </div>
     )
   }
@@ -562,12 +562,12 @@ export default function Reservas() {
           onChange={setSearchTerm}
           placeholder="Buscar por cliente o unidad (ej. carpa 19)..."
           className="flex-1 min-w-[160px]"
-          inputClassName="focus:border-[#FDE047]/50 py-3"
+          inputClassName="focus:border-gold/50 py-3"
         />
         <div className="flex items-center gap-1">
           <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-40" />
           {desde && (
-            <button type="button" onClick={() => setDesde('')} className="p-2 text-gray-500 hover:text-white transition-all" title="Limpiar 'Llegada desde'">
+            <button type="button" onClick={() => setDesde('')} className="p-2 text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada desde'">
               <X size={14} />
             </button>
           )}
@@ -575,7 +575,7 @@ export default function Reservas() {
         <div className="flex items-center gap-1">
           <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-40" />
           {hasta && (
-            <button type="button" onClick={() => setHasta('')} className="p-2 text-gray-500 hover:text-white transition-all" title="Limpiar 'Llegada hasta'">
+            <button type="button" onClick={() => setHasta('')} className="p-2 text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada hasta'">
               <X size={14} />
             </button>
           )}
@@ -583,43 +583,43 @@ export default function Reservas() {
         <div ref={filtrosOverlay.bind} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
-            className={`glass-card px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-[#FDE047]' : 'text-gray-400 hover:text-white'}`}
+            className={`card-light px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-gold' : 'text-prius-slate hover:text-black'}`}
           >
             <Filter size={16} /> Filtros {filtrosActivos ? 'Activos' : ''}
           </button>
 
           {showFiltros && (
-              <div className="absolute right-0 mt-2 w-56 glass-card rounded-xl overflow-hidden z-50 p-3 space-y-3">
+              <div className="absolute right-0 mt-2 w-56 card-light rounded-xl overflow-hidden z-50 p-3 space-y-3">
                 <div>
-                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1 px-1">Estado de pago</p>
+                  <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest mb-1 px-1">Estado de pago</p>
                   {FILTROS_ESTADO.map((f) => (
                     <button
                       key={f.value}
                       onClick={() => setFiltroEstado(f.value)}
-                      className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/10 flex items-center justify-between rounded-lg"
+                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle flex items-center justify-between rounded-lg"
                     >
                       {f.label}
-                      {filtroEstado === f.value && <Check size={14} className="text-[#FDE047]" />}
+                      {filtroEstado === f.value && <Check size={14} className="text-gold" />}
                     </button>
                   ))}
                 </div>
-                <div className="border-t border-white/10 pt-2">
-                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1 px-1">Tipo de alquiler</p>
+                <div className="border-t border-hairline pt-2">
+                  <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest mb-1 px-1">Tipo de alquiler</p>
                   {FILTROS_TIPO.map((f) => (
                     <button
                       key={f.value}
                       onClick={() => setFiltroTipo(f.value)}
-                      className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/10 flex items-center justify-between rounded-lg"
+                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle flex items-center justify-between rounded-lg"
                     >
                       {f.label}
-                      {filtroTipo === f.value && <Check size={14} className="text-[#FDE047]" />}
+                      {filtroTipo === f.value && <Check size={14} className="text-gold" />}
                     </button>
                   ))}
                 </div>
                 {filtrosActivos && (
                   <button
                     onClick={() => { limpiarFiltros(); setShowFiltros(false) }}
-                    className="w-full text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-red-400 hover:bg-red-500/10 rounded-lg border-t border-white/10 pt-3"
+                    className="w-full text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-prius-error hover:bg-red-500/10 rounded-lg border-t border-hairline pt-3"
                   >
                     Limpiar todos los filtros
                   </button>
@@ -629,7 +629,7 @@ export default function Reservas() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="bg-[#FDE047] hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
+          className="bg-gold hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
         >
           <Plus size={18} /> Nueva Reserva
         </button>
@@ -639,7 +639,7 @@ export default function Reservas() {
         {unidadFiltrada && (
           <button
             onClick={() => setFiltroUnidadId(null)}
-            className="inline-flex items-center gap-2 bg-[#FDE047]/10 border border-[#FDE047]/30 text-[#FDE047] px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-[#FDE047]/20 transition-all"
+            className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 text-gold px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gold/20 transition-all"
             title="Quitar filtro de unidad"
           >
             {unidadEmoji(unidadFiltrada.tipo)} {unidadFiltrada.tipo} #{unidadFiltrada.numero} <X size={12} />
@@ -657,7 +657,7 @@ export default function Reservas() {
         )}
       </div>
       {rangoFechaInvalido && (
-        <p className="text-xs font-bold text-red-400 uppercase tracking-widest">
+        <p className="text-xs font-bold text-prius-error uppercase tracking-widest">
           "Llegada desde" no puede ser posterior a "Llegada hasta" — corregí el rango para filtrar por fecha.
         </p>
       )}
@@ -677,20 +677,20 @@ export default function Reservas() {
               <tr
                 key={res.id}
                 onClick={() => navigate(linkToCliente(res.cliente_id))}
-                className="hover:bg-white/5 transition-all group cursor-pointer"
+                className="hover:bg-prius-subtle transition-all group cursor-pointer"
               >
-                <td className="px-6 py-5 text-gray-300 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-                <td className="px-6 py-5 font-bold text-white uppercase">
+                <td className="px-6 py-5 text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+                <td className="px-6 py-5 font-bold text-black uppercase">
                   {res.clientes?.nombre || 'S/N'}
                   {coSocios(res).length > 0 && (
-                    <p className="text-[10px] text-gray-500 font-normal normal-case tracking-widest mt-0.5">
+                    <p className="text-[10px] text-prius-muted font-normal normal-case tracking-widest mt-0.5">
                       Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                     </p>
                   )}
                 </td>
-                <td className="px-6 py-5 font-medium text-gray-300 uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
-                <td className="px-6 py-5 font-bold text-white"><MontoReserva reserva={res} /></td>
-                <td className="px-6 py-5 font-bold text-red-400">
+                <td className="px-6 py-5 font-medium text-prius-slate uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
+                <td className="px-6 py-5 font-bold text-black"><MontoReserva reserva={res} /></td>
+                <td className="px-6 py-5 font-bold text-prius-error">
                   {formatPesosVisible(res.saldo)}
                 </td>
                 <td className="px-6 py-5">
@@ -702,36 +702,36 @@ export default function Reservas() {
                   </div>
                 </td>
                 <td className="px-6 py-5">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted">
                     {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                     {res.origen === 'web' ? 'Web' : 'Manual'}
                   </span>
                 </td>
-                <td className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Ver cliente</td>
+                <td className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-prius-muted">Ver cliente</td>
               </tr>
             )
           }
           return (
-            <tr key={res.id} className="hover:bg-white/5 transition-all group">
-              <td className="px-6 py-5 text-gray-300 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-              <td className="px-6 py-5 font-bold text-white uppercase">
+            <tr key={res.id} className="hover:bg-prius-subtle transition-all group">
+              <td className="px-6 py-5 text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+              <td className="px-6 py-5 font-bold text-black uppercase">
                 {res.clientes?.nombre || 'S/N'}
                 {coSocios(res).length > 0 && (
-                  <p className="text-[10px] text-gray-500 font-normal normal-case tracking-widest mt-0.5">
+                  <p className="text-[10px] text-prius-muted font-normal normal-case tracking-widest mt-0.5">
                     Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                   </p>
                 )}
               </td>
-              <td className="px-6 py-5 font-medium text-gray-300 uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
-              <td className="px-6 py-5 font-bold text-white"><MontoReserva reserva={res} /></td>
-              <td className="px-6 py-5 font-bold text-red-400">
+              <td className="px-6 py-5 font-medium text-prius-slate uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
+              <td className="px-6 py-5 font-bold text-black"><MontoReserva reserva={res} /></td>
+              <td className="px-6 py-5 font-bold text-prius-error">
                 {formatPesosVisible(res.saldo)}
               </td>
               <td className="px-6 py-5">
                 <StatusBadge status={estadoBadgeStatus(res)} />
               </td>
               <td className="px-6 py-5">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted">
                   {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                   {res.origen === 'web' ? 'Web' : 'Manual'}
                 </span>
@@ -741,7 +741,7 @@ export default function Reservas() {
                   {estadoBadgeStatus(res) === 'preconfirmada' && (
                     <button
                       onClick={() => navigate(linkToRecepcion(res.codigo))}
-                      className="p-2 hover:bg-white/10 rounded-lg text-sky-400 transition-all"
+                      className="p-2 hover:bg-prius-subtle rounded-lg text-sky-400 transition-all"
                       title="Hacer check-in"
                     >
                       <QrCode size={16} />
@@ -751,22 +751,22 @@ export default function Reservas() {
                     <button
                       onClick={() => setPagoReserva(res)}
                       disabled={Number(res.saldo) <= 0}
-                      className="p-2 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-green-400 transition-all"
+                      className="p-2 hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-prius-success transition-all"
                       title={Number(res.saldo) > 0 ? 'Registrar pago' : 'Sin saldo pendiente'}
                     >
                       <Wallet size={16} />
                     </button>
                   )}
-                  <button onClick={() => navigate(linkToComprobante(res.id))} className="p-2 hover:bg-white/10 rounded-lg text-white transition-all" title="Emitir comprobante">
+                  <button onClick={() => navigate(linkToComprobante(res.id))} className="p-2 hover:bg-prius-subtle rounded-lg text-black transition-all" title="Emitir comprobante">
                     <Receipt size={16} />
                   </button>
-                  <button onClick={() => handleOpenEdit(res)} className="p-2 hover:bg-white/10 rounded-lg text-[#FDE047] transition-all">
+                  <button onClick={() => handleOpenEdit(res)} className="p-2 hover:bg-prius-subtle rounded-lg text-gold transition-all">
                     <Edit2 size={16} />
                   </button>
                   <button onClick={() => handleCancelarClick(res)} className="p-2 hover:bg-orange-500/10 rounded-lg text-orange-400 transition-all" title="Cancelar reserva">
                     <XCircle size={16} />
                   </button>
-                  <button onClick={() => handleEliminarClick(res)} className="p-2 hover:bg-red-500/10 rounded-lg text-red-400 transition-all" title="Eliminar definitivamente">
+                  <button onClick={() => handleEliminarClick(res)} className="p-2 hover:bg-red-500/10 rounded-lg text-prius-error transition-all" title="Eliminar definitivamente">
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -780,13 +780,13 @@ export default function Reservas() {
               <div onClick={() => navigate(linkToCliente(res.cliente_id))} className="cursor-pointer -m-5 p-5">
                 <div className="flex justify-between items-start gap-3">
                   <div className="min-w-0">
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>
-                    <h3 className="font-bold uppercase text-sm text-white truncate">{res.clientes?.nombre || 'S/N'}</h3>
-                    <p className="text-[11px] text-gray-500 uppercase mt-0.5">
+                    <p className="text-[10px] text-prius-muted font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>
+                    <h3 className="font-bold uppercase text-sm text-black truncate">{res.clientes?.nombre || 'S/N'}</h3>
+                    <p className="text-[11px] text-prius-muted uppercase mt-0.5">
                       {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}
                     </p>
                     {coSocios(res).length > 0 && (
-                      <p className="text-[10px] text-gray-500 uppercase mt-0.5">
+                      <p className="text-[10px] text-prius-muted uppercase mt-0.5">
                         Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                       </p>
                     )}
@@ -798,14 +798,14 @@ export default function Reservas() {
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center border-t border-white/5 pt-3 mt-3">
+                <div className="flex justify-between items-center border-t border-hairline pt-3 mt-3">
                   <div>
-                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Saldo</p>
-                    <p className="text-sm font-bold text-red-400">
+                    <p className="text-[10px] text-prius-muted uppercase font-bold tracking-widest">Saldo</p>
+                    <p className="text-sm font-bold text-prius-error">
                       {formatPesosVisible(res.saldo)}
                     </p>
                   </div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Ver cliente</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-prius-muted">Ver cliente</p>
                 </div>
               </div>
             )
@@ -814,23 +814,23 @@ export default function Reservas() {
             <>
               <div className="flex justify-between items-start gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>
-                  <h3 className="font-bold uppercase text-sm text-white truncate">{res.clientes?.nombre || 'S/N'}</h3>
-                  <p className="text-[11px] text-gray-500 uppercase mt-0.5">
+                  <p className="text-[10px] text-prius-muted font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>
+                  <h3 className="font-bold uppercase text-sm text-black truncate">{res.clientes?.nombre || 'S/N'}</h3>
+                  <p className="text-[11px] text-prius-muted uppercase mt-0.5">
                     {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero} &bull; {res.tipo_alquiler}
                   </p>
                   {coSocios(res).length > 0 && (
-                    <p className="text-[10px] text-gray-500 uppercase mt-0.5">
+                    <p className="text-[10px] text-prius-muted uppercase mt-0.5">
                       Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                     </p>
                   )}
                 </div>
                 <StatusBadge status={estadoBadgeStatus(res)} />
               </div>
-              <div className="flex justify-between items-center border-t border-white/5 pt-3">
+              <div className="flex justify-between items-center border-t border-hairline pt-3">
                 <div>
-                  <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Saldo</p>
-                  <p className="text-sm font-bold text-red-400">
+                  <p className="text-[10px] text-prius-muted uppercase font-bold tracking-widest">Saldo</p>
+                  <p className="text-sm font-bold text-prius-error">
                     {formatPesosVisible(res.saldo)}
                   </p>
                 </div>
@@ -838,7 +838,7 @@ export default function Reservas() {
                   {estadoBadgeStatus(res) === 'preconfirmada' && (
                     <button
                       onClick={() => navigate(linkToRecepcion(res.codigo))}
-                      className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-sky-400 transition-all"
+                      className="p-2.5 bg-prius-subtle hover:bg-prius-subtle rounded-lg text-sky-400 transition-all"
                       title="Hacer check-in"
                     >
                       <QrCode size={16} />
@@ -848,21 +848,21 @@ export default function Reservas() {
                     <button
                       onClick={() => setPagoReserva(res)}
                       disabled={Number(res.saldo) <= 0}
-                      className="p-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-30 rounded-lg text-green-400 transition-all"
+                      className="p-2.5 bg-prius-subtle hover:bg-prius-subtle disabled:opacity-30 rounded-lg text-prius-success transition-all"
                     >
                       <Wallet size={16} />
                     </button>
                   )}
-                  <button onClick={() => navigate(linkToComprobante(res.id))} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-white transition-all">
+                  <button onClick={() => navigate(linkToComprobante(res.id))} className="p-2.5 bg-prius-subtle hover:bg-prius-subtle rounded-lg text-black transition-all">
                     <Receipt size={16} />
                   </button>
-                  <button onClick={() => handleOpenEdit(res)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-[#FDE047] transition-all">
+                  <button onClick={() => handleOpenEdit(res)} className="p-2.5 bg-prius-subtle hover:bg-prius-subtle rounded-lg text-gold transition-all">
                     <Edit2 size={16} />
                   </button>
-                  <button onClick={() => handleCancelarClick(res)} className="p-2.5 bg-white/5 hover:bg-orange-500/10 rounded-lg text-orange-400 transition-all">
+                  <button onClick={() => handleCancelarClick(res)} className="p-2.5 bg-prius-subtle hover:bg-orange-500/10 rounded-lg text-orange-400 transition-all">
                     <XCircle size={16} />
                   </button>
-                  <button onClick={() => handleEliminarClick(res)} className="p-2.5 bg-white/5 hover:bg-red-500/10 rounded-lg text-red-400 transition-all">
+                  <button onClick={() => handleEliminarClick(res)} className="p-2.5 bg-prius-subtle hover:bg-red-500/10 rounded-lg text-prius-error transition-all">
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -889,21 +889,21 @@ export default function Reservas() {
         footer={
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Total</p>
-              <p className="text-lg font-bold text-white">{formatPesos(bonificada ? 0 : valorTotal)}</p>
+              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Total</p>
+              <p className="text-lg font-bold text-black">{formatPesos(bonificada ? 0 : valorTotal)}</p>
             </div>
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+                className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-slate bg-prius-subtle hover:bg-prius-subtle border border-hairline transition-all"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 form="form-reserva"
-                className="px-6 py-3 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+                className="px-6 py-3 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
               >
                 {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
               </button>
@@ -917,7 +917,7 @@ export default function Reservas() {
             <SeccionTitulo>Cliente y unidad</SeccionTitulo>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Cliente</label>
+              <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Seleccionar Cliente</label>
               <ClienteSelector
                 value={clienteId}
                 onChange={(id) => setClienteId(id)}
@@ -925,16 +925,16 @@ export default function Reservas() {
             </div>
 
             {editingReserva && (
-              <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-                <div className="flex items-center gap-2 text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                  {bloqueada ? <Lock size={14} className="text-red-400" /> : <Unlock size={14} className="text-gray-500" />}
+              <div className="flex items-center justify-between p-3 bg-prius-subtle border border-hairline rounded-xl">
+                <div className="flex items-center gap-2 text-[10px] text-prius-slate uppercase tracking-widest font-bold">
+                  {bloqueada ? <Lock size={14} className="text-prius-error" /> : <Unlock size={14} className="text-prius-muted" />}
                   {bloqueada ? 'Fecha y unidad bloqueadas' : 'Fecha y unidad editables'}
                 </div>
                 <button
                   type="button"
                   onClick={handleToggleBloqueada}
                   className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                    bloqueada ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-white/5 text-gray-400 hover:text-white'
+                    bloqueada ? 'bg-red-500/10 text-prius-error hover:bg-red-500/20' : 'bg-prius-subtle text-prius-slate hover:text-white'
                   }`}
                 >
                   {bloqueada ? 'Desbloquear' : 'Bloquear'}
@@ -944,7 +944,7 @@ export default function Reservas() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unidad</label>
+                <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</label>
                 <BrandSelect
                   value={unidadId}
                   onChange={setUnidadId}
@@ -955,14 +955,14 @@ export default function Reservas() {
                   searchPlaceholder="Buscar unidad..."
                 />
                 {conflictoFechas && (
-                  <p className="text-[10px] text-red-400 uppercase tracking-widest font-bold">
+                  <p className="text-[10px] text-prius-error uppercase tracking-widest font-bold">
                     Ocupada en esas fechas — elegí otra unidad o cambiá las fechas.
                   </p>
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Temporada</label>
-                <p className="w-full h-9 flex items-center bg-white/5 border border-white/10 rounded-xl px-4 text-gray-300 text-sm font-bold truncate">
+                <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Temporada</label>
+                <p className="w-full h-9 flex items-center bg-prius-subtle border border-hairline rounded-xl px-4 text-prius-slate text-sm font-bold truncate">
                   {editingReserva?.temporada || temporadaActiva?.nombre || '—'}
                 </p>
               </div>
@@ -983,15 +983,15 @@ export default function Reservas() {
                     onClick={() => setTipoAlquiler(t.key)}
                     className={`h-9 rounded-xl text-[9px] font-bold uppercase tracking-widest border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                       tipoAlquiler === t.key
-                        ? 'bg-[#FDE047] text-black border-[#FDE047]'
-                        : 'bg-white/5 text-gray-400 border-white/10 hover:text-white'
+                        ? 'bg-gold text-black border-gold'
+                        : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
                     }`}
                   >
                     {t.label}
                   </button>
                 ))}
               </div>
-              <p className="text-[9px] text-gray-500 uppercase tracking-widest">
+              <p className="text-[9px] text-prius-muted uppercase tracking-widest">
                 Temporada completa se carga desde el Directorio de Clientes.
               </p>
             </div>
@@ -999,15 +999,15 @@ export default function Reservas() {
             {tipoAlquiler === 'periodo' && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fechas (Inicio — Fin)</label>
-                  <span className="text-xs font-bold text-[#FDE047]">
+                  <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Fechas (Inicio — Fin)</label>
+                  <span className="text-xs font-bold text-gold">
                     {fechaInicio || '—'} → {fechaFin || '—'}
                   </span>
                 </div>
                 {!unidadId && (
-                  <p className="text-[10px] text-gray-500 uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
+                  <p className="text-[10px] text-prius-muted uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
                 )}
-                <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-center">
+                <div className="bg-prius-subtle border border-hairline rounded-xl p-3 flex justify-center">
                   <ReservaCalendar
                     mode="range"
                     value={{ desde: fechaInicio, hasta: fechaFin }}
@@ -1025,13 +1025,13 @@ export default function Reservas() {
             {tipoAlquiler === 'dia' && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha</label>
-                  <span className="text-xs font-bold text-[#FDE047]">{fecha || '—'}</span>
+                  <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Fecha</label>
+                  <span className="text-xs font-bold text-gold">{fecha || '—'}</span>
                 </div>
                 {!unidadId && (
-                  <p className="text-[10px] text-gray-500 uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
+                  <p className="text-[10px] text-prius-muted uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
                 )}
-                <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-center">
+                <div className="bg-prius-subtle border border-hairline rounded-xl p-3 flex justify-center">
                   <ReservaCalendar mode="single" value={fecha} onChange={setFecha} rangosOcupados={rangosOcupados} disabled={bloqueada} />
                 </div>
               </div>
@@ -1043,8 +1043,8 @@ export default function Reservas() {
             <SeccionTitulo>Precio y pago</SeccionTitulo>
 
             {puedeBonificar && (
-              <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-                <label htmlFor="reserva-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
+              <div className="flex items-center justify-between p-3 bg-prius-subtle border border-hairline rounded-xl">
+                <label htmlFor="reserva-bonificada" className="text-[10px] font-bold text-prius-slate uppercase tracking-widest cursor-pointer">
                   Unidad bonificada
                 </label>
                 <input
@@ -1072,10 +1072,10 @@ export default function Reservas() {
                 partir de valor_total/bonificada y los pagos registrados en
                 `pagos`. */}
             {editingReserva && (
-              <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-prius-subtle border border-hairline rounded-xl">
                 <div>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Saldo Pendiente</p>
-                  <p className={`text-lg font-bold ${Number(editingReserva.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                  <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Saldo Pendiente</p>
+                  <p className={`text-lg font-bold ${Number(editingReserva.saldo) > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
                     {estaSaldada(editingReserva) ? 'Unidad saldada' : formatPesos(editingReserva.saldo)}
                   </p>
                 </div>
@@ -1087,25 +1087,25 @@ export default function Reservas() {
                 que ya se eligió a la izquierda, de un vistazo antes de
                 confirmar. Balneario, no hotel: siempre "días" (Tarea 2,
                 oct 2026), nunca "noches". */}
-            <div className="p-4 bg-white/5 border border-[#FDE047]/20 rounded-xl space-y-2">
-              <p className="text-[9px] font-bold text-[#FDE047] uppercase tracking-[0.2em]">Resumen</p>
+            <div className="p-4 bg-prius-subtle border border-gold/20 rounded-xl space-y-2">
+              <p className="text-[9px] font-bold text-gold uppercase tracking-[0.2em]">Resumen</p>
               <div className="grid grid-cols-2 gap-y-1.5 text-xs">
-                <span className="text-gray-500 uppercase tracking-widest">Unidad</span>
-                <span className="text-white font-bold text-right truncate">
+                <span className="text-prius-muted uppercase tracking-widest">Unidad</span>
+                <span className="text-black font-bold text-right truncate">
                   {opcionesUnidad.find((o) => o.value === unidadId)?.label || '—'}
                 </span>
-                <span className="text-gray-500 uppercase tracking-widest">Fechas</span>
-                <span className="text-white font-bold text-right truncate">
+                <span className="text-prius-muted uppercase tracking-widest">Fechas</span>
+                <span className="text-black font-bold text-right truncate">
                   {tipoAlquiler === 'dia' ? (fecha ? formatFecha(fecha) : '—') : (fechaInicio && fechaFin ? formatRangoFechas(fechaInicio, fechaFin) : '—')}
                 </span>
-                <span className="text-gray-500 uppercase tracking-widest">Días</span>
-                <span className="text-white font-bold text-right">
+                <span className="text-prius-muted uppercase tracking-widest">Días</span>
+                <span className="text-black font-bold text-right">
                   {tipoAlquiler === 'dia' ? (fecha ? 1 : '—') : (diasEntre(fechaInicio, fechaFin) ?? '—')}
                 </span>
-                <span className="text-gray-500 uppercase tracking-widest">Total</span>
-                <span className="text-white font-bold text-right">{formatPesos(bonificada ? 0 : valorTotal)}</span>
-                <span className="text-gray-500 uppercase tracking-widest">Saldo</span>
-                <span className={`font-bold text-right ${editingReserva && Number(editingReserva.saldo) > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                <span className="text-prius-muted uppercase tracking-widest">Total</span>
+                <span className="text-black font-bold text-right">{formatPesos(bonificada ? 0 : valorTotal)}</span>
+                <span className="text-prius-muted uppercase tracking-widest">Saldo</span>
+                <span className={`font-bold text-right ${editingReserva && Number(editingReserva.saldo) > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
                   {editingReserva ? (estaSaldada(editingReserva) ? 'Saldado' : formatPesos(editingReserva.saldo)) : '—'}
                 </span>
               </div>
@@ -1113,29 +1113,29 @@ export default function Reservas() {
 
             {/* Más opciones: notas + historial, cerrado por defecto — uso
                 poco frecuente, no debería ocupar espacio arriba del fold. */}
-            <div className="border border-white/10 rounded-xl overflow-hidden">
+            <div className="border border-hairline rounded-xl overflow-hidden">
               <button
                 type="button"
                 onClick={() => setMasOpcionesAbierto((v) => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-white transition-all"
+                className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-bold text-prius-slate uppercase tracking-widest hover:text-black transition-all"
               >
                 Más opciones
                 <ChevronDown size={14} className={`transition-transform ${masOpcionesAbierto ? 'rotate-180' : ''}`} />
               </button>
               {masOpcionesAbierto && (
-                <div className="px-4 pb-4 space-y-4 border-t border-white/10 pt-4">
+                <div className="px-4 pb-4 space-y-4 border-t border-hairline pt-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Notas</label>
+                    <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Notas</label>
                     <textarea
                       rows={3}
                       value={notas}
                       onChange={(e) => setNotas(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#FDE047]/50 outline-none resize-none"
+                      className="w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-sm focus:border-gold/50 outline-none resize-none"
                     />
                   </div>
                   {editingReserva && (
                     <div>
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Historial</p>
+                      <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Historial</p>
                       <Historial tipo="reserva" id={editingReserva.id} compact />
                     </div>
                   )}

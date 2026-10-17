@@ -278,8 +278,8 @@ export default function PlanoPublicoPreview() {
     <div className="h-full flex flex-col overflow-hidden animate-premium-fade">
       <div className="flex-1 flex flex-col space-y-4 overflow-hidden pb-4">
         <div className="shrink-0">
-          <h1 className="text-lg font-bold text-white">Vista previa — Plano público</h1>
-          <p className="text-[11px] uppercase tracking-widest text-gray-500 mt-1">
+          <h1 className="text-lg font-bold text-black">Vista previa — Plano público</h1>
+          <p className="text-[11px] uppercase tracking-widest text-prius-muted mt-1">
             Herramienta interna (solo superadmin) — no crea ninguna reserva
           </p>
         </div>
@@ -290,9 +290,9 @@ export default function PlanoPublicoPreview() {
           <IntegerInput label="Personas" value={personas} onChange={(n) => setPersonas(n || 1)} min={1} max={40} className="w-28" />
         </div>
 
-        <div className="flex-1 min-h-0 glass-card rounded-3xl glass-card-inner relative overflow-hidden flex flex-col">
+        <div className="flex-1 min-h-0 card-light rounded-3xl card-light-inner relative overflow-hidden flex flex-col">
           {loadingDisp && disponibilidad.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+            <div className="flex-1 flex items-center justify-center text-prius-muted text-[10px] font-bold uppercase tracking-widest">
               Cargando disponibilidad…
             </div>
           ) : (
@@ -315,11 +315,11 @@ export default function PlanoPublicoPreview() {
         </div>
 
         {resumenSeleccion && (
-          <div className="shrink-0 glass-card rounded-2xl px-5 py-3 flex items-center justify-between">
-            <span className="text-sm font-semibold text-white">{resumenSeleccion}</span>
+          <div className="shrink-0 card-light rounded-2xl px-5 py-3 flex items-center justify-between">
+            <span className="text-sm font-semibold text-black">{resumenSeleccion}</span>
             <button
               onClick={() => { setSelectedUnit(null); setSuggestedUnit(null) }}
-              className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors"
+              className="text-[10px] font-bold uppercase tracking-widest text-prius-slate hover:text-black transition-colors"
             >
               Limpiar
             </button>

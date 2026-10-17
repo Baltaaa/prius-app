@@ -123,12 +123,12 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2">
-          {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+        <label htmlFor={inputId} className="text-[11px] font-bold text-prius-muted uppercase tracking-widest block mb-2">
+          {label}{required && <span className="text-prius-error ml-0.5">*</span>}
         </label>
       )}
       <div className="relative">
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-base md:text-sm font-bold pointer-events-none select-none">$</span>
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-prius-muted text-base md:text-sm font-bold pointer-events-none select-none">$</span>
         <input
           ref={setRef}
           id={inputId}
@@ -147,8 +147,8 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
           placeholder={placeholder}
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
-          className={`w-full min-h-[44px] pl-8 pr-4 py-3 bg-white/5 border rounded-xl text-white text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
-            error ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-[#FDE047]/50'
+          className={`w-full min-h-[44px] pl-8 pr-4 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
+            error ? 'border-red-500/60 focus:border-red-500' : 'border-hairline focus:border-gold/50'
           }`}
         />
       </div>
@@ -160,7 +160,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
               type="button"
               onClick={() => aplicar(c.value)}
               className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
-                value === c.value ? 'bg-[#FDE047] text-black border-[#FDE047]' : 'bg-white/5 text-gray-300 border-white/10 hover:text-white'
+                value === c.value ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
               }`}
             >
               {c.label}
@@ -169,9 +169,9 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
         </div>
       )}
       {error ? (
-        <p id={`${inputId}-error`} className="text-[11px] text-red-400 mt-1.5">{error}</p>
+        <p id={`${inputId}-error`} className="text-[11px] text-prius-error mt-1.5">{error}</p>
       ) : hint ? (
-        <p id={`${inputId}-hint`} className="text-[11px] text-gray-500 mt-1.5">{hint}</p>
+        <p id={`${inputId}-hint`} className="text-[11px] text-prius-muted mt-1.5">{hint}</p>
       ) : null}
     </div>
   )

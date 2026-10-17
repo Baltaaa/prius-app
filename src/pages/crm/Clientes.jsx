@@ -50,7 +50,7 @@ import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, Circle
 // pantallas no se confundan a simple vista, dentro de la misma paleta Glass
 // Dark ya estandarizada.
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-cyan-400/50 outline-none font-bold'
+  'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-cyan-400/50 outline-none font-bold'
 
 const TIPO_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 
@@ -575,7 +575,7 @@ export default function Clientes() {
   if (loading || resLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-gray-500 animate-pulse uppercase tracking-widest">Cargando Clientes...</span>
+        <span className="text-sm font-semibold text-prius-muted animate-pulse uppercase tracking-widest">Cargando Clientes...</span>
       </div>
     )
   }
@@ -594,20 +594,20 @@ export default function Clientes() {
         <div ref={filtrosOverlay.bind} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
-            className={`glass-card px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-[#FDE047]' : 'text-gray-400 hover:text-white'}`}
+            className={`card-light px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-gold' : 'text-prius-slate hover:text-black'}`}
           >
             <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
           </button>
           {showFiltros && (
-              <div className="absolute left-0 mt-2 w-48 glass-card rounded-xl overflow-hidden z-50 p-3">
+              <div className="absolute left-0 mt-2 w-48 card-light rounded-xl overflow-hidden z-50 p-3">
                 {FILTROS_ESTADO_CLIENTE.map((f) => (
                   <button
                     key={f.value}
                     onClick={() => { setFiltroEstado(f.value); setShowFiltros(false) }}
-                    className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/10 flex items-center justify-between rounded-lg"
+                    className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle flex items-center justify-between rounded-lg"
                   >
                     {f.label}
-                    {filtroEstado === f.value && <Check size={14} className="text-[#FDE047]" />}
+                    {filtroEstado === f.value && <Check size={14} className="text-gold" />}
                   </button>
                 ))}
               </div>
@@ -615,7 +615,7 @@ export default function Clientes() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="sm:ml-auto bg-[#FDE047] hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
+          className="sm:ml-auto bg-gold hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
         >
           <Plus size={18} /> Nuevo Cliente
         </button>
@@ -623,7 +623,7 @@ export default function Clientes() {
 
       {/* Directorio: filas-tarjeta expandibles, NO una tabla */}
       {clientesVisibles.length === 0 ? (
-        <div className="p-12 text-center text-sm tracking-wider text-gray-500 glass-card rounded-xl">
+        <div className="p-12 text-center text-sm tracking-wider text-prius-muted card-light rounded-xl">
           No se encontraron clientes.
         </div>
       ) : (
@@ -678,7 +678,7 @@ export default function Clientes() {
                 key={cliente.id}
                 data-cliente-id={cliente.id}
                 data-deeplink-id={cliente.id}
-                className={`glass-card rounded-xl overflow-hidden border transition-all ${isExpanded ? 'border-cyan-400/40' : 'border-white/10'}`}
+                className={`card-light rounded-xl overflow-hidden border transition-all ${isExpanded ? 'border-cyan-400/40' : 'border-hairline'}`}
               >
                 {/* Toda la caja es clickeable para expandir/colapsar. Mobile
                     (Tarea 4.7): dos líneas explícitas — nombre/unidad arriba,
@@ -688,7 +688,7 @@ export default function Clientes() {
                     duplicar el layout de desktop. */}
                 <div
                   onClick={() => handleToggleExpand(cliente.id, isExpanded)}
-                  className="w-full text-left px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-6 gap-y-2 cursor-pointer hover:bg-white/5 transition-all"
+                  className="w-full text-left px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-6 gap-y-2 cursor-pointer hover:bg-prius-subtle transition-all"
                 >
                   <div className="flex items-center gap-3 sm:contents">
                     <ChevronDown
@@ -696,10 +696,10 @@ export default function Clientes() {
                       className={`text-cyan-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                     />
                     <div className="min-w-[160px]">
-                      <p className="font-bold text-white uppercase truncate">{cliente.nombre}</p>
-                      <p className="text-gray-300 text-xs mt-0.5 flex items-center gap-1.5">
-                        <Phone size={11} className="text-gray-600 shrink-0" />
-                        {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-gray-500">Sin cargar</span>}
+                      <p className="font-bold text-black uppercase truncate">{cliente.nombre}</p>
+                      <p className="text-prius-slate text-xs mt-0.5 flex items-center gap-1.5">
+                        <Phone size={11} className="text-prius-muted shrink-0" />
+                        {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-prius-muted">Sin cargar</span>}
                       </p>
                       {/* Línea extra cuando el match de búsqueda fue por
                           número de comprobante, no por nombre (Tarea 3, oct
@@ -712,7 +712,7 @@ export default function Clientes() {
                             setExpandedId(cliente.id)
                             scrollAndHighlight(`pago-${comprobanteMatchPorCliente[cliente.id].pago.id}`)
                           }}
-                          className="text-[10px] text-[#FDE047] font-bold mt-1 hover:underline truncate block"
+                          className="text-[10px] text-gold font-bold mt-1 hover:underline truncate block"
                         >
                           Comprobante {formatComprobante(comprobanteMatchPorCliente[cliente.id].comprobante.tipo, comprobanteMatchPorCliente[cliente.id].comprobante.numero)}
                           {formatPesosVisible(comprobanteMatchPorCliente[cliente.id].pago.monto) ? ` · ${formatPesosVisible(comprobanteMatchPorCliente[cliente.id].pago.monto)}` : ''}
@@ -725,17 +725,17 @@ export default function Clientes() {
                       title={unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
                     >
                       {unidadesCliente.length === 0 ? (
-                        <span className="text-[11px] text-gray-500 font-bold tracking-widest">Sin unidad</span>
+                        <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
                       ) : (
                         <>
                           {unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
                             <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
                               <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
-                              <span className="text-base font-extrabold text-white leading-none">{u.numero}</span>
+                              <span className="text-base font-extrabold text-black leading-none">{u.numero}</span>
                             </span>
                           ))}
                           {unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
-                            <span className="text-[10px] text-gray-500 font-bold tracking-widest">
+                            <span className="text-[10px] text-prius-muted font-bold tracking-widest">
                               +{unidadesCliente.length - MAX_UNIDADES_VISIBLES}
                             </span>
                           )}
@@ -759,20 +759,20 @@ export default function Clientes() {
                         // cuántos comprobantes de este cliente no tienen
                         // monto cargado — nunca se asume saldo $0 ni total.
                         saldoHeaderSaldado ? null : (
-                          <span className="block text-red-400 text-[9px] font-bold uppercase tracking-widest">
+                          <span className="block text-prius-error text-[9px] font-bold uppercase tracking-widest">
                             Saldo sin verificar
                             {comprobantesPendientesCliente > 0 && (
-                              <span className="block text-gray-500 font-normal normal-case tracking-normal">
+                              <span className="block text-prius-muted font-normal normal-case tracking-normal">
                                 {comprobantesPendientesCliente} comprobante{comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
                               </span>
                             )}
                           </span>
                         )
                       ) : sinPrecio ? (
-                        <span className="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
+                        <span className="text-prius-slate text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
                       ) : (
                         formatPesosVisible(saldoInfo.total) && (
-                          <span className="font-bold text-sm text-red-400">{formatPesosVisible(saldoInfo.total)}</span>
+                          <span className="font-bold text-sm text-prius-error">{formatPesosVisible(saldoInfo.total)}</span>
                         )
                       )}
                     </p>
@@ -780,7 +780,7 @@ export default function Clientes() {
                       <button
                         onClick={() => setPagoCliente(cliente)}
                         disabled={reservasPagables.length === 0}
-                        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-green-400 transition-all"
+                        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-prius-success transition-all"
                         title="Registrar pago"
                       >
                         <Wallet size={16} />
@@ -790,16 +790,16 @@ export default function Clientes() {
                       {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
                         <button
                           onClick={() => navigate(linkToNuevaReservaCliente(cliente.id))}
-                          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-cyan-400 transition-all"
+                          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-cyan-400 transition-all"
                           title="Nueva reserva"
                         >
                           <CalendarPlus size={16} />
                         </button>
                       )}
-                      <button onClick={() => handleOpenEdit(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-[#FDE047] transition-all" title="Editar">
+                      <button onClick={() => handleOpenEdit(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-gold transition-all" title="Editar">
                         <Edit2 size={16} />
                       </button>
-                      <button onClick={() => setClienteAEliminar(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-500/10 rounded-lg text-red-400 transition-all" title="Borrar">
+                      <button onClick={() => setClienteAEliminar(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-500/10 rounded-lg text-prius-error transition-all" title="Borrar">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -814,25 +814,25 @@ export default function Clientes() {
                         detectada en auditoría. */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="col-span-2 md:col-span-1">
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><Mail size={11} /> Email</p>
-                        <p className="text-sm text-white mt-1 lowercase break-all">{cliente.mail || <span className="text-gray-500 normal-case">Sin cargar</span>}</p>
+                        <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest flex items-center gap-1"><Mail size={11} /> Email</p>
+                        <p className="text-sm text-black mt-1 lowercase break-all">{cliente.mail || <span className="text-prius-muted normal-case">Sin cargar</span>}</p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> CUIT</p>
-                        <p className="text-sm text-white mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-gray-500">Sin cargar</span>}</p>
+                        <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> CUIT</p>
+                        <p className="text-sm text-black mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-prius-muted">Sin cargar</span>}</p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> DNI</p>
-                        <p className="text-sm text-white mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-gray-500">Sin cargar</span>}</p>
+                        <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> DNI</p>
+                        <p className="text-sm text-black mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-prius-muted">Sin cargar</span>}</p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cliente desde</p>
-                        <p className="text-sm text-white mt-1">{formatFecha(cliente.created_at)}</p>
+                        <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Cliente desde</p>
+                        <p className="text-sm text-black mt-1">{formatFecha(cliente.created_at)}</p>
                       </div>
                       {cliente.notas && (
                         <div className="col-span-2 md:col-span-4">
-                          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Notas</p>
-                          <p className="text-sm text-gray-300 mt-1">{cliente.notas}</p>
+                          <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Notas</p>
+                          <p className="text-sm text-prius-slate mt-1">{cliente.notas}</p>
                         </div>
                       )}
                     </div>
@@ -850,7 +850,7 @@ export default function Clientes() {
                       const pagado = Math.max(Number(grupo.precio_total || 0) - (saldo ?? 0), 0)
                       const primeraReservaActiva = reservasGrupo.find((r) => r.estado !== 'cancelada') || reservasGrupo[0]
                       return (
-                        <div key={grupoId} className="px-4 py-4 bg-white/5 border border-cyan-400/20 rounded-xl space-y-4">
+                        <div key={grupoId} className="px-4 py-4 bg-prius-subtle border border-cyan-400/20 rounded-xl space-y-4">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">
                               Reserva con precio unificado{grupo.temporada ? ` · ${grupo.temporada}` : ''}
@@ -859,47 +859,47 @@ export default function Clientes() {
                           </div>
                           <div className="grid grid-cols-3 gap-4 text-xs">
                             <div>
-                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Precio total</p>
-                              <p className="text-sm font-bold text-white mt-1">{formatPesosVisible(grupo.precio_total)}</p>
+                              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Precio total</p>
+                              <p className="text-sm font-bold text-black mt-1">{formatPesosVisible(grupo.precio_total)}</p>
                             </div>
                             <div>
-                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Pagado</p>
-                              <p className="text-sm font-bold text-green-400 mt-1">{formatPesosVisible(pagado)}</p>
+                              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Pagado</p>
+                              <p className="text-sm font-bold text-prius-success mt-1">{formatPesosVisible(pagado)}</p>
                             </div>
                             <div>
-                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Saldo</p>
-                              <p className={`text-sm font-bold mt-1 ${saldo === null ? 'text-red-400' : saldo > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Saldo</p>
+                              <p className={`text-sm font-bold mt-1 ${saldo === null ? 'text-prius-error' : saldo > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
                                 {saldo === null ? 'Saldo sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Unidad saldada'}
                               </p>
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Períodos</p>
+                            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Períodos</p>
                             {reservasGrupo.map((r) => (
-                              <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-300">
+                              <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-prius-slate">
                                 <span>{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</span>
-                                <span className="text-gray-500">
+                                <span className="text-prius-muted">
                                   {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
                                 </span>
-                                {r.estado === 'cancelada' && <span className="text-red-400 font-bold uppercase text-[10px]">Cancelada</span>}
+                                {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase text-[10px]">Cancelada</span>}
                               </div>
                             ))}
                           </div>
 
                           <div className="space-y-1.5">
                             <div className="flex items-center justify-between">
-                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Pagos</p>
+                              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Pagos</p>
                               <button
                                 type="button"
                                 onClick={() => setPagoCelda({ reserva: { ...primeraReservaActiva, clientes: cliente }, pago: null })}
-                                className="text-[10px] font-bold uppercase tracking-widest text-green-400 hover:text-green-300 transition-all"
+                                className="text-[10px] font-bold uppercase tracking-widest text-prius-success hover:text-green-300 transition-all"
                               >
                                 + Cargar pago
                               </button>
                             </div>
                             {pagoGrupo.length === 0 ? (
-                              <p className="text-xs text-gray-500">Sin pagos registrados.</p>
+                              <p className="text-xs text-prius-muted">Sin pagos registrados.</p>
                             ) : (
                               pagoGrupo.map((p) => (
                                 <button
@@ -907,12 +907,12 @@ export default function Clientes() {
                                   type="button"
                                   onClick={() => setPagoCelda({ reserva: { ...p.__reserva, clientes: cliente }, pago: p })}
                                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs ${
-                                    p.estado === 'anulado' ? 'bg-white/5 text-gray-600 line-through' : 'bg-white/5 text-white hover:bg-white/10'
+                                    p.estado === 'anulado' ? 'bg-prius-subtle text-prius-muted line-through' : 'bg-prius-subtle text-black hover:bg-prius-subtle'
                                   }`}
                                 >
                                   <span>{formatFecha(p.fecha)}</span>
                                   <span className="font-bold">{p.monto == null ? 'Monto nulo' : formatPesosVisible(p.monto)}</span>
-                                  <span className="text-gray-500">
+                                  <span className="text-prius-muted">
                                     {p.comprobantes?.length > 0
                                       ? p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
                                       : 'Sin comprobante'}
@@ -928,7 +928,7 @@ export default function Clientes() {
                     {/* Reservas sueltas: históricas y actuales, cualquier tipo */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                        <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">
                           Reservas ({reservasSueltas.length})
                         </p>
                         {reservasSueltas.filter((r) => r.estado !== 'cancelada').length >= 2 && (
@@ -941,7 +941,7 @@ export default function Clientes() {
                         )}
                       </div>
                       {reservasSueltas.length === 0 ? (
-                        <p className="text-xs text-gray-500 uppercase tracking-widest">Sin reservas sueltas.</p>
+                        <p className="text-xs text-prius-muted uppercase tracking-widest">Sin reservas sueltas.</p>
                       ) : (
                         <div className="space-y-2">
                           {reservasSueltas.map((r) => {
@@ -959,12 +959,12 @@ export default function Clientes() {
                                   ? formatFecha(r.fecha)
                                   : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`
                             return (
-                              <div key={r.id} className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs space-y-1.5">
+                              <div key={r.id} className="px-4 py-3 bg-prius-subtle border border-hairline rounded-xl text-xs space-y-1.5">
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                                   <span className="font-bold text-cyan-400 uppercase tracking-widest">{TIPO_LABEL[r.tipo_alquiler] || r.tipo_alquiler}</span>
-                                  <span className="text-gray-300">{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</span>
-                                  <span className="text-gray-500">{fechas}</span>
-                                  {r.estado === 'cancelada' && <span className="text-red-400 font-bold uppercase">Cancelada</span>}
+                                  <span className="text-prius-slate">{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</span>
+                                  <span className="text-prius-muted">{fechas}</span>
+                                  {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase">Cancelada</span>}
                                   <div className="flex-1" />
                                   {badge === 'preconfirmada' && (
                                     <button
@@ -992,7 +992,7 @@ export default function Clientes() {
                                         e.stopPropagation()
                                         setPagoCelda({ reserva: { ...r, clientes: cliente }, pago: null })
                                       }}
-                                      className="text-[10px] font-bold uppercase tracking-widest text-green-400 hover:text-green-300 transition-all"
+                                      className="text-[10px] font-bold uppercase tracking-widest text-prius-success hover:text-green-300 transition-all"
                                     >
                                       Registrar pago
                                     </button>
@@ -1000,7 +1000,7 @@ export default function Clientes() {
                                   {r.estado !== 'cancelada' && (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); navigate(linkToComprobante(r.id)) }}
-                                      className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-white hover:text-gray-300 transition-all"
+                                      className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-black hover:text-prius-slate transition-all"
                                     >
                                       <Receipt size={11} /> Comprobante
                                     </button>
@@ -1015,7 +1015,7 @@ export default function Clientes() {
                                   )}
                                 </div>
                                 {socios.length > 0 && (
-                                  <p className="text-[10px] text-gray-500 uppercase tracking-widest">
+                                  <p className="text-[10px] text-prius-muted uppercase tracking-widest">
                                     Co-socios: {socios.map((s) => s.nombre).join(', ')}
                                   </p>
                                 )}
@@ -1033,17 +1033,17 @@ export default function Clientes() {
                         historial que había antes. */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                        <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">
                           Pagos por Reserva
                         </p>
                         {comprobantesPendientesCliente > 0 && (
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-red-400">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-prius-error">
                             {comprobantesPendientesCliente} comprobante{comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
                           </span>
                         )}
                       </div>
                       {reservasSueltas.length === 0 ? (
-                        <p className="text-xs text-gray-500 uppercase tracking-widest">Sin reservas sueltas — nada para cobrar acá (ver pagos del grupo arriba).</p>
+                        <p className="text-xs text-prius-muted uppercase tracking-widest">Sin reservas sueltas — nada para cobrar acá (ver pagos del grupo arriba).</p>
                       ) : (
                         <div className="space-y-4">
                           {reservasSueltas.map((r) => (
@@ -1068,7 +1068,7 @@ export default function Clientes() {
                     {/* Historial del cliente — mismo componente que la
                         unidad del Plano y el detalle de reserva (ítem 2). */}
                     <div>
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Historial</p>
+                      <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Historial</p>
                       <Historial tipo="cliente" id={cliente.id} compact />
                     </div>
                   </div>
@@ -1152,8 +1152,8 @@ export default function Clientes() {
               mismo formulario se reutiliza en el modal standalone de abajo
               para clientes ya existentes. */}
           {!editingCliente && (
-            <div className="space-y-4 border-t border-white/10 pt-6">
-              <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+            <div className="space-y-4 border-t border-hairline pt-6">
+              <label className="flex items-center gap-2 text-xs text-prius-slate cursor-pointer">
                 <input
                   type="checkbox"
                   checked={agregarTemporadaNueva}
@@ -1167,17 +1167,17 @@ export default function Clientes() {
                 <div className="space-y-4 pl-1">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unidad</label>
+                      <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</label>
                       <BrandSelect value={tUnidadId} onChange={setTUnidadId} options={opcionesUnidadTemporada} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Temporada</label>
-                      <p className={`${inputClass} text-gray-300`}>{temporadaActiva?.nombre || '—'}</p>
+                      <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Temporada</label>
+                      <p className={`${inputClass} text-prius-slate`}>{temporadaActiva?.nombre || '—'}</p>
                     </div>
                   </div>
                   {puedeBonificar && (
-                    <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
-                      <label htmlFor="cliente-temporada-bonificada" className="text-[10px] font-bold text-gray-300 uppercase tracking-widest cursor-pointer">
+                    <div className="flex items-center justify-between p-3 bg-prius-subtle border border-hairline rounded-xl">
+                      <label htmlFor="cliente-temporada-bonificada" className="text-[10px] font-bold text-prius-slate uppercase tracking-widest cursor-pointer">
                         Unidad bonificada
                       </label>
                       <input
@@ -1198,7 +1198,7 @@ export default function Clientes() {
                     hint={tBonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
                   />
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Notas de la reserva</label>
+                    <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Notas de la reserva</label>
                     <textarea
                       rows={2}
                       value={tNotas}
@@ -1213,7 +1213,7 @@ export default function Clientes() {
 
           <button
             type="submit"
-            className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
           </button>
@@ -1231,14 +1231,14 @@ export default function Clientes() {
       >
         <form onSubmit={handleSubmitConfirmarReserva} className="space-y-6">
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Cliente</p>
-            <p className="text-sm text-white font-bold uppercase mt-1">{confirmarReserva?.cliente?.nombre}</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Cliente</p>
+            <p className="text-sm text-black font-bold uppercase mt-1">{confirmarReserva?.cliente?.nombre}</p>
           </div>
           <MoneyInput label="Monto Total" value={confirmarValorTotal} onChange={setConfirmarValorTotal} required max={100_000_000} />
           <button
             type="submit"
             disabled={savingConfirmacion}
-            className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {savingConfirmacion ? 'Guardando...' : 'Confirmar'}
           </button>
@@ -1307,21 +1307,21 @@ export default function Clientes() {
       >
         <div className="space-y-6">
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">
               Elegí 2 o más períodos para unificar bajo un solo precio total
             </p>
             <div className="space-y-2">
               {(reservasPorCliente[agruparCliente?.id] || [])
                 .filter((r) => !r.grupo_id && r.estado !== 'cancelada')
                 .map((r) => (
-                  <label key={r.id} className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl text-xs cursor-pointer">
+                  <label key={r.id} className="flex items-center gap-3 p-3 bg-prius-subtle border border-hairline rounded-xl text-xs cursor-pointer">
                     <input
                       type="checkbox"
                       checked={agruparSeleccion.has(r.id)}
                       onChange={() => handleToggleSeleccionGrupo(r.id)}
                       className="accent-cyan-400 w-4 h-4"
                     />
-                    <span className="text-gray-300">
+                    <span className="text-prius-slate">
                       {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero} ·{' '}
                       {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
                     </span>
@@ -1335,7 +1335,7 @@ export default function Clientes() {
             type="button"
             disabled={agruparSeleccion.size < 2 || !agruparPrecioTotal || savingGrupo}
             onClick={handleCrearGrupo}
-            className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {savingGrupo ? 'Agrupando...' : 'Agrupar y Definir Precio'}
           </button>

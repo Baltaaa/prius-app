@@ -22,7 +22,7 @@ export default function SettingsPanel({ user, onClose, onLogout }) {
           </div>
           <button
             onClick={onLogout}
-            className="w-full py-4 bg-prius-black text-white rounded-sm font-bold text-[10px] uppercase tracking-widest hover:bg-prius-black/90 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-prius-black text-black rounded-sm font-bold text-[10px] uppercase tracking-widest hover:bg-prius-black/90 transition-all flex items-center justify-center gap-2"
           >
             <LogOut className="w-4 h-4" />
             Cerrar Sesión

@@ -4,16 +4,16 @@ import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 import { ArrowUpRight, ArrowDownRight, Scale, FileText, AlertTriangle } from 'lucide-react'
 
 const Section = ({ title, children }) => (
-  <div className="glass-card p-6 sm:p-8 rounded-3xl glass-card-inner space-y-4">
-    <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">{title}</h3>
+  <div className="card-light p-6 sm:p-8 rounded-3xl card-light-inner space-y-4">
+    <h3 className="text-xs font-bold uppercase tracking-widest text-prius-slate">{title}</h3>
     {children}
   </div>
 )
 
 const Fila = ({ label, value, tone }) => (
-  <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-    <span className="text-sm text-gray-400">{label}</span>
-    <span className={`text-sm font-bold tabular-nums ${tone || 'text-white'}`}>{value}</span>
+  <div className="flex items-center justify-between py-2 border-b border-hairline last:border-0">
+    <span className="text-sm text-prius-slate">{label}</span>
+    <span className={`text-sm font-bold tabular-nums ${tone || 'text-black'}`}>{value}</span>
   </div>
 )
 
@@ -36,32 +36,32 @@ export default function ResumenCaja({ resumen }) {
       </Section>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="glass-card p-5 rounded-2xl glass-card-inner text-center">
-          <ArrowUpRight className="text-green-400 mx-auto mb-2" size={18} />
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Ingresos</p>
-          <p className="text-lg font-bold text-green-400 tabular-nums mt-1">{formatPesos(totales.ingresos)}</p>
+        <div className="card-light p-5 rounded-2xl card-light-inner text-center">
+          <ArrowUpRight className="text-prius-success mx-auto mb-2" size={18} />
+          <p className="text-[10px] text-prius-muted uppercase tracking-widest">Ingresos</p>
+          <p className="text-lg font-bold text-prius-success tabular-nums mt-1">{formatPesos(totales.ingresos)}</p>
         </div>
-        <div className="glass-card p-5 rounded-2xl glass-card-inner text-center">
-          <ArrowDownRight className="text-red-400 mx-auto mb-2" size={18} />
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Egresos</p>
-          <p className="text-lg font-bold text-red-400 tabular-nums mt-1">{formatPesos(totales.egresos)}</p>
+        <div className="card-light p-5 rounded-2xl card-light-inner text-center">
+          <ArrowDownRight className="text-prius-error mx-auto mb-2" size={18} />
+          <p className="text-[10px] text-prius-muted uppercase tracking-widest">Egresos</p>
+          <p className="text-lg font-bold text-prius-error tabular-nums mt-1">{formatPesos(totales.egresos)}</p>
         </div>
-        <div className="glass-card p-5 rounded-2xl glass-card-inner text-center border border-[#FDE047]/20">
-          <Scale className="text-[#FDE047] mx-auto mb-2" size={18} />
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Neto</p>
-          <p className="text-lg font-bold text-[#FDE047] tabular-nums mt-1">{formatPesos(totales.neto)}</p>
+        <div className="card-light p-5 rounded-2xl card-light-inner text-center border border-gold/20">
+          <Scale className="text-gold mx-auto mb-2" size={18} />
+          <p className="text-[10px] text-prius-muted uppercase tracking-widest">Neto</p>
+          <p className="text-lg font-bold text-gold tabular-nums mt-1">{formatPesos(totales.neto)}</p>
         </div>
       </div>
 
       <Section title="Por medio de pago">
         {(por_medio || []).length === 0 ? (
-          <p className="text-xs text-gray-500 uppercase tracking-widest">Sin movimientos.</p>
+          <p className="text-xs text-prius-muted uppercase tracking-widest">Sin movimientos.</p>
         ) : por_medio.map((m) => (
           <Fila
             key={m.medio}
             label={MEDIO_PAGO_LABEL[m.medio] || m.medio}
             value={formatPesos(m.neto)}
-            tone={Number(m.neto) < 0 ? 'text-red-400' : 'text-white'}
+            tone={Number(m.neto) < 0 ? 'text-prius-error' : 'text-black'}
           />
         ))}
       </Section>
@@ -73,7 +73,7 @@ export default function ResumenCaja({ resumen }) {
         <Fila
           label="Diferencia"
           value={formatPesos(arqueo.diferencia)}
-          tone={diferenciaArqueo === 0 ? 'text-green-400' : 'text-[#FDE047]'}
+          tone={diferenciaArqueo === 0 ? 'text-prius-success' : 'text-gold'}
         />
       </Section>
 
@@ -86,9 +86,9 @@ export default function ResumenCaja({ resumen }) {
           <Fila label="Cantidad de comprobantes" value={z.cantidad_comprobantes ?? '—'} />
           <Fila label="Primer / último comprobante" value={`${z.primer_comprobante || '—'} / ${z.ultimo_comprobante || '—'}`} />
           {(Number(z.comparacion?.diferencia_total) !== 0 || Number(z.comparacion?.diferencia_cantidad) !== 0) && (
-            <div className="flex items-start gap-2 mt-2 p-3 bg-[#FDE047]/5 border border-[#FDE047]/20 rounded-xl">
-              <AlertTriangle className="text-[#FDE047] shrink-0 mt-0.5" size={14} />
-              <p className="text-xs text-gray-300">
+            <div className="flex items-start gap-2 mt-2 p-3 bg-gold/5 border border-gold/20 rounded-xl">
+              <AlertTriangle className="text-gold shrink-0 mt-0.5" size={14} />
+              <p className="text-xs text-prius-slate">
                 Diferencia vs. lo registrado en el sistema: {formatPesos(z.comparacion.diferencia_total)} en monto,
                 {' '}{z.comparacion.diferencia_cantidad} en cantidad de comprobantes.
               </p>
@@ -99,29 +99,29 @@ export default function ResumenCaja({ resumen }) {
 
       <Section title={`Facturas (${(facturas || []).length})`}>
         {(facturas || []).length === 0 ? (
-          <p className="text-xs text-gray-500 uppercase tracking-widest">Sin facturas en esta caja.</p>
+          <p className="text-xs text-prius-muted uppercase tracking-widest">Sin facturas en esta caja.</p>
         ) : facturas.map((f) => (
-          <Fila key={f.etiqueta} label={f.etiqueta} value={formatPesos(f.monto_total)} tone={f.estado === 'anulado' ? 'text-gray-500 line-through' : undefined} />
+          <Fila key={f.etiqueta} label={f.etiqueta} value={formatPesos(f.monto_total)} tone={f.estado === 'anulado' ? 'text-prius-muted line-through' : undefined} />
         ))}
       </Section>
 
       <Section title={`Recibos (${(recibos || []).length})`}>
         {(recibos || []).length === 0 ? (
-          <p className="text-xs text-gray-500 uppercase tracking-widest">Sin recibos en esta caja.</p>
+          <p className="text-xs text-prius-muted uppercase tracking-widest">Sin recibos en esta caja.</p>
         ) : recibos.map((r) => (
-          <Fila key={r.etiqueta} label={r.etiqueta} value={formatPesos(r.monto_total)} tone={r.estado === 'anulado' ? 'text-gray-500 line-through' : undefined} />
+          <Fila key={r.etiqueta} label={r.etiqueta} value={formatPesos(r.monto_total)} tone={r.estado === 'anulado' ? 'text-prius-muted line-through' : undefined} />
         ))}
       </Section>
 
       {(sin_comprobante || []).length > 0 && (
         <Section title={`Pagos sin comprobante (${sin_comprobante.length})`}>
           {sin_comprobante.map((p) => (
-            <div key={p.pago_id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0 gap-3">
+            <div key={p.pago_id} className="flex items-center justify-between py-2 border-b border-hairline last:border-0 gap-3">
               <div className="flex items-center gap-2 min-w-0">
-                <FileText size={14} className="text-gray-500 shrink-0" />
-                <span className="text-sm text-gray-300 truncate">{p.cliente || 'S/N'} — {p.concepto}</span>
+                <FileText size={14} className="text-prius-muted shrink-0" />
+                <span className="text-sm text-prius-slate truncate">{p.cliente || 'S/N'} — {p.concepto}</span>
               </div>
-              <span className="text-sm font-bold text-white tabular-nums shrink-0">{formatPesos(p.monto)}</span>
+              <span className="text-sm font-bold text-black tabular-nums shrink-0">{formatPesos(p.monto)}</span>
             </div>
           ))}
         </Section>
@@ -129,29 +129,29 @@ export default function ResumenCaja({ resumen }) {
 
       <Section title="Gastos por categoría">
         {(gastos?.por_categoria || []).length === 0 ? (
-          <p className="text-xs text-gray-500 uppercase tracking-widest">Sin gastos en esta caja.</p>
+          <p className="text-xs text-prius-muted uppercase tracking-widest">Sin gastos en esta caja.</p>
         ) : gastos.por_categoria.map((g) => (
-          <Fila key={g.categoria} label={CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} value={formatPesos(g.total)} tone="text-red-400" />
+          <Fila key={g.categoria} label={CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} value={formatPesos(g.total)} tone="text-prius-error" />
         ))}
       </Section>
 
       {((anulados?.pagos || []).length > 0 || (anulados?.gastos || []).length > 0) && (
         <Section title="Anulados">
           {(anulados.pagos || []).map((p) => (
-            <Fila key={`p-${p.pago_id}`} label={`Pago — ${p.motivo}`} value={formatPesos(p.monto)} tone="text-gray-500 line-through" />
+            <Fila key={`p-${p.pago_id}`} label={`Pago — ${p.motivo}`} value={formatPesos(p.monto)} tone="text-prius-muted line-through" />
           ))}
           {(anulados.gastos || []).map((g) => (
-            <Fila key={`g-${g.gasto_id}`} label={`Gasto — ${g.motivo}`} value={formatPesos(g.monto)} tone="text-gray-500 line-through" />
+            <Fila key={`g-${g.gasto_id}`} label={`Gasto — ${g.motivo}`} value={formatPesos(g.monto)} tone="text-prius-muted line-through" />
           ))}
         </Section>
       )}
 
       <div className="grid grid-cols-2 gap-8 pt-6">
-        <div className="border-t border-white/20 pt-3 text-center">
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Cajero</p>
+        <div className="border-t border-hairline pt-3 text-center">
+          <p className="text-[10px] text-prius-muted uppercase tracking-widest">Cajero</p>
         </div>
-        <div className="border-t border-white/20 pt-3 text-center">
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Administración</p>
+        <div className="border-t border-hairline pt-3 text-center">
+          <p className="text-[10px] text-prius-muted uppercase tracking-widest">Administración</p>
         </div>
       </div>
     </div>

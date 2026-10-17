@@ -27,10 +27,10 @@ export default function AvisoCajaCerrada({ onAbierta, className = '' }) {
   }
 
   return (
-    <div className={`p-4 bg-[#FDE047]/5 border border-[#FDE047]/20 rounded-xl space-y-3 ${className}`}>
+    <div className={`p-4 bg-gold/5 border border-gold/20 rounded-xl space-y-3 ${className}`}>
       <div className="flex items-start gap-3">
-        <Wallet className="text-[#FDE047] shrink-0 mt-0.5" size={18} />
-        <p className="text-sm text-gray-300">
+        <Wallet className="text-gold shrink-0 mt-0.5" size={18} />
+        <p className="text-sm text-prius-slate">
           Todavía no hubo movimientos en la caja de hoy. Empieza en $0 con el primer cobro o gasto.
         </p>
       </div>
@@ -38,7 +38,7 @@ export default function AvisoCajaCerrada({ onAbierta, className = '' }) {
         loading={saving}
         loadingText="Abriendo..."
         onClick={handleAbrir}
-        className="w-full py-2.5 min-h-[44px] rounded-lg text-[10px] font-bold uppercase tracking-widest bg-[#FDE047] text-black hover:bg-yellow-300"
+        className="w-full py-2.5 min-h-[44px] rounded-lg text-[10px] font-bold uppercase tracking-widest bg-gold text-black hover:bg-yellow-300"
       >
         Abrir caja
       </LoadingButton>

@@ -199,8 +199,8 @@ export default function Login({ modo }) {
         <div className="md:hidden shrink-0 flex items-center gap-2 px-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
           <img src="/images/prius-icon.png" alt="" className="w-8 h-8 object-contain" />
           <div className="leading-tight">
-            <p className="text-white font-display font-extrabold text-lg tracking-tight">Prius</p>
-            <p className="text-white/70 text-[10px] font-semibold uppercase tracking-[0.2em] -mt-0.5">Playa Grande</p>
+            <p className="text-black font-display font-extrabold text-lg tracking-tight">Prius</p>
+            <p className="text-prius-slate text-[10px] font-semibold uppercase tracking-[0.2em] -mt-0.5">Playa Grande</p>
           </div>
         </div>
 

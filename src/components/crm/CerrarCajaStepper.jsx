@@ -77,23 +77,23 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[999] bg-[#0a0d14] sm:bg-black/70 sm:backdrop-blur-md sm:flex sm:items-center sm:justify-center sm:p-4"
+      className="fixed inset-0 z-[999] bg-white sm:bg-black/70 sm:backdrop-blur-md sm:flex sm:items-center sm:justify-center sm:p-4"
       onClick={requestClose}
     >
-      <div ref={bind} onClick={(e) => e.stopPropagation()} className="h-full sm:h-auto sm:max-h-[90vh] w-full sm:max-w-lg glass-card sm:rounded-2xl flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5 shrink-0">
+      <div ref={bind} onClick={(e) => e.stopPropagation()} className="h-full sm:h-auto sm:max-h-[90vh] w-full sm:max-w-lg card-light sm:rounded-2xl flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b border-hairline bg-prius-subtle shrink-0">
           <div className="flex items-center gap-3">
             {paso > 0 && (
-              <button onClick={() => setPaso((p) => p - 1)} className="text-gray-400 hover:text-white">
+              <button onClick={() => setPaso((p) => p - 1)} className="text-prius-slate hover:text-black">
                 <ChevronLeft size={20} />
               </button>
             )}
             <div>
-              <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-[#FDE047]">Cerrar Caja</h2>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Paso {paso + 1} de 3 — {PASOS[paso]}</p>
+              <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-gold">Cerrar Caja</h2>
+              <p className="text-[10px] text-prius-muted uppercase tracking-widest mt-0.5">Paso {paso + 1} de 3 — {PASOS[paso]}</p>
             </div>
           </div>
-          <button onClick={requestClose} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-white/50 hover:text-white">
+          <button onClick={requestClose} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-prius-muted hover:text-black">
             <X size={20} />
           </button>
         </div>
@@ -101,16 +101,16 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
           {paso === 0 && (
             <>
-              <div className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
-                <span className="text-xs text-gray-400 uppercase tracking-widest">Efectivo esperado</span>
-                <span className="text-lg font-bold text-white tabular-nums">{formatPesos(efectivoEsperado)}</span>
+              <div className="p-4 bg-prius-subtle border border-hairline rounded-xl flex items-center justify-between">
+                <span className="text-xs text-prius-slate uppercase tracking-widest">Efectivo esperado</span>
+                <span className="text-lg font-bold text-black tabular-nums">{formatPesos(efectivoEsperado)}</span>
               </div>
               <MoneyInput label="Efectivo contado" value={efectivoContado} onChange={setEfectivoContado} />
               <div className={`p-4 rounded-xl border text-center ${
-                diferencia === 0 ? 'bg-green-500/5 border-green-500/20' : 'bg-[#FDE047]/5 border-[#FDE047]/20'
+                diferencia === 0 ? 'bg-green-500/5 border-green-500/20' : 'bg-gold/5 border-gold/20'
               }`}>
-                <p className="text-[10px] uppercase tracking-widest text-gray-400">Diferencia</p>
-                <p className={`text-xl font-bold tabular-nums mt-1 ${diferencia === 0 ? 'text-green-400' : 'text-[#FDE047]'}`}>
+                <p className="text-[10px] uppercase tracking-widest text-prius-slate">Diferencia</p>
+                <p className={`text-xl font-bold tabular-nums mt-1 ${diferencia === 0 ? 'text-prius-success' : 'text-gold'}`}>
                   {formatPesos(diferencia)}
                 </p>
               </div>
@@ -135,11 +135,11 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
                 type="button"
                 onClick={() => setTieneZ((v) => !v)}
                 className={`w-full flex items-center justify-between px-4 py-4 rounded-xl border text-sm font-bold transition-all ${
-                  tieneZ ? 'bg-[#FDE047]/10 border-[#FDE047]/30 text-[#FDE047]' : 'bg-white/5 border-white/10 text-gray-300'
+                  tieneZ ? 'bg-gold/10 border-gold/30 text-gold' : 'bg-prius-subtle border-hairline text-prius-slate'
                 }`}
               >
                 Tengo cierre Z del controlador fiscal
-                <span className={`w-5 h-5 rounded-full border flex items-center justify-center ${tieneZ ? 'bg-[#FDE047] border-[#FDE047]' : 'border-white/30'}`}>
+                <span className={`w-5 h-5 rounded-full border flex items-center justify-center ${tieneZ ? 'bg-gold border-gold' : 'border-hairline'}`}>
                   {tieneZ && <Check size={12} className="text-black" />}
                 </span>
               </button>
@@ -165,7 +165,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
                     <TextInput placeholder="Primer comprobante" value={z.z_primer_comprobante} onChange={(v) => setZ({ ...z, z_primer_comprobante: v })} />
                     <TextInput placeholder="Último comprobante" value={z.z_ultimo_comprobante} onChange={(v) => setZ({ ...z, z_ultimo_comprobante: v })} />
                   </div>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-widest">
+                  <p className="text-[10px] text-prius-muted uppercase tracking-widest">
                     La diferencia contra lo registrado en el sistema se muestra en el resumen final.
                   </p>
                 </div>
@@ -175,34 +175,34 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
 
           {paso === 2 && (
             <div className="space-y-4">
-              <div className="p-5 bg-white/5 border border-white/10 rounded-xl space-y-3">
+              <div className="p-5 bg-prius-subtle border border-hairline rounded-xl space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Efectivo contado</span>
-                  <span className="font-bold text-white tabular-nums">{formatPesos(efectivoContado)}</span>
+                  <span className="text-prius-slate">Efectivo contado</span>
+                  <span className="font-bold text-black tabular-nums">{formatPesos(efectivoContado)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Diferencia de arqueo</span>
-                  <span className={`font-bold tabular-nums ${diferencia === 0 ? 'text-green-400' : 'text-[#FDE047]'}`}>{formatPesos(diferencia)}</span>
+                  <span className="text-prius-slate">Diferencia de arqueo</span>
+                  <span className={`font-bold tabular-nums ${diferencia === 0 ? 'text-prius-success' : 'text-gold'}`}>{formatPesos(diferencia)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Cierre Z</span>
-                  <span className="font-bold text-white">{tieneZ ? `Cargado (N.° ${z.z_numero || '—'})` : 'No cargado'}</span>
+                  <span className="text-prius-slate">Cierre Z</span>
+                  <span className="font-bold text-black">{tieneZ ? `Cargado (N.° ${z.z_numero || '—'})` : 'No cargado'}</span>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 text-center uppercase tracking-widest">
+              <p className="text-xs text-prius-muted text-center uppercase tracking-widest">
                 Una vez cerrada, no se podrán registrar más movimientos para esta fecha.
               </p>
             </div>
           )}
         </div>
 
-        <div className="p-6 border-t border-white/5 shrink-0">
+        <div className="p-6 border-t border-hairline shrink-0">
           {paso < 2 ? (
             <button
               type="button"
               disabled={paso === 0 && !puedeAvanzarPaso1}
               onClick={() => setPaso((p) => p + 1)}
-              className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+              className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
             >
               Continuar
             </button>

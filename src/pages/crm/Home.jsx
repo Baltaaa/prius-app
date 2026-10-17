@@ -24,26 +24,26 @@ const todayStr = () => new Date().toISOString().split('T')[0]
 /** Tarjeta de KPI del Dashboard — número grande, label chico en mayúscula,
  * barra de progreso fina opcional. Clickeable cuando se pasa `onClick`
  * (lleva al módulo correspondiente, filtrado cuando aplica). Mismo lenguaje
- * visual que el resto de la app (glass-card, acento #FDE047). */
+ * visual que el resto de la app (card-light, acento #FDE047). */
 function DashCard({ icon: Icon, label, value, sub, progress, accent, onClick, className = '' }) {
   const Tag = onClick ? 'button' : 'div'
   return (
     <Tag
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`glass-card rounded-2xl p-4 text-left transition-all min-w-0 ${onClick ? 'hover:bg-white/[0.07] cursor-pointer' : ''} ${className}`}
+      className={`card-light rounded-2xl p-4 text-left transition-all min-w-0 ${onClick ? 'hover:bg-white/[0.07] cursor-pointer' : ''} ${className}`}
     >
       <div className="flex items-center gap-2 mb-2.5">
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border shrink-0 ${accent ? 'border-[#FDE047]/30 bg-[#FDE047]/10' : 'border-white/10 bg-white/5'}`}>
-          <Icon size={14} className={accent ? 'text-[#FDE047]' : 'text-gray-400'} />
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border shrink-0 ${accent ? 'border-gold/30 bg-gold/10' : 'border-hairline bg-prius-subtle'}`}>
+          <Icon size={14} className={accent ? 'text-gold' : 'text-prius-slate'} />
         </div>
-        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">{label}</p>
+        <p className="text-[9px] font-bold text-prius-slate uppercase tracking-widest truncate">{label}</p>
       </div>
-      <p className="text-2xl font-bold text-white tabular-nums leading-none truncate">{value}</p>
-      {sub != null && <p className="text-[10px] text-gray-500 tabular-nums mt-1 truncate">{sub}</p>}
+      <p className="text-2xl font-bold text-black tabular-nums leading-none truncate">{value}</p>
+      {sub != null && <p className="text-[10px] text-prius-muted tabular-nums mt-1 truncate">{sub}</p>}
       {progress != null && (
-        <div className="mt-2.5 h-[3px] rounded-full bg-white/10 overflow-hidden">
-          <div className="h-full rounded-full bg-[#FDE047]" style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }} />
+        <div className="mt-2.5 h-[3px] rounded-full bg-prius-subtle overflow-hidden">
+          <div className="h-full rounded-full bg-gold" style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }} />
         </div>
       )}
     </Tag>
@@ -51,7 +51,7 @@ function DashCard({ icon: Icon, label, value, sub, progress, accent, onClick, cl
 }
 
 function SeccionTitulo({ children }) {
-  return <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-3">{children}</h2>
+  return <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-prius-muted mb-3">{children}</h2>
 }
 
 export default function Home() {
@@ -124,7 +124,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-gray-500 animate-pulse uppercase tracking-widest">Sincronizando PriusAdmin...</span>
+        <span className="text-sm font-semibold text-prius-muted animate-pulse uppercase tracking-widest">Sincronizando PriusAdmin...</span>
       </div>
     )
   }
@@ -137,8 +137,8 @@ export default function Home() {
       {/* Fila 1: saludo + clima */}
       <div className="space-y-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Hola, {primerNombre}</h1>
-          <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">{formatFechaLarga(hoy)}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-black">Hola, {primerNombre}</h1>
+          <p className="text-xs text-prius-muted uppercase tracking-wider mt-1">{formatFechaLarga(hoy)}</p>
         </div>
         <ClimaHero fecha={hoy} />
       </div>
@@ -193,19 +193,19 @@ export default function Home() {
           )}
         </div>
 
-        <div className="glass-card rounded-2xl p-5">
+        <div className="card-light rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-prius-slate flex items-center gap-2">
               <Clock size={13} /> Últimos movimientos
             </p>
-            <button onClick={() => navigate('/app/historial')} className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300 flex items-center gap-1">
+            <button onClick={() => navigate('/app/historial')} className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-yellow-300 flex items-center gap-1">
               Ver todo <ArrowRight size={12} />
             </button>
           </div>
           {historialLoading ? (
-            <p className="text-xs text-gray-500 uppercase tracking-widest animate-pulse py-4 text-center">Cargando...</p>
+            <p className="text-xs text-prius-muted uppercase tracking-widest animate-pulse py-4 text-center">Cargando...</p>
           ) : ultimosMovimientos.length === 0 ? (
-            <p className="text-xs text-gray-500 py-4 text-center">Sin movimientos recientes.</p>
+            <p className="text-xs text-prius-muted py-4 text-center">Sin movimientos recientes.</p>
           ) : (
             <div className="divide-y divide-white/5">
               {ultimosMovimientos.map((ev) => (
@@ -215,15 +215,15 @@ export default function Home() {
                     if (ev.tabla === 'reservas' && ev.registro_id) navigate(linkToReserva(ev.registro_id))
                     else if (ev.cliente_id) navigate(linkToCliente(ev.cliente_id))
                   }}
-                  className="w-full flex items-center justify-between gap-3 py-3 text-left hover:bg-white/5 rounded-lg px-2 -mx-2 transition-all"
+                  className="w-full flex items-center justify-between gap-3 py-3 text-left hover:bg-prius-subtle rounded-lg px-2 -mx-2 transition-all"
                 >
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-white truncate">{ev.descripcion}</p>
-                    <p className="text-[10px] text-gray-500 mt-0.5 truncate">
+                    <p className="text-xs font-bold text-black truncate">{ev.descripcion}</p>
+                    <p className="text-[10px] text-prius-muted mt-0.5 truncate">
                       {ev.actor_nombre || 'Sistema'}{ev.cliente_nombre ? ` · ${ev.cliente_nombre}` : ''}
                     </p>
                   </div>
-                  <span className="text-[10px] text-gray-600 tabular-nums shrink-0">{formatHora(ev.ts)}</span>
+                  <span className="text-[10px] text-prius-muted tabular-nums shrink-0">{formatHora(ev.ts)}</span>
                 </button>
               ))}
             </div>

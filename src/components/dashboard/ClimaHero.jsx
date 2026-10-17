@@ -25,16 +25,16 @@ export default function ClimaHero({ fecha }) {
   const resumen = resumenDiaClima(clima)
 
   if (loading) {
-    return <div className="glass-card rounded-3xl p-6 h-[180px] animate-pulse" />
+    return <div className="card-light rounded-3xl p-6 h-[180px] animate-pulse" />
   }
 
   if (!resumen) {
     return (
-      <div className="glass-card rounded-3xl p-6 flex items-center gap-4">
-        <Cloud size={28} className="text-gray-500" />
+      <div className="card-light rounded-3xl p-6 flex items-center gap-4">
+        <Cloud size={28} className="text-prius-muted" />
         <div>
-          <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Clima</p>
-          <p className="text-xs text-gray-500 mt-1">Sin pronóstico para hoy.</p>
+          <p className="text-sm font-bold text-prius-slate uppercase tracking-widest">Clima</p>
+          <p className="text-xs text-prius-muted mt-1">Sin pronóstico para hoy.</p>
         </div>
       </div>
     )
@@ -51,31 +51,31 @@ export default function ClimaHero({ fecha }) {
 
   return (
     <>
-      <div className={`glass-card rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center gap-6 ${alerta ? 'border border-amber-500/30' : ''}`}>
+      <div className={`card-light rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center gap-6 ${alerta ? 'border border-amber-500/30' : ''}`}>
         <div className="flex items-center gap-5 shrink-0">
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border shrink-0 ${alerta ? 'border-amber-500/40 bg-amber-500/10' : 'border-white/10 bg-white/5'}`}>
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border shrink-0 ${alerta ? 'border-amber-500/40 bg-amber-500/10' : 'border-hairline bg-prius-subtle'}`}>
             <Icono size={30} className={alerta ? 'text-amber-300' : 'text-[#F2CA50]'} />
           </div>
           <div>
-            <p className="text-4xl font-bold text-white tabular-nums leading-none">
+            <p className="text-4xl font-bold text-black tabular-nums leading-none">
               {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
             </p>
-            <p className={`text-[10px] font-bold uppercase tracking-widest mt-1.5 ${alerta ? 'text-amber-300' : 'text-gray-500'}`}>
+            <p className={`text-[10px] font-bold uppercase tracking-widest mt-1.5 ${alerta ? 'text-amber-300' : 'text-prius-muted'}`}>
               {alerta ? 'Viento fuerte' : 'Mar del Plata · Base Naval'}
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-sm font-bold tabular-nums text-gray-200">
+          <div className="flex items-center gap-1.5 text-sm font-bold tabular-nums text-prius-slate">
             <ArrowUp size={14} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
             {actual.viento != null ? Math.round(actual.viento) : '--'} km/h
           </div>
-          <div className={`flex items-center gap-1.5 text-sm font-bold tabular-nums ${alerta ? 'text-amber-300' : 'text-gray-400'}`}>
+          <div className={`flex items-center gap-1.5 text-sm font-bold tabular-nums ${alerta ? 'text-amber-300' : 'text-prius-slate'}`}>
             <Gauge size={14} /> ráfaga {Math.round(rafagaMax)} km/h
           </div>
           {actual.olaAltura != null && (
-            <div className="flex items-center gap-1.5 text-sm font-bold tabular-nums text-gray-400">
+            <div className="flex items-center gap-1.5 text-sm font-bold tabular-nums text-prius-slate">
               <Waves size={14} /> ola {Number(actual.olaAltura).toFixed(1)} m
             </div>
           )}
@@ -84,9 +84,9 @@ export default function ClimaHero({ fecha }) {
         {proximasHoras.length > 0 && (
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
             {proximasHoras.map((h) => (
-              <div key={h.hora} className="shrink-0 w-12 text-center px-1 py-2 bg-white/[0.04] border border-white/10 rounded-lg">
-                <p className="text-[9px] font-bold text-gray-500">{h.hora.slice(0, 2)}h</p>
-                <p className="text-xs font-bold text-white mt-0.5 tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
+              <div key={h.hora} className="shrink-0 w-12 text-center px-1 py-2 bg-white/[0.04] border border-hairline rounded-lg">
+                <p className="text-[9px] font-bold text-prius-muted">{h.hora.slice(0, 2)}h</p>
+                <p className="text-xs font-bold text-black mt-0.5 tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
               </div>
             ))}
           </div>
@@ -96,7 +96,7 @@ export default function ClimaHero({ fecha }) {
           <button
             type="button"
             onClick={() => setPanelOpen(true)}
-            className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:border-white/20 transition-all"
+            className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-prius-subtle border border-hairline text-prius-slate hover:text-black hover:border-hairline transition-all"
           >
             Ver pronóstico
           </button>
@@ -104,7 +104,7 @@ export default function ClimaHero({ fecha }) {
             href={WINDGURU_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-[#FDE047] text-black hover:bg-yellow-300 transition-all flex items-center justify-center gap-1.5"
+            className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-gold text-black hover:bg-yellow-300 transition-all flex items-center justify-center gap-1.5"
           >
             Windguru <ExternalLink size={12} />
           </a>

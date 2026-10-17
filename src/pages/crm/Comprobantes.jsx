@@ -117,17 +117,17 @@ export default function Comprobantes() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-gray-500 animate-pulse uppercase tracking-widest">Sincronizando Comprobantes...</span>
+        <span className="text-sm font-semibold text-prius-muted animate-pulse uppercase tracking-widest">Sincronizando Comprobantes...</span>
       </div>
     )
   }
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      <div className="glass-card p-6 rounded-2xl glass-card-inner space-y-2">
+      <div className="card-light p-6 rounded-2xl card-light-inner space-y-2">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex-1 min-w-[280px] space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Buscar reserva (cliente, DNI/CUIT, unidad)</label>
+            <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Buscar reserva (cliente, DNI/CUIT, unidad)</label>
             <div className="max-w-xl">
               <BrandSelect
                 value={selectedReservaId}
@@ -142,25 +142,25 @@ export default function Comprobantes() {
 
           {selectedReserva && (
             <div className="flex items-center gap-3 shrink-0">
-              <div className="flex rounded-xl border border-white/10 overflow-hidden" role="group" aria-label="Modo de impresión">
+              <div className="flex rounded-xl border border-hairline overflow-hidden" role="group" aria-label="Modo de impresión">
                 <button
                   type="button"
                   onClick={() => setModo('color')}
-                  className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${modo === 'color' ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:bg-white/5'}`}
+                  className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${modo === 'color' ? 'bg-gold text-black' : 'text-prius-slate hover:bg-prius-subtle'}`}
                 >
                   Color
                 </button>
                 <button
                   type="button"
                   onClick={() => setModo('bn')}
-                  className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${modo === 'bn' ? 'bg-[#FDE047] text-black' : 'text-gray-400 hover:bg-white/5'}`}
+                  className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${modo === 'bn' ? 'bg-gold text-black' : 'text-prius-slate hover:bg-prius-subtle'}`}
                 >
                   B y N
                 </button>
               </div>
               <button
                 onClick={() => imprimir('estado_cuenta')}
-                className="bg-[#FDE047] hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl"
+                className="bg-gold hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl"
               >
                 <Printer size={18} /> Imprimir Comprobante
               </button>
@@ -180,28 +180,28 @@ export default function Comprobantes() {
           </div>
 
           {pagosReserva.length > 0 && (
-            <div className="glass-card p-6 rounded-2xl glass-card-inner space-y-3">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Pagos Registrados — recibo individual</p>
+            <div className="card-light p-6 rounded-2xl card-light-inner space-y-3">
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-[0.2em]">Pagos Registrados — recibo individual</p>
               <div className="space-y-2">
                 {pagosReserva.map((p) => (
-                  <div key={p.id} className="flex justify-between items-center text-xs px-4 py-3 bg-white/5 border border-white/10 rounded-xl gap-3">
-                    <div className="text-gray-400 min-w-0">
-                      <span className="text-white font-bold">{formatFecha(p.fecha)}</span>
+                  <div key={p.id} className="flex justify-between items-center text-xs px-4 py-3 bg-prius-subtle border border-hairline rounded-xl gap-3">
+                    <div className="text-prius-slate min-w-0">
+                      <span className="text-black font-bold">{formatFecha(p.fecha)}</span>
                       {' — '}{formatMedioPago(p)}
                       {p.comprobante && <span> · Comp. {p.comprobante}</span>}
                       {p.nro_cuota && <span> · Cuota {p.nro_cuota}</span>}
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       {pagoSinVerificar(p) ? (
-                        <strong className="inline-flex items-center gap-1.5 text-gray-500 text-[11px] uppercase tracking-widest">
+                        <strong className="inline-flex items-center gap-1.5 text-prius-muted text-[11px] uppercase tracking-widest">
                           <HelpCircle size={12} /> Sin verificar
                         </strong>
                       ) : (
-                        <strong className="text-green-400">{formatPesos(p.monto)}</strong>
+                        <strong className="text-prius-success">{formatPesos(p.monto)}</strong>
                       )}
                       <button
                         onClick={() => imprimir('recibo', p.id)}
-                        className="p-2 hover:bg-white/10 rounded-lg text-[#FDE047] transition-all"
+                        className="p-2 hover:bg-prius-subtle rounded-lg text-gold transition-all"
                         title="Emitir recibo de este pago"
                       >
                         <Receipt size={16} />
@@ -214,9 +214,9 @@ export default function Comprobantes() {
           )}
         </div>
       ) : (
-        <div className="p-20 glass-card rounded-3xl text-center glass-card-inner">
-          <FileText className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <p className="text-sm text-gray-400 uppercase font-bold tracking-widest">No hay reservas registradas para generar comprobantes.</p>
+        <div className="p-20 card-light rounded-3xl text-center card-light-inner">
+          <FileText className="w-12 h-12 text-prius-muted mx-auto mb-4" />
+          <p className="text-sm text-prius-slate uppercase font-bold tracking-widest">No hay reservas registradas para generar comprobantes.</p>
         </div>
       )}
     </div>

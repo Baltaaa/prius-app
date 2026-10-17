@@ -1,12 +1,12 @@
-import Sidebar from './Sidebar'
+import Sidebar from '../crm/Sidebar'
+import BottomNav from '../crm/BottomNav'
 import NavRail from './NavRail'
-import BottomNav from './BottomNav'
 
-// AppShell "Playa Privada": decide la navegación por breakpoint —
-// BottomNav <768px, NavRail 768–1023px, Sidebar ≥1024px — y deja el resto
-// del layout (TopBar, main scrollable) a cargo de quien lo use (AppLayout.jsx
-// lo consume a medida que cada pantalla migra, Fase 2/3). `children` es el
-// <main> completo (TopBar + Outlet) para no imponer su estructura interna.
+// AppShell "Playa Privada": decide la navegación por breakpoint — BottomNav
+// <768px, NavRail 768–1023px (nuevo), Sidebar ≥1024px (ajustado de md a lg) —
+// usando los mismos Sidebar/BottomNav reales de crm/ (ya re-estilizados al
+// tema claro), no una copia paralela. `children` es el <main> completo
+// (TopBar + Outlet), a cargo de AppLayout.jsx.
 export default function AppShell({ children }) {
   return (
     <div className="h-dvh w-screen flex bg-white text-black font-ui overflow-hidden">

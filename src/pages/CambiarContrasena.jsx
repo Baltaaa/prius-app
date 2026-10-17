@@ -70,12 +70,12 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
 
   if (linkInvalido) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0d14] px-6">
-        <div className="max-w-sm w-full bg-[#0a0d14]/90 border border-white/10 rounded-[32px] p-8 text-center space-y-4">
-          <p className="text-white font-bold">El enlace venció o ya se usó.</p>
+      <div className="min-h-screen flex items-center justify-center bg-white px-6">
+        <div className="max-w-sm w-full bg-white/90 border border-hairline rounded-[32px] p-8 text-center space-y-4">
+          <p className="text-black font-bold">El enlace venció o ya se usó.</p>
           <button
             onClick={() => navigate('/recuperar')}
-            className="w-full h-14 bg-[#FDE047] hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-widest rounded-full transition-all"
+            className="w-full h-14 bg-gold hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-widest rounded-full transition-all"
           >
             Pedir uno nuevo
           </button>
@@ -85,14 +85,14 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0d14] px-6">
-      <div className="max-w-sm w-full bg-[#0a0d14]/90 border border-white/10 rounded-[32px] p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-white px-6">
+      <div className="max-w-sm w-full bg-white/90 border border-hairline rounded-[32px] p-8 space-y-6">
         <div>
-          <h1 className="text-2xl font-display font-extrabold text-white">
+          <h1 className="text-2xl font-display font-extrabold text-black">
             {modoRecuperacion ? 'Elegí tu nueva contraseña' : 'Cambiá tu contraseña'}
           </h1>
           {!modoRecuperacion && (
-            <p className="text-white/50 text-sm mt-2">Es tu primer ingreso — definí una contraseña nueva para seguir.</p>
+            <p className="text-prius-muted text-sm mt-2">Es tu primer ingreso — definí una contraseña nueva para seguir.</p>
           )}
         </div>
 
@@ -107,9 +107,9 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
               required
               placeholder="Nueva contraseña"
               style={{ fontSize: 16 }}
-              className="w-full h-14 pl-14 pr-14 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white focus:border-[#FDE047]/50"
+              className="w-full h-14 pl-14 pr-14 bg-white/[0.03] border border-hairline rounded-full outline-none text-black focus:border-gold/50"
             />
-            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white">
+            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 hover:text-black">
               {show ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
@@ -122,32 +122,32 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
             required
             placeholder="Repetir contraseña"
             style={{ fontSize: 16 }}
-            className="w-full h-14 px-6 bg-white/[0.03] border border-white/10 rounded-full outline-none text-white focus:border-[#FDE047]/50"
+            className="w-full h-14 px-6 bg-white/[0.03] border border-hairline rounded-full outline-none text-black focus:border-gold/50"
           />
 
           <div className="space-y-1.5 px-2">
             {REQS.map((r) => {
               const ok = r.test(password)
               return (
-                <div key={r.key} className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider ${ok ? 'text-green-400' : 'text-white/30'}`}>
+                <div key={r.key} className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider ${ok ? 'text-prius-success' : 'text-white/30'}`}>
                   {ok ? <Check size={12} /> : <X size={12} />} {r.label}
                 </div>
               )
             })}
           </div>
 
-          {error && <p className="text-[11px] font-bold text-red-400 uppercase tracking-wider">{error}</p>}
+          {error && <p className="text-[11px] font-bold text-prius-error uppercase tracking-wider">{error}</p>}
 
           <button
             type="submit"
             disabled={loading || !cumple || !coincide}
-            className="w-full h-14 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-black text-xs uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-2"
+            className="w-full h-14 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-black text-xs uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : 'Guardar y continuar'}
           </button>
 
           {!modoRecuperacion && (
-            <button type="button" onClick={signOut} className="w-full text-center text-[10px] font-bold text-white/30 hover:text-white uppercase tracking-widest">
+            <button type="button" onClick={signOut} className="w-full text-center text-[10px] font-bold text-white/30 hover:text-black uppercase tracking-widest">
               Cerrar sesión
             </button>
           )}

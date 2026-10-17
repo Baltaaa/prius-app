@@ -1,8 +1,7 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import Sidebar from '../components/crm/Sidebar'
 import TopBar from '../components/crm/TopBar'
-import BottomNav from '../components/crm/BottomNav'
+import AppShell from '../components/ui-prius/AppShell'
 import InactivityWarningModal from '../components/crm/InactivityWarningModal'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
@@ -33,12 +32,9 @@ export default function AppLayout() {
             direcciones visible, 100vh mide más que el alto visible real —
             con h-dvh el shell siempre ocupa exactamente lo que se ve,
             el BottomNav fijo y el contenido final de cada pantalla quedan
-            dentro del área visible desde el primer render. */}
-        <div className="h-dvh w-screen flex text-white overflow-hidden">
-          {/* Sidebar: solo desktop (oculto por completo en mobile, ver Sidebar.jsx) */}
-          <Sidebar />
-
-          {/* Main Workspace Area */}
+            dentro del área visible desde el primer render. AppShell decide
+            Sidebar (≥1024px) / NavRail (768–1023px) / BottomNav (<768px). */}
+        <AppShell>
           <div className="flex-1 flex flex-col h-dvh min-w-0 overflow-hidden relative">
             <TopBar />
 
@@ -54,9 +50,7 @@ export default function AppLayout() {
               <Outlet />
             </main>
           </div>
-
-          <BottomNav />
-        </div>
+        </AppShell>
         </NotificacionesProvider>
       </DataProvider>
     </DialogProvider>

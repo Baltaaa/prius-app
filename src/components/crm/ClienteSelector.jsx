@@ -78,10 +78,10 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
 
   if (showNuevo) {
     return (
-      <div className="space-y-3 p-4 bg-white/5 border border-[#FDE047]/30 rounded-xl">
+      <div className="space-y-3 p-4 bg-prius-subtle border border-gold/30 rounded-xl">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] font-bold text-[#FDE047] uppercase tracking-widest">Cliente Nuevo</p>
-          <button type="button" onClick={resetNuevo} className="text-gray-500 hover:text-white transition-all">
+          <p className="text-[10px] font-bold text-gold uppercase tracking-widest">Cliente Nuevo</p>
+          <button type="button" onClick={resetNuevo} className="text-prius-muted hover:text-black transition-all">
             <X size={16} />
           </button>
         </div>
@@ -103,12 +103,12 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
           onChange={(v) => setMail(v.toLowerCase())}
           error={intentado ? errors.mail : undefined}
         />
-        {error && <p className="text-[11px] text-red-400">{error}</p>}
+        {error && <p className="text-[11px] text-prius-error">{error}</p>}
         <button
           type="button"
           onClick={handleGuardar}
           disabled={saving}
-          className="w-full py-2.5 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-widest text-[10px] rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full py-2.5 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-widest text-[10px] rounded-xl transition-all flex items-center justify-center gap-2"
         >
           <UserPlus size={14} /> {saving ? 'Guardando...' : 'Guardar Cliente'}
         </button>
@@ -133,18 +133,18 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
           setShowDropdown(true)
           e.target.select()
         }}
-        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-[#FDE047]/50 outline-none uppercase font-bold"
+        className="w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-gold/50 outline-none uppercase font-bold"
       />
       {showDropdown && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-          {/* bg-[#0a0d14] opaco a propósito, no glass-card: este panel flota
+          {/* bg-white opaco a propósito, no card-light: este panel flota
               encima de contenido (ej. Temporada/Monto total/Asignar unidad
-              en AsignarUnidadModal) y glass-card es semi-transparente por
+              en AsignarUnidadModal) y card-light es semi-transparente por
               diseño — tapaba mal lo que había detrás (bug reportado). */}
-          <div className="absolute left-0 right-0 mt-2 bg-[#0a0d14] border border-white/10 rounded-xl overflow-hidden z-50 max-h-64 overflow-y-auto shadow-2xl">
+          <div className="absolute left-0 right-0 mt-2 bg-white border border-hairline rounded-xl overflow-hidden z-50 max-h-64 overflow-y-auto shadow-2xl">
             {clientesFiltrados.length === 0 ? (
-              <p className="px-4 py-3 text-xs text-gray-500 uppercase tracking-widest">Sin resultados</p>
+              <p className="px-4 py-3 text-xs text-prius-muted uppercase tracking-widest">Sin resultados</p>
             ) : (
               clientesFiltrados.map((c) => (
                 <button
@@ -155,7 +155,7 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
                     setInputValue(c.nombre)
                     setShowDropdown(false)
                   }}
-                  className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-white/10 transition-all uppercase font-bold"
+                  className="w-full text-left px-4 py-2.5 text-sm text-black hover:bg-prius-subtle transition-all uppercase font-bold"
                 >
                   {c.nombre}
                 </button>
@@ -167,7 +167,7 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
                 setShowDropdown(false)
                 setShowNuevo(true)
               }}
-              className="w-full text-left px-4 py-2.5 text-sm text-[#FDE047] hover:bg-white/10 transition-all font-bold border-t border-white/10 flex items-center gap-2"
+              className="w-full text-left px-4 py-2.5 text-sm text-gold hover:bg-prius-subtle transition-all font-bold border-t border-hairline flex items-center gap-2"
             >
               <UserPlus size={14} /> Crear cliente nuevo
             </button>

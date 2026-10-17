@@ -34,7 +34,7 @@ const SEARCH_THRESHOLD = 10
 // armado a mano con el mismo patrón que Modal.jsx/ClienteSelector.jsx:
 // portal a document.body (position: fixed adentro de un ancestro con
 // `transform` queda atrapado, no cubre el viewport), bottom sheet en mobile,
-// fondo opaco (nunca glass-card: un panel flotante encima de contenido no
+// fondo opaco (nunca card-light: un panel flotante encima de contenido no
 // puede ser semi-transparente — bug real que tenía ClienteSelector).
 export default function BrandSelect({
   value, onChange, options, placeholder = 'Seleccionar...', searchPlaceholder = 'Buscar...',

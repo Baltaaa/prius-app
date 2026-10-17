@@ -22,7 +22,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
 
   if (!data || data.length === 0) {
     return (
-      <div className="p-12 text-center text-sm tracking-wider text-gray-500 glass-card rounded-xl">
+      <div className="p-12 text-center text-sm tracking-wider text-prius-muted card-light rounded-xl">
         {emptyMessage || 'No se encontraron registros.'}
       </div>
     )
@@ -31,16 +31,16 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
   if (isDesktop || !renderMobileCard) {
     return (
       <div className="w-full">
-        <div className="glass-card rounded-xl overflow-x-auto glass-card-inner">
+        <div className="card-light rounded-xl overflow-x-auto card-light-inner">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10 text-[11px] font-bold uppercase tracking-widest text-gray-500">
+              <tr className="border-b border-hairline text-[11px] font-bold uppercase tracking-widest text-prius-muted">
                 {headers.map((h, i) => (
                   <th key={i} className="px-6 py-4 font-semibold whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-sm text-gray-300">
+            <tbody className="divide-y divide-white/5 text-sm text-prius-slate">
               {data.map((row, i) => renderRow(row, i))}
             </tbody>
           </table>
@@ -52,7 +52,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
   return (
     <div className="w-full space-y-3">
       {data.map((row, i) => (
-        <div key={row.id ?? i} className="p-5 glass-card rounded-xl flex flex-col gap-3">
+        <div key={row.id ?? i} className="p-5 card-light rounded-xl flex flex-col gap-3">
           {renderMobileCard(row, i)}
         </div>
       ))}

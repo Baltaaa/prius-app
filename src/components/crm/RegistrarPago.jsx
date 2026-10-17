@@ -19,11 +19,11 @@ import LoadingButton from '../ui/LoadingButton'
 import { CheckCircle2 } from 'lucide-react'
 
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-[#FDE047]/50 outline-none font-bold'
+  'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-gold/50 outline-none font-bold'
 
 const chipClass = (active) =>
   `px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
-    active ? 'bg-[#FDE047] text-black border-[#FDE047]' : 'bg-white/5 text-gray-300 border-white/10 hover:text-white'
+    active ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
   }`
 
 // Componente compartido de cobro (Tarea 4): Clientes, Reservas y el modal de
@@ -242,11 +242,11 @@ export default function RegistrarPago({
       <Modal isOpen={isOpen} onClose={onClose} title={tituloOverride || 'Registrar Pago'}>
         <div className="flex flex-col items-center text-center gap-4 py-6">
           <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
-            <CheckCircle2 className="text-green-400" size={32} />
+            <CheckCircle2 className="text-prius-success" size={32} />
           </div>
           <div>
-            <p className="text-lg font-bold text-white">{formatPesos(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
-            <p className="text-xs text-gray-400 uppercase tracking-widest mt-1">
+            <p className="text-lg font-bold text-black">{formatPesos(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
+            <p className="text-xs text-prius-slate uppercase tracking-widest mt-1">
               {exito.historico
                 ? 'El cobro ya está reflejado en la reserva. Pago histórico: no impacta en la caja diaria.'
                 : 'El cobro ya está reflejado en la reserva y en la caja de hoy.'}
@@ -255,7 +255,7 @@ export default function RegistrarPago({
           <div className="flex gap-3 pt-2">
             <button
               onClick={onClose}
-              className="px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-[#FDE047] text-black hover:bg-yellow-300 transition-all"
+              className="px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold text-black hover:bg-yellow-300 transition-all"
             >
               Listo
             </button>
@@ -283,7 +283,7 @@ export default function RegistrarPago({
         {/* 1. Reserva */}
         {reservasOptions.length > 1 || allowSinReserva ? (
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Reserva</label>
+            <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Reserva</label>
             <BrandSelect
               value={reservaId}
               onChange={setReservaId}
@@ -297,28 +297,28 @@ export default function RegistrarPago({
             />
           </div>
         ) : reservaSeleccionada ? (
-          <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-            <p className="text-sm font-bold text-white uppercase">{unidadLabel}</p>
+          <div className="p-4 bg-prius-subtle border border-hairline rounded-xl">
+            <p className="text-sm font-bold text-black uppercase">{unidadLabel}</p>
           </div>
         ) : null}
 
         {/* 2. Resumen */}
         {reservaSeleccionada && (
           <div className="grid grid-cols-3 gap-3">
-            <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-center">
-              <p className="text-[9px] text-gray-500 uppercase tracking-widest">Total</p>
-              <p className="text-sm font-bold text-white mt-1">{formatPesos(total)}</p>
+            <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+              <p className="text-[9px] text-prius-muted uppercase tracking-widest">Total</p>
+              <p className="text-sm font-bold text-black mt-1">{formatPesos(total)}</p>
             </div>
-            <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-center">
-              <p className="text-[9px] text-gray-500 uppercase tracking-widest">Pagado</p>
-              <p className="text-sm font-bold text-green-400 mt-1">
-                {saldoDesconocido ? <span className="text-gray-400 normal-case">Sin verificar</span> : formatPesos(pagado)}
+            <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+              <p className="text-[9px] text-prius-muted uppercase tracking-widest">Pagado</p>
+              <p className="text-sm font-bold text-prius-success mt-1">
+                {saldoDesconocido ? <span className="text-prius-slate normal-case">Sin verificar</span> : formatPesos(pagado)}
               </p>
             </div>
-            <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-center">
-              <p className="text-[9px] text-gray-500 uppercase tracking-widest">Saldo</p>
-              <p className="text-sm font-bold text-[#FDE047] mt-1">
-                {saldoDesconocido ? <span className="text-gray-400 normal-case">Sin verificar</span> : formatPesos(saldo)}
+            <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+              <p className="text-[9px] text-prius-muted uppercase tracking-widest">Saldo</p>
+              <p className="text-sm font-bold text-gold mt-1">
+                {saldoDesconocido ? <span className="text-prius-slate normal-case">Sin verificar</span> : formatPesos(saldo)}
               </p>
             </div>
           </div>
@@ -342,8 +342,8 @@ export default function RegistrarPago({
               se eligen a mano, se calculan solos — esto es lo único que el
               usuario ve de esa decisión antes de confirmar. */}
           {!excedeSaldo && Number(monto) > 0 && (
-            <p className="text-[11px] text-gray-400 mt-1.5">
-              Se registrará como: <span className="text-gray-200 font-semibold">{tipoLabel}</span>
+            <p className="text-[11px] text-prius-slate mt-1.5">
+              Se registrará como: <span className="text-prius-slate font-semibold">{tipoLabel}</span>
               {reservaSeleccionada && !saldoDesconocido && (
                 <> — saldo restante {formatPesos(Math.max(saldo - Number(monto), 0))}</>
               )}
@@ -354,7 +354,7 @@ export default function RegistrarPago({
 
         {/* 4. Medio de pago + referencia */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Medio de pago</label>
+          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de pago</label>
           <div className="flex flex-wrap gap-2">
             {Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => (
               <button key={value} type="button" onClick={() => setMedio(value)} className={chipClass(medio === value)}>{label}</button>
@@ -373,14 +373,14 @@ export default function RegistrarPago({
 
         {/* 5. Comprobante — obligatorio desde oct 2026 (Tarea 4.2), siempre
             visible, ya no hay "lo cargo después". */}
-        <div className="border border-white/10 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 bg-white/5 text-xs font-bold uppercase tracking-widest text-gray-300">
+        <div className="border border-hairline rounded-xl overflow-hidden">
+          <div className="px-4 py-3 bg-prius-subtle text-xs font-bold uppercase tracking-widest text-prius-slate">
             Comprobante
           </div>
           <div className="p-4 space-y-4 bg-black/20">
             {pagosConComprobante.length > 0 && (
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mismo comprobante que otro pago</label>
+                <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Mismo comprobante que otro pago</label>
                 <BrandSelect
                   value={mismoComprobanteDe}
                   onChange={setMismoComprobanteDe}
@@ -397,7 +397,7 @@ export default function RegistrarPago({
             {!mismoComprobanteDe && (
               <>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tipo</label>
+                  <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Tipo</label>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(COMPROBANTE_TIPO_SIGLA).map(([value, sigla]) => (
                       <button
@@ -424,9 +424,9 @@ export default function RegistrarPago({
                     placeholder="Ej: 727" error={comprobanteIncompleto && !numero ? 'Obligatorio' : undefined}
                   />
                 </div>
-                {verificandoDuplicado && <p className="text-[11px] text-gray-500">Verificando...</p>}
+                {verificandoDuplicado && <p className="text-[11px] text-prius-muted">Verificando...</p>}
                 {duplicado && (
-                  <p className="text-[11px] text-red-400">
+                  <p className="text-[11px] text-prius-error">
                     Ese comprobante ya está cargado ({duplicado.cliente}{duplicado.fecha ? `, ${formatFecha(duplicado.fecha)}` : ''}).
                   </p>
                 )}
@@ -439,7 +439,7 @@ export default function RegistrarPago({
                   hint={esHistorico ? 'Pago histórico: queda en el historial del cliente, no afecta la caja' : undefined}
                 />
                 {comprobanteIncompleto && (
-                  <p className="text-[11px] text-red-400">
+                  <p className="text-[11px] text-prius-error">
                     El comprobante es obligatorio: completá tipo, punto de venta, número y fecha.
                   </p>
                 )}
@@ -456,7 +456,7 @@ export default function RegistrarPago({
             monto <= 0 || excedeSaldo || comprobanteIncompleto || !!duplicado
             || (!editingPago && !reservaId && !allowSinReserva) || (!editingPago && !cliente?.id)
           }
-          className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
+          className="w-full py-4 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
         >
           {editingPago
             ? `Guardar ${monto > 0 ? formatPesos(monto) : ''}`.trim()

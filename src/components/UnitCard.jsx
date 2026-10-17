@@ -3,7 +3,7 @@ export default function UnitCard({ number, status = "available", type = "sombril
     available: "bg-green-100 border-green-300 text-green-800 hover:bg-green-200",
     occupied: "bg-red-100 border-beach-primary text-beach-primary hover:bg-red-200",
     reserved: "bg-orange-100 border-beach-secondary text-orange-800 hover:bg-orange-200",
-    maintenance: "bg-gray-100 border-gray-300 text-gray-500",
+    maintenance: "bg-gray-100 border-gray-300 text-prius-muted",
   }
 
   const statusLabels = {

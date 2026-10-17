@@ -13,18 +13,18 @@ import {
 const TIPO_META = {
   lead_nuevo: { icon: Inbox, color: 'text-orange-400', accion: 'Contactar lead', plural: 'leads nuevos' },
   comprobante_sin_vincular: { icon: FileText, color: 'text-violet-400', accion: 'Vincular comprobante', plural: 'comprobantes sin vincular' },
-  pago_sin_monto: { icon: AlertCircle, color: 'text-red-400', accion: 'Cargar recibos', plural: 'reservas con recibos sin monto' },
+  pago_sin_monto: { icon: AlertCircle, color: 'text-prius-error', accion: 'Cargar recibos', plural: 'reservas con recibos sin monto' },
   reserva_sin_precio: { icon: AlertCircle, color: 'text-amber-400', accion: 'Asignar precio', plural: 'reservas sin precio' },
   caja_sin_cerrar: { icon: Wallet, color: 'text-amber-400', accion: 'Cerrar caja', plural: 'cajas sin cerrar' },
-  saldo_pendiente_checkin: { icon: Clock, color: 'text-red-400', accion: 'Ver reserva', plural: 'saldos pendientes' },
-  reserva_creada: { icon: CalendarPlus, color: 'text-[#FDE047]', accion: 'Ver reserva', plural: 'reservas creadas' },
-  reserva_modificada: { icon: CalendarClock, color: 'text-[#FDE047]', accion: 'Ver reserva', plural: 'reservas modificadas' },
-  reserva_cancelada: { icon: Ban, color: 'text-red-400', accion: 'Ver reserva', plural: 'reservas canceladas' },
-  pago_registrado: { icon: CheckCircle2, color: 'text-green-400', accion: 'Ver pago', plural: 'pagos registrados' },
-  caja_cerrada: { icon: Wallet, color: 'text-green-400', accion: 'Ver caja', plural: 'cajas cerradas' },
+  saldo_pendiente_checkin: { icon: Clock, color: 'text-prius-error', accion: 'Ver reserva', plural: 'saldos pendientes' },
+  reserva_creada: { icon: CalendarPlus, color: 'text-gold', accion: 'Ver reserva', plural: 'reservas creadas' },
+  reserva_modificada: { icon: CalendarClock, color: 'text-gold', accion: 'Ver reserva', plural: 'reservas modificadas' },
+  reserva_cancelada: { icon: Ban, color: 'text-prius-error', accion: 'Ver reserva', plural: 'reservas canceladas' },
+  pago_registrado: { icon: CheckCircle2, color: 'text-prius-success', accion: 'Ver pago', plural: 'pagos registrados' },
+  caja_cerrada: { icon: Wallet, color: 'text-prius-success', accion: 'Ver caja', plural: 'cajas cerradas' },
 }
 
-const metaDe = (tipo) => TIPO_META[tipo] || { icon: Bell, color: 'text-gray-400', accion: null, plural: 'notificaciones' }
+const metaDe = (tipo) => TIPO_META[tipo] || { icon: Bell, color: 'text-prius-slate', accion: null, plural: 'notificaciones' }
 
 const TZ = 'America/Argentina/Buenos_Aires'
 const diaFmt = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' })
@@ -85,16 +85,16 @@ function ItemNotificacion({ item, onAccion }) {
     <button
       type="button"
       onClick={() => onAccion(item)}
-      className="w-full text-left flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-all group"
+      className="w-full text-left flex items-start gap-3 p-3 rounded-xl hover:bg-prius-subtle transition-all group"
     >
-      <div className={`w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 ${meta.color}`}>
+      <div className={`w-9 h-9 rounded-full bg-prius-subtle border border-hairline flex items-center justify-center shrink-0 ${meta.color}`}>
         <Icon size={16} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-white leading-snug">{item.titulo}</p>
-        {item.detalle && <p className="text-[11px] text-gray-400 mt-0.5 truncate">{item.detalle}</p>}
+        <p className="text-xs font-bold text-black leading-snug">{item.titulo}</p>
+        {item.detalle && <p className="text-[11px] text-prius-slate mt-0.5 truncate">{item.detalle}</p>}
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-[10px] text-gray-600">{formatTiempoRelativo(item.creada_at)}</span>
+          <span className="text-[10px] text-prius-muted">{formatTiempoRelativo(item.creada_at)}</span>
           {meta.accion && (
             <span className={`text-[10px] font-bold uppercase tracking-widest ${meta.color} opacity-0 group-hover:opacity-100 transition-opacity`}>
               {meta.accion}
@@ -115,15 +115,15 @@ function GrupoColapsado({ grupo, onAccion }) {
       <button
         type="button"
         onClick={() => setAbierto((v) => !v)}
-        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all"
+        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-prius-subtle transition-all"
       >
-        <div className={`w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 ${meta.color}`}>
+        <div className={`w-9 h-9 rounded-full bg-prius-subtle border border-hairline flex items-center justify-center shrink-0 ${meta.color}`}>
           <Icon size={16} />
         </div>
-        <span className="flex-1 text-left text-xs font-bold text-white">
+        <span className="flex-1 text-left text-xs font-bold text-black">
           {grupo.items.length} {meta.plural}
         </span>
-        <ChevronDown size={14} className={`text-gray-500 transition-transform ${abierto ? 'rotate-180' : ''}`} />
+        <ChevronDown size={14} className={`text-prius-muted transition-transform ${abierto ? 'rotate-180' : ''}`} />
       </button>
       {abierto && (
         <div className="pl-4 space-y-0.5">
@@ -158,7 +158,7 @@ function FilaNovedad({ item, onAccion, onArchivar }) {
       onPointerUp={handleUp}
       onPointerCancel={() => { setDragging(false); setDx(0) }}
       style={{ transform: `translateX(${dx}px)`, transition: dragging ? 'none' : 'transform 0.2s ease' }}
-      className={`touch-pan-y ${!item.leida_at ? 'bg-[#FDE047]/[0.03]' : ''}`}
+      className={`touch-pan-y ${!item.leida_at ? 'bg-gold/[0.03]' : ''}`}
     >
       <ItemNotificacion item={item} onAccion={onAccion} />
     </div>
@@ -200,7 +200,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
   const gruposNovedades = useMemo(() => agruparPorDia(novedades), [novedades])
 
   if (loading) {
-    return <p className="px-4 py-10 text-center text-xs text-gray-500 uppercase tracking-widest animate-pulse">Cargando...</p>
+    return <p className="px-4 py-10 text-center text-xs text-prius-muted uppercase tracking-widest animate-pulse">Cargando...</p>
   }
 
   return (
@@ -210,7 +210,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
           type="button"
           onClick={() => setTab('pendientes')}
           className={`flex-1 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
-            tab === 'pendientes' ? 'bg-[#FDE047] text-black' : 'bg-white/5 text-gray-400 hover:text-white'
+            tab === 'pendientes' ? 'bg-gold text-black' : 'bg-prius-subtle text-prius-slate hover:text-black'
           }`}
         >
           Pendientes {countPendientes > 0 && `(${countPendientes})`}
@@ -219,7 +219,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
           type="button"
           onClick={() => setTab('novedades')}
           className={`flex-1 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
-            tab === 'novedades' ? 'bg-[#FDE047] text-black' : 'bg-white/5 text-gray-400 hover:text-white'
+            tab === 'novedades' ? 'bg-gold text-black' : 'bg-prius-subtle text-prius-slate hover:text-black'
           }`}
         >
           Novedades {countNovedadesNoLeidas > 0 && `(${countNovedadesNoLeidas})`}
@@ -231,7 +231,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
           <button
             type="button"
             onClick={marcarTodoLeido}
-            className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all flex items-center gap-1.5"
+            className="text-[10px] font-bold uppercase tracking-widest text-prius-slate hover:text-black transition-all flex items-center gap-1.5"
           >
             <CheckCheck size={12} /> Marcar todo como leído
           </button>
@@ -241,11 +241,11 @@ export default function NotificacionesBandeja({ onNavigate }) {
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4">
         {tab === 'pendientes' ? (
           pendientes.length === 0 ? (
-            <p className="px-4 py-10 text-center text-xs text-gray-500 uppercase tracking-widest">Todo al día</p>
+            <p className="px-4 py-10 text-center text-xs text-prius-muted uppercase tracking-widest">Todo al día</p>
           ) : (
             gruposPendientes.map(({ bucket, grupos }) => (
               <div key={bucket} className="space-y-1">
-                <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">{bucket}</p>
+                <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-prius-muted">{bucket}</p>
                 {grupos.map((g) => g.tipo === 'grupo'
                   ? <GrupoColapsado key={g.clave} grupo={g} onAccion={handleAccion} />
                   : <ItemNotificacion key={g.item.id} item={g.item} onAccion={handleAccion} />)}
@@ -254,11 +254,11 @@ export default function NotificacionesBandeja({ onNavigate }) {
           )
         ) : (
           novedades.length === 0 ? (
-            <p className="px-4 py-10 text-center text-xs text-gray-500 uppercase tracking-widest">Sin novedades</p>
+            <p className="px-4 py-10 text-center text-xs text-prius-muted uppercase tracking-widest">Sin novedades</p>
           ) : (
             gruposNovedades.map(({ bucket, grupos }) => (
               <div key={bucket} className="space-y-1">
-                <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">{bucket}</p>
+                <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-prius-muted">{bucket}</p>
                 {grupos.map((g) => g.tipo === 'grupo'
                   ? <GrupoColapsado key={g.clave} grupo={g} onAccion={handleAccion} />
                   : <FilaNovedad key={g.item.id} item={g.item} onAccion={handleAccion} onArchivar={archivarNovedad} />)}

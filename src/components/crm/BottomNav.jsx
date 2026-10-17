@@ -66,7 +66,7 @@ export default function BottomNav() {
   return (
     <>
       <nav
-        className="no-print md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0a0d14] border-t border-white/10 flex items-stretch"
+        className="no-print md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-hairline flex items-stretch"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {ITEMS.map((item) => (
@@ -76,7 +76,7 @@ export default function BottomNav() {
             onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[11px] font-bold uppercase tracking-wider transition-all ${
-                isActive ? 'text-[#FDE047]' : 'text-gray-500'
+                isActive ? 'text-gold' : 'text-prius-muted'
               }`
             }
           >
@@ -86,12 +86,12 @@ export default function BottomNav() {
         ))}
         <button
           onClick={() => setShowMore(true)}
-          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[11px] font-bold uppercase tracking-wider text-gray-500 transition-all"
+          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[11px] font-bold uppercase tracking-wider text-prius-muted transition-all"
         >
           <span className="relative">
             <MoreHorizontal size={20} />
             {notificationsCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-[#FDE047] text-black text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-gold text-black text-[10px] font-bold flex items-center justify-center">
                 {notificationsCount > 9 ? '9+' : notificationsCount}
               </span>
             )}
@@ -107,18 +107,18 @@ export default function BottomNav() {
         >
           <div
             ref={bindMore}
-            className="w-full max-h-[85vh] bg-[#0a0d14] border-t border-white/10 rounded-t-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
+            className="w-full max-h-[85vh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
             onClick={(e) => e.stopPropagation()}
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex justify-center pt-3 pb-1 shrink-0">
-              <div className="w-10 h-1 rounded-full bg-white/20" />
+              <div className="w-10 h-1 rounded-full bg-prius-subtle" />
             </div>
             <div className="flex items-center justify-between px-6 py-3 shrink-0">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-white">Más secciones</h2>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-black">Más secciones</h2>
               <button
                 onClick={() => setShowMore(false)}
-                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-white/50"
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-prius-muted"
               >
                 <X size={20} />
               </button>
@@ -131,7 +131,7 @@ export default function BottomNav() {
                   onClick={() => setShowMore(false)}
                   className={({ isActive }) =>
                     `flex items-center justify-between gap-3 px-3 py-3 min-h-[44px] rounded-xl text-sm font-medium transition-all ${
-                      isActive ? 'bg-white/10 text-[#FDE047]' : 'text-gray-300 hover:bg-white/5'
+                      isActive ? 'bg-prius-subtle text-gold' : 'text-prius-slate hover:bg-prius-subtle'
                     }`
                   }
                 >
@@ -140,16 +140,16 @@ export default function BottomNav() {
                     <span className="truncate">{item.name}</span>
                   </div>
                   {item.comingSoon && (
-                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-white/10 text-gray-400 rounded uppercase tracking-wider">Pronto</span>
+                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-prius-subtle text-prius-slate rounded uppercase tracking-wider">Pronto</span>
                   )}
                   {!item.comingSoon && item.badge > 0 && (
-                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-[#FDE047] text-black rounded-full">{item.badge}</span>
+                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-gold text-black rounded-full">{item.badge}</span>
                   )}
                 </NavLink>
               ))}
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-xl text-sm font-medium text-red-400 hover:bg-red-400/10 transition-all"
+                className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-xl text-sm font-medium text-prius-error hover:bg-red-400/10 transition-all"
               >
                 <LogOut size={18} />
                 Cerrar Sesión

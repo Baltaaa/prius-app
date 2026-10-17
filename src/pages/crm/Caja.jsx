@@ -175,54 +175,54 @@ export default function Caja() {
     }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-gray-500 uppercase animate-pulse">Sincronizando Caja...</span></div>
+  if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-prius-muted uppercase animate-pulse">Sincronizando Caja...</span></div>
 
   return (
     <div className="space-y-8 animate-premium-fade">
       {/* Barra de navegación por fecha + historial */}
       <div className="no-print flex flex-wrap items-center gap-3">
-        <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
+        <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="p-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
           <ChevronLeft size={16} />
         </button>
         <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="w-36" />
-        <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="p-3 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed border border-white/10 rounded-xl text-gray-300 transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
+        <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="p-3 bg-prius-subtle hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
           <ChevronRight size={16} />
         </button>
         {!esHoy && (
-          <button onClick={() => setSelectedDate(todayStr())} className="px-4 py-3 bg-[#FDE047]/10 hover:bg-[#FDE047]/20 border border-[#FDE047]/20 rounded-xl text-[#FDE047] text-xs font-bold uppercase tracking-widest transition-all">
+          <button onClick={() => setSelectedDate(todayStr())} className="px-4 py-3 bg-gold/10 hover:bg-gold/20 border border-gold/20 rounded-xl text-gold text-xs font-bold uppercase tracking-widest transition-all">
             Volver a Hoy
           </button>
         )}
         {cajaSeleccionada && (
-          <span className={`px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-green-500/10 text-green-400 border-green-500/20'}`}>
+          <span className={`px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-red-500/10 text-prius-error border-red-500/20' : 'bg-green-500/10 text-prius-success border-green-500/20'}`}>
             {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
           </span>
         )}
         <div className="flex-1" />
         <button
           onClick={() => setMostrarHistorial((v) => !v)}
-          className="flex items-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 text-xs font-bold uppercase tracking-widest transition-all min-h-[44px]"
+          className="flex items-center gap-2 px-4 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all min-h-[44px]"
         >
           <History size={14} /> Historial
         </button>
       </div>
 
       {mostrarHistorial && (
-        <div className="no-print glass-card p-6 rounded-2xl glass-card-inner space-y-2">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Historial de cajas</h3>
+        <div className="no-print card-light p-6 rounded-2xl card-light-inner space-y-2">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-prius-slate mb-3">Historial de cajas</h3>
           {historialCajas.length === 0 ? (
-            <p className="text-xs text-gray-500 uppercase tracking-widest">Sin cajas registradas todavía.</p>
+            <p className="text-xs text-prius-muted uppercase tracking-widest">Sin cajas registradas todavía.</p>
           ) : historialCajas.map((c) => (
             <button
               key={c.id}
               onClick={() => { setSelectedDate(c.fecha); setMostrarHistorial(false) }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-left"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-prius-subtle transition-all text-left"
             >
-              <span className="text-sm text-gray-300">{formatFecha(c.fecha)}</span>
+              <span className="text-sm text-prius-slate">{formatFecha(c.fecha)}</span>
               <span className="flex items-center gap-4 text-xs">
-                <span className="font-bold text-white tabular-nums">{formatPesos(c.total_neto)}</span>
+                <span className="font-bold text-black tabular-nums">{formatPesos(c.total_neto)}</span>
                 {c.diferencia != null && Number(c.diferencia) !== 0 && (
-                  <span className="text-[#FDE047] tabular-nums">dif. {formatPesos(c.diferencia)}</span>
+                  <span className="text-gold tabular-nums">dif. {formatPesos(c.diferencia)}</span>
                 )}
               </span>
             </button>
@@ -233,26 +233,26 @@ export default function Caja() {
       {/* Estado A: sin caja */}
       {!cajaSeleccionada && (
         esHoy ? (
-          <div className="no-print glass-card p-20 text-center rounded-3xl glass-card-inner space-y-6">
-            <div className="w-20 h-20 bg-[#FDE047]/10 rounded-full flex items-center justify-center mx-auto border border-[#FDE047]/20">
-              <Wallet className="w-10 h-10 text-[#FDE047]" />
+          <div className="no-print card-light p-20 text-center rounded-3xl card-light-inner space-y-6">
+            <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/20">
+              <Wallet className="w-10 h-10 text-gold" />
             </div>
-            <h2 className="text-xl font-bold text-white uppercase tracking-wider">Caja no iniciada</h2>
-            <p className="text-gray-400 text-sm max-w-md mx-auto">Abrí la caja del día para empezar a registrar cobros y gastos. Siempre arranca en $0.</p>
+            <h2 className="text-xl font-bold text-black uppercase tracking-wider">Caja no iniciada</h2>
+            <p className="text-prius-slate text-sm max-w-md mx-auto">Abrí la caja del día para empezar a registrar cobros y gastos. Siempre arranca en $0.</p>
             <div className="max-w-xs mx-auto">
               <LoadingButton
                 onClick={handleAbrirCaja}
                 loading={abriendo}
                 loadingText="Abriendo..."
-                className="w-full bg-[#FDE047] hover:bg-yellow-300 text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl"
+                className="w-full bg-gold hover:bg-yellow-300 text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl"
               >
                 Abrir Caja de Hoy
               </LoadingButton>
             </div>
           </div>
         ) : (
-          <div className="no-print glass-card p-20 text-center rounded-3xl glass-card-inner">
-            <p className="text-gray-400 text-sm uppercase tracking-widest font-bold">Sin movimientos registrados este día.</p>
+          <div className="no-print card-light p-20 text-center rounded-3xl card-light-inner">
+            <p className="text-prius-slate text-sm uppercase tracking-widest font-bold">Sin movimientos registrados este día.</p>
           </div>
         )
       )}
@@ -261,23 +261,23 @@ export default function Caja() {
       {cajaSeleccionada && cajaSeleccionada.estado === 'abierta' && (
         <>
           <div className="no-print grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-card p-5 rounded-2xl glass-card-inner">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Ingresos</p>
-              <p className="text-xl font-bold text-green-400 tabular-nums">{formatPesos(cajaSeleccionada.total_cobros)}</p>
+            <div className="card-light p-5 rounded-2xl card-light-inner">
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Ingresos</p>
+              <p className="text-xl font-bold text-prius-success tabular-nums">{formatPesos(cajaSeleccionada.total_cobros)}</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl glass-card-inner">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Egresos</p>
-              <p className="text-xl font-bold text-red-400 tabular-nums">{formatPesos(cajaSeleccionada.total_gastos)}</p>
+            <div className="card-light p-5 rounded-2xl card-light-inner">
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Egresos</p>
+              <p className="text-xl font-bold text-prius-error tabular-nums">{formatPesos(cajaSeleccionada.total_gastos)}</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl glass-card-inner border border-[#FDE047]/20">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Neto</p>
-              <p className="text-xl font-bold text-[#FDE047] tabular-nums">{formatPesos(cajaSeleccionada.total_neto)}</p>
+            <div className="card-light p-5 rounded-2xl card-light-inner border border-gold/20">
+              <p className="text-[10px] font-bold text-prius-slate uppercase tracking-widest mb-2">Neto</p>
+              <p className="text-xl font-bold text-gold tabular-nums">{formatPesos(cajaSeleccionada.total_neto)}</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl glass-card-inner flex items-center gap-3">
-              <Banknote className="text-green-400 shrink-0" size={20} />
+            <div className="card-light p-5 rounded-2xl card-light-inner flex items-center gap-3">
+              <Banknote className="text-prius-success shrink-0" size={20} />
               <div>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Efectivo esperado</p>
-                <p className="text-lg font-bold text-white tabular-nums">{formatPesos(efectivoEsperadoPreview)}</p>
+                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Efectivo esperado</p>
+                <p className="text-lg font-bold text-black tabular-nums">{formatPesos(efectivoEsperadoPreview)}</p>
               </div>
             </div>
           </div>
@@ -285,18 +285,18 @@ export default function Caja() {
           {(resumen?.por_medio?.length > 0) && (
             <div className="no-print flex flex-wrap gap-3">
               {resumen.por_medio.map((m) => (
-                <div key={m.medio} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs flex items-center gap-2">
-                  <span className="text-gray-400">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
-                  <span className="font-bold text-white tabular-nums">{formatPesos(m.neto)}</span>
+                <div key={m.medio} className="px-4 py-2 bg-prius-subtle border border-hairline rounded-xl text-xs flex items-center gap-2">
+                  <span className="text-prius-slate">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                  <span className="font-bold text-black tabular-nums">{formatPesos(m.neto)}</span>
                 </div>
               ))}
             </div>
           )}
 
           {resumen?.sin_comprobante?.length > 0 && (
-            <div className="no-print flex items-start gap-3 p-4 bg-[#FDE047]/5 border border-[#FDE047]/20 rounded-xl">
-              <AlertTriangle className="text-[#FDE047] shrink-0 mt-0.5" size={16} />
-              <p className="text-xs text-gray-300">
+            <div className="no-print flex items-start gap-3 p-4 bg-gold/5 border border-gold/20 rounded-xl">
+              <AlertTriangle className="text-gold shrink-0 mt-0.5" size={16} />
+              <p className="text-xs text-prius-slate">
                 Hay {resumen.sin_comprobante.length} pago{resumen.sin_comprobante.length > 1 ? 's' : ''} sin comprobante cargado todavía.
               </p>
             </div>
@@ -309,7 +309,7 @@ export default function Caja() {
                   key={t.value}
                   onClick={() => setTab(t.value)}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all min-h-[44px] ${
-                    tab === t.value ? 'bg-[#FDE047] text-black' : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
+                    tab === t.value ? 'bg-gold text-black' : 'bg-prius-subtle text-prius-slate hover:text-black border border-hairline'
                   }`}
                 >
                   {t.label}
@@ -323,26 +323,26 @@ export default function Caja() {
               )}
             </div>
 
-            <div className="glass-card p-6 sm:p-8 rounded-3xl glass-card-inner">
+            <div className="card-light p-6 sm:p-8 rounded-3xl card-light-inner">
               {tab === 'movimientos' && (
                 movimientosFiltrados.length === 0 ? (
-                  <p className="text-xs text-gray-500 uppercase tracking-widest">Sin movimientos con este filtro.</p>
+                  <p className="text-xs text-prius-muted uppercase tracking-widest">Sin movimientos con este filtro.</p>
                 ) : (
                   <div className="space-y-2">
                     {movimientosFiltrados.map((m) => (
                       <button
                         key={`${m.tipo_movimiento}-${m.movimiento_id}`}
                         onClick={() => abrirDetalleMovimiento(m)}
-                        className={`w-full flex justify-between items-center py-3 px-2 border-b border-white/5 last:border-0 hover:bg-white/5 rounded-lg transition-all text-left ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
+                        className={`w-full flex justify-between items-center py-3 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg transition-all text-left ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          {m.tipo_movimiento === 'ingreso' ? <ArrowUpRight size={16} className="text-green-400 shrink-0" /> : <ArrowDownRight size={16} className="text-red-400 shrink-0" />}
+                          {m.tipo_movimiento === 'ingreso' ? <ArrowUpRight size={16} className="text-prius-success shrink-0" /> : <ArrowDownRight size={16} className="text-prius-error shrink-0" />}
                           <div className="min-w-0">
-                            <p className={`text-sm font-bold text-gray-200 truncate ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
-                            <p className="text-[10px] text-gray-500 uppercase tracking-widest">{m.cliente_proveedor} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}</p>
+                            <p className={`text-sm font-bold text-prius-slate truncate ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
+                            <p className="text-[10px] text-prius-muted uppercase tracking-widest">{m.cliente_proveedor} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}</p>
                           </div>
                         </div>
-                        <span className={`text-sm font-bold tabular-nums shrink-0 ml-3 ${m.monto < 0 ? 'text-red-400' : 'text-green-400'}`}>{formatPesos(m.monto)}</span>
+                        <span className={`text-sm font-bold tabular-nums shrink-0 ml-3 ${m.monto < 0 ? 'text-prius-error' : 'text-prius-success'}`}>{formatPesos(m.monto)}</span>
                       </button>
                     ))}
                   </div>
@@ -350,12 +350,12 @@ export default function Caja() {
               )}
 
               {tab === 'facturas' && (
-                (resumen?.facturas || []).length === 0 ? <p className="text-xs text-gray-500 uppercase tracking-widest">Sin facturas todavía.</p> : (
+                (resumen?.facturas || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin facturas todavía.</p> : (
                   <div className="space-y-2">
                     {resumen.facturas.map((f) => (
-                      <div key={f.etiqueta} className="flex justify-between py-2 border-b border-white/5 last:border-0">
-                        <span className="text-sm text-gray-300">{f.etiqueta}</span>
-                        <span className="text-sm font-bold text-white tabular-nums">{formatPesos(f.monto_total)}</span>
+                      <div key={f.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
+                        <span className="text-sm text-prius-slate">{f.etiqueta}</span>
+                        <span className="text-sm font-bold text-black tabular-nums">{formatPesos(f.monto_total)}</span>
                       </div>
                     ))}
                   </div>
@@ -363,12 +363,12 @@ export default function Caja() {
               )}
 
               {tab === 'recibos' && (
-                (resumen?.recibos || []).length === 0 ? <p className="text-xs text-gray-500 uppercase tracking-widest">Sin recibos todavía.</p> : (
+                (resumen?.recibos || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin recibos todavía.</p> : (
                   <div className="space-y-2">
                     {resumen.recibos.map((r) => (
-                      <div key={r.etiqueta} className="flex justify-between py-2 border-b border-white/5 last:border-0">
-                        <span className="text-sm text-gray-300">{r.etiqueta}</span>
-                        <span className="text-sm font-bold text-white tabular-nums">{formatPesos(r.monto_total)}</span>
+                      <div key={r.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
+                        <span className="text-sm text-prius-slate">{r.etiqueta}</span>
+                        <span className="text-sm font-bold text-black tabular-nums">{formatPesos(r.monto_total)}</span>
                       </div>
                     ))}
                   </div>
@@ -376,16 +376,16 @@ export default function Caja() {
               )}
 
               {tab === 'sin_comprobante' && (
-                (resumen?.sin_comprobante || []).length === 0 ? <p className="text-xs text-gray-500 uppercase tracking-widest">Todos los pagos tienen comprobante.</p> : (
+                (resumen?.sin_comprobante || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Todos los pagos tienen comprobante.</p> : (
                   <div className="space-y-2">
                     {resumen.sin_comprobante.map((p) => (
                       <button
                         key={p.pago_id}
                         onClick={() => { const pago = pagos.find((x) => x.id === p.pago_id); if (pago) setPagoSeleccionado(pago) }}
-                        className="w-full flex justify-between py-2 px-2 border-b border-white/5 last:border-0 hover:bg-white/5 rounded-lg text-left"
+                        className="w-full flex justify-between py-2 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg text-left"
                       >
-                        <span className="text-sm text-gray-300">{p.cliente || 'S/N'} — {p.concepto}</span>
-                        <span className="text-sm font-bold text-white tabular-nums">{formatPesos(p.monto)}</span>
+                        <span className="text-sm text-prius-slate">{p.cliente || 'S/N'} — {p.concepto}</span>
+                        <span className="text-sm font-bold text-black tabular-nums">{formatPesos(p.monto)}</span>
                       </button>
                     ))}
                   </div>
@@ -393,19 +393,19 @@ export default function Caja() {
               )}
 
               {tab === 'gastos' && (
-                todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length === 0 ? <p className="text-xs text-gray-500 uppercase tracking-widest">Sin gastos todavía.</p> : (
+                todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin gastos todavía.</p> : (
                   <div className="space-y-2">
                     {todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).map((g) => (
                       <button
                         key={g.id}
                         onClick={() => setGastoSeleccionado(g)}
-                        className={`w-full flex justify-between items-center py-3 px-2 border-b border-white/5 last:border-0 hover:bg-white/5 rounded-lg text-left group ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
+                        className={`w-full flex justify-between items-center py-3 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg text-left group ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
                       >
                         <div className="min-w-0">
-                          <p className={`text-sm font-bold text-gray-200 truncate ${g.estado === 'anulado' ? 'line-through' : ''}`}>{g.descripcion}</p>
-                          <p className="text-[10px] text-gray-500 uppercase tracking-widest">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
+                          <p className={`text-sm font-bold text-prius-slate truncate ${g.estado === 'anulado' ? 'line-through' : ''}`}>{g.descripcion}</p>
+                          <p className="text-[10px] text-prius-muted uppercase tracking-widest">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
                         </div>
-                        <span className="text-sm font-bold text-red-400 tabular-nums shrink-0 ml-3">{formatPesos(g.monto)}</span>
+                        <span className="text-sm font-bold text-prius-error tabular-nums shrink-0 ml-3">{formatPesos(g.monto)}</span>
                       </button>
                     ))}
                   </div>
@@ -417,13 +417,13 @@ export default function Caja() {
           {/* Acción principal: Registrar Gasto — FAB en mobile, botón en desktop */}
           <button
             onClick={() => setMostrarGasto(true)}
-            className="no-print md:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-[#FDE047] text-black shadow-2xl flex items-center justify-center"
+            className="no-print md:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gold text-black shadow-2xl flex items-center justify-center"
             title="Registrar gasto"
           >
             <Plus size={24} />
           </button>
           <div className="no-print hidden md:flex gap-4">
-            <button onClick={() => setMostrarGasto(true)} className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold uppercase text-xs tracking-widest border border-white/10 transition-all">
+            <button onClick={() => setMostrarGasto(true)} className="flex items-center gap-2 px-6 py-3 bg-prius-subtle hover:bg-prius-subtle text-black rounded-xl font-bold uppercase text-xs tracking-widest border border-hairline transition-all">
               <Plus size={16} /> Registrar Gasto
             </button>
             <button onClick={() => setMostrarCierre(true)} className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold uppercase text-xs tracking-widest transition-all">
@@ -440,39 +440,39 @@ export default function Caja() {
       {cajaSeleccionada && cajaSeleccionada.estado === 'cerrada' && (
         <>
           <div className="no-print flex flex-wrap gap-3">
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 text-xs font-bold uppercase tracking-widest transition-all">
+            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all">
               <Printer size={14} /> Imprimir A4
             </button>
-            <button onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })} disabled={!resumen} className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40">
+            <button onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })} disabled={!resumen} className="flex items-center gap-2 px-5 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40">
               <Download size={14} /> Exportar CSV
             </button>
             <div className="flex-1" />
             {!reabriendo && puedeReabrir ? (
-              <button onClick={() => setReabriendo(true)} className="flex items-center gap-2 px-5 py-3 bg-[#FDE047]/10 hover:bg-[#FDE047]/20 border border-[#FDE047]/20 rounded-xl text-[#FDE047] text-xs font-bold uppercase tracking-widest transition-all">
+              <button onClick={() => setReabriendo(true)} className="flex items-center gap-2 px-5 py-3 bg-gold/10 hover:bg-gold/20 border border-gold/20 rounded-xl text-gold text-xs font-bold uppercase tracking-widest transition-all">
                 Reabrir Caja
               </button>
             ) : null}
           </div>
 
           {reabriendo && puedeReabrir && (
-            <div className="no-print glass-card p-6 rounded-2xl glass-card-inner space-y-4 border border-[#FDE047]/20">
+            <div className="no-print card-light p-6 rounded-2xl card-light-inner space-y-4 border border-gold/20">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#FDE047]">Reabrir caja</h3>
-                <button onClick={() => { setReabriendo(false); setMotivoReapertura('') }} className="text-gray-500 hover:text-white"><X size={18} /></button>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-gold">Reabrir caja</h3>
+                <button onClick={() => { setReabriendo(false); setMotivoReapertura('') }} className="text-prius-muted hover:text-black"><X size={18} /></button>
               </div>
               <textarea
                 rows={2} value={motivoReapertura} onChange={(e) => setMotivoReapertura(e.target.value)}
                 placeholder="Motivo de la reapertura (obligatorio)"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm outline-none focus:border-[#FDE047]/50 resize-none"
+                className="w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm outline-none focus:border-gold/50 resize-none"
               />
-              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-[#FDE047] hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all">
+              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all">
                 Confirmar reapertura
               </button>
             </div>
           )}
 
           <div className="no-print">
-            {resumenLoading ? <p className="text-xs text-gray-500 uppercase tracking-widest">Cargando resumen...</p> : <ResumenCaja resumen={resumen} />}
+            {resumenLoading ? <p className="text-xs text-prius-muted uppercase tracking-widest">Cargando resumen...</p> : <ResumenCaja resumen={resumen} />}
           </div>
           <CajaImpresion resumen={resumen} />
         </>

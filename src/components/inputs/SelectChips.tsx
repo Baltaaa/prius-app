@@ -25,8 +25,8 @@ export default function SelectChips({ label, hint, error, options, value, onChan
   return (
     <div className={className}>
       {label && (
-        <label className="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2">
-          {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+        <label className="text-[11px] font-bold text-prius-muted uppercase tracking-widest block mb-2">
+          {label}{required && <span className="text-prius-error ml-0.5">*</span>}
         </label>
       )}
       <div className="flex flex-wrap gap-2" role="radiogroup">
@@ -38,14 +38,14 @@ export default function SelectChips({ label, hint, error, options, value, onChan
             aria-checked={value === o.value}
             onClick={() => onChange(o.value)}
             className={`px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
-              value === o.value ? 'bg-[#FDE047] text-black border-[#FDE047]' : 'bg-white/5 text-gray-300 border-white/10 hover:text-white'
+              value === o.value ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
             }`}
           >
             {o.label}
           </button>
         ))}
       </div>
-      {error ? <p className="text-[11px] text-red-400 mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-gray-500 mt-1.5">{hint}</p> : null}
+      {error ? <p className="text-[11px] text-prius-error mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-prius-muted mt-1.5">{hint}</p> : null}
     </div>
   )
 }

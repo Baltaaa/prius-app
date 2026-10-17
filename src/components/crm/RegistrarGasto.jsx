@@ -78,7 +78,7 @@ export default function RegistrarGasto({ isOpen, onClose }) {
           loading={saving}
           loadingText="Registrando..."
           disabled={!conceptoValido || !montoValido}
-          className="w-full py-4 bg-[#FDE047] hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
+          className="w-full py-4 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
         >
           Registrar Gasto
         </LoadingButton>

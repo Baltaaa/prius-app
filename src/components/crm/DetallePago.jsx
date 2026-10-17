@@ -16,11 +16,11 @@ import { usePermiso } from '../../context/AuthProvider'
 import { FileText, AlertTriangle, Pencil } from 'lucide-react'
 
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-base md:text-sm focus:border-[#FDE047]/50 outline-none font-bold'
+  'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-gold/50 outline-none font-bold'
 
 const chipClass = (active) =>
   `px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
-    active ? 'bg-[#FDE047] text-black border-[#FDE047]' : 'bg-white/5 text-gray-300 border-white/10 hover:text-white'
+    active ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
   }`
 
 // Detalle de un pago ya registrado (Tarea 4): mismo patrón sheet/drawer que
@@ -130,8 +130,8 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
     <Modal isOpen={isOpen} onClose={onClose} title={`Pago N.° ${pago.nro_cuota || ''}`}>
       <div className="space-y-6">
         {reserva && (
-          <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-            <p className="text-sm font-bold text-white uppercase">{unidadLabel}</p>
+          <div className="p-4 bg-prius-subtle border border-hairline rounded-xl">
+            <p className="text-sm font-bold text-black uppercase">{unidadLabel}</p>
           </div>
         )}
 
@@ -142,7 +142,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
           <button
             type="button"
             onClick={() => { onClose?.(); navigate(linkToCliente(pago.cliente_id, { pagoId: pago.id })) }}
-            className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:underline"
+            className="text-[10px] font-bold uppercase tracking-widest text-gold hover:underline"
           >
             Ver cliente →
           </button>
@@ -150,27 +150,27 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
 
         {pago.estado === 'anulado' && (
           <div className="flex items-start gap-3 p-4 bg-red-500/5 border border-red-500/20 rounded-xl">
-            <AlertTriangle className="text-red-400 shrink-0 mt-0.5" size={18} />
+            <AlertTriangle className="text-prius-error shrink-0 mt-0.5" size={18} />
             <div>
-              <p className="text-sm font-bold text-red-400 uppercase tracking-widest">Pago anulado</p>
-              <p className="text-xs text-gray-400 mt-1">{pago.anulado_motivo}</p>
-              {pago.anulado_at && <p className="text-[10px] text-gray-600 mt-1">{formatFecha(pago.anulado_at)}</p>}
+              <p className="text-sm font-bold text-prius-error uppercase tracking-widest">Pago anulado</p>
+              <p className="text-xs text-prius-slate mt-1">{pago.anulado_motivo}</p>
+              {pago.anulado_at && <p className="text-[10px] text-prius-muted mt-1">{formatFecha(pago.anulado_at)}</p>}
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monto</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Monto</p>
             <div className="flex items-center gap-3 mt-1">
-              <p className={`text-lg font-bold ${pago.estado === 'anulado' ? 'text-gray-500 line-through' : pagoSinVerificar(pago) ? 'text-red-400' : 'text-green-400'}`}>
+              <p className={`text-lg font-bold ${pago.estado === 'anulado' ? 'text-prius-muted line-through' : pagoSinVerificar(pago) ? 'text-prius-error' : 'text-prius-success'}`}>
                 {pagoSinVerificar(pago) ? 'Monto nulo' : formatPesos(pago.monto)}
               </p>
               {pagoSinVerificar(pago) && pago.estado !== 'anulado' && puedeEditarMontoPago && (
                 <button
                   type="button"
                   onClick={() => onEditarMonto?.(pago)}
-                  className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300"
+                  className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-yellow-300"
                 >
                   Cargar monto
                 </button>
@@ -178,41 +178,41 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Medio de Pago</p>
-            <p className="text-sm font-bold text-white mt-1">{formatMedioPago(pago)}</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de Pago</p>
+            <p className="text-sm font-bold text-black mt-1">{formatMedioPago(pago)}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tipo</p>
-            <p className="text-sm text-white mt-1">{TIPO_PAGO_LABEL[pago.tipo_pago] || '—'}</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Tipo</p>
+            <p className="text-sm text-black mt-1">{TIPO_PAGO_LABEL[pago.tipo_pago] || '—'}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Fecha</p>
             {/* pago.fecha es la fecha real del pago (editable, la del
                 comprobante si vino con uno) — nunca fecha_hora, que es solo
                 el timestamp de carga en el sistema (auditoría). */}
-            <p className="text-sm text-white mt-1">{formatFecha(pago.fecha)}</p>
+            <p className="text-sm text-black mt-1">{formatFecha(pago.fecha)}</p>
             {pago.fecha_hora && (
-              <p className="text-[10px] text-gray-600 mt-0.5">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
+              <p className="text-[10px] text-prius-muted mt-0.5">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
             )}
           </div>
           {pago.concepto && (
             <div className="col-span-2">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Concepto</p>
-              <p className="text-sm text-white mt-1">{pago.concepto}</p>
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Concepto</p>
+              <p className="text-sm text-black mt-1">{pago.concepto}</p>
             </div>
           )}
           {pago.referencia && (
             <div className="col-span-2">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Referencia</p>
-              <p className="text-sm text-white mt-1">{pago.referencia}</p>
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Referencia</p>
+              <p className="text-sm text-black mt-1">{pago.referencia}</p>
             </div>
           )}
         </div>
 
         {/* Comprobante: etiqueta si ya existe, o form para cargarlo/corregirlo */}
-        <div className="border border-white/10 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 bg-white/5">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-300">
+        <div className="border border-hairline rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 bg-prius-subtle">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-prius-slate">
               <FileText size={14} />
               {comprobantes.length === 0 && 'Sin comprobante'}
             </div>
@@ -220,7 +220,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               <button
                 type="button"
                 onClick={() => setCargandoComprobante(true)}
-                className="text-[10px] font-bold uppercase tracking-widest text-[#FDE047] hover:text-yellow-300"
+                className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-yellow-300"
               >
                 {comprobantes.length > 0 ? 'Agregar otro' : 'Cargar'}
               </button>
@@ -238,10 +238,10 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                         <DateInput label="Fecha" value={editFecha} onChange={setEditFecha} max={new Date().toISOString().split('T')[0]} calendarOnly />
                       </div>
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => setEditandoId(null)} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-white/5 text-gray-300 border border-white/10">
+                        <button type="button" onClick={() => setEditandoId(null)} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-prius-subtle text-prius-slate border border-hairline">
                           Cancelar
                         </button>
-                        <button type="button" disabled={saving} onClick={handleGuardarEdicion} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-[#FDE047] text-black disabled:opacity-50">
+                        <button type="button" disabled={saving} onClick={handleGuardarEdicion} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-gold text-black disabled:opacity-50">
                           Guardar
                         </button>
                       </div>
@@ -249,9 +249,9 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                   ) : (
                     <>
                       <div className="text-xs">
-                        <span className="font-bold text-white uppercase tracking-widest">{formatComprobante(c.tipo, c.numero)}</span>
-                        {c.fecha && <span className="text-gray-500"> · {formatFecha(c.fecha)}</span>}
-                        <span className={`ml-2 font-bold ${c.monto_total == null ? 'text-red-400' : 'text-green-400'}`}>
+                        <span className="font-bold text-black uppercase tracking-widest">{formatComprobante(c.tipo, c.numero)}</span>
+                        {c.fecha && <span className="text-prius-muted"> · {formatFecha(c.fecha)}</span>}
+                        <span className={`ml-2 font-bold ${c.monto_total == null ? 'text-prius-error' : 'text-prius-success'}`}>
                           {c.monto_total == null ? 'Sin monto' : formatPesos(c.monto_total)}
                         </span>
                       </div>
@@ -259,7 +259,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                         <button
                           type="button"
                           onClick={() => abrirEdicion(c)}
-                          className="shrink-0 text-gray-500 hover:text-[#FDE047] transition-all p-2 -m-2"
+                          className="shrink-0 text-prius-muted hover:text-gold transition-all p-2 -m-2"
                         >
                           <Pencil size={14} />
                         </button>
@@ -277,7 +277,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                 </div>
               )}
               {comprobantesPendientes > 0 && (
-                <p className="px-4 py-2 text-[10px] text-gray-500 uppercase tracking-widest">
+                <p className="px-4 py-2 text-[10px] text-prius-muted uppercase tracking-widest">
                   {comprobantesPendientes} comprobante{comprobantesPendientes > 1 ? 's' : ''} sin monto cargado
                 </p>
               )}
@@ -304,14 +304,14 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               </div>
               <DateInput value={fecha} onChange={setFecha} max={new Date().toISOString().split('T')[0]} />
               <div className="flex gap-3">
-                <button type="button" onClick={() => setCargandoComprobante(false)} className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-white/5 text-gray-300 border border-white/10">
+                <button type="button" onClick={() => setCargandoComprobante(false)} className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-prius-subtle text-prius-slate border border-hairline">
                   Cancelar
                 </button>
                 <button
                   type="button"
                   disabled={saving || !comprobanteTipo || !puntoVenta || !numero}
                   onClick={handleGuardarComprobante}
-                  className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-[#FDE047] text-black disabled:opacity-50"
+                  className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold text-black disabled:opacity-50"
                 >
                   Guardar
                 </button>
@@ -321,18 +321,18 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
         </div>
 
         {pago.estado === 'vigente' && (
-          <div className="border-t border-white/5 pt-6">
+          <div className="border-t border-hairline pt-6">
             {!anulando ? (
               <button
                 type="button"
                 onClick={() => setAnulando(true)}
-                className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-red-400 border border-red-500/20 hover:bg-red-500/5 transition-all"
+                className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-error border border-red-500/20 hover:bg-red-500/5 transition-all"
               >
                 Anular pago
               </button>
             ) : (
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Motivo de la anulación (obligatorio)</label>
+                <label className="text-[10px] font-bold text-prius-error uppercase tracking-widest">Motivo de la anulación (obligatorio)</label>
                 <textarea
                   rows={2}
                   value={motivo}
@@ -341,7 +341,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                   className={`${inputClass} resize-none`}
                 />
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => { setAnulando(false); setMotivo('') }} className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-white/5 text-gray-300 border border-white/10">
+                  <button type="button" onClick={() => { setAnulando(false); setMotivo('') }} className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-prius-subtle text-prius-slate border border-hairline">
                     Volver
                   </button>
                   <button

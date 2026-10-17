@@ -55,19 +55,19 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
     >
       <div
         ref={bind}
-        className={`glass-card w-full ${maxWidthClass} max-h-[92vh] sm:max-h-[90dvh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-white/10 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200`}
+        className={`card-light w-full ${maxWidthClass} max-h-[92vh] sm:max-h-[90dvh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-hairline shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Gesto de cierre (mobile) */}
         <div className="sm:hidden flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
+          <div className="w-10 h-1 rounded-full bg-prius-subtle" />
         </div>
 
-        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5 shrink-0">
-          <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-[#FDE047]">{title}</h2>
+        <div className="flex items-center justify-between p-6 border-b border-hairline bg-prius-subtle shrink-0">
+          <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-gold">{title}</h2>
           <button
             onClick={requestClose}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-white/50 hover:text-white transition-all"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-prius-muted hover:text-black transition-all"
           >
             <X size={20} />
           </button>
@@ -78,7 +78,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
         </div>
 
         {footer && (
-          <div className="shrink-0 border-t border-white/10 bg-white/5 p-4 sm:p-6">
+          <div className="shrink-0 border-t border-hairline bg-prius-subtle p-4 sm:p-6">
             {footer}
           </div>
         )}

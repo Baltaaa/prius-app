@@ -48,8 +48,8 @@ export default function PhoneInput({ label, hint, error, value, onChange, onBlur
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2">
-          {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+        <label htmlFor={inputId} className="text-[11px] font-bold text-prius-muted uppercase tracking-widest block mb-2">
+          {label}{required && <span className="text-prius-error ml-0.5">*</span>}
         </label>
       )}
       <input
@@ -66,11 +66,11 @@ export default function PhoneInput({ label, hint, error, value, onChange, onBlur
         onBlur={handleBlur}
         placeholder="Ej: 223 512-3456"
         aria-invalid={!!error}
-        className={`w-full min-h-[44px] px-4 py-3 bg-white/5 border rounded-xl text-white text-base md:text-sm font-bold outline-none transition-all disabled:opacity-50 ${
-          error ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-[#FDE047]/50'
+        className={`w-full min-h-[44px] px-4 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm font-bold outline-none transition-all disabled:opacity-50 ${
+          error ? 'border-red-500/60 focus:border-red-500' : 'border-hairline focus:border-gold/50'
         }`}
       />
-      {error ? <p className="text-[11px] text-red-400 mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-gray-500 mt-1.5">{hint}</p> : null}
+      {error ? <p className="text-[11px] text-prius-error mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-prius-muted mt-1.5">{hint}</p> : null}
     </div>
   )
 }

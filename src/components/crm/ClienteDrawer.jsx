@@ -42,20 +42,20 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
       <div
         ref={bind}
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:w-[420px] max-h-[88vh] sm:max-h-none sm:h-full glass-card sm:rounded-none rounded-t-3xl border-l border-white/10 flex flex-col overflow-hidden animate-in slide-in-from-bottom sm:slide-in-from-right duration-200"
+        className="w-full sm:w-[420px] max-h-[88vh] sm:max-h-none sm:h-full card-light sm:rounded-none rounded-t-3xl border-l border-hairline flex flex-col overflow-hidden animate-in slide-in-from-bottom sm:slide-in-from-right duration-200"
       >
         <div className="sm:hidden flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
+          <div className="w-10 h-1 rounded-full bg-prius-subtle" />
         </div>
-        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5 shrink-0">
+        <div className="flex items-center justify-between p-6 border-b border-hairline bg-prius-subtle shrink-0">
           <div className="min-w-0">
-            <h2 className="text-sm uppercase font-bold tracking-widest text-white truncate">{cliente.nombre}</h2>
+            <h2 className="text-sm uppercase font-bold tracking-widest text-black truncate">{cliente.nombre}</h2>
             {cliente.telefono && (
-              <p className="text-xs text-gray-400 mt-1 flex items-center gap-1.5"><Phone size={11} /> {formatTelefono(cliente.telefono)}</p>
+              <p className="text-xs text-prius-slate mt-1 flex items-center gap-1.5"><Phone size={11} /> {formatTelefono(cliente.telefono)}</p>
             )}
-            {cliente.mail && <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5 lowercase"><Mail size={11} /> {cliente.mail}</p>}
+            {cliente.mail && <p className="text-xs text-prius-slate mt-0.5 flex items-center gap-1.5 lowercase"><Mail size={11} /> {cliente.mail}</p>}
           </div>
-          <button onClick={() => onClose?.()} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 rounded-lg text-white/50 hover:text-white transition-all shrink-0">
+          <button onClick={() => onClose?.()} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-prius-muted hover:text-black transition-all shrink-0">
             <X size={20} />
           </button>
         </div>
@@ -64,7 +64,7 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => { onRegistrarPago?.(cliente); onClose?.() }}
-              className="py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-all flex items-center justify-center gap-2"
+              className="py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-green-500/10 text-prius-success hover:bg-green-500/20 transition-all flex items-center justify-center gap-2"
             >
               <Wallet size={14} /> Registrar pago
             </button>
@@ -77,22 +77,22 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
           </div>
 
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Reservas</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Reservas</p>
             {reservasCliente.length === 0 ? (
-              <p className="text-xs text-gray-500 uppercase tracking-widest">Sin reservas activas.</p>
+              <p className="text-xs text-prius-muted uppercase tracking-widest">Sin reservas activas.</p>
             ) : (
               <div className="space-y-2">
                 {reservasCliente.map((r) => {
                   const saldo = saldoNumerico(r, pagosPorReserva[r.id] || [])
                   return (
-                    <div key={r.id} className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between gap-3">
+                    <div key={r.id} className="p-3 bg-prius-subtle border border-hairline rounded-xl flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-white uppercase truncate">
+                        <p className="text-xs font-bold text-black uppercase truncate">
                           {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}
                         </p>
                         <StatusBadge status={estadoBadgeStatus(r)} />
                       </div>
-                      {saldo > 0 && <span className="text-xs font-bold text-red-400 shrink-0">{formatPesosVisible(saldo)}</span>}
+                      {saldo > 0 && <span className="text-xs font-bold text-prius-error shrink-0">{formatPesosVisible(saldo)}</span>}
                     </div>
                   )
                 })}
@@ -101,14 +101,14 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
           </div>
 
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Últimos eventos</p>
+            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Últimos eventos</p>
             <Historial tipo="cliente" id={clienteId} compact />
           </div>
         </div>
 
         <button
           onClick={() => { navigate(linkToCliente(cliente.id)); onClose?.() }}
-          className="shrink-0 w-full py-4 border-t border-white/10 bg-white/5 text-xs font-bold uppercase tracking-widest text-[#FDE047] hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+          className="shrink-0 w-full py-4 border-t border-hairline bg-prius-subtle text-xs font-bold uppercase tracking-widest text-gold hover:bg-prius-subtle transition-all flex items-center justify-center gap-2"
         >
           Ver ficha completa <ArrowRight size={14} />
         </button>

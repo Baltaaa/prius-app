@@ -104,23 +104,23 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
     >
       <div
         ref={bind}
-        className="glass-card w-full sm:max-w-lg max-h-[92vh] sm:max-h-[85vh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-white/10 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200"
+        className="card-light w-full sm:max-w-lg max-h-[92vh] sm:max-h-[85vh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-hairline shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Gesto de cierre (mobile) */}
         <div className="sm:hidden flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
+          <div className="w-10 h-1 rounded-full bg-prius-subtle" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5 shrink-0">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-hairline bg-prius-subtle shrink-0">
           <div className="min-w-0">
-            <h2 className="text-sm font-bold flex items-center gap-2 uppercase tracking-[0.2em] text-[#FDE047] truncate">
+            <h2 className="text-sm font-bold flex items-center gap-2 uppercase tracking-[0.2em] text-gold truncate">
               {unit.type === "sombrilla" ? <Umbrella size={18} /> : <Home size={18} />}
               {unidadEmoji(unit.type)} {unit.type === "sombrilla" ? "Sombrilla" : "Carpa"} #{unit.number}
             </h2>
             {sector && (
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1 flex items-center gap-1">
+              <p className="text-[10px] text-prius-muted uppercase tracking-widest mt-1 flex items-center gap-1">
                 <MapPin size={11} /> {sector}
               </p>
             )}
@@ -129,19 +129,19 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
             <span
               className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border ${
                 estado.key === "libre"
-                  ? "bg-green-500/10 text-green-400 border-green-500/20"
+                  ? "bg-green-500/10 text-prius-success border-green-500/20"
                   : estado.key === "ocupada"
-                    ? "bg-[#FDE047]/10 text-[#FDE047] border-[#FDE047]/20"
+                    ? "bg-gold/10 text-gold border-gold/20"
                     : estado.key === "sin_confirmar"
                       ? "bg-slate-500/10 text-slate-300 border-slate-500/20"
-                      : "bg-red-500/10 text-red-400 border-red-500/20"
+                      : "bg-red-500/10 text-prius-error border-red-500/20"
               }`}
             >
               {estado.label}
             </span>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-lg text-white/50 hover:text-white transition-all"
+              className="p-2 hover:bg-prius-subtle rounded-lg text-prius-muted hover:text-black transition-all"
             >
               <X size={20} />
             </button>
@@ -152,16 +152,16 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
           {/* Bloque Unidad */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Tipo</p>
-              <p className="text-sm text-white mt-1 uppercase">{unidadEmoji(unit.type)} {unit.type}</p>
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Tipo</p>
+              <p className="text-sm text-black mt-1 uppercase">{unidadEmoji(unit.type)} {unit.type}</p>
             </div>
             <div>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Número</p>
-              <p className="text-sm text-white mt-1">#{unit.number}</p>
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Número</p>
+              <p className="text-sm text-black mt-1">#{unit.number}</p>
             </div>
             <div className="col-span-2">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Temporada</p>
-              <p className="text-sm text-white mt-1">{temporadaActiva?.nombre || "—"}</p>
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Temporada</p>
+              <p className="text-sm text-black mt-1">{temporadaActiva?.nombre || "—"}</p>
             </div>
           </div>
 
@@ -169,18 +169,18 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
           {!reserva ? (
             <div className="space-y-4">
               <div className="px-4 py-4 bg-green-500/5 border border-green-500/20 rounded-xl text-center">
-                <p className="text-sm font-bold text-green-400 uppercase tracking-widest">Unidad disponible</p>
+                <p className="text-sm font-bold text-prius-success uppercase tracking-widest">Unidad disponible</p>
               </div>
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => onAsignarTemporada?.(unit)}
-                  className="w-full py-3.5 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-gold hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                 >
                   Asignar cliente de temporada <ArrowRight size={14} />
                 </button>
                 <button
                   onClick={nuevaReservaAcotada}
-                  className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-prius-subtle hover:bg-prius-subtle border border-hairline text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                 >
                   Nueva reserva por período o día <ArrowRight size={14} />
                 </button>
@@ -188,13 +188,13 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="px-4 py-4 bg-white/5 border border-white/10 rounded-xl space-y-3">
+              <div className="px-4 py-4 bg-prius-subtle border border-hairline rounded-xl space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-bold text-white uppercase truncate">{reserva.clientes?.nombre || "S/N"}</p>
+                  <p className="text-sm font-bold text-black uppercase truncate">{reserva.clientes?.nombre || "S/N"}</p>
                   <StatusBadge status={estadoBadgeStatus(reserva)} />
                 </div>
                 {socios.length > 0 && (
-                  <p className="text-[11px] text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <p className="text-[11px] text-prius-slate uppercase tracking-widest flex items-center gap-1.5">
                     <Users size={12} className="shrink-0" /> Co-socios: {socios.map((s) => s.nombre).join(", ")}
                   </p>
                 )}
@@ -215,33 +215,33 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                 )}
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Tipo de alquiler</p>
-                    <p className="text-white mt-0.5">{TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}</p>
+                    <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Tipo de alquiler</p>
+                    <p className="text-black mt-0.5">{TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Fechas</p>
-                    <p className="text-white mt-0.5">{fechasReserva}</p>
+                    <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Fechas</p>
+                    <p className="text-black mt-0.5">{fechasReserva}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Costo total</p>
-                    <p className="text-white mt-0.5">
+                    <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Costo total</p>
+                    <p className="text-black mt-0.5">
                       {esPendienteConfirmacion ? "Sin confirmar" : bonificada ? "Sin cargo" : precioSinVerificar ? "Sin verificar" : Number(valorTotal) > 0 ? formatPesos(valorTotal) : "Sin precio"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Saldo</p>
+                    <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Saldo</p>
                     {/* Saldo en $0 (pagada/saldada/bonificada): no se muestra
                         nada acá, nunca "$0" ni un texto de reemplazo — ver
                         CLAUDE.md "Nunca $0". */}
-                    <p className={`mt-0.5 font-bold ${saldo === null ? "text-gray-400" : "text-red-400"}`}>
+                    <p className={`mt-0.5 font-bold ${saldo === null ? "text-prius-slate" : "text-prius-error"}`}>
                       {esPendienteConfirmacion ? "—" : saldo === null ? "Sin verificar" : formatPesosVisible(saldo)}
                     </p>
                   </div>
                 </div>
                 {reserva.notas && (
                   <div>
-                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Notas</p>
-                    <p className="text-xs text-gray-300 mt-1">{reserva.notas}</p>
+                    <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Notas</p>
+                    <p className="text-xs text-prius-slate mt-1">{reserva.notas}</p>
                   </div>
                 )}
               </div>
@@ -251,21 +251,21 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                   <>
                     <button
                       onClick={irAClientes}
-                      className="w-full py-3.5 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-gold hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                     >
                       {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver ficha del cliente"} <ArrowRight size={14} />
                     </button>
                     {!reserva.bloqueada && (
                       <button
                         onClick={() => onMoverUnidad?.(reserva, unit)}
-                        className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+                        className="w-full py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline text-prius-slate rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
                       >
                         Mover a otra unidad
                       </button>
                     )}
                     <button
                       onClick={handleLiberarUnidad}
-                      className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-amber-400 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+                      className="w-full py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline text-amber-400 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
                     >
                       Liberar unidad
                     </button>
@@ -274,13 +274,13 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                   <>
                     <button
                       onClick={irAReserva}
-                      className="w-full py-3.5 bg-[#FDE047] hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-gold hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                     >
                       {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver reserva"} <ArrowRight size={14} />
                     </button>
                     <button
                       onClick={irAClientes}
-                      className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
+                      className="w-full py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline text-prius-slate rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all"
                     >
                       Ver cliente
                     </button>
@@ -294,7 +294,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
               cliente y el detalle de reserva (ítem 2, oct 2026). */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Historial</p>
+              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Historial</p>
               <button
                 onClick={verHistorialCompleto}
                 className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-all"

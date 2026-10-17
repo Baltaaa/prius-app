@@ -28,29 +28,29 @@ const formatWeekdayName = (date) => DIAS[(date.getDay() + 6) % 7]
 // botones de mes quedaban posicionados contra un ancestro lejano y no se
 // veían — de ahí que el calendario pareciera "sin navegación".
 const classNames = {
-  root: 'text-white',
+  root: 'text-black',
   months: 'block',
   month: 'grid grid-cols-[auto_1fr_auto] grid-rows-[auto_auto] items-center gap-y-1',
   month_caption: 'col-start-2 row-start-1 flex items-center justify-center h-9',
-  caption_label: 'text-xs font-bold uppercase tracking-widest text-white',
+  caption_label: 'text-xs font-bold uppercase tracking-widest text-black',
   button_previous:
-    'col-start-1 row-start-1 justify-self-start min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none',
+    'col-start-1 row-start-1 justify-self-start min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-prius-slate hover:text-black hover:bg-prius-subtle transition-colors disabled:opacity-30 disabled:pointer-events-none',
   button_next:
-    'col-start-3 row-start-1 justify-self-end min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none',
+    'col-start-3 row-start-1 justify-self-end min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-prius-slate hover:text-black hover:bg-prius-subtle transition-colors disabled:opacity-30 disabled:pointer-events-none',
   month_grid: 'col-span-3 row-start-2 w-full border-collapse mt-2',
   weekdays: 'flex',
-  weekday: 'w-9 h-9 text-[10px] font-bold uppercase tracking-widest text-gray-500 flex items-center justify-center',
+  weekday: 'w-9 h-9 text-[10px] font-bold uppercase tracking-widest text-prius-muted flex items-center justify-center',
   week: 'flex',
   day: 'w-9 h-9 p-0 text-center align-middle',
   day_button:
-    'w-9 h-9 rounded-lg text-sm font-semibold text-gray-300 hover:bg-white/10 transition-colors outline-none focus-visible:ring-1 focus-visible:ring-[#FDE047]/50',
-  today: '[&_button]:border [&_button]:border-[#FDE047]/40',
-  outside: '[&_button]:text-gray-700',
-  disabled: '[&_button]:text-gray-600 [&_button]:hover:bg-transparent [&_button]:cursor-not-allowed [&_button]:opacity-40',
-  selected: '[&_button]:bg-[#FDE047] [&_button]:text-black [&_button]:hover:bg-[#FDE047]',
-  range_start: '[&_button]:bg-[#FDE047] [&_button]:text-black [&_button]:hover:bg-[#FDE047]',
-  range_end: '[&_button]:bg-[#FDE047] [&_button]:text-black [&_button]:hover:bg-[#FDE047]',
-  range_middle: '[&_button]:bg-[#FDE047]/20 [&_button]:text-white [&_button]:rounded-none',
+    'w-9 h-9 rounded-lg text-sm font-semibold text-prius-slate hover:bg-prius-subtle transition-colors outline-none focus-visible:ring-1 focus-visible:ring-[#FDE047]/50',
+  today: '[&_button]:border [&_button]:border-gold/40',
+  outside: '[&_button]:text-prius-slate',
+  disabled: '[&_button]:text-prius-muted [&_button]:hover:bg-transparent [&_button]:cursor-not-allowed [&_button]:opacity-40',
+  selected: '[&_button]:bg-gold [&_button]:text-black [&_button]:hover:bg-gold',
+  range_start: '[&_button]:bg-gold [&_button]:text-black [&_button]:hover:bg-gold',
+  range_end: '[&_button]:bg-gold [&_button]:text-black [&_button]:hover:bg-gold',
+  range_middle: '[&_button]:bg-gold/20 [&_button]:text-black [&_button]:rounded-none',
 }
 
 const modifiersClassNames = {

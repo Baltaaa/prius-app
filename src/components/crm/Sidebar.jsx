@@ -61,23 +61,23 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="no-print hidden md:flex w-64 h-dvh bg-[#0a0d14] border-r border-white/10 flex-col justify-between shrink-0 sticky top-0 left-0 z-30">
+    <aside className="no-print hidden lg:flex w-64 h-dvh bg-white border-r border-hairline flex-col justify-between shrink-0 sticky top-0 left-0 z-30">
       <div className="flex flex-col overflow-hidden">
         {/* Brand Header */}
-        <div className="h-20 flex items-center px-4 border-b border-white/5 gap-2">
-          <div className="text-[#FDE047] text-3xl font-bold italic shrink-0">
+        <div className="h-20 flex items-center px-4 border-b border-hairline gap-2">
+          <div className="text-gold text-3xl font-bold italic shrink-0">
             <img src="/images/prius-icon.png" alt="P" className="w-8 h-8 object-contain" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="font-display font-extrabold text-[16px] text-white tracking-tight leading-none whitespace-nowrap">Prius Playa Grande</h1>
-            <p className="text-[10px] text-gray-500 font-semibold tracking-wider uppercase mt-1">PriusApp</p>
+            <h1 className="font-display font-extrabold text-[16px] text-black tracking-tight leading-none whitespace-nowrap">Prius Playa Grande</h1>
+            <p className="text-[10px] text-prius-muted font-semibold tracking-wider uppercase mt-1">PriusApp</p>
           </div>
         </div>
 
         {/* Navigation Content */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8">
           <div>
-            <h2 className="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] mb-3">
+            <h2 className="px-3 text-[10px] font-bold text-prius-muted uppercase tracking-[0.15em] mb-3">
               Gestión Operativa
             </h2>
             <nav className="space-y-1">
@@ -88,8 +88,8 @@ export default function Sidebar() {
                   className={({ isActive }) => `
                     flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${isActive
-                      ? 'bg-white/10 text-[#FDE047] border-l-2 border-[#FDE047]'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      ? 'bg-prius-subtle text-gold border-l-2 border-gold'
+                      : 'text-prius-slate hover:bg-prius-subtle hover:text-black'
                     }
                   `}
                 >
@@ -98,7 +98,7 @@ export default function Sidebar() {
                     <span className="truncate">{item.name}</span>
                   </div>
                   {item.comingSoon && (
-                    <span className="shrink-0 px-1.5 py-0.5 text-[8px] font-bold bg-white/10 text-gray-400 rounded uppercase tracking-wider">
+                    <span className="shrink-0 px-1.5 py-0.5 text-[8px] font-bold bg-prius-subtle text-prius-slate rounded uppercase tracking-wider">
                       Pronto
                     </span>
                   )}
@@ -108,7 +108,7 @@ export default function Sidebar() {
           </div>
 
           <div>
-            <h2 className="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] mb-3">
+            <h2 className="px-3 text-[10px] font-bold text-prius-muted uppercase tracking-[0.15em] mb-3">
               Módulos Adicionales
             </h2>
             <nav className="space-y-1">
@@ -119,8 +119,8 @@ export default function Sidebar() {
                   className={({ isActive }) => `
                     flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${isActive 
-                      ? 'bg-white/10 text-[#FDE047] border-l-2 border-[#FDE047]' 
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      ? 'bg-prius-subtle text-gold border-l-2 border-gold' 
+                      : 'text-prius-slate hover:bg-prius-subtle hover:text-black'
                     }
                   `}
                 >
@@ -129,7 +129,7 @@ export default function Sidebar() {
                     <span>{item.name}</span>
                   </div>
                   {item.badge > 0 && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-[#FDE047] text-black rounded-full">
+                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-gold text-black rounded-full">
                       {item.badge}
                     </span>
                   )}
@@ -141,10 +141,10 @@ export default function Sidebar() {
       </div>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t border-white/5">
+      <div className="p-4 border-t border-hairline">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors text-left"
+          className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-prius-slate hover:text-black transition-colors text-left"
         >
           <LogOut size={18} />
           <span>Cerrar Sesión</span>

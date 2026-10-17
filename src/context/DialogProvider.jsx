@@ -71,7 +71,7 @@ export function DialogProvider({ children }) {
           {toasts.map((t) => (
             <div
               key={t.id}
-              className="glass-card rounded-xl border border-white/10 shadow-2xl px-4 py-3 text-sm text-gray-200 animate-premium-fade"
+              className="card-light rounded-xl border border-hairline shadow-2xl px-4 py-3 text-sm text-prius-slate animate-premium-fade"
             >
               {t.message}
             </div>
@@ -86,30 +86,30 @@ export function DialogProvider({ children }) {
         >
           <div
             ref={bind}
-            className="glass-card w-full max-w-sm rounded-2xl border border-white/10 shadow-2xl p-6 space-y-5"
+            className="card-light w-full max-w-sm rounded-2xl border border-hairline shadow-2xl p-6 space-y-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isDanger ? 'bg-red-500/10 text-red-400' : 'bg-[#FDE047]/10 text-[#FDE047]'}`}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isDanger ? 'bg-red-500/10 text-prius-error' : 'bg-gold/10 text-gold'}`}>
                 {isDanger ? <AlertTriangle size={18} /> : <Info size={18} />}
               </div>
               <div className="pt-1 min-w-0">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-white">{dialog.title}</h3>
-                <p className="text-sm text-gray-300 mt-2 whitespace-pre-line">{dialog.message}</p>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-black">{dialog.title}</h3>
+                <p className="text-sm text-prius-slate mt-2 whitespace-pre-line">{dialog.message}</p>
               </div>
             </div>
             <div className="flex gap-3 justify-end pt-2">
               {dialog.mode === 'confirm' && (
                 <button
                   onClick={() => close(false)}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-slate bg-prius-subtle hover:bg-prius-subtle border border-hairline transition-all"
                 >
                   Cancelar
                 </button>
               )}
               <button
                 onClick={() => close(dialog.mode === 'confirm' ? true : undefined)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${isDanger ? 'bg-red-500 hover:bg-red-400 text-white' : 'bg-[#FDE047] hover:bg-yellow-300 text-black'}`}
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${isDanger ? 'bg-red-500 hover:bg-red-400 text-white' : 'bg-gold hover:bg-yellow-300 text-black'}`}
               >
                 {dialog.mode === 'confirm' ? 'Confirmar' : 'Entendido'}
               </button>
