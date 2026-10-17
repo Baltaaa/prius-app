@@ -255,7 +255,7 @@ export default function RegistrarPago({
           <div className="flex gap-3 pt-2">
             <button
               onClick={onClose}
-              className="px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold text-black hover:bg-yellow-300 transition-all"
+              className="px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold text-black hover:bg-gold-hover transition-all"
             >
               Listo
             </button>
@@ -456,7 +456,7 @@ export default function RegistrarPago({
             monto <= 0 || excedeSaldo || comprobanteIncompleto || !!duplicado
             || (!editingPago && !reservaId && !allowSinReserva) || (!editingPago && !cliente?.id)
           }
-          className="w-full py-4 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
+          className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
         >
           {editingPago
             ? `Guardar ${monto > 0 ? formatPesos(monto) : ''}`.trim()

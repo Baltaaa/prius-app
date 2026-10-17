@@ -615,7 +615,7 @@ export default function Clientes() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="sm:ml-auto bg-gold hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
+          className="sm:ml-auto bg-gold hover:bg-gold-hover text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
         >
           <Plus size={18} /> Nuevo Cliente
         </button>
@@ -1213,7 +1213,7 @@ export default function Clientes() {
 
           <button
             type="submit"
-            className="w-full py-4 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
           </button>
@@ -1238,7 +1238,7 @@ export default function Clientes() {
           <button
             type="submit"
             disabled={savingConfirmacion}
-            className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {savingConfirmacion ? 'Guardando...' : 'Confirmar'}
           </button>
@@ -1335,7 +1335,7 @@ export default function Clientes() {
             type="button"
             disabled={agruparSeleccion.size < 2 || !agruparPrecioTotal || savingGrupo}
             onClick={handleCrearGrupo}
-            className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {savingGrupo ? 'Agrupando...' : 'Agrupar y Definir Precio'}
           </button>

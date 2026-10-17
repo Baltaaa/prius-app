@@ -170,7 +170,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                 <button
                   type="button"
                   onClick={() => onEditarMonto?.(pago)}
-                  className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-yellow-300"
+                  className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-black"
                 >
                   Cargar monto
                 </button>
@@ -220,7 +220,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               <button
                 type="button"
                 onClick={() => setCargandoComprobante(true)}
-                className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-yellow-300"
+                className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-black"
               >
                 {comprobantes.length > 0 ? 'Agregar otro' : 'Cargar'}
               </button>

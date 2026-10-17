@@ -38,7 +38,7 @@ export default function AvisoCajaCerrada({ onAbierta, className = '' }) {
         loading={saving}
         loadingText="Abriendo..."
         onClick={handleAbrir}
-        className="w-full py-2.5 min-h-[44px] rounded-lg text-[10px] font-bold uppercase tracking-widest bg-gold text-black hover:bg-yellow-300"
+        className="w-full py-2.5 min-h-[44px] rounded-lg text-[10px] font-bold uppercase tracking-widest bg-gold text-black hover:bg-gold-hover"
       >
         Abrir caja
       </LoadingButton>

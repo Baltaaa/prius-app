@@ -244,7 +244,7 @@ export default function Caja() {
                 onClick={handleAbrirCaja}
                 loading={abriendo}
                 loadingText="Abriendo..."
-                className="w-full bg-gold hover:bg-yellow-300 text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl"
+                className="w-full bg-gold hover:bg-gold-hover text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl"
               >
                 Abrir Caja de Hoy
               </LoadingButton>
@@ -465,7 +465,7 @@ export default function Caja() {
                 placeholder="Motivo de la reapertura (obligatorio)"
                 className="w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm outline-none focus:border-gold/50 resize-none"
               />
-              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all">
+              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all">
                 Confirmar reapertura
               </button>
             </div>

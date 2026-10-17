@@ -286,7 +286,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
             <button
               type="submit"
               disabled={!clienteNombre.trim()}
-              className="flex-1 py-4 bg-gold hover:bg-yellow-300 disabled:opacity-40 disabled:hover:bg-gold text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl"
+              className="flex-1 py-4 bg-gold hover:bg-gold-hover disabled:opacity-40 disabled:hover:bg-gold text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl"
             >
               {tieneReserva ? "Guardar Cambios" : "Crear Reserva"}
             </button>

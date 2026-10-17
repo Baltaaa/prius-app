@@ -53,7 +53,7 @@ export default function InactivityWarningModal({ open, secondsLeft, onContinuar,
             type="button"
             onClick={onContinuar}
             autoFocus
-            className="order-1 sm:order-2 flex-1 h-12 min-h-[44px] bg-gold hover:bg-yellow-300 active:scale-[0.98] text-black font-bold text-sm rounded-xl transition-all"
+            className="order-1 sm:order-2 flex-1 h-12 min-h-[44px] bg-gold hover:bg-gold-hover active:scale-[0.98] text-black font-bold text-sm rounded-xl transition-all"
           >
             Seguir conectado
           </button>

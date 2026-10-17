@@ -629,7 +629,7 @@ export default function Reservas() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="bg-gold hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
+          className="bg-gold hover:bg-gold-hover text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
         >
           <Plus size={18} /> Nueva Reserva
         </button>
@@ -903,7 +903,7 @@ export default function Reservas() {
               <button
                 type="submit"
                 form="form-reserva"
-                className="px-6 py-3 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+                className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
               >
                 {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
               </button>
@@ -934,7 +934,7 @@ export default function Reservas() {
                   type="button"
                   onClick={handleToggleBloqueada}
                   className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                    bloqueada ? 'bg-red-500/10 text-prius-error hover:bg-red-500/20' : 'bg-prius-subtle text-prius-slate hover:text-white'
+                    bloqueada ? 'bg-red-500/10 text-prius-error hover:bg-red-500/20' : 'bg-prius-subtle text-prius-slate hover:text-black'
                   }`}
                 >
                   {bloqueada ? 'Desbloquear' : 'Bloquear'}

@@ -160,7 +160,7 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
         href={WINDGURU_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold hover:bg-yellow-300 text-black transition-all flex items-center justify-center gap-2"
+        className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold hover:bg-gold-hover text-black transition-all flex items-center justify-center gap-2"
       >
         Ver en Windguru <ExternalLink size={14} />
       </a>

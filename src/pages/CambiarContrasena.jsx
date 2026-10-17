@@ -75,7 +75,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
           <p className="text-black font-bold">El enlace venció o ya se usó.</p>
           <button
             onClick={() => navigate('/recuperar')}
-            className="w-full h-14 bg-gold hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-widest rounded-full transition-all"
+            className="w-full h-14 bg-gold hover:bg-gold-hover text-black font-black text-xs uppercase tracking-widest rounded-full transition-all"
           >
             Pedir uno nuevo
           </button>
@@ -141,7 +141,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
           <button
             type="submit"
             disabled={loading || !cumple || !coincide}
-            className="w-full h-14 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-black text-xs uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-2"
+            className="w-full h-14 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-black text-xs uppercase tracking-widest rounded-full transition-all flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : 'Guardar y continuar'}
           </button>

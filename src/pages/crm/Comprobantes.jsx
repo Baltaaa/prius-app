@@ -160,7 +160,7 @@ export default function Comprobantes() {
               </div>
               <button
                 onClick={() => imprimir('estado_cuenta')}
-                className="bg-gold hover:bg-yellow-300 text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl"
+                className="bg-gold hover:bg-gold-hover text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl"
               >
                 <Printer size={18} /> Imprimir Comprobante
               </button>

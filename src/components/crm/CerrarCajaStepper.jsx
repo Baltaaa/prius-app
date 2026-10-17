@@ -202,7 +202,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
               type="button"
               disabled={paso === 0 && !puedeAvanzarPaso1}
               onClick={() => setPaso((p) => p + 1)}
-              className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+              className="w-full py-4 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
             >
               Continuar
             </button>

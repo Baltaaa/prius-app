@@ -174,7 +174,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => onAsignarTemporada?.(unit)}
-                  className="w-full py-3.5 bg-gold hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-gold hover:bg-gold-hover text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                 >
                   Asignar cliente de temporada <ArrowRight size={14} />
                 </button>
@@ -251,7 +251,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                   <>
                     <button
                       onClick={irAClientes}
-                      className="w-full py-3.5 bg-gold hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-gold hover:bg-gold-hover text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                     >
                       {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver ficha del cliente"} <ArrowRight size={14} />
                     </button>
@@ -274,7 +274,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
                   <>
                     <button
                       onClick={irAReserva}
-                      className="w-full py-3.5 bg-gold hover:bg-yellow-300 text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-gold hover:bg-gold-hover text-black rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
                     >
                       {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver reserva"} <ArrowRight size={14} />
                     </button>

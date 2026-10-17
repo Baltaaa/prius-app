@@ -72,7 +72,7 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
         <button
           type="submit"
           disabled={!clienteId || saving}
-          className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+          className="w-full py-4 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
         >
           {saving ? 'Asignando...' : 'Asignar Unidad'}
         </button>

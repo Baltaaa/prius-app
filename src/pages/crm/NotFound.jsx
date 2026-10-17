@@ -13,7 +13,7 @@ export default function NotFound() {
       </div>
       <Link
         to="/app/home"
-        className="mt-2 px-5 py-3 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all"
+        className="mt-2 px-5 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all"
       >
         Volver al Home
       </Link>

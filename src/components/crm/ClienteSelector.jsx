@@ -108,7 +108,7 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
           type="button"
           onClick={handleGuardar}
           disabled={saving}
-          className="w-full py-2.5 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-widest text-[10px] rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full py-2.5 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-widest text-[10px] rounded-xl transition-all flex items-center justify-center gap-2"
         >
           <UserPlus size={14} /> {saving ? 'Guardando...' : 'Guardar Cliente'}
         </button>

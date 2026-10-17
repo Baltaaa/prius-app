@@ -245,7 +245,7 @@ export default function Recepcion() {
         <div className="space-y-4">
           <button
             onClick={() => setScannerOpen(true)}
-            className="w-full py-6 bg-gold hover:bg-yellow-300 text-black rounded-2xl font-bold text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl"
+            className="w-full py-6 bg-gold hover:bg-gold-hover text-black rounded-2xl font-bold text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl"
           >
             <QrCode size={22} /> Escanear QR
           </button>
@@ -316,7 +316,7 @@ export default function Recepcion() {
                     <button
                       key={p.pago_id}
                       onClick={() => navigate(linkToComprobante(p.reserva_id))}
-                      className="text-[11px] font-bold uppercase tracking-widest text-gold hover:text-yellow-300 transition-all flex items-center gap-1 mx-auto"
+                      className="text-[11px] font-bold uppercase tracking-widest text-gold hover:text-black transition-all flex items-center gap-1 mx-auto"
                     >
                       <Receipt size={12} /> Cargar comprobante
                     </button>
@@ -325,7 +325,7 @@ export default function Recepcion() {
               )}
               <button
                 onClick={volverAlInicio}
-                className="w-full py-3.5 bg-gold hover:bg-yellow-300 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
+                className="w-full py-3.5 bg-gold hover:bg-gold-hover text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
               >
                 Siguiente cliente
               </button>
@@ -441,7 +441,7 @@ export default function Recepcion() {
                     <button
                       disabled={saving}
                       onClick={() => ejecutarCobro({ cobrar: true, hacerCheckin: false })}
-                      className="w-full py-3.5 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
+                      className="w-full py-3.5 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
                     >
                       {saving ? 'Registrando...' : `Registrar pago ${formatPesos(saldoGrupo)}`}
                     </button>
@@ -452,7 +452,7 @@ export default function Recepcion() {
                   <button
                     disabled={saving}
                     onClick={() => ejecutarCobro({ cobrar: true, hacerCheckin: todasHoy })}
-                    className="w-full py-4 bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-sm transition-all shadow-xl"
+                    className="w-full py-4 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-sm transition-all shadow-xl"
                   >
                     {saving
                       ? 'Procesando...'
@@ -488,7 +488,7 @@ export default function Recepcion() {
                   <button
                     disabled={abriendoCaja}
                     onClick={() => handleAbrirCajaYReintentar({ cobrar: true, hacerCheckin: todasHoy })}
-                    className="w-full py-3 min-h-[44px] bg-gold hover:bg-yellow-300 disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
+                    className="w-full py-3 min-h-[44px] bg-gold hover:bg-gold-hover disabled:opacity-50 text-black rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all"
                   >
                     {abriendoCaja ? 'Abriendo...' : 'Abrir caja y cobrar'}
                   </button>

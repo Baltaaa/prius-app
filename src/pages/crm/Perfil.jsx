@@ -61,7 +61,7 @@ export default function Perfil() {
             <MoneyInput label="⛱️ Precio Base Sombrilla" value={tarifaSombrilla} onChange={setTarifaSombrilla} max={100_000_000} />
             <button
               onClick={handleGuardarTarifas}
-              className="w-full py-4 bg-gold hover:bg-yellow-300 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl flex items-center justify-center gap-2"
+              className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl flex items-center justify-center gap-2"
             >
               {saved ? <><Check size={16} /> Guardado</> : <><Save size={16} /> Actualizar Tarifas</>}
             </button>

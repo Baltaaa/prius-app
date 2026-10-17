@@ -109,7 +109,7 @@ export function DialogProvider({ children }) {
               )}
               <button
                 onClick={() => close(dialog.mode === 'confirm' ? true : undefined)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${isDanger ? 'bg-red-500 hover:bg-red-400 text-white' : 'bg-gold hover:bg-yellow-300 text-black'}`}
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${isDanger ? 'bg-red-500 hover:bg-red-400 text-white' : 'bg-gold hover:bg-gold-hover text-black'}`}
               >
                 {dialog.mode === 'confirm' ? 'Confirmar' : 'Entendido'}
               </button>
