@@ -42,7 +42,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
 
   const numberLabel = (
     <span
-      className={`w-7 md:w-8 text-xs md:text-sm font-bold tabular-nums text-white/80 ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
+      className={`w-7 md:w-8 text-xs md:text-sm font-bold tabular-nums text-black ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
     >
       {number}
     </span>
