@@ -19,6 +19,9 @@ export const PERMISOS: Record<string, Rol[]> = {
   editar_unidades: ['superadmin'],
   gestion_usuarios: ['superadmin'],
   editar_comprobante: ['superadmin'],
+  // Borrado definitivo de un lead ya descartado (oct 2026) — espeja la
+  // policy de RLS real (es_superadmin()), acá es solo para ocultar el botón.
+  eliminar_lead: ['superadmin'],
   // Cargar el monto real de un pago migrado que llegó con monto null (nunca
   // "corregir" uno ya verificado) — oct 2026, pendiente pago_sin_monto.
   editar_monto_pago: ['superadmin', 'admin'],

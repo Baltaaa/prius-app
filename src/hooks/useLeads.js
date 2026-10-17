@@ -4,7 +4,7 @@ import { useData } from '../context/DataProvider'
 // Selector sobre el DataProvider para la bandeja de Leads.
 // `leads` llega ordenado por created_at desc y se refresca solo vía Realtime.
 export function useLeads() {
-  const { leads, loading, error, updateLead, refetchAll } = useData()
+  const { leads, loading, error, updateLead, deleteLead, refetchAll } = useData()
 
   const sinContactar = useMemo(
     () => leads.filter((l) => (l.estado || 'nuevo') === 'nuevo').length,
@@ -17,6 +17,7 @@ export function useLeads() {
     error,
     sinContactar,
     updateLead,
+    deleteLead,
     refetch: refetchAll,
   }
 }

@@ -1,9 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useLeads, waLink } from '../../hooks/useLeads'
 import { formatFechaHora } from '../../lib/format'
-import { Mail, Phone, Check, X, RotateCcw, Inbox } from 'lucide-react'
+import { usePermiso } from '../../context/AuthProvider'
+import { useDialog } from '../../context/DialogProvider'
+import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
+import { Mail, Phone, Check, X, RotateCcw, Inbox, Trash2 } from 'lucide-react'
 
 // Logo real de WhatsApp (no hay en lucide-react, se agrega inline para no sumar
 // una librería de íconos nueva). fill="currentColor" para heredar el color del
@@ -36,10 +39,16 @@ const ESTADO_META = {
 const fmt = formatFechaHora
 
 export default function Leads() {
-  const { leads, loading, sinContactar, updateLead } = useLeads()
+  const { leads, loading, sinContactar, updateLead, deleteLead } = useLeads()
+  const puedeEliminar = usePermiso('eliminar_lead')
+  const { alert } = useDialog()
   // [feat-8] filtro "Sin contactar/Todos" persistido en la URL (apagable
   // en lib/features.ts).
   const [filtro, setFiltro] = useFeatureUrlState('feat-8-leads-filtro-url', 'estado', 'todos')
+  // Borrado definitivo (oct 2026): solo sobre un lead ya descartado — hay
+  // leads de prueba que a veces ensucian la bandeja. Confirmación reforzada
+  // (ConfirmDeleteModal), igual que cualquier otro hard delete de la app.
+  const [leadAEliminar, setLeadAEliminar] = useState(null)
 
   // Deep link desde la notificación lead_nuevo (linkToLead): resalta la
   // tarjeta del lead. Si el filtro activo la esconde, no hace falta tocarlo
@@ -64,6 +73,15 @@ export default function Leads() {
   }
 
   const setEstado = (lead, estado) => updateLead(lead.id, { estado }).catch(() => {})
+
+  const confirmarEliminar = async () => {
+    try {
+      await deleteLead(leadAEliminar.id)
+      setLeadAEliminar(null)
+    } catch (err) {
+      await alert(err.message || 'No se pudo eliminar el lead.')
+    }
+  }
 
   if (loading) {
     return (
@@ -175,12 +193,22 @@ export default function Leads() {
                       <X size={14} /> Descartar
                     </button>
                   ) : (
-                    <button
-                      onClick={() => setEstado(lead, 'nuevo')}
-                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-white/5 text-gray-400 border border-white/10 hover:text-white transition-colors"
-                    >
-                      <RotateCcw size={14} /> Reabrir
-                    </button>
+                    <>
+                      <button
+                        onClick={() => setEstado(lead, 'nuevo')}
+                        className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-white/5 text-gray-400 border border-white/10 hover:text-white transition-colors"
+                      >
+                        <RotateCcw size={14} /> Reabrir
+                      </button>
+                      {puedeEliminar && (
+                        <button
+                          onClick={() => setLeadAEliminar(lead)}
+                          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                        >
+                          <Trash2 size={14} /> Eliminar
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -188,6 +216,15 @@ export default function Leads() {
           )
         })}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={!!leadAEliminar}
+        onClose={() => setLeadAEliminar(null)}
+        onConfirm={confirmarEliminar}
+        tipo="lead"
+        identificador={leadAEliminar?.nombre || ''}
+        detalle="Esto borra el lead para siempre — pensado para leads de prueba, no para leads reales descartados por error (esos quedan con 'Reabrir')."
+      />
     </div>
   )
 }

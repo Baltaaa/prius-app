@@ -493,6 +493,16 @@ export function DataProvider({ children }) {
     return data[0]
   }, [fetchLeads])
 
+  // Hard delete de un lead (oct 2026): solo tiene sentido sobre un lead ya
+  // descartado (hay leads de prueba que ensucian la bandeja) — la policy de
+  // RLS ya lo restringe a superadmin (es_superadmin()), acá no hace falta
+  // una RPC porque leads no es una tabla de dinero.
+  const deleteLead = useCallback(async (id) => {
+    const { error } = await supabase.from('leads').delete().eq('id', id)
+    if (error) throw error
+    setLeads((prev) => prev.filter((l) => l.id !== id))
+  }, [])
+
   // Fase 3 (Recepción): un código agrupa 1-2 reservas del mismo cliente web
   // (ver `codigo` en `reservas` y `codigos_reserva`). Filtra en memoria sobre
   // los datos ya cargados, mismo patrón que el resto de los buscadores del
@@ -526,7 +536,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarPagoCompleto,
+    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarPagoCompleto,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
@@ -536,7 +546,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarPagoCompleto,
+    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarPagoCompleto,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
