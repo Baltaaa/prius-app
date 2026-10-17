@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-tint": "#745b00", "tertiary-fixed": "#7ffc97", "on-secondary-fixed-variant": "#474747", "surface": "#ffffff", "on-surface-variant": "#4d4635", "on-primary-fixed-variant": "#574400", "on-primary-fixed": "#241a00", "on-error": "#ffffff", "on-secondary-container": "#646464", "tertiary-fixed-dim": "#62df7d", "on-secondary": "#ffffff", "secondary": "#5e5e5e", "primary": "#745b00", "on-primary": "#ffffff", "error-container": "#ffdad6", "on-error-container": "#93000a", "background": "#ffffff", "on-tertiary-container": "#00662a", "inverse-primary": "#eac249", "inverse-on-surface": "#f1f1f1", "primary-container": "#f2ca50", "surface-dim": "#dadada", "on-background": "#1a1c1c", "outline-variant": "#e5e5e5", "outline": "#7f7663", "surface-container-highest": "#e2e2e2", "surface-container": "#f9f9f9", "on-primary-container": "#6b5500", "surface-bright": "#ffffff", "error": "#ba1a1a", "on-secondary-fixed": "#1b1b1b", "surface-container-low": "#f4f3f3", "surface-container-high": "#e8e8e8", "on-tertiary-fixed-variant": "#005320", "tertiary-container": "#6ae785", "tertiary": "#006e2d", "secondary-container": "#e2e2e2", "primary-fixed": "#ffe08a", "on-tertiary": "#ffffff", "surface-container-lowest": "#ffffff", "secondary-fixed": "#e2e2e2", "on-surface": "#1a1c1c", "primary-fixed-dim": "#eac249", "inverse-surface": "#2f3131", "surface-variant": "#e2e2e2", "on-tertiary-fixed": "#002109", "secondary-fixed-dim": "#c6c6c6" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xl": "2.25rem", "space-sm": "0.5rem", "space-md": "1rem", "gutter": "1rem", "gutter-sm": "0.75rem", "gutter-lg": "1.5rem", "space-xs": "0.25rem", "margin-tablet": "2rem", "margin": "1.25rem", "margin-mobile": "1rem", "space-lg": "1.5rem" }, fontFamily: { "display-lg": ["Inter"], "body-sm": ["Inter"], "label-md": ["Inter"], "label-lg": ["Inter"], "headline-lg-mobile": ["Inter"], "headline-lg": ["Inter"], "title-md": ["Inter"], "headline-md": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Inter"], "metric-xl": ["Inter"], "body-md": ["Inter"] }, fontSize: { "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "metric-xl": ["34px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }] } } } };</script><style>@layer base{html,body{margin:0;padding:0;background-color:#ffffff;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface leading-none">Prius</span><span class="font-label-md text-[9px] tracking-widest uppercase text-secondary font-semibold">Playa Grande</span></div><span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-tertiary font-label-md text-[10px] tracking-wider uppercase font-semibold">OPERATIVO</span></div><div class="flex items-center gap-space-xs"><button class="w-11 h-11 flex items-center justify-center text-on-surface hover:bg-surface-container rounded-full transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">search</span></button><button class="w-11 h-11 relative flex items-center justify-center text-on-surface hover:bg-surface-container rounded-full transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary-fixed font-label-md text-[10px] flex items-center justify-center leading-none">42</span></button><div class="ml-1 flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full px-margin-mobile pb-space-xl">
+<!-- 1. BARRA SUPERIOR: SELECTOR DE FECHA & ACCIÓN IMPRIMIR -->
+<div class="flex items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-1.5 flex-1 max-w-[245px]">
+<button aria-label="Día anterior" class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="flex-1 h-10 px-space-sm rounded-xl bg-surface-container flex items-center justify-center gap-2 active:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px] text-secondary">calendar_today</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold tracking-tight">17/10/2026</span>
+</button>
+<button aria-label="Día siguiente" class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+<button class="h-10 px-3.5 rounded-xl bg-surface-container text-on-surface flex items-center gap-1.5 font-label-lg text-label-lg uppercase tracking-wider active:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span>
+<span>A4</span>
+</button>
+</div>
+<!-- 2. MÉTRICAS OPERATIVAS RÁPIDAS (ESTILO FINTECH RESUMEN) -->
+<div class="grid grid-cols-3 gap-2 mt-space-md">
+<!-- Ocupadas -->
+<div class="bg-surface-container p-3 rounded-xl flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-[10px] uppercase tracking-wider text-secondary">Ocupadas</span>
+<span class="w-2 h-2 rounded-full bg-on-surface"></span>
+</div>
+<div class="mt-1">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">137</span>
+<span class="font-body-sm text-[11px] text-secondary font-medium">74%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full mt-1.5 overflow-hidden">
+<div class="h-full bg-on-surface rounded-full" style="width: 74%;"></div>
+</div>
+</div>
+</div>
+<!-- Libres -->
+<div class="bg-surface-container p-3 rounded-xl flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-[10px] uppercase tracking-wider text-secondary">Libres</span>
+<span class="w-2 h-2 rounded-full bg-surface-container-highest"></span>
+</div>
+<div class="mt-1">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">47</span>
+<span class="font-body-sm text-[11px] text-tertiary font-medium">26%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full mt-1.5 overflow-hidden">
+<div class="h-full bg-tertiary rounded-full" style="width: 26%;"></div>
+</div>
+</div>
+</div>
+<!-- Pendientes -->
+<div class="bg-surface-container p-3 rounded-xl flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-[10px] uppercase tracking-wider text-secondary">Pendientes</span>
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+</div>
+<div class="mt-1">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">35</span>
+<span class="font-body-sm text-[10px] text-secondary truncate">$37M</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full mt-1.5 overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 19%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. CHIPS DE FILTRO SCROLLEABLES -->
+<div class="flex flex-col gap-2 mt-space-md">
+<!-- Nivel 1: Tipo de unidad -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+<button class="px-3.5 h-8 rounded-full bg-on-surface text-on-primary font-label-lg text-label-lg whitespace-nowrap active:scale-95 transition-transform" type="button">
+        Todo (184)
+      </button>
+<button class="px-3.5 h-8 rounded-full bg-surface-container text-secondary font-label-lg text-label-lg whitespace-nowrap hover:text-on-surface active:bg-surface-container-high transition-colors" type="button">
+        Carpas (144)
+      </button>
+<button class="px-3.5 h-8 rounded-full bg-surface-container text-secondary font-label-lg text-label-lg whitespace-nowrap hover:text-on-surface active:bg-surface-container-high transition-colors" type="button">
+        Sombrillas (40)
+      </button>
+</div>
+<!-- Nivel 2: Filtro por disponibilidad -->
+<div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+<button class="px-3 h-7 rounded-lg bg-surface-container text-on-surface font-label-md text-[11px] whitespace-nowrap font-medium" type="button">
+        Todas
+      </button>
+<button class="px-3 h-7 rounded-lg bg-surface-container text-secondary font-label-md text-[11px] whitespace-nowrap hover:text-on-surface" type="button">
+        Libres (47)
+      </button>
+<button class="px-3 h-7 rounded-lg bg-surface-container text-secondary font-label-md text-[11px] whitespace-nowrap hover:text-on-surface" type="button">
+        Ocupadas (102)
+      </button>
+<button class="px-3 h-7 rounded-lg bg-surface-container text-secondary font-label-md text-[11px] whitespace-nowrap hover:text-on-surface flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+        Pendientes (35)
+      </button>
+</div>
+</div>
+<!-- 4. LEYENDA CLARA DE ESTADOS -->
+<div class="flex items-center justify-between px-3 py-2.5 mt-space-sm bg-surface-container rounded-xl">
+<div class="flex items-center gap-1.5">
+<span class="w-3.5 h-3.5 rounded bg-surface-container-lowest"></span>
+<span class="font-body-sm text-body-sm text-on-surface">Libre</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3.5 h-3.5 rounded bg-on-surface"></span>
+<span class="font-body-sm text-body-sm text-on-surface">Ocupada</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3.5 h-3.5 rounded bg-primary-container"></span>
+<span class="font-body-sm text-body-sm text-on-surface">Pendiente</span>
+</div>
+</div>
+<!-- 5. PLANO INTERACTIVO DE PLAYA GRANDE (CANVAS RESTRINGIDO Y PAN-FRIENDLY) -->
+<div class="relative mt-space-md rounded-2xl bg-surface-container-low overflow-hidden">
+<!-- CONTROLES FLOTANTES DE ZOOM / AJUSTE (Quiet Luxury Glass) -->
+<div class="absolute right-3 top-16 z-20 flex flex-col gap-1.5">
+<button class="w-9 h-9 rounded-xl bg-surface-container-lowest text-on-surface flex items-center justify-center active:scale-90 transition-transform" id="btn-zoom-in" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+<button class="w-9 h-9 rounded-xl bg-surface-container-lowest text-on-surface flex items-center justify-center active:scale-90 transition-transform" id="btn-zoom-out" type="button">
+<span class="material-symbols-outlined text-[20px]">remove</span>
+</button>
+<button class="w-9 h-9 rounded-xl bg-surface-container-lowest text-on-surface flex items-center justify-center active:scale-90 transition-transform" id="btn-zoom-reset" type="button">
+<span class="material-symbols-outlined text-[19px]">crop_free</span>
+</button>
+</div>
+<!-- ENCABEZADO DE SECTORES DEL BALNEARIO (ZONA ALTA) -->
+<div class="grid grid-cols-3 gap-1 p-2 bg-surface-container">
+<div class="py-1.5 px-2 rounded-lg bg-surface-container-low flex items-center justify-center">
+<span class="font-label-md text-[9px] uppercase tracking-widest text-secondary font-semibold">RECREACIÓN</span>
+</div>
+<div class="py-1.5 px-2 rounded-lg bg-surface-container-low flex items-center justify-center">
+<span class="font-label-md text-[9px] uppercase tracking-widest text-secondary font-semibold">ACCESO</span>
+</div>
+<div class="py-1.5 px-2 rounded-lg bg-surface-container-high flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-secondary">pool</span>
+<span class="font-label-md text-[9px] uppercase tracking-widest text-on-surface font-semibold">PILETA</span>
+</div>
+</div>
+<!-- ÁREA DE MAPA CON SCROLL HORIZONTAL / VERTICAL COMPACTO -->
+<div class="overflow-x-auto overflow-y-auto no-scrollbar p-3.5 transition-transform origin-top-left" id="map-viewport" style="max-height: 440px;">
+<div class="min-w-[340px] flex flex-col items-center">
+<!-- BLOQUES DE CARPAS (144 UNIDADES EN 6 PASILLOS) -->
+<div class="w-full">
+<div class="flex items-center justify-between pb-2">
+<span class="font-label-md text-[10px] uppercase tracking-widest text-secondary font-semibold">PASILLO A - B - C</span>
+<span class="font-label-md text-[10px] uppercase tracking-widest text-secondary font-semibold">PASILLO D - E - F</span>
+</div>
+<!-- CONTENEDOR DE LAS 6 COLUMNAS VERTICALES EN 2 GRUPOS -->
+<div class="grid grid-cols-2 gap-4 w-full">
+<!-- GRUPO OESTE (Pasillos 1, 2, 3: Unidades 1-25, 26-50, 51-75) -->
+<div class="grid grid-cols-3 gap-1 bg-surface-container p-1.5 rounded-xl">
+<!-- Col 1 (1 a 25) -->
+<div class="flex flex-col gap-1">
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>1</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>2</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>3</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>4</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>5</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>6</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>7</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>8</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>9</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>10</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>11</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>12</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>13</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>14</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>15</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>16</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>17</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>18</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>19</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>20</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>21</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>22</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>23</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>24</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>25</span><span class="text-[8px]">T</span></div>
+</div>
+<!-- Col 2 (26 a 50) -->
+<div class="flex flex-col gap-1">
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>26</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>27</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>28</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>29</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>30</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>31</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>32</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>33</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>34</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>35</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>36</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>37</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>38</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>39</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>40</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>41</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>42</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>43</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>44</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>45</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>46</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>47</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>48</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>49</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>50</span><span class="text-[8px]">T</span></div>
+</div>
+<!-- Col 3 (51 a 75) -->
+<div class="flex flex-col gap-1">
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>51</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>52</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>53</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>54</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>55</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>56</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>57</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>58</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>59</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>60</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>61</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>62</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>63</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>64</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>65</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>66</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>67</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>68</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>69</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>70</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>71</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>72</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>73</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>74</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>75</span></div>
+</div>
+</div>
+<!-- GRUPO ESTE (Pasillos 4, 5, 6: Unidades 76-98, 99-121, 122-144) -->
+<div class="grid grid-cols-3 gap-1 bg-surface-container p-1.5 rounded-xl">
+<!-- Col 4 (76 a 98) -->
+<div class="flex flex-col gap-1">
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>76</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>77</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>78</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>79</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>80</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>81</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>82</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>83</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>84</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>85</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>86</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>87</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>88</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>89</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>90</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>91</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>92</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>93</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>94</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>95</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>96</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>97</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>98</span></div>
+<div class="h-6 rounded bg-surface-container-high flex items-center justify-center opacity-40"><span class="text-[8px] text-secondary">•</span></div>
+<div class="h-6 rounded bg-surface-container-high flex items-center justify-center opacity-40"><span class="text-[8px] text-secondary">•</span></div>
+</div>
+<!-- Col 5 (99 a 121) -->
+<div class="flex flex-col gap-1">
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>99</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>100</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>101</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>102</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>103</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>104</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>105</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>106</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>107</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>108</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>109</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>110</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>111</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>112</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>113</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>114</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>115</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>116</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>117</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>118</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>119</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>120</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>121</span></div>
+<div class="h-6 rounded bg-surface-container-high flex items-center justify-center opacity-40"><span class="text-[8px] text-secondary">•</span></div>
+<div class="h-6 rounded bg-surface-container-high flex items-center justify-center opacity-40"><span class="text-[8px] text-secondary">•</span></div>
+</div>
+<!-- Col 6 (122 a 144) -->
+<div class="flex flex-col gap-1">
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>122</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>123</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>124</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>125</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>126</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>127</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>128</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>129</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>130</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>131</span></div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-between px-1 text-[10px] font-semibold text-secondary"><span>132</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>133</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>134</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>135</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>136</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>137</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>138</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>139</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>140</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>141</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>142</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-between px-1 text-[10px] font-bold text-on-primary"><span>143</span></div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-between px-1 text-[10px] font-bold text-on-primary-fixed"><span>144</span><span class="text-[8px]">T</span></div>
+<div class="h-6 rounded bg-surface-container-high flex items-center justify-center opacity-40"><span class="text-[8px] text-secondary">•</span></div>
+<div class="h-6 rounded bg-surface-container-high flex items-center justify-center opacity-40"><span class="text-[8px] text-secondary">•</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SEPARADOR ELEGANTE: SECTOR SOMBRILLAS -->
+<div class="w-full my-4 py-1.5 flex items-center justify-center gap-2 bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-[15px] text-secondary">beach_access</span>
+<span class="font-label-md text-[10px] uppercase tracking-widest text-secondary font-semibold">SECTOR SOMBRILLAS (40 UNIDADES)</span>
+</div>
+<!-- GRILLA DE LAS 40 SOMBRILLAS (2 BLOQUES DE 20) -->
+<div class="grid grid-cols-2 gap-4 w-full">
+<!-- Bloque 1 (1 a 20) -->
+<div class="grid grid-cols-5 gap-1.5 bg-surface-container p-2 rounded-xl">
+<!-- Fila 1 -->
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">1</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">2</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">3</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">4</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">5</div>
+<!-- Fila 2 -->
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">6</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">7</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">8</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">9</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">10</div>
+<!-- Fila 3 -->
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">11</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">12</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">13</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">14</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">15</div>
+<!-- Fila 4 -->
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">16</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">17</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">18</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">19</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">20</div>
+</div>
+<!-- Bloque 2 (21 a 40) -->
+<div class="grid grid-cols-5 gap-1.5 bg-surface-container p-2 rounded-xl">
+<!-- Fila 1 -->
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">21</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">22</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">23</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">24</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">25</div>
+<!-- Fila 2 -->
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">26</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">27</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">28</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">29</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">30</div>
+<!-- Fila 3 -->
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">31</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">32</div>
+<div class="h-6 rounded bg-on-surface flex items-center justify-center text-[10px] font-bold text-on-primary">33</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">34</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">35</div>
+<!-- Fila 4 -->
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">36</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">37</div>
+<div class="h-6 rounded bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">38</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">39</div>
+<div class="h-6 rounded bg-surface-container-lowest flex items-center justify-center text-[10px] font-semibold text-secondary">40</div>
+</div>
+</div>
+<!-- ORIENTACIÓN MARÍTIMA INFERIOR -->
+<div class="w-full mt-4 py-2.5 px-3 bg-surface-container rounded-xl flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">waves</span>
+<span class="font-label-md text-[10px] uppercase tracking-widest text-secondary font-semibold">OCÉANO ATLÁNTICO</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">waves</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TARJETA CONTEXTUAL: DETALLE DE UNIDAD SELECCIONADA -->
+<div class="mt-space-md p-4 rounded-2xl bg-surface-container">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-fixed flex items-center justify-center font-headline-sm text-headline-sm">
+          32
+        </div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold leading-tight">Carpa 32 • Pasillo B</span>
+<span class="font-body-sm text-body-sm text-secondary">Familia Werthein (6 pax)</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-[10px] uppercase font-bold tracking-wider">
+        PENDIENTE
+      </span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-surface-container-high">
+<div>
+<span class="font-label-md text-[10px] uppercase tracking-wider text-secondary">Saldo a abonar</span>
+<p class="font-title-md text-title-md text-on-surface font-bold">$1.450.000</p>
+</div>
+<div>
+<span class="font-label-md text-[10px] uppercase tracking-wider text-secondary">Vigencia</span>
+<p class="font-body-sm text-body-sm text-on-surface font-medium">15 Oct - 30 Mar</p>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-3">
+<button class="flex-1 h-10 rounded-xl bg-on-surface text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-1.5 active:bg-secondary transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+<span>Cobrar Saldo</span>
+</button>
+<button class="w-10 h-10 rounded-xl bg-surface-container-high text-on-surface flex items-center justify-center active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[19px]">edit</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    let currentZoom = 1;
+    const viewport = document.getElementById('map-viewport');
+    const btnIn = document.getElementById('btn-zoom-in');
+    const btnOut = document.getElementById('btn-zoom-out');
+    const btnReset = document.getElementById('btn-zoom-reset');
+
+    if (btnIn && viewport) {
+      btnIn.addEventListener('click', () => {
+        if (currentZoom < 1.4) {
+          currentZoom += 0.15;
+          viewport.style.transform = `scale(${currentZoom})`;
+        }
+      });
+    }
+
+    if (btnOut && viewport) {
+      btnOut.addEventListener('click', () => {
+        if (currentZoom > 0.8) {
+          currentZoom -= 0.15;
+          viewport.style.transform = `scale(${currentZoom})`;
+        }
+      });
+    }
+
+    if (btnReset && viewport) {
+      btnReset.addEventListener('click', () => {
+        currentZoom = 1;
+        viewport.style.transform = 'scale(1)';
+        viewport.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-on-surface font-semibold border-b-2 border-primary-container"><div class="flex items-center justify-around h-16 px-space-xs relative"><a class="flex flex-col items-center justify-center w-14 h-full text-secondary hover:text-on-surface transition-colors" data-path="inicio" href="#"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-md text-[10px] mt-0.5">Inicio</span></a><a aria-current="page" class="flex flex-col items-center justify-center w-14 h-full transition-colors text-on-surface font-semibold border-b-2 border-primary-container" data-path="plano" href="#"><span class="material-symbols-outlined text-[22px]">map</span><span class="font-label-md text-[10px] mt-0.5">Plano</span></a><div class="flex flex-col items-center justify-center w-16 -mt-5"><a class="w-13 h-13 w-[52px] h-[52px] rounded-full bg-primary-container text-on-primary-fixed flex items-center justify-center active:scale-95 transition-transform" data-path="nueva-reserva" href="#"><span class="material-symbols-outlined text-[26px]">add</span></a><span class="font-label-md text-[10px] text-on-surface mt-1">Reserva</span></div><a class="flex flex-col items-center justify-center w-14 h-full text-secondary hover:text-on-surface transition-colors" data-path="clientes" href="#"><span class="material-symbols-outlined text-[22px]">group</span><span class="font-label-md text-[10px] mt-0.5">Clientes</span></a><a class="flex flex-col items-center justify-center w-14 h-full relative text-secondary hover:text-on-surface transition-colors" data-path="mas" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">menu</span><span class="absolute -top-1 -right-2 px-1 min-w-[14px] h-3.5 rounded-full bg-error text-on-error font-label-md text-[9px] flex items-center justify-center leading-none">9+</span></div><span class="font-label-md text-[10px] mt-0.5">Más</span></a></div></nav></body></html>

@@ -6,7 +6,7 @@ import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
 import { useOverlay } from '../../context/OverlayProvider'
 import {
-  Home, Map, CalendarDays, Users, MoreHorizontal, X, Wallet, BarChart2,
+  Home, Map, Users, MoreHorizontal, X, Wallet, BarChart2, Plus,
   DoorClosed, Inbox, GanttChartSquare, Activity, Bell, FileText, UserCheck, LogOut, QrCode,
 } from 'lucide-react'
 import { isFeatureEnabled } from '../../lib/features'
@@ -15,11 +15,15 @@ import { isFeatureEnabled } from '../../lib/features'
 // del Sidebar en pantallas chicas (el Sidebar completo queda solo para
 // desktop, ver AppLayout.jsx). "Más" abre un bottom sheet con el resto de
 // las secciones + Cerrar sesión, para no amontonar más de 5 ítems abajo
-// (regla de oro de bottom nav: 3 a 5, nunca más).
-const ITEMS = [
+// (regla de oro de bottom nav: 3 a 5, nunca más). Botón central "Reserva"
+// (oct 2026, mock Stitch): mismo destino que antes (/app/reservas, única
+// pantalla real de alta), solo cambia el look — círculo dorado elevado con
+// "+", no una pestaña plana más.
+const ITEMS_IZQ = [
   { name: 'Inicio', path: '/app/home', icon: Home },
   { name: 'Plano', path: '/app/plano', icon: Map },
-  { name: 'Reservas', path: '/app/reservas', icon: CalendarDays },
+]
+const ITEMS_DER = [
   { name: 'Clientes', path: '/app/clientes', icon: Users },
 ]
 
@@ -66,30 +70,54 @@ export default function BottomNav() {
   return (
     <>
       <nav
-        className="no-print md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-hairline flex items-stretch"
+        className="no-print md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-hairline flex items-stretch font-ui"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        {ITEMS.map((item) => (
+        {ITEMS_IZQ.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[11px] font-bold uppercase tracking-wider transition-all ${
-                isActive ? 'text-gold' : 'text-prius-muted'
+              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors ${
+                isActive ? 'text-black font-semibold' : 'text-prius-slate hover:text-black'
               }`
             }
           >
-            <item.icon size={20} />
+            <item.icon size={22} />
+            {item.name}
+          </NavLink>
+        ))}
+
+        {/* Botón central elevado "Reserva" (mock) */}
+        <NavLink to="/app/reservas" className="flex-1 flex flex-col items-center justify-center -mt-4">
+          <span className="w-12 h-12 rounded-full bg-gold flex items-center justify-center shadow-[0_2px_8px_rgba(242,202,80,0.35)] active:scale-95 transition-transform">
+            <Plus size={24} className="text-black" />
+          </span>
+          <span className="text-label-md text-black mt-1">Reserva</span>
+        </NavLink>
+
+        {ITEMS_DER.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors ${
+                isActive ? 'text-black font-semibold' : 'text-prius-slate hover:text-black'
+              }`
+            }
+          >
+            <item.icon size={22} />
             {item.name}
           </NavLink>
         ))}
         <button
           onClick={() => setShowMore(true)}
-          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[11px] font-bold uppercase tracking-wider text-prius-muted transition-all"
+          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md text-prius-slate hover:text-black transition-colors"
         >
           <span className="relative">
-            <MoreHorizontal size={20} />
+            <MoreHorizontal size={22} />
             {notificationsCount > 0 && (
               <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-gold text-black text-[10px] font-bold flex items-center justify-center">
                 {notificationsCount > 9 ? '9+' : notificationsCount}

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container": "#eeeeee",
+          "on-error": "#ffffff",
+          "on-error-container": "#93000a",
+          "on-primary-container": "#6b5500",
+          "surface-container-high": "#e8e8e8",
+          "primary-fixed": "#ffe08a",
+          "tertiary-fixed": "#7ffc97",
+          "on-tertiary-container": "#00662a",
+          "surface-container-lowest": "#ffffff",
+          "secondary": "#5e5e5e",
+          "error-container": "#ffdad6",
+          "surface-tint": "#745b00",
+          "surface": "#f9f9f9",
+          "secondary-fixed-dim": "#c6c6c6",
+          "on-surface": "#1a1c1c",
+          "on-primary-fixed": "#241a00",
+          "inverse-on-surface": "#f1f1f1",
+          "primary-fixed-dim": "#eac249",
+          "surface-container-low": "#f4f3f3",
+          "surface-dim": "#dadada",
+          "inverse-surface": "#2f3131",
+          "on-secondary-container": "#646464",
+          "surface-variant": "#e2e2e2",
+          "on-tertiary": "#ffffff",
+          "error": "#ba1a1a",
+          "on-primary-fixed-variant": "#574400",
+          "on-background": "#1a1c1c",
+          "secondary-container": "#e2e2e2",
+          "on-surface-variant": "#4d4635",
+          "secondary-fixed": "#e2e2e2",
+          "inverse-primary": "#eac249",
+          "on-tertiary-fixed": "#002109",
+          "on-tertiary-fixed-variant": "#005320",
+          "tertiary-fixed-dim": "#62df7d",
+          "outline-variant": "#d0c5af",
+          "on-secondary-fixed": "#1b1b1b",
+          "surface-bright": "#f9f9f9",
+          "surface-container-highest": "#e2e2e2",
+          "tertiary-container": "#6ae785",
+          "primary-container": "#f2ca50",
+          "tertiary": "#006e2d",
+          "primary": "#745b00",
+          "on-secondary-fixed-variant": "#474747",
+          "on-primary": "#ffffff",
+          "outline": "#7f7663",
+          "on-secondary": "#ffffff",
+          "background": "#f9f9f9"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "gutter-lg": "1.5rem",
+          "gutter": "1rem",
+          "space-md": "1rem",
+          "gutter-sm": "0.75rem",
+          "margin-tablet": "2rem",
+          "space-xl": "2.25rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "margin": "1.25rem",
+          "margin-mobile": "1rem"
+        },
+        "fontFamily": {
+          "headline-sm": ["Inter"],
+          "display-lg": ["Inter"],
+          "body-md": ["Inter"],
+          "headline-lg": ["Inter"],
+          "label-lg": ["Inter"],
+          "body-sm": ["Inter"],
+          "headline-md": ["Inter"],
+          "headline-lg-mobile": ["Inter"],
+          "label-md": ["Inter"],
+          "body-lg": ["Inter"],
+          "title-md": ["Inter"],
+          "metric-xl": ["Inter"]
+        },
+        "fontSize": {
+          "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600"}],
+          "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "headline-lg": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+          "label-lg": ["13px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "body-sm": ["12px", {"lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+          "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "headline-lg-mobile": ["26px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "label-md": ["11px", {"lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "title-md": ["16px", {"lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+          "metric-xl": ["34px", {"lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "600"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-container-lowest border-r border-surface-container z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="p-space-lg border-b border-surface-container-low"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-inverse-surface flex items-center justify-center text-inverse-on-surface font-headline-sm text-headline-sm">P</div><div><div class="font-headline-sm text-headline-sm text-on-surface leading-none tracking-tight">Prius</div><div class="font-label-md text-label-md text-on-surface-variant uppercase mt-1 tracking-wider">Playa Grande • CRM</div></div></div><button class="w-full mt-space-lg h-12 rounded-xl bg-primary-container text-on-surface font-label-lg text-label-lg flex items-center justify-center gap-space-sm hover:opacity-95 transition-opacity" type="button"><span class="material-symbols-outlined text-[20px]">add</span><span>Nueva reserva</span></button></div><nav class="flex flex-col py-space-sm px-space-xs" data-active-classes="bg-surface-container-low text-on-surface font-title-md border-r-2 border-primary-container"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-colors bg-surface-container-low text-on-surface font-title-md border-r-2 border-primary-container" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-body-md text-body-md">Inicio</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="plano" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Plano</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="clientes" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="font-body-md text-body-md">Clientes</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="mas" href="#"><span class="material-symbols-outlined text-[20px]">more_horiz</span><span class="font-body-md text-body-md">Más</span></a></nav></div><div class="p-space-md border-t border-surface-container-low"><div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-low"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="min-w-0 flex-1"><p class="font-label-lg text-label-lg text-on-surface truncate">Baltasar Bruschetti</p><p class="font-label-md text-label-md text-on-surface-variant truncate">Guardia Sur • Operativo</p></div></div><div class="mt-space-sm px-space-xs flex items-center justify-between text-on-surface-variant"><span class="font-label-md text-label-md">Versión 2.4</span><span class="w-2 h-2 rounded-full bg-tertiary"></span></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-surface-container z-40 px-gutter-lg flex items-center justify-between"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface">Playa Grande</span><span class="text-on-surface-variant text-body-sm">•</span><span class="font-body-sm text-body-sm text-on-surface-variant">Mar del Plata</span><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-low border border-surface-container font-label-md text-label-md text-tertiary ml-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>OPERATIVO</span></div><div class="relative w-80"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span><input class="w-full h-9 pl-9 pr-4 rounded-xl bg-surface-container-low border border-surface-container text-body-sm font-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-outline-variant" placeholder="Buscar cliente, reserva, carpa..." type="text"/></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[18px]">calendar_today</span><span>Sábado, 17 de octubre de 2026</span></div><button class="relative w-9 h-9 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-error text-on-error font-label-md text-[10px] leading-tight">42</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="relative pt-16 bg-surface min-h-screen px-gutter-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- Top Greeting & Real-time Status Banner -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-space-lg pb-space-lg">
+<div>
+<div class="flex items-center gap-space-sm mb-1.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-lowest text-tertiary font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+          GUARDIA SUR · ACTIVO
+        </span>
+<span class="font-body-sm text-body-sm text-secondary">|</span>
+<span class="font-body-sm text-body-sm text-secondary">Sábado, 17 de octubre de 2026</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface tracking-tight">Hola, Baltasar</h1>
+<p class="font-body-md text-body-md text-secondary mt-1">Gestión operativa de unidades de playa, cobranzas y accesos en tiempo real.</p>
+</div>
+<!-- Quick Micro KPI Badges -->
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px] text-tertiary">check_circle</span>
+<div class="text-left">
+<span class="block font-label-md text-label-md text-secondary uppercase tracking-wider">Leads sin contactar</span>
+<span class="font-title-md text-title-md text-on-surface">0 al día</span>
+</div>
+</div>
+<div class="flex items-center gap-2 px-space-md py-2.5 rounded-xl bg-surface-container-lowest">
+<div class="relative">
+<span class="material-symbols-outlined text-[18px] text-primary">notifications_active</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-error"></span>
+</div>
+<div class="text-left">
+<span class="block font-label-md text-label-md text-secondary uppercase tracking-wider">Notificaciones</span>
+<span class="font-title-md text-title-md text-on-surface">42 pendientes</span>
+</div>
+</div>
+<button class="h-11 px-space-md rounded-xl bg-on-surface text-surface-container-lowest font-label-lg text-label-lg flex items-center gap-2 hover:bg-inverse-surface transition-colors cursor-pointer" type="button">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+<span>Sincronizar</span>
+</button>
+</div>
+</section>
+<!-- Row 1: Weather / Maritime Conditions & Fast Operational Actions -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg pt-space-sm pb-space-lg">
+<!-- Weather & Maritime Conditions (Quiet Luxury Maritime Terminal) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-2xl p-space-lg flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary">air</span>
+<span class="font-label-md text-label-md text-secondary uppercase tracking-wider">Condiciones Marítimas · Biología Costera</span>
+</div>
+<div class="flex items-center gap-3">
+<a class="font-label-md text-label-md text-primary flex items-center gap-1 hover:underline" href="https://www.windguru.cz" rel="noopener" target="_blank">
+<span>Windguru</span>
+<span class="material-symbols-outlined text-[14px]">north_east</span>
+</a>
+<span class="text-surface-container-highest">•</span>
+<button class="font-label-md text-label-md text-secondary hover:text-on-surface transition-colors" type="button">
+              Ver pronóstico
+            </button>
+</div>
+</div>
+<!-- Hero Temperature & Wind Notice -->
+<div class="flex flex-wrap items-baseline justify-between gap-4 py-space-sm">
+<div class="flex items-baseline gap-space-sm">
+<span class="font-display-lg text-[44px] text-on-surface tracking-tighter">9°</span>
+<span class="font-headline-sm text-headline-sm text-secondary">Playa Grande</span>
+</div>
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">storm</span>
+<span>Viento fuerte del Sudoeste (SW)</span>
+</div>
+</div>
+<!-- Marine Telemetry Grid -->
+<div class="grid grid-cols-3 gap-space-md mt-space-md">
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary">
+<span class="font-label-md text-label-md uppercase tracking-wider">Viento</span>
+<span class="material-symbols-outlined text-[18px]">navigation</span>
+</div>
+<div class="mt-2">
+<span class="font-headline-md text-headline-md text-on-surface">19 <span class="text-body-sm font-normal text-secondary">km/h</span></span>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">Ráfagas hasta 50 km/h</p>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary">
+<span class="font-label-md text-label-md uppercase tracking-wider">Olas Mar</span>
+<span class="material-symbols-outlined text-[18px]">waves</span>
+</div>
+<div class="mt-2">
+<span class="font-headline-md text-headline-md text-on-surface">1.5 <span class="text-body-sm font-normal text-secondary">m</span></span>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">Período 10s · Moderado</p>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary">
+<span class="font-label-md text-label-md uppercase tracking-wider">Agua</span>
+<span class="material-symbols-outlined text-[18px]">thermostat</span>
+</div>
+<div class="mt-2">
+<span class="font-headline-md text-headline-md text-on-surface">12.8°</span>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">Pleamar a las 14:10 h</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Hourly Strip Forecast -->
+<div class="mt-space-lg pt-space-md border-t border-surface-container-low">
+<div class="flex items-center justify-between text-center gap-2">
+<div class="flex-1 py-1.5 px-1 rounded-lg bg-surface-container-low">
+<span class="block font-label-md text-label-md text-secondary">00h</span>
+<span class="material-symbols-outlined text-[18px] text-secondary my-1">cloud</span>
+<span class="block font-title-md text-title-md text-on-surface">9°</span>
+</div>
+<div class="flex-1 py-1.5 px-1 rounded-lg bg-surface-container-low">
+<span class="block font-label-md text-label-md text-secondary">01h</span>
+<span class="material-symbols-outlined text-[18px] text-secondary my-1">cloud</span>
+<span class="block font-title-md text-title-md text-on-surface">9°</span>
+</div>
+<div class="flex-1 py-1.5 px-1 rounded-lg bg-surface-container-low">
+<span class="block font-label-md text-label-md text-secondary">02h</span>
+<span class="material-symbols-outlined text-[18px] text-secondary my-1">cloud</span>
+<span class="block font-title-md text-title-md text-on-surface">9°</span>
+</div>
+<div class="flex-1 py-1.5 px-1 rounded-lg bg-surface-container-low">
+<span class="block font-label-md text-label-md text-secondary">03h</span>
+<span class="material-symbols-outlined text-[18px] text-secondary my-1">air</span>
+<span class="block font-title-md text-title-md text-on-surface">8°</span>
+</div>
+<div class="flex-1 py-1.5 px-1 rounded-lg bg-surface-container-low">
+<span class="block font-label-md text-label-md text-secondary">04h</span>
+<span class="material-symbols-outlined text-[18px] text-secondary my-1">air</span>
+<span class="block font-title-md text-title-md text-on-surface">8°</span>
+</div>
+<div class="flex-1 py-1.5 px-1 rounded-lg bg-surface-container-low">
+<span class="block font-label-md text-label-md text-secondary">05h</span>
+<span class="material-symbols-outlined text-[18px] text-secondary my-1">routine</span>
+<span class="block font-title-md text-title-md text-on-surface">9°</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Operations Column -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- 4 Primary Operation Actions Grid -->
+<div class="grid grid-cols-2 gap-space-sm flex-1">
+<!-- Reservar -->
+<button class="group p-space-md rounded-2xl bg-surface-container-lowest hover:bg-surface-container-low transition-all text-left flex flex-col justify-between" type="button">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low group-hover:bg-primary-container flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[22px] text-on-surface">bookmark_add</span>
+</div>
+<div class="mt-4">
+<span class="font-headline-sm text-headline-sm text-on-surface block">Reservar</span>
+<span class="font-body-sm text-body-sm text-secondary">Nueva carpa o sombrilla</span>
+</div>
+</button>
+<!-- Cobrar -->
+<button class="group p-space-md rounded-2xl bg-surface-container-lowest hover:bg-surface-container-low transition-all text-left flex flex-col justify-between" type="button">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low group-hover:bg-primary-container flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[22px] text-on-surface">payments</span>
+</div>
+<div class="mt-4">
+<span class="font-headline-sm text-headline-sm text-on-surface block">Cobrar</span>
+<span class="font-body-sm text-body-sm text-secondary">Recibos y saldos pendientes</span>
+</div>
+</button>
+<!-- Check-in -->
+<button class="group p-space-md rounded-2xl bg-surface-container-lowest hover:bg-surface-container-low transition-all text-left flex flex-col justify-between" type="button">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low group-hover:bg-primary-container flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[22px] text-on-surface">how_to_reg</span>
+</div>
+<div class="mt-4">
+<span class="font-headline-sm text-headline-sm text-on-surface block">Check-in</span>
+<span class="font-body-sm text-body-sm text-secondary">Ingreso socios y pulseras</span>
+</div>
+</button>
+<!-- Buscar Cliente -->
+<button class="group p-space-md rounded-2xl bg-surface-container-lowest hover:bg-surface-container-low transition-all text-left flex flex-col justify-between" type="button">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low group-hover:bg-primary-container flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[22px] text-on-surface">person_search</span>
+</div>
+<div class="mt-4">
+<span class="font-headline-sm text-headline-sm text-on-surface block">Buscar cliente</span>
+<span class="font-body-sm text-body-sm text-secondary">Legajos, historial y carnet</span>
+</div>
+</button>
+</div>
+<!-- Turno / Caja Rápida Status Banner -->
+<div class="p-space-md rounded-2xl bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">point_of_sale</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Caja sin iniciar</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-label-md uppercase tracking-wider bg-surface-container-low text-secondary">Puesto 01</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary">Turno mañana no registrado aún</p>
+</div>
+</div>
+<button class="h-9 px-4 rounded-xl bg-primary-container text-on-surface font-label-lg text-label-lg flex items-center gap-1 hover:opacity-90 transition-opacity" type="button">
+<span>Abrir</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Row 2: Operational Key Metrics (Fintech Balance + Seaside Occupancy) -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter-lg pb-space-lg">
+<!-- Card 1: OCUPACIÓN GENERAL -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-lg flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary">beach_access</span>
+<span class="font-label-md text-label-md text-secondary uppercase tracking-wider">Capacidad Diaria</span>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-container-low text-tertiary font-label-md text-label-md">
+            47 disponibles para hoy
+          </span>
+</div>
+<!-- Big Metric -->
+<div class="mt-space-md flex items-baseline justify-between">
+<div>
+<span class="font-label-md text-label-md text-secondary uppercase tracking-wider block">Ocupación General</span>
+<span class="font-metric-xl text-metric-xl text-on-surface">74%</span>
+</div>
+<div class="text-right">
+<span class="font-title-md text-title-md text-on-surface">137 ocupadas</span>
+<span class="block font-body-sm text-body-sm text-secondary">de 184 unidades totales</span>
+</div>
+</div>
+<!-- Master Golden Linear Progress -->
+<div class="w-full bg-surface-container-low h-3 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full transition-all duration-500" style="width: 74%;"></div>
+</div>
+</div>
+<!-- Sector Breakdown Sub-metrics -->
+<div class="grid grid-cols-2 gap-space-md mt-space-lg pt-space-md border-t border-surface-container-low">
+<div class="p-space-md rounded-xl bg-surface-container-low">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface">Carpas</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">74%</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">107 <span class="text-body-sm font-normal text-secondary">/ 144</span></span>
+<span class="font-body-sm text-body-sm text-tertiary">37 libres</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-on-surface h-full rounded-full" style="width: 74%;"></div>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface">Sombrillas</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">75%</span>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">30 <span class="text-body-sm font-normal text-secondary">/ 40</span></span>
+<span class="font-body-sm text-body-sm text-tertiary">10 libres</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 75%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: BALANCE DE TEMPORADA & DEUDA -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-lg flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary">account_balance_wallet</span>
+<span class="font-label-md text-label-md text-secondary uppercase tracking-wider">Cobranzas Temporada 26/27</span>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-container-low text-tertiary font-label-md text-label-md font-semibold">
+            85.8% Percibido
+          </span>
+</div>
+<!-- Big Financial Amount -->
+<div class="mt-space-md flex items-baseline justify-between">
+<div>
+<span class="font-label-md text-label-md text-secondary uppercase tracking-wider block">Total Recaudado</span>
+<span class="font-metric-xl text-metric-xl text-on-surface">$ 224.601.530</span>
+</div>
+<div class="text-right">
+<span class="font-title-md text-title-md text-secondary">Meta presupuestada</span>
+<span class="block font-body-sm text-body-sm text-secondary">$ 261.858.530</span>
+</div>
+</div>
+<!-- Dual Color Financial Progress -->
+<div class="w-full bg-surface-container-low h-3 rounded-full mt-3 overflow-hidden flex">
+<div class="bg-tertiary h-full transition-all duration-500" style="width: 85.8%;"></div>
+<div class="bg-surface-container-highest h-full flex-1"></div>
+</div>
+</div>
+<!-- Financial Warning & Cash Register Breakdown -->
+<div class="grid grid-cols-2 gap-space-md mt-space-lg pt-space-md border-t border-surface-container-low">
+<!-- Deuda Card -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary">Pendientes de Cobro</span>
+<span class="material-symbols-outlined text-[16px] text-error">priority_high</span>
+</div>
+<div class="mt-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">$ 37.257.000</span>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">35 reservas con saldo deudor</p>
+</div>
+</div>
+<!-- Ingresos del Día -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary">Caja Hoy</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary">trending_up</span>
+</div>
+<div class="mt-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">$ 1.840.000</span>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">14 cobros asentados</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Row 3: Últimos Movimientos (Fintech Operational Feed) -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-lg mb-space-lg">
+<!-- Header with Action -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Últimos movimientos</h2>
+<p class="font-body-sm text-body-sm text-secondary">Registro auditable de accesos, modificaciones y transacciones</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<!-- Filter Tabs -->
+<div class="flex items-center p-1 rounded-xl bg-surface-container-low">
+<button class="px-3 py-1 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-xs" type="button">Todos</button>
+<button class="px-3 py-1 rounded-lg text-secondary hover:text-on-surface font-label-md text-label-md transition-colors" type="button">Seguridad</button>
+<button class="px-3 py-1 rounded-lg text-secondary hover:text-on-surface font-label-md text-label-md transition-colors" type="button">Leads</button>
+<button class="px-3 py-1 rounded-lg text-secondary hover:text-on-surface font-label-md text-label-md transition-colors" type="button">Pagos</button>
+</div>
+<a class="h-9 px-3 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-lg text-label-lg inline-flex items-center gap-1 transition-colors" href="#">
+<span>Ver todo</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Movement Rows -->
+<div class="flex flex-col">
+<!-- Item 1: Inicio de sesión -->
+<div class="py-3.5 flex items-center justify-between border-b border-surface-container-low hover:bg-surface-container-low/50 px-2 rounded-xl transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px] text-on-surface">login</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Inicio de sesión</span>
+<span class="px-2 py-0.2 rounded text-[10px] font-label-md uppercase tracking-wider bg-surface-container-low text-tertiary">Autenticado</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary truncate">Baltasar Bruschetti • Terminal móvil Guardia Sur</p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="font-title-md text-title-md text-on-surface">00:17</span>
+<span class="block font-body-sm text-body-sm text-secondary">Hoy</span>
+</div>
+</div>
+<!-- Item 2: Cierre por inactividad -->
+<div class="py-3.5 flex items-center justify-between border-b border-surface-container-low hover:bg-surface-container-low/50 px-2 rounded-xl transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px] text-secondary">lock_clock</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Cierre por inactividad</span>
+<span class="px-2 py-0.2 rounded text-[10px] font-label-md uppercase tracking-wider bg-surface-container-low text-secondary">Seguridad</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary truncate">Baltasar Bruschetti • Bloqueo preventivo automático</p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="font-title-md text-title-md text-on-surface">00:11</span>
+<span class="block font-body-sm text-body-sm text-secondary">Hoy</span>
+</div>
+</div>
+<!-- Item 3: Lead editado Danila -->
+<div class="py-3.5 flex items-center justify-between border-b border-surface-container-low hover:bg-surface-container-low/50 px-2 rounded-xl transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px] text-primary">edit_note</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Lead editado — Danila</span>
+<span class="px-2 py-0.2 rounded text-[10px] font-label-md uppercase tracking-wider bg-primary-container/30 text-on-surface">Carpa Enero</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary truncate">Modificado por Baltasar Bruschetti • Agregó preferencia pasillo central</p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="font-title-md text-title-md text-on-surface">23:58</span>
+<span class="block font-body-sm text-body-sm text-secondary">Ayer</span>
+</div>
+</div>
+<!-- Item 4: Lead editado Julia Hueso -->
+<div class="py-3.5 flex items-center justify-between hover:bg-surface-container-low/50 px-2 rounded-xl transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px] text-primary">edit_note</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Lead editado — Julia hueso</span>
+<span class="px-2 py-0.2 rounded text-[10px] font-label-md uppercase tracking-wider bg-primary-container/30 text-on-surface">Sombrilla</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary truncate">Modificado por Baltasar Bruschetti • Solicitud Sombrilla primera quincena</p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="font-title-md text-title-md text-on-surface">23:58</span>
+<span class="block font-body-sm text-body-sm text-secondary">Ayer</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Editorial Brand Footer Line -->
+<footer class="pt-space-sm pb-space-xl flex flex-col sm:flex-row items-center justify-between text-secondary font-label-md text-label-md gap-2 border-t border-surface-container">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-on-surface">Prius Playa Grande</span>
+<span>•</span>
+<span>Sector Carpas y Balneario</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span>Mar del Plata · Buenos Aires</span>
+<span>•</span>
+<span class="tracking-widest">VER. 2.4 DESKTOP OPERATIVO</span>
+</div>
+</footer>
+</div>
+<script>
+  // Simple micro-interaction for quick refresh state feedback
+  document.addEventListener('DOMContentLoaded', () => {
+    const syncBtn = document.querySelector('button span.material-symbols-outlined:contains("sync")')?.parentElement;
+    if (syncBtn) {
+      syncBtn.addEventListener('click', () => {
+        const icon = syncBtn.querySelector('span');
+        icon.classList.add('animate-spin');
+        setTimeout(() => icon.classList.remove('animate-spin'), 600);
+      });
+    }
+  });
+</script></main></div></body></html>

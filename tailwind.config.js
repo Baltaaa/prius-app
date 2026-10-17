@@ -15,6 +15,10 @@ export default {
           black: '#000000',
           background: '#F9F9F9',
           subtle: '#F9F9F9',
+          // Superficie gris clara anidada DENTRO de una card blanca (mock
+          // Stitch "surface-container-low") — distinta de `subtle`, que es
+          // el fondo de página. Ej.: tiles de clima/KPI dentro de una card.
+          surface: '#F4F3F3',
           muted: '#999999',
           slate: '#666666',
           success: '#16A34A',
@@ -63,12 +67,23 @@ export default {
         md: '4px',
         sm: '2px',
       },
+      // Escala de espaciado del mock Stitch (DESIGN.md) — `gutter`/
+      // `margin-mobile`/`margin-desktop` reemplazan los valores viejos del
+      // scaffold original (24px/20px/64px), confirmado sin uso en ningún
+      // archivo antes de pisarlos.
       spacing: {
-        'margin-desktop': '64px',
-        'margin-mobile': '20px',
-        'gutter': '24px',
+        'margin-desktop': '1.25rem',
+        'margin': '1.25rem',
+        'margin-mobile': '1rem',
         'margin-tablet': '2rem',
+        'gutter': '1rem',
+        'gutter-sm': '0.75rem',
         'gutter-lg': '1.5rem',
+        'space-xs': '0.25rem',
+        'space-sm': '0.5rem',
+        'space-md': '1rem',
+        'space-lg': '1.5rem',
+        'space-xl': '2.25rem',
       },
       // `h-dvh`/`min-h-dvh` (Fase 1 mobile, oct 2026): Tailwind v3 no trae la
       // unidad `dvh` nativa — `h-screen` (100vh) en iOS Safari mide más que

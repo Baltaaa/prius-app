@@ -11,47 +11,36 @@ import { supabase } from '../../lib/supabase'
 import { calcularPlanoStats } from '../../lib/planoStats'
 import { buildUnitsMap } from '../../lib/planoUnits'
 import { formatPesos, formatFechaLarga, formatHora } from '../../lib/format'
-import { linkToPlano, linkToReserva, linkToCliente } from '../../lib/deepLinks'
+import { linkToReserva, linkToCliente } from '../../lib/deepLinks'
 import { isFeatureEnabled } from '../../lib/features'
 import ClimaHero from '../../components/dashboard/ClimaHero'
 import {
-  Activity, Tent, Umbrella, DoorOpen, Layers, Hourglass, Wallet, AlertCircle,
-  Lock, Unlock, TrendingUp, Inbox, Bell, Clock, QrCode, ArrowRight,
+  BookmarkPlus, CreditCard, UserCheck2, UserSearch, Lock, Unlock, ArrowRight,
+  AlertTriangle, LogIn, TimerOff, PenLine, QrCode, CircleCheck,
+  BellRing, Tent, Umbrella, Wallet,
 } from 'lucide-react'
 
 const todayStr = () => new Date().toISOString().split('T')[0]
 
-/** Tarjeta de KPI del Dashboard — número grande, label chico en mayúscula,
- * barra de progreso fina opcional. Clickeable cuando se pasa `onClick`
- * (lleva al módulo correspondiente, filtrado cuando aplica). Mismo lenguaje
- * visual que el resto de la app (card-light, acento #FDE047). */
-function DashCard({ icon: Icon, label, value, sub, progress, accent, onClick, className = '' }) {
-  const Tag = onClick ? 'button' : 'div'
+// Fila chica de dato al pie de una card (Mix T/P/D, Sin confirmar) — label +
+// valor, sin ícono, sin acento.
+function MiniStat({ label, value }) {
   return (
-    <Tag
-      type={onClick ? 'button' : undefined}
-      onClick={onClick}
-      className={`card-light rounded-2xl p-4 text-left transition-colors min-w-0 ${onClick ? 'hover:bg-prius-subtle cursor-pointer' : ''} ${className}`}
-    >
-      <div className="flex items-center gap-2 mb-2.5">
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border shrink-0 ${accent ? 'border-gold/30 bg-gold/10' : 'border-hairline bg-prius-subtle'}`}>
-          <Icon size={14} className={accent ? 'text-gold' : 'text-prius-slate'} />
-        </div>
-        <p className="text-label-md text-prius-slate truncate">{label}</p>
-      </div>
-      <p className="text-metric-xl text-black tabular-nums leading-none truncate">{value}</p>
-      {sub != null && <p className="text-body-sm text-prius-muted tabular-nums mt-1 truncate">{sub}</p>}
-      {progress != null && (
-        <div className="mt-2.5 h-[3px] rounded-full bg-prius-subtle overflow-hidden">
-          <div className="h-full rounded-full bg-gold" style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }} />
-        </div>
-      )}
-    </Tag>
+    <div className="flex items-center justify-between text-body-sm">
+      <span className="text-prius-slate">{label}</span>
+      <span className="text-black font-semibold tabular-nums">{value}</span>
+    </div>
   )
 }
 
-function SeccionTitulo({ children }) {
-  return <h2 className="text-label-md text-prius-muted mb-3">{children}</h2>
+// Barra de progreso fina dorada/negra reutilizada en las cards de capacidad.
+function Bar({ pct, tone = 'gold' }) {
+  const fill = tone === 'success' ? 'bg-prius-success' : tone === 'black' ? 'bg-black' : 'bg-gold'
+  return (
+    <div className="w-full h-3 rounded-full bg-prius-surface overflow-hidden">
+      <div className={`h-full rounded-full ${fill}`} style={{ width: `${Math.min(100, Math.max(0, Math.round(pct * 100)))}%` }} />
+    </div>
+  )
 }
 
 export default function Home() {
@@ -93,8 +82,7 @@ export default function Home() {
 
   // Llegadas de hoy: reservas (no canceladas) cuya fecha de inicio real es
   // hoy — temporada resuelve la fecha contra `temporadas` (no tiene fecha
-  // propia), mismo criterio que ya usa el resto de la app (ver
-  // CLAUDE.md "Historial"/notificaciones viejas).
+  // propia), mismo criterio que ya usa el resto de la app.
   const temporadasPorId = useMemo(() => Object.fromEntries((temporadas || []).map((t) => [t.id, t])), [temporadas])
   const llegadasHoy = useMemo(() => reservas.filter((r) => {
     if (r.estado === 'cancelada') return false
@@ -105,8 +93,11 @@ export default function Home() {
   }), [reservas, hoy, temporadasPorId])
 
   // Facturación/deuda (mismo cálculo que Reportes.jsx, sin query nueva —
-  // reusa `reservas` ya cargadas) — dato de dinero agregado de todo el CRM:
-  // mismo gate de permiso que ya tiene la pantalla de Reportes.
+  // reusa `reservas` ya cargadas). Dato agregado de dinero de todo el CRM:
+  // mismo gate de permiso que ya tiene Reportes — solo el bloque "Total
+  // recaudado / meta / % percibido" de la card de Cobranzas queda detrás de
+  // `puedeVerReportes`; Pendientes de cobro e Ingresos del día ya eran
+  // visibles para cualquier rol antes del rediseño, se mantiene así.
   const { facturacionBruta, deudaExterna, totalCobrado } = useMemo(() => {
     let facturado = 0, pendiente = 0
     for (const r of reservas) {
@@ -116,8 +107,24 @@ export default function Home() {
     }
     return { facturacionBruta: facturado, deudaExterna: pendiente, totalCobrado: facturado - pendiente }
   }, [reservas])
+  const pctPercibido = facturacionBruta > 0 ? totalCobrado / facturacionBruta : 0
 
-  const ultimosMovimientos = (historialItems || []).slice(0, 5)
+  // Tabs de "Últimos movimientos" (desktop): filtro client-side sobre los
+  // mismos `historialItems` ya cargados por useHistorial — sin query nueva.
+  const [tabMovimientos, setTabMovimientos] = useState('todos')
+  const TABS_MOVIMIENTOS = [
+    { key: 'todos', label: 'Todos' },
+    { key: 'seguridad', label: 'Seguridad', tabla: 'auth' },
+    { key: 'leads', label: 'Leads', tabla: 'leads' },
+    { key: 'pagos', label: 'Pagos', tabla: 'pagos' },
+  ]
+  const movimientosFiltrados = useMemo(() => {
+    const items = historialItems || []
+    const tab = TABS_MOVIMIENTOS.find((t) => t.key === tabMovimientos)
+    const filtrados = tab?.tabla ? items.filter((ev) => ev.tabla === tab.tabla) : items
+    return filtrados.slice(0, 5)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historialItems, tabMovimientos])
 
   const loading = resLoading || cajaLoading
 
@@ -132,104 +139,327 @@ export default function Home() {
   const nombreUsuario = perfil?.nombre || perfil?.usuario || 'Usuario'
   const primerNombre = nombreUsuario.split(' ')[0]
 
+  const iconoMovimiento = (ev) => {
+    if (ev.tabla === 'auth' && ev.tipo_evento === 'login') return LogIn
+    if (ev.tabla === 'auth') return TimerOff
+    return PenLine
+  }
+
+  // --- Accesos rápidos: navegación a pantallas/modales que ya existen, sin
+  // funcionalidad nueva (mock: Reservar/Cobrar/Check-in/Buscar cliente). ---
+  const accesos = [
+    { key: 'reservar', label: 'Reservar', sub: 'Nueva carpa o sombrilla', icon: BookmarkPlus, onClick: () => navigate('/app/reservas'), accent: true },
+    { key: 'cobrar', label: 'Cobrar', sub: 'Recibos y saldos pendientes', icon: CreditCard, onClick: () => navigate('/app/caja') },
+    { key: 'checkin', label: 'Check-in', sub: 'Ingreso de socios', icon: UserCheck2, onClick: () => navigate('/app/recepcion') },
+    { key: 'buscar', label: 'Buscar cliente', sub: 'Legajos e historial', icon: UserSearch, onClick: () => navigate('/app/clientes') },
+  ]
+
   return (
-    <div className="space-y-8 animate-premium-fade font-ui">
-      {/* Fila 1: saludo + clima */}
-      <div className="space-y-4">
+    <div className="flex flex-col gap-6 font-ui -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0 px-4 sm:px-6 md:px-8 lg:px-0 animate-premium-fade">
+      {/* Fila 0: saludo + estado + badges KPI (desktop) */}
+      <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div>
-          <h1 className="text-headline-lg-mobile sm:text-headline-lg text-black">Hola, {primerNombre}</h1>
-          <p className="text-label-md text-prius-muted mt-1">{formatFechaLarga(hoy)}</p>
-        </div>
-        <ClimaHero fecha={hoy} />
-      </div>
-
-      {/* Fila 2: operación del día */}
-      <div>
-        <SeccionTitulo>Operación de hoy</SeccionTitulo>
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-          <DashCard icon={Activity} label="Ocupación" value={`${Math.round(stats.ocupacion.pct * 100)}%`} sub={`${stats.ocupacion.count}/${stats.ocupacion.total} unidades`} progress={stats.ocupacion.pct} accent onClick={() => navigate(linkToPlano())} />
-          <DashCard icon={Tent} label="Carpas" value={`${Math.round(stats.carpas.pct * 100)}%`} sub={`${stats.carpas.count}/${stats.carpas.total}`} progress={stats.carpas.pct} onClick={() => navigate(linkToPlano())} />
-          <DashCard icon={Umbrella} label="Sombrillas" value={`${Math.round(stats.sombrillas.pct * 100)}%`} sub={`${stats.sombrillas.count}/${stats.sombrillas.total}`} progress={stats.sombrillas.pct} onClick={() => navigate(linkToPlano())} />
-          <DashCard icon={DoorOpen} label="Libres hoy" value={stats.libres.count} onClick={() => navigate(linkToPlano())} />
-          <DashCard icon={Layers} label="Mix T/P/D" value={`${stats.mix.temporada}/${stats.mix.periodo}/${stats.mix.dia}`} onClick={() => navigate(linkToPlano())} />
-          <DashCard icon={Hourglass} label="Sin confirmar" value={stats.pendientes.sinVerificar ? `${stats.pendientes.count}+` : stats.pendientes.count} onClick={() => navigate(linkToPlano())} />
-        </div>
-      </div>
-
-      {/* Fila 3: dinero y caja */}
-      <div>
-        <SeccionTitulo>Caja y dinero</SeccionTitulo>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <DashCard
-            icon={cajaHoy ? Unlock : Lock}
-            label="Caja"
-            value={cajaHoy ? 'Abierta' : 'Sin iniciar'}
-            sub={cajaHoy ? `Desde ${formatHora(cajaHoy.abierta_at)} · ${perfilesPorId[cajaHoy.abierta_por] || '—'}` : 'Tocá para abrirla'}
-            accent={!!cajaHoy}
-            onClick={() => navigate('/app/caja')}
-          />
-          <DashCard icon={Wallet} label="Ingresos del día" value={stats.ingresosDelDia != null ? formatPesos(stats.ingresosDelDia) : '—'} onClick={() => navigate('/app/caja')} />
-          <DashCard
-            icon={AlertCircle}
-            label="Pendientes de cobro"
-            value={stats.pendientes.count}
-            sub={stats.pendientes.saldo > 0 ? formatPesos(stats.pendientes.saldo) : null}
-            onClick={() => navigate('/app/reservas')}
-          />
-          {puedeVerReportes && (
-            <DashCard icon={TrendingUp} label="Deuda externa" value={formatPesos(deudaExterna)} sub={`Cobrado ${formatPesos(totalCobrado)} de ${formatPesos(facturacionBruta)}`} onClick={() => navigate('/app/reportes')} />
-          )}
-        </div>
-      </div>
-
-      {/* Fila 4: actividad */}
-      <div>
-        <SeccionTitulo>Actividad</SeccionTitulo>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-          <DashCard icon={Inbox} label="Leads sin contactar" value={leadsLoading ? '—' : leadsSinContactar} onClick={() => navigate('/app/leads?estado=nuevo')} />
-          <DashCard icon={Bell} label="Notificaciones" value={countPendientes + countNovedadesNoLeidas} sub={countPendientes > 0 ? `${countPendientes} pendientes` : 'Al día'} accent={countPendientes > 0} onClick={() => navigate('/app/notificaciones')} />
-          {recepcionOn && (
-            <DashCard icon={QrCode} label="Llegan hoy" value={llegadasHoy.length} onClick={() => navigate('/app/recepcion')} />
-          )}
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-prius-surface text-prius-success text-label-md uppercase">
+              <span className="w-2 h-2 rounded-full bg-prius-success animate-pulse" />
+              Guardia Sur · Activo
+            </span>
+            <span className="hidden lg:inline text-prius-slate text-body-sm">|</span>
+            <span className="hidden lg:inline text-prius-slate text-body-sm">{formatFechaLarga(hoy)}</span>
+          </div>
+          <h1 className="text-headline-lg-mobile lg:text-display-lg text-black tracking-tight">Hola, {primerNombre}</h1>
+          <p className="lg:hidden text-body-sm text-prius-slate mt-0.5">{formatFechaLarga(hoy)}</p>
+          <p className="hidden lg:block text-body-md text-prius-slate mt-1">Gestión operativa de unidades de playa, cobranzas y accesos en tiempo real.</p>
         </div>
 
-        <div className="card-light rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-label-md text-prius-slate flex items-center gap-2">
-              <Clock size={13} /> Últimos movimientos
-            </p>
-            <button onClick={() => navigate('/app/historial')} className="text-label-md text-gold hover:text-black flex items-center gap-1 transition-colors">
-              Ver todo <ArrowRight size={12} />
+        {/* Badges KPI — solo desktop (mobile los muestra como chips más abajo) */}
+        <div className="hidden lg:flex items-center gap-2">
+          <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-space-md py-2.5 rounded-xl card-light hover:bg-prius-subtle transition-colors text-left">
+            <CircleCheck size={18} className="text-prius-success" />
+            <div>
+              <span className="block text-label-md text-prius-slate uppercase">Leads sin contactar</span>
+              <span className="text-title-md text-black">{leadsLoading ? '—' : leadsSinContactar} al día</span>
+            </div>
+          </button>
+          <button onClick={() => navigate('/app/notificaciones')} className="flex items-center gap-2 px-space-md py-2.5 rounded-xl card-light hover:bg-prius-subtle transition-colors text-left">
+            <div className="relative">
+              <BellRing size={18} className="text-black" />
+              {countPendientes > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-prius-error" />}
+            </div>
+            <div>
+              <span className="block text-label-md text-prius-slate uppercase">Notificaciones</span>
+              <span className="text-title-md text-black">{countPendientes + countNovedadesNoLeidas} pendientes</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      {/* Fila 1 desktop: clima (7/12) + accesos rápidos y caja (5/12). Mobile: clima primero, accesos después. */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-7 min-w-0">
+          <ClimaHero fecha={hoy} />
+        </div>
+
+        <div className="lg:col-span-5 min-w-0 flex flex-col gap-4 order-first lg:order-none">
+          <div className="grid grid-cols-4 lg:grid-cols-2 gap-2 flex-1">
+            {accesos.map((a) => (
+              <button
+                key={a.key}
+                type="button"
+                onClick={a.onClick}
+                className="group flex flex-col items-center lg:items-start justify-center lg:justify-between p-space-sm lg:p-space-md rounded-2xl card-light hover:bg-prius-subtle active:scale-95 transition-all text-center lg:text-left"
+              >
+                <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-xl flex items-center justify-center mb-1.5 lg:mb-0 transition-colors ${a.accent ? 'bg-gold' : 'bg-prius-surface group-hover:bg-gold/20'}`}>
+                  <a.icon size={20} className="text-black" />
+                </div>
+                <div className="lg:mt-4">
+                  <span className="block text-label-md lg:text-headline-sm text-black">{a.label}</span>
+                  <span className="hidden lg:block text-body-sm text-prius-slate">{a.sub}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Caja: estado + abrir */}
+          <div className="p-space-md rounded-2xl card-light flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full lg:rounded-xl bg-prius-surface flex items-center justify-center shrink-0 text-prius-slate">
+                {cajaHoy ? <Unlock size={18} /> : <Lock size={18} />}
+              </div>
+              <div className="truncate">
+                <p className="text-title-md text-black truncate">{cajaHoy ? 'Caja abierta' : 'Caja sin iniciar'}</p>
+                <p className="text-body-sm text-prius-slate truncate">
+                  {cajaHoy ? `Desde ${formatHora(cajaHoy.abierta_at)} · ${perfilesPorId[cajaHoy.abierta_por] || '—'}` : 'Turno no registrado aún'}
+                </p>
+              </div>
+            </div>
+            {!cajaHoy && (
+              <button onClick={() => navigate('/app/caja')} className="h-9 px-3 rounded-xl bg-black text-white text-label-lg shrink-0 active:scale-95 transition-transform flex items-center gap-1">
+                Abrir <ArrowRight size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Fila 2 mobile: chips de actividad en vivo (scroll horizontal) — en desktop ya están arriba como badges */}
+      <section className="lg:hidden -mx-4 px-4 overflow-x-auto scrollbar-none flex items-center gap-2">
+        <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-3 py-2 rounded-xl card-light shrink-0">
+          <span className="w-2 h-2 rounded-full bg-prius-slate" />
+          <span className="text-body-sm text-prius-slate">Leads sin contactar:</span>
+          <span className="text-title-md text-black">{leadsLoading ? '—' : leadsSinContactar}</span>
+        </button>
+        <button onClick={() => navigate('/app/notificaciones')} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold text-black shrink-0">
+          <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
+          <span className="text-body-sm font-medium">Notificaciones:</span>
+          <span className="text-title-md font-bold">{countPendientes + countNovedadesNoLeidas}</span>
+        </button>
+        {recepcionOn && (
+          <button onClick={() => navigate('/app/recepcion')} className="flex items-center gap-2 px-3 py-2 rounded-xl card-light shrink-0">
+            <span className="w-2 h-2 rounded-full bg-prius-success" />
+            <span className="text-body-sm text-prius-slate">Llegan hoy:</span>
+            <span className="text-title-md text-black">{llegadasHoy.length}</span>
+          </button>
+        )}
+      </section>
+
+      {/* Fila 3: Capacidad diaria + Cobranzas temporada */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Capacidad diaria (antes "Operación de hoy") */}
+        <div className="card-light rounded-2xl p-space-lg flex flex-col justify-between min-w-0">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-label-md text-prius-slate uppercase">Capacidad Diaria</span>
+              <button onClick={() => navigate('/app/plano')} className="px-2.5 py-1 rounded-full bg-prius-surface text-prius-success text-label-md">
+                {stats.libres.count} disponibles para hoy
+              </button>
+            </div>
+            <button onClick={() => navigate('/app/plano')} className="w-full mt-space-md flex items-baseline justify-between text-left">
+              <div>
+                <span className="block text-label-md text-prius-slate uppercase">Ocupación General</span>
+                <span className="text-metric-xl text-black">{Math.round(stats.ocupacion.pct * 100)}%</span>
+              </div>
+              <div className="text-right">
+                <span className="text-title-md text-black">{stats.ocupacion.count} ocupadas</span>
+                <span className="block text-body-sm text-prius-slate">de {stats.ocupacion.total} unidades totales</span>
+              </div>
+            </button>
+            <div className="mt-3"><Bar pct={stats.ocupacion.pct} /></div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-space-lg pt-space-md border-t border-hairline">
+            <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-xl bg-prius-surface text-left">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-title-md text-black"><Tent size={14} /> Carpas</span>
+                <span className="text-label-md text-black font-semibold">{Math.round(stats.carpas.pct * 100)}%</span>
+              </div>
+              <div className="mt-2 flex items-baseline justify-between">
+                <span className="text-headline-sm text-black">{stats.carpas.count} <span className="text-body-sm font-normal text-prius-slate">/ {stats.carpas.total}</span></span>
+              </div>
+              <div className="mt-2"><Bar pct={stats.carpas.pct} tone="black" /></div>
+            </button>
+            <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-xl bg-prius-surface text-left">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-title-md text-black"><Umbrella size={14} /> Sombrillas</span>
+                <span className="text-label-md text-black font-semibold">{Math.round(stats.sombrillas.pct * 100)}%</span>
+              </div>
+              <div className="mt-2 flex items-baseline justify-between">
+                <span className="text-headline-sm text-black">{stats.sombrillas.count} <span className="text-body-sm font-normal text-prius-slate">/ {stats.sombrillas.total}</span></span>
+              </div>
+              <div className="mt-2"><Bar pct={stats.sombrillas.pct} /></div>
             </button>
           </div>
-          {historialLoading ? (
-            <p className="text-body-sm text-prius-muted uppercase tracking-widest animate-pulse py-4 text-center">Cargando...</p>
-          ) : ultimosMovimientos.length === 0 ? (
-            <p className="text-body-sm text-prius-muted py-4 text-center">Sin movimientos recientes.</p>
-          ) : (
-            <div className="divide-y divide-hairline">
-              {ultimosMovimientos.map((ev) => (
+
+          <div className="flex flex-col gap-1.5 mt-space-md pt-space-md border-t border-hairline">
+            <MiniStat label="Mix Temporada / Período / Día" value={`${stats.mix.temporada}/${stats.mix.periodo}/${stats.mix.dia}`} />
+            <MiniStat label="Sin confirmar" value={stats.pendientes.sinVerificar ? `${stats.pendientes.count}+` : stats.pendientes.count} />
+          </div>
+        </div>
+
+        {/* Cobranzas temporada (antes "Caja y dinero") */}
+        <div className="card-light rounded-2xl p-space-lg flex flex-col justify-between min-w-0">
+          <div>
+            {puedeVerReportes && (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-label-md text-prius-slate uppercase">Cobranzas Temporada</span>
+                  <span className="px-2.5 py-1 rounded-full bg-prius-surface text-prius-success text-label-md font-semibold">
+                    {(pctPercibido * 100).toFixed(1)}% Percibido
+                  </span>
+                </div>
+                <button onClick={() => navigate('/app/reportes')} className="w-full mt-space-md flex items-baseline justify-between text-left">
+                  <div>
+                    <span className="block text-label-md text-prius-slate uppercase">Total Recaudado</span>
+                    <span className="text-metric-xl text-black">{formatPesos(totalCobrado)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-title-md text-prius-slate">Meta presupuestada</span>
+                    <span className="block text-body-sm text-prius-slate">{formatPesos(facturacionBruta)}</span>
+                  </div>
+                </button>
+                <div className="mt-3"><Bar pct={pctPercibido} tone="success" /></div>
+              </>
+            )}
+            {!puedeVerReportes && (
+              <div className="flex items-center justify-between">
+                <span className="text-label-md text-prius-slate uppercase">Caja y Cobranzas</span>
+              </div>
+            )}
+          </div>
+
+          <div className={`grid grid-cols-2 gap-4 ${puedeVerReportes ? 'mt-space-lg pt-space-md border-t border-hairline' : 'mt-space-md'}`}>
+            <button onClick={() => navigate('/app/reservas')} className="p-space-md rounded-xl bg-prius-surface text-left flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-label-md text-prius-slate uppercase"><AlertTriangle size={14} className="text-prius-error" /> Pendientes</span>
+              </div>
+              <div className="mt-2">
+                <span className="text-headline-sm text-black">{stats.pendientes.saldo > 0 ? formatPesos(stats.pendientes.saldo) : formatPesos(0)}</span>
+                <p className="text-body-sm text-prius-slate mt-0.5">{stats.pendientes.count} reservas con saldo</p>
+              </div>
+            </button>
+            <button onClick={() => navigate('/app/caja')} className="p-space-md rounded-xl bg-prius-surface text-left flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-label-md text-prius-slate uppercase"><Wallet size={14} className="text-prius-success" /> Caja Hoy</span>
+              </div>
+              <div className="mt-2">
+                <span className="text-headline-sm text-black">{stats.ingresosDelDia != null ? formatPesos(stats.ingresosDelDia) : formatPesos(0)}</span>
+                <p className="text-body-sm text-prius-slate mt-0.5">Ingresos del día</p>
+              </div>
+            </button>
+          </div>
+
+          {/* Alerta de deuda — mobile, como en el mock */}
+          {puedeVerReportes && deudaExterna > 0 && (
+            <button onClick={() => navigate('/app/reservas')} className="lg:hidden p-2.5 rounded-xl bg-red-50 flex items-center justify-between mt-space-sm">
+              <div className="flex items-center gap-1.5">
+                <AlertTriangle size={16} className="text-prius-error" />
+                <span className="text-body-sm text-black font-medium">{stats.pendientes.count} reservas con deuda</span>
+              </div>
+              <span className="text-title-md font-bold text-prius-error">{formatPesos(deudaExterna)}</span>
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* Fila 4: llegan hoy (desktop, si está prendida la feature) */}
+      {recepcionOn && (
+        <section className="hidden lg:block">
+          <button
+            onClick={() => navigate('/app/recepcion')}
+            className="w-full card-light rounded-2xl p-space-md flex items-center justify-between hover:bg-prius-subtle transition-colors"
+          >
+            <div className="flex items-center gap-2.5">
+              <QrCode size={20} className="text-black" />
+              <span className="text-title-md text-black">Llegan hoy</span>
+            </div>
+            <span className="text-headline-sm text-black">{llegadasHoy.length}</span>
+          </button>
+        </section>
+      )}
+
+      {/* Fila 5: últimos movimientos */}
+      <section className="card-light rounded-2xl p-space-md lg:p-space-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-space-md">
+          <div>
+            <h2 className="text-headline-sm text-black flex items-center gap-2">
+              Últimos movimientos
+              <span className="w-1.5 h-1.5 rounded-full bg-prius-success" />
+            </h2>
+            <p className="hidden lg:block text-body-sm text-prius-slate">Registro auditable de accesos, modificaciones y transacciones</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="hidden lg:flex items-center p-1 rounded-xl bg-prius-surface">
+              {TABS_MOVIMIENTOS.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setTabMovimientos(t.key)}
+                  className={`px-3 py-1 rounded-lg text-label-md transition-colors ${tabMovimientos === t.key ? 'bg-white text-black' : 'text-prius-slate hover:text-black'}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => navigate('/app/historial')} className="text-label-lg text-prius-slate hover:text-black transition-colors flex items-center gap-1">
+              Ver todo <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+
+        {historialLoading ? (
+          <p className="text-body-sm text-prius-muted uppercase tracking-widest animate-pulse py-4 text-center">Cargando...</p>
+        ) : movimientosFiltrados.length === 0 ? (
+          <p className="text-body-sm text-prius-muted py-4 text-center">Sin movimientos recientes.</p>
+        ) : (
+          <div className="flex flex-col divide-y divide-hairline lg:divide-y-0">
+            {movimientosFiltrados.map((ev) => {
+              const Icon = iconoMovimiento(ev)
+              return (
                 <button
                   key={ev.id}
                   onClick={() => {
                     if (ev.tabla === 'reservas' && ev.registro_id) navigate(linkToReserva(ev.registro_id))
                     else if (ev.cliente_id) navigate(linkToCliente(ev.cliente_id))
                   }}
-                  className="w-full flex items-center justify-between gap-3 py-3 text-left hover:bg-prius-subtle rounded-lg px-2 -mx-2 transition-colors"
+                  className="w-full flex items-center justify-between gap-3 py-2.5 lg:py-3.5 text-left hover:bg-prius-subtle rounded-xl px-2 -mx-2 transition-colors lg:border-b lg:border-hairline lg:last:border-b-0"
                 >
-                  <div className="min-w-0">
-                    <p className="text-title-md text-black truncate">{ev.descripcion}</p>
-                    <p className="text-body-sm text-prius-muted mt-0.5 truncate">
-                      {ev.actor_nombre || 'Sistema'}{ev.cliente_nombre ? ` · ${ev.cliente_nombre}` : ''}
-                    </p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-prius-surface flex items-center justify-center shrink-0 text-black">
+                      <Icon size={18} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-title-md text-black truncate">{ev.descripcion}</p>
+                      <p className="text-body-sm text-prius-slate truncate">
+                        {ev.actor_nombre || 'Sistema'}{ev.cliente_nombre ? ` · ${ev.cliente_nombre}` : ''}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-body-sm text-prius-muted tabular-nums shrink-0">{formatHora(ev.ts)}</span>
+                  <span className="text-label-md text-prius-slate tabular-nums shrink-0">{formatHora(ev.ts)}</span>
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+              )
+            })}
+          </div>
+        )}
+      </section>
     </div>
   )
 }

@@ -8,13 +8,17 @@ import ClimaPanel from './ClimaPanel'
 const WINDGURU_URL = `https://www.windguru.cz/${WINDGURU_SPOT_ID}`
 
 /**
- * Card de clima destacada del Dashboard (oct 2026) — mismo hook/fuente que
- * el Plano (`useClima`, Edge Function `clima-playa`), cero lógica nueva:
- * reusa `resumenDiaClima` (lib/clima.js) y, para el detalle hora por hora +
- * el widget de Windguru, abre el mismo `ClimaPanel` que ya usa el Plano —
- * no se duplica esa parte. Solo el "pantallazo" de acá (hero horizontal) es
- * nuevo, porque el lugar donde vive (card grande arriba del Dashboard) es
- * otro que el chip angosto del riel del Plano.
+ * Card de clima del Dashboard — rediseño oct 2026 según mock de Stitch
+ * (design/stitch/01-home-*.html, bloque "Condiciones Marítimas"). Mismo
+ * hook/fuente que el Plano (`useClima`, Edge Function `clima-playa`), cero
+ * lógica nueva: reusa `resumenDiaClima` (lib/clima.js) y el mismo `ClimaPanel`
+ * que ya usa el Plano para el detalle hora por hora + Windguru embebido — no
+ * se duplica esa parte.
+ *
+ * El mock trae un tile "AGUA" con temperatura de mar + pleamar — ese dato NO
+ * existe hoy en `useClima` (solo viento/ráfaga/ola), así que la grilla queda
+ * en 3 tiles (Viento / Ráfaga / Olas) en vez de los 3 del mock (Viento/Olas/
+ * Agua) — grilla ajustada a los datos reales, no se inventa un tile vacío.
  *
  * No existe hoy ningún resumen/recomendación generado con IA en el sistema
  * de clima — no se inventa acá.
@@ -25,16 +29,16 @@ export default function ClimaHero({ fecha }) {
   const resumen = resumenDiaClima(clima)
 
   if (loading) {
-    return <div className="card-light rounded-3xl p-6 h-[180px] animate-pulse" />
+    return <div className="card-light rounded-2xl p-space-md h-[220px] animate-pulse" />
   }
 
   if (!resumen) {
     return (
-      <div className="card-light rounded-3xl p-6 flex items-center gap-4">
+      <div className="card-light rounded-2xl p-space-md flex items-center gap-4">
         <Cloud size={28} className="text-prius-muted" />
         <div>
-          <p className="text-sm font-bold text-prius-slate uppercase tracking-widest">Clima</p>
-          <p className="text-xs text-prius-muted mt-1">Sin pronóstico para hoy.</p>
+          <p className="text-label-md text-prius-slate uppercase">Clima</p>
+          <p className="text-body-sm text-prius-muted mt-1">Sin pronóstico para hoy.</p>
         </div>
       </div>
     )
@@ -51,64 +55,115 @@ export default function ClimaHero({ fecha }) {
 
   return (
     <>
-      <div className={`card-light rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center gap-6 ${alerta ? 'border border-amber-500/30' : ''}`}>
-        <div className="flex items-center gap-5 shrink-0">
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border shrink-0 ${alerta ? 'border-amber-500/40 bg-amber-500/10' : 'border-hairline bg-prius-subtle'}`}>
-            <Icono size={30} className={alerta ? 'text-amber-300' : 'text-[#F2CA50]'} />
+      <div className="card-light rounded-2xl p-space-md flex flex-col justify-between min-w-0 font-ui">
+        <div>
+          {/* Encabezado: eyebrow + acciones (Windguru / Ver pronóstico) */}
+          <div className="flex items-center justify-between pb-space-md">
+            <div className="flex items-center gap-2">
+              <Wind size={16} className="text-prius-slate" />
+              <span className="text-label-md text-prius-slate uppercase hidden sm:inline">Condiciones Marítimas · Biología Costera</span>
+              <span className="text-label-md text-prius-slate uppercase sm:hidden">Clima</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <a
+                href={WINDGURU_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-label-md text-black hover:underline flex items-center gap-1"
+              >
+                Windguru <ExternalLink size={12} />
+              </a>
+              <span className="text-hairline hidden sm:inline">•</span>
+              <button
+                type="button"
+                onClick={() => setPanelOpen(true)}
+                className="text-label-md text-prius-slate hover:text-black transition-colors hidden sm:inline"
+              >
+                Ver pronóstico
+              </button>
+            </div>
           </div>
-          <div>
-            <p className="text-4xl font-bold text-black tabular-nums leading-none">
-              {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
-            </p>
-            <p className={`text-[10px] font-bold uppercase tracking-widest mt-1.5 ${alerta ? 'text-amber-300' : 'text-prius-muted'}`}>
-              {alerta ? 'Viento fuerte' : 'Mar del Plata · Base Naval'}
-            </p>
-          </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-sm font-bold tabular-nums text-prius-slate">
-            <ArrowUp size={14} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
-            {actual.viento != null ? Math.round(actual.viento) : '--'} km/h
+          {/* Hero: temperatura + ubicación + alerta de viento */}
+          <div className="flex flex-wrap items-baseline justify-between gap-3 py-1">
+            <button type="button" onClick={() => setPanelOpen(true)} className="flex items-baseline gap-2 sm:hidden">
+              <span className="text-metric-xl text-black tracking-tighter tabular-nums">
+                {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
+              </span>
+              <span className="text-title-md text-prius-slate font-medium">Playa Grande</span>
+            </button>
+            <div className="hidden sm:flex items-baseline gap-3">
+              <span className="text-[44px] leading-none font-semibold text-black tracking-tighter tabular-nums">
+                {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
+              </span>
+              <span className="text-headline-sm text-prius-slate">Playa Grande</span>
+            </div>
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-body-sm ${alerta ? 'bg-red-50 text-prius-error' : 'bg-prius-surface text-black'}`}>
+              <ArrowUp size={14} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
+              {alerta ? 'Viento fuerte' : 'Viento'} del {actual.direccion != null ? Math.round(actual.direccion) : '--'}°
+            </div>
           </div>
-          <div className={`flex items-center gap-1.5 text-sm font-bold tabular-nums ${alerta ? 'text-amber-300' : 'text-prius-slate'}`}>
-            <Gauge size={14} /> ráfaga {Math.round(rafagaMax)} km/h
+
+          {/* Grilla de métricas reales (sin tile de agua/pleamar: no hay dato) */}
+          <div className="grid grid-cols-3 gap-2 mt-space-md">
+            <div className="p-space-sm sm:p-space-md rounded-xl bg-prius-surface flex flex-col justify-between">
+              <div className="flex items-center justify-between text-prius-slate">
+                <span className="text-label-md uppercase">Viento</span>
+                <Wind size={16} />
+              </div>
+              <div className="mt-2">
+                <span className="text-title-md sm:text-headline-md text-black tabular-nums">
+                  {actual.viento != null ? Math.round(actual.viento) : '--'} <span className="text-body-sm font-normal text-prius-slate">km/h</span>
+                </span>
+              </div>
+            </div>
+            <div className="p-space-sm sm:p-space-md rounded-xl bg-prius-surface flex flex-col justify-between">
+              <div className="flex items-center justify-between text-prius-slate">
+                <span className="text-label-md uppercase">Ráfaga</span>
+                <Gauge size={16} />
+              </div>
+              <div className="mt-2">
+                <span className={`text-title-md sm:text-headline-md tabular-nums ${alerta ? 'text-prius-error' : 'text-black'}`}>
+                  {Math.round(rafagaMax)} <span className="text-body-sm font-normal text-prius-slate">km/h</span>
+                </span>
+              </div>
+            </div>
+            <div className="p-space-sm sm:p-space-md rounded-xl bg-prius-surface flex flex-col justify-between">
+              <div className="flex items-center justify-between text-prius-slate">
+                <span className="text-label-md uppercase">Olas Mar</span>
+                <Waves size={16} />
+              </div>
+              <div className="mt-2">
+                <span className="text-title-md sm:text-headline-md text-black tabular-nums">
+                  {actual.olaAltura != null ? Number(actual.olaAltura).toFixed(1) : '--'} <span className="text-body-sm font-normal text-prius-slate">m</span>
+                </span>
+              </div>
+            </div>
           </div>
-          {actual.olaAltura != null && (
-            <div className="flex items-center gap-1.5 text-sm font-bold tabular-nums text-prius-slate">
-              <Waves size={14} /> ola {Number(actual.olaAltura).toFixed(1)} m
+
+          {/* Tira horaria */}
+          {proximasHoras.length > 0 && (
+            <div className="mt-space-md pt-space-sm border-t border-hairline">
+              <div className="flex items-center justify-between gap-1.5 overflow-x-auto scrollbar-none">
+                {proximasHoras.map((h) => (
+                  <div key={h.hora} className="flex-1 min-w-[48px] text-center py-1.5 px-1 rounded-lg bg-prius-surface">
+                    <p className="text-label-md text-prius-slate">{h.hora.slice(0, 2)}h</p>
+                    <Cloud size={16} className="text-prius-slate my-1 mx-auto" />
+                    <p className="text-title-md text-black tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        {proximasHoras.length > 0 && (
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
-            {proximasHoras.map((h) => (
-              <div key={h.hora} className="shrink-0 w-12 text-center px-1 py-2 bg-prius-subtle border border-hairline rounded-lg">
-                <p className="text-[9px] font-bold text-prius-muted">{h.hora.slice(0, 2)}h</p>
-                <p className="text-xs font-bold text-black mt-0.5 tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => setPanelOpen(true)}
-            className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-prius-subtle border border-hairline text-prius-slate hover:text-black hover:border-hairline transition-all"
-          >
-            Ver pronóstico
-          </button>
-          <a
-            href={WINDGURU_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-gold text-black hover:bg-gold-hover transition-colors flex items-center justify-center gap-1.5"
-          >
-            Windguru <ExternalLink size={12} />
-          </a>
-        </div>
+        <button
+          type="button"
+          onClick={() => setPanelOpen(true)}
+          className="sm:hidden mt-space-md h-9 rounded-xl bg-prius-surface text-black text-label-lg hover:bg-hairline transition-colors"
+        >
+          Ver pronóstico
+        </button>
       </div>
 
       <ClimaPanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} clima={clima} loading={loading} selectedDate={fecha} />
