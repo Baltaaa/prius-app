@@ -12,3 +12,15 @@ export function resumenDiaClima(clima) {
   const vientoMax = Math.max(...horas.map((h) => Number(h.viento) || 0))
   return { actual, rafagaMax, vientoMax }
 }
+
+const PUNTOS_CARDINALES = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO']
+
+// Solo presentación: grados meteorológicos (de dónde sopla, 0-360) → punto
+// cardinal de 16 rumbos para el texto "Viento fuerte del {rumbo}" — sin esto
+// se mostraba el grado crudo ("del 159°"), ilegible para alguien que no
+// hace la cuenta mental grado→rumbo.
+export function gradosARumbo(grados) {
+  if (grados == null || Number.isNaN(Number(grados))) return '--'
+  const idx = Math.round((Number(grados) % 360) / 22.5) % 16
+  return PUNTOS_CARDINALES[idx]
+}

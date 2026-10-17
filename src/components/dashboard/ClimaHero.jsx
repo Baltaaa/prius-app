@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ArrowUp, Cloud, CloudRain, ExternalLink, Gauge, Waves, Wind } from 'lucide-react'
 import { useClima } from '../../hooks/useClima'
-import { resumenDiaClima } from '../../lib/clima'
+import { resumenDiaClima, gradosARumbo } from '../../lib/clima'
 import { UMBRAL_RAFAGA_ALERTA_KMH, WINDGURU_SPOT_ID } from '../../config/clima'
 import ClimaPanel from './ClimaPanel'
 
@@ -29,12 +29,12 @@ export default function ClimaHero({ fecha }) {
   const resumen = resumenDiaClima(clima)
 
   if (loading) {
-    return <div className="card-light rounded-2xl p-space-md h-[220px] animate-pulse" />
+    return <div className="card-light rounded-2xl p-space-md sm:p-space-lg h-[220px] animate-pulse" />
   }
 
   if (!resumen) {
     return (
-      <div className="card-light rounded-2xl p-space-md flex items-center gap-4">
+      <div className="card-light rounded-2xl p-space-md sm:p-space-lg flex items-center gap-space-md">
         <Cloud size={28} className="text-prius-muted" />
         <div>
           <p className="text-label-md text-prius-slate uppercase">Clima</p>
@@ -55,7 +55,7 @@ export default function ClimaHero({ fecha }) {
 
   return (
     <>
-      <div className="card-light rounded-2xl p-space-md flex flex-col justify-between min-w-0 font-ui">
+      <div className="card-light rounded-2xl p-space-md sm:p-space-lg flex flex-col justify-between min-w-0 font-ui">
         <div>
           {/* Encabezado: eyebrow + acciones (Windguru / Ver pronóstico) */}
           <div className="flex items-center justify-between pb-space-md">
@@ -100,12 +100,12 @@ export default function ClimaHero({ fecha }) {
             </div>
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-body-sm ${alerta ? 'bg-red-50 text-prius-error' : 'bg-prius-surface text-black'}`}>
               <ArrowUp size={14} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
-              {alerta ? 'Viento fuerte' : 'Viento'} del {actual.direccion != null ? Math.round(actual.direccion) : '--'}°
+              {alerta ? 'Viento fuerte' : 'Viento'} del {gradosARumbo(actual.direccion)}
             </div>
           </div>
 
           {/* Grilla de métricas reales (sin tile de agua/pleamar: no hay dato) */}
-          <div className="grid grid-cols-3 gap-2 mt-space-md">
+          <div className="grid grid-cols-3 gap-space-sm mt-space-md">
             <div className="p-space-sm sm:p-space-md rounded-xl bg-prius-surface flex flex-col justify-between">
               <div className="flex items-center justify-between text-prius-slate">
                 <span className="text-label-md uppercase">Viento</span>

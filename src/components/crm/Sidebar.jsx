@@ -80,7 +80,7 @@ export default function Sidebar() {
       <div className="flex flex-col overflow-hidden">
         {/* Brand Header — logo/ícono reales del proyecto, nunca el placeholder del mock */}
         <div className="p-space-lg border-b border-hairline">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-space-sm">
             <img src="/images/prius-icon.png" alt="Prius" className="w-8 h-8 object-contain shrink-0" />
             <div className="min-w-0">
               <div className="text-headline-sm text-black leading-none truncate">Prius</div>
@@ -89,7 +89,7 @@ export default function Sidebar() {
           </div>
           <button
             onClick={() => navigate('/app/reservas')}
-            className="w-full mt-space-lg h-12 rounded-xl bg-gold text-black text-label-lg flex items-center justify-center gap-2 hover:bg-gold-hover transition-colors"
+            className="w-full mt-space-lg h-12 rounded-xl bg-gold text-black text-label-lg flex items-center justify-center gap-space-sm hover:bg-gold-hover transition-colors"
           >
             <Plus size={18} />
             <span>Nueva reserva</span>
@@ -144,7 +144,7 @@ export default function Sidebar() {
 
       {/* Footer: tarjeta de usuario (mock) + cerrar sesión + versión */}
       <div className="p-space-md border-t border-hairline">
-        <button onClick={() => navigate('/app/perfil')} className="w-full flex items-center gap-2 p-space-sm rounded-xl bg-prius-surface hover:bg-hairline transition-colors text-left">
+        <button onClick={() => navigate('/app/perfil')} className="w-full flex items-center gap-space-sm p-space-sm rounded-xl bg-prius-surface hover:bg-hairline transition-colors text-left">
           <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center shrink-0">
             <User size={16} className="text-white" />
           </div>

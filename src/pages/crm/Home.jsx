@@ -155,11 +155,11 @@ export default function Home() {
   ]
 
   return (
-    <div className="flex flex-col gap-6 font-ui -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0 px-4 sm:px-6 md:px-8 lg:px-0 animate-premium-fade">
+    <div className="flex flex-col gap-space-lg font-ui -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0 px-4 sm:px-6 md:px-8 lg:px-0 animate-premium-fade">
       {/* Fila 0: saludo + estado + badges KPI (desktop) */}
-      <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+      <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-center gap-space-sm mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-prius-surface text-prius-success text-label-md uppercase">
               <span className="w-2 h-2 rounded-full bg-prius-success animate-pulse" />
               Guardia Sur · Activo
@@ -173,7 +173,7 @@ export default function Home() {
         </div>
 
         {/* Badges KPI — solo desktop (mobile los muestra como chips más abajo) */}
-        <div className="hidden lg:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-space-sm">
           <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-space-md py-2.5 rounded-xl card-light hover:bg-prius-subtle transition-colors text-left">
             <CircleCheck size={18} className="text-prius-success" />
             <div>
@@ -195,13 +195,13 @@ export default function Home() {
       </section>
 
       {/* Fila 1 desktop: clima (7/12) + accesos rápidos y caja (5/12). Mobile: clima primero, accesos después. */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
         <div className="lg:col-span-7 min-w-0">
           <ClimaHero fecha={hoy} />
         </div>
 
-        <div className="lg:col-span-5 min-w-0 flex flex-col gap-4 order-first lg:order-none">
-          <div className="grid grid-cols-4 lg:grid-cols-2 gap-2 flex-1">
+        <div className="lg:col-span-5 min-w-0 flex flex-col gap-space-md order-first lg:order-none">
+          <div className="grid grid-cols-4 lg:grid-cols-2 gap-space-sm flex-1">
             {accesos.map((a) => (
               <button
                 key={a.key}
@@ -264,7 +264,7 @@ export default function Home() {
       </section>
 
       {/* Fila 3: Capacidad diaria + Cobranzas temporada */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-gutter-lg">
         {/* Capacidad diaria (antes "Operación de hoy") */}
         <div className="card-light rounded-2xl p-space-lg flex flex-col justify-between min-w-0">
           <div>
@@ -287,7 +287,7 @@ export default function Home() {
             <div className="mt-3"><Bar pct={stats.ocupacion.pct} /></div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-space-lg pt-space-md border-t border-hairline">
+          <div className="grid grid-cols-2 gap-space-md mt-space-lg pt-space-md border-t border-hairline">
             <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-xl bg-prius-surface text-left">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-title-md text-black"><Tent size={14} /> Carpas</span>
@@ -347,7 +347,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className={`grid grid-cols-2 gap-4 ${puedeVerReportes ? 'mt-space-lg pt-space-md border-t border-hairline' : 'mt-space-md'}`}>
+          <div className={`grid grid-cols-2 gap-space-md ${puedeVerReportes ? 'mt-space-lg pt-space-md border-t border-hairline' : 'mt-space-md'}`}>
             <button onClick={() => navigate('/app/reservas')} className="p-space-md rounded-xl bg-prius-surface text-left flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-label-md text-prius-slate uppercase"><AlertTriangle size={14} className="text-prius-error" /> Pendientes</span>
@@ -399,7 +399,7 @@ export default function Home() {
 
       {/* Fila 5: últimos movimientos */}
       <section className="card-light rounded-2xl p-space-md lg:p-space-lg">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-space-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md">
           <div>
             <h2 className="text-headline-sm text-black flex items-center gap-2">
               Últimos movimientos
