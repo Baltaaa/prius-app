@@ -46,6 +46,10 @@ export function DataProvider({ children }) {
   const [codigosReserva, setCodigosReserva] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  // Estado real de Realtime (no inventado): el chip "Operativo" del shell
+  // (TopBar, oct 2026) lo lee de acá — true solo si el canal principal está
+  // efectivamente SUBSCRIBED, no un flag siempre-true.
+  const [realtimeConectado, setRealtimeConectado] = useState(false)
 
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], [])
 
@@ -216,7 +220,7 @@ export function DataProvider({ children }) {
         () => { debouncedRefetch('pagos', fetchPagos); debouncedRefetch('ingresosCaja', fetchIngresosCaja); debouncedRefetch('caja', fetchCaja) })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'codigos_reserva' },
         () => debouncedRefetch('codigosReserva', fetchCodigosReserva))
-      .subscribe()
+      .subscribe((status) => setRealtimeConectado(status === 'SUBSCRIBED'))
 
     // `leads` va en su propio canal: un binding postgres_changes sobre una tabla
     // ausente de la publication `supabase_realtime` (hoy: clientes, caja_diaria,
@@ -532,7 +536,7 @@ export function DataProvider({ children }) {
 
   const value = useMemo(() => ({
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
-    eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error,
+    eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error, realtimeConectado,
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
@@ -542,7 +546,7 @@ export function DataProvider({ children }) {
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
   }), [
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
-    eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error,
+    eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error, realtimeConectado,
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,

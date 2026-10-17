@@ -23,6 +23,7 @@ import {
   User,
 } from 'lucide-react'
 import { isFeatureEnabled } from '../../lib/features'
+import { APP_VERSION } from '../../lib/appVersion'
 
 // Mobile-first (sept 2026): en pantallas chicas la navegación vive en
 // BottomNav.jsx (5 ítems + "Más") — este Sidebar queda oculto por completo
@@ -161,7 +162,7 @@ export default function Sidebar() {
             <LogOut size={14} />
             Cerrar sesión
           </button>
-          <span className="w-2 h-2 rounded-full bg-prius-success" title="Versión 2.4" />
+          <span className="w-2 h-2 rounded-full bg-prius-success" title={`Versión ${APP_VERSION}`} />
         </div>
       </div>
     </aside>

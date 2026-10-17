@@ -6,7 +6,7 @@ import NotificacionesBandeja from './NotificacionesBandeja'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
-import { unidadEmoji, normalizeText, formatComprobante } from '../../lib/format'
+import { unidadEmoji, normalizeText, formatComprobante, formatFechaLarga } from '../../lib/format'
 import { parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToPlano, linkToRecepcion } from '../../lib/deepLinks'
@@ -14,79 +14,11 @@ import { useOverlay } from '../../context/OverlayProvider'
 import { isFeatureEnabled } from '../../lib/features'
 import SearchInput from '../inputs/SearchInput'
 import {
-  Search, Bell, User, LogOut, ChevronDown, X, Wallet,
-  LayoutDashboard, Map, CalendarClock, Users, BarChart2, Inbox,
-  Activity, FileText, UserCheck, DoorClosed, QrCode,
+  Search, Bell, User, LogOut, ChevronDown, X,
+  QrCode, Calendar,
 } from 'lucide-react'
 import StatusBadge from './StatusBadge'
-
-// Título + subtítulo + ícono de cada sección, unificados acá (antes vivían
-// duplicados: sidebar, este label chico, y de nuevo como bloque grande en
-// cada página). Sincronizado con las rutas del Sidebar (mismo listado que
-// mainNav + additionalNav en Sidebar.jsx). Los subtítulos son el texto que
-// antes estaba debajo del <h1> grande de cada página.
-// `shortName` (Fase 1 mobile, oct 2026): versión corta del título para <768px
-// — en 360px los 3-4 botones de la derecha (QR, búsqueda, notificaciones,
-// perfil) le dejan al bloque del título muy poco ancho real, y el `name`
-// completo terminaba truncado a 2-3 letras ("Directo…", "Notifica…"). Debajo
-// de md se usa `shortName` (o `name` si no hace falta acortarlo); en desktop
-// siempre el `name` completo, sin cambios.
-const SECTION_TITLES = [
-  {
-    path: '/app/home', name: 'Dashboard', shortName: 'Inicio', subtitle: 'Resumen de métricas y actividades principales en tiempo real.',
-    icon: LayoutDashboard, iconBg: 'bg-gold/10', iconBorder: 'border-gold/20', iconColor: 'text-gold',
-  },
-  {
-    path: '/app/plano', name: 'Plano de Playa', shortName: 'Plano', subtitle: 'Gestión de Unidades Prius Playa Grande',
-    icon: Map, iconBg: 'bg-sky-400/10', iconBorder: 'border-sky-400/20', iconColor: 'text-sky-400',
-  },
-  {
-    path: '/app/cabinas-lockers', name: 'Cabinas y Lockers', shortName: 'Cabinas', subtitle: 'Sección en desarrollo — solo lectura.',
-    icon: DoorClosed, iconBg: 'bg-prius-subtle', iconBorder: 'border-hairline', iconColor: 'text-prius-slate',
-  },
-  {
-    path: '/app/reservas', name: 'Cola de Reservas', shortName: 'Reservas', subtitle: 'Alquileres por período y día, ordenados por llegada.',
-    icon: CalendarClock, iconBg: 'bg-gold/10', iconBorder: 'border-gold/20', iconColor: 'text-gold',
-  },
-  {
-    path: '/app/clientes', name: 'Directorio de Clientes', shortName: 'Clientes', subtitle: 'Historial completo: temporadas y alquileres pasados.',
-    icon: Users, iconBg: 'bg-cyan-400/10', iconBorder: 'border-cyan-400/20', iconColor: 'text-cyan-400',
-  },
-  {
-    path: '/app/caja', name: 'Caja Diaria', shortName: 'Caja', subtitle: 'Arqueo, historial y cruce automático con pagos.',
-    icon: Wallet, iconBg: 'bg-green-400/10', iconBorder: 'border-green-400/20', iconColor: 'text-prius-success',
-  },
-  {
-    path: '/app/reportes', name: 'Reportes', subtitle: 'Métricas avanzadas de facturación y ocupación.',
-    icon: BarChart2, iconBg: 'bg-purple-400/10', iconBorder: 'border-purple-400/20', iconColor: 'text-purple-400',
-  },
-  {
-    path: '/app/leads', name: 'Leads', subtitle: 'Consultas del formulario de la web, en tiempo real.',
-    icon: Inbox, iconBg: 'bg-orange-400/10', iconBorder: 'border-orange-400/20', iconColor: 'text-orange-400',
-  },
-  {
-    path: '/app/historial', name: 'Historial', subtitle: 'Toda acción sobre reservas, pagos, clientes y unidades.',
-    icon: Activity, iconBg: 'bg-teal-400/10', iconBorder: 'border-teal-400/20', iconColor: 'text-teal-400',
-  },
-  {
-    path: '/app/notificaciones', name: 'Notificaciones', shortName: 'Avisos', subtitle: 'Alertas de sistema, saldos y operaciones diarias.',
-    icon: Bell, iconBg: 'bg-amber-400/10', iconBorder: 'border-amber-400/20', iconColor: 'text-amber-400',
-  },
-  {
-    path: '/app/comprobantes', name: 'Comprobantes', subtitle: 'Generación de recibos oficiales para clientes.',
-    icon: FileText, iconBg: 'bg-violet-400/10', iconBorder: 'border-violet-400/20', iconColor: 'text-violet-400',
-  },
-  {
-    path: '/app/perfil', name: 'Perfil y Tarifas', shortName: 'Perfil', subtitle: 'Configuración de cuenta y valores de temporada.',
-    icon: UserCheck, iconBg: 'bg-pink-400/10', iconBorder: 'border-pink-400/20', iconColor: 'text-pink-400',
-  },
-]
-
-const DEFAULT_SECTION = { name: 'Balneario Playa Grande', shortName: 'Prius', subtitle: '', icon: LayoutDashboard, iconBg: 'bg-prius-subtle', iconBorder: 'border-hairline', iconColor: 'text-prius-slate' }
-
-function useSection(pathname) {
-  return SECTION_TITLES.find((s) => pathname.startsWith(s.path)) || DEFAULT_SECTION
-}
+import { useSection } from '../../lib/sectionTitles'
 
 const normalize = normalizeText
 
@@ -134,7 +66,6 @@ export default function TopBar() {
   const navigate = useNavigate()
   const location = useLocation()
   const section = useSection(location.pathname)
-  const SectionIcon = section.icon
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -145,10 +76,11 @@ export default function TopBar() {
   const searchInputRef = useRef(null)
   const searchFeatureOn = isFeatureEnabled('feat-1-search-global-mejorado')
   const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
-  const { clientes, reservas, unidades, pagos } = useData()
+  const { clientes, reservas, unidades, pagos, realtimeConectado } = useData()
   const { perfil, rol, signOut } = useAuth()
 
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
+  const hoyTopbar = useMemo(() => new Date().toISOString().split('T')[0], [])
   const rolLabel = rol === 'superadmin' ? 'Superadmin' : rol === 'admin' ? 'Admin' : ''
 
   // Hover solo en dispositivos con mouse real — en touch (incluso tablets
@@ -331,42 +263,50 @@ export default function TopBar() {
   }
 
   return (
-    <header className="no-print relative h-20 flex items-center gap-3 px-4 sm:px-6 md:px-8 bg-white border-b border-hairline sticky top-0 z-20 shrink-0">
-      {/* Ancho fijo: el título de sección cambia de largo (Dashboard vs
-          Perfil y Tarifas) pero no puede correr la barra de búsqueda, que se
-          centra contra el nav completo (ver div absoluto más abajo), no
-          contra este espacio. Título + subtítulo + ícono de color: antes
-          vivían repetidos como bloque grande en cada página, ahora viven acá
-          una sola vez. */}
-      <div className="flex items-center gap-3 min-w-0 flex-1 sm:flex-none sm:w-64 md:w-80">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className={`w-10 h-10 rounded-xl ${section.iconBg} border ${section.iconBorder} flex items-center justify-center shrink-0`}>
-            <SectionIcon size={18} className={section.iconColor} />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-sm font-display font-extrabold text-black tracking-tight truncate">
-              <span className="md:hidden">{section.shortName || section.name}</span>
-              <span className="hidden md:inline">{section.name}</span>
-            </h1>
-            {section.subtitle && (
-              <p className="hidden sm:block text-[9px] text-prius-muted font-semibold uppercase tracking-wider truncate">{section.subtitle}</p>
+    <header className="no-print relative h-16 flex items-center justify-between gap-3 px-4 md:px-gutter-lg bg-white border-b border-hairline sticky top-0 z-20 shrink-0 font-ui">
+      {/* Izquierda: desktop/tablet (≥768px, mock 01-home-desktop) = ubicación +
+          chip Operativo + buscador inline. Mobile (<768px, mock
+          01-home-mobile) = "Prius App" + chip + nombre de la sección actual
+          chico debajo (el título grande real de cada pantalla ahora vive al
+          principio del contenido, ver AppLayout.jsx). */}
+      <div className="flex items-center gap-space-lg min-w-0 flex-1 md:flex-initial">
+        <div className="hidden md:flex items-center gap-space-sm shrink-0">
+          <span className="text-headline-sm text-black">Playa Grande</span>
+          <span className="text-body-sm text-prius-slate">•</span>
+          <span className="text-body-sm text-prius-slate">Mar del Plata</span>
+          {realtimeConectado && (
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-prius-surface text-label-md text-prius-success">
+              <span className="w-1.5 h-1.5 rounded-full bg-prius-success animate-pulse" />
+              OPERATIVO
+            </span>
+          )}
+        </div>
+
+        <div className="md:hidden min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-title-md text-black truncate">Prius App</span>
+            {realtimeConectado && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-prius-surface text-label-md text-prius-success shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-prius-success" />
+                Operativo
+              </span>
             )}
           </div>
+          <p className="text-label-md text-prius-slate truncate">{section.shortName || section.name}</p>
         </div>
-      </div>
 
-      {/* Búsqueda global (desktop): centrada respecto al nav completo
-          (posición absoluta, independiente del ancho del título o del bloque
-          de notificaciones/perfil) para que no se corra al cambiar de
-          sección. En mobile pasa a un ícono que abre pantalla completa (ver
-          bloque debajo del header) — no compite por espacio con título/avatar. */}
-      <div ref={searchOverlay.bind} className="hidden sm:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 max-w-[calc(100%-2rem)] z-10">
+        {/* Búsqueda global inline (desktop/tablet) — mismo handler/datos de
+            siempre, solo el shell visual cambia (w-80, fondo prius-surface,
+            h-9, rounded-xl del mock). En mobile pasa a un ícono que abre
+            pantalla completa (ver bloque más abajo). */}
+        <div ref={searchOverlay.bind} className="hidden md:block relative w-80 shrink-0">
         <SearchInput
           ref={searchInputRef}
           value={searchValue}
           onChange={setSearchValue}
           onKeyDown={handleSearchKeyDown}
           placeholder="Buscar cliente, reserva, unidad o comprobante..."
+          inputClassName="bg-prius-surface border-hairline rounded-xl h-9 min-h-0 py-0 text-body-sm"
         />
 
         {showDropdown && (
@@ -447,9 +387,16 @@ export default function TopBar() {
               )}
             </div>
         )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-6 shrink-0 ml-auto">
+      {/* Derecha: fecha (solo ≥1024px), campana, avatar — igual en todas
+          las pantallas, mock 01-home-desktop. */}
+      <div className="flex items-center gap-2 md:gap-space-md shrink-0">
+        <div className="hidden lg:flex items-center gap-1.5 text-body-sm text-prius-slate">
+          <Calendar size={16} />
+          {formatFechaLarga(hoyTopbar)}
+        </div>
         {/* Fase 3 (Recepción, D1): acceso directo al escáner de QR — solo
             mobile (oct 2026), mismo breakpoint que BottomNav/Sidebar. No se
             monta en desktop (no solo oculto por CSS): sin uso en escritorio
@@ -466,7 +413,7 @@ export default function TopBar() {
         {/* Búsqueda (mobile): ícono que abre pantalla completa */}
         <button
           onClick={() => setMobileSearchOpen(true)}
-          className="sm:hidden text-prius-slate hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-prius-subtle transition-all"
+          className="md:hidden text-prius-slate hover:text-black p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-prius-subtle transition-all"
         >
           <Search size={20} />
         </button>
@@ -493,9 +440,9 @@ export default function TopBar() {
             onClick={() => { if (!supportsHover) setShowNotifications((v) => !v) }}
             aria-haspopup="menu"
             aria-expanded={showNotifications}
-            className="text-prius-slate hover:text-black relative p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-prius-subtle transition-all"
+            className="relative w-9 h-9 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center rounded-xl text-prius-slate hover:text-black md:bg-prius-surface md:border md:border-hairline transition-colors"
           >
-            <Bell size={20} />
+            <Bell size={18} />
             {countPendientes > 0 ? (
               <span className="absolute top-1 right-1 w-2 h-2 bg-gold rounded-full border-2 border-white" />
             ) : countNovedadesNoLeidas > 0 ? (
@@ -514,7 +461,7 @@ export default function TopBar() {
             // era descendiente de este contenedor y cerraba el panel antes
             // de llegar). El popover-light real queda en el div de adentro,
             // que no se mueve ni cambia de tamaño — mismo look de siempre.
-            <div className="hidden sm:block absolute right-0 top-full pt-3 w-[380px] max-w-[90vw] z-50">
+            <div className="hidden md:block absolute right-0 top-full pt-3 w-[380px] max-w-[90vw] z-50">
               <div className="max-h-[70vh] popover-light rounded-xl overflow-hidden">
                 <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
               </div>
@@ -523,8 +470,8 @@ export default function TopBar() {
         </div>
 
         {showNotifications && createPortal(
-          <div ref={notifOverlay.bind} className="sm:hidden fixed inset-0 z-[997] bg-white flex flex-col">
-            <div className="flex items-center justify-between px-4 h-20 border-b border-hairline shrink-0">
+          <div ref={notifOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-white flex flex-col">
+            <div className="flex items-center justify-between px-4 h-16 border-b border-hairline shrink-0">
               <h1 className="text-sm font-bold uppercase tracking-widest text-black">Notificaciones</h1>
               <button
                 onClick={() => setShowNotifications(false)}
@@ -559,15 +506,12 @@ export default function TopBar() {
             onClick={() => { if (!supportsHover) setShowProfileMenu((v) => !v) }}
             aria-haspopup="menu"
             aria-expanded={showProfileMenu}
-            className="flex items-center gap-3 p-1 min-h-[44px] hover:bg-prius-subtle rounded-lg transition-all"
+            className="flex items-center gap-1.5 p-1 min-h-[44px] hover:bg-prius-subtle rounded-full transition-colors"
           >
-            <div className="w-8 h-8 bg-gold text-black rounded flex items-center justify-center font-bold text-sm">
+            <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-semibold text-sm shrink-0">
               {nombreMostrado.charAt(0).toUpperCase()}
             </div>
-            <span className="text-sm font-medium text-black hidden sm:block">
-              {nombreMostrado}
-            </span>
-            <ChevronDown size={14} className="text-prius-muted" />
+            <ChevronDown size={14} className="hidden md:block text-prius-muted" />
           </button>
 
           {showProfileMenu && (
@@ -601,8 +545,8 @@ export default function TopBar() {
       {/* Búsqueda mobile a pantalla completa (Tarea 4.2) — mismos resultados
           que el buscador de desktop, reutiliza clienteMatches/reservaMatches. */}
       {mobileSearchOpen && createPortal(
-        <div ref={mobileSearchOverlay.bind} className="sm:hidden fixed inset-0 z-[997] bg-white flex flex-col">
-          <div className="flex items-center gap-3 px-4 h-20 border-b border-hairline shrink-0">
+        <div ref={mobileSearchOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-white flex flex-col">
+          <div className="flex items-center gap-3 px-4 h-16 border-b border-hairline shrink-0">
             <SearchInput
               value={searchValue}
               onChange={setSearchValue}
