@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>Caja Diaria - Prius Balneario Playa Grande</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#745b00",
+            "primary-container": "#f2ca50",
+            "on-primary-container": "#6b5500",
+            "surface": "#F9F9F9",
+            "surface-container-low": "#F4F3F3",
+            "surface-container": "#EEEEEE",
+            "surface-container-lowest": "#FFFFFF",
+            "on-surface": "#1A1C1C",
+            "secondary": "#5E5E5E",
+            "outline": "#7F7663",
+            "outline-variant": "#E5E7EB",
+            "tertiary": "#006E2D",
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #F9F9F9;
+        font-family: 'Inter', sans-serif;
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-[#F9F9F9] text-[#1A1C1C] antialiased min-h-screen">
+<!-- Sidebar Persistente -->
+<aside class="fixed left-0 top-0 h-full w-72 bg-white border-r border-[#E5E7EB] z-50 flex flex-col justify-between py-6 px-4">
+<div class="flex flex-col gap-6">
+<!-- Brand Header -->
+<div class="px-2 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-base tracking-wider uppercase text-[#1A1C1C] font-bold">Prius</span>
+<span class="text-[11px] uppercase tracking-widest text-[#5E5E5E]">Playa Grande</span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+</div>
+<!-- Action Button -->
+<div class="px-2">
+<button class="w-full h-11 bg-[#F2CA50] text-[#6B5500] font-semibold text-sm rounded-xl flex items-center justify-center gap-2 hover:bg-[#EAC249] transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Nueva reserva</span>
+</button>
+</div>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1 px-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span>Inicio (Dashboard)</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">beach_access</span>
+<span>Plano de Playa</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+<span>Reservas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#F2CA50] text-[#6B5500] font-semibold text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]">point_of_sale</span>
+<span>Caja Diaria</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+<span>Clientes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+<span>Reportes</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span>Notificaciones</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-[#EEEEEE] text-[#1A1C1C] text-xs font-semibold">42</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span>Comprobantes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">sell</span>
+<span>Tarifas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5E5E5E] hover:bg-[#F4F3F3] hover:text-[#1A1C1C] transition-colors text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span>Configuración</span>
+</a>
+</nav>
+</div>
+<!-- User Profile Footer -->
+<div class="px-2 pt-4">
+<div class="flex items-center justify-between p-3 rounded-xl bg-[#F4F3F3]">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-[#745B00] flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[#1A1C1C] leading-tight">Baltasar Bruschetti</span>
+<span class="text-[10px] text-[#5E5E5E] uppercase tracking-wider font-semibold">SUPERADMIN</span>
+</div>
+</div>
+<a class="text-[#5E5E5E] hover:text-[#1A1C1C] transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper with Left Margin for Sidebar -->
+<div class="pl-72 min-h-screen bg-[#F9F9F9] flex flex-col">
+<!-- Topbar Persistente -->
+<header class="sticky top-0 h-16 bg-white/90 backdrop-blur-md border-b border-[#E5E7EB] z-40 px-8 flex items-center justify-between gap-6">
+<div class="flex items-center gap-6">
+<!-- Balneario selector indicator -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F4F3F3]">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-semibold text-[#1A1C1C] uppercase tracking-wide">Playa Grande • Operativo</span>
+</div>
+<span class="text-sm text-[#5E5E5E] hidden xl:inline">Sábado 17 Octubre 2026</span>
+<!-- Search input -->
+<div class="relative w-80 lg:w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#5E5E5E] text-[18px]">search</span>
+<input class="w-full h-9 pl-9 pr-4 bg-[#F4F3F3] rounded-xl text-sm text-[#1A1C1C] placeholder:text-[#5E5E5E] focus:outline-none focus:bg-white focus:ring-1 focus:ring-gray-300 transition-all border-none" placeholder="Buscar cliente, reserva, unidad o comprobante..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<!-- Weather Badge -->
+<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F4F3F3] text-xs font-medium text-[#1A1C1C]">
+<span class="material-symbols-outlined text-[16px] text-[#5E5E5E]">air</span>
+<span>18 kn NE • 19°C</span>
+</div>
+<!-- Notification Bell -->
+<div class="relative flex items-center justify-center">
+<button class="w-9 h-9 rounded-xl bg-[#F4F3F3] flex items-center justify-center text-[#5E5E5E] hover:text-[#1A1C1C] hover:bg-[#EEEEEE] transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<span class="absolute -top-1 -right-1 px-1.5 py-0.2 bg-[#F2CA50] text-[#6B5500] rounded-full text-[10px] font-bold leading-tight">42</span>
+</div>
+<!-- Avatar -->
+<div class="w-8 h-8 rounded-full bg-[#745B00] flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+</div>
+</header>
+<!-- Page Content Container -->
+<main class="p-8 max-w-[1600px] w-full mx-auto flex flex-col gap-6">
+<!-- Franja Superior -->
+<section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-3 flex-wrap">
+<h1 class="text-3xl font-bold text-[#1A1C1C] tracking-tight">Caja Diaria</h1>
+<!-- Selector de fecha -->
+<div class="flex items-center bg-white border border-[#E5E7EB] rounded-xl px-1 py-0.5 shadow-sm">
+<button aria-label="Día anterior" class="w-8 h-8 flex items-center justify-center rounded-lg text-[#5E5E5E] hover:text-[#1A1C1C] hover:bg-[#F4F3F3] transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<div class="flex items-center gap-1.5 px-2.5 py-1 text-sm font-semibold text-[#1A1C1C] select-none">
+<span class="material-symbols-outlined text-[#5E5E5E] text-[16px]">calendar_today</span>
+<span>17/10/2026</span>
+</div>
+<button aria-label="Día siguiente" class="w-8 h-8 flex items-center justify-center rounded-lg text-[#5E5E5E] hover:text-[#1A1C1C] hover:bg-[#F4F3F3] transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+<!-- Chip de estado -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-semibold tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+<span>CAJA CERRADA</span>
+</div>
+<span class="text-xs text-[#5E5E5E]">
+              Cerrada 20:45 hs por <strong class="text-[#1A1C1C] font-semibold">B. Bruschetti</strong>
+</span>
+</div>
+<p class="text-sm text-[#5E5E5E]">
+            Arqueo, historial y cruce automático con pagos.
+          </p>
+</div>
+<!-- Acciones a la derecha -->
+<div class="flex items-center gap-3 flex-wrap">
+<button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-[18px] text-gray-500">print</span>
+<span>Imprimir A4</span>
+</button>
+<button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px] text-gray-500">download</span>
+<span>Exportar CSV</span>
+</button>
+<button class="text-sm text-[#5E5E5E] hover:text-red-600 transition-colors flex items-center gap-1.5 ml-1 font-medium" onclick="document.getElementById('reabrir-modal').classList.remove('hidden')" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_open</span>
+<span>Reabrir caja (requiere PIN)</span>
+</button>
+</div>
+</section>
+<!-- Banner de Confirmación de Balance -->
+<section class="bg-white rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+<span class="text-sm font-bold text-emerald-900">Jornada cerrada — Balance cuadrado sin diferencias</span>
+<span class="hidden sm:inline text-xs text-emerald-700">• Operaciones del 17/10/2026 conciliadas y archivadas.</span>
+</div>
+</div>
+<span class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-white/80 border border-emerald-200 px-3 py-1 rounded-full">
+          Balance Auditado
+        </span>
+</section>
+<!-- Layout Principal en 2 Columnas Amplias (gap-8) -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+<!-- COLUMNA IZQUIERDA (~50%) -->
+<div class="flex flex-col gap-8">
+<!-- 1. Card Cabecera de la Jornada -->
+<section class="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-[#5E5E5E]">calendar_today</span>
+<h2 class="text-base font-bold text-[#1A1C1C]">Cabecera de la Jornada</h2>
+</div>
+<span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#F4F3F3] text-[#5E5E5E]">Folio #CJA-2026-10-17</span>
+</div>
+<!-- Grid 2x2 de tiles internos #F4F3F3 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col gap-1">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Fecha</span>
+<span class="text-base font-bold text-[#1A1C1C]">17/10/2026</span>
+<span class="text-xs text-[#5E5E5E]">Sábado • Playa Grande</span>
+</div>
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col gap-1">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Estado</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                    Cerrada
+                  </span>
+</div>
+<span class="text-xs text-[#5E5E5E]">Sin movimientos pendientes</span>
+</div>
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col gap-1">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Hora de Cierre</span>
+<span class="text-base font-bold text-[#1A1C1C]">20:45 hs</span>
+<span class="text-xs text-[#5E5E5E]">Apertura: 08:30 hs</span>
+</div>
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col gap-1">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Responsable</span>
+<span class="text-base font-bold text-[#1A1C1C]">Baltasar Bruschetti</span>
+<span class="text-xs text-[#5E5E5E]">SuperAdmin</span>
+</div>
+</div>
+</section>
+<!-- 2. Card Totales Operativos -->
+<section class="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-[#5E5E5E]">account_balance_wallet</span>
+<h2 class="text-base font-bold text-[#1A1C1C]">Totales Operativos</h2>
+</div>
+<span class="text-xs font-medium text-[#5E5E5E]">Moneda: ARS ($)</span>
+</div>
+<!-- 3 métricas en tiles internos #F4F3F3 -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col justify-between gap-3">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Ingresos</span>
+<div>
+<div class="text-2xl font-bold text-emerald-600 tracking-tight">$ 602.000</div>
+<span class="text-xs text-[#5E5E5E] mt-1 block">1 cobro registrado</span>
+</div>
+</div>
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col justify-between gap-3">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Egresos</span>
+<div>
+<div class="text-2xl font-bold text-gray-900 tracking-tight">$ 0</div>
+<span class="text-xs text-[#5E5E5E] mt-1 block">0 vales emitidos</span>
+</div>
+</div>
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col justify-between gap-3">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Balance Neto</span>
+<div>
+<div class="text-2xl font-bold text-gray-900 tracking-tight">$ 602.000</div>
+<span class="text-xs text-[#5E5E5E] mt-1 block">Total jornada</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Card Arqueo de Efectivo -->
+<section class="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-[#5E5E5E]">payments</span>
+<h2 class="text-base font-bold text-[#1A1C1C]">Arqueo de Efectivo</h2>
+</div>
+<span class="text-xs font-medium text-[#5E5E5E]">Billetaje conciliado</span>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between p-4 rounded-xl bg-[#F4F3F3]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#5E5E5E] text-[18px]">lock</span>
+<span class="text-sm font-medium text-[#1A1C1C]">Fondo Inicial</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-base font-bold text-[#1A1C1C]">$ 0</span>
+<span class="text-xs text-[#5E5E5E] bg-white px-2 py-0.5 rounded border border-[#E5E7EB]">Regla fija del sistema</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 rounded-xl bg-[#F4F3F3]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#5E5E5E] text-[18px]">receipt_long</span>
+<span class="text-sm font-medium text-[#1A1C1C]">Efectivo Esperado</span>
+</div>
+<span class="text-base font-bold text-[#1A1C1C]">$ 602.000</span>
+</div>
+<div class="flex items-center justify-between p-4 rounded-xl bg-[#F4F3F3]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#5E5E5E] text-[18px]">price_check</span>
+<span class="text-sm font-medium text-[#1A1C1C]">Efectivo Contado (Billetaje)</span>
+</div>
+<span class="text-base font-bold text-emerald-700">$ 602.000</span>
+</div>
+</div>
+<!-- Banner interior verde suave -->
+<div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-600 text-[20px]">verified</span>
+<div>
+<span class="text-sm font-bold text-emerald-900 block">Diferencia de Arqueo: $ 0</span>
+<span class="text-xs text-emerald-700">Arqueo cuadrado perfecto. No se registran sobrantes ni faltantes.</span>
+</div>
+</div>
+<span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-white px-2.5 py-1 rounded-lg border border-emerald-200">
+                Correcto
+              </span>
+</div>
+</section>
+<!-- 4. Card Controlador Fiscal — Cierre Z -->
+<section class="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-[#5E5E5E]">receipt</span>
+<h2 class="text-base font-bold text-[#1A1C1C]">Controlador Fiscal — Cierre Z</h2>
+</div>
+<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Emitido</span>
+</div>
+<!-- Mostrando únicamente Número, Monto y Operador -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col gap-1">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Número de Z</span>
+<span class="text-base font-bold text-[#1A1C1C]">Z #0482</span>
+</div>
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col gap-1">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Monto Z</span>
+<span class="text-base font-bold text-emerald-700">$ 602.000</span>
+</div>
+<div class="bg-[#F4F3F3] rounded-xl p-4 flex flex-col gap-1">
+<span class="text-xs uppercase tracking-wider text-[#5E5E5E] font-medium">Operador de Cierre</span>
+<span class="text-base font-bold text-[#1A1C1C]">Baltasar Bruschetti</span>
+</div>
+</div>
+</section>
+</div>
+<!-- COLUMNA DERECHA (~50%) -->
+<div class="flex flex-col gap-8">
+<!-- 1. Card Desglose por Medio de Pago -->
+<section class="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-[#5E5E5E]">credit_card</span>
+<h2 class="text-base font-bold text-[#1A1C1C]">Desglose por Medio de Pago</h2>
+</div>
+<span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#F4F3F3] text-[#5E5E5E]">1 movimiento total</span>
+</div>
+<!-- Tiles internos #F4F3F3 -->
+<div class="flex flex-col gap-3">
+<!-- Efectivo en Caja -->
+<div class="p-4 rounded-xl bg-[#F4F3F3] flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-gray-800 shadow-sm">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div>
+<span class="text-sm font-semibold text-[#1A1C1C] block">Efectivo en Caja</span>
+<span class="text-xs text-[#5E5E5E]">100% de la jornada • 1 movimiento</span>
+</div>
+</div>
+<span class="text-base font-bold text-[#1A1C1C]">$ 602.000</span>
+</div>
+<!-- Transferencia Bancaria -->
+<div class="p-4 rounded-xl bg-[#F4F3F3] flex items-center justify-between opacity-80">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#5E5E5E] shadow-sm">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+</div>
+<div>
+<span class="text-sm font-medium text-[#1A1C1C] block">Transferencia Bancaria</span>
+<span class="text-xs text-[#5E5E5E]">0 movimientos</span>
+</div>
+</div>
+<span class="text-base font-medium text-[#5E5E5E]">$ 0</span>
+</div>
+<!-- Mercado Pago / QR -->
+<div class="p-4 rounded-xl bg-[#F4F3F3] flex items-center justify-between opacity-80">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#5E5E5E] shadow-sm">
+<span class="material-symbols-outlined text-[20px]">qr_code_2</span>
+</div>
+<div>
+<span class="text-sm font-medium text-[#1A1C1C] block">Mercado Pago / QR</span>
+<span class="text-xs text-[#5E5E5E]">0 movimientos</span>
+</div>
+</div>
+<span class="text-base font-medium text-[#5E5E5E]">$ 0</span>
+</div>
+<!-- Tarjeta Débito -->
+<div class="p-4 rounded-xl bg-[#F4F3F3] flex items-center justify-between opacity-80">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#5E5E5E] shadow-sm">
+<span class="material-symbols-outlined text-[20px]">credit_card</span>
+</div>
+<div>
+<span class="text-sm font-medium text-[#1A1C1C] block">Tarjeta Débito</span>
+<span class="text-xs text-[#5E5E5E]">0 movimientos</span>
+</div>
+</div>
+<span class="text-base font-medium text-[#5E5E5E]">$ 0</span>
+</div>
+<!-- Tarjeta Crédito -->
+<div class="p-4 rounded-xl bg-[#F4F3F3] flex items-center justify-between opacity-80">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#5E5E5E] shadow-sm">
+<span class="material-symbols-outlined text-[20px]">contactless</span>
+</div>
+<div>
+<span class="text-sm font-medium text-[#1A1C1C] block">Tarjeta Crédito</span>
+<span class="text-xs text-[#5E5E5E]">0 movimientos</span>
+</div>
+</div>
+<span class="text-base font-medium text-[#5E5E5E]">$ 0</span>
+</div>
+</div>
+</section>
+<!-- 2. Card Comprobantes de la Jornada -->
+<section class="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-[#5E5E5E]">description</span>
+<h2 class="text-base font-bold text-[#1A1C1C]">Comprobantes de la Jornada</h2>
+</div>
+<span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#F4F3F3] text-[#5E5E5E]">Total: 1</span>
+</div>
+<!-- Sub-bloque: Recibos Emitidos (1) -->
+<div class="flex flex-col gap-3">
+<span class="text-xs font-bold uppercase tracking-wider text-[#5E5E5E]">Recibos Emitidos (1)</span>
+<div class="p-4 rounded-xl bg-[#F4F3F3] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="px-2.5 py-1 rounded-md bg-white border border-[#E5E7EB] text-xs font-bold text-[#1A1C1C]">
+                    RB-3684
+                  </span>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[#1A1C1C]">Agustín</span>
+<span class="text-xs text-[#5E5E5E]">Sombrilla #27 • Efectivo</span>
+</div>
+</div>
+<div class="flex items-center gap-3 justify-between sm:justify-end">
+<span class="text-base font-bold text-[#1A1C1C]">$ 602.000</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    Cobrado
+                  </span>
+</div>
+</div>
+</div>
+<!-- Sub-bloque: Facturas Emitidas (0) -->
+<div class="flex flex-col gap-2 pt-1">
+<span class="text-xs font-bold uppercase tracking-wider text-[#5E5E5E]">Facturas Emitidas (0)</span>
+<div class="p-3.5 rounded-xl bg-[#F4F3F3] text-xs text-[#5E5E5E]">
+                Sin facturas emitidas en esta jornada.
+              </div>
+</div>
+<!-- Sub-bloque: Gastos Operativos (0) -->
+<div class="flex flex-col gap-2 pt-1">
+<span class="text-xs font-bold uppercase tracking-wider text-[#5E5E5E]">Gastos Operativos (0)</span>
+<div class="p-3.5 rounded-xl bg-[#F4F3F3] text-xs text-[#5E5E5E]">
+                Sin gastos registrados en esta caja.
+              </div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+<!-- MODAL: Reabrir Caja (requiere PIN) -->
+<div aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm hidden" id="reabrir-modal" role="dialog">
+<div class="relative w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl flex flex-col gap-4 border border-[#E5E7EB]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-red-600">
+<span class="material-symbols-outlined text-[22px]">lock_open</span>
+<span class="text-base font-bold text-[#1A1C1C]">Reabrir Caja Diaria</span>
+</div>
+<button aria-label="Cerrar modal" class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5E5E5E] hover:bg-[#F4F3F3] transition-colors" onclick="document.getElementById('reabrir-modal').classList.add('hidden')" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<p class="text-xs text-[#5E5E5E] leading-relaxed">
+        Esta acción cancelará el cierre definitivo y habilitará nuevas operaciones para la fecha 17/10/2026. Requiere PIN de SuperAdmin.
+      </p>
+<input class="w-full h-11 px-4 rounded-xl bg-[#F4F3F3] text-center text-lg tracking-widest font-bold text-[#1A1C1C] focus:outline-none focus:ring-2 focus:ring-red-400 border-none" maxlength="4" placeholder="••••" type="password"/>
+<div class="flex items-center gap-2.5 pt-1">
+<button class="flex-1 h-10 rounded-xl bg-[#F4F3F3] text-xs font-semibold text-[#1A1C1C] hover:bg-[#EEEEEE] transition-colors" onclick="document.getElementById('reabrir-modal').classList.add('hidden')" type="button">
+          Cancelar
+        </button>
+<button class="flex-1 h-10 rounded-xl bg-red-600 text-xs font-semibold text-white hover:bg-red-700 transition-colors shadow-sm" onclick="document.getElementById('reabrir-modal').classList.add('hidden')" type="button">
+          Autorizar
+        </button>
+</div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-bright": "#f9f9f9", "on-error": "#ffffff", "on-surface-variant": "#4d4635", "primary-fixed-dim": "#eac249", "on-tertiary-fixed-variant": "#005320", "on-secondary": "#ffffff", "on-primary-container": "#6b5500", "error-container": "#ffdad6", "inverse-surface": "#2f3131", "on-primary-fixed-variant": "#574400", "on-background": "#1a1c1c", "secondary-fixed-dim": "#c6c6c6", "on-tertiary": "#ffffff", "on-secondary-fixed-variant": "#474747", "secondary-fixed": "#e2e2e2", "surface-container": "#eeeeee", "tertiary-container": "#6ae785", "surface-variant": "#e2e2e2", "on-primary-fixed": "#241a00", "secondary": "#5e5e5e", "primary-fixed": "#ffe08a", "error": "#ba1a1a", "secondary-container": "#e2e2e2", "outline-variant": "#d0c5af", "on-secondary-fixed": "#1b1b1b", "background": "#f9f9f9", "primary-container": "#f2ca50", "inverse-on-surface": "#f1f1f1", "surface-container-lowest": "#ffffff", "tertiary-fixed": "#7ffc97", "on-surface": "#1a1c1c", "inverse-primary": "#eac249", "surface-container-high": "#e8e8e8", "surface": "#f9f9f9", "surface-container-highest": "#e2e2e2", "surface-container-low": "#f4f3f3", "on-tertiary-fixed": "#002109", "tertiary": "#006e2d", "tertiary-fixed-dim": "#62df7d", "outline": "#7f7663", "primary": "#745b00", "surface-tint": "#745b00", "on-primary": "#ffffff", "surface-dim": "#dadada", "on-tertiary-container": "#00662a", "on-error-container": "#93000a", "on-secondary-container": "#646464" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter-lg": "1.5rem", "space-md": "1rem", "margin-tablet": "2rem", "space-xs": "0.25rem", "margin": "1.25rem", "margin-mobile": "1rem", "gutter-sm": "0.75rem", "space-sm": "0.5rem", "space-lg": "1.5rem", "space-xl": "2.25rem", "gutter": "1rem" }, "fontFamily": { "display-lg": ["Inter"], "label-lg": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Inter"], "label-md": ["Inter"], "title-md": ["Inter"], "body-sm": ["Inter"], "headline-lg": ["Inter"], "metric-xl": ["Inter"], "headline-md": ["Inter"] }, "fontSize": { "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "metric-xl": ["34px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "600" }] } } } }</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-container"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-14 px-margin-mobile flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><button aria-label="Volver" class="w-11 h-11 -ml-space-xs flex items-center justify-center text-on-surface hover:text-primary transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><h1 class="font-headline-sm text-headline-sm text-on-surface truncate">Nueva Reserva</h1></div><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-14 pb-10 px-margin-mobile bg-surface"><div class="flex flex-col w-full relative -mx-margin-mobile px-margin-mobile">
+<!-- Fondo de pantalla simulado (Dashboard Caja Prius Playa Grande detrás del modal) -->
+<div class="flex flex-col w-full gap-space-md opacity-40 select-none pointer-events-none filter blur-[1px]">
+<!-- Weather & Operational Chip Bar -->
+<div class="flex items-center justify-between py-space-xs">
+<div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-on-surface">air</span>
+<span class="font-label-md text-label-md text-on-surface">18 KTS NE • 21°C</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-primary">wb_sunny</span>
+<span class="font-label-md text-label-md text-on-surface">TURNO TARDE</span>
+</div>
+</div>
+<!-- Resumen Diario Caja Ficticio -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl flex flex-col gap-space-sm">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-secondary uppercase">Total Operado</span>
+<span class="font-title-md text-title-md text-on-surface">$ 1.840.000</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-secondary">Carpas &amp; Sombrillas</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">$ 1.238.000</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-secondary">Efectivo Físico</span>
+<span class="font-body-sm text-body-sm text-primary font-semibold">$ 602.000</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="h-12 bg-surface-container-lowest rounded-lg"></div>
+<div class="h-12 bg-surface-container-lowest rounded-lg"></div>
+<div class="h-12 bg-surface-container-lowest rounded-lg"></div>
+</div>
+</div>
+<!-- Backdrop Modal Oscurecido -->
+<div class="fixed inset-0 z-40 bg-on-surface/45 transition-opacity duration-200"></div>
+<!-- Bottom Sheet Nativo de Cierre de Caja -->
+<aside aria-modal="true" class="fixed inset-x-0 bottom-0 z-50 flex flex-col max-h-[813px] overflow-y-auto bg-surface-container-lowest rounded-t-[24px] pb-safe" role="dialog">
+<!-- Drag Handle & Close Row -->
+<div class="relative pt-3 pb-2 flex flex-col items-center shrink-0">
+<div aria-hidden="true" class="w-10 h-1 bg-surface-variant rounded-full mb-3"></div>
+<button aria-label="Cerrar modal" class="absolute right-4 top-3 w-8 h-8 rounded-full flex items-center justify-center text-secondary hover:text-on-surface bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Encabezado del Modal -->
+<div class="px-space-md pb-space-sm flex flex-col text-left">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-md text-label-md tracking-widest uppercase text-primary font-bold">Prius Balneario • Playa Grande</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight mt-0.5">CERRAR CAJA</h2>
+<p class="font-body-sm text-body-sm text-secondary">Arqueo de billetes y validación de controlador fiscal</p>
+</div>
+<!-- Stepper de 2 Pasos con línea de progreso -->
+<div class="px-space-md py-space-xs">
+<div class="flex items-center justify-between gap-space-sm bg-surface-container-low px-space-md py-2.5 rounded-xl">
+<div class="flex items-center gap-space-xs">
+<div class="w-5 h-5 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[13px] font-bold">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">1. Cierre Z Fiscal</span>
+</div>
+<div class="h-0.5 w-6 bg-primary-container rounded-full"></div>
+<div class="flex items-center gap-space-xs">
+<div class="w-5 h-5 rounded-full bg-primary-container text-on-primary-fixed flex items-center justify-center">
+<span class="font-label-md text-[11px] font-bold">2</span>
+</div>
+<span class="font-label-md text-label-md text-primary-fixed-dim font-bold">2. Arqueo</span>
+</div>
+</div>
+</div>
+<!-- Contenido del Formulario de Cierre -->
+<div class="px-space-md py-space-sm flex flex-col gap-space-md">
+<!-- Paso 1: Tarjeta Cierre Z Fiscal -->
+<section class="bg-surface-container-low rounded-xl p-3.5 flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<label class="flex items-center gap-space-xs cursor-pointer select-none">
+<input checked="" class="w-4 h-4 rounded accent-primary cursor-pointer" type="checkbox"/>
+<span class="font-label-lg text-label-lg text-on-surface">Cierre Z emitido por controlador</span>
+</label>
+<span class="bg-tertiary-container/30 text-tertiary font-label-md text-label-md px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">verified</span>
+            Fiscal OK
+          </span>
+</div>
+<!-- Inputs de Cierre Fiscal Z -->
+<div class="grid grid-cols-2 gap-space-xs mt-1">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-[10px] uppercase text-secondary tracking-wider">N° Cierre Z</label>
+<div class="bg-surface-container-lowest px-3 h-10 rounded-lg flex items-center">
+<input class="w-full bg-transparent font-title-md text-title-md text-on-surface font-semibold outline-none" readonly="" type="text" value="0482"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-[10px] uppercase text-secondary tracking-wider">Total Facturado Z</label>
+<div class="bg-surface-container-lowest px-3 h-10 rounded-lg flex items-center">
+<input class="w-full bg-transparent font-title-md text-title-md text-on-surface font-semibold outline-none" readonly="" type="text" value="$ 602.000"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Paso 2: Arqueo de Efectivo Físico -->
+<section class="flex flex-col gap-space-sm">
+<!-- Tile: Efectivo Esperado en Sistema -->
+<div class="bg-surface-container-low p-3.5 rounded-xl flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-secondary uppercase tracking-wider">Efectivo Esperado en Sistema</span>
+<span class="font-body-sm text-[11px] text-secondary">Cobros automáticos del turno</span>
+</div>
+<div class="text-right">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight" id="valorEsperado">$ 602.000</span>
+</div>
+</div>
+<!-- Input Interactivo: Efectivo Contado en Mano -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<label class="font-label-lg text-label-lg text-on-surface font-bold uppercase tracking-wide" for="efectivoContado">
+              Efectivo Contado Real <span class="text-error">*</span>
+</label>
+<span class="font-body-sm text-[11px] text-secondary">Ingrese monto arqueado</span>
+</div>
+<div class="relative flex items-center bg-surface-container-lowest rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary-container">
+<div class="pl-3.5 pr-1 flex items-center pointer-events-none text-on-surface font-headline-sm font-semibold">
+              $
+            </div>
+<input class="w-full h-12 bg-transparent text-on-surface font-headline-sm text-headline-sm font-bold pl-1 pr-3.5 outline-none tracking-tight" id="efectivoContado" inputmode="numeric" placeholder="0" type="text" value="602.000"/>
+<button class="mr-2 text-primary text-label-md font-semibold px-2 py-1 bg-primary-container/20 rounded-md active:bg-primary-container" onclick="document.getElementById('efectivoContado').value='602.000'; actualizarDiferencia(602000);" title="Cuadrar exacto" type="button">
+              Igualar
+            </button>
+</div>
+</div>
+<!-- Caja de Estado de Diferencia -->
+<div class="bg-tertiary-container/25 rounded-xl p-3.5 flex flex-col gap-1 transition-colors" id="cajaDiferencia">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-tertiary-container font-semibold">Diferencia de Caja</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary" id="iconoEstado">check_circle</span>
+<span class="font-headline-sm text-headline-sm text-tertiary font-bold tracking-tight" id="textoDiferencia">$ 0</span>
+</div>
+</div>
+<div class="flex justify-between items-center pt-0.5">
+<span class="font-body-sm text-body-sm text-on-tertiary-container font-medium" id="subtextoEstado">Arqueo cuadrado perfecto</span>
+<span class="font-label-md text-[10px] text-secondary">Inicio de caja: $0</span>
+</div>
+</div>
+</section>
+<!-- Nota de Auditoría Balneario -->
+<div class="flex items-start gap-space-xs px-1">
+<span class="material-symbols-outlined text-[16px] text-secondary shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-[11px] text-secondary leading-tight">
+          Al confirmar, el sistema asienta el cierre fiscal definitivo y bloquea las terminales de cobro de carpas hasta el turno de mañana.
+        </p>
+</div>
+<!-- Botones de Acción al Pie -->
+<div class="flex flex-col gap-space-xs pt-1 pb-3">
+<button class="w-full h-12 bg-primary-container active:bg-primary-fixed-dim text-on-primary-fixed rounded-xl font-label-lg text-label-lg font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-transform active:scale-[0.99]" id="btnConfirmar" type="button">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+<span>Confirmar y Cerrar Caja</span>
+</button>
+<button class="w-full h-10 bg-transparent text-secondary active:text-on-surface rounded-xl font-label-lg text-label-lg font-medium transition-colors" type="button">
+          Volver a Operaciones
+        </button>
+</div>
+</div>
+</aside>
+</div>
+<script>
+  (function initCierreCaja() {
+    const input = document.getElementById('efectivoContado');
+    const valorEsperadoNum = 602000;
+    const txtDif = document.getElementById('textoDiferencia');
+    const subtxt = document.getElementById('subtextoEstado');
+    const caja = document.getElementById('cajaDiferencia');
+    const icono = document.getElementById('iconoEstado');
+    const btn = document.getElementById('btnConfirmar');
+
+    function parseInput(val) {
+      const clean = val.replace(/[^0-9]/g, '');
+      return clean ? parseInt(clean, 10) : 0;
+    }
+
+    function formatNumber(num) {
+      return num.toLocaleString('es-AR');
+    }
+
+    window.actualizarDiferencia = function(contado) {
+      const dif = contado - valorEsperadoNum;
+
+      if (dif === 0) {
+        caja.className = 'bg-tertiary-container/25 rounded-xl p-3.5 flex flex-col gap-1 transition-colors';
+        txtDif.className = 'font-headline-sm text-headline-sm text-tertiary font-bold tracking-tight';
+        txtDif.textContent = '$ 0';
+        subtxt.textContent = 'Arqueo cuadrado perfecto';
+        subtxt.className = 'font-body-sm text-body-sm text-on-tertiary-container font-medium';
+        icono.textContent = 'check_circle';
+        icono.className = 'material-symbols-outlined text-[16px] text-tertiary';
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+      } else if (dif > 0) {
+        caja.className = 'bg-primary-container/20 rounded-xl p-3.5 flex flex-col gap-1 transition-colors';
+        txtDif.className = 'font-headline-sm text-headline-sm text-primary font-bold tracking-tight';
+        txtDif.textContent = '+ $ ' + formatNumber(dif);
+        subtxt.textContent = 'Sobrante de caja no asignado';
+        subtxt.className = 'font-body-sm text-body-sm text-on-surface font-medium';
+        icono.textContent = 'add_circle';
+        icono.className = 'material-symbols-outlined text-[16px] text-primary';
+      } else {
+        caja.className = 'bg-error-container/40 rounded-xl p-3.5 flex flex-col gap-1 transition-colors';
+        txtDif.className = 'font-headline-sm text-headline-sm text-error font-bold tracking-tight';
+        txtDif.textContent = '- $ ' + formatNumber(Math.abs(dif));
+        subtxt.textContent = 'Faltante de dinero en arqueo';
+        subtxt.className = 'font-body-sm text-body-sm text-error font-medium';
+        icono.textContent = 'warning';
+        icono.className = 'material-symbols-outlined text-[16px] text-error';
+      }
+    };
+
+    if (input) {
+      input.addEventListener('input', (e) => {
+        const parsed = parseInput(e.target.value);
+        e.target.value = formatNumber(parsed);
+        actualizarDiferencia(parsed);
+      });
+    }
+
+    if (btn) {
+      btn.addEventListener('click', () => {
+        btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Registrando cierre...</span>';
+        setTimeout(() => {
+          btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">verified</span><span>Caja Cerrada con Éxito</span>';
+          btn.classList.remove('bg-primary-container');
+          btn.classList.add('bg-tertiary', 'text-on-tertiary');
+        }, 900);
+      });
+    }
+  })();
+</script></main></body></html>
