@@ -195,7 +195,7 @@ export default function DateInput({
           onBlur={handleTextBlur}
           placeholder={placeholder}
           aria-invalid={!!error}
-          className={`w-full min-h-[44px] pl-4 pr-10 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm font-bold outline-none transition-all disabled:opacity-50 ${
+          className={`w-full min-h-[44px] pl-4 pr-10 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
             calendarOnly ? 'cursor-pointer' : ''
           } ${error ? 'border-red-500/60 focus:border-red-500' : 'border-hairline focus:border-gold/50'}`}
         />
