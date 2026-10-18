@@ -12,6 +12,8 @@ import { formatMontoCsv, etiqueta, unidadNotacionCsv } from '../../lib/export/fo
 import { isFeatureEnabled } from '../../lib/features'
 import ClienteDrawer from '../../components/crm/ClienteDrawer'
 import RegistrarPago from '../../components/crm/RegistrarPago'
+import { useInitialLoad } from '../../hooks/useInitialLoad'
+import Skeleton from '../../components/ui/Skeleton'
 
 const OPCIONES_TEMPORADA = [
   { value: 'all', label: 'Todas las temporadas' },
@@ -21,6 +23,7 @@ const OPCIONES_TEMPORADA = [
 export default function Reportes() {
   const navigate = useNavigate()
   const { reservas, loading } = useReservas()
+  const readyReportes = useInitialLoad(loading)
   const [temporadaFilter, setTemporadaFilter] = useState('2025-2026')
   // [feat-3] drawer de cliente en vez de navegar directo a Clientes.
   const [drawerClienteId, setDrawerClienteId] = useState(null)
@@ -73,7 +76,18 @@ export default function Reportes() {
     return { totalIngresosEsperados: ingresos, totalSaldosPendientes: saldos, totalCobrado: ingresos - saldos }
   }, [activeReservas])
 
-  if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-prius-muted uppercase animate-pulse">Analizando Datos...</span></div>
+  if (!readyReportes) {
+    return (
+      <div className="space-y-10 font-ui">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-10 animate-premium-fade">

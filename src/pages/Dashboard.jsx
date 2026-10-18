@@ -25,6 +25,8 @@ import DateInput from "../components/inputs/DateInput"
 import { useDeepLinkTarget } from "../hooks/useDeepLinkTarget"
 import { useOverlay } from "../context/OverlayProvider"
 import { useClima } from "../hooks/useClima"
+import { useInitialLoad } from "../hooks/useInitialLoad"
+import Skeleton from "../components/ui/Skeleton"
 
 // El plano de playa solo dibuja carpas y sombrillas. Cabinas y lockers están
 // dentro del complejo y se manejan en su propia sección del CRM.
@@ -42,6 +44,11 @@ const shiftDate = (fecha, delta) => {
 
 export default function Dashboard() {
   const { unidades, reservas, loading, temporadaActiva, cajaHoy, historialCajas, pagos, realtimeConectado } = useData()
+  // B2 (oct 2026): `loading` es el flag global del DataProvider (compartido
+  // por toda la app) — este hook solo decide cuándo mostrar el skeleton de
+  // ESTA pantalla la primera vez; si el usuario ya navegó por otra pantalla
+  // antes, `loading` ya viene en false y acá ni se nota.
+  const readyPlano = useInitialLoad(loading)
 
   // Se guarda el ID, no una copia de `units[...]`: así el modal de preview
   // sigue leyendo el objeto vivo del useMemo de abajo en cada render y se
@@ -744,6 +751,18 @@ export default function Dashboard() {
             onAsignarTemporada={handleAsignarTemporada}
             onMoverUnidad={handleMoverUnidadClick}
           />
+        </div>
+      </div>
+    )
+  }
+
+  if (!readyPlano) {
+    return (
+      <div className="h-full flex flex-col overflow-hidden font-ui p-4 gap-4">
+        <Skeleton className="h-24 shrink-0" />
+        <div className="flex-1 flex gap-4 min-h-0">
+          <Skeleton className="flex-1" />
+          <Skeleton className="hidden lg:block w-96 shrink-0" />
         </div>
       </div>
     )

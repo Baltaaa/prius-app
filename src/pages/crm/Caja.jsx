@@ -23,6 +23,8 @@ import DetallePago from '../../components/crm/DetallePago'
 import ResumenCaja from '../../components/crm/ResumenCaja'
 import CajaImpresion from '../../components/crm/CajaImpresion'
 import CerrarCajaStepper from '../../components/crm/CerrarCajaStepper'
+import { useInitialLoad } from '../../hooks/useInitialLoad'
+import Skeleton from '../../components/ui/Skeleton'
 
 const FILTROS_MEDIO = [
   { value: 'todos', label: 'Todos los medios' },
@@ -47,6 +49,7 @@ const shiftDate = (fecha, delta) => {
 
 export default function Caja() {
   const { cajaHoy, historialCajas, todosGastos, loading, iniciarCaja, cerrarCaja, reabrirCaja } = useCaja()
+  const readyCaja = useInitialLoad(loading)
   const puedeReabrir = usePermiso('reabrir_caja')
   const { pagos } = useData()
   const { alert } = useDialog()
@@ -175,7 +178,14 @@ export default function Caja() {
     }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><span className="text-sm font-semibold text-prius-muted uppercase animate-pulse">Sincronizando Caja...</span></div>
+  if (!readyCaja) {
+    return (
+      <div className="space-y-4 font-ui">
+        <Skeleton className="h-12 w-64" />
+        <Skeleton className="h-80" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8 animate-premium-fade">

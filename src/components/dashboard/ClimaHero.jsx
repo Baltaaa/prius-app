@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { ArrowUp, Cloud, CloudRain, ExternalLink, Gauge, Waves, Wind } from 'lucide-react'
-import { useClima } from '../../hooks/useClima'
 import { resumenDiaClima, gradosARumbo } from '../../lib/clima'
 import { UMBRAL_RAFAGA_ALERTA_KMH, WINDGURU_SPOT_ID } from '../../config/clima'
 import ClimaPanel from './ClimaPanel'
@@ -23,8 +22,13 @@ const WINDGURU_URL = `https://www.windguru.cz/${WINDGURU_SPOT_ID}`
  * No existe hoy ningún resumen/recomendación generado con IA en el sistema
  * de clima — no se inventa acá.
  */
-export default function ClimaHero({ fecha }) {
-  const { clima, loading } = useClima(fecha)
+// `clima`/`loading` ahora llegan por prop (B2, oct 2026): Home.jsx levantó
+// el único `useClima(fecha)` para poder esperarlo junto con el resto de sus
+// datos antes de mostrar nada (ver useInitialLoad) — dos llamadas separadas
+// a este hook (acá y en Home) hubieran disparado el fetch a la Edge
+// Function dos veces en paralelo. Mismo hook, misma Edge Function, cero
+// cambio en su lógica/queries — solo cambió quién lo invoca.
+export default function ClimaHero({ fecha, clima, loading }) {
   const [panelOpen, setPanelOpen] = useState(false)
   const resumen = resumenDiaClima(clima)
 

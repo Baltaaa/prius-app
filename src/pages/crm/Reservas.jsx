@@ -26,6 +26,8 @@ import ReservaCalendar from '../../components/crm/ReservaCalendar'
 import Historial from '../../components/crm/Historial'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
 import { useMountTransition } from '../../hooks/useMountTransition'
+import { useInitialLoad } from '../../hooks/useInitialLoad'
+import Skeleton from '../../components/ui/Skeleton'
 import ReservaDetalleContent from '../../components/crm/ReservaDetalleContent'
 import ReservaListaMobile from '../../components/crm/ReservaListaMobile'
 import BottomSheet from '../../components/ui-prius/BottomSheet'
@@ -100,6 +102,7 @@ const resolverFechaLlegada = (r, temporadasPorId) => {
 export default function Reservas() {
   const { reservas, unidades, temporadas, temporadaActiva, loading: resLoading, createReserva, updateReserva, deleteReserva, cancelarReserva } = useReservas()
   const { loading: cliLoading } = useClientes()
+  const readyReservas = useInitialLoad(resLoading || cliLoading)
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const { confirm, alert } = useDialog()
@@ -597,10 +600,25 @@ export default function Reservas() {
     [reservas, unidadId, editingReserva],
   )
 
-  if (resLoading || cliLoading) {
+  if (!readyReservas) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-prius-muted animate-pulse uppercase tracking-widest">Cargando Reservas...</span>
+      <div className="space-y-6 lg:space-y-10 font-ui">
+        <div className="flex flex-wrap gap-4">
+          <Skeleton className="flex-1 min-w-[160px] h-12" />
+          <Skeleton className="w-40 h-12" />
+          <Skeleton className="w-40 h-12" />
+          <Skeleton className="w-32 h-12" />
+          <Skeleton className="w-40 h-12" />
+        </div>
+        <div className="flex gap-4 items-start">
+          <div className="flex-1 min-w-0 space-y-2">
+            <Skeleton className="h-14" />
+            <Skeleton className="h-14" />
+            <Skeleton className="h-14" />
+            <Skeleton className="h-14" />
+          </div>
+          <Skeleton className="hidden lg:block w-96 h-96 shrink-0" />
+        </div>
       </div>
     )
   }

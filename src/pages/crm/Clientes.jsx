@@ -35,6 +35,8 @@ import SearchInput from '../../components/inputs/SearchInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import StatusBadge from '../../components/crm/StatusBadge'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
+import { useInitialLoad } from '../../hooks/useInitialLoad'
+import Skeleton from '../../components/ui/Skeleton'
 import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, CircleDollarSign, Filter, Check, CalendarPlus, Receipt } from 'lucide-react'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
@@ -113,6 +115,7 @@ export default function Clientes() {
     reservas, unidades, temporadaActiva, loading: resLoading, createReserva, updateReserva, cancelarReserva, crearGrupoReservas,
   } = useReservas()
   const { pagos: todosPagos } = usePagos() // sin reservaId: historial completo, filtrado acá por cliente
+  const readyClientes = useInitialLoad(loading || resLoading)
 
   const GRUPO_UNIDAD_CLIENTES = { carpa: 'Carpas', sombrilla: 'Sombrillas', cabina: 'Cabinas', locker: 'Lockers' }
   const opcionesUnidadTemporada = useMemo(
@@ -576,10 +579,13 @@ export default function Clientes() {
     return map
   }, [reservas])
 
-  if (loading || resLoading) {
+  if (!readyClientes) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-prius-muted animate-pulse uppercase tracking-widest">Cargando Clientes...</span>
+      <div className="space-y-6 font-ui">
+        <Skeleton className="h-12" />
+        <div className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-16" />)}
+        </div>
       </div>
     )
   }

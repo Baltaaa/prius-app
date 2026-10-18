@@ -13,6 +13,9 @@ import { buildUnitsMap } from '../../lib/planoUnits'
 import { formatPesos, formatFechaLarga, formatHora } from '../../lib/format'
 import { linkToReserva, linkToCliente } from '../../lib/deepLinks'
 import { isFeatureEnabled } from '../../lib/features'
+import { useClima } from '../../hooks/useClima'
+import { useInitialLoad, useTimeoutFallback } from '../../hooks/useInitialLoad'
+import Skeleton from '../../components/ui/Skeleton'
 import ClimaHero from '../../components/dashboard/ClimaHero'
 import {
   BookmarkPlus, CreditCard, UserCheck2, UserSearch, Lock, Unlock, ArrowRight,
@@ -57,6 +60,13 @@ export default function Home() {
   const { items: historialItems, loading: historialLoading } = useHistorial('global', null, null, null)
 
   const hoy = useMemo(() => todayStr(), [])
+
+  // B2 (oct 2026): único `useClima` levantado acá (ver comentario en
+  // ClimaHero.jsx) — con timeout de 4s porque es la única request externa
+  // lenta de esta pantalla (Open-Meteo vía Edge Function); el resto son
+  // queries propias de Supabase, sin timeout porque no cuelgan.
+  const { clima, loading: climaLoadingRaw } = useClima(hoy)
+  const climaLoading = useTimeoutFallback(climaLoadingRaw, 4000)
 
   // Estado de caja con usuario — `caja_diaria.abierta_por/cerrada_por` son
   // uuid; no hay ningún hook que ya resuelva nombres de perfil (solo el
@@ -126,12 +136,31 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historialItems, tabMovimientos])
 
-  const loading = resLoading || cajaLoading
+  // climaLoading YA tiene su propio timeout de 4s (arriba) — a los 4s deja
+  // de bloquear la sección aunque Open-Meteo no haya contestado todavía;
+  // ClimaHero cae sola a su estado "no disponible" (mismo tamaño de card).
+  const loading = resLoading || cajaLoading || climaLoading
+  const ready = useInitialLoad(loading)
 
-  if (loading) {
+  if (!ready) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <span className="text-sm font-semibold text-prius-muted animate-pulse uppercase tracking-widest">Sincronizando PriusAdmin...</span>
+      <div className="space-y-6 lg:space-y-10 font-ui">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
+          <Skeleton className="lg:col-span-7 h-[220px]" />
+          <div className="lg:col-span-5 flex flex-col gap-gutter-lg">
+            <Skeleton className="h-24" />
+            <div className="grid grid-cols-3 gap-space-sm">
+              <Skeleton className="h-20" />
+              <Skeleton className="h-20" />
+              <Skeleton className="h-20" />
+            </div>
+            <Skeleton className="h-20" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter-lg">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+        </div>
       </div>
     )
   }
@@ -197,7 +226,7 @@ export default function Home() {
       {/* Fila 1 desktop: clima (7/12) + accesos rápidos y caja (5/12). Mobile: clima primero, accesos después. */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
         <div className="lg:col-span-7 min-w-0">
-          <ClimaHero fecha={hoy} />
+          <ClimaHero fecha={hoy} clima={clima} loading={climaLoading} />
         </div>
 
         <div className="lg:col-span-5 min-w-0 flex flex-col gap-space-md order-first lg:order-none">
