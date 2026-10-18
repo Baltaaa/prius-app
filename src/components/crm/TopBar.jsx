@@ -283,13 +283,15 @@ export default function TopBar() {
         </div>
 
         <div className="md:hidden min-w-0">
+          {/* "Prius App" no puede truncar (oct 2026): con el ícono de QR de
+              Recepción sumado a la derecha, el chip "Operativo" con texto ya
+              no entraba a 390px y el título se cortaba a "Prius …" — achicado
+              a solo el punto (mismo significado, sin texto) en vez de
+              arriesgar el mismo corte de nuevo en una pantalla más angosta. */}
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="text-title-md text-black truncate">Prius App</span>
             {realtimeConectado && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-prius-surface text-label-md text-prius-success shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-prius-success" />
-                Operativo
-              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-prius-success shrink-0" title="Operativo" />
             )}
           </div>
           <p className="text-label-md text-prius-slate truncate">{section.shortName || section.name}</p>
