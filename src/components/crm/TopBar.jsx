@@ -283,12 +283,15 @@ export default function TopBar() {
         </div>
 
         <div className="md:hidden min-w-0">
-          {/* "Prius App" no puede truncar (oct 2026): con el ícono de QR de
-              Recepción sumado a la derecha, el chip "Operativo" con texto ya
-              no entraba a 390px y el título se cortaba a "Prius …" — achicado
-              a solo el punto (mismo significado, sin texto) en vez de
-              arriesgar el mismo corte de nuevo en una pantalla más angosta. */}
+          {/* Logo (B4, oct 2026): mismo /images/prius-icon.png del Sidebar
+              desktop, a 28px. "Prius App" no puede truncar (oct 2026): con
+              el ícono de QR de Recepción sumado a la derecha, el chip
+              "Operativo" con texto ya no entraba a 390px y el título se
+              cortaba a "Prius …" — achicado a solo el punto (mismo
+              significado, sin texto) en vez de arriesgar el mismo corte de
+              nuevo en una pantalla más angosta (360px incluido). */}
           <div className="flex items-center gap-1.5 min-w-0">
+            <img src="/images/prius-icon.png" alt="Prius" className="w-7 h-7 object-contain shrink-0" />
             <span className="text-title-md text-black truncate">Prius App</span>
             {realtimeConectado && (
               <span className="w-1.5 h-1.5 rounded-full bg-prius-success shrink-0" title="Operativo" />
