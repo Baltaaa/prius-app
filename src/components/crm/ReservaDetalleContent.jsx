@@ -1,0 +1,181 @@
+import { useNavigate } from 'react-router-dom'
+import { X, Wallet, Receipt, Edit2, XCircle, Trash2, QrCode, Globe, MonitorSmartphone, Users } from 'lucide-react'
+import { usePagos } from '../../hooks/usePagos'
+import { coSocios, estadoBadgeStatus, saldoNumerico, pagoSinVerificar } from '../../lib/reservas'
+import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, unidadEmoji } from '../../lib/format'
+import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
+import StatusBadge from './StatusBadge'
+import MontoReserva from './MontoReserva'
+
+const TIPO_LABEL = { periodo: 'Período', dia: 'Día', temporada: 'Temporada' }
+
+// Detalle de una reserva período/día — contenido compartido entre el panel
+// lateral fijo de desktop (≥1024px), la hoja inferior de tablet y la
+// pantalla completa de mobile (mismo patrón que UnidadDetalleContent.jsx
+// del Plano: una sola fuente de datos/acciones, cada contenedor solo
+// cambia cómo la envuelve). Mismos handlers que ya usaba la fila de la
+// tabla/tarjeta — nada nuevo, solo reorganizado en cards tipo mock.
+export default function ReservaDetalleContent({
+  reserva, fechaLlegada, onClose, onRegistrarPago, onEditar, onCancelar, onEliminar, showCloseButton = true,
+}) {
+  const navigate = useNavigate()
+  const { pagos } = usePagos(reserva?.id)
+
+  if (!reserva) return null
+
+  const socios = coSocios(reserva)
+  const cuotas = [...pagos].sort((a, b) => (a.nro_cuota || 0) - (b.nro_cuota || 0))
+  const saldo = saldoNumerico(reserva, cuotas)
+  const fechasLabel = reserva.tipo_alquiler === 'dia'
+    ? formatFecha(reserva.fecha)
+    : formatRangoFechas(reserva.fecha_inicio, reserva.fecha_fin)
+
+  return (
+    <>
+      <div className="flex items-start justify-between pb-space-md shrink-0">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-headline-sm text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
+            <StatusBadge status={estadoBadgeStatus(reserva)} />
+          </div>
+          <p className="text-body-sm text-prius-slate mt-1">
+            {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero} · {TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}
+          </p>
+        </div>
+        {showCloseButton && (
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg bg-prius-surface text-prius-slate hover:text-black flex items-center justify-center transition-colors shrink-0"
+            title="Cerrar"
+          >
+            <X size={18} />
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-space-md">
+        {/* Cliente */}
+        <div className="bg-prius-surface rounded-xl p-space-md flex flex-col gap-space-sm">
+          <span className="text-label-md text-prius-slate uppercase tracking-wider">Cliente</span>
+          <div className="flex items-center gap-space-sm">
+            <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center text-title-md font-semibold shrink-0">
+              {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-title-md text-black truncate">{reserva.clientes?.nombre || 'S/N'}</p>
+              {socios.length > 0 && (
+                <p className="text-body-sm text-prius-slate truncate flex items-center gap-1">
+                  <Users size={12} className="shrink-0" /> {socios.map((s) => s.nombre).join(', ')}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Unidad y fechas */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between py-1.5">
+            <span className="text-body-sm text-prius-slate">Llegada</span>
+            <span className="text-body-md text-black font-medium">{formatFecha(fechaLlegada(reserva))}</span>
+          </div>
+          <div className="flex items-center justify-between py-1.5">
+            <span className="text-body-sm text-prius-slate">Fechas</span>
+            <span className="text-body-md text-black font-medium text-right">{fechasLabel}</span>
+          </div>
+          <div className="flex items-center justify-between py-1.5">
+            <span className="text-body-sm text-prius-slate">Origen</span>
+            <span className="text-body-md text-black font-medium flex items-center gap-1.5">
+              {reserva.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
+              {reserva.origen === 'web' ? 'Web' : 'Manual'}
+            </span>
+          </div>
+          {reserva.notas && (
+            <div className="py-1.5">
+              <span className="block text-body-sm text-prius-slate">Notas</span>
+              <span className="text-body-md text-black">{reserva.notas}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Pagos: total/pagado/saldo + lista, estilo mock — lectura, el alta
+            de un pago nuevo sigue siendo la acción "Registrar pago" de
+            abajo (mismo flujo de siempre, RegistrarPago.jsx). */}
+        <div className="bg-prius-surface rounded-xl p-space-md flex flex-col gap-space-sm">
+          <span className="text-label-md text-prius-slate uppercase tracking-wider">Pagos</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-body-md text-prius-slate">Total</span>
+            <span className="text-body-md text-black font-medium"><MontoReserva reserva={reserva} /></span>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-body-md text-prius-slate">Saldo</span>
+            <span className={`text-headline-sm font-bold ${saldo === null ? 'text-prius-slate' : saldo > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
+              {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
+            </span>
+          </div>
+          {cuotas.length > 0 && (
+            <div className="pt-2 border-t border-hairline space-y-1.5">
+              {cuotas.map((p) => (
+                <div key={p.id} className="flex items-center justify-between text-body-sm">
+                  <span className={`text-prius-slate ${p.estado === 'anulado' ? 'line-through' : ''}`}>
+                    Cuota {p.nro_cuota} {p.comprobantes?.length > 0 ? `· ${p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')}` : ''}
+                  </span>
+                  <span className={`font-medium ${p.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-black'}`}>
+                    {pagoSinVerificar(p) ? 'Sin verificar' : formatPesosVisible(p.monto)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Acciones — mismos handlers que ya usaba la fila/tarjeta de la
+            lista, nada nuevo. */}
+        <div className="flex flex-col gap-2">
+          {estadoBadgeStatus(reserva) === 'preconfirmada' && (
+            <button
+              onClick={() => navigate(linkToRecepcion(reserva.codigo))}
+              className="w-full h-11 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+            >
+              <QrCode size={16} /> Hacer check-in
+            </button>
+          )}
+          {!reserva.bonificada && (
+            <button
+              onClick={() => onRegistrarPago?.(reserva)}
+              disabled={Number(reserva.saldo) <= 0}
+              className="w-full h-12 bg-gold hover:bg-gold-hover disabled:opacity-40 disabled:cursor-not-allowed text-black rounded-xl text-title-md font-semibold flex items-center justify-center gap-2 transition-colors"
+            >
+              <Wallet size={16} /> Registrar pago
+            </button>
+          )}
+          <button
+            onClick={() => navigate(linkToComprobante(reserva.id))}
+            className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            <Receipt size={16} /> Ver comprobante
+          </button>
+          <button
+            onClick={() => onEditar?.(reserva)}
+            className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            <Edit2 size={16} /> Editar reserva
+          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onCancelar?.(reserva)}
+              className="flex-1 h-11 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-xl text-label-lg font-medium flex items-center justify-center gap-2 transition-colors"
+            >
+              <XCircle size={14} /> Cancelar
+            </button>
+            <button
+              onClick={() => onEliminar?.(reserva)}
+              className="flex-1 h-11 bg-red-50 hover:bg-red-100 text-prius-error rounded-xl text-label-lg font-medium flex items-center justify-center gap-2 transition-colors"
+            >
+              <Trash2 size={14} /> Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
