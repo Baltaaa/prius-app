@@ -149,6 +149,67 @@ body {
 }
 
 /*
+  Animación de apertura/cierre única (B1, oct 2026) para todo lo que se abre
+  por interacción — modales, bottom sheets, dropdowns, selects, menús,
+  popovers, paneles laterales, pantallas de detalle. Reemplaza las clases
+  del plugin `tailwindcss-animate` (`animate-in fade-in slide-in-from-*`)
+  que se usaban en Modal.jsx/BottomSheet.jsx/etc. sin que el plugin
+  estuviera instalado (`tailwind.config.js` tenía `plugins: []`) — nunca
+  animaron nada, eran no-ops silenciosos. Solo transform/opacity (compuestas
+  por GPU, sin reflow). Emparejar con el hook `useMountTransition`
+  (src/hooks/useMountTransition.js) para que el cierre también se vea: sin
+  eso, React desmonta el nodo antes de que `.ui-close*` llegue a correr.
+*/
+@keyframes ui-open {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ui-close {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(12px); }
+}
+@keyframes ui-open-sheet {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ui-close-sheet {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(100%); }
+}
+@keyframes ui-backdrop-open {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ui-backdrop-close {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+/* @layer utilities (no global suelto como el resto de este archivo): es lo
+   que le permite a Tailwind generar variantes `sm:ui-open`/`sm:ui-close` —
+   Modal.jsx las necesita para animar distinto en mobile (sheet, desde
+   abajo) y desktop (zoom/fade centrado), igual que hacía el patrón viejo
+   `slide-in-from-bottom sm:zoom-in-95` del plugin que nunca estuvo
+   instalado. Una clase CSS global sin @layer no es "utility" para el JIT:
+   el prefijo de breakpoint simplemente no generaría nada. */
+@layer utilities {
+  .ui-open        { animation: ui-open 200ms ease-out both; }
+  .ui-close       { animation: ui-close 150ms ease-in both; }
+  .ui-open-sheet  { animation: ui-open-sheet 200ms ease-out both; }
+  .ui-close-sheet { animation: ui-close-sheet 150ms ease-in both; }
+  .ui-backdrop-open  { animation: ui-backdrop-open 150ms ease-out both; }
+  .ui-backdrop-close { animation: ui-backdrop-close 150ms ease-in both; }
+}
+
+/* prefers-reduced-motion: solo fade, nunca desplazamiento — reusa las
+   keyframes de opacidad del backdrop para el panel también. */
+@media (prefers-reduced-motion: reduce) {
+  .ui-open, .ui-open-sheet, .sm\:ui-open, .sm\:ui-close,
+  .ui-close, .ui-close-sheet { animation-duration: 150ms !important; }
+  .ui-open, .ui-open-sheet   { animation-name: ui-backdrop-open !important; }
+  .ui-close, .ui-close-sheet { animation-name: ui-backdrop-close !important; }
+}
+
+/*
   Resaltado de destino de deep-link (useDeepLinkTarget, oct 2026): borde
   #F2CA50 de 2px que se desvanece solo, sin sombra (Quiet Luxury). border en
   vez de outline para no competir con el que ya usan las tarjetas con focus.

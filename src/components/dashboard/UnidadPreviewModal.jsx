@@ -1,6 +1,7 @@
-import { useEffect, useId } from "react"
+import { useEffect, useId, useRef } from "react"
 import { createPortal } from "react-dom"
 import { useOverlay } from "../../context/OverlayProvider"
+import { useMountTransition } from "../../hooks/useMountTransition"
 import UnidadDetalleContent from "./UnidadDetalleContent"
 
 // Hoja inferior de detalle de unidad — tablet y mobile (<1024px). Desktop
@@ -19,16 +20,24 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
     return () => { document.body.style.overflow = prev }
   }, [])
 
-  if (!unit) return null
+  const shouldRender = useMountTransition(!!unit)
+  // Igual que ClienteDrawer: `unit` llega en null para señalizar el cierre,
+  // así que se congela la última unidad real mientras dura la animación de
+  // salida — si no, el contenido desaparecía de golpe en vez de verse cerrar.
+  const lastUnitRef = useRef(unit)
+  if (unit) lastUnitRef.current = unit
+  const unitActiva = unit ?? lastUnitRef.current
+
+  if (!shouldRender) return null
 
   return createPortal(
     <div
-      className="lg:hidden fixed inset-0 z-[999] flex items-end justify-center bg-black/40 animate-in fade-in duration-200"
+      className={`lg:hidden fixed inset-0 z-[999] flex items-end justify-center bg-black/40 ${unit ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={() => onClose?.()}
     >
       <div
         ref={bind}
-        className="w-full max-h-[85vh] bg-white rounded-t-3xl flex flex-col overflow-hidden border-t border-hairline animate-in slide-in-from-bottom duration-200"
+        className={`w-full max-h-[85vh] bg-white rounded-t-3xl flex flex-col overflow-hidden border-t border-hairline ${unit ? 'ui-open-sheet' : 'ui-close-sheet'}`}
         onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
@@ -37,7 +46,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
         </div>
         <div className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
           <UnidadDetalleContent
-            unit={unit}
+            unit={unitActiva}
             reservas={reservas}
             temporadaActiva={temporadaActiva}
             onClose={onClose}

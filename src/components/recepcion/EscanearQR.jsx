@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import { X, CameraOff } from 'lucide-react'
 import { useOverlay } from '../../context/OverlayProvider'
+import { useMountTransition } from '../../hooks/useMountTransition'
 
 // Bottom sheet de pantalla completa con la cámara trasera leyendo un QR de
 // reserva (Tarea 5). No usa <Modal> (que tiene max-width/padding pensados
@@ -43,10 +44,11 @@ export default function EscanearQR({ isOpen, onClose, onScan }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
-  if (!isOpen) return null
+  const shouldRender = useMountTransition(isOpen)
+  if (!shouldRender) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] bg-black flex flex-col animate-in fade-in duration-200">
+    <div className={`fixed inset-0 z-[999] bg-black flex flex-col ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}>
       <div ref={bind} className="flex-1 flex flex-col">
         <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] shrink-0">
           <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-gold">Escanear QR</h2>

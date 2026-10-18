@@ -2,6 +2,7 @@ import { useId } from 'react'
 import { createPortal } from 'react-dom'
 import { Clock } from 'lucide-react'
 import { useOverlay } from '../../context/OverlayProvider'
+import { useMountTransition } from '../../hooks/useMountTransition'
 
 function formatMMSS(totalSeconds) {
   const m = Math.floor(totalSeconds / 60)
@@ -16,11 +17,12 @@ export default function InactivityWarningModal({ open, secondsLeft, onContinuar,
   const overlayId = useId()
   const { bind } = useOverlay({ id: `inactivity-warning-${overlayId}`, isOpen: open, onRequestClose: onContinuar })
 
-  if (!open) return null
+  const shouldRender = useMountTransition(open)
+  if (!shouldRender) return null
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[1200] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
+      className={`fixed inset-0 z-[1200] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-md ${open ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={onContinuar}
       role="presentation"
     >
@@ -30,7 +32,7 @@ export default function InactivityWarningModal({ open, secondsLeft, onContinuar,
         aria-modal="true"
         aria-labelledby="inactivity-warning-title"
         aria-describedby="inactivity-warning-desc"
-        className="card-light w-full sm:max-w-sm rounded-t-3xl sm:rounded-2xl border border-hairline shadow-2xl p-6 sm:p-8 space-y-6 animate-in slide-in-from-bottom sm:zoom-in-95 duration-200"
+        className={`card-light w-full sm:max-w-sm rounded-t-3xl sm:rounded-2xl border border-hairline shadow-2xl p-6 sm:p-8 space-y-6 ${open ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sm:hidden flex justify-center -mt-2 mb-1">

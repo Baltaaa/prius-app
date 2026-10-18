@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useDialog } from '../../context/DialogProvider'
+import { useMountTransition } from '../../hooks/useMountTransition'
 
 // Se monta en un portal sobre document.body: las páginas del CRM viven dentro
 // de contenedores con `transform` (animate-premium-fade), y un `position: fixed`
@@ -43,19 +44,20 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
     return () => { document.body.style.overflow = prev }
   }, [isOpen])
 
-  if (!isOpen) return null
+  const shouldRender = useMountTransition(isOpen)
+  if (!shouldRender) return null
 
   // Mobile: bottom sheet de altura completa (mismo patrón que
   // UnidadPreviewModal.jsx — gesto de cierre arriba, esquinas redondeadas
   // solo arriba, scroll interno). Desktop: modal centrado sin cambios.
   return createPortal(
     <div
-      className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
+      className={`fixed inset-0 z-[999] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-md ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={requestClose}
     >
       <div
         ref={bind}
-        className={`card-light w-full ${maxWidthClass} max-h-[92vh] sm:max-h-[90dvh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-hairline shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-200`}
+        className={`card-light w-full ${maxWidthClass} max-h-[92vh] sm:max-h-[90dvh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-hairline shadow-2xl ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Gesto de cierre (mobile) */}

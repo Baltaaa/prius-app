@@ -312,7 +312,7 @@ export default function TopBar() {
         />
 
         {showDropdown && (
-            <div className="absolute left-0 right-0 mt-2 popover-light rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto">
+            <div className="absolute left-0 right-0 mt-2 popover-light rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto ui-open">
               {!activo ? (
                 <p className="px-4 py-6 text-center text-xs text-prius-muted">Seguí escribiendo (mínimo 2 caracteres)...</p>
               ) : resultadosFlat.length === 0 ? (
@@ -464,7 +464,7 @@ export default function TopBar() {
             // de llegar). El popover-light real queda en el div de adentro,
             // que no se mueve ni cambia de tamaño — mismo look de siempre.
             <div className="hidden md:block absolute right-0 top-full pt-3 w-[380px] max-w-[90vw] z-50">
-              <div className="max-h-[70vh] popover-light rounded-xl overflow-hidden">
+              <div className="max-h-[70vh] popover-light rounded-xl overflow-hidden ui-open">
                 <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
               </div>
             </div>
@@ -472,7 +472,7 @@ export default function TopBar() {
         </div>
 
         {showNotifications && createPortal(
-          <div ref={notifOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-white flex flex-col">
+          <div ref={notifOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-white flex flex-col ui-open">
             <div className="flex items-center justify-between px-4 h-16 border-b border-hairline shrink-0">
               <h1 className="text-sm font-bold uppercase tracking-widest text-black">Notificaciones</h1>
               <button
@@ -521,7 +521,7 @@ export default function TopBar() {
             // para que el hueco visual quede adentro del territorio
             // hovereable (ver comentario arriba).
             <div className="absolute right-0 top-full pt-3 w-56 z-50">
-              <div className="popover-light rounded-xl overflow-hidden p-1">
+              <div className="popover-light rounded-xl overflow-hidden p-1 ui-open">
                 <div className="px-4 py-3 border-b border-hairline">
                   <p className="text-[11px] font-bold text-prius-muted uppercase tracking-wider">{rolLabel}</p>
                   <p className="text-xs font-medium text-black truncate">{nombreMostrado}</p>
@@ -547,7 +547,7 @@ export default function TopBar() {
       {/* Búsqueda mobile a pantalla completa (Tarea 4.2) — mismos resultados
           que el buscador de desktop, reutiliza clienteMatches/reservaMatches. */}
       {mobileSearchOpen && createPortal(
-        <div ref={mobileSearchOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-white flex flex-col">
+        <div ref={mobileSearchOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-white flex flex-col ui-open">
           <div className="flex items-center gap-3 px-4 h-16 border-b border-hairline shrink-0">
             <SearchInput
               value={searchValue}

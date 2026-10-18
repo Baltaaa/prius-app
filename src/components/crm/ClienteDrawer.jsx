@@ -1,5 +1,6 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useMountTransition } from '../../hooks/useMountTransition'
 import { useNavigate } from 'react-router-dom'
 import { X, Wallet, CalendarPlus, ArrowRight, Phone, Mail } from 'lucide-react'
 import { useData } from '../../context/DataProvider'
@@ -28,21 +29,29 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
   const { clientes, reservas, pagos } = useData()
   const overlayId = useId()
   const { bind } = useOverlay({ id: `cliente-drawer-${overlayId}`, isOpen: !!clienteId, onRequestClose: () => onClose?.() })
+  const shouldRender = useMountTransition(!!clienteId)
+  // Durante la animación de salida `clienteId` ya llegó en null (así se
+  // señaliza el cierre) — sin esto, el contenido desaparecía de golpe a
+  // mitad de la transición en vez de verse cerrar. Se congela el último id
+  // real mientras `shouldRender` sigue true por la cola del hook.
+  const lastIdRef = useRef(clienteId)
+  if (clienteId) lastIdRef.current = clienteId
+  const idActivo = clienteId ?? lastIdRef.current
 
-  if (!clienteId) return null
-  const cliente = clientes.find((c) => c.id === clienteId)
+  if (!shouldRender) return null
+  const cliente = clientes.find((c) => c.id === idActivo)
   if (!cliente) return null
 
-  const reservasCliente = reservas.filter((r) => r.cliente_id === clienteId && r.estado !== 'cancelada')
+  const reservasCliente = reservas.filter((r) => r.cliente_id === idActivo && r.estado !== 'cancelada')
   const pagosPorReserva = {}
   for (const p of pagos) (pagosPorReserva[p.reserva_id] ||= []).push(p)
 
   return createPortal(
-    <div className="fixed inset-0 z-[996] flex items-end sm:items-stretch sm:justify-end bg-black/70 backdrop-blur-md animate-in fade-in duration-200" onClick={() => onClose?.()}>
+    <div className={`fixed inset-0 z-[996] flex items-end sm:items-stretch sm:justify-end bg-black/70 backdrop-blur-md ${clienteId ? 'ui-backdrop-open' : 'ui-backdrop-close'}`} onClick={() => onClose?.()}>
       <div
         ref={bind}
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:w-[420px] max-h-[88vh] sm:max-h-none sm:h-full card-light sm:rounded-none rounded-t-3xl border-l border-hairline flex flex-col overflow-hidden animate-in slide-in-from-bottom sm:slide-in-from-right duration-200"
+        className={`w-full sm:w-[420px] max-h-[88vh] sm:max-h-none sm:h-full card-light sm:rounded-none rounded-t-3xl border-l border-hairline flex flex-col overflow-hidden ${clienteId ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
       >
         <div className="sm:hidden flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-prius-subtle" />
@@ -102,7 +111,7 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
 
           <div className="space-y-2">
             <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Últimos eventos</p>
-            <Historial tipo="cliente" id={clienteId} compact />
+            <Historial tipo="cliente" id={idActivo} compact />
           </div>
         </div>
 

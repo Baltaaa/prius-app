@@ -93,11 +93,11 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
   return createPortal(
     <>
     <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-[999] p-4 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-[999] p-4 backdrop-blur-md ui-backdrop-open"
       onClick={onClose}
     >
       <div
-        className="card-light w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl flex flex-col border border-hairline shadow-2xl"
+        className="card-light w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl flex flex-col border border-hairline shadow-2xl ui-open"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-hairline bg-prius-subtle">
@@ -147,7 +147,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
           )}
 
           {esClienteNuevo && (
-            <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="grid grid-cols-2 gap-4 ui-open">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-prius-muted">Teléfono</label>
                 <input
@@ -194,7 +194,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
 
           {/* Fechas según tipo */}
           {tipoAlquiler === "periodo" && (
-            <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="grid grid-cols-2 gap-4 ui-open">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-prius-muted">Desde</label>
                 <input
@@ -219,7 +219,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
           )}
 
           {tipoAlquiler === "dia" && (
-            <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+            <div className="space-y-2 ui-open">
               <label className="text-[10px] font-bold uppercase tracking-widest text-prius-muted">Fecha</label>
               <input
                 type="date"

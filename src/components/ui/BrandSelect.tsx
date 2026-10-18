@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { ChevronDown, Search, Check } from 'lucide-react'
 import { normalizeText } from '../../lib/format'
 import { useOverlay } from '../../context/OverlayProvider'
+import { useMountTransition } from '../../hooks/useMountTransition'
 
 export type BrandSelectOption = {
   value: string
@@ -41,6 +42,7 @@ export default function BrandSelect({
   searchable, disabled, error, invalid, className = '',
 }: BrandSelectProps) {
   const [open, setOpen] = useState(false)
+  const shouldRenderOpen = useMountTransition(open)
   const [search, setSearch] = useState('')
   const [highlight, setHighlight] = useState(0)
   const [coords, setCoords] = useState<{ top: number; left: number; width: number; openUp: boolean } | null>(null)
@@ -229,7 +231,7 @@ export default function BrandSelect({
         <ChevronDown size={16} className={`shrink-0 text-prius-slate transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {open && !isMobile && coords &&
+      {shouldRenderOpen && !isMobile && coords &&
         createPortal(
           <>
             <div className="fixed inset-0 z-[1000]" onClick={() => setOpen(false)} />
@@ -237,7 +239,7 @@ export default function BrandSelect({
               ref={bind}
               onKeyDown={handleKeyDown}
               style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width }}
-              className="z-[1001] bg-white border border-hairline rounded-xl overflow-hidden"
+              className={`z-[1001] bg-white border border-hairline rounded-xl overflow-hidden ${open ? 'ui-open' : 'ui-close'}`}
             >
               {showSearch && (
                 <div className="flex items-center gap-2 px-4 py-2.5 border-b border-hairline">
@@ -258,17 +260,17 @@ export default function BrandSelect({
           document.body,
         )}
 
-      {open && isMobile &&
+      {shouldRenderOpen && isMobile &&
         createPortal(
           <div
-            className="fixed inset-0 z-[1000] flex items-end bg-black/40 animate-in fade-in duration-200"
+            className={`fixed inset-0 z-[1000] flex items-end bg-black/40 ${open ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
             onClick={() => setOpen(false)}
           >
             <div
               ref={bind}
               onClick={(e) => e.stopPropagation()}
               onKeyDown={handleKeyDown}
-              className="w-full max-h-[80vh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
+              className={`w-full max-h-[80vh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden ${open ? 'ui-open-sheet' : 'ui-close-sheet'}`}
             >
               <div className="flex justify-center pt-3 pb-1 shrink-0">
                 <div className="w-10 h-1 rounded-full bg-hairline" />

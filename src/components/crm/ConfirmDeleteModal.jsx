@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AlertTriangle, X } from 'lucide-react'
 import { useOverlay } from '../../context/OverlayProvider'
+import { useMountTransition } from '../../hooks/useMountTransition'
 
 // Confirmación reforzada para cualquier borrado de dato raíz (reservas,
 // clientes, unidades): a diferencia de useDialog().confirm() (un simple
@@ -37,7 +38,8 @@ export default function ConfirmDeleteModal({ isOpen, onClose, onConfirm, tipo, i
     return () => { document.body.style.overflow = prev }
   }, [isOpen])
 
-  if (!isOpen) return null
+  const shouldRender = useMountTransition(isOpen)
+  if (!shouldRender) return null
 
   const esCancelar = accion === 'cancelar'
   const matches = input === identificador
@@ -53,12 +55,12 @@ export default function ConfirmDeleteModal({ isOpen, onClose, onConfirm, tipo, i
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
+      className={`fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={() => !loading && onClose?.()}
     >
       <div
         ref={bind}
-        className="card-light w-full max-w-sm rounded-2xl border border-red-500/20 shadow-2xl p-6 space-y-5"
+        className={`card-light w-full max-w-sm rounded-2xl border border-red-500/20 shadow-2xl p-6 space-y-5 ${isOpen ? 'ui-open' : 'ui-close'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start gap-3">

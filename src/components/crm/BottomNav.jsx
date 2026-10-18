@@ -10,6 +10,7 @@ import {
   DoorClosed, Inbox, GanttChartSquare, Activity, Bell, FileText, UserCheck, LogOut, QrCode,
 } from 'lucide-react'
 import { isFeatureEnabled } from '../../lib/features'
+import { useMountTransition } from '../../hooks/useMountTransition'
 
 // Bottom nav fijo de 5 ítems para mobile (sept 2026) — reemplaza al drawer
 // del Sidebar en pantallas chicas (el Sidebar completo queda solo para
@@ -44,6 +45,7 @@ export default function BottomNav() {
   const location = useLocation()
   const [showMore, setShowMore] = useState(false)
   const { bind: bindMore } = useOverlay({ id: 'bottomnav-mas', isOpen: showMore, onRequestClose: () => setShowMore(false) })
+  const shouldRenderMore = useMountTransition(showMore)
   const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
   const notificationsCount = countPendientes + countNovedadesNoLeidas
   const { sinContactar: leadsSinContactar } = useLeads()
@@ -128,14 +130,14 @@ export default function BottomNav() {
         </button>
       </nav>
 
-      {showMore && createPortal(
+      {shouldRenderMore && createPortal(
         <div
-          className="md:hidden fixed inset-0 z-[998] flex items-end bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
+          className={`md:hidden fixed inset-0 z-[998] flex items-end bg-black/70 backdrop-blur-md ${showMore ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
           onClick={() => setShowMore(false)}
         >
           <div
             ref={bindMore}
-            className="w-full max-h-[85vh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
+            className={`w-full max-h-[85vh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden ${showMore ? 'ui-open-sheet' : 'ui-close-sheet'}`}
             onClick={(e) => e.stopPropagation()}
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >

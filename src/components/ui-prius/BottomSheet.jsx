@@ -2,6 +2,7 @@ import { useId } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useOverlay } from '../../context/OverlayProvider'
+import { useMountTransition } from '../../hooks/useMountTransition'
 
 // Sheet siempre anclado abajo (a diferencia de Modal, que en desktop se
 // centra) — para pickers, menús "Más" y selectores cortos. `maxHeightClass`
@@ -11,16 +12,17 @@ export default function BottomSheet({ isOpen, onClose, title, children, maxHeigh
   const overlayId = useId()
   const { bind } = useOverlay({ id: `prius-sheet-${overlayId}`, isOpen, onRequestClose: () => onClose?.() })
 
-  if (!isOpen) return null
+  const shouldRender = useMountTransition(isOpen)
+  if (!shouldRender) return null
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[998] flex items-end justify-center bg-black/40 animate-in fade-in duration-200"
+      className={`fixed inset-0 z-[998] flex items-end justify-center bg-black/40 ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={() => onClose?.()}
     >
       <div
         ref={bind}
-        className={`w-full sm:max-w-md bg-white border-t border-hairline sm:border sm:rounded-2xl rounded-t-2xl flex flex-col overflow-hidden ${maxHeightClass} animate-in slide-in-from-bottom duration-200`}
+        className={`w-full sm:max-w-md bg-white border-t border-hairline sm:border sm:rounded-2xl rounded-t-2xl flex flex-col overflow-hidden ${maxHeightClass} ${isOpen ? 'ui-open-sheet' : 'ui-close-sheet'}`}
         onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
