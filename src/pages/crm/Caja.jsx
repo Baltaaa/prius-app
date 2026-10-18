@@ -184,7 +184,10 @@ export default function Caja() {
         <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="p-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
           <ChevronLeft size={16} />
         </button>
-        <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="w-36" />
+        {/* w-36 (144px) no entraba la fecha completa en mobile (texto 16px ahí
+            vs 14px en desktop) — encontrado auditando el fix de tabular-nums
+            del Plano, oct 2026. */}
+        <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="w-[164px]" />
         <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="p-3 bg-prius-subtle hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
           <ChevronRight size={16} />
         </button>
