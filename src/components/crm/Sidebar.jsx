@@ -85,7 +85,7 @@ export default function Sidebar() {
             <img src="/images/prius-icon.png" alt="Prius" className="w-8 h-8 object-contain shrink-0" />
             <div className="min-w-0">
               <div className="text-headline-sm text-black leading-none truncate">Prius</div>
-              <div className="text-label-md text-prius-slate uppercase mt-1 truncate">Playa Grande · CRM</div>
+              <div className="text-label-md text-prius-slate uppercase mt-1 truncate">Playa Grande · APP</div>
             </div>
           </div>
           <button
