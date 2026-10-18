@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useNotificaciones } from '../../context/NotificacionesProvider'
 import NotificacionesBandeja from './NotificacionesBandeja'
+import { supabase } from '../../lib/supabase'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
@@ -15,8 +16,16 @@ import { isFeatureEnabled } from '../../lib/features'
 import SearchInput from '../inputs/SearchInput'
 import {
   Search, Bell, User, LogOut, ChevronDown, X,
-  QrCode, Calendar,
+  QrCode, Calendar, EyeOff,
 } from 'lucide-react'
+
+// B5 (oct 2026): modo incógnito — visible SOLO para esta cuenta puntual.
+// Esto es nada más una comodidad de UI (ocultar el botón a quien no debería
+// verlo); la seguridad real está del lado del servidor, en
+// fn_toggle_modo_incognito() (verifica auth.uid() contra este mismo id,
+// con excepción si no coincide) — ver migración
+// 20261018082719_modo_incognito_perfiles.sql.
+const USER_ID_MODO_INCOGNITO = 'ccae0faf-3b4c-402b-902e-b0cd3c5dc1e8'
 import StatusBadge from './StatusBadge'
 import { useSection } from '../../lib/sectionTitles'
 
@@ -77,7 +86,7 @@ export default function TopBar() {
   const searchFeatureOn = isFeatureEnabled('feat-1-search-global-mejorado')
   const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
   const { clientes, reservas, unidades, pagos, realtimeConectado } = useData()
-  const { perfil, rol, signOut } = useAuth()
+  const { perfil, rol, signOut, refetchPerfil } = useAuth()
 
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
   const hoyTopbar = useMemo(() => new Date().toISOString().split('T')[0], [])
@@ -109,6 +118,25 @@ export default function TopBar() {
     setShowProfileMenu(false)
     await signOut()
     navigate('/login')
+  }
+
+  // B5: la RPC ya valida del lado del servidor que sea esta cuenta puntual
+  // — `puedeVerModoIncognito` acá solo decide si se muestra el botón, no es
+  // la seguridad real.
+  const puedeVerModoIncognito = perfil?.user_id === USER_ID_MODO_INCOGNITO
+  const [togglingIncognito, setTogglingIncognito] = useState(false)
+  const handleToggleIncognito = async () => {
+    if (togglingIncognito) return
+    setTogglingIncognito(true)
+    try {
+      await supabase.rpc('fn_toggle_modo_incognito')
+      await refetchPerfil?.()
+    } catch (err) {
+      // silencioso a propósito: si falla, el perfil no cambió y el ícono
+      // de abajo simplemente no aparece — no bloquea el resto del menú.
+    } finally {
+      setTogglingIncognito(false)
+    }
   }
 
   // Búsqueda global: client-side sobre los datos ya en DataProvider (sin
@@ -513,6 +541,11 @@ export default function TopBar() {
             aria-expanded={showProfileMenu}
             className="flex items-center gap-1.5 p-1 min-h-[44px] hover:bg-prius-subtle rounded-full transition-colors"
           >
+            {/* B5: indicador discreto mientras el modo incógnito está
+                activo — para que no quede prendido sin querer. */}
+            {puedeVerModoIncognito && perfil?.modo_incognito && (
+              <EyeOff size={14} className="text-prius-slate shrink-0" title="Modo incógnito activo" />
+            )}
             <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-semibold text-sm shrink-0">
               {nombreMostrado.charAt(0).toUpperCase()}
             </div>
@@ -535,6 +568,15 @@ export default function TopBar() {
                 >
                   <User size={14} /> Perfil
                 </button>
+                {puedeVerModoIncognito && (
+                  <button
+                    onClick={handleToggleIncognito}
+                    disabled={togglingIncognito}
+                    className={`w-full text-left px-4 py-2.5 text-xs hover:bg-prius-subtle flex items-center gap-2 rounded-lg disabled:opacity-50 ${perfil?.modo_incognito ? 'text-black font-semibold' : 'text-prius-slate'}`}
+                  >
+                    <EyeOff size={14} /> Modo incógnito {perfil?.modo_incognito ? '· Activo' : ''}
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-2.5 text-xs text-prius-error hover:bg-red-400/10 flex items-center gap-2 rounded-lg"
