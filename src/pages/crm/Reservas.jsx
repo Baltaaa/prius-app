@@ -25,7 +25,11 @@ import MontoReserva from '../../components/crm/MontoReserva'
 import ReservaCalendar from '../../components/crm/ReservaCalendar'
 import Historial from '../../components/crm/Historial'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
-import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, X, Lock, Unlock, ChevronDown, Receipt, QrCode } from 'lucide-react'
+import { useMountTransition } from '../../hooks/useMountTransition'
+import ReservaDetalleContent from '../../components/crm/ReservaDetalleContent'
+import ReservaListaMobile from '../../components/crm/ReservaListaMobile'
+import BottomSheet from '../../components/ui-prius/BottomSheet'
+import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, X, Lock, Unlock, ChevronDown, Receipt, QrCode, ChevronLeft, LayoutList } from 'lucide-react'
 
 // Título chico de sección dentro del modal de reserva (Tarea 5, oct 2026) —
 // mismo patrón repetido en ambas columnas, separador en vez de mayúscula de
@@ -110,6 +114,30 @@ export default function Reservas() {
   const filtrosOverlay = useOverlay({ id: 'reservas-filtros', isOpen: showFiltros, onRequestClose: () => setShowFiltros(false) })
   const [filtroUnidadId, setFiltroUnidadId] = useState(null) // deep-link "Ver todas" desde el modal de unidad del Plano
 
+  // Rediseño maestro-detalle (oct 2026, mock 03-reservas-*): un solo id
+  // seleccionado, el breakpoint decide cómo se muestra — panel fijo
+  // (≥1024px), bottom sheet (768-1023px) o pantalla completa (<768px).
+  // Mismo patrón de doble matchMedia que ya usa Dashboard.jsx/TopBar.jsx.
+  const [selectedReservaId, setSelectedReservaId] = useState(null)
+  const [isDesktopLG, setIsDesktopLG] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
+  )
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  )
+  useEffect(() => {
+    const mqlLg = window.matchMedia('(min-width: 1024px)')
+    const mqlMobile = window.matchMedia('(max-width: 767px)')
+    const updateLg = () => setIsDesktopLG(mqlLg.matches)
+    const updateMobile = () => setIsMobile(mqlMobile.matches)
+    mqlLg.addEventListener('change', updateLg)
+    mqlMobile.addEventListener('change', updateMobile)
+    return () => {
+      mqlLg.removeEventListener('change', updateLg)
+      mqlMobile.removeEventListener('change', updateMobile)
+    }
+  }, [])
+
   // Form state
   const [clienteId, setClienteId] = useState('')
   const [unidadId, setUnidadId] = useState('')
@@ -128,6 +156,14 @@ export default function Reservas() {
   // esto igual en la base (costo_total=0, estado_pago='pagado'), así que acá
   // solo se refleja para no confundir al que carga el form.
   const [bonificada, setBonificada] = useState(false)
+  // Wizard mobile (<768px, mock 03-reservas-mobile-nueva): mismos 3 campos
+  // reales del form de siempre (Cliente / Unidad+Fechas / Monto+resumen),
+  // solo se muestran de a uno con Siguiente/Atrás — desktop/tablet siguen
+  // viendo el form de dos columnas completo, sin pasos. Nunca se inventan
+  // campos de personas ni precio por método de pago (no existen en este
+  // flujo, ver auditoría previa).
+  const [mobileStep, setMobileStep] = useState(0)
+  const MOBILE_STEPS = ['Cliente', 'Unidad y fechas', 'Monto']
 
   const resetForm = () => {
     setClienteId('')
@@ -152,6 +188,7 @@ export default function Reservas() {
     setEditingReserva(null)
     resetForm()
     setMasOpcionesAbierto(false)
+    setMobileStep(0)
     setIsModalOpen(true)
     formSnapshotRef.current = snapshotForm({
       clienteId: '', unidadId: '', tipoAlquiler: 'periodo', fechaInicio: '', fechaFin: '',
@@ -162,6 +199,7 @@ export default function Reservas() {
   const handleOpenEdit = (res) => {
     registrarVisto('reserva', res.id) // [feat-4]
     setMasOpcionesAbierto(false)
+    setMobileStep(0)
     setEditingReserva(res)
     setClienteId(res.cliente_id || '')
     setUnidadId(res.unidad_id || '')
@@ -473,6 +511,21 @@ export default function Reservas() {
 
   const filtrosActivos = filtroEstado !== 'todos' || filtroTipo !== 'todos' || desde || hasta
 
+  // Reserva seleccionada para el panel/sheet/pantalla de detalle — se busca
+  // en `reservas` (no en `filteredReservas`) para que no desaparezca de
+  // golpe si cambia un filtro mientras el detalle está abierto.
+  const selectedReserva = selectedReservaId ? reservas.find((r) => r.id === selectedReservaId) : null
+  const handleCloseDetalle = () => setSelectedReservaId(null)
+  const handleOpenDetalle = (res) => setSelectedReservaId(res.id)
+  const handleCheckIn = (res) => navigate(linkToRecepcion(res.codigo))
+  // Pantalla completa mobile: igual que UnidadPreviewModal del Plano, se
+  // congela la última reserva real mientras dura la animación de cierre
+  // (B1) — `selectedReserva` llega en null para señalizar el cierre.
+  const mobileDetalleShouldRender = useMountTransition(isMobile && !!selectedReserva)
+  const lastDetalleReservaRef = useRef(selectedReserva)
+  if (selectedReserva) lastDetalleReservaRef.current = selectedReserva
+  const mobileDetalleReserva = selectedReserva ?? lastDetalleReservaRef.current
+
   // Unidad del filtro deep-link, solo para mostrar el chip con su nombre.
   const unidadFiltrada = filtroUnidadId ? unidades.find((u) => u.id === filtroUnidadId) : null
 
@@ -583,7 +636,7 @@ export default function Reservas() {
         <div ref={filtrosOverlay.bind} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
-            className={`card-light px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-gold' : 'text-prius-slate hover:text-black'}`}
+            className={`card-light px-4 py-3 min-h-[44px] rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-gold' : 'text-prius-slate hover:text-black'}`}
           >
             <Filter size={16} /> Filtros {filtrosActivos ? 'Activos' : ''}
           </button>
@@ -629,7 +682,7 @@ export default function Reservas() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="bg-gold hover:bg-gold-hover text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
+          className="bg-gold hover:bg-gold-hover text-black px-6 py-3 min-h-[44px] rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
         >
           <Plus size={18} /> Nueva Reserva
         </button>
@@ -662,7 +715,29 @@ export default function Reservas() {
         </p>
       )}
 
-      {/* Table Section */}
+      {/* Mobile (<768px, mock 03-reservas-mobile): lista agrupada por fecha
+          de llegada, componente aparte — reemplaza por completo a la
+          DataTable/sus tarjetas en este ancho. */}
+      {isMobile && (
+        <ReservaListaMobile
+          reservas={filteredReservas}
+          fechaLlegada={fechaLlegada}
+          onOpenDetalle={handleOpenDetalle}
+          onIrACliente={(res) => navigate(linkToCliente(res.cliente_id))}
+          onRegistrarPago={setPagoReserva}
+          onComprobante={(res) => navigate(linkToComprobante(res.id))}
+          onCheckIn={handleCheckIn}
+        />
+      )}
+
+      {/* Tablet/desktop (≥768px, mock 03-reservas-desktop): tabla maestro a
+          la izquierda + detalle a la derecha. El panel fijo solo se ve en
+          ≥1024px (`hidden lg:flex`); 768-1023px usa el BottomSheet de más
+          abajo en cambio — mismo patrón dual-render que UnidadPreviewModal/
+          UnidadDetallePanel del Plano. */}
+      {!isMobile && (
+        <div className="flex gap-4 items-start">
+          <div className="flex-1 min-w-0">
       <DataTable
         headers={headers}
         data={filteredReservas}
@@ -712,7 +787,11 @@ export default function Reservas() {
             )
           }
           return (
-            <tr key={res.id} className="hover:bg-prius-subtle transition-all group">
+            <tr
+              key={res.id}
+              onClick={() => handleOpenDetalle(res)}
+              className={`hover:bg-prius-subtle transition-all group cursor-pointer ${selectedReservaId === res.id ? 'bg-prius-subtle' : ''}`}
+            >
               <td className="px-6 py-5 text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
               <td className="px-6 py-5 font-bold text-black uppercase">
                 {res.clientes?.nombre || 'S/N'}
@@ -774,103 +853,75 @@ export default function Reservas() {
             </tr>
           )
         }}
-        renderMobileCard={(res) => {
-          if (res.tipo_alquiler === 'temporada') {
-            return (
-              <div onClick={() => navigate(linkToCliente(res.cliente_id))} className="cursor-pointer -m-5 p-5">
-                <div className="flex justify-between items-start gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] text-prius-muted font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>
-                    <h3 className="font-bold uppercase text-sm text-black truncate">{res.clientes?.nombre || 'S/N'}</h3>
-                    <p className="text-[11px] text-prius-muted uppercase mt-0.5">
-                      {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}
-                    </p>
-                    {coSocios(res).length > 0 && (
-                      <p className="text-[10px] text-prius-muted uppercase mt-0.5">
-                        Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <StatusBadge status={estadoBadgeStatus(res)} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-cyan-400 border border-cyan-400/30 rounded px-1.5 py-0.5">
-                      Temporada
-                    </span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center border-t border-hairline pt-3 mt-3">
-                  <div>
-                    <p className="text-[10px] text-prius-muted uppercase font-bold tracking-widest">Saldo</p>
-                    <p className="text-sm font-bold text-prius-error">
-                      {formatPesosVisible(res.saldo)}
-                    </p>
-                  </div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-prius-muted">Ver cliente</p>
-                </div>
-              </div>
-            )
-          }
-          return (
-            <>
-              <div className="flex justify-between items-start gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] text-prius-muted font-bold uppercase tracking-widest">{formatFecha(fechaLlegada(res))}</p>
-                  <h3 className="font-bold uppercase text-sm text-black truncate">{res.clientes?.nombre || 'S/N'}</h3>
-                  <p className="text-[11px] text-prius-muted uppercase mt-0.5">
-                    {unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero} &bull; {res.tipo_alquiler}
-                  </p>
-                  {coSocios(res).length > 0 && (
-                    <p className="text-[10px] text-prius-muted uppercase mt-0.5">
-                      Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
-                    </p>
-                  )}
-                </div>
-                <StatusBadge status={estadoBadgeStatus(res)} />
-              </div>
-              <div className="flex justify-between items-center border-t border-hairline pt-3">
-                <div>
-                  <p className="text-[10px] text-prius-muted uppercase font-bold tracking-widest">Saldo</p>
-                  <p className="text-sm font-bold text-prius-error">
-                    {formatPesosVisible(res.saldo)}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {estadoBadgeStatus(res) === 'preconfirmada' && (
-                    <button
-                      onClick={() => navigate(linkToRecepcion(res.codigo))}
-                      className="p-2.5 bg-prius-subtle hover:bg-prius-subtle rounded-lg text-sky-400 transition-all"
-                      title="Hacer check-in"
-                    >
-                      <QrCode size={16} />
-                    </button>
-                  )}
-                  {!res.bonificada && (
-                    <button
-                      onClick={() => setPagoReserva(res)}
-                      disabled={Number(res.saldo) <= 0}
-                      className="p-2.5 bg-prius-subtle hover:bg-prius-subtle disabled:opacity-30 rounded-lg text-prius-success transition-all"
-                    >
-                      <Wallet size={16} />
-                    </button>
-                  )}
-                  <button onClick={() => navigate(linkToComprobante(res.id))} className="p-2.5 bg-prius-subtle hover:bg-prius-subtle rounded-lg text-black transition-all">
-                    <Receipt size={16} />
-                  </button>
-                  <button onClick={() => handleOpenEdit(res)} className="p-2.5 bg-prius-subtle hover:bg-prius-subtle rounded-lg text-gold transition-all">
-                    <Edit2 size={16} />
-                  </button>
-                  <button onClick={() => handleCancelarClick(res)} className="p-2.5 bg-prius-subtle hover:bg-orange-500/10 rounded-lg text-orange-400 transition-all">
-                    <XCircle size={16} />
-                  </button>
-                  <button onClick={() => handleEliminarClick(res)} className="p-2.5 bg-prius-subtle hover:bg-red-500/10 rounded-lg text-prius-error transition-all">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            </>
-          )
-        }}
       />
+          </div>
+
+          {/* Panel fijo — solo ≥1024px. */}
+          <aside className="hidden lg:flex w-96 shrink-0 card-light rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start max-h-[calc(100vh-2rem)]">
+            {selectedReserva ? (
+              <ReservaDetalleContent
+                reserva={selectedReserva}
+                fechaLlegada={fechaLlegada}
+                onClose={handleCloseDetalle}
+                onRegistrarPago={setPagoReserva}
+                onEditar={handleOpenEdit}
+                onCancelar={handleCancelarClick}
+                onEliminar={handleEliminarClick}
+              />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
+                <LayoutList size={28} />
+                <p className="text-body-md">Elegí una reserva para ver el detalle</p>
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
+
+      {/* Tablet (768-1023px): mismo detalle, como bottom sheet — reusa
+          BottomSheet.jsx (B1: animación de apertura/cierre real). */}
+      {!isMobile && !isDesktopLG && (
+        <BottomSheet isOpen={!!selectedReserva} onClose={handleCloseDetalle} maxHeightClass="max-h-[88vh]">
+          {selectedReserva && (
+            <ReservaDetalleContent
+              reserva={selectedReserva}
+              fechaLlegada={fechaLlegada}
+              onClose={handleCloseDetalle}
+              onRegistrarPago={setPagoReserva}
+              onEditar={handleOpenEdit}
+              onCancelar={handleCancelarClick}
+              onEliminar={handleEliminarClick}
+              showCloseButton={false}
+            />
+          )}
+        </BottomSheet>
+      )}
+
+      {/* Mobile (<768px, mock 03-reservas-mobile-detalle): pantalla completa
+          con flecha de volver, acciones fijas abajo (adentro de
+          ReservaDetalleContent). */}
+      {isMobile && mobileDetalleShouldRender && (
+        <div className={`fixed inset-0 z-[995] bg-white flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}>
+          <div className="flex items-center gap-2 px-2 h-16 border-b border-hairline shrink-0">
+            <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-slate hover:text-black">
+              <ChevronLeft size={20} />
+            </button>
+            <h1 className="text-sm font-bold uppercase tracking-widest text-black">Detalle Reserva</h1>
+          </div>
+          <div className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
+            <ReservaDetalleContent
+              reserva={mobileDetalleReserva}
+              fechaLlegada={fechaLlegada}
+              onClose={handleCloseDetalle}
+              onRegistrarPago={setPagoReserva}
+              onEditar={handleOpenEdit}
+              onCancelar={handleCancelarClick}
+              onEliminar={handleEliminarClick}
+              showCloseButton={false}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Modal Form */}
       {/* Rediseño Tarea 5 (oct 2026): solo JSX/layout — mismo state, mismos
@@ -895,26 +946,60 @@ export default function Reservas() {
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => (isMobile && mobileStep > 0 ? setMobileStep((s) => s - 1) : setIsModalOpen(false))}
                 className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-slate bg-prius-subtle hover:bg-prius-subtle border border-hairline transition-all"
               >
-                Cancelar
+                {isMobile && mobileStep > 0 ? 'Atrás' : 'Cancelar'}
               </button>
-              <button
-                type="submit"
-                form="form-reserva"
-                className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
-              >
-                {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
-              </button>
+              {isMobile && mobileStep < MOBILE_STEPS.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setMobileStep((s) => s + 1)}
+                  className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+                >
+                  Siguiente
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  form="form-reserva"
+                  className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+                >
+                  {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
+                </button>
+              )}
             </div>
           </div>
         }
       >
         <form id="form-reserva" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Columna izquierda: quién, dónde, cuándo */}
+          {/* Indicador de paso (mobile, <768px, mock 03-reservas-mobile-nueva)
+              — mismos 3 campos reales del form de siempre, no los 5 pasos
+              inventados del mock (sin personas ni precio por método de
+              pago, ver auditoría). Desktop/tablet no muestran esto: todo el
+              form entra de una vez, como siempre. */}
+          {isMobile && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-gold uppercase tracking-widest">
+                  Paso {mobileStep + 1} de {MOBILE_STEPS.length}
+                </span>
+                <span className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">{MOBILE_STEPS[mobileStep]}</span>
+              </div>
+              <div className="h-1 rounded-full bg-prius-subtle overflow-hidden flex gap-0.5">
+                {MOBILE_STEPS.map((s, i) => (
+                  <div key={s} className={`flex-1 rounded-full ${i <= mobileStep ? 'bg-gold' : 'bg-hairline'}`} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Columna izquierda: quién, dónde, cuándo. En mobile, cada
+              sub-bloque se oculta según `mobileStep` (0=Cliente,
+              1=Unidad y fechas) sin romper la columna única de desktop. */}
           <div className="space-y-5">
-            <SeccionTitulo>Cliente y unidad</SeccionTitulo>
+            <div className={isMobile && mobileStep !== 0 ? 'hidden' : 'space-y-5'}>
+            <SeccionTitulo>{isMobile ? 'Cliente' : 'Cliente y unidad'}</SeccionTitulo>
 
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Seleccionar Cliente</label>
@@ -941,7 +1026,10 @@ export default function Reservas() {
                 </button>
               </div>
             )}
+            </div>
 
+            <div className={isMobile && mobileStep !== 1 ? 'hidden' : 'space-y-5'}>
+            {isMobile && <SeccionTitulo>Unidad y fechas</SeccionTitulo>}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</label>
@@ -1036,10 +1124,11 @@ export default function Reservas() {
                 </div>
               </div>
             )}
+            </div>
           </div>
 
-          {/* Columna derecha: precio, resumen, extras */}
-          <div className="space-y-5">
+          {/* Columna derecha: precio, resumen, extras (mobile: paso 2) */}
+          <div className={isMobile && mobileStep !== 2 ? 'hidden' : 'space-y-5'}>
             <SeccionTitulo>Precio y pago</SeccionTitulo>
 
             {puedeBonificar && (
