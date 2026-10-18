@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useClientes } from '../../hooks/useClientes'
 import { useReservas } from '../../hooks/useReservas'
@@ -14,17 +15,19 @@ import { isFeatureEnabled } from '../../lib/features'
 import { registrarVisto } from '../../hooks/useRecientes'
 import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
 import {
-  coSocios, saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus,
-  esGrupo, reservasDelGrupo, saldoGrupo, estadoPagoGrupo, pagoSinVerificar,
+  saldoNumerico, esPendienteConfirmacion, montoInfo, estadoBadgeStatus,
+  esGrupo, saldoGrupo, estadoPagoGrupo, pagoSinVerificar,
 } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
 import Modal from '../../components/crm/Modal'
+import BottomSheet from '../../components/ui-prius/BottomSheet'
 import RegistrarPago from '../../components/crm/RegistrarPago'
 import DetallePago from '../../components/crm/DetallePago'
-import PagosGrid from '../../components/crm/PagosGrid'
+import ClienteDetalleContent from '../../components/crm/ClienteDetalleContent'
 import Historial from '../../components/crm/Historial'
 import ScrollToTopButton from '../../components/crm/ScrollToTopButton'
+import { useMountTransition } from '../../hooks/useMountTransition'
 import MoneyInput from '../../components/inputs/MoneyInput'
 import TextInput from '../../components/inputs/TextInput'
 import PhoneInput from '../../components/inputs/PhoneInput'
@@ -37,7 +40,7 @@ import StatusBadge from '../../components/crm/StatusBadge'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
-import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, CircleDollarSign, Filter, Check, CalendarPlus, Receipt } from 'lucide-react'
+import { Plus, Edit2, Trash2, Wallet, Phone, Filter, Check, CalendarPlus, ChevronLeft, LayoutList } from 'lucide-react'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
 // reserva de período/día activa hoy — temporada actual, temporadas pasadas,
@@ -53,8 +56,6 @@ import { Plus, Edit2, Trash2, Wallet, ChevronDown, Mail, Phone, FileText, Circle
 // Dark ya estandarizada.
 const inputClass =
   'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-cyan-400/50 outline-none font-bold'
-
-const TIPO_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 
 // Unidades únicas asociadas a un cliente a partir de sus reservas (co-socio en
 // varias unidades, o histórico de varias temporadas: puede haber más de una).
@@ -140,7 +141,28 @@ export default function Clientes() {
   const [editingCliente, setEditingCliente] = useState(null)
   const [pagoCliente, setPagoCliente] = useState(null)
   const [pagoCelda, setPagoCelda] = useState(null) // { reserva, pago } | null — click en PagosGrid
-  const [expandedId, setExpandedId] = useState(null) // un solo cliente expandido a la vez
+  const [expandedId, setExpandedId] = useState(null) // cliente seleccionado — un solo detalle a la vez
+  // Breakpoints de maestro-detalle (mismo patrón que Reservas.jsx): desktop
+  // ≥1024px panel fijo, tablet 768-1023px bottom sheet, mobile <768px
+  // pantalla completa.
+  const [isDesktopLG, setIsDesktopLG] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
+  )
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  )
+  useEffect(() => {
+    const mqlLg = window.matchMedia('(min-width: 1024px)')
+    const mqlMobile = window.matchMedia('(max-width: 767px)')
+    const updateLg = () => setIsDesktopLG(mqlLg.matches)
+    const updateMobile = () => setIsMobile(mqlMobile.matches)
+    mqlLg.addEventListener('change', updateLg)
+    mqlMobile.addEventListener('change', updateMobile)
+    return () => {
+      mqlLg.removeEventListener('change', updateLg)
+      mqlMobile.removeEventListener('change', updateMobile)
+    }
+  }, [])
 
   // Acción primaria "Confirmar temporada" de una reserva pendiente_confirmacion:
   // define el precio (valor_total) recién ahora — el trigger
@@ -579,6 +601,53 @@ export default function Clientes() {
     return map
   }, [reservas])
 
+  // Toda la información derivada de un cliente puntual (badge, saldo, grupos,
+  // reservas sueltas, etc.) — un solo cálculo reusado tanto por la fila
+  // compacta de la lista como por el panel/pantalla de detalle
+  // (ClienteDetalleContent), así nunca se desincronizan entre sí.
+  const derivarCliente = (cliente) => {
+    const reservasCliente = reservasPorCliente[cliente.id] || []
+    const saldoInfo = saldoPorCliente[cliente.id] || { total: 0, sinVerificar: false }
+    const unidadesCliente = unidadesDeReservas([
+      ...reservasCliente,
+      ...(reservasComoCoSocioPorCliente[cliente.id] || []),
+    ])
+    const reservaGrupoCliente = reservasCliente.find((r) => esGrupo(r) && r.estado !== 'cancelada')
+    const reservaBadge = reservaGrupoCliente || reservaActivaDeTemporada(reservasCliente)
+    const sinPrecio = !reservaGrupoCliente && precioSinDefinir(reservasCliente)
+    const reservasPagables = reservasCliente.filter((r) => r.estado !== 'cancelada' && !r.bonificada)
+    const badgeStatus = reservaGrupoCliente
+      ? estadoPagoGrupo(saldoGrupo(reservaGrupoCliente, reservas, pagosPorReserva), reservaGrupoCliente.reserva_grupos)
+      : (reservaBadge ? estadoBadgeStatus(reservaBadge) : null)
+    const saldoHeaderSaldado = reservaGrupoCliente
+      ? badgeStatus === 'pagado'
+      : reservaBadge && (reservaBadge.estado_pago === 'pagado' || reservaBadge.bonificada)
+    const reservasSueltas = reservasCliente.filter((r) => !r.grupo_id)
+    const comprobantesPendientesCliente = todosPagos
+      .filter((p) => p.cliente_id === cliente.id && p.estado !== 'anulado' && pagoSinVerificar(p)).length
+    const gruposCliente = {}
+    for (const r of reservasCliente) {
+      if (r.grupo_id) (gruposCliente[r.grupo_id] ||= []).push(r)
+    }
+    return {
+      reservasCliente, saldoInfo, unidadesCliente, reservaBadge, sinPrecio, reservasPagables,
+      badgeStatus, saldoHeaderSaldado, reservasSueltas, comprobantesPendientesCliente, gruposCliente,
+      comprobanteMatch: comprobanteMatchPorCliente[cliente.id] || null,
+    }
+  }
+
+  const clienteSeleccionado = expandedId ? clientes.find((c) => c.id === expandedId) : null
+  const derivadoSeleccionado = clienteSeleccionado ? derivarCliente(clienteSeleccionado) : null
+  const handleCloseDetalle = () => setExpandedId(null)
+  // Mobile (<768px): pantalla completa, con el mismo "congelar último valor"
+  // que Reservas.jsx/UnidadPreviewModal para que la animación de cierre (B1)
+  // tenga contenido que mostrar mientras se desmonta.
+  const mobileDetalleShouldRender = useMountTransition(isMobile && !!clienteSeleccionado)
+  const lastDetalleClienteRef = useRef(clienteSeleccionado)
+  if (clienteSeleccionado) lastDetalleClienteRef.current = clienteSeleccionado
+  const mobileDetalleCliente = clienteSeleccionado ?? lastDetalleClienteRef.current
+  const mobileDetalleDerivado = mobileDetalleCliente ? derivarCliente(mobileDetalleCliente) : null
+
   if (!readyClientes) {
     return (
       <div className="space-y-6 font-ui">
@@ -631,467 +700,254 @@ export default function Clientes() {
         </button>
       </div>
 
-      {/* Directorio: filas-tarjeta expandibles, NO una tabla */}
-      {clientesVisibles.length === 0 ? (
-        <div className="p-12 text-center text-sm tracking-wider text-prius-muted card-light rounded-xl">
-          No se encontraron clientes.
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {clientesVisibles.map((cliente) => {
-            const reservasCliente = reservasPorCliente[cliente.id] || []
-            const saldoInfo = saldoPorCliente[cliente.id] || { total: 0, sinVerificar: false }
-            const isExpanded = expandedId === cliente.id
-            const unidadesCliente = unidadesDeReservas([
-              ...reservasCliente,
-              ...(reservasComoCoSocioPorCliente[cliente.id] || []),
-            ])
-            // Un grupo con precio unificado (Ana Lescano) manda por sobre
-            // cualquier período suelto para el badge/saldo del header — es la
-            // imagen más completa del cliente.
-            const reservaGrupoCliente = reservasCliente.find((r) => esGrupo(r) && r.estado !== 'cancelada')
-            const reservaBadge = reservaGrupoCliente || reservaActivaDeTemporada(reservasCliente)
-            const sinPrecio = !reservaGrupoCliente && precioSinDefinir(reservasCliente)
-            // Reservas sobre las que tiene sentido ofrecer "Registrar pago"
-            // desde acá — las bonificadas nunca admiten pagos (bloqueado a
-            // nivel base), así que quedan afuera de las opciones del modal.
-            const reservasPagables = reservasCliente.filter((r) => r.estado !== 'cancelada' && !r.bonificada)
-            const badgeStatus = reservaGrupoCliente
-              ? estadoPagoGrupo(saldoGrupo(reservaGrupoCliente, reservas, pagosPorReserva), reservaGrupoCliente.reserva_grupos)
-              : (reservaBadge ? estadoBadgeStatus(reservaBadge) : null)
-            // Exception del saldo "Monto nulo" (Tarea 3.2): si la reserva que
-            // manda el badge del header ya está pagada o bonificada, el saldo
-            // agregado en $0 es real (saldado), no un monto sin verificar.
-            const saldoHeaderSaldado = reservaGrupoCliente
-              ? badgeStatus === 'pagado'
-              : reservaBadge && (reservaBadge.estado_pago === 'pagado' || reservaBadge.bonificada)
-
-            // Reservas con precio unificado (ver lib/reservas.js) se sacan de
-            // la lista suelta y se agrupan por grupo_id — cada grupo renderiza
-            // UN solo bloque (precio_total/pagado/saldo arriba, períodos y
-            // pagos abajo) en vez de una fila + PagosGrid por período.
-            const reservasSueltas = reservasCliente.filter((r) => !r.grupo_id)
-            // Ítem 4: cuántos pagos de este cliente todavía no tienen monto
-            // cargado (muchos vienen así de la migración del Excel) — vía
-            // `pagoSinVerificar` (fuente única: `pagos.monto`, no
-            // `comprobantes.monto_total`, que no tiene ningún trigger que lo
-            // mantenga sincronizado).
-            const comprobantesPendientesCliente = todosPagos
-              .filter((p) => p.cliente_id === cliente.id && p.estado !== 'anulado' && pagoSinVerificar(p)).length
-            const gruposCliente = {}
-            for (const r of reservasCliente) {
-              if (r.grupo_id) (gruposCliente[r.grupo_id] ||= []).push(r)
-            }
-
-            return (
-              <div
-                key={cliente.id}
-                data-cliente-id={cliente.id}
-                data-deeplink-id={cliente.id}
-                className={`card-light rounded-xl overflow-hidden border transition-all ${isExpanded ? 'border-cyan-400/40' : 'border-hairline'}`}
-              >
-                {/* Toda la caja es clickeable para expandir/colapsar. Mobile
-                    (Tarea 4.7): dos líneas explícitas — nombre/unidad arriba,
-                    badge/saldo/acciones abajo. `sm:contents` hace que ambos
-                    grupos desaparezcan como contenedor a partir de `sm` y sus
-                    hijos vuelvan a la misma fila flex-wrap de siempre, sin
-                    duplicar el layout de desktop. */}
-                <div
-                  onClick={() => handleToggleExpand(cliente.id, isExpanded)}
-                  className="w-full text-left px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-6 gap-y-2 cursor-pointer hover:bg-prius-subtle transition-all"
-                >
-                  <div className="flex items-center gap-3 sm:contents">
-                    <ChevronDown
-                      size={18}
-                      className={`text-cyan-400 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                    />
-                    <div className="min-w-[160px]">
-                      <p className="font-bold text-black uppercase truncate">{cliente.nombre}</p>
-                      <p className="text-prius-slate text-xs mt-0.5 flex items-center gap-1.5">
-                        <Phone size={11} className="text-prius-muted shrink-0" />
-                        {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-prius-muted">Sin cargar</span>}
-                      </p>
-                      {/* Línea extra cuando el match de búsqueda fue por
-                          número de comprobante, no por nombre (Tarea 3, oct
-                          2026) — salta directo a esa cuota resaltada. */}
-                      {comprobanteMatchPorCliente[cliente.id] && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setExpandedId(cliente.id)
-                            scrollAndHighlight(`pago-${comprobanteMatchPorCliente[cliente.id].pago.id}`)
-                          }}
-                          className="text-[10px] text-gold font-bold mt-1 hover:underline truncate block"
-                        >
-                          Comprobante {formatComprobante(comprobanteMatchPorCliente[cliente.id].comprobante.tipo, comprobanteMatchPorCliente[cliente.id].comprobante.numero)}
-                          {formatPesosVisible(comprobanteMatchPorCliente[cliente.id].pago.monto) ? ` · ${formatPesosVisible(comprobanteMatchPorCliente[cliente.id].pago.monto)}` : ''}
-                          {comprobanteMatchPorCliente[cliente.id].comprobante.fecha ? ` · ${formatFecha(comprobanteMatchPorCliente[cliente.id].comprobante.fecha)}` : ''}
-                        </button>
-                      )}
-                    </div>
-                    <div
-                      className="flex items-baseline gap-2 flex-wrap min-w-[90px]"
-                      title={unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
-                    >
-                      {unidadesCliente.length === 0 ? (
-                        <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
-                      ) : (
-                        <>
-                          {unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
-                            <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
-                              <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
-                              <span className="text-base font-extrabold text-black leading-none">{u.numero}</span>
-                            </span>
-                          ))}
-                          {unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
-                            <span className="text-[10px] text-prius-muted font-bold tracking-widest">
-                              +{unidadesCliente.length - MAX_UNIDADES_VISIBLES}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 sm:contents">
-                    {badgeStatus && <StatusBadge status={badgeStatus} />}
-                    <div className="flex-1" />
-                    {/* Columna fija: siempre a la misma distancia del borde,
-                        sin importar el largo de unidad/badge de cada fila. */}
-                    <p className="w-28 text-right shrink-0">
-                      {saldoInfo.sinVerificar ? (
-                        // Si la reserva que manda el badge ya está pagada o
-                        // bonificada, ese "sin verificar" agregado no es una
-                        // deuda real — nunca se muestra $0 acá, así que no se
-                        // muestra nada (ver CLAUDE.md "Nunca $0"). Oct 2026:
-                        // "Saldo sin verificar" (antes "Monto nulo") +
-                        // cuántos comprobantes de este cliente no tienen
-                        // monto cargado — nunca se asume saldo $0 ni total.
-                        saldoHeaderSaldado ? null : (
-                          <span className="block text-prius-error text-[9px] font-bold uppercase tracking-widest">
-                            Saldo sin verificar
-                            {comprobantesPendientesCliente > 0 && (
-                              <span className="block text-prius-muted font-normal normal-case tracking-normal">
-                                {comprobantesPendientesCliente} comprobante{comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
-                              </span>
-                            )}
-                          </span>
-                        )
-                      ) : sinPrecio ? (
-                        <span className="text-prius-slate text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
-                      ) : (
-                        formatPesosVisible(saldoInfo.total) && (
-                          <span className="font-bold text-sm text-prius-error">{formatPesosVisible(saldoInfo.total)}</span>
-                        )
-                      )}
+      {/* Directorio maestro-detalle (oct 2026, mock 04-clientes): lista
+          compacta a la izquierda (ancho fijo ≥1024px, columna completa
+          abajo), detalle en panel fijo / bottom sheet / pantalla completa
+          según breakpoint — mismo patrón que Reservas.jsx. */}
+      <div className={isDesktopLG ? 'flex gap-space-lg items-start' : ''}>
+        <div className={isDesktopLG ? 'flex-1 min-w-0 max-w-xl' : 'w-full'}>
+          {clientesVisibles.length === 0 ? (
+            <div className="p-12 text-center text-sm tracking-wider text-prius-muted bg-white border border-hairline rounded-xl">
+              No se encontraron clientes.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {clientesVisibles.map((cliente, i) => {
+                const d = derivarCliente(cliente)
+                const isSelected = expandedId === cliente.id
+                // Agrupamiento alfabético (mock 04-clientes-mobile): solo en
+                // la lista de ancho completo (tablet/mobile) — el maestro-
+                // detalle de desktop no lo muestra, mismo criterio del mock.
+                const letra = (cliente.nombre || '?').trim()[0]?.toUpperCase() || '?'
+                const letraAnterior = i > 0 ? (clientesVisibles[i - 1].nombre || '?').trim()[0]?.toUpperCase() || '?' : null
+                const mostrarGrupo = !isDesktopLG && letra !== letraAnterior
+                const totalGrupo = !isDesktopLG && mostrarGrupo
+                  ? clientesVisibles.filter((c) => ((c.nombre || '?').trim()[0]?.toUpperCase() || '?') === letra).length
+                  : 0
+                return (
+                  <React.Fragment key={cliente.id}>
+                  {mostrarGrupo && (
+                    <p className="text-label-md font-bold text-prius-slate uppercase tracking-wider pt-2 first:pt-0">
+                      {letra} · {totalGrupo} cliente{totalGrupo > 1 ? 's' : ''}
                     </p>
-                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => setPagoCliente(cliente)}
-                        disabled={reservasPagables.length === 0}
-                        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-prius-success transition-all"
-                        title="Registrar pago"
-                      >
-                        <Wallet size={16} />
-                      </button>
-                      {/* [feat-2] acción rápida: nueva reserva con este
-                          cliente ya precargado. */}
-                      {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
-                        <button
-                          onClick={() => navigate(linkToNuevaReservaCliente(cliente.id))}
-                          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-cyan-400 transition-all"
-                          title="Nueva reserva"
-                        >
-                          <CalendarPlus size={16} />
-                        </button>
-                      )}
-                      <button onClick={() => handleOpenEdit(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-gold transition-all" title="Editar">
-                        <Edit2 size={16} />
-                      </button>
-                      <button onClick={() => setClienteAEliminar(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-500/10 rounded-lg text-prius-error transition-all" title="Borrar">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sección expandida — inline, sin modal ni ruta nueva */}
-                {isExpanded && (
-                  <div className="border-t border-cyan-400/20 bg-black/20 px-6 py-6 space-y-6">
-                    {/* Solo datos que NO se ven ya en el header (teléfono y
-                        unidad quedan arriba) — evita la duplicación
-                        detectada en auditoría. */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="col-span-2 md:col-span-1">
-                        <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest flex items-center gap-1"><Mail size={11} /> Email</p>
-                        <p className="text-sm text-black mt-1 lowercase break-all">{cliente.mail || <span className="text-prius-muted normal-case">Sin cargar</span>}</p>
+                  )}
+                  <div
+                    data-cliente-id={cliente.id}
+                    data-deeplink-id={cliente.id}
+                    onClick={() => setExpandedId(isSelected ? null : cliente.id)}
+                    className={`bg-white rounded-xl border px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-6 gap-y-2 cursor-pointer transition-all ${
+                      isSelected ? 'border-gold bg-prius-surface' : 'border-hairline hover:bg-prius-surface'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 sm:contents">
+                      <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
+                        {cliente.nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
                       </div>
-                      <div>
-                        <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> CUIT</p>
-                        <p className="text-sm text-black mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-prius-muted">Sin cargar</span>}</p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest flex items-center gap-1"><FileText size={11} /> DNI</p>
-                        <p className="text-sm text-black mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-prius-muted">Sin cargar</span>}</p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Cliente desde</p>
-                        <p className="text-sm text-black mt-1">{formatFecha(cliente.created_at)}</p>
-                      </div>
-                      {cliente.notas && (
-                        <div className="col-span-2 md:col-span-4">
-                          <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Notas</p>
-                          <p className="text-sm text-prius-slate mt-1">{cliente.notas}</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Grupos con precio unificado: un bloque por grupo,
-                        arriba precio_total/pagado/saldo/estado, abajo cada
-                        período y la lista de pagos con su comprobante — ver
-                        CLAUDE.md / caso Ana Lescano. */}
-                    {Object.entries(gruposCliente).map(([grupoId, reservasGrupo]) => {
-                      const grupo = reservasGrupo[0].reserva_grupos
-                      const saldo = saldoGrupo(reservasGrupo[0], reservas, pagosPorReserva)
-                      const estado = estadoPagoGrupo(saldo, grupo)
-                      const pagoGrupo = reservasGrupo.flatMap((r) => (pagosPorReserva[r.id] || []).map((p) => ({ ...p, __reserva: r })))
-                        .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
-                      const pagado = Math.max(Number(grupo.precio_total || 0) - (saldo ?? 0), 0)
-                      const primeraReservaActiva = reservasGrupo.find((r) => r.estado !== 'cancelada') || reservasGrupo[0]
-                      return (
-                        <div key={grupoId} className="px-4 py-4 bg-prius-subtle border border-cyan-400/20 rounded-xl space-y-4">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">
-                              Reserva con precio unificado{grupo.temporada ? ` · ${grupo.temporada}` : ''}
-                            </p>
-                            {estado && <StatusBadge status={estado} />}
-                          </div>
-                          <div className="grid grid-cols-3 gap-4 text-xs">
-                            <div>
-                              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Precio total</p>
-                              <p className="text-sm font-bold text-black mt-1">{formatPesosVisible(grupo.precio_total)}</p>
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Pagado</p>
-                              <p className="text-sm font-bold text-prius-success mt-1">{formatPesosVisible(pagado)}</p>
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Saldo</p>
-                              <p className={`text-sm font-bold mt-1 ${saldo === null ? 'text-prius-error' : saldo > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
-                                {saldo === null ? 'Saldo sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Unidad saldada'}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Períodos</p>
-                            {reservasGrupo.map((r) => (
-                              <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-prius-slate">
-                                <span>{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</span>
-                                <span className="text-prius-muted">
-                                  {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
-                                </span>
-                                {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase text-[10px]">Cancelada</span>}
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between">
-                              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Pagos</p>
-                              <button
-                                type="button"
-                                onClick={() => setPagoCelda({ reserva: { ...primeraReservaActiva, clientes: cliente }, pago: null })}
-                                className="text-[10px] font-bold uppercase tracking-widest text-prius-success hover:text-green-300 transition-all"
-                              >
-                                + Cargar pago
-                              </button>
-                            </div>
-                            {pagoGrupo.length === 0 ? (
-                              <p className="text-xs text-prius-muted">Sin pagos registrados.</p>
-                            ) : (
-                              pagoGrupo.map((p) => (
-                                <button
-                                  key={p.id}
-                                  type="button"
-                                  onClick={() => setPagoCelda({ reserva: { ...p.__reserva, clientes: cliente }, pago: p })}
-                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs ${
-                                    p.estado === 'anulado' ? 'bg-prius-subtle text-prius-muted line-through' : 'bg-prius-subtle text-black hover:bg-prius-subtle'
-                                  }`}
-                                >
-                                  <span>{formatFecha(p.fecha)}</span>
-                                  <span className="font-bold">{p.monto == null ? 'Monto nulo' : formatPesosVisible(p.monto)}</span>
-                                  <span className="text-prius-muted">
-                                    {p.comprobantes?.length > 0
-                                      ? p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
-                                      : 'Sin comprobante'}
-                                  </span>
-                                </button>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-
-                    {/* Reservas sueltas: históricas y actuales, cualquier tipo */}
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">
-                          Reservas ({reservasSueltas.length})
+                      <div className="min-w-[160px]">
+                        <p className="font-bold text-black truncate">{cliente.nombre}</p>
+                        <p className="text-prius-slate text-xs mt-0.5 flex items-center gap-1.5">
+                          <Phone size={11} className="text-prius-muted shrink-0" />
+                          {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-prius-muted">Sin cargar</span>}
                         </p>
-                        {reservasSueltas.filter((r) => r.estado !== 'cancelada').length >= 2 && (
+                        {d.comprobanteMatch && (
                           <button
-                            onClick={(e) => { e.stopPropagation(); handleAbrirAgrupar(cliente) }}
-                            className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-all"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setExpandedId(cliente.id)
+                              scrollAndHighlight(`pago-${d.comprobanteMatch.pago.id}`)
+                            }}
+                            className="text-[10px] text-gold font-bold mt-1 hover:underline truncate block"
                           >
-                            Agrupar reservas
+                            Comprobante {formatComprobante(d.comprobanteMatch.comprobante.tipo, d.comprobanteMatch.comprobante.numero)}
+                            {formatPesosVisible(d.comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(d.comprobanteMatch.pago.monto)}` : ''}
                           </button>
                         )}
                       </div>
-                      {reservasSueltas.length === 0 ? (
-                        <p className="text-xs text-prius-muted uppercase tracking-widest">Sin reservas sueltas.</p>
-                      ) : (
-                        <div className="space-y-2">
-                          {reservasSueltas.map((r) => {
-                            const socios = coSocios(r)
-                            // Oct 2026: el badge de estado de esta fila se
-                            // sacó (queda solo el de la cabecera del
-                            // cliente, al lado del nombre) — `badge` se
-                            // sigue calculando porque algunas acciones de
-                            // abajo (check-in) dependen de su valor.
-                            const badge = estadoBadgeStatus(r)
-                            const fechas =
-                              r.tipo_alquiler === 'temporada'
-                                ? r.temporada
-                                : r.tipo_alquiler === 'dia'
-                                  ? formatFecha(r.fecha)
-                                  : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`
-                            return (
-                              <div key={r.id} className="px-4 py-3 bg-prius-subtle border border-hairline rounded-xl text-xs space-y-1.5">
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                                  <span className="font-bold text-cyan-400 uppercase tracking-widest">{TIPO_LABEL[r.tipo_alquiler] || r.tipo_alquiler}</span>
-                                  <span className="text-prius-slate">{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</span>
-                                  <span className="text-prius-muted">{fechas}</span>
-                                  {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase">Cancelada</span>}
-                                  <div className="flex-1" />
-                                  {badge === 'preconfirmada' && (
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); navigate(linkToRecepcion(r.codigo)) }}
-                                      className="text-[10px] font-bold uppercase tracking-widest text-sky-400 hover:text-sky-300 transition-all"
-                                    >
-                                      Hacer check-in
-                                    </button>
-                                  )}
-                                  {r.estado !== 'cancelada' && !r.bonificada && esPendienteConfirmacion(r) && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        setConfirmarValorTotal(0)
-                                        setConfirmarReserva({ reserva: r, cliente })
-                                      }}
-                                      className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-all"
-                                    >
-                                      Confirmar temporada
-                                    </button>
-                                  )}
-                                  {r.estado !== 'cancelada' && !r.bonificada && (r.estado_pago === 'parcial' || r.estado_pago === 'pendiente') && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        setPagoCelda({ reserva: { ...r, clientes: cliente }, pago: null })
-                                      }}
-                                      className="text-[10px] font-bold uppercase tracking-widest text-prius-success hover:text-green-300 transition-all"
-                                    >
-                                      Registrar pago
-                                    </button>
-                                  )}
-                                  {r.estado !== 'cancelada' && (
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); navigate(linkToComprobante(r.id)) }}
-                                      className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-black hover:text-prius-slate transition-all"
-                                    >
-                                      <Receipt size={11} /> Comprobante
-                                    </button>
-                                  )}
-                                  {r.estado !== 'cancelada' && (
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); handleLiberarUnidad(r) }}
-                                      className="text-[10px] font-bold uppercase tracking-widest text-amber-400 hover:text-amber-300 transition-all"
-                                    >
-                                      Liberar unidad
-                                    </button>
-                                  )}
-                                </div>
-                                {socios.length > 0 && (
-                                  <p className="text-[10px] text-prius-muted uppercase tracking-widest">
-                                    Co-socios: {socios.map((s) => s.nombre).join(', ')}
-                                  </p>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Grilla de pagos por reserva, estilo el cuadro Excel del
-                        administrador: Precio de Venta | Mes 1..N | Saldo.
-                        Una grilla por reserva (valor_total/saldo son de la
-                        reserva, no del cliente). Reemplaza la lista plana de
-                        historial que había antes. */}
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">
-                          Pagos por Reserva
-                        </p>
-                        {comprobantesPendientesCliente > 0 && (
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-prius-error">
-                            {comprobantesPendientesCliente} comprobante{comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
-                          </span>
+                      <div
+                        className="flex items-baseline gap-2 flex-wrap min-w-[90px]"
+                        title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
+                      >
+                        {d.unidadesCliente.length === 0 ? (
+                          <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
+                        ) : (
+                          <>
+                            {d.unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
+                              <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
+                                <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
+                                <span className="text-base font-extrabold text-black leading-none">{u.numero}</span>
+                              </span>
+                            ))}
+                            {d.unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
+                              <span className="text-[10px] text-prius-muted font-bold tracking-widest">
+                                +{d.unidadesCliente.length - MAX_UNIDADES_VISIBLES}
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
-                      {reservasSueltas.length === 0 ? (
-                        <p className="text-xs text-prius-muted uppercase tracking-widest">Sin reservas sueltas — nada para cobrar acá (ver pagos del grupo arriba).</p>
-                      ) : (
-                        <div className="space-y-4">
-                          {reservasSueltas.map((r) => (
-                            <div key={r.id} data-deeplink-id={`reserva-${r.id}`}>
-                              <PagosGrid
-                                reserva={r}
-                                pagos={todosPagos.filter((p) => p.reserva_id === r.id)}
-                                onCellClick={(reserva, pago) =>
-                                  setPagoCelda({ reserva: { ...reserva, clientes: cliente }, pago })
-                                }
-                                onDefinirPrecio={(reserva) => {
-                                  setConfirmarValorTotal(0)
-                                  setConfirmarReserva({ reserva, cliente })
-                                }}
-                                onEditarPrecio={puedeAjustarPrecio ? (reserva) => {
-                                  setConfirmarValorTotal(Number(reserva.valor_total) || 0)
-                                  setConfirmarReserva({ reserva, cliente })
-                                } : undefined}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
 
-                    {/* Historial del cliente — mismo componente que la
-                        unidad del Plano y el detalle de reserva (ítem 2). */}
-                    <div>
-                      <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Historial</p>
-                      <Historial tipo="cliente" id={cliente.id} compact />
+                    <div className="flex items-center gap-3 sm:contents">
+                      {d.badgeStatus && <StatusBadge status={d.badgeStatus} />}
+                      <div className="flex-1" />
+                      <p className="w-28 text-right shrink-0">
+                        {d.saldoInfo.sinVerificar ? (
+                          d.saldoHeaderSaldado ? null : (
+                            <span className="block text-prius-error text-[9px] font-bold uppercase tracking-widest">
+                              Saldo sin verificar
+                              {d.comprobantesPendientesCliente > 0 && (
+                                <span className="block text-prius-muted font-normal normal-case tracking-normal">
+                                  {d.comprobantesPendientesCliente} comprobante{d.comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
+                                </span>
+                              )}
+                            </span>
+                          )
+                        ) : d.sinPrecio ? (
+                          <span className="text-prius-slate text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
+                        ) : (
+                          formatPesosVisible(d.saldoInfo.total) && (
+                            <span className="font-bold text-sm text-prius-error">{formatPesosVisible(d.saldoInfo.total)}</span>
+                          )
+                        )}
+                      </p>
+                      <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => setPagoCliente(cliente)}
+                          disabled={d.reservasPagables.length === 0}
+                          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-hairline disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-prius-success transition-all"
+                          title="Registrar pago"
+                        >
+                          <Wallet size={16} />
+                        </button>
+                        {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
+                          <button
+                            onClick={() => navigate(linkToNuevaReservaCliente(cliente.id))}
+                            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-hairline rounded-lg text-prius-slate transition-all"
+                            title="Nueva reserva"
+                          >
+                            <CalendarPlus size={16} />
+                          </button>
+                        )}
+                        <button onClick={() => handleOpenEdit(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-hairline rounded-lg text-gold transition-all" title="Editar">
+                          <Edit2 size={16} />
+                        </button>
+                        <button onClick={() => setClienteAEliminar(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-50 rounded-lg text-prius-error transition-all" title="Borrar">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-            )
-          })}
+                  </React.Fragment>
+                )
+              })}
+            </div>
+          )}
         </div>
+
+        {/* Panel fijo — solo ≥1024px. */}
+        {isDesktopLG && (
+          <aside className="hidden lg:flex w-96 shrink-0 bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start max-h-[calc(100vh-2rem)]">
+            {clienteSeleccionado ? (
+              <ClienteDetalleContent
+                cliente={clienteSeleccionado}
+                derivado={derivadoSeleccionado}
+                reservas={reservas}
+                pagosPorReserva={pagosPorReserva}
+                todosPagos={todosPagos}
+                puedeAjustarPrecio={puedeAjustarPrecio}
+                onClose={handleCloseDetalle}
+                onEditar={() => handleOpenEdit(clienteSeleccionado)}
+                onEliminar={() => setClienteAEliminar(clienteSeleccionado)}
+                onRegistrarPago={() => setPagoCliente(clienteSeleccionado)}
+                onPagoCelda={setPagoCelda}
+                onDefinirPrecio={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+                onEditarPrecio={(reserva) => { setConfirmarValorTotal(Number(reserva.valor_total) || 0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+                onAgruparReservas={() => handleAbrirAgrupar(clienteSeleccionado)}
+                onLiberarUnidad={handleLiberarUnidad}
+                onConfirmarTemporada={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+              />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
+                <LayoutList size={28} />
+                <p className="text-body-md">Elegí un cliente para ver la ficha</p>
+              </div>
+            )}
+          </aside>
+        )}
+      </div>
+
+      {/* Tablet (768-1023px): mismo detalle, como bottom sheet. */}
+      {!isMobile && !isDesktopLG && (
+        <BottomSheet isOpen={!!clienteSeleccionado} onClose={handleCloseDetalle} maxHeightClass="max-h-[88vh]">
+          {clienteSeleccionado && (
+            <ClienteDetalleContent
+              cliente={clienteSeleccionado}
+              derivado={derivadoSeleccionado}
+              reservas={reservas}
+              pagosPorReserva={pagosPorReserva}
+              todosPagos={todosPagos}
+              puedeAjustarPrecio={puedeAjustarPrecio}
+              onClose={handleCloseDetalle}
+              onEditar={() => handleOpenEdit(clienteSeleccionado)}
+              onEliminar={() => setClienteAEliminar(clienteSeleccionado)}
+              onRegistrarPago={() => setPagoCliente(clienteSeleccionado)}
+              onPagoCelda={setPagoCelda}
+              onDefinirPrecio={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+              onEditarPrecio={(reserva) => { setConfirmarValorTotal(Number(reserva.valor_total) || 0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+              onAgruparReservas={() => handleAbrirAgrupar(clienteSeleccionado)}
+              onLiberarUnidad={handleLiberarUnidad}
+              onConfirmarTemporada={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+              showCloseButton={false}
+            />
+          )}
+        </BottomSheet>
       )}
+
+      {/* Mobile (<768px, mock 04-clientes-mobile-ficha): pantalla completa,
+          vía portal a document.body — igual que BottomSheet.jsx. Necesario:
+          el wrapper raíz de esta página usa `animate-premium-fade`, cuya
+          animación deja un `transform` aplicado (fill-mode `both`) incluso
+          después de terminar — eso convierte a ese wrapper en containing
+          block de cualquier `position:fixed` anidado adentro (mismo bug
+          documentado en CLAUDE.md para el portal del date picker), así que
+          sin portal este overlay quedaba recortado a la altura del
+          contenido scrolleable en vez de cubrir el viewport real. */}
+      {isMobile && mobileDetalleShouldRender && createPortal(
+        <div className={`fixed inset-0 z-[995] bg-white flex flex-col ${clienteSeleccionado ? 'ui-open' : 'ui-close'}`}>
+          <div className="flex items-center gap-2 px-2 h-16 border-b border-hairline shrink-0">
+            <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-slate hover:text-black">
+              <ChevronLeft size={20} />
+            </button>
+            <h1 className="text-sm font-bold uppercase tracking-widest text-black">Ficha de Cliente</h1>
+          </div>
+          <div className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
+            {mobileDetalleCliente && (
+              <ClienteDetalleContent
+                cliente={mobileDetalleCliente}
+                derivado={mobileDetalleDerivado}
+                reservas={reservas}
+                pagosPorReserva={pagosPorReserva}
+                todosPagos={todosPagos}
+                puedeAjustarPrecio={puedeAjustarPrecio}
+                onClose={handleCloseDetalle}
+                onEditar={() => handleOpenEdit(mobileDetalleCliente)}
+                onEliminar={() => setClienteAEliminar(mobileDetalleCliente)}
+                onRegistrarPago={() => setPagoCliente(mobileDetalleCliente)}
+                onPagoCelda={setPagoCelda}
+                onDefinirPrecio={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: mobileDetalleCliente }) }}
+                onEditarPrecio={(reserva) => { setConfirmarValorTotal(Number(reserva.valor_total) || 0); setConfirmarReserva({ reserva, cliente: mobileDetalleCliente }) }}
+                onAgruparReservas={() => handleAbrirAgrupar(mobileDetalleCliente)}
+                onLiberarUnidad={handleLiberarUnidad}
+                onConfirmarTemporada={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: mobileDetalleCliente }) }}
+                showCloseButton={false}
+              />
+            )}
+          </div>
+        </div>,
+        document.body,
+      )}
+
 
       {/* Create / Edit Modal */}
       <Modal
