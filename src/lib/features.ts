@@ -27,6 +27,13 @@ export const FEATURES = {
   // prueba disponibilidad_publica()/buscar_unidad_vecina() con datos
   // reales antes de llevar el plano portable a la landing.
   plano_publico_preview: true,
+  // Reportes y Ocupación (oct 2026): ocultas de toda la navegación a
+  // pedido del dueño — el front y la lógica de estas dos pantallas
+  // todavía no están terminados (Reportes más que nada). El código y las
+  // rutas siguen existiendo tal cual, esto es solo un kill-switch de
+  // nav — poner en `true` cuando estén listas, sin tocar nada más.
+  reportes: false,
+  ocupacion: false,
 } as const
 
 export type FeatureKey = keyof typeof FEATURES

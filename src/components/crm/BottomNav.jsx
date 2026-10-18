@@ -53,11 +53,11 @@ export default function BottomNav() {
 
   const masItems = [
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
-    ...(permiso('reportes_globales') ? [{ name: 'Reportes', path: '/app/reportes', icon: BarChart2 }] : []),
+    ...(isFeatureEnabled('reportes') && permiso('reportes_globales') ? [{ name: 'Reportes', path: '/app/reportes', icon: BarChart2 }] : []),
     { name: 'Cabinas y Lockers', path: '/app/cabinas-lockers', icon: DoorClosed, comingSoon: true },
     ...(isFeatureEnabled('recepcion') ? [{ name: 'Recepción', path: '/app/recepcion', icon: QrCode }] : []),
     { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
-    { name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare },
+    ...(isFeatureEnabled('ocupacion') ? [{ name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare }] : []),
     { name: 'Historial', path: '/app/historial', icon: Activity },
     { name: 'Notificaciones', path: '/app/notificaciones', icon: Bell, badge: notificationsCount },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },

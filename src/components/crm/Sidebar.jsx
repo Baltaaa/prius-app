@@ -53,12 +53,12 @@ export default function Sidebar() {
     { name: 'Reservas', path: '/app/reservas', icon: CalendarDays },
     { name: 'Clientes', path: '/app/clientes', icon: Users },
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
-    ...(permiso('reportes_globales') ? [{ name: 'Reportes', path: '/app/reportes', icon: BarChart2 }] : []),
+    ...(isFeatureEnabled('reportes') && permiso('reportes_globales') ? [{ name: 'Reportes', path: '/app/reportes', icon: BarChart2 }] : []),
   ]
 
   const additionalNav = [
     { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
-    { name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare },
+    ...(isFeatureEnabled('ocupacion') ? [{ name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare }] : []),
     { name: 'Historial', path: '/app/historial', icon: Activity },
     { name: 'Notificaciones', path: '/app/notificaciones', icon: Bell, badge: notificationsCount },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },

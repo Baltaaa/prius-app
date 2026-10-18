@@ -368,7 +368,14 @@ export default function Home() {
                     {(pctPercibido * 100).toFixed(1)}% Percibido
                   </span>
                 </div>
-                <button onClick={() => navigate('/app/reportes')} className="w-full mt-space-md flex items-baseline justify-between text-left">
+                {/* Reportes oculto de momento (oct 2026, flag `reportes`
+                    en false) — esta card sigue mostrando el dato real, pero
+                    deja de ser un link a una pantalla que no está en la
+                    navegación. */}
+                <button
+                  onClick={isFeatureEnabled('reportes') ? () => navigate('/app/reportes') : undefined}
+                  className={`w-full mt-space-md flex items-baseline justify-between text-left ${isFeatureEnabled('reportes') ? '' : 'cursor-default'}`}
+                >
                   <div>
                     <span className="block text-label-md text-prius-slate uppercase">Total Recaudado</span>
                     <span className="text-metric-xl text-black">{formatPesos(totalCobrado)}</span>
