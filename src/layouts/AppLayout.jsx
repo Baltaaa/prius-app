@@ -58,13 +58,15 @@ export default function AppLayout() {
                 al BottomNav fijo (56px + safe-area) para que no tape contenido. */}
             <main id="app-main-scroll" className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-20 md:pb-12 bg-prius-background">
               {!esHome && (
-                <div className="mb-space-lg">
+                <div className="no-print mb-space-lg">
                   <h1 className="text-headline-lg text-black tracking-tight">{section.name}</h1>
                   {section.subtitle && <p className="text-body-md text-prius-slate mt-1">{section.subtitle}</p>}
                 </div>
               )}
               <Outlet />
-              <AppFooter />
+              <div className="no-print">
+                <AppFooter />
+              </div>
             </main>
           </div>
         </AppShell>

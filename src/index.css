@@ -15,6 +15,17 @@
   box-sizing: border-box;
 }
 
+/* Global (oct 2026): cualquier elemento marcado .no-print desaparece al
+   imprimir — antes solo lo definía el <style> inline de Caja.jsx, así que
+   solo tapaba lo propio de esa pantalla. El título de sección + footer de
+   AppLayout.jsx (mismo wrapper para toda la app) también lo usan ahora, si
+   no se colaban arriba/abajo del resumen de Caja al imprimir — Plano no lo
+   necesita porque PlanoImpresion.jsx usa su propio #print-root con un
+   mecanismo más agresivo (body > *:not(#print-root) { display:none }). */
+@media print {
+  .no-print { display: none !important; }
+}
+
 /* Rediseño "Playa Privada" (oct 2026): fondo blanco plano, sin gradiente ni
    glassmorphism — reemplaza el tema "Glass Dark" anterior. */
 body {
