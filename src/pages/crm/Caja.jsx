@@ -270,183 +270,225 @@ export default function Caja() {
         )
       )}
 
-      {/* Estado B: caja abierta (en vivo) */}
+      {/* Estado B: caja abierta (en vivo) — dos columnas en desktop (mock
+          05-caja-desktop-abierta): movimientos a la izquierda, desglose por
+          medio + acciones a la derecha. Tablet/mobile: una sola columna,
+          mismo orden que antes. Ningún "Cobrar" acá — el único alta manual
+          de esta pantalla es Registrar Gasto (ver CLAUDE.md). */}
       {cajaSeleccionada && cajaSeleccionada.estado === 'abierta' && (
-        <>
-          <div className="no-print grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="card-light p-5 rounded-2xl card-light-inner">
-              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Ingresos</p>
-              <p className="text-xl font-bold text-prius-success tabular-nums">{formatPesos(cajaSeleccionada.total_cobros)}</p>
-            </div>
-            <div className="card-light p-5 rounded-2xl card-light-inner">
-              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Egresos</p>
-              <p className="text-xl font-bold text-prius-error tabular-nums">{formatPesos(cajaSeleccionada.total_gastos)}</p>
-            </div>
-            <div className="card-light p-5 rounded-2xl card-light-inner border border-gold/20">
-              <p className="text-[10px] font-bold text-prius-slate uppercase tracking-widest mb-2">Neto</p>
-              <p className="text-xl font-bold text-gold tabular-nums">{formatPesos(cajaSeleccionada.total_neto)}</p>
-            </div>
-            <div className="card-light p-5 rounded-2xl card-light-inner flex items-center gap-3">
-              <Banknote className="text-prius-success shrink-0" size={20} />
-              <div>
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Efectivo esperado</p>
-                <p className="text-lg font-bold text-black tabular-nums">{formatPesos(efectivoEsperadoPreview)}</p>
+        <div className="no-print lg:flex lg:gap-6 lg:items-start">
+          <div className="lg:flex-1 lg:min-w-0 space-y-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="card-light p-5 rounded-2xl card-light-inner">
+                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Ingresos</p>
+                <p className="text-xl font-bold text-prius-success tabular-nums">{formatPesos(cajaSeleccionada.total_cobros)}</p>
+              </div>
+              <div className="card-light p-5 rounded-2xl card-light-inner">
+                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Egresos</p>
+                <p className="text-xl font-bold text-prius-error tabular-nums">{formatPesos(cajaSeleccionada.total_gastos)}</p>
+              </div>
+              <div className="card-light p-5 rounded-2xl card-light-inner border border-gold/20">
+                <p className="text-[10px] font-bold text-prius-slate uppercase tracking-widest mb-2">Neto</p>
+                <p className="text-xl font-bold text-gold tabular-nums">{formatPesos(cajaSeleccionada.total_neto)}</p>
+              </div>
+              <div className="card-light p-5 rounded-2xl card-light-inner flex items-center gap-3 col-span-2 lg:col-span-3">
+                <Banknote className="text-prius-success shrink-0" size={20} />
+                <div>
+                  <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Efectivo esperado</p>
+                  <p className="text-lg font-bold text-black tabular-nums">{formatPesos(efectivoEsperadoPreview)}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {(resumen?.por_medio?.length > 0) && (
-            <div className="no-print flex flex-wrap gap-3">
-              {resumen.por_medio.map((m) => (
-                <div key={m.medio} className="px-4 py-2 bg-prius-subtle border border-hairline rounded-xl text-xs flex items-center gap-2">
-                  <span className="text-prius-slate">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
-                  <span className="font-bold text-black tabular-nums">{formatPesos(m.neto)}</span>
-                </div>
-              ))}
-            </div>
-          )}
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                {TABS.map((t) => (
+                  <button
+                    key={t.value}
+                    onClick={() => setTab(t.value)}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all min-h-[44px] ${
+                      tab === t.value ? 'bg-gold text-black' : 'bg-prius-subtle text-prius-slate hover:text-black border border-hairline'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+                <div className="flex-1" />
+                {tab === 'movimientos' && (
+                  <div className="w-48">
+                    <BrandSelect value={filtroMedio} onChange={setFiltroMedio} options={FILTROS_MEDIO} className="py-2.5" />
+                  </div>
+                )}
+              </div>
 
-          {resumen?.sin_comprobante?.length > 0 && (
-            <div className="no-print flex items-start gap-3 p-4 bg-gold/5 border border-gold/20 rounded-xl">
-              <AlertTriangle className="text-gold shrink-0 mt-0.5" size={16} />
-              <p className="text-xs text-prius-slate">
-                Hay {resumen.sin_comprobante.length} pago{resumen.sin_comprobante.length > 1 ? 's' : ''} sin comprobante cargado todavía.
-              </p>
-            </div>
-          )}
-
-          <div className="no-print space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              {TABS.map((t) => (
-                <button
-                  key={t.value}
-                  onClick={() => setTab(t.value)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all min-h-[44px] ${
-                    tab === t.value ? 'bg-gold text-black' : 'bg-prius-subtle text-prius-slate hover:text-black border border-hairline'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-              <div className="flex-1" />
-              {tab === 'movimientos' && (
-                <div className="w-48">
-                  <BrandSelect value={filtroMedio} onChange={setFiltroMedio} options={FILTROS_MEDIO} className="py-2.5" />
-                </div>
-              )}
-            </div>
-
-            <div className="card-light p-6 sm:p-8 rounded-3xl card-light-inner">
-              {tab === 'movimientos' && (
-                movimientosFiltrados.length === 0 ? (
-                  <p className="text-xs text-prius-muted uppercase tracking-widest">Sin movimientos con este filtro.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {movimientosFiltrados.map((m) => (
-                      <button
-                        key={`${m.tipo_movimiento}-${m.movimiento_id}`}
-                        onClick={() => abrirDetalleMovimiento(m)}
-                        className={`w-full flex justify-between items-center py-3 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg transition-all text-left ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          {m.tipo_movimiento === 'ingreso' ? <ArrowUpRight size={16} className="text-prius-success shrink-0" /> : <ArrowDownRight size={16} className="text-prius-error shrink-0" />}
-                          <div className="min-w-0">
-                            <p className={`text-sm font-bold text-prius-slate truncate ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
-                            <p className="text-[10px] text-prius-muted uppercase tracking-widest">{m.cliente_proveedor} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}</p>
+              <div className="card-light p-6 sm:p-8 rounded-3xl card-light-inner">
+                {tab === 'movimientos' && (
+                  movimientosFiltrados.length === 0 ? (
+                    <p className="text-xs text-prius-muted uppercase tracking-widest">Sin movimientos con este filtro.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {movimientosFiltrados.map((m) => (
+                        <button
+                          key={`${m.tipo_movimiento}-${m.movimiento_id}`}
+                          onClick={() => abrirDetalleMovimiento(m)}
+                          className={`w-full flex justify-between items-center py-3 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg transition-all text-left ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {m.tipo_movimiento === 'ingreso' ? <ArrowUpRight size={16} className="text-prius-success shrink-0" /> : <ArrowDownRight size={16} className="text-prius-error shrink-0" />}
+                            <div className="min-w-0">
+                              <p className={`text-sm font-bold text-prius-slate truncate ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
+                              <p className="text-[10px] text-prius-muted uppercase tracking-widest">{m.cliente_proveedor} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}</p>
+                            </div>
                           </div>
+                          <span className={`text-sm font-bold tabular-nums shrink-0 ml-3 ${m.monto < 0 ? 'text-prius-error' : 'text-prius-success'}`}>{formatPesos(m.monto)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )
+                )}
+
+                {tab === 'facturas' && (
+                  (resumen?.facturas || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin facturas todavía.</p> : (
+                    <div className="space-y-2">
+                      {resumen.facturas.map((f) => (
+                        <div key={f.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
+                          <span className="text-sm text-prius-slate">{f.etiqueta}</span>
+                          <span className="text-sm font-bold text-black tabular-nums">{formatPesos(f.monto_total)}</span>
                         </div>
-                        <span className={`text-sm font-bold tabular-nums shrink-0 ml-3 ${m.monto < 0 ? 'text-prius-error' : 'text-prius-success'}`}>{formatPesos(m.monto)}</span>
-                      </button>
-                    ))}
-                  </div>
-                )
-              )}
+                      ))}
+                    </div>
+                  )
+                )}
 
-              {tab === 'facturas' && (
-                (resumen?.facturas || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin facturas todavía.</p> : (
-                  <div className="space-y-2">
-                    {resumen.facturas.map((f) => (
-                      <div key={f.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
-                        <span className="text-sm text-prius-slate">{f.etiqueta}</span>
-                        <span className="text-sm font-bold text-black tabular-nums">{formatPesos(f.monto_total)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )
-              )}
-
-              {tab === 'recibos' && (
-                (resumen?.recibos || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin recibos todavía.</p> : (
-                  <div className="space-y-2">
-                    {resumen.recibos.map((r) => (
-                      <div key={r.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
-                        <span className="text-sm text-prius-slate">{r.etiqueta}</span>
-                        <span className="text-sm font-bold text-black tabular-nums">{formatPesos(r.monto_total)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )
-              )}
-
-              {tab === 'sin_comprobante' && (
-                (resumen?.sin_comprobante || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Todos los pagos tienen comprobante.</p> : (
-                  <div className="space-y-2">
-                    {resumen.sin_comprobante.map((p) => (
-                      <button
-                        key={p.pago_id}
-                        onClick={() => { const pago = pagos.find((x) => x.id === p.pago_id); if (pago) setPagoSeleccionado(pago) }}
-                        className="w-full flex justify-between py-2 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg text-left"
-                      >
-                        <span className="text-sm text-prius-slate">{p.cliente || 'S/N'} — {p.concepto}</span>
-                        <span className="text-sm font-bold text-black tabular-nums">{formatPesos(p.monto)}</span>
-                      </button>
-                    ))}
-                  </div>
-                )
-              )}
-
-              {tab === 'gastos' && (
-                todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin gastos todavía.</p> : (
-                  <div className="space-y-2">
-                    {todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).map((g) => (
-                      <button
-                        key={g.id}
-                        onClick={() => setGastoSeleccionado(g)}
-                        className={`w-full flex justify-between items-center py-3 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg text-left group ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
-                      >
-                        <div className="min-w-0">
-                          <p className={`text-sm font-bold text-prius-slate truncate ${g.estado === 'anulado' ? 'line-through' : ''}`}>{g.descripcion}</p>
-                          <p className="text-[10px] text-prius-muted uppercase tracking-widest">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
+                {tab === 'recibos' && (
+                  (resumen?.recibos || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin recibos todavía.</p> : (
+                    <div className="space-y-2">
+                      {resumen.recibos.map((r) => (
+                        <div key={r.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
+                          <span className="text-sm text-prius-slate">{r.etiqueta}</span>
+                          <span className="text-sm font-bold text-black tabular-nums">{formatPesos(r.monto_total)}</span>
                         </div>
-                        <span className="text-sm font-bold text-prius-error tabular-nums shrink-0 ml-3">{formatPesos(g.monto)}</span>
-                      </button>
-                    ))}
-                  </div>
-                )
-              )}
+                      ))}
+                    </div>
+                  )
+                )}
+
+                {tab === 'sin_comprobante' && (
+                  (resumen?.sin_comprobante || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Todos los pagos tienen comprobante.</p> : (
+                    <div className="space-y-2">
+                      {resumen.sin_comprobante.map((p) => (
+                        <button
+                          key={p.pago_id}
+                          onClick={() => { const pago = pagos.find((x) => x.id === p.pago_id); if (pago) setPagoSeleccionado(pago) }}
+                          className="w-full flex justify-between py-2 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg text-left"
+                        >
+                          <span className="text-sm text-prius-slate">{p.cliente || 'S/N'} — {p.concepto}</span>
+                          <span className="text-sm font-bold text-black tabular-nums">{formatPesos(p.monto)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )
+                )}
+
+                {tab === 'gastos' && (
+                  todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin gastos todavía.</p> : (
+                    <div className="space-y-2">
+                      {todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).map((g) => (
+                        <button
+                          key={g.id}
+                          onClick={() => setGastoSeleccionado(g)}
+                          className={`w-full flex justify-between items-center py-3 px-2 border-b border-hairline last:border-0 hover:bg-prius-subtle rounded-lg text-left group ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
+                        >
+                          <div className="min-w-0">
+                            <p className={`text-sm font-bold text-prius-slate truncate ${g.estado === 'anulado' ? 'line-through' : ''}`}>{g.descripcion}</p>
+                            <p className="text-[10px] text-prius-muted uppercase tracking-widest">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
+                          </div>
+                          <span className="text-sm font-bold text-prius-error tabular-nums shrink-0 ml-3">{formatPesos(g.monto)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )
+                )}
+              </div>
             </div>
+
+            {/* Acción principal: Registrar Gasto — FAB en mobile */}
+            <button
+              onClick={() => setMostrarGasto(true)}
+              className="md:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gold text-black shadow-2xl flex items-center justify-center"
+              title="Registrar gasto"
+            >
+              <Plus size={24} />
+            </button>
+            <button onClick={() => setMostrarCierre(true)} className="md:hidden w-full py-4 bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-widest text-xs rounded-xl transition-all shadow-xl flex items-center justify-center gap-2">
+              <Lock size={16} /> Cerrar Caja de Hoy
+            </button>
           </div>
 
-          {/* Acción principal: Registrar Gasto — FAB en mobile, botón en desktop */}
-          <button
-            onClick={() => setMostrarGasto(true)}
-            className="no-print md:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gold text-black shadow-2xl flex items-center justify-center"
-            title="Registrar gasto"
-          >
-            <Plus size={24} />
-          </button>
-          <div className="no-print hidden md:flex gap-4">
-            <button onClick={() => setMostrarGasto(true)} className="flex items-center gap-2 px-6 py-3 bg-prius-subtle hover:bg-prius-subtle text-black rounded-xl font-bold uppercase text-xs tracking-widest border border-hairline transition-all">
+          {/* Columna derecha — solo ≥1024px: desglose por medio + acciones. */}
+          <aside className="hidden lg:flex lg:w-80 lg:shrink-0 flex-col gap-4 sticky top-4 self-start">
+            {resumen?.por_medio?.length > 0 && (
+              <div className="card-light p-6 rounded-2xl card-light-inner space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-prius-slate">Por medio de pago</h3>
+                {resumen.por_medio.map((m) => (
+                  <div key={m.medio} className="flex items-center justify-between py-1.5 border-b border-hairline last:border-0">
+                    <span className="text-sm text-prius-slate">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                    <span className="font-bold text-black tabular-nums text-sm">{formatPesos(m.neto)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {resumen?.sin_comprobante?.length > 0 && (
+              <div className="flex items-start gap-3 p-4 bg-gold/5 border border-gold/20 rounded-xl">
+                <AlertTriangle className="text-gold shrink-0 mt-0.5" size={16} />
+                <p className="text-xs text-prius-slate">
+                  Hay {resumen.sin_comprobante.length} pago{resumen.sin_comprobante.length > 1 ? 's' : ''} sin comprobante cargado todavía.
+                </p>
+              </div>
+            )}
+
+            <button onClick={() => setMostrarGasto(true)} className="flex items-center justify-center gap-2 px-6 py-3 bg-prius-subtle hover:bg-prius-subtle text-black rounded-xl font-bold uppercase text-xs tracking-widest border border-hairline transition-all">
               <Plus size={16} /> Registrar Gasto
             </button>
-            <button onClick={() => setMostrarCierre(true)} className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold uppercase text-xs tracking-widest transition-all">
+            <button onClick={() => setMostrarCierre(true)} className="flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold uppercase text-xs tracking-widest transition-all">
               <Lock size={16} /> Cerrar Caja
             </button>
+          </aside>
+
+          {/* Tablet/mobile (<1024px): desglose + alerta en el flujo normal,
+              abajo del todo (los botones de acción siguen siendo el FAB +
+              "Cerrar Caja de Hoy" de más arriba en mobile, y el par
+              Gasto/Cerrar de acá en tablet). */}
+          <div className="lg:hidden space-y-4 mt-6">
+            {resumen?.por_medio?.length > 0 && (
+              <div className="flex flex-wrap gap-3">
+                {resumen.por_medio.map((m) => (
+                  <div key={m.medio} className="px-4 py-2 bg-prius-subtle border border-hairline rounded-xl text-xs flex items-center gap-2">
+                    <span className="text-prius-slate">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                    <span className="font-bold text-black tabular-nums">{formatPesos(m.neto)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {resumen?.sin_comprobante?.length > 0 && (
+              <div className="flex items-start gap-3 p-4 bg-gold/5 border border-gold/20 rounded-xl">
+                <AlertTriangle className="text-gold shrink-0 mt-0.5" size={16} />
+                <p className="text-xs text-prius-slate">
+                  Hay {resumen.sin_comprobante.length} pago{resumen.sin_comprobante.length > 1 ? 's' : ''} sin comprobante cargado todavía.
+                </p>
+              </div>
+            )}
+            <div className="hidden md:flex gap-4">
+              <button onClick={() => setMostrarGasto(true)} className="flex items-center gap-2 px-6 py-3 bg-prius-subtle hover:bg-prius-subtle text-black rounded-xl font-bold uppercase text-xs tracking-widest border border-hairline transition-all">
+                <Plus size={16} /> Registrar Gasto
+              </button>
+              <button onClick={() => setMostrarCierre(true)} className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold uppercase text-xs tracking-widest transition-all">
+                <Lock size={16} /> Cerrar Caja
+              </button>
+            </div>
           </div>
-          <button onClick={() => setMostrarCierre(true)} className="no-print md:hidden w-full py-4 bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-widest text-xs rounded-xl transition-all shadow-xl flex items-center justify-center gap-2">
-            <Lock size={16} /> Cerrar Caja de Hoy
-          </button>
-        </>
+        </div>
       )}
 
       {/* Estado D: caja cerrada — resumen del día */}
@@ -516,7 +558,6 @@ export default function Caja() {
         @media print {
           @page { size: A4 portrait; margin: 8mm; }
           html, body { background: white !important; color: black !important; }
-          .no-print { display: none !important; }
         }
       `}</style>
     </div>
