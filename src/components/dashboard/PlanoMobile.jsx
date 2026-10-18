@@ -1,15 +1,18 @@
-import { ChevronLeft, ChevronRight, Printer, Expand, Shrink, Layers } from "lucide-react"
+import { ChevronLeft, ChevronRight, Printer, Layers } from "lucide-react"
 import PlanoGrid from "../plano/PlanoGrid"
 import PlanoViewport from "../plano/PlanoViewport"
 import DateInput from "../inputs/DateInput"
+import PlanoZoomBar from "./PlanoZoomBar"
+import PlanoLeyenda from "./PlanoLeyenda"
 import { pct } from "./PlanoStatsBar"
 
 // Plano mobile (<768px, mock 02-plano-mobile) — componente NUEVO y separado
 // del layout desktop/tablet de Dashboard.jsx: nunca edita ni reimplementa
-// PlanoGrid.jsx/PlanoViewport.jsx/Cell.jsx (los importa y los usa tal cual,
-// vía los mismos props/handlers que ya calcula Dashboard.jsx — mismas
-// unidades, mismo orden, misma disposición real). Del mock se toma
-// únicamente el estilo de los contenedores/chips/KPIs; la grilla de
+// PlanoGrid.jsx/PlanoViewport.jsx (los importa y los usa tal cual, vía los
+// mismos props/handlers que ya calcula Dashboard.jsx — mismas unidades,
+// mismo orden, misma disposición real). `renderCelda` que recibe ya es
+// renderCeldaMobile (CellMobile.jsx, celda táctil real ≥44x36 — ver ese
+// archivo y Dashboard.jsx), nunca Cell.jsx escalado. La grilla de
 // "Pasillo A-B-C/D-E-F" del mock es un placeholder inventado por Stitch, acá
 // se dibuja la disposición real vía `renderCelda`/`unidades`.
 export default function PlanoMobile({
@@ -18,8 +21,7 @@ export default function PlanoMobile({
   transform, ready, isDragging, canPan,
   onZoomIn, onZoomOut, onEncuadrar, onTouchStart, onTouchMove, onTouchEnd,
   onMapMouseDown, onMapWheel, onAnimationEnd, viewportRef, contentRef,
-  fullscreen, onToggleFullscreen,
-  unidades, renderCelda,
+  unidades, renderCelda, extraButtonsViewport,
 }) {
   const kpis = planoStats && [
     { key: 'ocupacion', label: 'Ocupadas', value: planoStats.ocupacion.count, sub: `${pct(planoStats.ocupacion.pct)}`, progress: planoStats.ocupacion.pct, tone: 'black' },
@@ -36,7 +38,10 @@ export default function PlanoMobile({
             <ChevronLeft size={16} />
           </button>
           <div className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-1">
-            <DateInput value={selectedDate} onChange={(v) => v && onDateChange(v)} calendarOnly className="w-[92px]" />
+            {/* w-[164px] (no 92px): la fecha completa dd/mm/aaaa no entraba,
+                se veía cortada ("01/0" en vez de "01/01/2027") — ver reporte
+                de la tarea. */}
+            <DateInput value={selectedDate} onChange={(v) => v && onDateChange(v)} calendarOnly className="w-[164px]" />
             {!esHoy && (
               <button onClick={onHoy} className="text-label-md text-gold font-bold uppercase shrink-0">Hoy</button>
             )}
@@ -75,8 +80,8 @@ export default function PlanoMobile({
         </div>
       )}
 
-      {/* Filtros: tipo + estado, scroll horizontal */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0 pb-0.5">
+      {/* Filtro por tipo */}
+      <div className="flex items-center overflow-x-auto scrollbar-none shrink-0">
         <div className="flex items-center bg-prius-subtle p-1 rounded-full gap-0.5 shrink-0">
           {[['todo', 'Todo', planoStats?.ocupacion.total], ['carpas', 'Carpas', planoStats?.carpas.total], ['sombrillas', 'Sombrillas', planoStats?.sombrillas.total]].map(([key, label, total]) => (
             <button
@@ -90,27 +95,29 @@ export default function PlanoMobile({
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {[['todas', 'Todas', null], ['libres', 'Libres', planoStats?.libres.count], ['ocupacion', 'Ocupadas', planoStats?.ocupacion.count], ['pendientes', 'Pendientes', planoStats?.pendientes.count]].map(([key, label, count]) => (
-            <button
-              key={key}
-              onClick={() => onToggleFiltro(key === 'todas' ? null : key)}
-              className={`h-7 px-2.5 rounded-full text-label-md uppercase whitespace-nowrap transition-colors ${
-                (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-gold text-black' : 'bg-prius-subtle text-prius-slate'
-              }`}
-            >
-              {label}{count != null ? ` (${count})` : ''}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* Leyenda */}
-      <div className="flex items-center gap-3 overflow-x-auto scrollbar-none shrink-0 text-body-sm text-prius-slate">
-        <span className="flex items-center gap-1.5 shrink-0"><span className="w-3 h-3 rounded bg-white border border-hairline" />Libre</span>
-        <span className="flex items-center gap-1.5 shrink-0"><span className="w-3 h-3 rounded bg-black" />Ocupada</span>
-        <span className="flex items-center gap-1.5 shrink-0"><span className="w-3 h-3 rounded bg-gold" />Pendiente</span>
+      {/* Filtro por estado — fila propia (oct 2026): antes compartía el
+          mismo renglón con scroll horizontal que el filtro de tipo, así que
+          "Pendientes" quedaba fuera de vista sin que se notara que había
+          que scrollear. Ahora siempre visible. */}
+      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
+        {[['todas', 'Todas', null], ['libres', 'Libres', planoStats?.libres.count], ['ocupacion', 'Ocupadas', planoStats?.ocupacion.count], ['pendientes', 'Pendientes', planoStats?.pendientes.count]].map(([key, label, count]) => (
+          <button
+            key={key}
+            onClick={() => onToggleFiltro(key === 'todas' ? null : key)}
+            className={`h-7 px-2.5 rounded-full text-label-md uppercase whitespace-nowrap shrink-0 transition-colors ${
+              (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-gold text-black' : 'bg-prius-subtle text-prius-slate'
+            }`}
+          >
+            {label}{count != null ? ` (${count})` : ''}
+          </button>
+        ))}
       </div>
+
+      {/* Leyenda — explica los 6 indicadores reales (ver PlanoLeyenda.jsx),
+          no solo los 3 colores de fondo. */}
+      <PlanoLeyenda compact />
 
       {/* Card del plano — PlanoGrid/PlanoViewport SIN modificar */}
       <section className="flex-1 min-h-0 card-light rounded-2xl card-light-inner relative overflow-hidden flex flex-col">
@@ -121,30 +128,35 @@ export default function PlanoMobile({
         {loading ? (
           <div className="flex-1 flex items-center justify-center text-prius-muted text-label-md">Cargando plano…</div>
         ) : (
-          <PlanoViewport
-            transform={transform}
-            ready={ready}
-            isDragging={isDragging}
-            canPan={canPan}
-            onZoomIn={onZoomIn}
-            onZoomOut={onZoomOut}
-            onEncuadrar={onEncuadrar}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-            onMapMouseDown={onMapMouseDown}
-            onMapWheel={onMapWheel}
-            onAnimationEnd={onAnimationEnd}
-            viewportRef={viewportRef}
-            contentRef={contentRef}
-            extraButtons={
-              <button onClick={onToggleFullscreen} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title={fullscreen ? "Cerrar pantalla completa" : "Ver en pantalla completa"}>
-                {fullscreen ? <Shrink size={18} /> : <Expand size={18} />}
-              </button>
-            }
-          >
-            <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
-          </PlanoViewport>
+          <div className="flex-1 min-h-0 flex gap-2 px-2 pb-2">
+            {/* Misma técnica que Dashboard.jsx desktop: la barra de zoom
+                propia de PlanoViewport.jsx (congelado) se oculta desde
+                afuera con este selector, sin tocar ese archivo —
+                PlanoZoomBar.jsx la reemplaza al lado, dentro del padding de
+                la card, nunca superpuesta a una celda. */}
+            <div className="flex-1 min-h-0 flex flex-col relative [&>div:first-child]:hidden">
+              <PlanoViewport
+                transform={transform}
+                ready={ready}
+                isDragging={isDragging}
+                canPan={canPan}
+                onZoomIn={onZoomIn}
+                onZoomOut={onZoomOut}
+                onEncuadrar={onEncuadrar}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                onMapMouseDown={onMapMouseDown}
+                onMapWheel={onMapWheel}
+                onAnimationEnd={onAnimationEnd}
+                viewportRef={viewportRef}
+                contentRef={contentRef}
+              >
+                <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+              </PlanoViewport>
+            </div>
+            <PlanoZoomBar onZoomIn={onZoomIn} onZoomOut={onZoomOut} onEncuadrar={onEncuadrar} extraButtons={extraButtonsViewport} />
+          </div>
         )}
       </section>
     </div>

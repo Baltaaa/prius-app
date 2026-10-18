@@ -10,6 +10,9 @@ import PlanoMobile from "../components/dashboard/PlanoMobile"
 import AsignarUnidadModal from "../components/dashboard/AsignarUnidadModal"
 import MoverUnidadDialog from "../components/dashboard/MoverUnidadDialog"
 import Cell from "../components/dashboard/Cell"
+import CellMobile from "../components/dashboard/CellMobile"
+import PlanoZoomBar from "../components/dashboard/PlanoZoomBar"
+import PlanoLeyenda from "../components/dashboard/PlanoLeyenda"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import PlanoGrid from "../components/plano/PlanoGrid"
 import PlanoViewport from "../components/plano/PlanoViewport"
@@ -66,6 +69,22 @@ export default function Dashboard() {
     return () => { document.body.style.overflow = prev }
   }, [fullscreenOpen])
 
+  // Mismo breakpoint que el resto del shell (BottomNav/Sidebar, 768px) — por
+  // debajo de eso se monta PlanoMobile.jsx (componente nuevo y separado del
+  // layout desktop/tablet de acá, ver rediseño oct 2026) en vez del body de
+  // franja superior + panel lateral. Declarado ANTES de `computeFit` (abajo),
+  // que lo lee para decidir si auto-encuadra (desktop) o arranca siempre a
+  // escala 1 (mobile, ver ese comentario).
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  )
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(mql.matches)
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
+
   // --- Fit al contenedor (mobile y desktop, Fase 4A hotfix oct 2026) -------
   // Antes: por debajo de 768px el mapa usaba un modo aparte (scroll nativo +
   // zoom simple por escala, sin encuadre). Bug real que eso causaba en
@@ -102,12 +121,30 @@ export default function Dashboard() {
 
   const round1 = (n) => Math.round(n * 10) / 10
   const PLANO_PAD = 24
-  const computeFit = (contW, contH, contentW, contentH) =>
-    Math.min((contW - PLANO_PAD * 2) / contentW, (contH - PLANO_PAD * 2) / contentH)
+  // Mobile (<768px, hotfix oct 2026): nunca se auto-achica para entrar en
+  // los dos ejes — eso era la causa real de las celdas microscópicas ("el
+  // componente desktop escalado" que reportó el dueño). El plano mobile
+  // arranca siempre a escala 1 (tamaño real de CellMobile, min 44x36) y, si
+  // no entra en algún eje, el pan/pinch-zoom ya existente resuelve el resto
+  // — nunca scroll de la página. `fitScale` (piso del zoom-out) queda fijo
+  // en 1*0.5 acá, independiente del tamaño real del contenido.
+  const computeFit = (contW, contH, contentW, contentH) => {
+    if (isMobile) return 1
+    return Math.min((contW - PLANO_PAD * 2) / contentW, (contH - PLANO_PAD * 2) / contentH)
+  }
   const centeredPos = (contW, contH, contentW, contentH, scale) => ({
     x: (contW - contentW * scale) / 2,
     y: (contH - contentH * scale) / 2,
   })
+  // Mobile, posición inicial (no `centeredPos`): a escala 1 el contenido
+  // real del plano (franja Recreación/Acceso/Pileta + 6 columnas de carpas +
+  // sombrillas + "Océano Atlántico") excede por mucho los ~340px de ancho
+  // útil de un celular — centrar matemáticamente arrancaba mostrando un
+  // tramo vacío del medio (el hueco entre bloques), en vez de la esquina
+  // superior izquierda real (Recreación + carpa 1). clampPan(0,0,scale)
+  // ancla arriba-izquierda cuando desborda y centra solo si en algún eje
+  // entra entero — mismo helper que ya usa el pan por drag/pinch.
+  const anchorPos = (scale) => clampPan(0, 0, scale)
   const clampScale = (s) => Math.min(3, Math.max(fitScale * 0.5, s))
   // Si el plano escalado entra en el eje, se fuerza centrado (no hay nada
   // para desplazar ahí); si lo excede, se limita para que nunca salga
@@ -146,7 +183,7 @@ export default function Dashboard() {
       const fit = computeFit(contW, contH, contentW, contentH)
       setFitScale(fit)
       if (!userInteractedRef.current) {
-        setTransform({ scale: fit, ...centeredPos(contW, contH, contentW, contentH, fit) })
+        setTransform({ scale: fit, ...(isMobile ? anchorPos(fit) : centeredPos(contW, contH, contentW, contentH, fit)) })
       }
       setReady(true)
     }
@@ -158,7 +195,12 @@ export default function Dashboard() {
     ro.observe(viewport)
     ro.observe(content)
     return () => ro.disconnect()
-  }, [fullscreenOpen, loading])
+    // `isMobile` en las deps: si se cruza el breakpoint 768px con la pantalla
+    // ya montada (resize del navegador), el observer tiene que releer el
+    // `computeFit` nuevo (closure fresca) — si no, seguía auto-encuadrando
+    // con la fórmula vieja hasta el próximo cambio de `fullscreenOpen`/
+    // `loading`.
+  }, [fullscreenOpen, loading, isMobile])
 
   const handleEncuadrar = () => {
     userInteractedRef.current = false
@@ -166,7 +208,7 @@ export default function Dashboard() {
     const { contW, contH, contentW, contentH } = sizesRef.current
     const fit = computeFit(contW, contH, contentW, contentH)
     setFitScale(fit)
-    setTransform({ scale: fit, ...centeredPos(contW, contH, contentW, contentH, fit) })
+    setTransform({ scale: fit, ...(isMobile ? anchorPos(fit) : centeredPos(contW, contH, contentW, contentH, fit)) })
   }
 
   // Zoom manteniendo fijo el punto (px, py) EN COORDENADAS DEL CONTENEDOR —
@@ -389,19 +431,6 @@ export default function Dashboard() {
   const handleAsignarTemporada = (unit) => { setSelectedUnitId(null); setAsignarUnit(unit) }
   const handleMoverUnidadClick = (reserva, unit) => { setSelectedUnitId(null); setMoverTarget({ reserva, unit }) }
 
-  // Mismo breakpoint que el resto del shell (BottomNav/Sidebar, 768px) — por
-  // debajo de eso se monta PlanoMobile.jsx (componente nuevo y separado del
-  // layout desktop/tablet de acá, ver rediseño oct 2026) en vez del body de
-  // franja superior + panel lateral.
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
-  )
-  useEffect(() => {
-    const mql = window.matchMedia('(max-width: 767px)')
-    const update = () => setIsMobile(mql.matches)
-    mql.addEventListener('change', update)
-    return () => mql.removeEventListener('change', update)
-  }, [])
 
   // Deep-link vía linkToPlano() (Tarea 1, oct 2026): mueve el plano a la
   // fecha pedida y resalta la unidad referida (ej. desde Notificaciones o
@@ -464,6 +493,23 @@ export default function Dashboard() {
     )
   }, [units, handleUnitClick, cellHighlight])
 
+  // Misma unidad/handlers que renderCelda, pero con CellMobile (celda nueva
+  // y separada, ver ese archivo) — nunca Cell.jsx escalado. Mismo puente,
+  // mismo PlanoGrid congelado, solo cambia qué componente dibuja cada celda.
+  const renderCeldaMobile = useCallback((slot) => {
+    const prefijo = PREFIJO[slot.tipo]
+    const unit = prefijo ? units[`${prefijo}${slot.numero}`] : null
+    return (
+      <CellMobile
+        key={`${slot.tipo}-${slot.numero}`}
+        number={slot.numero}
+        unit={unit}
+        onClick={handleUnitClick}
+        {...cellHighlight(unit)}
+      />
+    )
+  }, [units, handleUnitClick, cellHighlight])
+
   // Un solo nodo cumple el doble rol de "ref de la animación de slide al
   // cambiar de fecha" y "ref del viewport para medir fitScale" — nunca dos
   // elementos distintos, porque solo hay UNO montado a la vez (ver abajo).
@@ -479,14 +525,16 @@ export default function Dashboard() {
   const canPanAhora = sizesRef.current.contentW * transform.scale > sizesRef.current.contW || sizesRef.current.contentH * transform.scale > sizesRef.current.contH
 
   const renderPlanoBody = (fullscreen) => {
+    // Mismo estilo claro que PlanoZoomBar (ya no glass-card oscuro): este
+    // botón ahora vive DENTRO de esa barra, no flotando sobre el mapa.
     const extraButtonsViewport = (
       fullscreen ? (
-        <button onClick={() => setFullscreenOpen(false)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Cerrar pantalla completa">
-          <Shrink size={18} />
+        <button onClick={() => setFullscreenOpen(false)} className="w-9 h-9 rounded-lg bg-prius-subtle hover:bg-[#EEEEEE] text-black flex items-center justify-center transition-colors" title="Cerrar pantalla completa">
+          <Shrink size={16} />
         </button>
       ) : (
-        <button onClick={() => setFullscreenOpen(true)} className="w-10 h-10 glass-card rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-all" title="Ver en pantalla completa">
-          <Expand size={18} />
+        <button onClick={() => setFullscreenOpen(true)} className="w-9 h-9 rounded-lg bg-prius-subtle hover:bg-[#EEEEEE] text-black flex items-center justify-center transition-colors" title="Ver en pantalla completa">
+          <Expand size={16} />
         </button>
       )
     )
@@ -524,7 +572,8 @@ export default function Dashboard() {
           fullscreen={fullscreen}
           onToggleFullscreen={() => setFullscreenOpen(!fullscreen)}
           unidades={unidades}
-          renderCelda={renderCelda}
+          renderCelda={renderCeldaMobile}
+          extraButtonsViewport={extraButtonsViewport}
         />
       )
     }
@@ -551,7 +600,7 @@ export default function Dashboard() {
                 {/* calendarOnly: mismo DateInput/calendario de siempre, con el
                     look del mock (texto + día de semana) en vez del input
                     con borde por defecto — "el mismo selector y handler". */}
-                <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} calendarOnly className="w-[106px]" />
+                <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} calendarOnly className="w-[148px]" />
                 <span className="text-label-md text-prius-slate uppercase shrink-0">{diaSemana}</span>
                 {!esHoy && (
                   <button onClick={() => goToDate(todayStr())} className="text-label-md text-gold hover:text-black font-bold uppercase ml-1 shrink-0">Hoy</button>
@@ -629,10 +678,8 @@ export default function Dashboard() {
                 </button>
               ))}
             </div>
-            <div className="hidden lg:flex items-center gap-4 bg-prius-subtle px-3 py-1.5 rounded-xl ml-auto shrink-0">
-              <span className="flex items-center gap-1.5 text-body-sm text-prius-slate"><span className="w-3.5 h-3.5 rounded bg-white border border-hairline" />Libre</span>
-              <span className="flex items-center gap-1.5 text-body-sm text-prius-slate"><span className="w-3.5 h-3.5 rounded bg-black" />Alquilada</span>
-              <span className="flex items-center gap-1.5 text-body-sm text-prius-slate"><span className="w-3.5 h-3.5 rounded bg-gold flex items-center justify-center text-[8px] font-bold text-black">T</span>Pendiente de pago</span>
+            <div className="hidden lg:block ml-auto shrink-0">
+              <PlanoLeyenda />
             </div>
           </div>
         </div>
@@ -657,26 +704,35 @@ export default function Dashboard() {
                 Cargando plano…
               </div>
             ) : (
-              <PlanoViewport
-                transform={transform}
-                ready={ready}
-                isDragging={isDragging}
-                canPan={canPanAhora}
-                onZoomIn={handleZoomIn}
-                onZoomOut={handleZoomOut}
-                onEncuadrar={handleEncuadrar}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onMapMouseDown={handleMapMouseDown}
-                onMapWheel={handleMapWheel}
-                onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
-                viewportRef={setMapViewportRef}
-                contentRef={contentRef}
-                extraButtons={extraButtonsViewport}
-              >
-                <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
-              </PlanoViewport>
+              <div className="flex-1 min-h-0 flex gap-2 px-2 pb-2">
+                {/* `[&>div:first-child]:hidden` oculta la barra de zoom propia
+                    de PlanoViewport.jsx (congelado, vive adentro con
+                    position:absolute encima del mapa) sin tocar ese archivo —
+                    PlanoZoomBar.jsx la reemplaza acá al lado, fuera del mapa,
+                    llamando a las mismas funciones. */}
+                <div className="flex-1 min-h-0 flex flex-col relative [&>div:first-child]:hidden">
+                  <PlanoViewport
+                    transform={transform}
+                    ready={ready}
+                    isDragging={isDragging}
+                    canPan={canPanAhora}
+                    onZoomIn={handleZoomIn}
+                    onZoomOut={handleZoomOut}
+                    onEncuadrar={handleEncuadrar}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onMapMouseDown={handleMapMouseDown}
+                    onMapWheel={handleMapWheel}
+                    onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
+                    viewportRef={setMapViewportRef}
+                    contentRef={contentRef}
+                  >
+                    <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+                  </PlanoViewport>
+                </div>
+                <PlanoZoomBar onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onEncuadrar={handleEncuadrar} extraButtons={extraButtonsViewport} />
+              </div>
             )}
           </section>
 
