@@ -227,8 +227,11 @@ export default function Ocupacion() {
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
       >
-        <div className="flex items-center gap-2">
-          <div className="card-light p-1 rounded-xl flex">
+        {/* B6 (oct 2026): este grupo no entraba en 390px y desbordaba la
+            página entera (la fecha quedaba directamente fuera de pantalla)
+            — scroll horizontal interno acá, nunca scroll de la página. */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none max-w-full">
+          <div className="card-light p-1 rounded-xl flex shrink-0">
             {['semana', 'mes'].map((v) => (
               <button
                 key={v}
@@ -241,21 +244,21 @@ export default function Ocupacion() {
               </button>
             ))}
           </div>
-          <button onClick={irAnterior} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all" title="Anterior">
+          <button onClick={irAnterior} className="p-2.5 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all" title="Anterior">
             <ChevronLeft size={16} />
           </button>
-          <button onClick={irSiguiente} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all" title="Siguiente">
+          <button onClick={irSiguiente} className="p-2.5 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all" title="Siguiente">
             <ChevronRight size={16} />
           </button>
-          <button onClick={irHoy} className="px-3 py-2.5 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-[10px] font-bold uppercase tracking-widest text-prius-slate transition-all">
+          <button onClick={irHoy} className="px-3 py-2.5 shrink-0 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-[10px] font-bold uppercase tracking-widest text-prius-slate transition-all">
             Hoy
           </button>
           {/* [feat-5] "Ir a fecha": salta directo al día/semana/mes elegido
               sin tener que ir clickeando anterior/siguiente. */}
           {isFeatureEnabled('feat-5-ir-a-fecha') && (
-            <DateInput value={anchor} onChange={(v) => v && setAnchor(v)} className="w-36" />
+            <DateInput value={anchor} onChange={(v) => v && setAnchor(v)} className="w-36 shrink-0" />
           )}
-          <span className="text-sm font-bold text-black capitalize px-2">{tituloRango}</span>
+          <span className="text-sm font-bold text-black capitalize px-2 shrink-0 whitespace-nowrap">{tituloRango}</span>
         </div>
 
         <div className="card-light p-1 rounded-xl flex flex-wrap">

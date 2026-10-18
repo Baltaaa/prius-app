@@ -228,9 +228,16 @@ export default function Home() {
               </div>
               <div className="truncate">
                 <p className="text-title-md text-black truncate">{cajaHoy ? 'Caja abierta' : 'Caja sin iniciar'}</p>
-                <p className="text-body-sm text-prius-slate truncate">
-                  {cajaHoy ? `Desde ${formatHora(cajaHoy.abierta_at)} · ${perfilesPorId[cajaHoy.abierta_por] || '—'}` : 'Turno no registrado aún'}
-                </p>
+                {/* B6 (oct 2026): si falta la hora o el usuario que la abrió,
+                    se oculta la línea entera en vez de mostrar "—" — un
+                    dato a medias no aporta nada acá. */}
+                {cajaHoy && cajaHoy.abierta_at && perfilesPorId[cajaHoy.abierta_por] ? (
+                  <p className="text-body-sm text-prius-slate truncate">
+                    Desde {formatHora(cajaHoy.abierta_at)} · {perfilesPorId[cajaHoy.abierta_por]}
+                  </p>
+                ) : !cajaHoy ? (
+                  <p className="text-body-sm text-prius-slate truncate">Turno no registrado aún</p>
+                ) : null}
               </div>
             </div>
             {!cajaHoy && (
@@ -263,8 +270,13 @@ export default function Home() {
         )}
       </section>
 
-      {/* Fila 3: Capacidad diaria + Cobranzas temporada */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-gutter-lg">
+      {/* Fila 3: Capacidad diaria + Cobranzas temporada. `items-start` (B6,
+          oct 2026): sin esto, CSS Grid estira las dos cards a la altura de
+          la más alta por default — con `justify-between` adentro, esa
+          altura de más se convertía en un hueco vacío entre el bloque de
+          arriba y las sub-cards de abajo. Alto automático por card, sin
+          estirar. */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-gutter-lg items-start">
         {/* Capacidad diaria (antes "Operación de hoy") */}
         <div className="card-light rounded-2xl p-space-lg flex flex-col justify-between min-w-0">
           <div>
