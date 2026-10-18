@@ -1,45 +1,33 @@
 import React from 'react'
 import { Loader2 } from 'lucide-react'
 
-export default function GlobalLoader({ message = "Sincronizando..." }) {
+// Splash de carga (B3, oct 2026 — rebrandeo): antes era bg-white con un
+// borde gold al 30% y un glow difuso, se leía "traslúcido" y el logo casi
+// no se distinguía. Ahora fondo negro sólido, logo a color pleno sin
+// opacidad dentro de un círculo con borde dorado al 100%, texto y spinner
+// dorados al 100% — contraste verificado ≥4.5:1 sobre #000 (gold #F2CA50
+// da ~11:1, texto blanco no hace falta). Salida: fade de 250ms a cargo de
+// quien desmonta este componente (Login.jsx ya reemplaza el árbol entero
+// con un `animate-premium-fade`, no hace falta nada acá para eso).
+export default function GlobalLoader({ message = 'Sincronizando...' }) {
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white">
-      <div className="relative flex flex-col items-center">
-        {/* Logo container with pulsing glow */}
-        <div className="w-20 h-20 mb-8 relative">
-          <div className="absolute inset-0 bg-gold/20 rounded-full animate-ping" />
-          <div className="relative z-10 w-full h-full bg-white border border-gold/30 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(253,224,71,0.15)]">
-            <img 
-              src="/images/prius-icon.png" 
-              alt="P" 
-              className="w-10 h-10 object-contain"
-            />
-          </div>
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black">
+      <div className="flex flex-col items-center">
+        <div className="w-[72px] h-[72px] rounded-full border-2 border-[#F2CA50] bg-black flex items-center justify-center shrink-0">
+          <img
+            src="/images/prius-icon.png"
+            alt="Prius"
+            className="w-11 h-11 object-contain"
+          />
         </div>
 
-        {/* Loading Spinner */}
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-6 h-6 text-gold animate-spin" />
-          <p className="text-[10px] font-bold text-gold uppercase tracking-[0.3em] animate-pulse">
+        <div className="mt-8 flex flex-col items-center gap-4">
+          <Loader2 className="w-6 h-6 text-[#F2CA50] animate-spin" />
+          <p className="text-label-md text-[#F2CA50] uppercase tracking-[0.3em] text-center">
             {message}
           </p>
         </div>
-
-        {/* Decorative line */}
-        <div className="mt-8 w-48 h-[1px] bg-prius-subtle relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FDE047] to-transparent w-24 animate-shimmer" />
-        </div>
       </div>
-      
-      <style>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
-        }
-        .animate-shimmer {
-          animation: shimmer 2s infinite linear;
-        }
-      `}</style>
     </div>
   )
 }
