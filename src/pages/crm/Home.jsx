@@ -169,7 +169,7 @@ export default function Home() {
           </div>
           <h1 className="text-headline-lg-mobile lg:text-display-lg text-black tracking-tight">Hola, {primerNombre}</h1>
           <p className="lg:hidden text-body-sm text-prius-slate mt-0.5">{formatFechaLarga(hoy)}</p>
-          <p className="hidden lg:block text-body-md text-prius-slate mt-1">Gestión operativa de unidades de playa, cobranzas y accesos en tiempo real.</p>
+          <p className="hidden lg:block text-body-md text-prius-slate mt-1">Gestión operativa de playa, cobranzas y accesos en tiempo real.</p>
         </div>
 
         {/* Badges KPI — solo desktop (mobile los muestra como chips más abajo) */}
@@ -207,13 +207,13 @@ export default function Home() {
                 key={a.key}
                 type="button"
                 onClick={a.onClick}
-                className="group flex flex-col items-center lg:items-start justify-center lg:justify-between p-space-sm lg:p-space-md rounded-2xl card-light hover:bg-prius-subtle active:scale-95 transition-all text-center lg:text-left"
+                className="group flex flex-col items-center lg:items-start justify-center lg:justify-between gap-2 p-space-sm lg:p-space-md rounded-2xl card-light hover:bg-prius-subtle active:scale-95 transition-all text-center lg:text-left"
               >
                 <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-xl flex items-center justify-center mb-1.5 lg:mb-0 transition-colors ${a.accent ? 'bg-gold' : 'bg-prius-surface group-hover:bg-gold/20'}`}>
                   <a.icon size={20} className="text-black" />
                 </div>
                 <div className="lg:mt-4">
-                  <span className="block text-label-md lg:text-headline-sm text-black">{a.label}</span>
+                  <span className="block text-xs md:text-label-md lg:text-headline-sm text-black">{a.label}</span>
                   <span className="hidden lg:block text-body-sm text-prius-slate">{a.sub}</span>
                 </div>
               </button>

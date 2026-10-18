@@ -301,7 +301,7 @@ export default function TopBar() {
             siempre, solo el shell visual cambia (w-80, fondo prius-surface,
             h-9, rounded-xl del mock). En mobile pasa a un ícono que abre
             pantalla completa (ver bloque más abajo). */}
-        <div ref={searchOverlay.bind} className="hidden md:block relative w-80 shrink-0">
+        <div ref={searchOverlay.bind} className="hidden md:block relative w-max lg:w-full shrink-0">
         <SearchInput
           ref={searchInputRef}
           value={searchValue}
