@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
@@ -917,8 +918,17 @@ export default function Reservas() {
 
       {/* Mobile (<768px, mock 03-reservas-mobile-detalle): pantalla completa
           con flecha de volver, acciones fijas abajo (adentro de
-          ReservaDetalleContent). */}
-      {isMobile && mobileDetalleShouldRender && (
+          ReservaDetalleContent). Vía portal a document.body (fix oct 2026,
+          detectado al construir el mismo patrón en Clientes.jsx): el
+          wrapper raíz de esta página usa `animate-premium-fade`, cuya
+          animación deja un `transform` aplicado (fill-mode `both`) después
+          de terminar — eso lo convierte en containing block de cualquier
+          `position:fixed` anidado adentro (mismo bug ya documentado en
+          CLAUDE.md para el portal del date picker), así que sin portal este
+          overlay quedaba recortado a la altura del contenido scrolleable de
+          la página en vez de cubrir el viewport real, dejando el BottomNav
+          visible encima del detalle. */}
+      {isMobile && mobileDetalleShouldRender && createPortal(
         <div className={`fixed inset-0 z-[995] bg-white flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}>
           <div className="flex items-center gap-2 px-2 h-16 border-b border-hairline shrink-0">
             <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-slate hover:text-black">
@@ -938,7 +948,8 @@ export default function Reservas() {
               showCloseButton={false}
             />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* Modal Form */}
