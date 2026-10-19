@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
-import { useNotificaciones } from '../../context/NotificacionesProvider'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
 import { useOverlay } from '../../context/OverlayProvider'
 import {
   Home, Map, Users, MoreHorizontal, X, Wallet, BarChart2, Plus,
-  DoorClosed, Inbox, GanttChartSquare, Activity, Bell, FileText, UserCheck, LogOut, QrCode,
+  DoorClosed, Inbox, GanttChartSquare, Activity, FileText, UserCheck, LogOut, QrCode,
 } from 'lucide-react'
 import { isFeatureEnabled } from '../../lib/features'
 import { useMountTransition } from '../../hooks/useMountTransition'
@@ -46,8 +45,6 @@ export default function BottomNav() {
   const [showMore, setShowMore] = useState(false)
   const { bind: bindMore } = useOverlay({ id: 'bottomnav-mas', isOpen: showMore, onRequestClose: () => setShowMore(false) })
   const shouldRenderMore = useMountTransition(showMore)
-  const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
-  const notificationsCount = countPendientes + countNovedadesNoLeidas
   const { sinContactar: leadsSinContactar } = useLeads()
   const { signOut, permiso } = useAuth()
 
@@ -59,7 +56,6 @@ export default function BottomNav() {
     { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
     ...(isFeatureEnabled('ocupacion') ? [{ name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare }] : []),
     { name: 'Historial', path: '/app/historial', icon: Activity },
-    { name: 'Notificaciones', path: '/app/notificaciones', icon: Bell, badge: notificationsCount },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },
     { name: 'Perfil y Tarifas', path: '/app/perfil', icon: UserCheck },
   ]
@@ -118,14 +114,7 @@ export default function BottomNav() {
           onClick={() => setShowMore(true)}
           className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md text-prius-slate hover:text-black transition-colors"
         >
-          <span className="relative">
-            <MoreHorizontal size={22} />
-            {notificationsCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-gold text-black text-[10px] font-bold flex items-center justify-center">
-                {notificationsCount > 9 ? '9+' : notificationsCount}
-              </span>
-            )}
-          </span>
+          <MoreHorizontal size={22} />
           Más
         </button>
       </nav>

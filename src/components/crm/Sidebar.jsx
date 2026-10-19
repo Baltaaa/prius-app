@@ -1,6 +1,5 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useNotificaciones } from '../../context/NotificacionesProvider'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
 import {
@@ -11,7 +10,6 @@ import {
   BarChart2,
   Map,
   LogOut,
-  Bell,
   FileText,
   UserCheck,
   Activity,
@@ -31,10 +29,6 @@ import { APP_VERSION } from '../../lib/appVersion'
 // misma navegación de dos formas distintas en mobile.
 export default function Sidebar() {
   const navigate = useNavigate()
-  // Badge: pendientes abiertas + novedades sin leer (ver CLAUDE.md
-  // "Notificaciones") — mismo cómputo que usa el badge de la campana.
-  const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
-  const notificationsCount = countPendientes + countNovedadesNoLeidas
   const { sinContactar: leadsSinContactar } = useLeads()
   const { signOut, permiso, perfil, rol } = useAuth()
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
@@ -60,7 +54,6 @@ export default function Sidebar() {
     { name: 'Leads', path: '/app/leads', icon: Inbox, badge: leadsSinContactar },
     ...(isFeatureEnabled('ocupacion') ? [{ name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare }] : []),
     { name: 'Historial', path: '/app/historial', icon: Activity },
-    { name: 'Notificaciones', path: '/app/notificaciones', icon: Bell, badge: notificationsCount },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },
     { name: 'Perfil y Tarifas', path: '/app/perfil', icon: UserCheck }
   ]
