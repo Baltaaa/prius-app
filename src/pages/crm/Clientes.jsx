@@ -10,8 +10,6 @@ import { useOverlay } from '../../context/OverlayProvider'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
-import { linkToNuevaReservaCliente, linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
-import { isFeatureEnabled } from '../../lib/features'
 import { registrarVisto } from '../../hooks/useRecientes'
 import { validarClienteForm, requiereCuitClienteForm } from '../../lib/validators/cliente'
 import {
@@ -40,7 +38,7 @@ import StatusBadge from '../../components/crm/StatusBadge'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
-import { Plus, Edit2, Trash2, Wallet, Phone, Filter, Check, CalendarPlus, ChevronLeft, LayoutList } from 'lucide-react'
+import { Plus, Phone, Filter, Check, ChevronLeft, LayoutList } from 'lucide-react'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
 // reserva de período/día activa hoy — temporada actual, temporadas pasadas,
@@ -661,43 +659,49 @@ export default function Clientes() {
 
   return (
     <div className="space-y-10 animate-premium-fade">
-      {/* Toolbar: buscador + alta, en una sola fila pegada al navbar */}
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+      {/* Toolbar: buscador a ancho completo arriba, filtro + alta compacta
+          abajo (oct 2026) — antes "Nuevo Cliente" era una barra amarilla
+          gigante en mobile; ahora es un botón chico (h-10) a la derecha,
+          misma fila que el filtro ESTADO, en todos los breakpoints. */}
+      <div className="space-y-3">
         <SearchInput
           value={searchTerm}
           onChange={setSearchTerm}
           placeholder="Buscar por nombre, DNI, CUIT o unidad (ej. carpa 19)..."
-          className="flex-1 max-w-md"
-          inputClassName="focus:border-cyan-400/50 py-3"
+          className="w-full"
+          inputClassName="focus:border-gold/50 py-3"
         />
-        <div ref={filtrosOverlay.bind} className="relative">
+        <div className="flex items-center gap-3">
+          <div ref={filtrosOverlay.bind} className="relative">
+            <button
+              onClick={() => setShowFiltros((v) => !v)}
+              className={`h-10 px-4 bg-white border border-hairline rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-gold' : 'text-prius-slate hover:text-black'}`}
+            >
+              <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
+            </button>
+            {showFiltros && (
+                <div className="absolute left-0 mt-2 w-48 bg-white border border-hairline rounded-xl overflow-hidden z-50 p-3 shadow-sm">
+                  {FILTROS_ESTADO_CLIENTE.map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => { setFiltroEstado(f.value); setShowFiltros(false) }}
+                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-surface flex items-center justify-between rounded-lg"
+                    >
+                      {f.label}
+                      {filtroEstado === f.value && <Check size={14} className="text-gold" />}
+                    </button>
+                  ))}
+                </div>
+            )}
+          </div>
+          <div className="flex-1" />
           <button
-            onClick={() => setShowFiltros((v) => !v)}
-            className={`card-light px-4 py-3 rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-gold' : 'text-prius-slate hover:text-black'}`}
+            onClick={handleOpenCreate}
+            className="h-10 px-4 bg-gold hover:bg-gold-hover text-black rounded-xl transition-all flex items-center gap-2 font-semibold text-label-lg shrink-0"
           >
-            <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
+            <Plus size={16} /> <span className="hidden sm:inline">Nuevo Cliente</span><span className="sm:hidden">Nuevo</span>
           </button>
-          {showFiltros && (
-              <div className="absolute left-0 mt-2 w-48 card-light rounded-xl overflow-hidden z-50 p-3">
-                {FILTROS_ESTADO_CLIENTE.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => { setFiltroEstado(f.value); setShowFiltros(false) }}
-                    className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle flex items-center justify-between rounded-lg"
-                  >
-                    {f.label}
-                    {filtroEstado === f.value && <Check size={14} className="text-gold" />}
-                  </button>
-                ))}
-              </div>
-          )}
         </div>
-        <button
-          onClick={handleOpenCreate}
-          className="sm:ml-auto bg-gold hover:bg-gold-hover text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
-        >
-          <Plus size={18} /> Nuevo Cliente
-        </button>
       </div>
 
       {/* Directorio maestro-detalle (oct 2026, mock 04-clientes): lista
@@ -705,7 +709,7 @@ export default function Clientes() {
           abajo), detalle en panel fijo / bottom sheet / pantalla completa
           según breakpoint — mismo patrón que Reservas.jsx. */}
       <div className={isDesktopLG ? 'flex gap-space-lg items-start' : ''}>
-        <div className={isDesktopLG ? 'flex-1 min-w-0 max-w-xl' : 'w-full'}>
+        <div className={isDesktopLG ? 'w-[480px] shrink-0' : 'w-full'}>
           {clientesVisibles.length === 0 ? (
             <div className="p-12 text-center text-sm tracking-wider text-prius-muted bg-white border border-hairline rounded-xl">
               No se encontraron clientes.
@@ -791,6 +795,10 @@ export default function Clientes() {
                     <div className="flex items-center gap-3 sm:contents">
                       {d.badgeStatus && <StatusBadge status={d.badgeStatus} />}
                       <div className="flex-1" />
+                      {/* Sin acciones acá (oct 2026): Registrar pago/Nueva
+                          reserva/Editar/Borrar viven en la ficha
+                          (ClienteDetalleContent) — la fila entera es
+                          clickeable y solo muestra estado + saldo. */}
                       <p className="w-28 text-right shrink-0">
                         {d.saldoInfo.sinVerificar ? (
                           d.saldoHeaderSaldado ? null : (
@@ -811,31 +819,6 @@ export default function Clientes() {
                           )
                         )}
                       </p>
-                      <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => setPagoCliente(cliente)}
-                          disabled={d.reservasPagables.length === 0}
-                          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-hairline disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-prius-success transition-all"
-                          title="Registrar pago"
-                        >
-                          <Wallet size={16} />
-                        </button>
-                        {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
-                          <button
-                            onClick={() => navigate(linkToNuevaReservaCliente(cliente.id))}
-                            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-hairline rounded-lg text-prius-slate transition-all"
-                            title="Nueva reserva"
-                          >
-                            <CalendarPlus size={16} />
-                          </button>
-                        )}
-                        <button onClick={() => handleOpenEdit(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-hairline rounded-lg text-gold transition-all" title="Editar">
-                          <Edit2 size={16} />
-                        </button>
-                        <button onClick={() => setClienteAEliminar(cliente)} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-50 rounded-lg text-prius-error transition-all" title="Borrar">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
                     </div>
                   </div>
                   </React.Fragment>
@@ -847,7 +830,7 @@ export default function Clientes() {
 
         {/* Panel fijo — solo ≥1024px. */}
         {isDesktopLG && (
-          <aside className="hidden lg:flex w-96 shrink-0 bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start max-h-[calc(100vh-2rem)]">
+          <aside className="hidden lg:flex flex-1 min-w-0 bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start max-h-[calc(100vh-2rem)]">
             {clienteSeleccionado ? (
               <ClienteDetalleContent
                 cliente={clienteSeleccionado}
@@ -866,6 +849,7 @@ export default function Clientes() {
                 onAgruparReservas={() => handleAbrirAgrupar(clienteSeleccionado)}
                 onLiberarUnidad={handleLiberarUnidad}
                 onConfirmarTemporada={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+                wide
               />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
@@ -949,46 +933,70 @@ export default function Clientes() {
       )}
 
 
-      {/* Create / Edit Modal */}
+      {/* Create / Edit Modal — misma estética que "Nueva Reserva" (oct 2026):
+          mismo Modal.jsx (bottom sheet mobile / centrado desktop, header
+          dorado espaciado + X ya los da el componente), etiquetas de sección
+          con línea divisoria, footer sticky con Cancelar + submit siempre
+          visibles sin scroll. Mismos campos/validaciones/lógica de alta de
+          siempre — solo JSX/clases. */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingCliente ? 'Editar Cliente' : 'Nuevo Cliente'}
+        footer={
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-slate bg-prius-subtle hover:bg-prius-subtle border border-hairline transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form="form-cliente"
+              className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            >
+              {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
+            </button>
+          </div>
+        }
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <TextInput
-            label="Nombre Completo"
-            required
-            value={nombre}
-            onChange={(v) => setNombre(v.replace(/[´`]/g, "'").toUpperCase())}
-            maxLength={120}
-            placeholder="Ej. JUAN PÉREZ"
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <PhoneInput label="Teléfono" required value={telefono} onChange={setTelefono} />
-            <DniInput label="DNI (opcional)" value={dni} onChange={setDni} />
+        <form id="form-cliente" onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-5">
+            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Cliente</p>
+            <TextInput
+              label="Nombre Completo"
+              required
+              value={nombre}
+              onChange={(v) => setNombre(v.replace(/[´`]/g, "'").toUpperCase())}
+              maxLength={120}
+              placeholder="Ej. JUAN PÉREZ"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <PhoneInput label="Teléfono" required value={telefono} onChange={setTelefono} />
+              <DniInput label="DNI (opcional)" value={dni} onChange={setDni} />
+            </div>
+            <TextInput
+              label="Email" type="email" value={mail} onChange={(v) => setMail(v.toLowerCase())}
+              placeholder="cliente@email.com" error={mail && clienteFormErrors.mail ? clienteFormErrors.mail : undefined}
+            />
           </div>
 
-          <TextInput
-            label="Email" type="email" value={mail} onChange={(v) => setMail(v.toLowerCase())}
-            placeholder="cliente@email.com" error={mail && clienteFormErrors.mail ? clienteFormErrors.mail : undefined}
-          />
-
-          <SelectChips
-            label="Condición IVA"
-            required
-            value={condicionIva}
-            onChange={setCondicionIva}
-            options={[
-              { value: 'consumidor_final', label: 'Consumidor Final' },
-              { value: 'monotributo', label: 'Monotributo' },
-              { value: 'responsable_inscripto', label: 'Responsable Inscripto' },
-              { value: 'exento', label: 'Exento' },
-            ]}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-5">
+            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Datos fiscales</p>
+            <SelectChips
+              label="Condición IVA"
+              required
+              value={condicionIva}
+              onChange={setCondicionIva}
+              options={[
+                { value: 'consumidor_final', label: 'Consumidor Final' },
+                { value: 'monotributo', label: 'Monotributo' },
+                { value: 'responsable_inscripto', label: 'Responsable Inscripto' },
+                { value: 'exento', label: 'Exento' },
+              ]}
+            />
             <CuitInput
               label={requiereCuit ? 'CUIT' : 'CUIT (opcional)'}
               required={requiereCuit}
@@ -1008,34 +1016,38 @@ export default function Clientes() {
             )}
           </div>
 
-          <TextInput
-            as="textarea"
-            label="Notas / Comentarios"
-            rows={3}
-            value={notas}
-            onChange={setNotas}
-            maxLength={500}
-            placeholder="Comentarios adicionales..."
-          />
+          <div className="space-y-5">
+            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Notas</p>
+            <TextInput
+              as="textarea"
+              label="Notas / Comentarios"
+              rows={3}
+              value={notas}
+              onChange={setNotas}
+              maxLength={500}
+              placeholder="Comentarios adicionales..."
+            />
+          </div>
 
           {/* Alta de temporada opcional, solo al crear (no al editar) — el
               mismo formulario se reutiliza en el modal standalone de abajo
               para clientes ya existentes. */}
           {!editingCliente && (
-            <div className="space-y-4 border-t border-hairline pt-6">
+            <div className="space-y-5">
+              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Reserva de temporada (opcional)</p>
               <label className="flex items-center gap-2 text-xs text-prius-slate cursor-pointer">
                 <input
                   type="checkbox"
                   checked={agregarTemporadaNueva}
                   onChange={(e) => setAgregarTemporadaNueva(e.target.checked)}
-                  className="accent-cyan-400 w-4 h-4"
+                  className="accent-gold w-4 h-4"
                 />
                 Agregar reserva de temporada para este cliente ahora
               </label>
 
               {agregarTemporadaNueva && (
                 <div className="space-y-4 pl-1">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</label>
                       <BrandSelect value={tUnidadId} onChange={setTUnidadId} options={opcionesUnidadTemporada} />
@@ -1055,7 +1067,7 @@ export default function Clientes() {
                         type="checkbox"
                         checked={tBonificada}
                         onChange={(e) => setTBonificada(e.target.checked)}
-                        className="accent-cyan-400 w-4 h-4 cursor-pointer"
+                        className="accent-gold w-4 h-4 cursor-pointer"
                       />
                     </div>
                   )}
@@ -1080,13 +1092,6 @@ export default function Clientes() {
               )}
             </div>
           )}
-
-          <button
-            type="submit"
-            className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
-          >
-            {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
-          </button>
         </form>
       </Modal>
 
