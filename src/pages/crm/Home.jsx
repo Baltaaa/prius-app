@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useCaja } from '../../hooks/useCaja'
 import { useLeads } from '../../hooks/useLeads'
-import { useNotificaciones } from '../../context/NotificacionesProvider'
 import { useHistorial } from '../../hooks/useHistorial'
 import { useData } from '../../context/DataProvider'
 import { useAuth, usePermiso } from '../../context/AuthProvider'
@@ -20,7 +19,7 @@ import ClimaHero from '../../components/dashboard/ClimaHero'
 import {
   BookmarkPlus, CreditCard, UserCheck2, UserSearch, Lock, Unlock, ArrowRight,
   AlertTriangle, LogIn, TimerOff, PenLine, QrCode, CircleCheck,
-  BellRing, Tent, Umbrella, Wallet,
+  Tent, Umbrella, Wallet,
 } from 'lucide-react'
 
 const todayStr = () => new Date().toISOString().split('T')[0]
@@ -56,7 +55,6 @@ export default function Home() {
   const { pagos, temporadas } = useData()
   const { cajaHoy, loading: cajaLoading } = useCaja()
   const { sinContactar: leadsSinContactar, loading: leadsLoading } = useLeads()
-  const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
   const { items: historialItems, loading: historialLoading } = useHistorial('global', null, null, null)
 
   const hoy = useMemo(() => todayStr(), [])
@@ -210,16 +208,6 @@ export default function Home() {
               <span className="text-title-md text-black">{leadsLoading ? '—' : leadsSinContactar} al día</span>
             </div>
           </button>
-          <button onClick={() => navigate('/app/notificaciones')} className="flex items-center gap-2 px-space-md py-2.5 rounded-xl card-light hover:bg-prius-subtle transition-colors text-left">
-            <div className="relative">
-              <BellRing size={18} className="text-black" />
-              {countPendientes > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-prius-error" />}
-            </div>
-            <div>
-              <span className="block text-label-md text-prius-slate uppercase">Notificaciones</span>
-              <span className="text-title-md text-black">{countPendientes + countNovedadesNoLeidas} pendientes</span>
-            </div>
-          </button>
         </div>
       </section>
 
@@ -284,11 +272,6 @@ export default function Home() {
           <span className="w-2 h-2 rounded-full bg-prius-slate" />
           <span className="text-body-sm text-prius-slate">Leads sin contactar:</span>
           <span className="text-title-md text-black">{leadsLoading ? '—' : leadsSinContactar}</span>
-        </button>
-        <button onClick={() => navigate('/app/notificaciones')} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold text-black shrink-0">
-          <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
-          <span className="text-body-sm font-medium">Notificaciones:</span>
-          <span className="text-title-md font-bold">{countPendientes + countNovedadesNoLeidas}</span>
         </button>
         {recepcionOn && (
           <button onClick={() => navigate('/app/recepcion')} className="flex items-center gap-2 px-3 py-2 rounded-xl card-light shrink-0">

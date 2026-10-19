@@ -204,7 +204,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0 h-full">
       <div className="flex items-center gap-1 px-3 pt-3 shrink-0">
         <button
           type="button"
@@ -238,7 +238,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 py-2 space-y-4">
         {tab === 'pendientes' ? (
           pendientes.length === 0 ? (
             <p className="px-4 py-10 text-center text-xs text-prius-muted uppercase tracking-widest">Todo al día</p>

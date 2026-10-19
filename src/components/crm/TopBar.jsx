@@ -495,7 +495,7 @@ export default function TopBar() {
             // de llegar). El popover-light real queda en el div de adentro,
             // que no se mueve ni cambia de tamaño — mismo look de siempre.
             <div className="hidden md:block absolute right-0 top-full pt-3 w-[380px] max-w-[90vw] z-50">
-              <div className="max-h-[70vh] popover-light rounded-xl overflow-hidden ui-open">
+              <div className="max-h-[min(70vh,480px)] popover-light rounded-xl overflow-hidden ui-open flex flex-col">
                 <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
               </div>
             </div>
