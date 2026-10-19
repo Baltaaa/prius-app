@@ -922,7 +922,7 @@ export default function Clientes() {
             </button>
             <h1 className="text-sm font-bold uppercase tracking-widest text-black">Ficha de Cliente</h1>
           </div>
-          <div className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto px-space-lg pt-space-md pb-space-lg flex flex-col min-h-0">
             {mobileDetalleCliente && (
               <ClienteDetalleContent
                 cliente={mobileDetalleCliente}
