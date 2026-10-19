@@ -92,7 +92,7 @@ export default function ClienteDetalleContent({
             <button
               onClick={onRegistrarPago}
               disabled={reservasPagables.length === 0}
-              className="px-4 py-2.5 min-h-[44px] bg-gold hover:bg-gold-hover disabled:opacity-30 disabled:cursor-not-allowed text-black rounded-xl flex items-center gap-2 font-bold uppercase text-label-md transition-all"
+              className="px-4 py-2.5 min-h-[44px] bg-gold hover:bg-gold-hover disabled:opacity-30 disabled:cursor-not-allowed text-black rounded-xl flex items-center gap-2 font-semibold text-[13px] sm:text-sm transition-all"
             >
               <Wallet size={16} /> Registrar pago
             </button>
@@ -283,7 +283,7 @@ export default function ClienteDetalleContent({
                           <button
                             key={label}
                             onClick={onClick}
-                            className="h-10 px-3 rounded-xl bg-prius-surface hover:bg-hairline text-black text-label-lg flex items-center justify-center gap-1.5 transition-all flex-1 min-w-[132px] whitespace-nowrap"
+                            className="h-10 px-4 rounded-xl bg-prius-surface hover:bg-hairline text-black text-[13px] sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-all flex-1 min-w-[132px] whitespace-nowrap"
                           >
                             <Icon size={14} className="shrink-0" /> {label}
                           </button>

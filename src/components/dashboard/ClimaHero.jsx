@@ -81,7 +81,7 @@ export default function ClimaHero({ fecha, clima, loading }) {
               <button
                 type="button"
                 onClick={() => setPanelOpen(true)}
-                className="text-label-md text-prius-slate hover:text-black transition-colors hidden sm:inline"
+                className="text-[13px] sm:text-sm font-semibold text-prius-slate hover:text-black transition-colors hidden sm:inline"
               >
                 Ver pronóstico
               </button>
@@ -164,7 +164,7 @@ export default function ClimaHero({ fecha, clima, loading }) {
         <button
           type="button"
           onClick={() => setPanelOpen(true)}
-          className="sm:hidden mt-space-md h-9 rounded-xl bg-prius-surface text-black text-label-lg hover:bg-hairline transition-colors"
+          className="sm:hidden mt-space-md h-9 px-4 rounded-xl bg-prius-surface text-black text-[13px] font-semibold hover:bg-hairline transition-colors"
         >
           Ver pronóstico
         </button>

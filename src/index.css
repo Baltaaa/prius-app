@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Bloque 2 (oct 2026): display/headline/metric pasan a Manrope — el plugin
+   fontSize de Tailwind no soporta la key `fontFamily` dentro de la tupla de
+   tamaño (la descarta en silencio), así que se declara acá, después de
+   @tailwind utilities, para ganarle en el cascade a `font-ui`/`font-sans`
+   (Inter) del contenedor de la app. metric-xl además fuerza tabular-nums
+   por lo mismo — Tailwind tampoco soporta fontVariantNumeric ahí. */
+.text-display-lg, .text-headline-lg, .text-headline-lg-mobile,
+.text-headline-md, .text-headline-sm, .text-metric-xl {
+  font-family: "Manrope Variable", Manrope, sans-serif;
+}
+.text-metric-xl {
+  font-variant-numeric: tabular-nums;
+}
+
 
 :root {
   --prius-accent: #F2CA50;
@@ -26,10 +40,20 @@
   .no-print { display: none !important; }
 }
 
+/* Bloque 2 (oct 2026): ningún botón de la app puede partir su texto en 2
+   renglones — regla global en vez de cazar botón por botón, porque la app
+   no tiene un componente <Button> único (son <button> sueltos por toda la
+   base). `white-space:nowrap` es un reset de base sin especificidad de
+   clase, así que cualquier wrapper Flex/grid que lo contenga sigue
+   funcionando igual — solo evita que el texto del botón se parta. */
+button {
+  white-space: nowrap;
+}
+
 /* Rediseño "Playa Privada" (oct 2026): fondo blanco plano, sin gradiente ni
    glassmorphism — reemplaza el tema "Glass Dark" anterior. */
 body {
-  font-family: 'Inter', 'Montserrat', sans-serif;
+  font-family: 'Inter Variable', 'Inter', sans-serif;
   background-color: #FFFFFF;
   color: #000000;
   -webkit-font-smoothing: antialiased;

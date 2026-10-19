@@ -40,18 +40,32 @@ export default {
       // a tirar de `font-ui` en vez de `font-sans`/`font-display` — al
       // terminar Fase 3 (toda la app migrada), `sans`/`display` quedan sin
       // uso y se pueden borrar en una pasada aparte.
+      // Escala tipográfica (oct 2026, Bloque 2): Manrope para display (H1,
+      // H2, métricas grandes) vía la key `display`, Inter para texto vía
+      // `ui`/`sans` — self-hosted con @fontsource-variable, importado una
+      // sola vez en src/main.jsx, nunca más Google Fonts CDN.
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
-        display: ['Space Grotesk', 'sans-serif'],
-        ui: ['Inter', 'sans-serif'],
+        sans: ['Inter Variable', 'Inter', 'sans-serif'],
+        display: ['Manrope Variable', 'Manrope', 'sans-serif'],
+        ui: ['Inter Variable', 'Inter', 'sans-serif'],
       },
       // Escala tipográfica del design system "Playa Privada" (DESIGN.md de
       // Stitch), expresada como fontSize con lineHeight/letterSpacing/weight
       // emparejados — solo para las pantallas migradas al sistema nuevo.
+      // Bloque 2 (oct 2026): H1 mobile 24/30 (antes 26/32), tracking
+      // -0.02em; H1 desktop tope en 32px (headline-lg, sin cambios de
+      // tamaño); labels uppercase a tracking 0.08em (antes 0.06em). La
+      // fuente Manrope de display/métricas y tabular-nums de metric-xl NO
+      // se bakean acá: el plugin fontSize de Tailwind solo lee
+      // lineHeight/letterSpacing/fontWeight del segundo elemento de la
+      // tupla y descarta en silencio cualquier otra key (fontFamily,
+      // fontVariantNumeric) — confirmado con Playwright, el font-family no
+      // llegaba al CSS generado. Esas dos quedan en index.css como reglas
+      // explícitas sobre las mismas clases, después de @tailwind utilities.
       fontSize: {
-        'display-lg': ['40px', { lineHeight: '48px', letterSpacing: '-0.03em', fontWeight: '600' }],
+        'display-lg': ['40px', { lineHeight: '48px', letterSpacing: '-0.03em', fontWeight: '700' }],
         'headline-lg': ['32px', { lineHeight: '38px', letterSpacing: '-0.025em', fontWeight: '600' }],
-        'headline-lg-mobile': ['26px', { lineHeight: '32px', letterSpacing: '-0.02em', fontWeight: '600' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '30px', letterSpacing: '-0.02em', fontWeight: '600' }],
         'headline-md': ['22px', { lineHeight: '28px', letterSpacing: '-0.02em', fontWeight: '600' }],
         'headline-sm': ['18px', { lineHeight: '24px', letterSpacing: '-0.015em', fontWeight: '600' }],
         'title-md': ['16px', { lineHeight: '22px', letterSpacing: '-0.01em', fontWeight: '500' }],
@@ -59,8 +73,8 @@ export default {
         'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
         'body-sm': ['12px', { lineHeight: '18px', letterSpacing: '0.01em', fontWeight: '400' }],
         'label-lg': ['13px', { lineHeight: '16px', letterSpacing: '0.04em', fontWeight: '600' }],
-        'label-md': ['11px', { lineHeight: '14px', letterSpacing: '0.06em', fontWeight: '600' }],
-        'metric-xl': ['34px', { lineHeight: '40px', letterSpacing: '-0.03em', fontWeight: '600' }],
+        'label-md': ['11px', { lineHeight: '14px', letterSpacing: '0.08em', fontWeight: '600' }],
+        'metric-xl': ['34px', { lineHeight: '40px', letterSpacing: '-0.03em', fontWeight: '700' }],
       },
       borderRadius: {
         lg: '8px',
