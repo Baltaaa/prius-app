@@ -739,86 +739,103 @@ export default function Clientes() {
                     data-cliente-id={cliente.id}
                     data-deeplink-id={cliente.id}
                     onClick={() => setExpandedId(isSelected ? null : cliente.id)}
-                    className={`bg-white rounded-xl border px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-6 gap-y-2 cursor-pointer transition-all ${
+                    // flex, no grid (Bloque 3, oct 2026): con grid, columnas
+                    // minmax(0,Npx) que conviven con un track 1fr crecen
+                    // hasta su tope ANTES de repartir el sobrante al 1fr
+                    // (paso "maximize non-flexible tracks" del algoritmo de
+                    // grid) — el nombre quedaba con ~80px sin importar el
+                    // ancho real de saldo/unidad. Con flex, shrink-0 +
+                    // ancho fijo en las columnas de la derecha se comporta
+                    // como se espera: el nombre (flex-1 min-w-0) se lleva
+                    // todo el sobrante real.
+                    className={`bg-white rounded-xl border px-4 py-4 flex items-center gap-x-2 cursor-pointer transition-all ${
                       isSelected ? 'border-gold bg-prius-surface' : 'border-hairline hover:bg-prius-surface'
                     }`}
                   >
-                    <div className="flex items-center gap-3 sm:contents">
-                      <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
-                        {cliente.nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
-                      </div>
-                      <div className="min-w-[160px]">
-                        <p className="font-bold text-black truncate">{cliente.nombre}</p>
-                        <p className="text-prius-slate text-xs mt-0.5 flex items-center gap-1.5">
-                          <Phone size={11} className="text-prius-muted shrink-0" />
-                          {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-prius-muted">Sin cargar</span>}
-                        </p>
-                        {d.comprobanteMatch && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setExpandedId(cliente.id)
-                              scrollAndHighlight(`pago-${d.comprobanteMatch.pago.id}`)
-                            }}
-                            className="text-[10px] text-gold font-bold mt-1 hover:underline truncate block"
-                          >
-                            Comprobante {formatComprobante(d.comprobanteMatch.comprobante.tipo, d.comprobanteMatch.comprobante.numero)}
-                            {formatPesosVisible(d.comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(d.comprobanteMatch.pago.monto)}` : ''}
-                          </button>
-                        )}
-                      </div>
-                      <div
-                        className="flex items-baseline gap-2 flex-wrap min-w-[90px]"
-                        title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
-                      >
-                        {d.unidadesCliente.length === 0 ? (
-                          <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
-                        ) : (
-                          <>
-                            {d.unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
-                              <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
-                                <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
-                                <span className="text-base font-extrabold text-black leading-none">{u.numero}</span>
-                              </span>
-                            ))}
-                            {d.unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
-                              <span className="text-[10px] text-prius-muted font-bold tracking-widest">
-                                +{d.unidadesCliente.length - MAX_UNIDADES_VISIBLES}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
+                    <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      {cliente.nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
                     </div>
 
-                    <div className="flex items-center gap-3 sm:contents">
-                      {d.badgeStatus && <StatusBadge status={d.badgeStatus} />}
-                      <div className="flex-1" />
-                      {/* Sin acciones acá (oct 2026): Registrar pago/Nueva
-                          reserva/Editar/Borrar viven en la ficha
-                          (ClienteDetalleContent) — la fila entera es
-                          clickeable y solo muestra estado + saldo. */}
-                      <p className="w-28 text-right shrink-0">
-                        {d.saldoInfo.sinVerificar ? (
-                          d.saldoHeaderSaldado ? null : (
-                            <span className="block text-prius-error text-[9px] font-bold uppercase tracking-widest">
-                              Saldo sin verificar
-                              {d.comprobantesPendientesCliente > 0 && (
-                                <span className="block text-prius-muted font-normal normal-case tracking-normal">
-                                  {d.comprobantesPendientesCliente} comprobante{d.comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
-                                </span>
-                              )}
-                            </span>
-                          )
-                        ) : d.sinPrecio ? (
-                          <span className="text-prius-slate text-[10px] uppercase tracking-widest font-bold">Sin precio</span>
-                        ) : (
-                          formatPesosVisible(d.saldoInfo.total) && (
-                            <span className="font-bold text-sm text-prius-error">{formatPesosVisible(d.saldoInfo.total)}</span>
-                          )
-                        )}
+                    {/* Nombre + teléfono: ellipsis, nunca empuja las
+                        columnas de la derecha (Bloque 3, oct 2026). */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline gap-2 min-w-0">
+                        <p className="font-bold text-black truncate flex-1 min-w-0">{cliente.nombre}</p>
+                        {d.badgeStatus && <span className="shrink-0"><StatusBadge status={d.badgeStatus} /></span>}
+                      </div>
+                      <p className="text-prius-slate text-xs mt-0.5 flex items-center gap-1.5 truncate">
+                        <Phone size={11} className="text-prius-muted shrink-0" />
+                        {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-prius-muted">Sin cargar</span>}
                       </p>
+                      {d.comprobanteMatch && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setExpandedId(cliente.id)
+                            scrollAndHighlight(`pago-${d.comprobanteMatch.pago.id}`)
+                          }}
+                          className="text-[10px] text-gold font-bold mt-1 hover:underline truncate block max-w-full text-left"
+                        >
+                          Comprobante {formatComprobante(d.comprobanteMatch.comprobante.tipo, d.comprobanteMatch.comprobante.numero)}
+                          {formatPesosVisible(d.comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(d.comprobanteMatch.pago.monto)}` : ''}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Saldo: columna propia, SIEMPRE a la derecha de la
+                        info y a la izquierda de la unidad — una sola línea
+                        por renglón, la segunda se trunca en vez de partir. */}
+                    {/* shrink-0 sin ancho fijo (Bloque 3): un flex item al
+                        final de la fila queda pegado al borde derecho del
+                        padding de la card por posición natural, no hace
+                        falta un ancho fijo para "mismo borde en toda fila"
+                        — y así cuando el saldo está vacío/corto, el nombre
+                        se queda con todo el espacio sobrante real. */}
+                    <div className="text-right shrink-0 max-w-[128px]">
+                      {d.saldoInfo.sinVerificar ? (
+                        d.saldoHeaderSaldado ? null : (
+                          <>
+                            <p className="text-prius-error text-[9px] font-bold uppercase tracking-wide whitespace-nowrap">Saldo sin verificar</p>
+                            {d.comprobantesPendientesCliente > 0 && (
+                              <p className="text-prius-muted font-normal normal-case tracking-normal text-[10px] truncate">
+                                {d.comprobantesPendientesCliente} comprobante{d.comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
+                              </p>
+                            )}
+                          </>
+                        )
+                      ) : d.sinPrecio ? (
+                        <span className="text-prius-slate text-[10px] uppercase tracking-widest font-bold whitespace-nowrap">Sin precio</span>
+                      ) : (
+                        formatPesosVisible(d.saldoInfo.total) && (
+                          <span className="font-bold text-sm text-prius-error whitespace-nowrap">{formatPesosVisible(d.saldoInfo.total)}</span>
+                        )
+                      )}
+                    </div>
+
+                    {/* Unidad: columna de ancho fijo, pegada al borde
+                        derecho de la card en todas las filas (Bloque 3). */}
+                    <div
+                      className="flex items-baseline justify-end gap-1 tabular-nums shrink-0"
+                      title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
+                    >
+                      {d.unidadesCliente.length === 0 ? (
+                        <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
+                      ) : (
+                        <>
+                          {d.unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
+                            <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
+                              <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
+                              <span className="text-base font-extrabold text-black leading-none">{u.numero}</span>
+                            </span>
+                          ))}
+                          {d.unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
+                            <span className="text-[10px] text-prius-muted font-bold tracking-widest">
+                              +{d.unidadesCliente.length - MAX_UNIDADES_VISIBLES}
+                            </span>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                   </React.Fragment>
