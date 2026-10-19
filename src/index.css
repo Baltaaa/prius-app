@@ -50,6 +50,16 @@ button {
   white-space: nowrap;
 }
 
+/* Seguimiento (oct 2026): chips/pills/badges (<span> con rounded-full, el
+   patrón que usa toda la app para "47 disponibles para hoy", "Leads sin
+   contactar", StatusBadge, etc.) tampoco pueden partir su texto — mismo
+   motivo que la regla de <button> de arriba, cubre lo que esa no alcanza
+   porque no todo chip es un <button>. Inocuo en avatares circulares (solo
+   tienen 1-2 letras, nowrap no cambia nada ahí). */
+.rounded-full {
+  white-space: nowrap;
+}
+
 /* Rediseño "Playa Privada" (oct 2026): fondo blanco plano, sin gradiente ni
    glassmorphism — reemplaza el tema "Glass Dark" anterior. */
 body {

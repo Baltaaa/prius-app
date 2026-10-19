@@ -118,15 +118,15 @@ export default function ClienteDetalleContent({
         <div className="bg-prius-surface rounded-xl p-space-md grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="col-span-2 md:col-span-1">
             <p className="text-label-md text-prius-slate uppercase tracking-wider flex items-center gap-1"><Mail size={11} /> Email</p>
-            <p className="text-body-sm text-black mt-1 lowercase break-all">{cliente.mail || <span className="text-prius-muted normal-case">Sin cargar</span>}</p>
+            <p className="text-body-sm text-black mt-1 lowercase break-all">{cliente.mail || <span className="text-prius-muted normal-case whitespace-nowrap">Sin cargar</span>}</p>
           </div>
           <div>
             <p className="text-label-md text-prius-slate uppercase tracking-wider flex items-center gap-1"><FileText size={11} /> CUIT</p>
-            <p className="text-body-sm text-black mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-prius-muted">Sin cargar</span>}</p>
+            <p className="text-body-sm text-black mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-prius-muted whitespace-nowrap">Sin cargar</span>}</p>
           </div>
           <div>
             <p className="text-label-md text-prius-slate uppercase tracking-wider flex items-center gap-1"><FileText size={11} /> DNI</p>
-            <p className="text-body-sm text-black mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-prius-muted">Sin cargar</span>}</p>
+            <p className="text-body-sm text-black mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-prius-muted whitespace-nowrap">Sin cargar</span>}</p>
           </div>
           <div>
             <p className="text-label-md text-prius-slate uppercase tracking-wider">Cliente desde</p>

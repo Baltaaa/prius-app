@@ -15,7 +15,7 @@ export default function SaldoReserva({ reserva, pagos = [], className = '' }) {
 
   if (saldo === null) {
     return (
-      <span className={`inline-flex items-center gap-1.5 text-prius-muted font-bold text-xs uppercase tracking-widest ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 text-prius-muted font-bold text-xs uppercase tracking-widest whitespace-nowrap ${className}`}>
         <HelpCircle size={13} /> Sin verificar
       </span>
     )
