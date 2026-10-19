@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus, Receipt, Users } from 'lucide-react'
+import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus, Receipt, Users, QrCode, CalendarCheck, Unlock } from 'lucide-react'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
 import { coSocios, esPendienteConfirmacion, estadoBadgeStatus, saldoGrupo, estadoPagoGrupo } from '../../lib/reservas'
 import { linkToComprobante, linkToRecepcion, linkToNuevaReservaCliente } from '../../lib/deepLinks'
@@ -21,7 +21,7 @@ export default function ClienteDetalleContent({
   cliente, derivado, reservas, pagosPorReserva, todosPagos, puedeAjustarPrecio,
   onClose, onEditar, onEliminar, onRegistrarPago, onPagoCelda, onDefinirPrecio,
   onEditarPrecio, onAgruparReservas, onLiberarUnidad, onConfirmarTemporada,
-  showCloseButton = true,
+  showCloseButton = true, wide = false,
 }) {
   const navigate = useNavigate()
   if (!cliente || !derivado) return null
@@ -69,7 +69,8 @@ export default function ClienteDetalleContent({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-space-md">
+      <div className={`flex-1 overflow-y-auto ${wide ? 'lg:grid lg:grid-cols-2 lg:gap-space-md lg:items-start space-y-space-md lg:space-y-0' : 'space-y-space-md'}`}>
+      <div className="space-y-space-md">
         {/* Saldo + acciones rápidas */}
         <div className="bg-prius-surface rounded-xl p-space-md flex items-center justify-between gap-space-sm flex-wrap">
           <div>
@@ -240,44 +241,54 @@ export default function ClienteDetalleContent({
                 const fechas = r.tipo_alquiler === 'temporada'
                   ? r.temporada
                   : r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`
+                // Mismos handlers/condiciones de siempre, solo unificados en
+                // un único estilo de botón (oct 2026) — antes cada acción
+                // tenía su propio color suelto (amarillo/verde/negro/
+                // naranja), ahora todas son #F4F3F3 + texto/ícono negro.
+                const acciones = [
+                  badge === 'preconfirmada' && { label: 'Hacer check-in', icon: QrCode, onClick: () => navigate(linkToRecepcion(r.codigo)) },
+                  r.estado !== 'cancelada' && !r.bonificada && esPendienteConfirmacion(r) && { label: 'Confirmar temporada', icon: CalendarCheck, onClick: () => onConfirmarTemporada(r) },
+                  r.estado !== 'cancelada' && !r.bonificada && (r.estado_pago === 'parcial' || r.estado_pago === 'pendiente') && { label: 'Registrar pago', icon: Wallet, onClick: () => onPagoCelda({ reserva: { ...r, clientes: cliente }, pago: null }) },
+                  r.estado !== 'cancelada' && { label: 'Comprobante', icon: Receipt, onClick: () => navigate(linkToComprobante(r.id)) },
+                  r.estado !== 'cancelada' && { label: 'Liberar unidad', icon: Unlock, onClick: () => onLiberarUnidad(r) },
+                ].filter(Boolean)
                 return (
-                  <div key={r.id} className="bg-white border border-hairline rounded-xl px-4 py-3 text-xs space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                      <span className="font-bold text-gold uppercase tracking-wider">{TIPO_LABEL[r.tipo_alquiler] || r.tipo_alquiler}</span>
-                      <span className="text-prius-slate">{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</span>
-                      <span className="text-prius-muted">{fechas}</span>
-                      {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase">Cancelada</span>}
-                      <div className="flex-1" />
-                      {badge === 'preconfirmada' && (
-                        <button onClick={() => navigate(linkToRecepcion(r.codigo))} className="text-label-md font-bold uppercase tracking-wider text-sky-600 hover:text-sky-700 transition-all">
-                          Hacer check-in
-                        </button>
-                      )}
-                      {r.estado !== 'cancelada' && !r.bonificada && esPendienteConfirmacion(r) && (
-                        <button onClick={() => onConfirmarTemporada(r)} className="text-label-md font-bold uppercase tracking-wider text-gold hover:text-gold-hover transition-all">
-                          Confirmar temporada
-                        </button>
-                      )}
-                      {r.estado !== 'cancelada' && !r.bonificada && (r.estado_pago === 'parcial' || r.estado_pago === 'pendiente') && (
-                        <button onClick={() => onPagoCelda({ reserva: { ...r, clientes: cliente }, pago: null })} className="text-label-md font-bold uppercase tracking-wider text-prius-success hover:text-green-700 transition-all">
-                          Registrar pago
-                        </button>
-                      )}
-                      {r.estado !== 'cancelada' && (
-                        <button onClick={() => navigate(linkToComprobante(r.id))} className="inline-flex items-center gap-1 text-label-md font-bold uppercase tracking-wider text-black hover:text-prius-slate transition-all">
-                          <Receipt size={11} /> Comprobante
-                        </button>
-                      )}
-                      {r.estado !== 'cancelada' && (
-                        <button onClick={() => onLiberarUnidad(r)} className="text-label-md font-bold uppercase tracking-wider text-amber-600 hover:text-amber-700 transition-all">
-                          Liberar unidad
-                        </button>
-                      )}
+                  <div key={r.id} className="bg-white border border-hairline rounded-xl px-4 py-3 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="px-2.5 py-1 rounded-full bg-prius-surface text-[10px] font-bold uppercase tracking-wider text-prius-slate">
+                        {TIPO_LABEL[r.tipo_alquiler] || r.tipo_alquiler}
+                      </span>
+                      <span className="text-xs text-prius-slate flex items-center gap-1.5">
+                        {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}
+                        <span className="text-prius-muted">{fechas}</span>
+                      </span>
+                      {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase text-[10px]">Cancelada</span>}
                     </div>
                     {socios.length > 0 && (
-                      <p className="text-label-md text-prius-muted uppercase tracking-wider flex items-center gap-1">
-                        <Users size={11} /> Co-socios: {socios.map((s) => s.nombre).join(', ')}
+                      <p className="text-body-sm text-prius-slate flex items-center gap-1">
+                        <Users size={11} className="shrink-0" /> Co-socios: {socios.map((s) => s.nombre).join(', ')}
                       </p>
+                    )}
+                    {acciones.length > 0 && (
+                      // flex-wrap en vez de grid de 3 columnas fijas: en la
+                      // ficha ancha de desktop (2 columnas internas, oct
+                      // 2026) esta tarjeta vive en una columna angosta —
+                      // un grid a 3 cols por viewport width truncaba los
+                      // labels ("Confir…", "Libera…"). Con flex-wrap cada
+                      // botón pide su ancho mínimo real y los que no entran
+                      // bajan de línea solos, sin importar cuán angosto sea
+                      // el contenedor.
+                      <div className="flex flex-wrap gap-2">
+                        {acciones.map(({ label, icon: Icon, onClick }) => (
+                          <button
+                            key={label}
+                            onClick={onClick}
+                            className="h-10 px-3 rounded-xl bg-prius-surface hover:bg-hairline text-black text-label-lg flex items-center justify-center gap-1.5 transition-all flex-1 min-w-[132px] whitespace-nowrap"
+                          >
+                            <Icon size={14} className="shrink-0" /> {label}
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )
@@ -286,6 +297,9 @@ export default function ClienteDetalleContent({
           )}
         </div>
 
+      </div>
+
+      <div className="space-y-space-md">
         {/* Pagos por reserva */}
         <div>
           <p className="text-label-md text-prius-slate uppercase tracking-wider mb-2">Pagos por Reserva</p>
@@ -313,6 +327,7 @@ export default function ClienteDetalleContent({
           <p className="text-label-md text-prius-slate uppercase tracking-wider mb-2">Historial</p>
           <Historial tipo="cliente" id={cliente.id} compact />
         </div>
+      </div>
       </div>
     </>
   )
