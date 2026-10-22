@@ -229,9 +229,9 @@ export default function Home() {
                 <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-xl flex items-center justify-center mb-1.5 lg:mb-0 transition-colors ${a.accent ? 'bg-gold' : 'bg-prius-surface group-hover:bg-gold/20'}`}>
                   <a.icon size={20} className="text-black" />
                 </div>
-                <div className="lg:mt-4">
+                <div className="lg:mt-4 min-w-0 w-full">
                   <span className="block text-xs md:text-label-md lg:text-headline-sm text-black">{a.label}</span>
-                  <span className="hidden lg:block text-body-sm text-prius-slate">{a.sub}</span>
+                  <span className="hidden lg:block text-body-sm text-prius-slate whitespace-normal">{a.sub}</span>
                 </div>
               </button>
             ))}
@@ -298,12 +298,12 @@ export default function Home() {
                 {stats.libres.count} disponibles para hoy
               </button>
             </div>
-            <button onClick={() => navigate('/app/plano')} className="w-full mt-space-md flex items-baseline justify-between text-left">
-              <div>
+            <button onClick={() => navigate('/app/plano')} className="w-full mt-space-md flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between text-left whitespace-normal">
+              <div className="min-w-0">
                 <span className="block text-label-md text-prius-slate uppercase">Ocupación General</span>
                 <span className="text-metric-xl text-black">{Math.round(stats.ocupacion.pct * 100)}%</span>
               </div>
-              <div className="text-right">
+              <div className="min-w-0 sm:text-right">
                 <span className="text-title-md text-black">{stats.ocupacion.count} ocupadas</span>
                 <span className="block text-body-sm text-prius-slate">de {stats.ocupacion.total} unidades totales</span>
               </div>
@@ -357,13 +357,13 @@ export default function Home() {
                     navegación. */}
                 <button
                   onClick={isFeatureEnabled('reportes') ? () => navigate('/app/reportes') : undefined}
-                  className={`w-full mt-space-md flex items-baseline justify-between text-left ${isFeatureEnabled('reportes') ? '' : 'cursor-default'}`}
+                  className={`w-full mt-space-md flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between text-left whitespace-normal ${isFeatureEnabled('reportes') ? '' : 'cursor-default'}`}
                 >
-                  <div>
+                  <div className="min-w-0">
                     <span className="block text-label-md text-prius-slate uppercase">Total Recaudado</span>
                     <span className="text-metric-xl text-black">{formatPesos(totalCobrado)}</span>
                   </div>
-                  <div className="text-right">
+                  <div className="min-w-0 sm:text-right">
                     <span className="text-title-md text-prius-slate">Meta presupuestada</span>
                     <span className="block text-body-sm text-prius-slate">{formatPesos(facturacionBruta)}</span>
                   </div>

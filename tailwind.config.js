@@ -74,7 +74,14 @@ export default {
         'body-sm': ['12px', { lineHeight: '18px', letterSpacing: '0.01em', fontWeight: '400' }],
         'label-lg': ['13px', { lineHeight: '16px', letterSpacing: '0.04em', fontWeight: '600' }],
         'label-md': ['11px', { lineHeight: '14px', letterSpacing: '0.08em', fontWeight: '600' }],
-        'metric-xl': ['34px', { lineHeight: '40px', letterSpacing: '-0.03em', fontWeight: '700' }],
+        // clamp (oct 2026): montos grandes (Total Recaudado, Caja, Ocupación)
+        // no entraban en mobile angosto (320-414px) cuando el valor real es
+        // largo (ej. "$ 270.058.530") — en vez de partir los dígitos (nunca,
+        // ver CLAUDE.md formato de pesos) o dejar que desborden la card, la
+        // fuente se reduce proporcionalmente por debajo de ~566px de
+        // viewport; en viewports iguales o mayores (6vw*566≈34px) queda
+        // igual a los 34px de siempre, sin cambios visuales en desktop.
+        'metric-xl': ['clamp(22px, 6vw, 34px)', { lineHeight: '1.15', letterSpacing: '-0.03em', fontWeight: '700' }],
       },
       borderRadius: {
         lg: '8px',
