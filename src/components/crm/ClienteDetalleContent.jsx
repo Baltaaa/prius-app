@@ -114,9 +114,15 @@ export default function ClienteDetalleContent({
           </div>
         </div>
 
-        {/* Datos del cliente */}
-        <div className="bg-prius-surface rounded-xl p-space-md grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="col-span-2 md:col-span-1">
+        {/* Datos del cliente. grid-cols-2 fijo (nunca md:grid-cols-4, oct
+            2026): este panel vive adentro de un contenedor angosto (aside
+            fijo, bottom sheet, pantalla completa) que casi nunca llega al
+            ancho real del viewport — un breakpoint de Tailwind responde al
+            viewport, no al contenedor, así que md:grid-cols-4 metía 4
+            columnas en ~365px reales (aside del breakpoint lg más angosto)
+            y el email terminaba partido letra por letra por el break-all. */}
+        <div className="bg-prius-surface rounded-xl p-space-md grid grid-cols-2 gap-4">
+          <div className="col-span-2">
             <p className="text-label-md text-prius-slate uppercase tracking-wider flex items-center gap-1"><Mail size={11} /> Email</p>
             <p className="text-body-sm text-black mt-1 lowercase break-all">{cliente.mail || <span className="text-prius-muted normal-case whitespace-nowrap">Sin cargar</span>}</p>
           </div>
@@ -133,7 +139,7 @@ export default function ClienteDetalleContent({
             <p className="text-body-sm text-black mt-1">{formatFecha(cliente.created_at)}</p>
           </div>
           {cliente.notas && (
-            <div className="col-span-2 md:col-span-4">
+            <div className="col-span-2">
               <p className="text-label-md text-prius-slate uppercase tracking-wider">Notas</p>
               <p className="text-body-sm text-prius-slate mt-1">{cliente.notas}</p>
             </div>

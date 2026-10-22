@@ -709,7 +709,13 @@ export default function Clientes() {
           abajo), detalle en panel fijo / bottom sheet / pantalla completa
           según breakpoint — mismo patrón que Reservas.jsx. */}
       <div className={isDesktopLG ? 'flex gap-space-lg items-start' : ''}>
-        <div className={isDesktopLG ? 'w-[480px] shrink-0' : 'w-full'}>
+        {/* w-[480px] fijo (hasta oct 2026) dejaba casi sin aire al panel
+            fijo de la derecha justo en el arranque del breakpoint lg
+            (1024-1150px aprox, con Sidebar de 256px descontado): el texto
+            del panel terminaba partiéndose letra por letra. flex-1 con
+            min/max fluido reparte el espacio sobrante con el aside en vez
+            de forzar un ancho fijo que no entra. */}
+        <div className={isDesktopLG ? 'flex-1 min-w-[280px] max-w-[480px] shrink' : 'w-full'}>
           {clientesVisibles.length === 0 ? (
             <div className="p-12 text-center text-sm tracking-wider text-prius-muted bg-white border border-hairline rounded-xl">
               No se encontraron clientes.
@@ -847,7 +853,7 @@ export default function Clientes() {
 
         {/* Panel fijo — solo ≥1024px. */}
         {isDesktopLG && (
-          <aside className="hidden lg:flex flex-1 min-w-0 bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start max-h-[calc(100vh-2rem)]">
+          <aside className="hidden lg:flex flex-1 min-w-[320px] bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start max-h-[calc(100vh-2rem)]">
             {clienteSeleccionado ? (
               <ClienteDetalleContent
                 cliente={clienteSeleccionado}
