@@ -98,11 +98,13 @@ export default function CajaImpresion({ resumen }) {
         <div className="ci-section">
           <h2>Facturas y recibos</h2>
           <table className="ci-table">
-            <thead><tr><th>Comprobante</th><th>Fecha</th><th className="num">Total</th><th>Estado</th></tr></thead>
+            {/* Item 16 (testing oct 2026): columna Cliente — resumen_caja()
+                ya trae el nombre por comprobante, solo faltaba imprimirlo. */}
+            <thead><tr><th>Comprobante</th><th>Cliente</th><th>Fecha</th><th className="num">Total</th><th>Estado</th></tr></thead>
             <tbody>
               {[...(facturas || []), ...(recibos || [])].map((c) => (
                 <tr key={c.etiqueta}>
-                  <td>{c.etiqueta}</td><td>{formatFecha(c.fecha)}</td>
+                  <td>{c.etiqueta}</td><td>{c.cliente || '—'}</td><td>{formatFecha(c.fecha)}</td>
                   <td className="num">{formatPesos(c.monto_total)}</td><td>{c.estado}</td>
                 </tr>
               ))}

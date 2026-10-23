@@ -23,10 +23,16 @@ const Section = ({ title, icon: Icon, children }) => (
   </div>
 )
 
-const Fila = ({ label, value, tone }) => (
-  <div className="flex items-center justify-between py-2 border-b border-hairline last:border-0">
-    <span className="text-sm text-prius-slate">{label}</span>
-    <span className={`text-sm font-bold tabular-nums ${tone || 'text-black'}`}>{value}</span>
+const Fila = ({ label, value, tone, cliente }) => (
+  <div className="flex items-center justify-between py-2 border-b border-hairline last:border-0 gap-3">
+    <span className="text-sm text-prius-slate min-w-0">
+      {label}
+      {/* Item 16 (testing oct 2026): nombre del cliente a cargo del
+          comprobante, en chico — resumen_caja() ya lo traía, solo faltaba
+          mostrarlo acá. */}
+      {cliente && <span className="block text-[10px] text-prius-muted truncate">{cliente}</span>}
+    </span>
+    <span className={`text-sm font-bold tabular-nums shrink-0 ${tone || 'text-black'}`}>{value}</span>
   </div>
 )
 
@@ -160,7 +166,7 @@ export default function ResumenCaja({ resumen }) {
                 {(recibos || []).length === 0 ? (
                   <p className="text-xs text-prius-muted bg-prius-surface rounded-xl p-3">Sin recibos en esta caja.</p>
                 ) : recibos.map((r) => (
-                  <Fila key={r.etiqueta} label={r.etiqueta} value={formatPesos(r.monto_total)} tone={r.estado === 'anulado' ? 'text-prius-muted line-through' : undefined} />
+                  <Fila key={r.etiqueta} label={r.etiqueta} cliente={r.cliente} value={formatPesos(r.monto_total)} tone={r.estado === 'anulado' ? 'text-prius-muted line-through' : undefined} />
                 ))}
               </div>
               <div>
@@ -168,7 +174,7 @@ export default function ResumenCaja({ resumen }) {
                 {(facturas || []).length === 0 ? (
                   <p className="text-xs text-prius-muted bg-prius-surface rounded-xl p-3">Sin facturas emitidas en esta jornada.</p>
                 ) : facturas.map((f) => (
-                  <Fila key={f.etiqueta} label={f.etiqueta} value={formatPesos(f.monto_total)} tone={f.estado === 'anulado' ? 'text-prius-muted line-through' : undefined} />
+                  <Fila key={f.etiqueta} label={f.etiqueta} cliente={f.cliente} value={formatPesos(f.monto_total)} tone={f.estado === 'anulado' ? 'text-prius-muted line-through' : undefined} />
                 ))}
               </div>
               <div>
