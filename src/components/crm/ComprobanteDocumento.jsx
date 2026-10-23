@@ -29,6 +29,7 @@ const CSS = `
   .cd-doc-tag { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1.5mm 3mm; border-radius: 1.5mm; display: inline-block; }
   .cd-nro { font-size: 8pt; font-family: monospace; font-weight: 700; margin: 2.5mm 0 0; text-align: right; color: #333; }
   .cd-emision { font-size: 6.5pt; color: #666; text-align: right; margin: 1mm 0 0; }
+  .cd-copia-tag { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #999; text-align: right; margin: 1mm 0 0; }
 
   .cd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; border-bottom: 0.2mm solid #E5E5E5; padding-bottom: 6mm; margin-bottom: 6mm; }
   .cd-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #777; margin: 0 0 2mm; }
@@ -53,17 +54,13 @@ const CSS = `
   .cd-footer p { font-size: 7pt; margin: 0 0 1.5mm; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
   .cd-footer p.cd-legal { font-style: italic; font-weight: 500; text-transform: none; letter-spacing: 0; color: #666; }
 
-  /* Modo Color */
-  .cd-color .cd-doc-tag { background: #F2CA50; color: #000; }
-  .cd-color .cd-abonado { color: #166534; }
-  .cd-color .cd-saldo-valor.cd-pendiente { color: #991B1B; }
-  .cd-color .cd-saldo-valor.cd-saldada { color: #166534; }
-
-  /* Modo Blanco y Negro: sin fondos llenos, se diferencia por peso/tamaño y un recuadro para el saldo pendiente */
-  .cd-bn .cd-doc-tag { background: #fff; color: #000; border: 0.3mm solid #000; }
-  .cd-bn .cd-abonado { font-weight: 800; }
-  .cd-bn .cd-saldo-row.cd-pendiente { border: 0.4mm solid #000; padding: 3mm 4mm; border-radius: 1.5mm; }
-  .cd-bn .cd-saldo-valor { font-weight: 800; }
+  /* Blanco y negro siempre (testing oct 2026, item 15: se saca la opción de
+     color — ahorro de tinta) — sin fondos llenos, se diferencia por peso/
+     tamaño y un recuadro para el saldo pendiente. */
+  .cd-doc-tag { background: #fff; color: #000; border: 0.3mm solid #000; }
+  .cd-abonado { font-weight: 800; }
+  .cd-saldo-row.cd-pendiente { border: 0.4mm solid #000; padding: 3mm 4mm; border-radius: 1.5mm; }
+  .cd-saldo-valor { font-weight: 800; }
 `
 
 /**
@@ -72,7 +69,7 @@ const CSS = `
  * como la hoja de impresión (montada dentro del iframe oculto), con las
  * mismas props: así nunca pueden divergir.
  */
-export default function ComprobanteDocumento({ datos, modo = 'color', tipo = 'estado_cuenta' }) {
+export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', copia = null }) {
   if (!datos) return null
 
   const UnidadIcon = UNIDAD_ICON[datos.unidad.tipo] || null
@@ -86,12 +83,12 @@ export default function ComprobanteDocumento({ datos, modo = 'color', tipo = 'es
   const pagosAMostrar = tipo === 'recibo' && datos.pagoUnico ? [datos.pagoUnico] : datos.pagos
 
   return (
-    <div className={`cd-root cd-${modo}`}>
+    <div className="cd-root">
       <style>{CSS}</style>
 
       <div className="cd-header">
         <div className="cd-brand">
-          <img src="/prius-icon.png" alt="" className="cd-logo" />
+          <img src="/images/prius-icon.png" alt="" className="cd-logo" />
           <div>
             <p className="cd-brand-name">Prius Playa Grande</p>
             <p className="cd-brand-sub">Balneario &bull; Mar del Plata</p>
@@ -104,6 +101,9 @@ export default function ComprobanteDocumento({ datos, modo = 'color', tipo = 'es
             Emitido {formatFechaHora(datos.fechaEmision)}
             {datos.emitidoPor ? ` · ${datos.emitidoPor}` : ''}
           </p>
+          {/* Item 15 (testing oct 2026): dos copias idénticas por hoja — la
+              única diferencia visual entre Original y Duplicado. */}
+          {copia && <p className="cd-copia-tag">{copia === 'original' ? 'Original — Administración' : 'Duplicado — Cliente'}</p>}
         </div>
       </div>
 
@@ -111,10 +111,6 @@ export default function ComprobanteDocumento({ datos, modo = 'color', tipo = 'es
         <div>
           <p className="cd-label">Datos del Titular</p>
           <p className="cd-value">{datos.cliente.nombre || 'S/N'}</p>
-          <p className="cd-detail">
-            CUIT/DNI: {datos.cliente.cuit || datos.cliente.dni || 'N/A'}<br />
-            Tel: {datos.cliente.telefono || 'N/A'}
-          </p>
         </div>
         <div>
           <p className="cd-label">Detalle del Alquiler</p>

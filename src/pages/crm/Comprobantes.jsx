@@ -4,6 +4,7 @@ import { useReservas } from '../../hooks/useReservas'
 import { usePagos } from '../../hooks/usePagos'
 import { useAuth } from '../../context/AuthProvider'
 import { useDialog } from '../../context/DialogProvider'
+import { useData } from '../../context/DataProvider'
 import { usePreferenciaUsuario } from '../../hooks/usePreferenciaUsuario'
 import { isFeatureEnabled } from '../../lib/features'
 import { formatFecha, formatPesos } from '../../lib/format'
@@ -12,26 +13,20 @@ import { pagoSinVerificar, tieneAlgunPagoReal } from '../../lib/reservas'
 import { numeroComprobante, armarDatosComprobante, validarComprobante } from '../../lib/comprobante'
 import { imprimirDocumento } from '../../lib/imprimirDocumento'
 import ComprobanteDocumento from '../../components/crm/ComprobanteDocumento'
+import ComprobanteImpresionDoble from '../../components/crm/ComprobanteImpresionDoble'
 import BrandSelect from '../../components/ui/BrandSelect'
+import LoadingButton from '../../components/ui/LoadingButton'
 import { Printer, FileText, Receipt, HelpCircle } from 'lucide-react'
 
-const MODO_KEY = 'prius:comprobante:modo'
 const UNIDAD_LABEL = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina', locker: 'Locker' }
-
-function leerModoGuardado() {
-  try {
-    const v = localStorage.getItem(MODO_KEY)
-    return v === 'bn' ? 'bn' : 'color'
-  } catch {
-    return 'color'
-  }
-}
 
 export default function Comprobantes() {
   const { reservas, loading } = useReservas()
   const { perfil } = useAuth()
   const { toast } = useDialog()
+  const { emitirComprobante } = useData()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [imprimiendo, setImprimiendo] = useState(false)
 
   // [feat-9] recuerda la última reserva elegida, por usuario, sin
   // localStorage (preferencias_usuario) — si la feature está apagada,
@@ -40,11 +35,6 @@ export default function Comprobantes() {
   const [selectedReservaIdLocal, setSelectedReservaIdLocal] = useState('')
   const selectedReservaId = isFeatureEnabled('feat-9-comprobantes-recordar-config') ? selectedReservaIdPref : selectedReservaIdLocal
   const setSelectedReservaId = isFeatureEnabled('feat-9-comprobantes-recordar-config') ? setSelectedReservaIdPref : setSelectedReservaIdLocal
-
-  const [modo, setModo] = useState(leerModoGuardado)
-  useEffect(() => {
-    try { localStorage.setItem(MODO_KEY, modo) } catch { /* localStorage no disponible (modo privado, etc.) */ }
-  }, [modo])
 
   // Oct 2026: el selector solo lista reservas con al menos un pago real
   // registrado (ver `tieneAlgunPagoReal`) — una reserva SIN PAGO (ej.
@@ -104,14 +94,31 @@ export default function Comprobantes() {
       : datosEstadoCuenta
     const error = validarComprobante(datos, tipo)
     if (error) {
-      toast(error)
+      toast(error, { tone: 'error' })
       return
     }
-    const apellidoNombre = (datos.cliente.nombre || 'Cliente').trim()
-    await imprimirDocumento(
-      <ComprobanteDocumento datos={datos} modo={modo} tipo={tipo} />,
-      { titulo: `Comprobante ${datos.numero} - ${apellidoNombre}` },
-    )
+    setImprimiendo(true)
+    try {
+      // Item 15 (testing oct 2026): número correlativo real, asignado en la
+      // base (nunca calculado en el front) — reemplaza el slice de uuid de
+      // numeroComprobante(). Snapshot guardado para auditoría/reimpresión.
+      const emitido = await emitirComprobante({
+        reservaId: selectedReserva.id,
+        pagoId: tipo === 'recibo' ? pagoId : null,
+        tipo,
+        snapshot: datos,
+      })
+      const datosConNumero = { ...datos, numero: String(emitido.numero).padStart(3, '0') }
+      const apellidoNombre = (datos.cliente.nombre || 'Cliente').trim()
+      await imprimirDocumento(
+        <ComprobanteImpresionDoble datos={datosConNumero} tipo={tipo} />,
+        { titulo: `Comprobante ${datosConNumero.numero} - ${apellidoNombre}` },
+      )
+    } catch (err) {
+      toast(err.message || 'No se pudo emitir el comprobante.', { tone: 'error' })
+    } finally {
+      setImprimiendo(false)
+    }
   }
 
   if (loading) {
@@ -142,28 +149,14 @@ export default function Comprobantes() {
 
           {selectedReserva && (
             <div className="flex items-center gap-3 shrink-0">
-              <div className="flex rounded-xl border border-hairline overflow-hidden" role="group" aria-label="Modo de impresión">
-                <button
-                  type="button"
-                  onClick={() => setModo('color')}
-                  className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${modo === 'color' ? 'bg-gold text-black' : 'text-prius-slate hover:bg-prius-subtle'}`}
-                >
-                  Color
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setModo('bn')}
-                  className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${modo === 'bn' ? 'bg-gold text-black' : 'text-prius-slate hover:bg-prius-subtle'}`}
-                >
-                  B y N
-                </button>
-              </div>
-              <button
+              <LoadingButton
                 onClick={() => imprimir('estado_cuenta')}
-                className="bg-gold hover:bg-gold-hover text-black px-6 py-3 rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl"
+                loading={imprimiendo}
+                loadingText="Emitiendo..."
+                className="bg-gold hover:bg-gold-hover text-black px-6 py-3 rounded-xl flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl"
               >
                 <Printer size={18} /> Imprimir Comprobante
-              </button>
+              </LoadingButton>
             </div>
           )}
         </div>
@@ -171,11 +164,12 @@ export default function Comprobantes() {
 
       {selectedReserva ? (
         <div className="space-y-6">
-          {/* Vista previa WYSIWYG: hoja real en proporción A4, papel blanco, en
-              el modo elegido — el tema oscuro queda solo para este contenedor. */}
+          {/* Vista previa WYSIWYG: hoja real en proporción A4, papel blanco.
+              Siempre blanco y negro (item 15, testing oct 2026) — se sacó el
+              selector de color para ahorrar tinta. */}
           <div className="overflow-x-auto rounded-2xl bg-black/20 p-6 md:p-10 flex justify-center">
             <div className="shadow-2xl shrink-0">
-              <ComprobanteDocumento datos={datosEstadoCuenta} modo={modo} tipo="estado_cuenta" />
+              <ComprobanteDocumento datos={datosEstadoCuenta} tipo="estado_cuenta" />
             </div>
           </div>
 

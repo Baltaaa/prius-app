@@ -487,6 +487,20 @@ export function DataProvider({ children }) {
     return data
   }, [fetchPagos])
 
+  // Item 15 (testing oct 2026): registra la emisión de un comprobante
+  // interno (ComprobanteDocumento.jsx) y devuelve su número correlativo
+  // real (asignado en la base, nunca calculado en el front). El snapshot
+  // queda guardado para que una reimpresión futura pueda usar los mismos
+  // datos — hoy el front sigue recalculando en vivo para la vista previa,
+  // pero el número y el registro de auditoría ya son reales.
+  const emitirComprobante = useCallback(async ({ reservaId, pagoId, tipo, snapshot }) => {
+    const { data, error } = await supabase.rpc('fn_emitir_comprobante', {
+      p_reserva_id: reservaId, p_pago_id: pagoId || null, p_tipo: tipo, p_snapshot: snapshot,
+    })
+    if (error) throw error
+    return data
+  }, [])
+
   // Item 9 (testing oct 2026): corrige el monto de un pago YA verificado —
   // solo superadmin (validado en el RPC, no solo acá). Distinto de
   // editarMontoPago (arriba de esta sección), que es para cargar el monto
@@ -554,7 +568,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto,
+    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
@@ -564,7 +578,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto,
+    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
