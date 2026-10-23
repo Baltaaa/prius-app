@@ -207,7 +207,19 @@ export default function Dashboard() {
     // `computeFit` nuevo (closure fresca) — si no, seguía auto-encuadrando
     // con la fórmula vieja hasta el próximo cambio de `fullscreenOpen`/
     // `loading`.
-  }, [fullscreenOpen, loading, isMobile])
+    //
+    // `readyPlano` en las deps (bug real, oct 2026 testing): el guard de
+    // arriba (`if (!viewport || !content) return`) corta en silencio si el
+    // skeleton (`readyPlano`, ver `useInitialLoad`) todavía está tapando el
+    // plano real en ese commit — `viewportRef`/`contentRef` recién existen
+    // cuando `readyPlano` pasa a true. Si `loading` del DataProvider ya
+    // estaba en false al montar (datos en caché de una navegación previa),
+    // este efecto corría una sola vez con los refs en null y nunca se
+    // volvía a ejecutar: el plano quedaba con `ready=false` para siempre
+    // (`visibility:hidden`, invisible y sin click) hasta que alguna otra
+    // dependencia cambiara por casualidad. Causa real de "el plano no
+    // responde" al navegar desde otra pantalla.
+  }, [fullscreenOpen, loading, isMobile, readyPlano])
 
   const handleEncuadrar = () => {
     userInteractedRef.current = false

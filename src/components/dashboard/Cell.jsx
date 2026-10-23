@@ -26,14 +26,17 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
   const [showTooltip, setShowTooltip] = useState(false)
 
   const styles = isPendienteConfirmacion
-    ? "bg-white text-black border-white"
+    ? "bg-white text-black border-[#E5E5E5]"
     : isTemporada
       ? `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.text} ${COLOR_TIPO_ALQUILER.temporada.border}`
       : isPeriodo
         ? `${COLOR_TIPO_ALQUILER.periodo.bg} ${COLOR_TIPO_ALQUILER.periodo.text} ${COLOR_TIPO_ALQUILER.periodo.border}`
         : isDia
           ? `${COLOR_TIPO_ALQUILER.dia.bg} ${COLOR_TIPO_ALQUILER.dia.text} ${COLOR_TIPO_ALQUILER.dia.border}`
-          : "bg-white/5 text-white/20 border-white/10 hover:border-white/30"
+          // Libre (bug real, oct 2026 testing): antes "white/5 border-white/10"
+          // — pensado para el fondo dark glass viejo, invisible sobre el
+          // card-light blanco real de hoy. Borde sutil #E5E5E5 (Quiet Luxury).
+          : "bg-white text-prius-muted border-[#E5E5E5] hover:border-black/30"
 
   const opacityClass = isDimmed ? "opacity-20" : "opacity-100"
   const highlightClass = isHighlighted
@@ -50,15 +53,16 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
 
   return (
     <div
-      className="flex items-center relative"
+      className="flex items-center relative cursor-pointer select-none"
+      onClick={() => onClick(unit)}
       onMouseEnter={() => unit?.clientName && setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
       {numberSide === "left" && numberLabel}
       <button
         data-deeplink-id={unit?.dbId}
-        onClick={() => onClick(unit)}
-        className={`w-6 h-[18px] md:w-7 md:h-5 text-[10px] md:text-[11px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative ${styles} ${opacityClass} ${highlightClass} ${unit?.esPreconfirmadaWeb ? "border-dashed" : ""}`}
+        tabIndex={-1}
+        className={`w-6 h-[18px] md:w-7 md:h-5 text-[10px] md:text-[11px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative pointer-events-none ${styles} ${opacityClass} ${highlightClass} ${unit?.esPreconfirmadaWeb ? "border-dashed" : ""}`}
       >
         <span className="leading-none">
           {isPendienteConfirmacion && <Hourglass size={11} />}

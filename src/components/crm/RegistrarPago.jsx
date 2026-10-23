@@ -291,7 +291,13 @@ export default function RegistrarPago({
                 ...(allowSinReserva ? [{ value: '', label: 'Sin reserva — cobro directo al cliente' }] : []),
                 ...reservasOptions.map((r) => ({
                   value: r.id,
-                  label: `${unidadEmoji(r.unidades?.tipo)} ${r.unidades?.tipo} #${r.unidades?.numero} — saldo ${formatPesos(r.saldo)}`,
+                  // Reserva donde `cliente` es cosocio (no titular): se aclara
+                  // de quién es la unidad, para que quede claro a nombre de
+                  // quién se está cobrando (el pago igual queda con el
+                  // cliente_id de `cliente`, el cosocio que abrió el form).
+                  label: r.cliente_id && cliente?.id && r.cliente_id !== cliente.id
+                    ? `${unidadEmoji(r.unidades?.tipo)} ${r.unidades?.tipo} #${r.unidades?.numero} (cosocio de ${r.clientes?.nombre || 'otro cliente'}) — saldo ${formatPesos(r.saldo)}`
+                    : `${unidadEmoji(r.unidades?.tipo)} ${r.unidades?.tipo} #${r.unidades?.numero} — saldo ${formatPesos(r.saldo)}`,
                 })),
               ]}
             />

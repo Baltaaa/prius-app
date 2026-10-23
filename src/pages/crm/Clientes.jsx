@@ -1149,14 +1149,24 @@ export default function Clientes() {
         </form>
       </Modal>
 
-      {/* Registrar Pago (Tarea 4) — mismo componente que usa Reservas y el Plano */}
+      {/* Registrar Pago (Tarea 4) — mismo componente que usa Reservas y el Plano.
+          reservasOptions incluye también las reservas donde `pagoCliente` es
+          CO-SOCIO (no titular): un cosocio puede pagar su parte de la unidad
+          compartida — el pago queda con cliente_id del cosocio y reserva_id
+          de la reserva compartida (registrar_pago ya admite esa combinación,
+          el saldo que valida es el de la reserva, no el del titular). No se
+          mezcla con `reservasPorCliente` en ningún otro lado (saldo del
+          header, PagosGrid) a propósito, ver reservasComoCoSocioPorCliente. */}
       <RegistrarPago
         isOpen={!!pagoCliente}
         onClose={() => setPagoCliente(null)}
         cliente={pagoCliente}
         reservasOptions={
           pagoCliente
-            ? (reservasPorCliente[pagoCliente.id] || []).filter((r) => r.estado !== 'cancelada' && !r.bonificada)
+            ? [
+                ...(reservasPorCliente[pagoCliente.id] || []),
+                ...(reservasComoCoSocioPorCliente[pagoCliente.id] || []),
+              ].filter((r) => r.estado !== 'cancelada' && !r.bonificada)
             : []
         }
       />

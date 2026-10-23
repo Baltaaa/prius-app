@@ -140,25 +140,45 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
           </div>
         ) : (
           <>
-            {/* Titular */}
+            {/* Titular + cosocios (reserva_clientes) — cada uno navega a su
+                propia ficha (mismo linkToCliente de "Ver ficha del cliente");
+                el titular se distingue visualmente (avatar negro + badge) de
+                los cosocios (avatar gris, sin badge). */}
             <div className="bg-prius-surface rounded-xl p-space-md flex flex-col gap-space-sm">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-label-md text-prius-slate uppercase tracking-wider">Titular</span>
                 <StatusBadge status={estadoBadgeStatus(reserva)} />
               </div>
-              <div className="flex items-center gap-space-sm">
+              <button
+                onClick={irAClientes}
+                className="flex items-center gap-space-sm text-left hover:bg-hairline/60 rounded-lg -m-1 p-1 transition-colors"
+              >
                 <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center text-title-md font-semibold shrink-0">
                   {(reserva.clientes?.nombre || "S/N").trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-title-md text-black truncate">{reserva.clientes?.nombre || "S/N"}</p>
-                  {socios.length > 0 && (
-                    <p className="text-body-sm text-prius-slate truncate flex items-center gap-1">
-                      <Users size={12} className="shrink-0" /> {socios.map((s) => s.nombre).join(", ")}
-                    </p>
-                  )}
                 </div>
-              </div>
+              </button>
+              {socios.length > 0 && (
+                <div className="flex flex-col gap-1 pt-1 border-t border-hairline">
+                  <span className="text-label-md text-prius-slate uppercase tracking-wider flex items-center gap-1 pt-1">
+                    <Users size={12} /> Cosocios
+                  </span>
+                  {socios.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => navigate(linkToCliente(s.id))}
+                      className="flex items-center gap-space-sm text-left hover:bg-hairline/60 rounded-lg -mx-1 p-1 transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-prius-slate/30 text-prius-slate flex items-center justify-center text-body-md font-semibold shrink-0">
+                        {(s.nombre || "S/N").trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase()}
+                      </div>
+                      <p className="min-w-0 flex-1 text-body-md text-black truncate">{s.nombre || "S/N"}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {reserva.origen === "web" && reserva.codigo && (

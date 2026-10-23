@@ -66,7 +66,7 @@ export default function PlanoViewport({
       >
         <div
           ref={contentRef}
-          className="absolute top-0 left-0 flex flex-col items-center"
+          className="absolute top-0 left-0 flex flex-col items-center select-none"
           style={{
             transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
             transformOrigin: "0 0",
