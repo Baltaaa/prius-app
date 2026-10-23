@@ -29,10 +29,16 @@ const chipClass = (active) =>
 // se duplica esta lógica en cada pantalla.
 export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirMonto = false, onEditarMonto }) {
   const navigate = useNavigate()
-  const { completarComprobante, anularPago, editarComprobante } = useData()
+  const { completarComprobante, anularPago, editarComprobante, editarMontoPagoVigente } = useData()
   const { alert } = useDialog()
   const puedeEditarComprobante = usePermiso('editar_comprobante')
   const puedeEditarMontoPago = usePermiso('editar_monto_pago')
+  // Items 9/10 (testing oct 2026): anular y editar el monto de un pago ya
+  // verificado quedan detrás de superadmin — espeja el guard real de los
+  // RPC (anular_pago / fn_editar_monto_pago_vigente), acá es solo para
+  // ocultar los botones a quien no tiene permiso.
+  const puedeAnularPago = usePermiso('anular_pago')
+  const puedeEditarMontoVigente = usePermiso('editar_monto_pago_vigente')
 
   const [cargandoComprobante, setCargandoComprobante] = useState(false)
   const [comprobanteTipo, setComprobanteTipo] = useState('factura_b')
@@ -44,6 +50,13 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
   const [editandoId, setEditandoId] = useState(null)
   const [editMonto, setEditMonto] = useState(null)
   const [editFecha, setEditFecha] = useState('')
+  const [editTipo, setEditTipo] = useState(null)
+
+  // Item 9 (testing oct 2026): editar el monto de un pago ya verificado —
+  // distinto del flujo "Cargar monto" (onEditarMonto) de un recibo migrado
+  // todavía sin monto.
+  const [editandoMontoPago, setEditandoMontoPago] = useState(false)
+  const [editMontoPago, setEditMontoPago] = useState(null)
 
   const [anulando, setAnulando] = useState(false)
   const [motivo, setMotivo] = useState('')
@@ -64,6 +77,8 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
     setNumero(null)
     setFecha(new Date().toISOString().split('T')[0])
     setEditandoId(null)
+    setEditandoMontoPago(false)
+    setEditMontoPago(null)
     if (autoAbrirMonto && pagoSinVerificar(pago) && pago?.estado !== 'anulado' && puedeEditarMontoPago) {
       onEditarMonto?.(pago)
     }
@@ -91,15 +106,31 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
     setEditandoId(comprobante.id)
     setEditMonto(comprobante.monto_total ?? null)
     setEditFecha(comprobante.fecha || new Date().toISOString().split('T')[0])
+    setEditTipo(comprobante.tipo || null)
   }
 
   const handleGuardarEdicion = async () => {
     setSaving(true)
     try {
-      await editarComprobante(editandoId, editMonto, editFecha)
+      await editarComprobante(editandoId, editMonto, editFecha, editTipo)
       setEditandoId(null)
     } catch (err) {
       await alert(err.message || 'No se pudo editar el comprobante.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Item 9 (testing oct 2026): corrige el monto de ESTE pago (no de su
+  // comprobante) — ej. error de tipeo del administrador al cargarlo.
+  const handleGuardarMontoPago = async () => {
+    if (!editMontoPago || Number(editMontoPago) <= 0) return
+    setSaving(true)
+    try {
+      await editarMontoPagoVigente(pago.id, editMontoPago)
+      setEditandoMontoPago(false)
+    } catch (err) {
+      await alert(err.message || 'No se pudo editar el monto del pago.')
     } finally {
       setSaving(false)
     }
@@ -175,7 +206,33 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                   Cargar monto
                 </button>
               )}
+              {/* Item 9 (testing oct 2026): corregir el monto de un pago YA
+                  verificado — solo superadmin, distinto de "Cargar monto"
+                  (que es para un recibo migrado sin verificar). */}
+              {!pagoSinVerificar(pago) && pago.estado !== 'anulado' && puedeEditarMontoVigente && !editandoMontoPago && (
+                <button
+                  type="button"
+                  onClick={() => { setEditandoMontoPago(true); setEditMontoPago(pago.monto) }}
+                  className="text-prius-muted hover:text-gold transition-all p-1 -m-1"
+                  title="Editar monto"
+                >
+                  <Pencil size={14} />
+                </button>
+              )}
             </div>
+            {editandoMontoPago && (
+              <div className="mt-3 space-y-2 p-3 bg-prius-subtle border border-hairline rounded-xl">
+                <MoneyInput label="Nuevo monto" value={editMontoPago} onChange={setEditMontoPago} max={100_000_000} />
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setEditandoMontoPago(false)} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-white text-prius-slate border border-hairline">
+                    Cancelar
+                  </button>
+                  <button type="button" disabled={saving} onClick={handleGuardarMontoPago} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-gold text-black disabled:opacity-50">
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de Pago</p>
@@ -233,6 +290,21 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                 <div key={c.id} className="px-4 py-3 flex items-center justify-between gap-3">
                   {editandoId === c.id ? (
                     <div className="flex-1 space-y-3">
+                      {/* Tipo de comprobante (item 9, testing oct 2026):
+                          antes esta edición solo tocaba monto/fecha. */}
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(COMPROBANTE_TIPO_SIGLA).map(([value, sigla]) => (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setEditTipo(value)}
+                            title={COMPROBANTE_TIPO_LABEL[value]}
+                            className={chipClass(editTipo === value)}
+                          >
+                            {sigla}
+                          </button>
+                        ))}
+                      </div>
                       <div className="grid grid-cols-2 gap-3">
                         <MoneyInput label="Monto" value={editMonto} onChange={setEditMonto} max={100_000_000} />
                         <DateInput label="Fecha" value={editFecha} onChange={setEditFecha} max={new Date().toISOString().split('T')[0]} calendarOnly />
@@ -320,7 +392,9 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
           )}
         </div>
 
-        {pago.estado === 'vigente' && (
+        {/* Item 10 (testing oct 2026): anular un pago requiere superadmin —
+            antes el botón se mostraba a cualquier usuario autenticado. */}
+        {pago.estado === 'vigente' && puedeAnularPago && (
           <div className="border-t border-hairline pt-6">
             {!anulando ? (
               <button

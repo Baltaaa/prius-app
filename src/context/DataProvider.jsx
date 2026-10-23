@@ -478,14 +478,28 @@ export function DataProvider({ children }) {
     return data
   }, [fetchPagos, fetchReservas, fetchCaja, fetchIngresosCaja])
 
-  const editarComprobante = useCallback(async (comprobanteId, monto, fecha) => {
+  const editarComprobante = useCallback(async (comprobanteId, monto, fecha, tipo) => {
     const { data, error } = await supabase.rpc('editar_comprobante', {
-      p_comprobante_id: comprobanteId, p_monto: monto, p_fecha: fecha || null,
+      p_comprobante_id: comprobanteId, p_monto: monto, p_fecha: fecha || null, p_tipo: tipo || null,
     })
     if (error) throw error
     await fetchPagos()
     return data
   }, [fetchPagos])
+
+  // Item 9 (testing oct 2026): corrige el monto de un pago YA verificado —
+  // solo superadmin (validado en el RPC, no solo acá). Distinto de
+  // editarMontoPago (arriba de esta sección), que es para cargar el monto
+  // de un recibo migrado que todavía está en null.
+  const editarMontoPagoVigente = useCallback(async (pagoId, monto) => {
+    const { data, error } = await supabase.rpc('fn_editar_monto_pago_vigente', {
+      p_pago_id: pagoId, p_monto: Number(monto),
+    })
+    if (error) throw error
+    await fetchPagos()
+    await fetchReservas()
+    return data
+  }, [fetchPagos, fetchReservas])
 
   // Update reactivo de un lead (estado: nuevo -> contactado -> descartado, o
   // notas_crm). Optimista; Realtime sobre `leads` concilia el resto.
@@ -540,7 +554,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarPagoCompleto,
+    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
@@ -550,7 +564,7 @@ export function DataProvider({ children }) {
     createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
-    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarPagoCompleto,
+    updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,

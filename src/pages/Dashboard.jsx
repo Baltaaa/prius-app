@@ -8,6 +8,7 @@ import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
 import UnidadDetallePanel from "../components/dashboard/UnidadDetallePanel"
 import PlanoMobile from "../components/dashboard/PlanoMobile"
 import AsignarUnidadModal from "../components/dashboard/AsignarUnidadModal"
+import RegistrarPago from "../components/crm/RegistrarPago"
 import MoverUnidadDialog from "../components/dashboard/MoverUnidadDialog"
 import Cell from "../components/dashboard/Cell"
 import CellMobile from "../components/dashboard/CellMobile"
@@ -56,6 +57,10 @@ export default function Dashboard() {
   // (ver CLAUDE.md "Modal de unidad en el Plano").
   const [selectedUnitId, setSelectedUnitId] = useState(null)
   const [asignarUnit, setAsignarUnit] = useState(null) // unidad libre a asignar, o null
+  // Item 8 (testing oct 2026): "Cargar un pago ahora" en AsignarUnidadModal
+  // encadena este mismo RegistrarPago con la reserva de temporada recién
+  // creada — nunca una segunda lógica de cobro.
+  const [pagoReserva, setPagoReserva] = useState(null)
   const [moverTarget, setMoverTarget] = useState(null) // { reserva, unit } a mover, o null
 
   // Modal de pantalla completa del plano (90% del viewport en desktop, 100%
@@ -817,6 +822,16 @@ export default function Dashboard() {
         onClose={() => setAsignarUnit(null)}
         unit={asignarUnit}
         temporadaActiva={temporadaActiva}
+        onCreated={setPagoReserva}
+      />
+
+      <RegistrarPago
+        isOpen={!!pagoReserva}
+        onClose={() => setPagoReserva(null)}
+        cliente={pagoReserva?.clientes}
+        reservasOptions={pagoReserva ? [pagoReserva] : []}
+        initialReservaId={pagoReserva?.id || ''}
+        allowSinReserva={false}
       />
 
       <MoverUnidadDialog

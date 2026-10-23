@@ -19,6 +19,12 @@ export const PERMISOS: Record<string, Rol[]> = {
   editar_unidades: ['superadmin'],
   gestion_usuarios: ['superadmin'],
   editar_comprobante: ['superadmin'],
+  // Anular un pago y corregir el monto de uno YA verificado (testing oct
+  // 2026, items 9/10) — espeja el guard real de anular_pago/
+  // fn_editar_monto_pago_vigente. Distinto de editar_monto_pago (abajo),
+  // que es solo para CARGAR el monto de un recibo migrado sin verificar.
+  anular_pago: ['superadmin'],
+  editar_monto_pago_vigente: ['superadmin'],
   // Borrado definitivo de un lead ya descartado (oct 2026) — espeja la
   // policy de RLS real (es_superadmin()), acá es solo para ocultar el botón.
   eliminar_lead: ['superadmin'],

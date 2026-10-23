@@ -104,7 +104,12 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
   // no está saldada por la regla de arriba.
   const saldoCalculado = saldoNumerico(reserva, cuotas)
 
-  const cellBase = 'shrink-0 w-[110px] flex flex-col items-center justify-center gap-1 rounded-lg py-3 text-xs font-bold transition-all'
+  // Grilla responsive (testing oct 2026, item 6): antes era un flex con
+  // overflow-x-auto (scroll horizontal, celdas de ancho fijo que se
+  // cortaban en mobile/ficha angosta) — ahora CSS grid con auto-fill/
+  // minmax: las celdas bajan de fila solas, nunca se cortan ni generan
+  // scroll propio en ningún breakpoint.
+  const cellBase = 'flex flex-col items-center justify-center gap-1 rounded-lg py-3 px-2 text-xs font-bold transition-all min-w-0'
 
   return (
     <div className="space-y-1">
@@ -112,8 +117,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
         <span className="text-cyan-400 font-bold">{reserva.temporada}</span>
         <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}</span>
       </div>
-      <div className="overflow-x-auto">
-        <div className="flex gap-2 min-w-fit pb-1">
+      <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))' }}>
           {/* Precio de venta — informativo, no clickeable. Nunca se
               renderiza en $0 (ver lib/format.js formatPesosVisible); en la
               práctica esta rama ya solo se alcanza con valor_total > 0 (el
@@ -168,17 +172,23 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
                 title={anulado ? `Pago anulado — ${pago.anulado_motivo || 'sin motivo'}` : 'Ver detalle del pago'}
               >
                 <span className="text-[8px] text-prius-muted uppercase tracking-widest">Cuota {pago.nro_cuota}</span>
-                {sinVerificar ? <MontoNulo /> : formatPesosVisible(pago.monto)}
+                {/* Jerarquía (testing oct 2026, item 7): dato principal = el
+                    comprobante (identifica el pago), secundario = el monto —
+                    antes era al revés. "Sin comprobante" en tono neutro
+                    cuando no hay ninguno cargado. */}
+                <span className="text-sm font-bold truncate max-w-full normal-case tracking-normal">
+                  {pago.comprobantes?.length > 0
+                    ? pago.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
+                    : <span className="text-prius-muted font-semibold">Sin comprobante</span>}
+                </span>
+                <span className="text-[10px] font-semibold normal-case tracking-normal">
+                  {sinVerificar ? <MontoNulo /> : formatPesosVisible(pago.monto)}
+                </span>
                 {pago.medio === 'tarjeta_credito' && pago.cuotas_tarjeta && (
                   <span className="flex items-center gap-0.5 text-[8px] text-gold font-bold">
                     <CreditCard size={10} /> {pago.cuotas_tarjeta}x
                   </span>
                 )}
-                <span className="text-[8px] text-prius-muted font-normal normal-case tracking-normal">
-                  {pago.comprobantes?.length > 0
-                    ? pago.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
-                    : 'Sin comprobante'}
-                </span>
               </button>
             )
           })}
@@ -205,7 +215,6 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
             <span className="text-[8px] text-prius-muted uppercase tracking-widest">Saldo</span>
             {saldada ? 'Unidad saldada' : saldoCalculado === null ? <MontoNulo texto="Saldo sin verificar" /> : formatPesosVisible(saldoCalculado)}
           </div>
-        </div>
       </div>
     </div>
   )

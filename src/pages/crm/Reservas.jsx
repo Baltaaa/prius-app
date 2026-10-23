@@ -4,14 +4,11 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
 import { formatPesos, formatPesosVisible, formatFecha, formatRangoFechas, unidadEmoji } from '../../lib/format'
-import { parseUnidadQuery } from '../../lib/parse'
-import SearchInput from '../../components/inputs/SearchInput'
 import DateInput from '../../components/inputs/DateInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import { coSocios, estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
-import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
 import { registrarVisto } from '../../hooks/useRecientes'
@@ -19,6 +16,7 @@ import { linkToCliente, linkToComprobante, linkToRecepcion } from '../../lib/dee
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
 import RegistrarPago from '../../components/crm/RegistrarPago'
+import DetallePago from '../../components/crm/DetallePago'
 import MoneyInput from '../../components/inputs/MoneyInput'
 import ClienteSelector from '../../components/crm/ClienteSelector'
 import StatusBadge from '../../components/crm/StatusBadge'
@@ -27,12 +25,13 @@ import ReservaCalendar from '../../components/crm/ReservaCalendar'
 import Historial from '../../components/crm/Historial'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
 import { useMountTransition } from '../../hooks/useMountTransition'
+import { useRevealOnCheck } from '../../hooks/useRevealOnCheck'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import ReservaDetalleContent from '../../components/crm/ReservaDetalleContent'
 import ReservaListaMobile from '../../components/crm/ReservaListaMobile'
 import BottomSheet from '../../components/ui-prius/BottomSheet'
-import { Plus, Edit2, Trash2, XCircle, Search, Filter, Check, Wallet, Globe, MonitorSmartphone, X, Lock, Unlock, ChevronDown, Receipt, QrCode, ChevronLeft, LayoutList } from 'lucide-react'
+import { Plus, Filter, Check, Globe, MonitorSmartphone, X, Lock, Unlock, ChevronDown, ChevronLeft, LayoutList } from 'lucide-react'
 
 // Título chico de sección dentro del modal de reserva (Tarea 5, oct 2026) —
 // mismo patrón repetido en ambas columnas, separador en vez de mayúscula de
@@ -113,7 +112,10 @@ export default function Reservas() {
   const [editingReserva, setEditingReserva] = useState(null)
   const [masOpcionesAbierto, setMasOpcionesAbierto] = useState(false) // "Más opciones" del modal de reserva (Tarea 5): notas + historial, cerrado por defecto
   const [pagoReserva, setPagoReserva] = useState(null)
-  const [searchTerm, setSearchTerm] = useState('')
+  // Item 7 (testing oct 2026): click en una instancia de pago del panel de
+  // detalle abre DetallePago (comprobante, monto, fecha, método, cliente) —
+  // mismo componente que ya usa Clientes.jsx para las celdas de PagosGrid.
+  const [pagoDetalle, setPagoDetalle] = useState(null)
   const [showFiltros, setShowFiltros] = useState(false)
   const filtrosOverlay = useOverlay({ id: 'reservas-filtros', isOpen: showFiltros, onRequestClose: () => setShowFiltros(false) })
   const [filtroUnidadId, setFiltroUnidadId] = useState(null) // deep-link "Ver todas" desde el modal de unidad del Plano
@@ -160,6 +162,14 @@ export default function Reservas() {
   // esto igual en la base (costo_total=0, estado_pago='pagado'), así que acá
   // solo se refleja para no confundir al que carga el form.
   const [bonificada, setBonificada] = useState(false)
+  // Alta all-in-one (testing oct 2026, item 8): checkbox "Cargar un pago
+  // ahora" en el form de nueva reserva. No duplica la lógica de
+  // RegistrarPago.jsx — al crear la reserva con éxito, si está tildado, se
+  // encadena abriendo ESE mismo componente ya precargado con la reserva
+  // recién creada (misma validación, mismo comprobante obligatorio, mismo
+  // impacto en caja). Solo tiene sentido en alta nueva, nunca al editar.
+  const [cargarPagoInicial, setCargarPagoInicial] = useState(false)
+  const revealPagoInicialRef = useRevealOnCheck(cargarPagoInicial)
   // Wizard mobile (<768px, mock 03-reservas-mobile-nueva): mismos 3 campos
   // reales del form de siempre (Cliente / Unidad+Fechas / Monto+resumen),
   // solo se muestran de a uno con Siguiente/Atrás — desktop/tablet siguen
@@ -180,6 +190,7 @@ export default function Reservas() {
     setNotas('')
     setBloqueada(false)
     setBonificada(false)
+    setCargarPagoInicial(false)
   }
 
   // Snapshot del form al abrir (Tarea 1, oct 2026) — para que el Modal
@@ -304,10 +315,17 @@ export default function Reservas() {
     try {
       if (editingReserva) {
         await updateReserva(editingReserva.id, payload)
+        setIsModalOpen(false)
       } else {
-        await createReserva(payload)
+        const nueva = await createReserva(payload)
+        setIsModalOpen(false)
+        // Item 8 (testing oct 2026): "cargar pago inicial" encadena a
+        // RegistrarPago ya abierto con la reserva recién creada (mismo
+        // componente/validación que el alta suelta) — si el pago falla o se
+        // cancela, la reserva igual quedó creada (no "a medias": el usuario
+        // la ve en la lista, sin pago, y puede cobrarla después desde ahí).
+        if (cargarPagoInicial) setPagoReserva(nueva)
       }
-      setIsModalOpen(false)
     } catch (err) {
       await alert('Error guardando la reserva.')
     }
@@ -430,8 +448,6 @@ export default function Reservas() {
     }, { replace: true })
   }, [searchParams, setSearchParams])
 
-  const debouncedSearch = useDebounced(searchTerm)
-
   // Filtros de llegada/estado/tipo persistidos en la URL (Tarea 4, oct
   // 2026): searchParams es la única fuente de verdad (no un useState en
   // paralelo) — así recargar la página y el botón atrás del navegador
@@ -488,17 +504,16 @@ export default function Reservas() {
     return reservas.filter((r) => r.tipo_alquiler === 'temporada' && r.unidad_id === filtroUnidadId)
   }, [reservas, filtroUnidadId])
 
+  // Búsqueda por texto (Tarea de testing, oct 2026): se sacó el buscador
+  // propio de esta pantalla — el global del header ya busca cliente/unidad
+  // sobre `reservas` completo (ver TopBar.jsx, `reservaMatches`/
+  // `unidadMatches`) y navega acá con `?id=<reserva>` o abre el Plano con la
+  // unidad resaltada. Esta grilla ahora solo filtra por estado/tipo/unidad/
+  // llegada, nunca por texto libre.
   const filteredReservas = useMemo(() => {
-    const term = debouncedSearch.trim().toLowerCase()
-    const unidadQuery = parseUnidadQuery(term)
     const base = filtroUnidadId ? [...reservasOperativas, ...temporadasDeUnidadFiltrada] : reservasOperativas
     return base
       .filter((r) => {
-        const matchesSearch =
-          !term ||
-          r.clientes?.nombre?.toLowerCase().includes(term) ||
-          String(r.unidades?.numero ?? '').includes(term) ||
-          (unidadQuery && r.unidades?.numero === unidadQuery.numero && (!unidadQuery.tipo || r.unidades?.tipo === unidadQuery.tipo))
         const matchesEstado = filtroEstado === 'todos' || r.estado_pago === filtroEstado
         const matchesTipo = filtroTipo === 'todos' || r.tipo_alquiler === filtroTipo
         const matchesUnidad = !filtroUnidadId || r.unidad_id === filtroUnidadId
@@ -507,11 +522,11 @@ export default function Reservas() {
         // inline más abajo — ver `rangoFechaInvalido`.
         const matchesDesde = rangoFechaInvalido || !desde || (llegada && llegada >= desde)
         const matchesHasta = rangoFechaInvalido || !hasta || (llegada && llegada <= hasta)
-        return matchesSearch && matchesEstado && matchesTipo && matchesUnidad && matchesDesde && matchesHasta
+        return matchesEstado && matchesTipo && matchesUnidad && matchesDesde && matchesHasta
       })
       // Llegadas más recientes primero.
       .sort((a, b) => (fechaLlegada(b) || '').localeCompare(fechaLlegada(a) || ''))
-  }, [reservasOperativas, temporadasDeUnidadFiltrada, debouncedSearch, filtroEstado, filtroTipo, filtroUnidadId, desde, hasta, rangoFechaInvalido, fechaLlegada])
+  }, [reservasOperativas, temporadasDeUnidadFiltrada, filtroEstado, filtroTipo, filtroUnidadId, desde, hasta, rangoFechaInvalido, fechaLlegada])
 
   const filtrosActivos = filtroEstado !== 'todos' || filtroTipo !== 'todos' || desde || hasta
 
@@ -533,7 +548,10 @@ export default function Reservas() {
   // Unidad del filtro deep-link, solo para mostrar el chip con su nombre.
   const unidadFiltrada = filtroUnidadId ? unidades.find((u) => u.id === filtroUnidadId) : null
 
-  const headers = ['Llegada', 'Cliente', 'Unidad', 'Monto Total', 'Saldo', 'Estado', 'Origen', 'Acciones']
+  // Columna "Acciones" sacada (testing oct 2026): esos mismos botones ya
+  // viven en la ficha lateral/bottom sheet que abre el click de la fila
+  // (ReservaDetalleContent) — tenerlos repetidos en la grilla era redundante.
+  const headers = ['Llegada', 'Cliente', 'Unidad', 'Monto Total', 'Saldo', 'Estado', 'Origen']
 
   // Unidades con una reserva de TEMPORADA activa: quedan tomadas para toda la
   // temporada sin importar qué fecha se elija, así que ni siquiera aparecen
@@ -629,15 +647,13 @@ export default function Reservas() {
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
       <div className="flex flex-wrap gap-4 items-center">
-        <SearchInput
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Buscar por cliente o unidad (ej. carpa 19)..."
-          className="flex-1 min-w-[160px]"
-          inputClassName="focus:border-gold/50 py-3"
-        />
+        {/* Buscador propio sacado (testing oct 2026): el global del header ya
+            busca cliente/unidad sobre todas las reservas y navega acá con
+            ?id=<reserva> — un solo buscador en toda la app, ver CLAUDE.md
+            "Navegación y deep-linking". El espacio libre lo usan los
+            filtros de fecha, que ahora pueden crecer un poco más. */}
         <div className="flex items-center gap-1">
-          <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-40" />
+          <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-44" />
           {desde && (
             <button type="button" onClick={() => setDesde('')} className="p-2 text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada desde'">
               <X size={14} />
@@ -645,7 +661,7 @@ export default function Reservas() {
           )}
         </div>
         <div className="flex items-center gap-1">
-          <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-40" />
+          <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-44" />
           {hasta && (
             <button type="button" onClick={() => setHasta('')} className="p-2 text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada hasta'">
               <X size={14} />
@@ -701,7 +717,7 @@ export default function Reservas() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="bg-gold hover:bg-gold-hover text-black px-6 py-3 min-h-[44px] rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0"
+          className="bg-gold hover:bg-gold-hover text-black px-6 py-3 min-h-[44px] rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0 md:ml-auto"
         >
           <Plus size={18} /> Nueva Reserva
         </button>
@@ -801,7 +817,6 @@ export default function Reservas() {
                     {res.origen === 'web' ? 'Web' : 'Manual'}
                   </span>
                 </td>
-                <td className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-prius-muted">Ver cliente</td>
               </tr>
             )
           }
@@ -834,41 +849,6 @@ export default function Reservas() {
                   {res.origen === 'web' ? 'Web' : 'Manual'}
                 </span>
               </td>
-              <td className="px-6 py-5">
-                <div className="flex gap-2">
-                  {estadoBadgeStatus(res) === 'preconfirmada' && (
-                    <button
-                      onClick={() => navigate(linkToRecepcion(res.codigo))}
-                      className="p-2 hover:bg-prius-subtle rounded-lg text-sky-400 transition-all"
-                      title="Hacer check-in"
-                    >
-                      <QrCode size={16} />
-                    </button>
-                  )}
-                  {!res.bonificada && (
-                    <button
-                      onClick={() => setPagoReserva(res)}
-                      disabled={Number(res.saldo) <= 0}
-                      className="p-2 hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-prius-success transition-all"
-                      title={Number(res.saldo) > 0 ? 'Registrar pago' : 'Sin saldo pendiente'}
-                    >
-                      <Wallet size={16} />
-                    </button>
-                  )}
-                  <button onClick={() => navigate(linkToComprobante(res.id))} className="p-2 hover:bg-prius-subtle rounded-lg text-black transition-all" title="Emitir comprobante">
-                    <Receipt size={16} />
-                  </button>
-                  <button onClick={() => handleOpenEdit(res)} className="p-2 hover:bg-prius-subtle rounded-lg text-gold transition-all">
-                    <Edit2 size={16} />
-                  </button>
-                  <button onClick={() => handleCancelarClick(res)} className="p-2 hover:bg-orange-500/10 rounded-lg text-orange-400 transition-all" title="Cancelar reserva">
-                    <XCircle size={16} />
-                  </button>
-                  <button onClick={() => handleEliminarClick(res)} className="p-2 hover:bg-red-500/10 rounded-lg text-prius-error transition-all" title="Eliminar definitivamente">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </td>
             </tr>
           )
         }}
@@ -886,6 +866,7 @@ export default function Reservas() {
                 onEditar={handleOpenEdit}
                 onCancelar={handleCancelarClick}
                 onEliminar={handleEliminarClick}
+                onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
               />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
@@ -910,6 +891,7 @@ export default function Reservas() {
               onEditar={handleOpenEdit}
               onCancelar={handleCancelarClick}
               onEliminar={handleEliminarClick}
+              onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
               showCloseButton={false}
             />
           )}
@@ -945,6 +927,7 @@ export default function Reservas() {
               onEditar={handleOpenEdit}
               onCancelar={handleCancelarClick}
               onEliminar={handleEliminarClick}
+              onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
               showCloseButton={false}
             />
           </div>
@@ -1229,6 +1212,28 @@ export default function Reservas() {
               </div>
             </div>
 
+            {/* Alta all-in-one (testing oct 2026, item 8): solo en reserva
+                nueva, nunca al editar (ahí ya existe "Registrar pago" desde
+                la ficha). Reutiliza RegistrarPago.jsx — ver handleSubmit. */}
+            {!editingReserva && !bonificada && (
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={cargarPagoInicial}
+                    onChange={(e) => setCargarPagoInicial(e.target.checked)}
+                    className="accent-gold w-4 h-4 cursor-pointer"
+                  />
+                  <span className="text-xs font-bold text-black uppercase tracking-widest">Cargar un pago ahora (seña o total)</span>
+                </label>
+                {cargarPagoInicial && (
+                  <p ref={revealPagoInicialRef} className="animate-premium-fade mt-2 text-[11px] text-prius-slate">
+                    Al guardar, se abre el formulario de pago con esta reserva ya seleccionada — mismas validaciones y comprobante obligatorio que "Registrar pago" desde la ficha del cliente.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Más opciones: notas + historial, cerrado por defecto — uso
                 poco frecuente, no debería ocupar espacio arriba del fold. */}
             <div className="border border-hairline rounded-xl overflow-hidden">
@@ -1272,6 +1277,16 @@ export default function Reservas() {
         reservasOptions={pagoReserva ? [pagoReserva] : []}
         initialReservaId={pagoReserva?.id || ''}
         allowSinReserva={false}
+      />
+
+      {/* Item 7 (testing oct 2026): click en una instancia de pago del panel
+          de detalle de reserva abre el mismo DetallePago que ya usa
+          Clientes.jsx (comprobante, monto, fecha, método, cliente). */}
+      <DetallePago
+        isOpen={!!pagoDetalle}
+        onClose={() => setPagoDetalle(null)}
+        pago={pagoDetalle?.pago}
+        reserva={pagoDetalle?.reserva}
       />
 
       <ConfirmDeleteModal

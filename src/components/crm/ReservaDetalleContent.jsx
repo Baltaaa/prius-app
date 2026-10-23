@@ -16,7 +16,7 @@ const TIPO_LABEL = { periodo: 'Período', dia: 'Día', temporada: 'Temporada' }
 // cambia cómo la envuelve). Mismos handlers que ya usaba la fila de la
 // tabla/tarjeta — nada nuevo, solo reorganizado en cards tipo mock.
 export default function ReservaDetalleContent({
-  reserva, fechaLlegada, onClose, onRegistrarPago, onEditar, onCancelar, onEliminar, showCloseButton = true,
+  reserva, fechaLlegada, onClose, onRegistrarPago, onEditar, onCancelar, onEliminar, onCellClick, showCloseButton = true,
 }) {
   const navigate = useNavigate()
   const { pagos } = usePagos(reserva?.id)
@@ -115,14 +115,25 @@ export default function ReservaDetalleContent({
           {cuotas.length > 0 && (
             <div className="pt-2 border-t border-hairline space-y-1.5">
               {cuotas.map((p) => (
-                <div key={p.id} className="flex items-center justify-between text-body-sm">
-                  <span className={`text-prius-slate ${p.estado === 'anulado' ? 'line-through' : ''}`}>
-                    Cuota {p.nro_cuota} {p.comprobantes?.length > 0 ? `· ${p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')}` : ''}
+                <button
+                  key={p.id}
+                  type="button"
+                  data-deeplink-id={`pago-${p.id}`}
+                  onClick={() => onCellClick?.(reserva, p)}
+                  className="w-full flex items-center justify-between gap-2 text-left hover:bg-hairline/50 rounded-lg -mx-1 px-1 py-0.5 transition-colors"
+                >
+                  {/* Jerarquía (testing oct 2026, item 7): comprobante como
+                      dato principal, monto como secundario — igual criterio
+                      que PagosGrid.jsx (ficha de cliente). */}
+                  <span className={`min-w-0 truncate font-semibold ${p.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-black'}`}>
+                    {p.comprobantes?.length > 0
+                      ? p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
+                      : 'Sin comprobante'}
                   </span>
-                  <span className={`font-medium ${p.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-black'}`}>
+                  <span className={`shrink-0 text-body-sm ${p.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-prius-slate'}`}>
                     {pagoSinVerificar(p) ? 'Sin verificar' : formatPesosVisible(p.monto)}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           )}

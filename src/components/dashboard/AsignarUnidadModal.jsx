@@ -5,18 +5,26 @@ import Modal from '../crm/Modal'
 import ClienteSelector from '../crm/ClienteSelector'
 import MoneyInput from '../inputs/MoneyInput'
 import { unidadEmoji } from '../../lib/format'
+import { useRevealOnCheck } from '../../hooks/useRevealOnCheck'
 
 // Asignar una unidad libre a un cliente de temporada, SIN salir del Plano —
 // mismo ClienteSelector (existente o nuevo) que usa Reservas.jsx (ítem 5,
 // oct 2026). Antes esto navegaba a Clientes.jsx, que solo permitía crear un
 // cliente nuevo, nunca elegir uno ya existente.
-export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaActiva }) {
+//
+// `onCreated(reserva)` (testing oct 2026, item 8): si el admin tildó "Cargar
+// un pago ahora", el padre (Dashboard.jsx) encadena RegistrarPago.jsx con la
+// reserva recién creada — mismo patrón que Reservas.jsx, sin duplicar la
+// lógica de cobro acá.
+export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaActiva, onCreated }) {
   const { createReserva } = useData()
   const { alert } = useDialog()
   const [clienteId, setClienteId] = useState('')
   const [valorTotal, setValorTotal] = useState(0)
   const [bonificada, setBonificada] = useState(false)
   const [notas, setNotas] = useState('')
+  const [cargarPagoInicial, setCargarPagoInicial] = useState(false)
+  const revealRef = useRevealOnCheck(cargarPagoInicial)
   const [saving, setSaving] = useState(false)
 
   const handleSubmit = async (e) => {
@@ -24,7 +32,7 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
     if (!clienteId || !unit?.dbId) return
     setSaving(true)
     try {
-      await createReserva({
+      const nueva = await createReserva({
         cliente_id: clienteId,
         unidad_id: unit.dbId,
         tipo_alquiler: 'temporada',
@@ -35,6 +43,8 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
         notas,
       })
       onClose()
+      if (cargarPagoInicial && !bonificada) onCreated?.(nueva)
+      setCargarPagoInicial(false)
     } catch (err) {
       await alert(err.message || 'No se pudo asignar la unidad.')
     } finally {
@@ -69,6 +79,24 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
           <input type="checkbox" checked={bonificada} onChange={(e) => setBonificada(e.target.checked)} className="accent-cyan-400 w-4 h-4" />
           Unidad bonificada
         </label>
+        {!bonificada && (
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={cargarPagoInicial}
+                onChange={(e) => setCargarPagoInicial(e.target.checked)}
+                className="accent-gold w-4 h-4 cursor-pointer"
+              />
+              <span className="text-xs font-bold text-black uppercase tracking-widest">Cargar un pago ahora (seña o total)</span>
+            </label>
+            {cargarPagoInicial && (
+              <p ref={revealRef} className="animate-premium-fade mt-2 text-[11px] text-prius-slate">
+                Al asignar, se abre el formulario de pago con esta reserva ya seleccionada.
+              </p>
+            )}
+          </div>
+        )}
         <button
           type="submit"
           disabled={!clienteId || saving}

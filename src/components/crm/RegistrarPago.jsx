@@ -147,6 +147,10 @@ export default function RegistrarPago({
   // abierta, nunca entra a ningún resumen de caja (ver lib/pagos.js).
   const fechaPago = fechaComprobante || null
   const esHistorico = esPagoHistorico(fechaPago)
+  // Item 11 (testing oct 2026): el pago no afecta la caja DE HOY tanto si es
+  // histórico (pre-corte) como si tiene una fecha de otro día post-corte —
+  // en los dos casos impacta la caja de esa fecha, no la de hoy.
+  const noAfectaCajaHoy = esHistorico || (fechaPago && fechaPago !== new Date().toISOString().split('T')[0])
 
   // Comprobante obligatorio (Tarea 4.2) salvo que se eligió "mismo
   // comprobante que otro pago" — ahí el bloque de datos ya no aplica.
@@ -195,7 +199,7 @@ export default function RegistrarPago({
         const pago = await editarPagoCompleto(editingPago.id, {
           monto, medio, tipoPago: tipoPagoFinal, fecha: fechaComprobante, comprobante: construirComprobantePayload(),
         })
-        setExito({ monto, historico: esHistorico, editado: true })
+        setExito({ monto, noAfectaCajaHoy, editado: true })
         onSuccess?.(pago)
       } catch (err) {
         await alert(err.message || 'No se pudo guardar el pago.')
@@ -215,7 +219,7 @@ export default function RegistrarPago({
         reservaId: reservaId || null, referencia, comprobante: construirComprobantePayload(),
         permitirExcedente, fecha: fechaPago,
       })
-      setExito({ monto, historico: esHistorico })
+      setExito({ monto, noAfectaCajaHoy })
       onSuccess?.(pago)
     } catch (err) {
       if (err.code === ERROR_EXCEDE_SALDO) {
@@ -246,11 +250,15 @@ export default function RegistrarPago({
           </div>
           <div>
             <p className="text-lg font-bold text-black">{formatPesos(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
-            <p className="text-xs text-prius-slate uppercase tracking-widest mt-1">
-              {exito.historico
-                ? 'El cobro ya está reflejado en la reserva. Pago histórico: no impacta en la caja diaria.'
-                : 'El cobro ya está reflejado en la reserva y en la caja de hoy.'}
-            </p>
+            {/* Item 11 (testing oct 2026): se sacó el aviso para el caso
+                normal (el pago SÍ afecta la caja de hoy — es lo esperable,
+                no hace falta avisarlo). Solo queda el aviso cuando NO la
+                afecta (histórico, o con fecha de otro día). */}
+            {exito.noAfectaCajaHoy && (
+              <p className="text-xs text-prius-slate uppercase tracking-widest mt-1">
+                El cobro ya está reflejado en la reserva. No impacta en la caja de hoy — queda imputado a la fecha del pago.
+              </p>
+            )}
           </div>
           <div className="flex gap-3 pt-2">
             <button
