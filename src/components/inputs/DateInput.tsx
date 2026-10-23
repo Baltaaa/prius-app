@@ -69,7 +69,13 @@ const COLLISION_PADDING = 16
 
 export default function DateInput({
   label, hint, error, value, onChange, onBlur, min, max, disabledRanges, required, disabled,
-  placeholder = 'dd/mm/aaaa', className = '', id, calendarOnly = false,
+  // Item 18 (testing oct 2026): todos los date pickers pasan a ser de solo
+  // selección — el default de `calendarOnly` cambia de false a true (nadie
+  // pasaba `calendarOnly={false}` explícito, así que esto cubre todos los
+  // usos existentes sin tocar cada call site). El modo tipeable queda
+  // disponible solo si algún caller futuro pide `calendarOnly={false}` a
+  // propósito.
+  placeholder = 'dd/mm/aaaa', className = '', id, calendarOnly = true,
 }: DateInputProps) {
   const [texto, setTexto] = useState(value ? formatFecha(value) : '')
   const [abierto, setAbierto] = useState(false)

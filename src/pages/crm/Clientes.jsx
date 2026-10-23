@@ -189,6 +189,7 @@ export default function Clientes() {
   // Form states — cliente
   const [nombre, setNombre] = useState('')
   const [telefono, setTelefono] = useState(null)
+  const [telefonoTocado, setTelefonoTocado] = useState(false)
   const [dni, setDni] = useState('')
   const [cuit, setCuit] = useState('')
   const [condicionIva, setCondicionIva] = useState('consumidor_final')
@@ -223,6 +224,7 @@ export default function Clientes() {
     setEditingCliente(null)
     setNombre('')
     setTelefono(null)
+    setTelefonoTocado(false)
     setDni('')
     setCuit('')
     setCondicionIva('consumidor_final')
@@ -238,6 +240,7 @@ export default function Clientes() {
     setEditingCliente(cliente)
     setNombre(cliente.nombre)
     setTelefono(cliente.telefono || null)
+    setTelefonoTocado(false)
     setDni(cliente.dni || '')
     setCuit(cliente.cuit || '')
     setCondicionIva(cliente.condicion_iva || 'consumidor_final')
@@ -248,7 +251,7 @@ export default function Clientes() {
   }
 
   const requiereCuit = requiereCuitClienteForm(condicionIva)
-  const clienteFormErrors = validarClienteForm({ nombre, telefono, condicionIva, cuit, mail }, razonSocial)
+  const clienteFormErrors = validarClienteForm({ nombre, telefono, condicionIva, cuit, dni, mail }, razonSocial)
   const cuitFormularioValido = !clienteFormErrors.cuit
   const razonSocialValida = !clienteFormErrors.razonSocial
 
@@ -1008,8 +1011,15 @@ export default function Clientes() {
               placeholder="Ej. JUAN PÉREZ"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <PhoneInput label="Teléfono" required value={telefono} onChange={setTelefono} />
-              <DniInput label="DNI (opcional)" value={dni} onChange={setDni} />
+              <PhoneInput
+                label="Teléfono" required value={telefono} onChange={setTelefono}
+                onBlur={() => setTelefonoTocado(true)}
+                error={telefonoTocado && clienteFormErrors.telefono ? 'Ingresá un teléfono válido' : undefined}
+              />
+              <DniInput
+                label="DNI (opcional)" value={dni} onChange={setDni}
+                error={dni && clienteFormErrors.dni ? clienteFormErrors.dni : undefined}
+              />
             </div>
             <TextInput
               label="Email" type="email" value={mail} onChange={(v) => setMail(v.toLowerCase())}

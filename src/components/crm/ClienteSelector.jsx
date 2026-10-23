@@ -35,7 +35,7 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
     return lista.slice(0, 8)
   }, [clientes, inputValue])
 
-  const errors = validarClienteForm({ nombre, telefono, condicionIva: 'consumidor_final', cuit: '', mail })
+  const errors = validarClienteForm({ nombre, telefono, condicionIva: 'consumidor_final', cuit: '', dni, mail })
   if (cuit && cuit.length === 11) {
     // CuitInput ya valida el dígito verificador visualmente — acá solo se
     // exige longitud para no duplicar esa lógica.
@@ -95,7 +95,7 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
         />
         <div className="grid grid-cols-2 gap-3">
           <PhoneInput label="Teléfono" required value={telefono} onChange={setTelefono} error={intentado ? errors.telefono : undefined} />
-          <DniInput label="DNI (opcional)" value={dni} onChange={setDni} />
+          <DniInput label="DNI (opcional)" value={dni} onChange={setDni} error={intentado ? errors.dni : undefined} />
         </div>
         <CuitInput label="CUIT (opcional)" value={cuit} onChange={setCuit} error={intentado ? errors.cuit : undefined} />
         <TextInput

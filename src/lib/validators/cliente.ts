@@ -1,4 +1,4 @@
-import { cuitValido, emailValido } from '../parse'
+import { cuitValido, emailValido, dniValido } from '../parse'
 
 // Única fuente de verdad de validación del alta/edición de cliente — usada
 // tanto en Clientes.jsx como en el alta inline de Reservas.jsx (oct 2026,
@@ -9,6 +9,7 @@ export interface ClienteFormValues {
   telefono: string | null
   condicionIva: string
   cuit: string
+  dni?: string
   mail?: string
 }
 
@@ -16,6 +17,7 @@ export interface ClienteFormErrors {
   nombre?: string
   telefono?: string
   cuit?: string
+  dni?: string
   razonSocial?: string
   mail?: string
 }
@@ -36,6 +38,9 @@ export function validarClienteForm(values: ClienteFormValues, razonSocial = ''):
     if (rs.length < 2 || rs.length > 120) errors.razonSocial = 'Entre 2 y 120 caracteres'
   }
   if (values.mail && !emailValido(values.mail)) errors.mail = 'Email inválido'
+  // DNI opcional: solo se valida formato si tiene contenido (item 18, testing
+  // oct 2026) — un DNI vacío es válido, uno con menos/más de 7-8 dígitos no.
+  if (values.dni && !dniValido(values.dni)) errors.dni = 'DNI inválido (7 u 8 dígitos)'
   return errors
 }
 
