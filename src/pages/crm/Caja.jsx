@@ -60,7 +60,7 @@ export default function Caja() {
   const readyCaja = useInitialLoad(loading)
   const puedeReabrir = usePermiso('reabrir_caja')
   const { pagos } = useData()
-  const { alert } = useDialog()
+  const { alert, toast } = useDialog()
 
   // Fecha y tab en la URL (Tarea 9, oct 2026) — antes recargar la página a
   // mitad de revisar un día pasado o la pestaña "Facturas" volvía todo a
@@ -149,8 +149,9 @@ export default function Caja() {
     setAbriendo(true)
     try {
       await iniciarCaja()
+      toast('Caja abierta con éxito', { tone: 'success' })
     } catch (err) {
-      await alert(err.message || 'No se pudo abrir la caja.')
+      toast(err.message || 'No se pudo abrir la caja.', { tone: 'error' })
     } finally {
       setAbriendo(false)
     }
@@ -159,20 +160,26 @@ export default function Caja() {
   const handleCerrarCaja = async ({ efectivoContado, observaciones, datosZ }) => {
     try {
       await cerrarCaja(cajaSeleccionada.id, efectivoContado, datosZ, observaciones)
+      toast('Caja cerrada con éxito', { tone: 'success' })
     } catch (err) {
-      await alert(err.message || 'No se pudo cerrar la caja.')
+      toast(err.message || 'No se pudo cerrar la caja.', { tone: 'error' })
       throw err
     }
   }
 
+  const [reabriendoSaving, setReabriendoSaving] = useState(false)
   const handleReabrir = async () => {
     if (!motivoReapertura.trim()) return
+    setReabriendoSaving(true)
     try {
       await reabrirCaja(cajaSeleccionada.id, motivoReapertura.trim())
       setReabriendo(false)
       setMotivoReapertura('')
+      toast('Caja reabierta con éxito', { tone: 'success' })
     } catch (err) {
-      await alert(err.message || 'No se pudo reabrir la caja.')
+      toast(err.message || 'No se pudo reabrir la caja.', { tone: 'error' })
+    } finally {
+      setReabriendoSaving(false)
     }
   }
 

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { AlertTriangle, Info } from 'lucide-react'
+import { AlertTriangle, Info, CheckCircle2 } from 'lucide-react'
 import { useOverlay, useOverlayTop } from './OverlayProvider'
 
 // Reemplazo propio de window.confirm/window.alert: los diálogos nativos
@@ -21,10 +21,16 @@ export function DialogProvider({ children }) {
   // alert() de arriba sería demasiado intrusivo. Se apila abajo a la
   // derecha y se auto-descarta a los 4s, sin necesidad de que el usuario
   // haga nada.
-  const toast = useCallback((message) => {
+  // `tone` (testing oct 2026, item 13): 'success' | 'error' | 'info'
+  // (default) — mismo toast de siempre, ahora con color/ícono distintivo
+  // para que un guardado exitoso y un error se distingan de un vistazo sin
+  // tener que leer el texto. Sigue siendo el único sistema de toast de la
+  // app (no se suma sonner/shadcn ni un segundo mecanismo en paralelo).
+  const toast = useCallback((message, opts = {}) => {
     const id = ++toastIdRef.current
-    setToasts((prev) => [...prev, { id, message }])
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000)
+    const tone = opts.tone || 'info'
+    setToasts((prev) => [...prev, { id, message, tone }])
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), tone === 'error' ? 6000 : 4000)
   }, [])
 
   const confirm = useCallback((message, opts = {}) => {
@@ -71,9 +77,17 @@ export function DialogProvider({ children }) {
           {toasts.map((t) => (
             <div
               key={t.id}
-              className="card-light rounded-xl border border-hairline shadow-2xl px-4 py-3 text-sm text-prius-slate animate-premium-fade"
+              className={`card-light rounded-xl border shadow-2xl px-4 py-3 text-sm flex items-start gap-2.5 animate-premium-fade ${
+                t.tone === 'success'
+                  ? 'border-green-500/30 text-prius-success'
+                  : t.tone === 'error'
+                    ? 'border-red-500/30 text-prius-error'
+                    : 'border-hairline text-prius-slate'
+              }`}
             >
-              {t.message}
+              {t.tone === 'success' && <CheckCircle2 size={16} className="shrink-0 mt-0.5" />}
+              {t.tone === 'error' && <AlertTriangle size={16} className="shrink-0 mt-0.5" />}
+              <span className="text-black">{t.message}</span>
             </div>
           ))}
         </div>,

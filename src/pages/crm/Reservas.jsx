@@ -8,6 +8,7 @@ import DateInput from '../../components/inputs/DateInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import { coSocios, estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
+import LoadingButton from '../../components/ui/LoadingButton'
 import { usePermiso } from '../../context/AuthProvider'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
@@ -105,7 +106,7 @@ export default function Reservas() {
   const readyReservas = useInitialLoad(resLoading || cliLoading)
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { confirm, alert } = useDialog()
+  const { confirm, alert, toast } = useDialog()
   const puedeBonificar = usePermiso('bonificar')
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -257,6 +258,8 @@ export default function Reservas() {
     }
   }
 
+  const [savingReserva, setSavingReserva] = useState(false)
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!clienteId) {
@@ -312,13 +315,16 @@ export default function Reservas() {
       // suma de `pagos`) — ver RegistrarPago / usePagos.
       notas,
     }
+    setSavingReserva(true)
     try {
       if (editingReserva) {
         await updateReserva(editingReserva.id, payload)
         setIsModalOpen(false)
+        toast('Reserva actualizada con éxito', { tone: 'success' })
       } else {
         const nueva = await createReserva(payload)
         setIsModalOpen(false)
+        toast('Reserva creada con éxito', { tone: 'success' })
         // Item 8 (testing oct 2026): "cargar pago inicial" encadena a
         // RegistrarPago ya abierto con la reserva recién creada (mismo
         // componente/validación que el alta suelta) — si el pago falla o se
@@ -327,7 +333,9 @@ export default function Reservas() {
         if (cargarPagoInicial) setPagoReserva(nueva)
       }
     } catch (err) {
-      await alert('Error guardando la reserva.')
+      toast(err.message || 'Error guardando la reserva.', { tone: 'error' })
+    } finally {
+      setSavingReserva(false)
     }
   }
 
@@ -972,13 +980,15 @@ export default function Reservas() {
                   Siguiente
                 </button>
               ) : (
-                <button
+                <LoadingButton
                   type="submit"
                   form="form-reserva"
-                  className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+                  loading={savingReserva}
+                  loadingText="Guardando..."
+                  className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
                 >
                   {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
-                </button>
+                </LoadingButton>
               )}
             </div>
           </div>

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useClientes } from '../../hooks/useClientes'
 import { useReservas } from '../../hooks/useReservas'
+import { useRevealOnCheck } from '../../hooks/useRevealOnCheck'
 import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
@@ -17,6 +18,7 @@ import {
   esGrupo, saldoGrupo, estadoPagoGrupo, pagoSinVerificar,
 } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
+import LoadingButton from '../../components/ui/LoadingButton'
 import { usePermiso } from '../../context/AuthProvider'
 import Modal from '../../components/crm/Modal'
 import BottomSheet from '../../components/ui-prius/BottomSheet'
@@ -130,7 +132,7 @@ export default function Clientes() {
   // actual. Detrás de `ajustes_precio` (solo superadmin, oct 2026).
   const puedeAjustarPrecio = usePermiso('ajustes_precio')
   const [searchParams, setSearchParams] = useSearchParams()
-  const { alert, confirm } = useDialog()
+  const { alert, confirm, toast } = useDialog()
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('todos')
   const [showFiltros, setShowFiltros] = useState(false)
@@ -202,6 +204,7 @@ export default function Clientes() {
   // opcional al crear un cliente nuevo (el botón "Agregar Temporada" para un
   // cliente ya existente se sacó, oct 2026).
   const [agregarTemporadaNueva, setAgregarTemporadaNueva] = useState(false)
+  const revealTemporadaNuevaRef = useRevealOnCheck(agregarTemporadaNueva)
   const [tUnidadId, setTUnidadId] = useState('')
   const [tValorTotal, setTValorTotal] = useState(0)
   const [tNotas, setTNotas] = useState('')
@@ -249,6 +252,8 @@ export default function Clientes() {
   const cuitFormularioValido = !clienteFormErrors.cuit
   const razonSocialValida = !clienteFormErrors.razonSocial
 
+  const [savingCliente, setSavingCliente] = useState(false)
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (Object.keys(clienteFormErrors).length > 0) return
@@ -256,6 +261,7 @@ export default function Clientes() {
       nombre: nombre.toUpperCase(), telefono, dni: dni || null, cuit: cuit || null,
       condicion_iva: condicionIva, razon_social: razonSocial || null, mail, notas,
     }
+    setSavingCliente(true)
     try {
       if (editingCliente) {
         await updateCliente(editingCliente.id, payload)
@@ -277,8 +283,11 @@ export default function Clientes() {
         }
       }
       setIsModalOpen(false)
+      toast(editingCliente ? 'Cliente actualizado con éxito' : 'Cliente creado con éxito', { tone: 'success' })
     } catch (err) {
-      await alert('Error guardando cliente.')
+      toast(err.message || 'Error guardando cliente.', { tone: 'error' })
+    } finally {
+      setSavingCliente(false)
     }
   }
 
@@ -975,13 +984,15 @@ export default function Clientes() {
             >
               Cancelar
             </button>
-            <button
+            <LoadingButton
               type="submit"
               form="form-cliente"
-              className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+              loading={savingCliente}
+              loadingText="Guardando..."
+              className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
             >
               {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
-            </button>
+            </LoadingButton>
           </div>
         }
       >
@@ -1069,7 +1080,7 @@ export default function Clientes() {
               </label>
 
               {agregarTemporadaNueva && (
-                <div className="space-y-4 pl-1">
+                <div ref={revealTemporadaNuevaRef} className="animate-premium-fade space-y-4 pl-1">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</label>

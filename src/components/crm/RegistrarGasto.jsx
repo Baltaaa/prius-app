@@ -16,7 +16,7 @@ const CATEGORIA_OPTIONS = Object.entries(CATEGORIA_GASTO_LABEL).map(([value, lab
 // carga desde Caja. FAB en mobile / botón primario en desktop, ver Caja.jsx.
 export default function RegistrarGasto({ isOpen, onClose }) {
   const { registrarGasto } = useData()
-  const { alert } = useDialog()
+  const { toast } = useDialog()
 
   const [concepto, setConcepto] = useState('')
   const [categoria, setCategoria] = useState('otros')
@@ -42,8 +42,9 @@ export default function RegistrarGasto({ isOpen, onClose }) {
     try {
       await registrarGasto({ concepto: concepto.trim(), categoria, medioPago, monto, proveedor: proveedor || null, comprobanteProveedor: comprobanteProveedor || null })
       onClose()
+      toast('Gasto registrado con éxito', { tone: 'success' })
     } catch (err) {
-      await alert(err.message || 'No se pudo registrar el gasto.')
+      toast(err.message || 'No se pudo registrar el gasto.', { tone: 'error' })
     } finally {
       setSaving(false)
     }
