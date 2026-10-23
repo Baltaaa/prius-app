@@ -291,7 +291,7 @@ export default function TopBar() {
   }
 
   return (
-    <header className="no-print relative h-16 flex items-center justify-between gap-3 px-4 md:px-gutter-lg bg-white border-b border-hairline sticky top-0 z-20 shrink-0 font-ui">
+    <header className="no-print relative h-16 md:h-20 flex items-center justify-between gap-3 px-4 md:px-gutter-lg bg-white border-b border-hairline sticky top-0 z-20 shrink-0 font-ui">
       {/* Izquierda: desktop/tablet (≥768px, mock 01-home-desktop) = ubicación +
           chip Operativo + buscador inline. Mobile (<768px, mock
           01-home-mobile) = "Prius App" + chip + nombre de la sección actual
@@ -332,7 +332,12 @@ export default function TopBar() {
             siempre, solo el shell visual cambia (w-80, fondo prius-surface,
             h-9, rounded-xl del mock). En mobile pasa a un ícono que abre
             pantalla completa (ver bloque más abajo). */}
-        <div ref={searchOverlay.bind} className="hidden md:block relative w-max lg:w-full shrink-0">
+        {/* Item 17 (testing oct 2026): `w-max lg:w-full` dejaba el buscador
+            sin tope de ancho — en 1280-1440px (ej. 1397x834) se comía todo
+            el espacio disponible del header y tapaba la fecha de la
+            derecha (quedaba "…de 2026" cortada). Ancho fijo que crece por
+            breakpoint, nunca `w-full` sin techo. */}
+        <div ref={searchOverlay.bind} className="hidden md:block relative w-48 lg:w-64 xl:w-80 min-w-0 shrink">
         <SearchInput
           ref={searchInputRef}
           value={searchValue}
