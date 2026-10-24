@@ -11,6 +11,17 @@ export const MEDIO_PAGO_LABEL = {
   tarjeta_credito: 'Tarjeta de Crédito',
 }
 
+// Emoji por medio (item 4, oct 2026): el select de Registrar Pago los usa
+// para distinguir de un vistazo — débito y crédito comparten 💳, se
+// distinguen por el texto del label, como pide el diseño.
+export const MEDIO_PAGO_EMOJI = {
+  efectivo: '💵',
+  transferencia: '🏦',
+  mercado_pago: '📲',
+  tarjeta_debito: '💳',
+  tarjeta_credito: '💳',
+}
+
 // `cuotas_tarjeta` es la cantidad de cuotas en la que la tarjeta le cobra el
 // pago al cliente — distinto de `nro_cuota` (qué instancia de pago es esta
 // sobre el saldo total de la reserva). Solo tiene sentido con tarjeta_credito.

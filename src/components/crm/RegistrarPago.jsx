@@ -4,7 +4,7 @@ import { usePagos } from '../../hooks/usePagos'
 import { supabase } from '../../lib/supabase'
 import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
 import {
-  MEDIO_PAGO_LABEL, TIPO_PAGO_LABEL, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL,
+  MEDIO_PAGO_LABEL, MEDIO_PAGO_EMOJI, TIPO_PAGO_LABEL, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL,
   calcularTipoPagoAutomatico, construirConceptoAutomatico, comprobanteTipoDefault,
   ERROR_EXCEDE_SALDO, esPagoHistorico,
 } from '../../lib/pagos'
@@ -381,11 +381,13 @@ export default function RegistrarPago({
         {/* 4. Medio de pago + referencia */}
         <div className="space-y-2">
           <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de pago</label>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => (
-              <button key={value} type="button" onClick={() => setMedio(value)} className={chipClass(medio === value)}>{label}</button>
-            ))}
-          </div>
+          <BrandSelect
+            value={medio}
+            onChange={setMedio}
+            options={Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => ({
+              value, label: `${MEDIO_PAGO_EMOJI[value] || ''} ${label}`.trim(),
+            }))}
+          />
           {medio !== 'efectivo' && (
             <input
               type="text"
@@ -398,12 +400,16 @@ export default function RegistrarPago({
         </div>
 
         {/* 5. Comprobante — obligatorio desde oct 2026 (Tarea 4.2), siempre
-            visible, ya no hay "lo cargo después". */}
+            visible, ya no hay "lo cargo después". Rediseño (item 4, oct
+            2026): fondo blanco liso en vez del bg-black/20 original — un
+            panel flotante sobre contenido claro nunca necesitó ese
+            oscurecido, quedaba pesado visualmente contra el resto del modal
+            (ya blanco/bordes #E5E5E5 sutiles en todos lados). */}
         <div className="border border-hairline rounded-xl overflow-hidden">
           <div className="px-4 py-3 bg-prius-subtle text-xs font-bold uppercase tracking-widest text-prius-slate">
             Comprobante
           </div>
-          <div className="p-4 space-y-4 bg-black/20">
+          <div className="p-4 space-y-4 bg-white">
             {pagosConComprobante.length > 0 && (
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Mismo comprobante que otro pago</label>
@@ -438,18 +444,14 @@ export default function RegistrarPago({
                     ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <IntegerInput
-                    label="Punto de venta" value={puntoVenta} onChange={(v) => { setPuntoVenta(v); setDuplicado(null); setAnuladoPrevio(false) }}
-                    onBlur={verificarDuplicado} min={1} max={99999}
-                    placeholder="Ej: 1" error={comprobanteIncompleto && !puntoVenta ? 'Obligatorio' : undefined}
-                  />
-                  <IntegerInput
-                    label="Número" value={numero} onChange={(v) => { setNumero(v); setDuplicado(null); setAnuladoPrevio(false) }}
-                    onBlur={verificarDuplicado} min={1} max={99999999}
-                    placeholder="Ej: 727" error={comprobanteIncompleto && !numero ? 'Obligatorio' : undefined}
-                  />
-                </div>
+                {/* Punto de venta: siempre 1, automático — no se muestra ni
+                    se pregunta (item 4, oct 2026). Se sigue guardando en la
+                    base como siempre (puntoVenta queda fijo en 1 acá). */}
+                <IntegerInput
+                  label="Número" value={numero} onChange={(v) => { setNumero(v); setDuplicado(null); setAnuladoPrevio(false) }}
+                  onBlur={verificarDuplicado} min={1} max={99999999}
+                  placeholder="Ej: 727" error={comprobanteIncompleto && !numero ? 'Obligatorio' : undefined}
+                />
                 {verificandoDuplicado && <p className="text-[11px] text-prius-muted">Verificando...</p>}
                 {duplicado && (
                   <p className="text-[11px] text-prius-error">
@@ -471,7 +473,7 @@ export default function RegistrarPago({
                 />
                 {comprobanteIncompleto && (
                   <p className="text-[11px] text-prius-error">
-                    El comprobante es obligatorio: completá tipo, punto de venta, número y fecha.
+                    El comprobante es obligatorio: completá tipo, número y fecha.
                   </p>
                 )}
               </>
