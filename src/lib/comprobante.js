@@ -104,7 +104,10 @@ export function armarDatosComprobante({ reserva, pagos, perfil, tipo = 'estado_c
 export function validarComprobante(datos, tipo = 'estado_cuenta') {
   if (!datos) return 'Seleccioná una reserva para emitir el comprobante.'
   if (!datos.cliente.nombre) return 'El cliente no tiene nombre cargado.'
-  if (!datos.cliente.dni && !datos.cliente.cuit) return 'El cliente no tiene DNI ni CUIT cargado.'
+  // DNI/CUIT ya no es obligatorio para emitir (oct 2026): el documento no
+  // los imprime desde el item 15 anterior, así que exigirlos acá solo
+  // bloqueaba la emisión sin motivo — el dato queda disponible igual si
+  // está cargado, solo se saca el bloqueo.
   if (!datos.unidad.tipo || datos.unidad.numero == null) return 'La reserva no tiene unidad asignada.'
   if (datos.pendienteConfirmacion) return 'La reserva todavía no confirmó precio para esta temporada.'
   if (datos.montoTotalSinVerificar) return 'El monto total de esta reserva no está verificado todavía.'
