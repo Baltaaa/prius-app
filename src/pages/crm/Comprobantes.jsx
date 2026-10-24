@@ -7,7 +7,7 @@ import { useDialog } from '../../context/DialogProvider'
 import { useData } from '../../context/DataProvider'
 import { usePreferenciaUsuario } from '../../hooks/usePreferenciaUsuario'
 import { isFeatureEnabled } from '../../lib/features'
-import { formatFecha, formatPesos } from '../../lib/format'
+import { formatFecha, formatPesos, formatComprobante } from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { pagoSinVerificar, tieneAlgunPagoReal } from '../../lib/reservas'
 import { numeroComprobante, armarDatosComprobante, validarComprobante } from '../../lib/comprobante'
@@ -19,6 +19,17 @@ import LoadingButton from '../../components/ui/LoadingButton'
 import { Printer, FileText, Receipt, HelpCircle } from 'lucide-react'
 
 const UNIDAD_LABEL = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina', locker: 'Locker' }
+
+// Item 4 (fix urgente oct 2026): `p.comprobante` es la columna de texto
+// vieja de `pagos` (previa a la tabla relacional `comprobantes`, solo
+// poblada en pagos migrados) — para cualquier pago cargado con el sistema
+// actual el comprobante real vive en `p.comprobantes[]` (join de
+// fetchPagos), con tipo+número de verdad. Mismo criterio que lib/comprobante.js.
+function etiquetaComprobantePago(p) {
+  const vigentes = (p.comprobantes || []).filter((c) => c.estado !== 'anulado')
+  if (vigentes.length > 0) return vigentes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
+  return p.comprobante || null
+}
 
 export default function Comprobantes() {
   const { reservas, loading } = useReservas()
@@ -182,7 +193,11 @@ export default function Comprobantes() {
                     <div className="text-prius-slate min-w-0">
                       <span className="text-black font-bold">{formatFecha(p.fecha)}</span>
                       {' — '}{formatMedioPago(p)}
-                      {p.comprobante && <span> · Comp. {p.comprobante}</span>}
+                      {/* Item 4 (fix urgente oct 2026): p.comprobante es la
+                          columna de texto vieja (solo pagos migrados) —
+                          p.comprobantes[] (la relación real) es la fuente
+                          para cualquier pago cargado con el sistema actual. */}
+                      {etiquetaComprobantePago(p) && <span> · Comp. {etiquetaComprobantePago(p)}</span>}
                       {p.nro_cuota && <span> · Cuota {p.nro_cuota}</span>}
                     </div>
                     <div className="flex items-center gap-3 shrink-0">

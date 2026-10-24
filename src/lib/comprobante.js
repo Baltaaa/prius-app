@@ -1,4 +1,5 @@
 import { formatMedioPago } from './pagos'
+import { formatComprobante } from './format'
 import { montoInfo, saldoNumerico, pagoSinVerificar, tienePagoSinVerificar, esPendienteConfirmacion } from './reservas'
 
 // Cuántos de los pagos vigentes de esta reserva son "sin verificar" (monto
@@ -18,12 +19,29 @@ export function numeroComprobante(reserva) {
   return reserva?.numero_factura || `REC-${String(reserva?.id || '').slice(0, 8).toUpperCase()}`
 }
 
+// Fix urgente (oct 2026, item 4): `p.comprobante` es la columna de texto
+// VIEJA de `pagos` (previa a la tabla relacional `comprobantes`, solo
+// poblada en los ~94 pagos migrados del Excel) — para cualquier pago
+// cargado con el sistema actual (RegistrarPago/vincular comprobante) esa
+// columna siempre queda en null, así que el comprobante real (tipo +
+// número, en `p.comprobantes[]` vía el join de fetchPagos) nunca se
+// mostraba acá ni en el documento impreso. Mismo criterio que ya usan
+// PagosGrid/DetallePago/ReservaDetalleContent: formatComprobante() sobre
+// los comprobantes vigentes vinculados, con fallback a la columna vieja
+// solo para no perder la referencia de los pagos migrados que SÍ la tienen
+// y no tienen fila en `comprobantes`.
+function etiquetaComprobanteLegacyOReal(p) {
+  const vigentes = (p.comprobantes || []).filter((c) => c.estado !== 'anulado')
+  if (vigentes.length > 0) return vigentes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
+  return p.comprobante || null
+}
+
 function mapPago(p) {
   return {
     id: p.id,
     fecha: p.fecha,
     medioLabel: formatMedioPago(p),
-    comprobante: p.comprobante || null,
+    comprobante: etiquetaComprobanteLegacyOReal(p),
     nroCuota: p.nro_cuota || null,
     monto: p.monto,
     sinVerificar: pagoSinVerificar(p),
