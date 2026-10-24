@@ -251,6 +251,25 @@ export function DataProvider({ children }) {
     return data[0]
   }, [])
 
+  // Item 3 (oct 2026): alta de reserva + primer pago/comprobante en una
+  // sola transacción (fn_crear_reserva_con_pago) — si el pago falla, la
+  // reserva no queda creada. `pago` es opcional (null = "Cargar más
+  // tarde" o unidad bonificada, mismo comportamiento de siempre). El RPC
+  // devuelve la reserva cruda (sin los joins de RESERVA_SELECT) — se
+  // refetchea en vez de mergear a mano, mismo patrón que registrarPago.
+  const crearReservaConPago = useCallback(async ({ reserva, pago }) => {
+    const { data, error } = await supabase.rpc('fn_crear_reserva_con_pago', {
+      p_reserva: reserva, p_pago: pago || null,
+    })
+    if (error) throw error
+    await fetchReservas()
+    if (pago) {
+      await fetchPagos()
+      await fetchCaja()
+    }
+    return data
+  }, [fetchReservas, fetchPagos, fetchCaja])
+
   const updateReserva = useCallback(async (id, updates) => {
     const { clientes: _c, unidades: _u, ...clean } = updates
     const { data, error } = await supabase.from('reservas').update(clean).eq('id', id).select(RESERVA_SELECT)
@@ -565,7 +584,7 @@ export function DataProvider({ children }) {
   const value = useMemo(() => ({
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
     eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error, realtimeConectado,
-    createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
+    createReserva, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
     updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
@@ -575,7 +594,7 @@ export function DataProvider({ children }) {
   }), [
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
     eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error, realtimeConectado,
-    createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
+    createReserva, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
     updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,

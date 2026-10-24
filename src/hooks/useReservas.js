@@ -5,10 +5,10 @@ import { useData } from '../context/DataProvider'
 export function useReservas() {
   const {
     reservas, unidades, temporadas, temporadaActiva, loading, error,
-    createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas, refetchAll,
+    createReserva, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas, refetchAll,
   } = useData()
   return {
     reservas, unidades, temporadas, temporadaActiva, loading, error,
-    createReserva, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas, refetch: refetchAll,
+    createReserva, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas, refetch: refetchAll,
   }
 }

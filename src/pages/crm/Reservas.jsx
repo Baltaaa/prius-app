@@ -17,6 +17,8 @@ import { linkToCliente, linkToComprobante, linkToRecepcion } from '../../lib/dee
 import DataTable from '../../components/crm/DataTable'
 import Modal from '../../components/crm/Modal'
 import RegistrarPago from '../../components/crm/RegistrarPago'
+import PagoComprobanteCampos from '../../components/crm/PagoComprobanteCampos'
+import { usePagoComprobanteForm } from '../../hooks/usePagoComprobanteForm'
 import DetallePago from '../../components/crm/DetallePago'
 import MoneyInput from '../../components/inputs/MoneyInput'
 import ClienteSelector from '../../components/crm/ClienteSelector'
@@ -101,8 +103,8 @@ const resolverFechaLlegada = (r, temporadasPorId) => {
 }
 
 export default function Reservas() {
-  const { reservas, unidades, temporadas, temporadaActiva, loading: resLoading, createReserva, updateReserva, deleteReserva, cancelarReserva } = useReservas()
-  const { loading: cliLoading } = useClientes()
+  const { reservas, unidades, temporadas, temporadaActiva, loading: resLoading, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva } = useReservas()
+  const { clientes, loading: cliLoading } = useClientes()
   const readyReservas = useInitialLoad(resLoading || cliLoading)
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -163,14 +165,14 @@ export default function Reservas() {
   // esto igual en la base (costo_total=0, estado_pago='pagado'), así que acá
   // solo se refleja para no confundir al que carga el form.
   const [bonificada, setBonificada] = useState(false)
-  // Alta all-in-one (testing oct 2026, item 8): checkbox "Cargar un pago
-  // ahora" en el form de nueva reserva. No duplica la lógica de
-  // RegistrarPago.jsx — al crear la reserva con éxito, si está tildado, se
-  // encadena abriendo ESE mismo componente ya precargado con la reserva
-  // recién creada (misma validación, mismo comprobante obligatorio, mismo
-  // impacto en caja). Solo tiene sentido en alta nueva, nunca al editar.
-  const [cargarPagoInicial, setCargarPagoInicial] = useState(false)
-  const revealPagoInicialRef = useRevealOnCheck(cargarPagoInicial)
+  // Alta all-in-one (item 3, oct 2026): el primer pago (seña o total) con
+  // su comprobante se carga sí o sí en el mismo modal — ya no hay checkbox
+  // "cargar un pago ahora" ni un RegistrarPago encadenado después. Única
+  // excepción: "Cargar más tarde", que oculta la sección y crea la reserva
+  // sin pago (como siempre). Solo tiene sentido en alta nueva, nunca al
+  // editar (ahí ya existe "Registrar pago" desde la ficha).
+  const [cargarMasTarde, setCargarMasTarde] = useState(false)
+  const revealPagoInicialRef = useRevealOnCheck(!cargarMasTarde)
   // Wizard mobile (<768px, mock 03-reservas-mobile-nueva): mismos 3 campos
   // reales del form de siempre (Cliente / Unidad+Fechas / Monto+resumen),
   // solo se muestran de a uno con Siguiente/Atrás — desktop/tablet siguen
@@ -191,7 +193,7 @@ export default function Reservas() {
     setNotas('')
     setBloqueada(false)
     setBonificada(false)
-    setCargarPagoInicial(false)
+    setCargarMasTarde(false)
   }
 
   // Snapshot del form al abrir (Tarea 1, oct 2026) — para que el Modal
@@ -237,7 +239,7 @@ export default function Reservas() {
 
   const isFormDirty = () => snapshotForm({
     clienteId, unidadId, tipoAlquiler, fechaInicio, fechaFin, fecha, valorTotal, notas, bloqueada, bonificada,
-  }) !== formSnapshotRef.current
+  }) !== formSnapshotRef.current || Number(pagoForm.monto) > 0 || !!pagoForm.numero
 
   const handleToggleBloqueada = async () => {
     if (!editingReserva) return
@@ -315,6 +317,29 @@ export default function Reservas() {
       // suma de `pagos`) — ver RegistrarPago / usePagos.
       notas,
     }
+    // Item 3 (oct 2026): el primer pago es obligatorio salvo bonificada o
+    // "Cargar más tarde" — se valida acá antes de disparar la transacción
+    // (el botón ya se deshabilita por esto, ver disabled del submit).
+    const requierePago = !editingReserva && !bonificada && !cargarMasTarde
+    if (requierePago) {
+      if (Number(pagoForm.monto) <= 0) {
+        await alert('Cargá el monto del primer pago, o tildá "Cargar más tarde".')
+        return
+      }
+      if (pagoForm.excedeSaldo) {
+        await alert(`El monto supera el total de la reserva (${formatPesos(valorTotal)}).`)
+        return
+      }
+      if (pagoForm.comprobanteIncompleto) {
+        await alert('El comprobante del primer pago es obligatorio: completá tipo, número y fecha.')
+        return
+      }
+      if (pagoForm.duplicado) {
+        await alert('Ese número de comprobante ya está cargado en otro pago.')
+        return
+      }
+    }
+
     setSavingReserva(true)
     try {
       if (editingReserva) {
@@ -322,15 +347,21 @@ export default function Reservas() {
         setIsModalOpen(false)
         toast('Reserva actualizada con éxito', { tone: 'success' })
       } else {
-        const nueva = await createReserva(payload)
+        const pagoPayload = requierePago ? {
+          cliente_id: clienteId,
+          monto: pagoForm.monto,
+          medio: pagoForm.medio,
+          tipo_pago: pagoForm.tipoPago || 'parcial',
+          concepto: pagoForm.concepto,
+          referencia: pagoForm.referencia,
+          comprobante: pagoForm.construirComprobantePayload(),
+          fecha: pagoForm.fechaComprobante,
+        } : null
+        // Reserva + pago en una sola transacción (fn_crear_reserva_con_pago):
+        // si el pago falla, la reserva no queda creada — ver DataProvider.
+        await crearReservaConPago({ reserva: payload, pago: pagoPayload })
         setIsModalOpen(false)
-        toast('Reserva creada con éxito', { tone: 'success' })
-        // Item 8 (testing oct 2026): "cargar pago inicial" encadena a
-        // RegistrarPago ya abierto con la reserva recién creada (mismo
-        // componente/validación que el alta suelta) — si el pago falla o se
-        // cancela, la reserva igual quedó creada (no "a medias": el usuario
-        // la ve en la lista, sin pago, y puede cobrarla después desde ahí).
-        if (cargarPagoInicial) setPagoReserva(nueva)
+        toast(pagoPayload ? 'Reserva y pago registrados' : 'Reserva creada con éxito', { tone: 'success' })
       }
     } catch (err) {
       toast(err.message || 'Error guardando la reserva.', { tone: 'error' })
@@ -622,6 +653,27 @@ export default function Reservas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [unidadesDisponibles, unidadId, conflictoFechas],
   )
+
+  // Item 3 (oct 2026): mismo bloque de campos (monto/medio/comprobante) que
+  // Registrar Pago, inline acá — la reserva todavía no existe, así que
+  // total=saldo=valorTotal y pagado=0 (nada cobrado todavía). `resetKey`
+  // cambia cada vez que se abre el modal en modo alta, para arrancar en
+  // blanco cada vez (nunca al editar, ahí no se usa esta sección).
+  const unidadSeleccionadaLabel = opcionesUnidad.find((o) => o.value === unidadId)?.label || ''
+  const clienteSeleccionado = clientes.find((c) => c.id === clienteId) || null
+  const pagoForm = usePagoComprobanteForm({
+    resetKey: isModalOpen && !editingReserva ? 'nueva-reserva-abierta' : 'cerrado',
+    cliente: clienteSeleccionado,
+    reservaInfo: {
+      total: bonificada ? 0 : Number(valorTotal || 0),
+      saldo: bonificada ? 0 : Number(valorTotal || 0),
+      saldoDesconocido: false,
+      pagado: 0,
+      unidadLabel: unidadSeleccionadaLabel,
+      temporadaOTipo: tipoAlquiler === 'temporada' ? temporadaActiva?.nombre : tipoAlquiler,
+      sinReserva: false,
+    },
+  })
 
   // Días ya ocupados por otra reserva período/día de la unidad elegida, para
   // tacharlos/bloquearlos en el date picker del form (Tarea 7) — misma regla
@@ -989,6 +1041,10 @@ export default function Reservas() {
                   form="form-reserva"
                   loading={savingReserva}
                   loadingText="Guardando..."
+                  disabled={
+                    !editingReserva && !bonificada && !cargarMasTarde
+                    && (Number(pagoForm.monto) <= 0 || pagoForm.excedeSaldo || pagoForm.comprobanteIncompleto || !!pagoForm.duplicado)
+                  }
                   className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
                 >
                   {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
@@ -1252,25 +1308,28 @@ export default function Reservas() {
               </div>
             </div>
 
-            {/* Alta all-in-one (testing oct 2026, item 8): solo en reserva
-                nueva, nunca al editar (ahí ya existe "Registrar pago" desde
-                la ficha). Reutiliza RegistrarPago.jsx — ver handleSubmit. */}
+            {/* Item 3 (oct 2026): el primer pago (seña o total) con su
+                comprobante va siempre acá, inline y obligatorio — nunca más
+                un RegistrarPago encadenado después de crear la reserva.
+                Única excepción: "Cargar más tarde". Solo en alta nueva,
+                nunca al editar (ahí ya existe "Registrar pago" desde la
+                ficha), y nunca si la unidad es bonificada (no admite pagos). */}
             {!editingReserva && !bonificada && (
-              <div>
+              <div className="space-y-4">
+                {!cargarMasTarde && (
+                  <div ref={revealPagoInicialRef} className="animate-premium-fade">
+                    <PagoComprobanteCampos form={pagoForm} />
+                  </div>
+                )}
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
-                    checked={cargarPagoInicial}
-                    onChange={(e) => setCargarPagoInicial(e.target.checked)}
+                    checked={cargarMasTarde}
+                    onChange={(e) => setCargarMasTarde(e.target.checked)}
                     className="accent-gold w-4 h-4 cursor-pointer"
                   />
-                  <span className="text-xs font-bold text-black uppercase tracking-widest">Cargar un pago ahora (seña o total)</span>
+                  <span className="text-xs font-bold text-black uppercase tracking-widest">Cargar más tarde</span>
                 </label>
-                {cargarPagoInicial && (
-                  <p ref={revealPagoInicialRef} className="animate-premium-fade mt-2 text-[11px] text-prius-slate">
-                    Al guardar, se abre el formulario de pago con esta reserva ya seleccionada — mismas validaciones y comprobante obligatorio que "Registrar pago" desde la ficha del cliente.
-                  </p>
-                )}
               </div>
             )}
 

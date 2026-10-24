@@ -1,36 +1,25 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useData } from '../../context/DataProvider'
 import { usePagos } from '../../hooks/usePagos'
-import { supabase } from '../../lib/supabase'
-import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
-import {
-  MEDIO_PAGO_LABEL, MEDIO_PAGO_EMOJI, TIPO_PAGO_LABEL, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL,
-  calcularTipoPagoAutomatico, construirConceptoAutomatico, comprobanteTipoDefault,
-  ERROR_EXCEDE_SALDO, esPagoHistorico,
-} from '../../lib/pagos'
+import { formatPesos, unidadEmoji } from '../../lib/format'
+import { comprobanteTipoDefault, ERROR_EXCEDE_SALDO } from '../../lib/pagos'
+import { usePagoComprobanteForm } from '../../hooks/usePagoComprobanteForm'
 import Modal from './Modal'
 import AvisoCajaCerrada from './AvisoCajaCerrada'
-import MoneyInput from '../inputs/MoneyInput'
-import IntegerInput from '../inputs/IntegerInput'
-import DateInput from '../inputs/DateInput'
+import PagoComprobanteCampos from './PagoComprobanteCampos'
 import BrandSelect from '../ui/BrandSelect'
 import { useDialog } from '../../context/DialogProvider'
 import LoadingButton from '../ui/LoadingButton'
 import { CheckCircle2 } from 'lucide-react'
-
-const inputClass =
-  'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-gold/50 outline-none font-bold'
-
-const chipClass = (active) =>
-  `px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
-    active ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
-  }`
 
 // Componente compartido de cobro (Tarea 4): Clientes, Reservas y el modal de
 // unidad del Plano abren este mismo bottom sheet/drawer para registrar un
 // pago. Un solo punto de escritura → registrar_pago (RPC), que asigna la
 // caja abierta, valida saldo/bonificada, y crea el comprobante si vino
 // incluido. Si la caja está cerrada, ofrece abrirla sin perder lo cargado.
+// Los campos de monto/medio/comprobante viven en PagoComprobanteCampos +
+// usePagoComprobanteForm (item 3/4, oct 2026) — mismo bloque que usa la
+// sección de pago inline de Nueva Reserva/Asignar Unidad de Temporada.
 export default function RegistrarPago({
   isOpen, onClose, cliente, reservasOptions = [], initialReservaId = '', allowSinReserva = true, onSuccess,
   // Oct 2026 (modal "Pago N.º X" → Cargar monto con datos completos): si
@@ -45,24 +34,6 @@ export default function RegistrarPago({
   const { alert, confirm } = useDialog()
 
   const [reservaId, setReservaId] = useState(initialReservaId)
-  const [monto, setMonto] = useState(0)
-  const [medio, setMedio] = useState('efectivo')
-  const [referencia, setReferencia] = useState('')
-
-  // Comprobante (oct 2026, Tarea 4.2): ya no es "lo cargo después" — el
-  // bloque siempre está abierto y es obligatorio para poder confirmar.
-  const [comprobanteTipo, setComprobanteTipo] = useState('factura_b')
-  const [puntoVenta, setPuntoVenta] = useState(1)
-  const [numero, setNumero] = useState(null)
-  const [fechaComprobante, setFechaComprobante] = useState(() => new Date().toISOString().split('T')[0])
-  const [mismoComprobanteDe, setMismoComprobanteDe] = useState('')
-  // Duplicado (Tarea 4.5): se chequea al salir del campo "Número" contra
-  // (tipo, punto_venta, numero) en la base — evita el 409 silencioso de
-  // completar_comprobante (constraint comprobantes_tipo_punto_venta_numero_key).
-  const [duplicado, setDuplicado] = useState(null) // { cliente, fecha } | null
-  const [anuladoPrevio, setAnuladoPrevio] = useState(false)
-  const [verificandoDuplicado, setVerificandoDuplicado] = useState(false)
-
   const [saving, setSaving] = useState(false)
   const [exito, setExito] = useState(null) // { monto } | null
 
@@ -71,48 +42,6 @@ export default function RegistrarPago({
   // comprobante" con pagos de otro cliente.
   const { pagos: pagosDeReserva } = usePagos(reservaId || undefined)
   const pagosConComprobante = reservaId ? pagosDeReserva.filter((p) => p.comprobante_id && p.estado === 'vigente') : []
-
-  useEffect(() => {
-    if (!isOpen) return
-    setReservaId(initialReservaId || reservasOptions[0]?.id || '')
-    setExito(null)
-    setDuplicado(null)
-    setAnuladoPrevio(false)
-
-    if (editingPago) {
-      // Precarga desde el pago existente — el comprobante que ya tiene
-      // vinculado (si lo tiene) define tipo/punto de venta/número/fecha.
-      // Un recibo sin monto de la migración siempre viene con un
-      // comprobante real (si no, es una fila fantasma, ver `esPagoReal` en
-      // lib/reservas.js) — pero por las dudas no asumimos que exista.
-      const comprobanteExistente = editingPago.comprobantes?.[0] || null
-      setMonto(editingPago.monto ?? 0)
-      setMedio(editingPago.medio || 'efectivo')
-      setReferencia(editingPago.referencia || '')
-      setComprobanteTipo(comprobanteExistente?.tipo || comprobanteTipoDefault(cliente?.condicion_iva))
-      setPuntoVenta(comprobanteExistente?.punto_venta || 1)
-      setNumero(comprobanteExistente?.numero || '')
-      // Fecha original del recibo, nunca "hoy" — si no hay fecha propia
-      // cargada (migración), el mejor dato disponible es fecha_hora (el
-      // timestamp de carga), nunca la fecha de hoy.
-      setFechaComprobante(
-        comprobanteExistente?.fecha || editingPago.fecha
-          || (editingPago.fecha_hora ? editingPago.fecha_hora.slice(0, 10) : new Date().toISOString().split('T')[0])
-      )
-      setMismoComprobanteDe('')
-      return
-    }
-
-    setMonto(0)
-    setMedio('efectivo')
-    setReferencia('')
-    setComprobanteTipo(comprobanteTipoDefault(cliente?.condicion_iva))
-    setPuntoVenta(1)
-    setNumero('')
-    setFechaComprobante(new Date().toISOString().split('T')[0])
-    setMismoComprobanteDe('')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, initialReservaId, editingPago?.id])
 
   const reservaSeleccionada = reservasOptions.find((r) => r.id === reservaId) || null
   const total = reservaSeleccionada ? Number(reservaSeleccionada.valor_total || 0) : 0
@@ -123,79 +52,56 @@ export default function RegistrarPago({
   const saldoDesconocido = !!reservaSeleccionada && reservaSeleccionada.saldo == null
   const saldo = reservaSeleccionada && !saldoDesconocido ? Number(reservaSeleccionada.saldo || 0) : 0
   const pagado = saldoDesconocido ? null : Math.max(total - saldo, 0)
-
   const unidadLabel = reservaSeleccionada?.unidades
     ? `${unidadEmoji(reservaSeleccionada.unidades.tipo)} ${reservaSeleccionada.unidades.tipo} #${reservaSeleccionada.unidades.numero}`
     : ''
 
-  // Tipo y concepto automáticos (Tarea 4.1, oct 2026): ya no hay selects
-  // manuales — se calculan solos a partir del saldo de la reserva.
-  const excedeSaldo = !!reservaSeleccionada && !saldoDesconocido && Number(monto) > saldo
-  const tipoPago = excedeSaldo ? null : calcularTipoPagoAutomatico({
-    monto, saldo, costoTotal: total, huboPagosPrevios: !saldoDesconocido && pagado > 0,
-    saldoDesconocido, sinReserva: !reservaSeleccionada,
+  const form = usePagoComprobanteForm({
+    resetKey: `${isOpen}-${initialReservaId}-${editingPago?.id || ''}`,
+    cliente,
+    reservaInfo: {
+      total, saldo, saldoDesconocido, pagado, unidadLabel,
+      temporadaOTipo: reservaSeleccionada?.temporada || reservaSeleccionada?.tipo_alquiler,
+      sinReserva: !reservaSeleccionada,
+    },
+    pagosConComprobante,
   })
-  const tipoLabel = tipoPago ? (TIPO_PAGO_LABEL[tipoPago] || 'Pago') : null
-  const concepto = useMemo(() => construirConceptoAutomatico({
-    tipoLabel: tipoLabel || 'Pago',
-    unidadLabel,
-    temporadaOTipo: reservaSeleccionada?.temporada || reservaSeleccionada?.tipo_alquiler,
-    clienteNombre: cliente?.nombre,
-  }), [tipoLabel, unidadLabel, reservaSeleccionada, cliente])
+  const {
+    monto, setMonto, medio, referencia, comprobanteTipo, setComprobanteTipo, numero, setNumero,
+    fechaComprobante, setFechaComprobante, excedeSaldo, tipoPago, concepto, esHistorico,
+    comprobanteIncompleto, construirComprobantePayload, duplicado,
+  } = form
 
-  // La fecha del comprobante define la fecha del pago (comprobante siempre
-  // obligatorio desde oct 2026, Tarea 4.2 — ya no hay "lo cargo después").
-  // Anterior al inicio de la caja digital = histórico: no exige caja
-  // abierta, nunca entra a ningún resumen de caja (ver lib/pagos.js).
-  const fechaPago = fechaComprobante || null
-  const esHistorico = esPagoHistorico(fechaPago)
+  useEffect(() => {
+    if (!isOpen) return
+    setReservaId(initialReservaId || reservasOptions[0]?.id || '')
+    setExito(null)
+
+    if (editingPago) {
+      // Precarga desde el pago existente — el comprobante que ya tiene
+      // vinculado (si lo tiene) define tipo/número/fecha.
+      const comprobanteExistente = editingPago.comprobantes?.[0] || null
+      setMonto(editingPago.monto ?? 0)
+      form.setMedio(editingPago.medio || 'efectivo')
+      form.setReferencia(editingPago.referencia || '')
+      setComprobanteTipo(comprobanteExistente?.tipo || comprobanteTipoDefault(cliente?.condicion_iva))
+      setNumero(comprobanteExistente?.numero || '')
+      // Fecha original del recibo, nunca "hoy" — si no hay fecha propia
+      // cargada (migración), el mejor dato disponible es fecha_hora (el
+      // timestamp de carga), nunca la fecha de hoy.
+      setFechaComprobante(
+        comprobanteExistente?.fecha || editingPago.fecha
+          || (editingPago.fecha_hora ? editingPago.fecha_hora.slice(0, 10) : new Date().toISOString().split('T')[0])
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialReservaId, editingPago?.id])
+
   // Item 11 (testing oct 2026): el pago no afecta la caja DE HOY tanto si es
   // histórico (pre-corte) como si tiene una fecha de otro día post-corte —
   // en los dos casos impacta la caja de esa fecha, no la de hoy.
+  const fechaPago = fechaComprobante || null
   const noAfectaCajaHoy = esHistorico || (fechaPago && fechaPago !== new Date().toISOString().split('T')[0])
-
-  // Comprobante obligatorio (Tarea 4.2) salvo que se eligió "mismo
-  // comprobante que otro pago" — ahí el bloque de datos ya no aplica.
-  const comprobanteIncompleto = !mismoComprobanteDe && (!comprobanteTipo || !puntoVenta || !numero || !fechaComprobante)
-
-  const construirComprobantePayload = () => {
-    if (mismoComprobanteDe) return { comprobante_id: mismoComprobanteDe }
-    if (!comprobanteTipo || !puntoVenta || !numero) return null
-    return { tipo: comprobanteTipo, punto_venta: puntoVenta, numero, fecha: fechaComprobante }
-  }
-
-  // Duplicado (Tarea 4.5): chequea (tipo, punto_venta, numero) contra
-  // `comprobantes` al salir del campo "Número" — antes esto lo detectaba
-  // recién el RPC con un 409 genérico (constraint
-  // comprobantes_tipo_punto_venta_numero_key) y el pago quedaba sin
-  // comprobante asociado.
-  // Oct 2026 (item 5): un comprobante anulado NO bloquea — la unicidad en
-  // base ahora es un índice parcial que solo aplica a vigentes (migración
-  // comprobantes_unicidad_solo_vigentes), así que este chequeo también
-  // ignora anulados. Si el único match es un anulado, se permite cargar y
-  // solo se muestra un aviso informativo (sin bloquear).
-  const verificarDuplicado = async () => {
-    setDuplicado(null)
-    setAnuladoPrevio(false)
-    if (mismoComprobanteDe || !comprobanteTipo || !puntoVenta || !numero) return
-    setVerificandoDuplicado(true)
-    try {
-      const { data } = await supabase
-        .from('comprobantes')
-        .select('fecha, estado, clientes(nombre)')
-        .eq('tipo', comprobanteTipo)
-        .eq('punto_venta', puntoVenta)
-        .eq('numero', String(numero))
-      const vigente = (data || []).find((c) => c.estado !== 'anulado')
-      if (vigente) {
-        setDuplicado({ cliente: vigente.clientes?.nombre || 'otro cliente', fecha: vigente.fecha })
-      } else if ((data || []).length > 0) {
-        setAnuladoPrevio(true)
-      }
-    } finally {
-      setVerificandoDuplicado(false)
-    }
-  }
 
   const submit = async (permitirExcedente = false) => {
     if (monto <= 0) return
@@ -300,7 +206,7 @@ export default function RegistrarPago({
             1/10) nunca lo necesita, por eso se oculta solo si corresponde. */}
         {!cajaHoy && !esHistorico && <AvisoCajaCerrada />}
 
-        {/* 1. Reserva */}
+        {/* Reserva */}
         {reservasOptions.length > 1 || allowSinReserva ? (
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Reserva</label>
@@ -328,7 +234,7 @@ export default function RegistrarPago({
           </div>
         ) : null}
 
-        {/* 2. Resumen */}
+        {/* Resumen */}
         {reservaSeleccionada && (
           <div className="grid grid-cols-3 gap-3">
             <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
@@ -350,136 +256,7 @@ export default function RegistrarPago({
           </div>
         )}
 
-        {/* 3. Monto */}
-        <div>
-          <MoneyInput
-            label="Monto"
-            value={monto}
-            onChange={setMonto}
-            required
-            max={100_000_000}
-            error={excedeSaldo ? `El monto supera el saldo pendiente (${formatPesos(saldo)})` : undefined}
-            chips={reservaSeleccionada && !saldoDesconocido && saldo > 0 ? [
-              { label: 'Saldo total', value: saldo },
-              { label: '50%', value: Math.round(saldo / 2) },
-            ] : undefined}
-          />
-          {/* Vista previa en vivo (Tarea 4.1, oct 2026): tipo/concepto ya no
-              se eligen a mano, se calculan solos — esto es lo único que el
-              usuario ve de esa decisión antes de confirmar. */}
-          {!excedeSaldo && Number(monto) > 0 && (
-            <p className="text-[11px] text-prius-slate mt-1.5">
-              Se registrará como: <span className="text-prius-slate font-semibold">{tipoLabel}</span>
-              {reservaSeleccionada && !saldoDesconocido && (
-                <> — saldo restante {formatPesos(Math.max(saldo - Number(monto), 0))}</>
-              )}
-              {saldoDesconocido && <span className="text-amber-400"> · Saldo sin verificar</span>}
-            </p>
-          )}
-        </div>
-
-        {/* 4. Medio de pago + referencia */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de pago</label>
-          <BrandSelect
-            value={medio}
-            onChange={setMedio}
-            options={Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => ({
-              value, label: `${MEDIO_PAGO_EMOJI[value] || ''} ${label}`.trim(),
-            }))}
-          />
-          {medio !== 'efectivo' && (
-            <input
-              type="text"
-              value={referencia}
-              onChange={(e) => setReferencia(e.target.value)}
-              placeholder="N.° de operación / referencia (opcional)"
-              className={inputClass}
-            />
-          )}
-        </div>
-
-        {/* 5. Comprobante — obligatorio desde oct 2026 (Tarea 4.2), siempre
-            visible, ya no hay "lo cargo después". Rediseño (item 4, oct
-            2026): fondo blanco liso en vez del bg-black/20 original — un
-            panel flotante sobre contenido claro nunca necesitó ese
-            oscurecido, quedaba pesado visualmente contra el resto del modal
-            (ya blanco/bordes #E5E5E5 sutiles en todos lados). */}
-        <div className="border border-hairline rounded-xl overflow-hidden">
-          <div className="px-4 py-3 bg-prius-subtle text-xs font-bold uppercase tracking-widest text-prius-slate">
-            Comprobante
-          </div>
-          <div className="p-4 space-y-4 bg-white">
-            {pagosConComprobante.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Mismo comprobante que otro pago</label>
-                <BrandSelect
-                  value={mismoComprobanteDe}
-                  onChange={setMismoComprobanteDe}
-                  options={[
-                    { value: '', label: 'No — es un comprobante nuevo' },
-                    ...pagosConComprobante.map((p) => ({
-                      value: p.comprobante_id,
-                      label: `Cuota ${p.nro_cuota} — ${formatPesos(p.monto)}`,
-                    })),
-                  ]}
-                />
-              </div>
-            )}
-            {!mismoComprobanteDe && (
-              <>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Tipo</label>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(COMPROBANTE_TIPO_SIGLA).map(([value, sigla]) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => { setComprobanteTipo(value); setDuplicado(null); setAnuladoPrevio(false) }}
-                        title={COMPROBANTE_TIPO_LABEL[value]}
-                        className={chipClass(comprobanteTipo === value)}
-                      >
-                        {sigla}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                {/* Punto de venta: siempre 1, automático — no se muestra ni
-                    se pregunta (item 4, oct 2026). Se sigue guardando en la
-                    base como siempre (puntoVenta queda fijo en 1 acá). */}
-                <IntegerInput
-                  label="Número" value={numero} onChange={(v) => { setNumero(v); setDuplicado(null); setAnuladoPrevio(false) }}
-                  onBlur={verificarDuplicado} min={1} max={99999999}
-                  placeholder="Ej: 727" error={comprobanteIncompleto && !numero ? 'Obligatorio' : undefined}
-                />
-                {verificandoDuplicado && <p className="text-[11px] text-prius-muted">Verificando...</p>}
-                {duplicado && (
-                  <p className="text-[11px] text-prius-error">
-                    Ese comprobante ya está cargado ({duplicado.cliente}{duplicado.fecha ? `, ${formatFecha(duplicado.fecha)}` : ''}).
-                  </p>
-                )}
-                {anuladoPrevio && (
-                  <p className="text-[11px] text-prius-muted">
-                    Este número tiene un comprobante anulado previo — se puede volver a cargar.
-                  </p>
-                )}
-                <DateInput
-                  label="Fecha"
-                  value={fechaComprobante}
-                  onChange={setFechaComprobante}
-                  max={new Date().toISOString().split('T')[0]}
-                  calendarOnly
-                  hint={esHistorico ? 'Pago histórico: queda en el historial del cliente, no afecta la caja' : undefined}
-                />
-                {comprobanteIncompleto && (
-                  <p className="text-[11px] text-prius-error">
-                    El comprobante es obligatorio: completá tipo, número y fecha.
-                  </p>
-                )}
-              </>
-            )}
-          </div>
-        </div>
+        <PagoComprobanteCampos form={form} />
 
         <LoadingButton
           type="submit"

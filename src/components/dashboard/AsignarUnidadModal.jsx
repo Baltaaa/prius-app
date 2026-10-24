@@ -1,50 +1,106 @@
 import { useState } from 'react'
 import { useData } from '../../context/DataProvider'
 import { useDialog } from '../../context/DialogProvider'
+import { usePagoComprobanteForm } from '../../hooks/usePagoComprobanteForm'
+import { useRevealOnCheck } from '../../hooks/useRevealOnCheck'
 import Modal from '../crm/Modal'
 import ClienteSelector from '../crm/ClienteSelector'
+import PagoComprobanteCampos from '../crm/PagoComprobanteCampos'
 import MoneyInput from '../inputs/MoneyInput'
+import LoadingButton from '../ui/LoadingButton'
 import { unidadEmoji } from '../../lib/format'
-import { useRevealOnCheck } from '../../hooks/useRevealOnCheck'
 
 // Asignar una unidad libre a un cliente de temporada, SIN salir del Plano —
 // mismo ClienteSelector (existente o nuevo) que usa Reservas.jsx (ítem 5,
 // oct 2026). Antes esto navegaba a Clientes.jsx, que solo permitía crear un
 // cliente nuevo, nunca elegir uno ya existente.
 //
-// `onCreated(reserva)` (testing oct 2026, item 8): si el admin tildó "Cargar
-// un pago ahora", el padre (Dashboard.jsx) encadena RegistrarPago.jsx con la
-// reserva recién creada — mismo patrón que Reservas.jsx, sin duplicar la
-// lógica de cobro acá.
-export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaActiva, onCreated }) {
-  const { createReserva } = useData()
+// Item 3 (oct 2026): el primer pago con su comprobante se carga sí o sí acá
+// mismo, en una sola transacción con la reserva (fn_crear_reserva_con_pago)
+// — ya no hay "cargar un pago ahora" que encadene un RegistrarPago aparte.
+// Única excepción: "Cargar más tarde". Las unidades bonificadas no piden
+// pago. Mismo bloque de campos (PagoComprobanteCampos) que usa Reservas.jsx.
+export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaActiva }) {
+  const { crearReservaConPago, clientes } = useData()
   const { alert } = useDialog()
   const [clienteId, setClienteId] = useState('')
   const [valorTotal, setValorTotal] = useState(0)
   const [bonificada, setBonificada] = useState(false)
-  const [notas, setNotas] = useState('')
-  const [cargarPagoInicial, setCargarPagoInicial] = useState(false)
-  const revealRef = useRevealOnCheck(cargarPagoInicial)
+  const [cargarMasTarde, setCargarMasTarde] = useState(false)
+  const [notas] = useState('')
   const [saving, setSaving] = useState(false)
+
+  const clienteSeleccionado = clientes.find((c) => c.id === clienteId) || null
+  const pagoForm = usePagoComprobanteForm({
+    resetKey: isOpen ? 'asignar-abierto' : 'cerrado',
+    cliente: clienteSeleccionado,
+    reservaInfo: {
+      total: bonificada ? 0 : Number(valorTotal || 0),
+      saldo: bonificada ? 0 : Number(valorTotal || 0),
+      saldoDesconocido: false,
+      pagado: 0,
+      unidadLabel: `${unidadEmoji(unit?.type)} ${unit?.type === 'sombrilla' ? 'Sombrilla' : 'Carpa'} #${unit?.number}`,
+      temporadaOTipo: temporadaActiva?.nombre,
+      sinReserva: false,
+    },
+  })
+
+  const requierePago = !bonificada && !cargarMasTarde
+  const revealRef = useRevealOnCheck(!cargarMasTarde)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!clienteId || !unit?.dbId) return
+
+    if (requierePago) {
+      if (Number(pagoForm.monto) <= 0) {
+        await alert('Cargá el monto del primer pago, o tildá "Cargar más tarde".')
+        return
+      }
+      if (pagoForm.excedeSaldo) {
+        await alert(`El monto supera el total de la reserva.`)
+        return
+      }
+      if (pagoForm.comprobanteIncompleto) {
+        await alert('El comprobante del primer pago es obligatorio: completá tipo, número y fecha.')
+        return
+      }
+      if (pagoForm.duplicado) {
+        await alert('Ese número de comprobante ya está cargado en otro pago.')
+        return
+      }
+    }
+
     setSaving(true)
     try {
-      const nueva = await createReserva({
+      const pagoPayload = requierePago ? {
         cliente_id: clienteId,
-        unidad_id: unit.dbId,
-        tipo_alquiler: 'temporada',
-        estado: 'activa',
-        origen: 'manual',
-        valor_total: bonificada ? 0 : Number(valorTotal || 0),
-        bonificada,
-        notas,
+        monto: pagoForm.monto,
+        medio: pagoForm.medio,
+        tipo_pago: pagoForm.tipoPago || 'parcial',
+        concepto: pagoForm.concepto,
+        referencia: pagoForm.referencia,
+        comprobante: pagoForm.construirComprobantePayload(),
+        fecha: pagoForm.fechaComprobante,
+      } : null
+      await crearReservaConPago({
+        reserva: {
+          cliente_id: clienteId,
+          unidad_id: unit.dbId,
+          tipo_alquiler: 'temporada',
+          estado: 'activa',
+          origen: 'manual',
+          valor_total: bonificada ? 0 : Number(valorTotal || 0),
+          bonificada,
+          notas,
+        },
+        pago: pagoPayload,
       })
       onClose()
-      if (cargarPagoInicial && !bonificada) onCreated?.(nueva)
-      setCargarPagoInicial(false)
+      setBonificada(false)
+      setCargarMasTarde(false)
+      setValorTotal(0)
+      setClienteId('')
     } catch (err) {
       await alert(err.message || 'No se pudo asignar la unidad.')
     } finally {
@@ -79,31 +135,39 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
           <input type="checkbox" checked={bonificada} onChange={(e) => setBonificada(e.target.checked)} className="accent-cyan-400 w-4 h-4" />
           Unidad bonificada
         </label>
+
+        {/* Item 3 (oct 2026): primer pago inline y obligatorio, salvo
+            bonificada o "Cargar más tarde" — mismo bloque que Reservas.jsx. */}
         {!bonificada && (
-          <div>
+          <div className="space-y-4">
+            {!cargarMasTarde && (
+              <div ref={revealRef} className="animate-premium-fade">
+                <PagoComprobanteCampos form={pagoForm} />
+              </div>
+            )}
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
-                checked={cargarPagoInicial}
-                onChange={(e) => setCargarPagoInicial(e.target.checked)}
+                checked={cargarMasTarde}
+                onChange={(e) => setCargarMasTarde(e.target.checked)}
                 className="accent-gold w-4 h-4 cursor-pointer"
               />
-              <span className="text-xs font-bold text-black uppercase tracking-widest">Cargar un pago ahora (seña o total)</span>
+              <span className="text-xs font-bold text-black uppercase tracking-widest">Cargar más tarde</span>
             </label>
-            {cargarPagoInicial && (
-              <p ref={revealRef} className="animate-premium-fade mt-2 text-[11px] text-prius-slate">
-                Al asignar, se abre el formulario de pago con esta reserva ya seleccionada.
-              </p>
-            )}
           </div>
         )}
-        <button
+
+        <LoadingButton
           type="submit"
-          disabled={!clienteId || saving}
-          className="w-full py-4 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+          loading={saving}
+          loadingText="Asignando..."
+          disabled={
+            !clienteId || (requierePago && (Number(pagoForm.monto) <= 0 || pagoForm.excedeSaldo || pagoForm.comprobanteIncompleto || !!pagoForm.duplicado))
+          }
+          className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
         >
-          {saving ? 'Asignando...' : 'Asignar Unidad'}
-        </button>
+          Asignar Unidad
+        </LoadingButton>
       </form>
     </Modal>
   )
