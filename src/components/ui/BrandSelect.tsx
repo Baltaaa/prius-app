@@ -234,7 +234,7 @@ export default function BrandSelect({
       {shouldRenderOpen && !isMobile && coords &&
         createPortal(
           <>
-            <div className="fixed inset-0 z-[1000]" onClick={() => setOpen(false)} />
+            <div ref={bind} className="fixed inset-0 z-[1000]" onClick={() => setOpen(false)} />
             <div
               ref={bind}
               onKeyDown={handleKeyDown}
@@ -263,11 +263,11 @@ export default function BrandSelect({
       {shouldRenderOpen && isMobile &&
         createPortal(
           <div
+            ref={bind}
             className={`fixed inset-0 z-[1000] flex items-end bg-black/40 ${open ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
             onClick={() => setOpen(false)}
           >
             <div
-              ref={bind}
               onClick={(e) => e.stopPropagation()}
               onKeyDown={handleKeyDown}
               className={`w-full max-h-[80vh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden ${open ? 'ui-open-sheet' : 'ui-close-sheet'}`}
