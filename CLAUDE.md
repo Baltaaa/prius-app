@@ -69,12 +69,16 @@ El dueño piensa el sistema como **cliente-céntrico y reactivo en tiempo real**
 - Plano: todas las casillas con borde sutil (#E5E5E5), toda la casilla clickeable (número incluido), sin selección de texto (select-none). El panel de unidad muestra titular y cosocios; "Ver ficha de cliente" navega a `/clientes?cliente=<id>` con la ficha abierta. "Asignar cliente de temporada" / "Asignar reserva" abre el modal ahí mismo en el Plano, sin navegar, con la unidad precargada.
 - Un solo buscador: el global del header. Las secciones no tienen buscadores propios.
 - Reservas: sin columna de acciones en la tabla; las acciones viven en la ficha lateral.
-- Nueva reserva: tipo Temporada / Período / Día. Temporada oculta el date picker y usa las fechas de la temporada vigente desde una única fuente de verdad; solo admite unidades libres toda la temporada.
+- Nueva reserva: tipo Temporada / Período / Día. Temporada oculta el date picker y usa las fechas de la temporada vigente desde una única fuente de verdad; solo admite unidades libres toda la temporada. En pantalla solo se muestra "Temporada vigente 2026/2027", nunca las fechas.
+- Nueva reserva: el primer pago (seña o total) con su comprobante se carga sí o sí en el mismo modal, inline y en una sola transacción. Única excepción: check "Cargar más tarde". Las unidades bonificadas no piden pago.
 - Instancias de pago: grilla responsive sin scroll horizontal ni vertical interno; dato principal = número de comprobante (tipo + número), secundario = monto. El tipo de comprobante se muestra siempre en tarjeta y detalle.
 - Nueva reserva y asignación de temporada permiten cargar el pago y su comprobante en el mismo flujo, reutilizando exactamente la lógica de Registrar Pago.
 - Se pueden registrar pagos a nombre de un cosocio, vinculados a la reserva compartida.
 - Solo superadmin puede editar monto o tipo de comprobante de un pago, anularlo o eliminarlo. Se valida en UI y en Supabase (RLS/RPC).
 - Registrar Pago solo muestra aviso cuando el pago NO afecta la caja de hoy (histórico u otro día).
+- Registrar Pago (componente único, usado en ficha de cliente, ficha de reserva y nueva reserva): medio de pago como select con ícono/emoji por opción, sin fondos grises, punto de venta siempre 1 automático y oculto.
+- Comprobantes anulados no bloquean: la unicidad tipo + punto de venta + número aplica solo a comprobantes vigentes; un número anulado se puede volver a cargar y el anulado queda en el historial.
+- Overlays anidados: click fuera de un select/popover/date picker abierto solo cierra ese overlay, nunca el modal que lo contiene. El modal solo se cierra (o pide descartar cambios) con click en su propio fondo cuando no hay ningún overlay interno abierto. Escape cierra solo la capa de arriba.
 - Checks que despliegan campos: fade + scroll suave que centra los campos nuevos en el viewport (utilidad reutilizable).
 - Toda request a Supabase usa el loader universal: botón en loading y deshabilitado, sin pantallazos, toast de éxito/error específico. Un único sistema de toast en la app.
 - Todo monto en pesos se muestra con el formateador único de la app (incluye Notificaciones e Historial).
