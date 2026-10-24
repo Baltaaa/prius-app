@@ -23,6 +23,7 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 - **Caja diaria**: registro de movimientos de dinero del día.
 - **Preconfirmada**: estado intermedio de una reserva.
 - **Cosocios**: clientes adicionales vinculados a una misma reserva/unidad (tabla `reserva_clientes`).
+- **Temporada / Período / Día**: valores de `reservas.tipo_alquiler`.
 - **ARCA / AFIP**: autoridad fiscal argentina.
 - **Mercado Pago**: pasarela de pago principal candidata.
 - **CUIT / clave fiscal**: credenciales fiscales argentinas.
@@ -65,10 +66,11 @@ El dueño piensa el sistema como **cliente-céntrico y reactivo en tiempo real**
 - Mobile-first, con bottom nav bar en pantallas chicas. La versión mobile debe sentirse como una app nativa de Play Store: totalmente interactiva, moderna, prolija visualmente e intuitiva — no una web responsive genérica.
 
 ## Reglas UX/UI y permisos (testing 23/10/2026)
-- Plano: todas las casillas con borde sutil (#E5E5E5), toda la casilla clickeable (número incluido), sin selección de texto (select-none). El panel de unidad muestra titular y cosocios; "Ver ficha de cliente" navega a `/clientes?cliente=<id>` con la ficha abierta.
+- Plano: todas las casillas con borde sutil (#E5E5E5), toda la casilla clickeable (número incluido), sin selección de texto (select-none). El panel de unidad muestra titular y cosocios; "Ver ficha de cliente" navega a `/clientes?cliente=<id>` con la ficha abierta. "Asignar cliente de temporada" / "Asignar reserva" abre el modal ahí mismo en el Plano, sin navegar, con la unidad precargada.
 - Un solo buscador: el global del header. Las secciones no tienen buscadores propios.
 - Reservas: sin columna de acciones en la tabla; las acciones viven en la ficha lateral.
-- Instancias de pago: grilla responsive sin scroll horizontal ni vertical interno; dato principal = número de comprobante (tipo + número), secundario = monto.
+- Nueva reserva: tipo Temporada / Período / Día. Temporada oculta el date picker y usa las fechas de la temporada vigente desde una única fuente de verdad; solo admite unidades libres toda la temporada.
+- Instancias de pago: grilla responsive sin scroll horizontal ni vertical interno; dato principal = número de comprobante (tipo + número), secundario = monto. El tipo de comprobante se muestra siempre en tarjeta y detalle.
 - Nueva reserva y asignación de temporada permiten cargar el pago y su comprobante en el mismo flujo, reutilizando exactamente la lógica de Registrar Pago.
 - Se pueden registrar pagos a nombre de un cosocio, vinculados a la reserva compartida.
 - Solo superadmin puede editar monto o tipo de comprobante de un pago, anularlo o eliminarlo. Se valida en UI y en Supabase (RLS/RPC).
@@ -77,9 +79,10 @@ El dueño piensa el sistema como **cliente-céntrico y reactivo en tiempo real**
 - Toda request a Supabase usa el loader universal: botón en loading y deshabilitado, sin pantallazos, toast de éxito/error específico. Un único sistema de toast en la app.
 - Todo monto en pesos se muestra con el formateador único de la app (incluye Notificaciones e Historial).
 - Comprobantes emitidos: ID correlativo único desde 001 generado en base; impresión siempre en blanco y negro, dos copias idénticas por hoja A4 (50% cada una, línea de corte); sin DNI, teléfono ni CUIT del cliente.
-- Caja (abierta, cerrada, impresión y CSV): cada comprobante muestra en chico el nombre y apellido del cliente.
+- Caja (abierta, cerrada, impresión y CSV): el arqueo es el total de todos los medios de pago con desglose por medio (cantidad, ingresos, gastos, neto), calculado en un solo lugar. Cada comprobante muestra en chico el nombre y apellido del cliente.
 - Validación: un único módulo de validadores para toda la app. DNI 7-8 dígitos (se guarda sin puntos), CUIT 11 dígitos con verificador módulo 11, celular normalizado a +549…, email válido en minúsculas, montos positivos. Date pickers de solo selección, sin texto tipeable. CHECK constraints NOT VALID en `clientes` (no tocan datos históricos). Errores en español debajo del campo, al blur o submit.
 - Responsive: verificar siempre 390, 1024, 1280, 1397x834 y 1440; nada se pisa ni se corta en el header.
+- Verificación: ningún fix de interacción (clicks, navegación, modales) se da por terminado sin probarlo con un click real en el navegador o un test de interacción.
 
 ## Pendiente / en foco ahora (migración a Claude Code)
 - Pasarela de pago: Mercado Pago Checkout Pro (candidata principal) vs Payway vs Mobbex — evaluar comisiones.
@@ -96,3 +99,4 @@ El dueño piensa el sistema como **cliente-céntrico y reactivo en tiempo real**
 - Instrucciones abstractas generan que el agente invente componentes nuevos que no pedimos.
 - Es mejor dar el código fuente real en el prompt que descripciones abstractas o listas de archivos.
 - Preferir "borrar y reemplazar" explícito en vez de "mejorar" cuando se pide refactor.
+- Un fix declarado "resuelto" sin verificación de interacción no cuenta: siempre reproducir el bug y probar el arreglo en navegador.
