@@ -60,6 +60,7 @@ export default function RegistrarPago({
   // (tipo, punto_venta, numero) en la base — evita el 409 silencioso de
   // completar_comprobante (constraint comprobantes_tipo_punto_venta_numero_key).
   const [duplicado, setDuplicado] = useState(null) // { cliente, fecha } | null
+  const [anuladoPrevio, setAnuladoPrevio] = useState(false)
   const [verificandoDuplicado, setVerificandoDuplicado] = useState(false)
 
   const [saving, setSaving] = useState(false)
@@ -76,6 +77,7 @@ export default function RegistrarPago({
     setReservaId(initialReservaId || reservasOptions[0]?.id || '')
     setExito(null)
     setDuplicado(null)
+    setAnuladoPrevio(false)
 
     if (editingPago) {
       // Precarga desde el pago existente — el comprobante que ya tiene
@@ -167,19 +169,29 @@ export default function RegistrarPago({
   // recién el RPC con un 409 genérico (constraint
   // comprobantes_tipo_punto_venta_numero_key) y el pago quedaba sin
   // comprobante asociado.
+  // Oct 2026 (item 5): un comprobante anulado NO bloquea — la unicidad en
+  // base ahora es un índice parcial que solo aplica a vigentes (migración
+  // comprobantes_unicidad_solo_vigentes), así que este chequeo también
+  // ignora anulados. Si el único match es un anulado, se permite cargar y
+  // solo se muestra un aviso informativo (sin bloquear).
   const verificarDuplicado = async () => {
     setDuplicado(null)
+    setAnuladoPrevio(false)
     if (mismoComprobanteDe || !comprobanteTipo || !puntoVenta || !numero) return
     setVerificandoDuplicado(true)
     try {
       const { data } = await supabase
         .from('comprobantes')
-        .select('fecha, clientes(nombre)')
+        .select('fecha, estado, clientes(nombre)')
         .eq('tipo', comprobanteTipo)
         .eq('punto_venta', puntoVenta)
         .eq('numero', String(numero))
-        .maybeSingle()
-      if (data) setDuplicado({ cliente: data.clientes?.nombre || 'otro cliente', fecha: data.fecha })
+      const vigente = (data || []).find((c) => c.estado !== 'anulado')
+      if (vigente) {
+        setDuplicado({ cliente: vigente.clientes?.nombre || 'otro cliente', fecha: vigente.fecha })
+      } else if ((data || []).length > 0) {
+        setAnuladoPrevio(true)
+      }
     } finally {
       setVerificandoDuplicado(false)
     }
@@ -417,7 +429,7 @@ export default function RegistrarPago({
                       <button
                         key={value}
                         type="button"
-                        onClick={() => { setComprobanteTipo(value); setDuplicado(null) }}
+                        onClick={() => { setComprobanteTipo(value); setDuplicado(null); setAnuladoPrevio(false) }}
                         title={COMPROBANTE_TIPO_LABEL[value]}
                         className={chipClass(comprobanteTipo === value)}
                       >
@@ -428,12 +440,12 @@ export default function RegistrarPago({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <IntegerInput
-                    label="Punto de venta" value={puntoVenta} onChange={(v) => { setPuntoVenta(v); setDuplicado(null) }}
+                    label="Punto de venta" value={puntoVenta} onChange={(v) => { setPuntoVenta(v); setDuplicado(null); setAnuladoPrevio(false) }}
                     onBlur={verificarDuplicado} min={1} max={99999}
                     placeholder="Ej: 1" error={comprobanteIncompleto && !puntoVenta ? 'Obligatorio' : undefined}
                   />
                   <IntegerInput
-                    label="Número" value={numero} onChange={(v) => { setNumero(v); setDuplicado(null) }}
+                    label="Número" value={numero} onChange={(v) => { setNumero(v); setDuplicado(null); setAnuladoPrevio(false) }}
                     onBlur={verificarDuplicado} min={1} max={99999999}
                     placeholder="Ej: 727" error={comprobanteIncompleto && !numero ? 'Obligatorio' : undefined}
                   />
@@ -442,6 +454,11 @@ export default function RegistrarPago({
                 {duplicado && (
                   <p className="text-[11px] text-prius-error">
                     Ese comprobante ya está cargado ({duplicado.cliente}{duplicado.fecha ? `, ${formatFecha(duplicado.fecha)}` : ''}).
+                  </p>
+                )}
+                {anuladoPrevio && (
+                  <p className="text-[11px] text-prius-muted">
+                    Este número tiene un comprobante anulado previo — se puede volver a cargar.
                   </p>
                 )}
                 <DateInput
