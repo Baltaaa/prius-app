@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { useOverlay } from "../../context/OverlayProvider"
 import { useMountTransition } from "../../hooks/useMountTransition"
@@ -10,9 +10,31 @@ import UnidadDetalleContent from "./UnidadDetalleContent"
 // portal para que, aunque React la siga montando, no se vea ni intercepte
 // clicks en ≥1024px (Dashboard.jsx decide cuál mostrar, pero ambas quedan
 // en el árbol para no romper el `useOverlay`/Escape de la que esté activa).
+//
+// Bug real (oct 2026, testing): `useOverlay` se registraba con
+// `isOpen: !!unit` sin importar el breakpoint — a ≥1024px esta hoja queda
+// oculta solo por CSS (`lg:hidden`), pero React la sigue montando y
+// `useOverlay` la registraba igual como overlay "abierto". El panel de
+// unidad real (`UnidadDetallePanel.jsx`, un `<aside>` sin overlay propio)
+// no es parte del territorio registrado de ESTA hoja invisible, así que
+// `OverlayProvider` trataba cualquier click en el panel de escritorio
+// (incluidos sus propios botones, "Ver ficha del cliente" entre ellos)
+// como un click "afuera" de la hoja mobile y la cerraba en el `mousedown`
+// — el panel se cerraba antes de que el `click` del botón llegara a
+// dispararse. Fix: solo se registra como overlay cuando además está
+// realmente visible (viewport <1024px, mismo breakpoint que `lg:hidden`).
 export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, onClose, onAsignarTemporada, onMoverUnidad }) {
   const overlayId = useId()
-  const { bind } = useOverlay({ id: `unidad-preview-${overlayId}`, isOpen: !!unit, onRequestClose: () => onClose?.() })
+  const [esVisible, setEsVisible] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches
+  )
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 1023px)')
+    const update = () => setEsVisible(mql.matches)
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
+  const { bind } = useOverlay({ id: `unidad-preview-${overlayId}`, isOpen: !!unit && esVisible, onRequestClose: () => onClose?.() })
 
   useEffect(() => {
     const prev = document.body.style.overflow
