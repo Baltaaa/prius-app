@@ -1123,9 +1123,6 @@ export default function Reservas() {
                 <div className="bg-prius-subtle border border-hairline rounded-xl p-4 text-center">
                   <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Temporada vigente</p>
                   <p className="text-sm font-bold text-black mt-1">{temporadaActiva?.nombre || '—'}</p>
-                  {temporadaActiva?.fecha_inicio && temporadaActiva?.fecha_fin && (
-                    <p className="text-xs text-prius-slate mt-1">{formatRangoFechas(temporadaActiva.fecha_inicio, temporadaActiva.fecha_fin)}</p>
-                  )}
                 </div>
                 {unidadId && conflictoFechas && (
                   <p className="text-[11px] text-prius-error">
