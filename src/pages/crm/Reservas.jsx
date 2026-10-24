@@ -575,10 +575,14 @@ export default function Reservas() {
 
   // ¿Esta unidad ya tiene otra reserva de período/día activa que se solapa
   // con las fechas elegidas en el form? Sin fechas cargadas todavía, no hay
-  // nada que chequear (se habilita a medida que se completan).
+  // nada que chequear (se habilita a medida que se completan). Item 3 (fix
+  // urgente oct 2026): con tipoAlquiler='temporada' no hay date picker —
+  // el rango candidato es la temporada vigente completa
+  // (temporadaActiva.fecha_inicio/fecha_fin), única fuente de verdad ya
+  // usada en toda la app (ver `temporadas`, CLAUDE.md "Estructura de datos").
   const unidadTieneConflictoDeFechas = (unidadId) => {
-    const candStart = tipoAlquiler === 'dia' ? fecha : fechaInicio
-    const candEnd = tipoAlquiler === 'dia' ? fecha : fechaFin
+    const candStart = tipoAlquiler === 'dia' ? fecha : tipoAlquiler === 'temporada' ? temporadaActiva?.fecha_inicio : fechaInicio
+    const candEnd = tipoAlquiler === 'dia' ? fecha : tipoAlquiler === 'temporada' ? temporadaActiva?.fecha_fin : fechaFin
     if (!candStart || !candEnd) return false
     return reservas.some((r) => {
       if (r.unidad_id !== unidadId || r.estado !== 'activa') return false
@@ -600,7 +604,7 @@ export default function Reservas() {
         (u) => u.id === unidadId || (!unidadesBloqueadasPorTemporada.has(u.id) && !unidadTieneConflictoDeFechas(u.id)),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [unidades, unidadesBloqueadasPorTemporada, unidadId, tipoAlquiler, fechaInicio, fechaFin, fecha, reservas, editingReserva],
+    [unidades, unidadesBloqueadasPorTemporada, unidadId, tipoAlquiler, fechaInicio, fechaFin, fecha, reservas, editingReserva, temporadaActiva],
   )
 
   const conflictoFechas = unidadId ? unidadTieneConflictoDeFechas(unidadId) : false
@@ -1081,8 +1085,14 @@ export default function Reservas() {
             <SeccionTitulo>Fechas</SeccionTitulo>
 
             <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
+              {/* Item 3 (fix urgente oct 2026): se agrega Temporada, orden
+                  Temporada/Período/Día. Solo en alta nueva — editar una
+                  reserva de temporada sigue viviendo en Clientes (el
+                  deep-link de edición ya redirige para allá, ver
+                  useDeepLinkTarget más abajo). */}
+              <div className={`grid gap-2 ${editingReserva ? 'grid-cols-2' : 'grid-cols-3'}`}>
                 {[
+                  ...(editingReserva ? [] : [{ key: 'temporada', label: 'Temporada' }]),
                   { key: 'periodo', label: 'Período' },
                   { key: 'dia', label: 'Día' },
                 ].map((t) => (
@@ -1101,10 +1111,29 @@ export default function Reservas() {
                   </button>
                 ))}
               </div>
-              <p className="text-[9px] text-prius-muted uppercase tracking-widest">
-                Temporada completa se carga desde el Directorio de Clientes.
-              </p>
+              {tipoAlquiler === 'temporada' && (
+                <p className="text-[9px] text-prius-muted uppercase tracking-widest">
+                  Se asigna toda la temporada vigente ({temporadaActiva?.nombre || '—'}), sin elegir fechas.
+                </p>
+              )}
             </div>
+
+            {tipoAlquiler === 'temporada' && (
+              <div className="space-y-2">
+                <div className="bg-prius-subtle border border-hairline rounded-xl p-4 text-center">
+                  <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Temporada vigente</p>
+                  <p className="text-sm font-bold text-black mt-1">{temporadaActiva?.nombre || '—'}</p>
+                  {temporadaActiva?.fecha_inicio && temporadaActiva?.fecha_fin && (
+                    <p className="text-xs text-prius-slate mt-1">{formatRangoFechas(temporadaActiva.fecha_inicio, temporadaActiva.fecha_fin)}</p>
+                  )}
+                </div>
+                {unidadId && conflictoFechas && (
+                  <p className="text-[11px] text-prius-error">
+                    Esa unidad ya tiene una reserva de período o día dentro de esta temporada — no se puede asignar toda la temporada. Elegí otra unidad.
+                  </p>
+                )}
+              </div>
+            )}
 
             {tipoAlquiler === 'periodo' && (
               <div className="space-y-2">
@@ -1207,11 +1236,15 @@ export default function Reservas() {
                 </span>
                 <span className="text-prius-muted uppercase tracking-widest">Fechas</span>
                 <span className="text-black font-bold text-right truncate">
-                  {tipoAlquiler === 'dia' ? (fecha ? formatFecha(fecha) : '—') : (fechaInicio && fechaFin ? formatRangoFechas(fechaInicio, fechaFin) : '—')}
+                  {tipoAlquiler === 'temporada'
+                    ? temporadaActiva?.nombre || '—'
+                    : tipoAlquiler === 'dia' ? (fecha ? formatFecha(fecha) : '—') : (fechaInicio && fechaFin ? formatRangoFechas(fechaInicio, fechaFin) : '—')}
                 </span>
                 <span className="text-prius-muted uppercase tracking-widest">Días</span>
                 <span className="text-black font-bold text-right">
-                  {tipoAlquiler === 'dia' ? (fecha ? 1 : '—') : (diasEntre(fechaInicio, fechaFin) ?? '—')}
+                  {tipoAlquiler === 'temporada'
+                    ? 'Temporada completa'
+                    : tipoAlquiler === 'dia' ? (fecha ? 1 : '—') : (diasEntre(fechaInicio, fechaFin) ?? '—')}
                 </span>
                 <span className="text-prius-muted uppercase tracking-widest">Total</span>
                 <span className="text-black font-bold text-right">{formatPesos(bonificada ? 0 : valorTotal)}</span>
