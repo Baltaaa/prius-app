@@ -27,7 +27,7 @@ export default function CajaImpresion({ resumen }) {
           .ci-table th, .ci-table td { text-align: left; padding: 0.8mm 1.5mm; border-bottom: 0.15mm solid #999; }
           .ci-table th { font-weight: 700; text-transform: uppercase; font-size: 7pt; }
           .ci-table td.num, .ci-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
-          .ci-totales { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-bottom: 4mm; }
+          .ci-totales { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-bottom: 4mm; }
           .ci-totales div { border: 0.3mm solid #000; padding: 2mm; text-align: center; }
           .ci-totales .label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.08em; }
           .ci-totales .valor { font-size: 11pt; font-weight: 700; }
@@ -44,19 +44,23 @@ export default function CajaImpresion({ resumen }) {
       </div>
 
       <div className="ci-totales">
+        <div><div className="label">Movimientos</div><div className="valor">{totales.cantidad ?? '—'}</div></div>
         <div><div className="label">Ingresos</div><div className="valor">{formatPesos(totales.ingresos)}</div></div>
         <div><div className="label">Egresos</div><div className="valor">{formatPesos(totales.egresos)}</div></div>
         <div><div className="label ci-accent">Neto</div><div className="valor ci-accent">{formatPesos(totales.neto)}</div></div>
       </div>
 
+      {/* Item 2 (fix urgente oct 2026): columna Cantidad — total general de
+          todos los medios ya está arriba (ci-totales), acá el desglose. */}
       <div className="ci-section">
         <h2>Por medio de pago</h2>
         <table className="ci-table">
-          <thead><tr><th>Medio</th><th className="num">Ingresos</th><th className="num">Egresos</th><th className="num">Neto</th></tr></thead>
+          <thead><tr><th>Medio</th><th className="num">Cantidad</th><th className="num">Ingresos</th><th className="num">Egresos</th><th className="num">Neto</th></tr></thead>
           <tbody>
             {(por_medio || []).map((m) => (
               <tr key={m.medio}>
                 <td>{MEDIO_PAGO_LABEL[m.medio] || m.medio}</td>
+                <td className="num">{m.cantidad}</td>
                 <td className="num">{formatPesos(m.ingresos)}</td>
                 <td className="num">{formatPesos(m.egresos)}</td>
                 <td className="num">{formatPesos(m.neto)}</td>

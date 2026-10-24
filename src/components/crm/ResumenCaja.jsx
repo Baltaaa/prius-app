@@ -136,6 +136,19 @@ export default function ResumenCaja({ resumen }) {
         </div>
 
         <div className="space-y-6">
+          {/* Item 2 (fix urgente oct 2026): total de TODOS los medios de pago,
+              con desglose por medio (cantidad de movimientos, ingresos,
+              gastos, neto) — todo sale de resumen_caja(), nunca recalculado
+              acá. "Arqueo de Efectivo" de arriba sigue siendo solo el
+              conteo físico de billetes (no tiene sentido "contar" una
+              transferencia o un swipe de tarjeta). */}
+          <Section title="Total General — Todos los Medios" icon={Scale}>
+            <Fila label="Movimientos" value={totales.cantidad ?? '—'} />
+            <Fila label="Ingresos" value={formatPesos(totales.ingresos)} tone="text-prius-success" />
+            <Fila label="Gastos" value={formatPesos(totales.egresos)} tone="text-prius-error" />
+            <Fila label="Neto" value={formatPesos(totales.neto)} tone="text-gold" />
+          </Section>
+
           <Section title="Desglose por Medio de Pago" icon={CreditCard}>
             {(por_medio || []).length === 0 ? (
               <p className="text-xs text-prius-muted uppercase tracking-widest">Sin movimientos.</p>
@@ -144,14 +157,20 @@ export default function ResumenCaja({ resumen }) {
                 {por_medio.map((m) => {
                   const Icono = MEDIO_ICONO[m.medio] || Banknote
                   return (
-                    <div key={m.medio} className="bg-prius-surface rounded-xl p-3.5 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div key={m.medio} className="bg-prius-surface rounded-xl p-3.5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-prius-slate shrink-0">
                           <Icono size={16} />
                         </div>
-                        <span className="text-sm font-semibold text-black">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                        <div className="min-w-0">
+                          <span className="block text-sm font-semibold text-black">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                          <span className="block text-[11px] text-prius-muted">
+                            {m.cantidad} movimiento{Number(m.cantidad) === 1 ? '' : 's'}
+                            {Number(m.egresos) > 0 && <> · Ingresos {formatPesos(m.ingresos)} · Gastos {formatPesos(m.egresos)}</>}
+                          </span>
+                        </div>
                       </div>
-                      <span className={`text-sm font-bold tabular-nums ${Number(m.neto) < 0 ? 'text-prius-error' : 'text-black'}`}>{formatPesos(m.neto)}</span>
+                      <span className={`text-sm font-bold tabular-nums shrink-0 ${Number(m.neto) < 0 ? 'text-prius-error' : 'text-black'}`}>{formatPesos(m.neto)}</span>
                     </div>
                   )
                 })}
