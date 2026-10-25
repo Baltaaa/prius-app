@@ -57,7 +57,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
     >
       <div
         ref={bind}
-        className={`card-light w-full ${maxWidthClass} max-h-[92vh] sm:max-h-[90dvh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-hairline shadow-2xl ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
+        className={`card-light w-full ${maxWidthClass} max-h-[92dvh] sm:max-h-[90dvh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-hairline shadow-2xl ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Gesto de cierre (mobile) */}
@@ -65,7 +65,11 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
           <div className="w-10 h-1 rounded-full bg-prius-subtle" />
         </div>
 
-        <div className="flex items-center justify-between p-6 border-b border-hairline bg-prius-subtle shrink-0">
+        {/* Header compacto en mobile (pulido mobile iPhone, oct 2026): franja
+            baja fondo blanco (antes p-6 + bg-prius-subtle era un bloque gris
+            alto) — desktop sin cambios (sm:p-6 sm:bg-prius-subtle, igual que
+            siempre). */}
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-hairline bg-white sm:bg-prius-subtle shrink-0">
           <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-gold">{title}</h2>
           <button
             onClick={requestClose}
@@ -75,12 +79,18 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-6 sm:p-8 space-y-6">
           {children}
         </div>
 
+        {/* Footer sticky (pulido mobile iPhone, oct 2026): safe-area-inset-bottom
+            para que el botón de confirmar nunca quede tapado por la barra de
+            Safari/home indicator. */}
         {footer && (
-          <div className="shrink-0 border-t border-hairline bg-prius-subtle p-4 sm:p-6">
+          <div
+            className="shrink-0 border-t border-hairline bg-white sm:bg-prius-subtle p-4 sm:p-6"
+            style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+          >
             {footer}
           </div>
         )}

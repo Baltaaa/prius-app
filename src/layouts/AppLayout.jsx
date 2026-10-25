@@ -56,7 +56,17 @@ export default function AppLayout() {
                 sola vez acá: ninguna página debe agregar su propio
                 max-w/px/mx-auto que lo contradiga. pb-20 en mobile deja lugar
                 al BottomNav fijo (56px + safe-area) para que no tape contenido. */}
-            <main id="app-main-scroll" className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-20 md:pb-12 bg-prius-background">
+            {/* pb-bottom-nav-safe (pulido iPhone, oct 2026, ver index.css):
+                antes un pb-20 (80px) fijo — con safe-area-inset-bottom
+                grande (home indicator, iPhone con notch) el BottomNav mide
+                más de 80px (56px + safe-area) y el contenido quedaba tapado
+                atrás (caso real: cards de Caja). calc() explícito = altura
+                real del nav (56px) + la safe area + 16px de aire, solo
+                <768px — en desktop sigue siendo md:pb-12, sin cambios.
+                overscroll-behavior: contain acá (no en html/body) para que
+                el scroll propio de esta columna nunca "rebote" hacia el
+                documento. */}
+            <main id="app-main-scroll" className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-bottom-nav-safe md:pb-12 bg-prius-background">
               {!esHome && (
                 <div className="no-print mb-space-lg">
                   <h1 className="text-headline-lg text-black tracking-tight">{section.name}</h1>

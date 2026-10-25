@@ -8,7 +8,7 @@ import { useMountTransition } from '../../hooks/useMountTransition'
 // centra) — para pickers, menús "Más" y selectores cortos. `maxHeightClass`
 // por defecto deja margen arriba para que nunca quede pegado al borde
 // superior del viewport (date pickers largos incluidos).
-export default function BottomSheet({ isOpen, onClose, title, children, maxHeightClass = 'max-h-[85vh]' }) {
+export default function BottomSheet({ isOpen, onClose, title, children, maxHeightClass = 'max-h-[85dvh]' }) {
   const overlayId = useId()
   const { bind } = useOverlay({ id: `prius-sheet-${overlayId}`, isOpen, onRequestClose: () => onClose?.() })
 
@@ -40,7 +40,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, maxHeigh
             </button>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto px-4 pb-4 font-ui">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4 font-ui">
           {children}
         </div>
       </div>

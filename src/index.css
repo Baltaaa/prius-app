@@ -304,3 +304,40 @@ button, a {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
+
+/*
+  Pulido mobile iPhone (oct 2026) — sistema único de espaciado/safe-areas,
+  reemplaza valores sueltos por pantalla. Solo <768px (mismo breakpoint que
+  BottomNav/AppShell): ≥768px nada de esto aplica, desktop queda intacto.
+*/
+@media (max-width: 767px) {
+  /* Espacio para el contenido de #app-main-scroll (AppLayout.jsx) — altura
+     real del BottomNav (56px, ver BottomNav.jsx min-h-[56px]) + su propia
+     safe-area-inset-bottom + 16px de aire, para que ninguna card quede
+     tapada atrás (bug real: KPIs de Caja). */
+  .pb-bottom-nav-safe { padding-bottom: calc(56px + env(safe-area-inset-bottom) + 16px); }
+
+  /* Gutter lateral único de 16px — mismo valor en todas las pantallas en
+     vez de px-4/px-6 mezclados sueltos por componente. */
+  .gutter-mobile { padding-left: 16px; padding-right: 16px; }
+
+  /* Touch targets mínimos: refuerzo global además de los min-h-[44px]/
+     min-w-[44px] puntuales que ya tiene cada botón — cubre los que falten. */
+  button, a[href], [role="button"] { min-height: 44px; }
+
+  /* iOS hace zoom automático al enfocar un input/select/textarea con
+     font-size < 16px — la mayoría de los inputs de la app ya usan
+     text-base md:text-sm (16px en mobile), esto es la red de seguridad
+     para cualquiera que no lo tenga explícito. */
+  /* !important a propósito: es una regla funcional (evitar el zoom
+     automático de iOS al enfocar), no solo estética — tiene que ganarle a
+     cualquier text-xs/text-sm suelto que algún input todavía tenga. */
+  input, select, textarea { font-size: 16px !important; }
+}
+
+/* overscroll-behavior: contain en vez de los overflow-y-auto/scroll sueltos
+   de la app — el scroll interno (modales, bottom sheets, listas largas)
+   nunca "pasa" el gesto al documento de atrás cuando llega al tope/fondo.
+   Clase reutilizable, aplicada en los contenedores con scroll propio
+   (#app-main-scroll, Modal.jsx, bottom sheets). */
+.overscroll-contain { overscroll-behavior: contain; }

@@ -159,7 +159,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
               key={c.label}
               type="button"
               onClick={() => aplicar(c.value)}
-              className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
+              className={`flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
                 value === c.value ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
               }`}
             >
