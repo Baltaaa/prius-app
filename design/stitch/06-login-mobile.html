@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>06 Login Mobile - Prius Playa Grande CRM</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            prius: {
+              yellow: '#F2CA50',
+              yellowHover: '#E5BD40',
+              dark: '#1A2A43',
+              graySub: '#666666',
+              border: '#E5E5E5',
+              fieldBg: '#F9F9F9',
+              noticeBg: '#F4F3F3'
+            }
+          },
+          fontFamily: {
+            manrope: ['Manrope', 'sans-serif'],
+            inter: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layout">
+    /* Dispositivo iOS nativo frame preview styling */
+    body {
+      background-color: #121212;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .mobile-screen-container {
+      width: 100%;
+      max-width: 375px;
+      min-height: 834px;
+      height: 100vh;
+      max-height: 834px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Fondo superior con la fotografía de Playa Grande provista */
+    .hero-sky-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 48%;
+      background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDuiiLjNK3u7XhS2OM2_FSwKPB1dwVamIFYiS5362sG9IJzTqwa1mGXGT2xXMDmRkq4MfqK1nDh94M7pkAD-FTzrB1RYz0EohGhECisy_-0gAbACNx8AoYur86RSl1zWJZ8yRwKrzGOXDbJUG3qo81Kochqkh-P06SJQcaksYkcl9dMKSgWAUNVRXztcsqQy42Z5rWChMlbBOQ-L9RmiXl0afrJ7imusohxznnpuWokl-wUnrr-pi471oDHLViPWnQoO5E');
+      background-position: top center;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    /* Overlay sutil para garantizar contraste del header */
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(14, 38, 70, 0.35) 0%, rgba(20, 50, 90, 0.1) 60%, rgba(0,0,0,0) 100%);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-0 sm:p-4">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="mobile-screen-container bg-white relative rounded-none sm:rounded-[44px] border-0 sm:border-[8px] sm:border-neutral-800">
+<!-- BEGIN: BackgroundImageLayer -->
+<div class="hero-sky-bg" data-purpose="scenery-background">
+<div class="hero-overlay"></div>
+</div>
+<!-- END: BackgroundImageLayer -->
+<!-- BEGIN: iOSStatusBar -->
+<header class="relative z-20 flex justify-between items-center px-6 pt-3 text-white" data-purpose="ios-status-bar">
+<!-- iOS Clock -->
+<span class="font-semibold text-[15px] tracking-tight">09:41</span>
+<!-- iOS Indicators Icons -->
+<div class="flex items-center space-x-2 text-white">
+<!-- Signal Icon -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25c-.2.2-.2.51 0 .71.2.2.51.2.71 0l.64-.64C7.24 19.34 9.49 20 12 20s4.76-.66 6.3-1.68l.64.64c.1.1.23.15.35.15s.26-.05.35-.15c.2-.2.2-.51 0-.71l-.62-.64C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"></path>
+</svg>
+<!-- Wifi Icon -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.32c3.74 0 7.15 1.48 9.68 3.91L12 19.4 2.32 11.23C4.85 8.8 8.26 7.32 12 7.32z"></path>
+</svg>
+<!-- Battery Icon -->
+<div class="w-6 h-3 border border-white rounded-[4px] p-[1px] flex items-center">
+<div class="h-full w-4 bg-white rounded-sm"></div>
+</div>
+</div>
+</header>
+<!-- END: iOSStatusBar -->
+<!-- BEGIN: BrandHeader -->
+<div class="relative z-10 px-5 pt-4 pb-6 flex items-center space-x-3.5" data-purpose="brand-identification">
+<!-- Prius Circular Logo Badge -->
+<div class="w-12 h-12 rounded-full bg-prius-yellow flex items-center justify-center shadow-md flex-shrink-0">
+<svg class="w-8 h-8 text-neutral-900" fill="currentColor" viewbox="0 0 40 40">
+<path d="M20 5C11.716 5 5 11.716 5 20c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15 0-8.284-6.716-15-15-15zm-2.5 7h4.8c3.2 0 5.4 1.8 5.4 4.5s-2.2 4.5-5.4 4.5h-2.3v6.5h-2.5V12zm2.5 6.8h2.1c1.7 0 2.9-.9 2.9-2.3s-1.2-2.3-2.9-2.3H20v4.6z"></path>
+</svg>
+</div>
+<!-- Brand Titles -->
+<div class="flex flex-col">
+<span class="font-manrope font-extrabold text-[22px] tracking-tight text-white drop-shadow-sm leading-tight">Prius</span>
+<span class="font-inter text-[10px] font-semibold tracking-[0.25em] text-white/90 uppercase drop-shadow-sm">PLAYA GRANDE</span>
+</div>
+</div>
+<!-- END: BrandHeader -->
+<!-- BEGIN: BottomSheet -->
+<main class="relative z-20 mt-auto bg-white rounded-t-[32px] border-t border-prius-border shadow-[0_-8px_30px_rgba(0,0,0,0.06)] flex flex-col justify-between" data-purpose="login-bottom-sheet">
+<!-- Top Handle / Tirador -->
+<div aria-hidden="true" class="w-full flex justify-center pt-3 pb-1">
+<div class="w-10 h-1 rounded-full bg-neutral-300"></div>
+</div>
+<!-- Sheet Inner Form Content -->
+<div class="px-4 pt-2 pb-2">
+<!-- Headers -->
+<div class="mb-4">
+<h1 class="font-manrope font-bold text-[24px] text-neutral-900 leading-tight">Iniciar sesión</h1>
+<p class="font-inter text-[13px] text-prius-graySub mt-0.5">Acceso exclusivo para el equipo Prius.</p>
+</div>
+<form action="#" class="space-y-3.5" method="POST" onsubmit="event.preventDefault();">
+<!-- Field: Email -->
+<div data-purpose="form-group-email">
+<label class="block font-inter font-medium text-[13px] text-neutral-800 mb-1" for="email">Email</label>
+<input class="w-full h-11 px-3.5 rounded-xl bg-prius-fieldBg border border-prius-border text-[14px] text-neutral-900 font-inter focus:outline-none focus:ring-2 focus:ring-prius-yellow focus:border-transparent transition" id="email" name="email" placeholder="ejemplo@priusplayagrande.com.ar" required="" type="email" value="baltasarbruschetti@yahoo.com.ar"/>
+</div>
+<!-- Field: Password -->
+<div data-purpose="form-group-password">
+<div class="flex justify-between items-center mb-1">
+<label class="font-inter font-medium text-[13px] text-neutral-800" for="password">Contraseña</label>
+<a class="font-inter text-[12px] font-medium text-prius-dark hover:underline underline-offset-2" href="#olvide">¿Olvidaste tu contraseña?</a>
+</div>
+<div class="relative">
+<input class="w-full h-11 px-3.5 pr-11 rounded-xl bg-prius-fieldBg border border-prius-border text-[14px] text-neutral-900 font-inter focus:outline-none focus:ring-2 focus:ring-prius-yellow focus:border-transparent tracking-widest transition" id="password" name="password" required="" type="password" value="••••••••••••"/>
+<!-- Toggle Visibility Button -->
+<button aria-label="Ver u ocultar contraseña" class="absolute right-0 top-0 h-11 w-11 flex items-center justify-center text-neutral-400 hover:text-neutral-600 focus:outline-none" data-purpose="password-visibility-toggle" id="togglePassword" type="button">
+<!-- Eye Outline SVG -->
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Checkbox: Remember Device -->
+<div class="flex items-center pt-0.5" data-purpose="remember-device-checkbox">
+<input checked="" class="w-4 h-4 rounded text-prius-yellow border-neutral-300 focus:ring-prius-yellow focus:ring-offset-0 focus:ring-1 cursor-pointer accent-[#F2CA50]" id="remember" type="checkbox"/>
+<label class="ml-2 font-inter text-[13px] text-neutral-700 cursor-pointer select-none" for="remember">
+              Recordar equipo en este dispositivo
+            </label>
+</div>
+<!-- Info Notice: Inactivity Alert -->
+<div class="p-3 bg-prius-noticeBg border border-prius-border rounded-xl flex items-start space-x-2.5" data-purpose="inactivity-notice">
+<div class="flex-shrink-0 mt-0.5 text-neutral-500">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<p class="font-inter text-[12px] text-neutral-600 leading-snug">
+              Cerramos tu sesión por inactividad. Volvé a ingresar para continuar.
+            </p>
+</div>
+<!-- Action Button -->
+<div class="pt-1">
+<button class="w-full h-12 bg-prius-yellow hover:bg-prius-yellowHover text-neutral-950 font-manrope font-bold text-[15px] rounded-xl transition duration-150 flex items-center justify-center shadow-sm active:scale-[0.99]" type="submit">
+              Ingresar
+            </button>
+</div>
+</form>
+<!-- Footer / Version Note -->
+<footer class="mt-4 text-center pb-2">
+<p class="font-inter text-[11px] text-neutral-400">
+            Prius Balneario Playa Grande · CRM v1.0
+          </p>
+</footer>
+</div>
+<!-- iOS Home Indicator -->
+<div aria-hidden="true" class="w-full pb-2 pt-1 flex justify-center" data-purpose="ios-home-indicator">
+<div class="w-36 h-1 bg-neutral-900 rounded-full"></div>
+</div>
+</main>
+<!-- END: BottomSheet -->
+</div>
+<!-- END: MobileDeviceFrame -->
+<!-- JavaScript Interactivity -->
+<script data-purpose="password-visibility">
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+
+      if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', () => {
+          const isPassword = passwordInput.getAttribute('type') === 'password';
+          passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+          
+          // Toggle tracking visual style for asterisks vs plain text
+          if (isPassword) {
+            passwordInput.classList.remove('tracking-widest');
+          } else {
+            passwordInput.classList.add('tracking-widest');
+          }
+        });
+      }
+    });
+  </script>
+</body></html>
