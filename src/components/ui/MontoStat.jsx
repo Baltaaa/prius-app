@@ -18,6 +18,10 @@ import { formatPesos } from '../../lib/format'
 const SIZE_CLASS = {
   lg: 'text-metric-xl',
   md: 'text-[clamp(18px,5vw,24px)] font-bold leading-tight',
+  // `sm`: cards más chicas (ej. "Totales Operativos" de ResumenCaja), tope
+  // en 18px = mismo tamaño que el text-lg fijo que usaban en desktop (sin
+  // cambios ahí), se achica desde ~360px de ancho de card.
+  sm: 'text-[clamp(14px,4.5vw,18px)] font-bold leading-tight',
 }
 
 export default function MontoStat({ value, size = 'lg', className = '', as: Tag = 'p' }) {

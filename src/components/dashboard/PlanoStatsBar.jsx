@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Activity, AlertCircle, DoorOpen, Hourglass, Layers, Tent, Umbrella, Wallet } from 'lucide-react'
 import { formatPesos } from '../../lib/format'
+import MontoStat from '../ui/MontoStat'
 import { COLOR_TIPO_ALQUILER } from '../../lib/colors'
 import { useClima } from '../../hooks/useClima'
 import ClimaChip from './ClimaChip'
@@ -203,9 +204,11 @@ export function PendientesCard({ stats, filtro, onToggleFiltro, className = 'w-[
 export function IngresosCard({ stats, className = 'w-[150px]' }) {
   return (
     <StatCard icon={Wallet} label="Ingresos del día" className={className}>
-      <p className="text-2xl font-bold text-black tabular-nums leading-none truncate">
-        {stats.ingresosDelDia != null ? formatPesos(stats.ingresosDelDia) : '—'}
-      </p>
+      {stats.ingresosDelDia != null ? (
+        <MontoStat value={stats.ingresosDelDia} size="md" className="text-black leading-none" />
+      ) : (
+        <p className="text-2xl font-bold text-black tabular-nums leading-none">—</p>
+      )}
     </StatCard>
   )
 }

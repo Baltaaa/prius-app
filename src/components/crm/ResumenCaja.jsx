@@ -1,5 +1,6 @@
 import { formatPesos, formatFecha } from '../../lib/format'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
+import MontoStat from '../ui/MontoStat'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 import {
   ArrowUpRight, ArrowDownRight, Scale, FileText, AlertTriangle, CheckCircle2,
@@ -84,21 +85,27 @@ export default function ResumenCaja({ resumen }) {
           </Section>
 
           <Section title="Totales Operativos" icon={Wallet}>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-prius-surface rounded-xl p-4 text-center">
-                <ArrowUpRight className="text-prius-success mx-auto mb-2" size={18} />
-                <p className="text-[10px] text-prius-muted uppercase tracking-widest">Ingresos</p>
-                <p className="text-lg font-bold text-prius-success tabular-nums mt-1">{formatPesos(totales.ingresos)}</p>
-              </div>
-              <div className="bg-prius-surface rounded-xl p-4 text-center">
-                <ArrowDownRight className="text-prius-error mx-auto mb-2" size={18} />
-                <p className="text-[10px] text-prius-muted uppercase tracking-widest">Egresos</p>
-                <p className="text-lg font-bold text-prius-error tabular-nums mt-1">{formatPesos(totales.egresos)}</p>
-              </div>
-              <div className="bg-prius-surface rounded-xl p-4 text-center border border-gold/20">
+            {/* Pulido UX (oct 2026, item 2): grid-cols-3 pasa a 1+2 en mobile
+                (Neto arriba, Ingresos/Egresos abajo) — en 375px tres
+                columnas con un monto de 9 cifras ($ 239.947.560) no
+                entraban, el "$" se iba a otro renglón. MontoStat size="sm"
+                (clamp 14-18px, tope en 18px = mismo tamaño que el text-lg
+                fijo de siempre en desktop/tablet) en las tres. */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="col-span-2 sm:col-span-1 sm:order-3 bg-prius-surface rounded-xl p-4 text-center border border-gold/20 min-w-0">
                 <Scale className="text-gold mx-auto mb-2" size={18} />
                 <p className="text-[10px] text-prius-muted uppercase tracking-widest">Neto</p>
-                <p className="text-lg font-bold text-gold tabular-nums mt-1">{formatPesos(totales.neto)}</p>
+                <MontoStat value={totales.neto} size="sm" className="text-gold mt-1 mx-auto" />
+              </div>
+              <div className="sm:order-1 bg-prius-surface rounded-xl p-4 text-center min-w-0">
+                <ArrowUpRight className="text-prius-success mx-auto mb-2" size={18} />
+                <p className="text-[10px] text-prius-muted uppercase tracking-widest">Ingresos</p>
+                <MontoStat value={totales.ingresos} size="sm" className="text-prius-success mt-1 mx-auto" />
+              </div>
+              <div className="sm:order-2 bg-prius-surface rounded-xl p-4 text-center min-w-0">
+                <ArrowDownRight className="text-prius-error mx-auto mb-2" size={18} />
+                <p className="text-[10px] text-prius-muted uppercase tracking-widest">Egresos</p>
+                <MontoStat value={totales.egresos} size="sm" className="text-prius-error mt-1 mx-auto" />
               </div>
             </div>
           </Section>
