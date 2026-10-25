@@ -235,10 +235,7 @@ export default function Recepcion() {
         </Suspense>
       )}
 
-      <div className="flex items-center gap-3">
-        <QrCode className="text-gold" size={22} />
-        <h1 className="text-lg font-bold text-black uppercase tracking-wider">Recepción</h1>
-      </div>
+      <h1 className="sr-only">Recepción</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Columna izquierda: escanear / tipear / llegan hoy */}
