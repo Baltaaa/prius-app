@@ -25,6 +25,7 @@ import CajaImpresion from '../../components/crm/CajaImpresion'
 import CerrarCajaStepper from '../../components/crm/CerrarCajaStepper'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
+import MontoStat from '../../components/ui/MontoStat'
 
 const FILTROS_MEDIO = [
   { value: 'todos', label: 'Todos los medios' },
@@ -204,36 +205,62 @@ export default function Caja() {
 
   return (
     <div className="space-y-8 animate-premium-fade">
-      {/* Barra de navegación por fecha + historial */}
-      <div className="no-print flex flex-wrap items-center gap-3">
-        <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="p-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
-          <ChevronLeft size={16} />
-        </button>
-        {/* w-36 (144px) no entraba la fecha completa en mobile (texto 16px ahí
-            vs 14px en desktop) — encontrado auditando el fix de tabular-nums
-            del Plano, oct 2026. */}
-        <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="w-[164px]" />
-        <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="p-3 bg-prius-subtle hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
-          <ChevronRight size={16} />
-        </button>
+      {/* Barra de navegación por fecha + historial. Pulido mobile iPhone (oct
+          2026): en mobile la navegación de fecha pasa a ser su propia fila
+          simétrica de ancho completo (flecha | fecha | flecha, las dos
+          flechas del mismo tamaño y la fecha ocupando el centro) — antes
+          quedaba apretada entre "Volver a Hoy" y el badge de estado, que
+          wrappeaban de forma impredecible. Debajo, estado + Historial en una
+          fila de dos columnas iguales. Desktop (sm+) sigue siendo la fila
+          única de siempre. */}
+      <div className="no-print space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+        <div className="flex items-center gap-3 sm:contents">
+          <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
+            <ChevronLeft size={16} />
+          </button>
+          {/* w-36 (144px) no entraba la fecha completa en mobile (texto 16px ahí
+              vs 14px en desktop) — encontrado auditando el fix de tabular-nums
+              del Plano, oct 2026. flex-1 en mobile para que la fecha ocupe el
+              centro de la fila simétrica; ancho fijo en desktop (sin cambios). */}
+          <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="flex-1 min-w-0 sm:flex-none sm:w-[164px]" />
+          <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 bg-prius-subtle hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
+            <ChevronRight size={16} />
+          </button>
+        </div>
         {!esHoy && (
-          <button onClick={() => setSelectedDate(todayStr())} className="px-4 py-3 bg-gold/10 hover:bg-gold/20 border border-gold/20 rounded-xl text-gold text-xs font-bold uppercase tracking-widest transition-all">
+          <button onClick={() => setSelectedDate(todayStr())} className="w-full sm:w-auto px-4 py-3 bg-gold/10 hover:bg-gold/20 border border-gold/20 rounded-xl text-gold text-xs font-bold uppercase tracking-widest transition-all">
             Volver a Hoy
           </button>
         )}
         {cajaSeleccionada && (
-          <span className={`px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-red-500/10 text-prius-error border-red-500/20' : 'bg-green-500/10 text-prius-success border-green-500/20'}`}>
+          <span className={`hidden sm:inline-block px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-red-500/10 text-prius-error border-red-500/20' : 'bg-green-500/10 text-prius-success border-green-500/20'}`}>
             {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
           </span>
         )}
-        <div className="flex-1" />
+        <div className="hidden sm:block sm:flex-1" />
         <button
           onClick={() => setMostrarHistorial((v) => !v)}
-          className="flex items-center gap-2 px-4 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all min-h-[44px]"
+          className="hidden sm:flex items-center gap-2 px-4 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all min-h-[44px]"
         >
           <History size={14} /> Historial
         </button>
       </div>
+
+      {/* Estado + Historial: fila de dos columnas iguales, solo mobile (sm:
+          ya los muestra arriba en la fila de siempre). */}
+      {cajaSeleccionada && (
+        <div className="no-print sm:hidden grid grid-cols-2 gap-3">
+          <span className={`flex items-center justify-center px-4 py-3 min-h-[44px] rounded-xl text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-red-500/10 text-prius-error border-red-500/20' : 'bg-green-500/10 text-prius-success border-green-500/20'}`}>
+            {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
+          </span>
+          <button
+            onClick={() => setMostrarHistorial((v) => !v)}
+            className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all"
+          >
+            <History size={14} /> Historial
+          </button>
+        </div>
+      )}
 
       {mostrarHistorial && (
         <div className="no-print card-light p-6 rounded-2xl card-light-inner space-y-2">
@@ -293,41 +320,49 @@ export default function Caja() {
           Gasto (ver CLAUDE.md). */}
       {cajaSeleccionada && cajaSeleccionada.estado === 'abierta' && (
         <div className="no-print space-y-6">
-          {/* 4 KPI cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-hairline rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Neto en caja</p>
-                <div className="w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Wallet size={16} /></div>
+          {/* 4 KPI cards — grilla 2x2 en mobile (pulido mobile iPhone, oct
+              2026): las 4 usan el mismo componente de monto (MontoStat,
+              clamp + nowrap) en vez de 1 con text-metric-xl y 3 con
+              text-2xl fijo — eso partía los montos largos ($ 239.947.560)
+              en dos renglones en 375px. Título siempre en una línea
+              (truncate), ícono 32px arriba a la derecha igual en las
+              cuatro, el pill de la primera con overflow-hidden/truncate
+              para que nunca se salga de la card. */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Neto en caja</p>
+                <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Wallet size={16} /></div>
               </div>
-              <p className="text-metric-xl text-black tabular-nums mb-2">{formatPesos(cajaSeleccionada.total_neto)}</p>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-prius-success text-[10px] font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-prius-success" /> Arqueado en tiempo real
+              <MontoStat value={cajaSeleccionada.total_neto} className="text-black mb-2" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-prius-success text-[10px] font-medium max-w-full overflow-hidden mt-auto">
+                <span className="w-1.5 h-1.5 rounded-full bg-prius-success shrink-0" />
+                <span className="truncate">Arqueado en tiempo real</span>
               </span>
             </div>
-            <div className="bg-white border border-hairline rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Ingresos</p>
-                <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center text-prius-success"><ArrowDownRight size={16} /></div>
+            <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Ingresos</p>
+                <div className="shrink-0 w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center text-prius-success"><ArrowDownRight size={16} /></div>
               </div>
-              <p className="text-2xl font-bold text-prius-success tabular-nums mb-2">{formatPesos(cajaSeleccionada.total_cobros)}</p>
-              <p className="text-[10px] text-prius-muted">{movimientos.filter((m) => m.tipo_movimiento === 'ingreso' && m.estado !== 'anulado').length} cobro{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'} acreditado{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'}</p>
+              <MontoStat value={cajaSeleccionada.total_cobros} size="md" className="text-prius-success mb-2" />
+              <p className="text-[10px] text-prius-muted mt-auto truncate">{movimientos.filter((m) => m.tipo_movimiento === 'ingreso' && m.estado !== 'anulado').length} cobro{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'} acreditado{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'}</p>
             </div>
-            <div className="bg-white border border-hairline rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Egresos / gastos</p>
-                <div className="w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><ArrowUpRight size={16} /></div>
+            <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Egresos</p>
+                <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><ArrowUpRight size={16} /></div>
               </div>
-              <p className="text-2xl font-bold text-black tabular-nums mb-2">{formatPesos(cajaSeleccionada.total_gastos)}</p>
-              <p className="text-[10px] text-prius-muted">{todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id && g.estado !== 'anulado').length > 0 ? `${todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length} gasto(s) cargado(s)` : 'Sin retiros cargados'}</p>
+              <MontoStat value={cajaSeleccionada.total_gastos} size="md" className="text-black mb-2" />
+              <p className="text-[10px] text-prius-muted mt-auto truncate">{todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id && g.estado !== 'anulado').length > 0 ? `${todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length} gasto(s) cargado(s)` : 'Sin retiros cargados'}</p>
             </div>
-            <div className="bg-white border border-hairline rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Efectivo esperado</p>
-                <div className="w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Banknote size={16} /></div>
+            <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Efectivo</p>
+                <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Banknote size={16} /></div>
               </div>
-              <p className="text-2xl font-bold text-black tabular-nums mb-2">{formatPesos(efectivoEsperadoPreview)}</p>
-              <p className="text-[10px] text-prius-muted">Billetaje esperado en cajón</p>
+              <MontoStat value={efectivoEsperadoPreview} size="md" className="text-black mb-2" />
+              <p className="text-[10px] text-prius-muted mt-auto truncate">Billetaje esperado en cajón</p>
             </div>
           </div>
 
@@ -409,29 +444,35 @@ export default function Caja() {
                         </table>
                       </div>
 
-                      {/* Tablet/mobile: feed de tarjetas (mock mobile-abierta) */}
+                      {/* Tablet/mobile: feed de tarjetas (mock mobile-abierta). Pulido
+                          mobile iPhone (oct 2026): rediseñada en dos renglones para que
+                          nada se salga de la card — antes "12:21" quedaba cortado al
+                          final de un único renglón con cliente+unidad+medio+hora+ícono.
+                          Renglón 1: concepto truncado + monto. Renglón 2 (chico,
+                          truncado): cliente · unidad · medio · hora. Chip de comprobante
+                          debajo, en su propia línea. */}
                       <div className="lg:hidden space-y-2">
                         {movimientosFiltrados.map((m) => (
                           <button
                             key={`${m.tipo_movimiento}-${m.movimiento_id}`}
                             onClick={() => abrirDetalleMovimiento(m)}
-                            className={`w-full flex items-start justify-between gap-3 p-3 bg-prius-surface rounded-xl text-left transition-all ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
+                            className={`w-full flex flex-col gap-1 p-3 bg-prius-surface rounded-xl text-left transition-all ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
                           >
-                            <div className="flex items-start gap-3 min-w-0">
-                              <div className={`w-10 h-10 rounded-lg bg-white flex items-center justify-center shrink-0 ${m.tipo_movimiento === 'ingreso' ? 'text-prius-success' : 'text-prius-error'}`}>
-                                {m.tipo_movimiento === 'ingreso' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className={`shrink-0 w-6 h-6 rounded-md bg-white flex items-center justify-center ${m.tipo_movimiento === 'ingreso' ? 'text-prius-success' : 'text-prius-error'}`}>
+                                  {m.tipo_movimiento === 'ingreso' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                                </span>
+                                <p className={`text-sm font-bold text-black truncate min-w-0 ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
                               </div>
-                              <div className="min-w-0">
-                                <p className={`text-sm font-bold text-black truncate ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
-                                <p className="text-[10px] text-prius-muted uppercase tracking-wider mt-0.5">
-                                  {m.cliente_proveedor}{m.unidad ? ` • ${m.unidad}` : ''} • {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} • {formatHora(m.fecha_hora)}
-                                </p>
-                                {m.comprobante && (
-                                  <span className="inline-block mt-1.5 px-2 py-0.5 rounded bg-white text-[10px] font-mono font-semibold text-prius-slate">{m.comprobante}</span>
-                                )}
-                              </div>
+                              <span className={`text-sm font-bold tabular-nums whitespace-nowrap shrink-0 ${m.monto < 0 ? 'text-prius-error' : 'text-prius-success'}`}>{formatPesos(m.monto)}</span>
                             </div>
-                            <span className={`text-sm font-bold tabular-nums shrink-0 ${m.monto < 0 ? 'text-prius-error' : 'text-prius-success'}`}>{formatPesos(m.monto)}</span>
+                            <p className="text-[10px] text-prius-muted uppercase tracking-wider truncate pl-8">
+                              {m.cliente_proveedor}{m.unidad ? ` · ${m.unidad}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
+                            </p>
+                            {m.comprobante && (
+                              <span className="inline-block self-start ml-8 px-2 py-0.5 rounded bg-white text-[10px] font-mono font-semibold text-prius-slate">{m.comprobante}</span>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -533,17 +574,21 @@ export default function Caja() {
                 </div>
               </div>
 
-              {/* Mobile (<768px): FAB + botón fijo abajo */}
-              <button
-                onClick={() => setMostrarGasto(true)}
-                className="md:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gold text-black shadow-2xl flex items-center justify-center"
-                title="Registrar gasto"
-              >
-                <Plus size={24} />
-              </button>
-              <button onClick={() => setMostrarCierre(true)} className="md:hidden w-full py-4 bg-black hover:bg-gray-800 text-white font-bold uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2">
-                <Lock size={16} /> Cerrar Caja de Hoy
-              </button>
+              {/* Mobile (<768px): acciones en botones visibles dentro de la
+                  sección, apiladas. Antes "Registrar Gasto" era un FAB
+                  flotante fijo (bottom-24 right-4, con sombra) — se saca del
+                  todo (pulido mobile iPhone, oct 2026): el único botón
+                  flotante de alta que queda en la app es el "+" de la
+                  bottom nav (Nueva reserva). Esta acción pasa a un botón de
+                  ancho completo, mismo estilo que su par de desktop. */}
+              <div className="md:hidden space-y-3">
+                <button onClick={() => setMostrarGasto(true)} className="w-full py-4 bg-prius-surface hover:bg-hairline border border-hairline text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]">
+                  <Plus size={16} /> Registrar Gasto
+                </button>
+                <button onClick={() => setMostrarCierre(true)} className="w-full py-4 bg-black hover:bg-gray-800 text-white font-bold uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]">
+                  <Lock size={16} /> Cerrar Caja de Hoy
+                </button>
+              </div>
             </div>
 
             {/* Columna derecha — solo >=1024px: desglose por medio con tiles + acciones (mock). */}
