@@ -87,12 +87,21 @@ export default function BottomNav() {
           </NavLink>
         ))}
 
-        {/* Botón central elevado "Reserva" (mock) */}
-        <NavLink to="/app/reservas" className="flex-1 flex flex-col items-center justify-center -mt-4">
-          <span className="w-12 h-12 rounded-full bg-gold flex items-center justify-center shadow-[0_2px_8px_rgba(242,202,80,0.35)] active:scale-95 transition-transform">
+        {/* Botón central elevado "Reserva" (mock). Mismo bloque flex-col
+            items-center justify-center gap-1 py-2 min-h-[56px] que los
+            otros 4 ítems (spacer de 22px en vez del ícono real) para que el
+            label quede en la MISMA línea base que "Inicio"/"Plano"/etc —
+            antes el círculo de 48px + `-mt-4` en todo el bloque corría el
+            centrado y el label quedaba más abajo que el resto. El círculo
+            dorado se posiciona absolute por separado, así puede "flotar"
+            sobre el borde superior del nav sin afectar ese centrado. Sin
+            sombra (Quiet Luxury, pulido mobile oct 2026). */}
+        <NavLink to="/app/reservas" className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px]">
+          <span className="w-[22px] h-[22px]" aria-hidden="true" />
+          <span className="absolute -top-4 w-12 h-12 rounded-full bg-gold flex items-center justify-center active:scale-95 transition-transform">
             <Plus size={24} className="text-black" />
           </span>
-          <span className="text-label-md text-black mt-1">Reserva</span>
+          <span className="text-label-md text-black">Reserva</span>
         </NavLink>
 
         {ITEMS_DER.map((item) => (
@@ -126,7 +135,7 @@ export default function BottomNav() {
         >
           <div
             ref={bindMore}
-            className={`w-full max-h-[85vh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden ${showMore ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+            className={`w-full max-h-[85dvh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden ${showMore ? 'ui-open-sheet' : 'ui-close-sheet'}`}
             onClick={(e) => e.stopPropagation()}
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
@@ -142,7 +151,7 @@ export default function BottomNav() {
                 <X size={20} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-1">
+            <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4 space-y-1">
               {masItems.map((item) => (
                 <NavLink
                   key={item.path}
