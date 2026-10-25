@@ -91,7 +91,7 @@ function ItemNotificacion({ item, onAccion }) {
         <Icon size={16} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-black leading-snug">{item.titulo}</p>
+        <p className="text-xs font-bold text-black leading-snug whitespace-normal break-words">{item.titulo}</p>
         {item.detalle && <p className="text-[11px] text-prius-slate mt-0.5 truncate">{item.detalle}</p>}
         <div className="flex items-center gap-2 mt-1">
           <span className="text-[10px] text-prius-muted">{formatTiempoRelativo(item.creada_at)}</span>
@@ -120,7 +120,7 @@ function GrupoColapsado({ grupo, onAccion }) {
         <div className={`w-9 h-9 rounded-full bg-prius-subtle border border-hairline flex items-center justify-center shrink-0 ${meta.color}`}>
           <Icon size={16} />
         </div>
-        <span className="flex-1 text-left text-xs font-bold text-black">
+        <span className="flex-1 text-left text-xs font-bold text-black whitespace-normal break-words">
           {grupo.items.length} {meta.plural}
         </span>
         <ChevronDown size={14} className={`text-prius-muted transition-transform ${abierto ? 'rotate-180' : ''}`} />
