@@ -825,7 +825,7 @@ export default function Clientes() {
                         <span className="text-prius-slate text-[10px] uppercase tracking-widest font-bold whitespace-nowrap">Sin precio</span>
                       ) : (
                         formatPesosVisible(d.saldoInfo.total) && (
-                          <MontoStat value={d.saldoInfo.total} size="sm" className="text-prius-error" />
+                          <MontoStat value={d.saldoInfo.total} size="xs" className="text-prius-error" />
                         )
                       )}
 

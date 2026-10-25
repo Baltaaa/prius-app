@@ -10,6 +10,7 @@ import PagoComprobanteCampos from './PagoComprobanteCampos'
 import BrandSelect from '../ui/BrandSelect'
 import { useDialog } from '../../context/DialogProvider'
 import LoadingButton from '../ui/LoadingButton'
+import MontoStat from '../ui/MontoStat'
 import { CheckCircle2 } from 'lucide-react'
 
 // Componente compartido de cobro (Tarea 4): Clientes, Reservas y el modal de
@@ -264,19 +265,23 @@ export default function RegistrarPago({
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
               <p className="text-[9px] text-prius-muted uppercase tracking-widest">Total</p>
-              <p className="text-sm font-bold text-black mt-1 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">{formatPesos(total)}</p>
+              <MontoStat value={total} size="xs" className="text-black mt-1" />
             </div>
             <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
               <p className="text-[9px] text-prius-muted uppercase tracking-widest">Pagado</p>
-              <p className="text-sm font-bold text-prius-success mt-1 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
-                {saldoDesconocido ? <span className="text-prius-slate normal-case">Sin verificar</span> : formatPesos(pagado)}
-              </p>
+              {saldoDesconocido ? (
+                <p className="text-sm font-bold text-prius-slate normal-case mt-1">Sin verificar</p>
+              ) : (
+                <MontoStat value={pagado} size="xs" className="text-prius-success mt-1" />
+              )}
             </div>
             <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
               <p className="text-[9px] text-prius-muted uppercase tracking-widest">Saldo</p>
-              <p className="text-sm font-bold text-gold mt-1 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
-                {saldoDesconocido ? <span className="text-prius-slate normal-case">Sin verificar</span> : formatPesos(saldo)}
-              </p>
+              {saldoDesconocido ? (
+                <p className="text-sm font-bold text-prius-slate normal-case mt-1">Sin verificar</p>
+              ) : (
+                <MontoStat value={saldo} size="xs" className="text-gold mt-1" />
+              )}
             </div>
           </div>
         )}
