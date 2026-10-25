@@ -178,7 +178,7 @@ export default function Comprobantes() {
           {/* Vista previa WYSIWYG: hoja real en proporción A4, papel blanco.
               Siempre blanco y negro (item 15, testing oct 2026) — se sacó el
               selector de color para ahorrar tinta. */}
-          <div className="overflow-x-auto rounded-2xl bg-black/20 p-6 md:p-10 flex justify-center">
+          <div className="overflow-x-auto rounded-2xl p-6 md:p-10 flex justify-center">
             <div className="shadow-2xl shrink-0">
               <ComprobanteDocumento datos={datosEstadoCuenta} tipo="estado_cuenta" />
             </div>
