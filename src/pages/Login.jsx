@@ -121,6 +121,15 @@ export default function Login({ modo }) {
 
       if (data?.user) {
         setFailedAttempts(0)
+        // Pulido UX (oct 2026, item 7) — causa raíz del "Dashboard aparece
+        // scrolleado": con el teclado de iOS abierto (input de contraseña
+        // enfocado), Safari desplaza el viewport para mantenerlo a la
+        // vista. Ese desplazamiento queda en window.scrollY incluso
+        // después de blurear — hay que forzar el scroll a 0 ACÁ, antes de
+        // que se monte el layout autenticado (el blur por sí solo no
+        // revierte el desplazamiento ya hecho).
+        document.activeElement?.blur?.()
+        window.scrollTo(0, 0)
         // Se marca ANTES de navegar (Tarea 3): si no, useInactivityLogout
         // podría leer un prius_last_activity viejo/ausente apenas se monta
         // el layout autenticado y reintroducir un cierre de sesión espurio.

@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import CambiarContrasena from './pages/CambiarContrasena'
 import PrivateRoute from './components/PrivateRoute'
 import GlobalLoader from './components/ui/GlobalLoader'
+import ScrollToTop from './components/ScrollToTop'
 import { AuthProvider } from './context/AuthProvider'
 
 // El login es la primera pantalla: solo él se carga en el bundle inicial.
@@ -30,6 +31,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ScrollToTop />
         <Suspense fallback={<GlobalLoader message="Cargando módulo" />}>
           <Routes>
             {/* Login: "/" se mantiene por compatibilidad, "/login" es la ruta canónica. */}

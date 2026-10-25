@@ -291,7 +291,10 @@ export default function TopBar() {
   }
 
   return (
-    <header className="no-print relative h-16 md:h-20 flex items-center justify-between gap-3 px-4 md:px-gutter-lg bg-white border-b border-hairline sticky top-0 z-20 shrink-0 font-ui">
+    <header
+      className="no-print relative min-h-16 md:h-20 flex items-center justify-between gap-3 px-4 md:px-gutter-lg bg-white border-b border-hairline sticky top-0 z-20 shrink-0 font-ui"
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+    >
       {/* Izquierda: desktop/tablet (≥768px, mock 01-home-desktop) = ubicación +
           chip Operativo + buscador inline. Mobile (<768px, mock
           01-home-mobile) = "Prius App" + chip + nombre de la sección actual
