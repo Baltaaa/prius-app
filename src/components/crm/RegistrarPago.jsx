@@ -197,9 +197,34 @@ export default function RegistrarPago({
   const esFormularioDirty = () =>
     Number(monto) > 0 || referencia.trim() !== '' || !!numero
 
+  // Botón de confirmar como footer sticky del Modal (pulido mobile iPhone,
+  // oct 2026) — antes vivía como último elemento del body scrolleable y
+  // quedaba cortado por la barra de Safari en pantallas chicas. `form`
+  // conecta el botón (fuera del <form> en el DOM, Modal lo renderiza en un
+  // hermano) con el submit real via el atributo HTML form=id.
+  const submitButton = (
+    <LoadingButton
+      type="submit"
+      form="form-registrar-pago"
+      loading={saving}
+      loadingText="Guardando..."
+      disabled={
+        monto <= 0 || excedeSaldo || comprobanteIncompleto || !!duplicado
+        || (!editingPago && !reservaId && !allowSinReserva) || (!editingPago && !cliente?.id)
+      }
+      className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
+    >
+      {editingPago
+        ? `Guardar ${monto > 0 ? formatPesos(monto) : ''}`.trim()
+        : esHistorico
+          ? `Confirmar pago histórico ${monto > 0 ? formatPesos(monto) : ''}`.trim()
+          : `Confirmar ${monto > 0 ? formatPesos(monto) : 'Pago'}`}
+    </LoadingButton>
+  )
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isDirty={esFormularioDirty} title={tituloOverride || 'Registrar Pago'}>
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <Modal isOpen={isOpen} onClose={onClose} isDirty={esFormularioDirty} title={tituloOverride || 'Registrar Pago'} footer={submitButton}>
+      <form id="form-registrar-pago" onSubmit={handleSubmit} className="space-y-6">
         {/* Oct 2026: aviso proactivo, no solo reactivo al error P0003 al
             enviar — se ve apenas se abre el form, antes de cargar nada. Un
             pago con fecha histórica (comprobante con fecha anterior al
@@ -236,20 +261,20 @@ export default function RegistrarPago({
 
         {/* Resumen */}
         {reservaSeleccionada && (
-          <div className="grid grid-cols-3 gap-3">
-            <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
               <p className="text-[9px] text-prius-muted uppercase tracking-widest">Total</p>
-              <p className="text-sm font-bold text-black mt-1">{formatPesos(total)}</p>
+              <p className="text-sm font-bold text-black mt-1 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">{formatPesos(total)}</p>
             </div>
-            <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+            <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
               <p className="text-[9px] text-prius-muted uppercase tracking-widest">Pagado</p>
-              <p className="text-sm font-bold text-prius-success mt-1">
+              <p className="text-sm font-bold text-prius-success mt-1 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                 {saldoDesconocido ? <span className="text-prius-slate normal-case">Sin verificar</span> : formatPesos(pagado)}
               </p>
             </div>
-            <div className="p-3 bg-prius-subtle border border-hairline rounded-xl text-center">
+            <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
               <p className="text-[9px] text-prius-muted uppercase tracking-widest">Saldo</p>
-              <p className="text-sm font-bold text-gold mt-1">
+              <p className="text-sm font-bold text-gold mt-1 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                 {saldoDesconocido ? <span className="text-prius-slate normal-case">Sin verificar</span> : formatPesos(saldo)}
               </p>
             </div>
@@ -257,23 +282,6 @@ export default function RegistrarPago({
         )}
 
         <PagoComprobanteCampos form={form} />
-
-        <LoadingButton
-          type="submit"
-          loading={saving}
-          loadingText="Guardando..."
-          disabled={
-            monto <= 0 || excedeSaldo || comprobanteIncompleto || !!duplicado
-            || (!editingPago && !reservaId && !allowSinReserva) || (!editingPago && !cliente?.id)
-          }
-          className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
-        >
-          {editingPago
-            ? `Guardar ${monto > 0 ? formatPesos(monto) : ''}`.trim()
-            : esHistorico
-              ? `Confirmar pago histórico ${monto > 0 ? formatPesos(monto) : ''}`.trim()
-              : `Confirmar ${monto > 0 ? formatPesos(monto) : 'Pago'}`}
-        </LoadingButton>
       </form>
     </Modal>
   )

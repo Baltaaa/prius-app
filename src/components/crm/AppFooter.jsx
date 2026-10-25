@@ -22,12 +22,15 @@ export default function AppFooter() {
         </div>
       </footer>
 
-      <div className="md:hidden mt-space-lg mb-6 rounded-xl p-3 bg-prius-surface flex items-center justify-between">
+      {/* Mobile (pulido iPhone, oct 2026): antes era una sola fila
+          justify-between que apretaba el nombre largo contra la versión en
+          375px — pasa a dos líneas centradas, sin ese apriete. */}
+      <div className="md:hidden mt-space-lg mb-6 rounded-xl p-4 bg-prius-surface flex flex-col items-center gap-1.5 text-center">
         <div className="flex items-center gap-2 text-prius-slate">
-          <Umbrella size={18} />
+          <Umbrella size={16} className="shrink-0" />
           <span className="text-body-sm">Prius Playa Grande · Sector Carpas y Balneario</span>
         </div>
-        <span className="text-[10px] uppercase tracking-wider text-prius-slate shrink-0 ml-2">{APP_VERSION}</span>
+        <span className="text-[10px] uppercase tracking-wider text-prius-slate">{APP_VERSION}</span>
       </div>
     </>
   )
