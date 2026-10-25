@@ -8,7 +8,8 @@ import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, unidadEmoji, formatComprobante } from '../../lib/format'
+import MontoStat from '../../components/ui/MontoStat'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
 import { registrarVisto } from '../../hooks/useRecientes'
@@ -40,7 +41,7 @@ import StatusBadge from '../../components/crm/StatusBadge'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
-import { Plus, Phone, Filter, Check, ChevronLeft, LayoutList } from 'lucide-react'
+import { Plus, Filter, Check, ChevronLeft, LayoutList } from 'lucide-react'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
 // reserva de período/día activa hoy — temporada actual, temporadas pasadas,
@@ -766,7 +767,7 @@ export default function Clientes() {
                     // ancho fijo en las columnas de la derecha se comporta
                     // como se espera: el nombre (flex-1 min-w-0) se lleva
                     // todo el sobrante real.
-                    className={`bg-white rounded-xl border px-4 py-4 flex items-center gap-x-2 cursor-pointer transition-all ${
+                    className={`bg-white rounded-xl border px-4 py-4 min-h-[76px] flex items-center gap-x-2 cursor-pointer transition-all ${
                       isSelected ? 'border-gold bg-prius-surface' : 'border-hairline hover:bg-prius-surface'
                     }`}
                   >
@@ -774,17 +775,18 @@ export default function Clientes() {
                       {cliente.nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
                     </div>
 
-                    {/* Nombre + teléfono: ellipsis, nunca empuja las
-                        columnas de la derecha (Bloque 3, oct 2026). */}
+                    {/* Nombre + estado (pulido UX, oct 2026, item 3): antes
+                        el teléfono ocupaba el segundo renglón y el badge de
+                        estado competía con el nombre en el primero (lo
+                        truncaba a "A.."). El teléfono ya se ve dentro de la
+                        ficha — acá va: renglón 1 nombre completo, renglón 2
+                        el badge de estado (mismo estadoBadgeStatus de
+                        siempre, sin tocar el mapeo). */}
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline gap-2 min-w-0">
-                        <p className="font-bold text-black truncate flex-1 min-w-0">{cliente.nombre}</p>
-                        {d.badgeStatus && <span className="shrink-0"><StatusBadge status={d.badgeStatus} /></span>}
+                      <p className="font-bold text-black truncate">{cliente.nombre}</p>
+                      <div className="mt-1 min-h-[18px]">
+                        {d.badgeStatus && <StatusBadge status={d.badgeStatus} />}
                       </div>
-                      <p className="text-prius-slate text-xs mt-0.5 flex items-center gap-1.5 truncate">
-                        <Phone size={11} className="text-prius-muted shrink-0" />
-                        {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-prius-muted">Sin cargar</span>}
-                      </p>
                       {d.comprobanteMatch && (
                         <button
                           type="button"
@@ -801,59 +803,54 @@ export default function Clientes() {
                       )}
                     </div>
 
-                    {/* Saldo: columna propia, SIEMPRE a la derecha de la
-                        info y a la izquierda de la unidad — una sola línea
-                        por renglón, la segunda se trunca en vez de partir. */}
-                    {/* shrink-0 sin ancho fijo (Bloque 3): un flex item al
-                        final de la fila queda pegado al borde derecho del
-                        padding de la card por posición natural, no hace
-                        falta un ancho fijo para "mismo borde en toda fila"
-                        — y así cuando el saldo está vacío/corto, el nombre
-                        se queda con todo el espacio sobrante real. */}
-                    <div className="text-right shrink-0 max-w-[128px]">
+                    {/* Columna derecha (pulido UX, oct 2026, item 3): saldo
+                        pendiente arriba (si hay) y unidad debajo, en una
+                        sola columna alineada a la derecha — antes eran dos
+                        bloques lado a lado. Sin saldo, items-center en la
+                        fila ya centra verticalmente este bloque (más chico)
+                        contra el bloque de nombre+badge de la izquierda. */}
+                    <div className="flex flex-col items-end gap-1 shrink-0 max-w-[128px]">
                       {d.saldoInfo.sinVerificar ? (
                         d.saldoHeaderSaldado ? null : (
-                          <>
+                          <div className="text-right">
                             <p className="text-prius-error text-[9px] font-bold uppercase tracking-wide whitespace-nowrap">Saldo sin verificar</p>
                             {d.comprobantesPendientesCliente > 0 && (
                               <p className="text-prius-muted font-normal normal-case tracking-normal text-[10px] truncate">
                                 {d.comprobantesPendientesCliente} comprobante{d.comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
                               </p>
                             )}
-                          </>
+                          </div>
                         )
                       ) : d.sinPrecio ? (
                         <span className="text-prius-slate text-[10px] uppercase tracking-widest font-bold whitespace-nowrap">Sin precio</span>
                       ) : (
                         formatPesosVisible(d.saldoInfo.total) && (
-                          <span className="font-bold text-sm text-prius-error whitespace-nowrap">{formatPesosVisible(d.saldoInfo.total)}</span>
+                          <MontoStat value={d.saldoInfo.total} size="sm" className="text-prius-error" />
                         )
                       )}
-                    </div>
 
-                    {/* Unidad: columna de ancho fijo, pegada al borde
-                        derecho de la card en todas las filas (Bloque 3). */}
-                    <div
-                      className="flex items-baseline justify-end gap-1 tabular-nums shrink-0"
-                      title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
-                    >
-                      {d.unidadesCliente.length === 0 ? (
-                        <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
-                      ) : (
-                        <>
-                          {d.unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
-                            <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
-                              <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
-                              <span className="text-base font-extrabold text-black leading-none">{u.numero}</span>
-                            </span>
-                          ))}
-                          {d.unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
-                            <span className="text-[10px] text-prius-muted font-bold tracking-widest">
-                              +{d.unidadesCliente.length - MAX_UNIDADES_VISIBLES}
-                            </span>
-                          )}
-                        </>
-                      )}
+                      <div
+                        className="flex items-baseline justify-end gap-1 tabular-nums"
+                        title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
+                      >
+                        {d.unidadesCliente.length === 0 ? (
+                          <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
+                        ) : (
+                          <>
+                            {d.unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
+                              <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
+                                <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
+                                <span className="text-base font-extrabold text-black leading-none">{u.numero}</span>
+                              </span>
+                            ))}
+                            {d.unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
+                              <span className="text-[10px] text-prius-muted font-bold tracking-widest">
+                                +{d.unidadesCliente.length - MAX_UNIDADES_VISIBLES}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   </React.Fragment>
