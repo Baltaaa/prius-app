@@ -218,7 +218,13 @@ export default function Home() {
         </div>
 
         <div className="lg:col-span-5 min-w-0 flex flex-col gap-space-md order-first lg:order-none">
-          <div className="grid grid-cols-4 lg:grid-cols-2 gap-space-sm flex-1">
+          {/* grid-cols-2 en mobile (pulido UX, oct 2026, item 8): antes era
+              grid-cols-4 — "Buscar cliente" (el label más largo) se salía
+              de su card en 375px. 2x2 da el doble de ancho por card; el
+              label queda centrado y puede partirse en dos líneas prolijas
+              (sin truncate: `break-words` + sin whitespace-nowrap) en vez
+              de desbordar. */}
+          <div className="grid grid-cols-2 gap-space-sm flex-1">
             {accesos.map((a) => (
               <button
                 key={a.key}
@@ -230,7 +236,7 @@ export default function Home() {
                   <a.icon size={20} className="text-black" />
                 </div>
                 <div className="lg:mt-4 min-w-0 w-full">
-                  <span className="block text-xs md:text-label-md lg:text-headline-sm text-black">{a.label}</span>
+                  <span className="block text-xs md:text-label-md lg:text-headline-sm text-black leading-tight break-words">{a.label}</span>
                   <span className="hidden lg:block text-body-sm text-prius-slate whitespace-normal">{a.sub}</span>
                 </div>
               </button>
