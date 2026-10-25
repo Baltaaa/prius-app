@@ -256,7 +256,15 @@ export default function TopBar() {
   // copiados (antes `setShowNotifications`/`setShowProfileMenu` se pisaban
   // a mano entre sí). `bind` se adjunta al trigger y al panel de cada uno;
   // un click en cualquiera de los dos cuenta como "adentro".
-  const searchOverlay = useOverlay({ id: 'topbar-search', isOpen: showDropdown, onRequestClose: closeSearch })
+  // No registrar/activar el overlay del buscador desktop mientras la
+  // pantalla completa de búsqueda mobile está abierta — comparten
+  // `searchValue`, así que tipear activa `showDropdown` para los dos a la
+  // vez. El nodo del desktop (oculto por CSS en mobile, no desmontado)
+  // igual queda en el DOM, y al no estar contenido dentro del territorio
+  // del overlay mobile, el OverlayManager lo trataba como un overlay de
+  // primer nivel nuevo y cerraba la búsqueda mobile apenas se escribía
+  // una letra (bug real, oct 2026).
+  const searchOverlay = useOverlay({ id: 'topbar-search', isOpen: showDropdown && !mobileSearchOpen, onRequestClose: closeSearch })
   const notifOverlay = useOverlay({ id: 'topbar-notif', isOpen: showNotifications, onRequestClose: () => setShowNotifications(false) })
   const profileOverlay = useOverlay({ id: 'topbar-profile', isOpen: showProfileMenu, onRequestClose: () => setShowProfileMenu(false) })
   // Pantalla completa, sin "afuera" — se registra solo para Escape y para
