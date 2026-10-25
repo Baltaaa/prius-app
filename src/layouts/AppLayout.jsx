@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import TopBar from '../components/crm/TopBar'
 import AppFooter from '../components/crm/AppFooter'
@@ -26,6 +26,15 @@ export default function AppLayout() {
   // toca — el título se renderiza acá, por fuera del componente del plano.
   const esHome = location.pathname.startsWith('/app/home')
   const section = useSection(location.pathname)
+
+  // Pulido UX (oct 2026, item 4): se sacó el bloque visible de título de
+  // sección (H1 + subtítulo) de todas las pantallas — ocupaba espacio y era
+  // redundante (la sección activa ya se ve en el Sidebar/BottomNav). El
+  // document.title sigue cambiando por sección, para accesibilidad y la
+  // pestaña del navegador; el h1 visible pasa a sr-only más abajo.
+  useEffect(() => {
+    document.title = esHome ? 'Prius App' : `${section.name} · Prius App`
+  }, [esHome, section.name])
 
   return (
     <OverlayProvider>
@@ -67,12 +76,11 @@ export default function AppLayout() {
                 el scroll propio de esta columna nunca "rebote" hacia el
                 documento. */}
             <main id="app-main-scroll" className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-bottom-nav-safe md:pb-12 bg-prius-background">
-              {!esHome && (
-                <div className="no-print mb-space-lg">
-                  <h1 className="text-headline-lg text-black tracking-tight">{section.name}</h1>
-                  {section.subtitle && <p className="text-body-md text-prius-slate mt-1">{section.subtitle}</p>}
-                </div>
-              )}
+              {/* h1 accesible oculto visualmente — el título visible de
+                  sección se sacó (item 4), pero un lector de pantalla sigue
+                  necesitando un h1 por página. Home tiene el suyo propio
+                  ("Hola, {nombre}"), no se duplica acá. */}
+              {!esHome && <h1 className="sr-only">{section.name}</h1>}
               <Outlet />
               <div className="no-print">
                 <AppFooter />
