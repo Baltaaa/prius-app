@@ -65,6 +65,11 @@ export default function BottomNav() {
     navigate('/login')
   }
 
+  // Resalta "Más" cuando la ruta activa es una de las que vive adentro del
+  // sheet (pulido UX, oct 2026, item 5) — mismo criterio de prefijo que ya
+  // usa NavLink por default para Inicio/Plano/Clientes.
+  const masActivo = masItems.some((item) => location.pathname.startsWith(item.path))
+
   return (
     <>
       <nav
@@ -77,13 +82,19 @@ export default function BottomNav() {
             to={item.path}
             onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors ${
+              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors duration-150 ${
                 isActive ? 'text-black font-semibold' : 'text-prius-slate hover:text-black'
               }`
             }
           >
-            <item.icon size={22} />
-            {item.name}
+            {({ isActive }) => (
+              <>
+                <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${isActive ? 'bg-gold/20' : ''}`}>
+                  <item.icon size={22} />
+                </span>
+                {item.name}
+              </>
+            )}
           </NavLink>
         ))}
 
@@ -101,7 +112,11 @@ export default function BottomNav() {
           <span className="absolute -top-4 w-12 h-12 rounded-full bg-gold flex items-center justify-center active:scale-95 transition-transform">
             <Plus size={24} className="text-black" />
           </span>
-          <span className="text-label-md text-black">Reserva</span>
+          {/* Label siempre neutro (pulido UX, oct 2026, item 5): antes era
+              text-black fijo, se veía "activo" en cualquier sección — el
+              destaque de este ítem lo da solo el círculo dorado, nunca el
+              label (nunca compite con el resaltado real de la bottom nav). */}
+          <span className="text-label-md text-prius-slate">Reserva</span>
         </NavLink>
 
         {ITEMS_DER.map((item) => (
@@ -110,20 +125,34 @@ export default function BottomNav() {
             to={item.path}
             onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors ${
+              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors duration-150 ${
                 isActive ? 'text-black font-semibold' : 'text-prius-slate hover:text-black'
               }`
             }
           >
-            <item.icon size={22} />
-            {item.name}
+            {({ isActive }) => (
+              <>
+                <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${isActive ? 'bg-gold/20' : ''}`}>
+                  <item.icon size={22} />
+                </span>
+                {item.name}
+              </>
+            )}
           </NavLink>
         ))}
+        {/* "Más" resalta cuando la ruta activa es una de las que vive
+            adentro del sheet (Caja, Historial, Comprobantes, etc. — pulido
+            UX, oct 2026, item 5): mismo pill/negrita/semibold que el resto,
+            aunque no sea un NavLink real (abre el sheet, no navega). */}
         <button
           onClick={() => setShowMore(true)}
-          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md text-prius-slate hover:text-black transition-colors"
+          className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors duration-150 ${
+            masActivo ? 'text-black font-semibold' : 'text-prius-slate hover:text-black'
+          }`}
         >
-          <MoreHorizontal size={22} />
+          <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${masActivo ? 'bg-gold/20' : ''}`}>
+            <MoreHorizontal size={22} />
+          </span>
           Más
         </button>
       </nav>
