@@ -80,40 +80,11 @@ export default function PlanoMobile({
         </div>
       )}
 
-      {/* Filtro por tipo */}
-      <div className="flex items-center overflow-x-auto scrollbar-none shrink-0">
-        <div className="flex items-center bg-prius-subtle p-1 rounded-full gap-0.5 shrink-0">
-          {[['todo', 'Todo', planoStats?.ocupacion.total], ['carpas', 'Carpas', planoStats?.carpas.total], ['sombrillas', 'Sombrillas', planoStats?.sombrillas.total]].map(([key, label, total]) => (
-            <button
-              key={key}
-              onClick={() => onToggleFiltro(key === 'todo' ? null : key)}
-              className={`px-3 py-1 rounded-full text-label-lg whitespace-nowrap transition-colors ${
-                (key === 'todo' ? !statsFiltro : statsFiltro === key) ? 'bg-black text-white' : 'text-prius-slate'
-              }`}
-            >
-              {label}{total != null ? ` (${total})` : ''}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Filtro por estado — fila propia (oct 2026): antes compartía el
-          mismo renglón con scroll horizontal que el filtro de tipo, así que
-          "Pendientes" quedaba fuera de vista sin que se notara que había
-          que scrollear. Ahora siempre visible. */}
-      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
-        {[['todas', 'Todas', null], ['libres', 'Libres', planoStats?.libres.count], ['ocupacion', 'Ocupadas', planoStats?.ocupacion.count], ['pendientes', 'Pendientes', planoStats?.pendientes.count]].map(([key, label, count]) => (
-          <button
-            key={key}
-            onClick={() => onToggleFiltro(key === 'todas' ? null : key)}
-            className={`h-7 px-2.5 rounded-full text-label-md uppercase whitespace-nowrap shrink-0 transition-colors ${
-              (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-gold text-black' : 'bg-prius-subtle text-prius-slate'
-            }`}
-          >
-            {label}{count != null ? ` (${count})` : ''}
-          </button>
-        ))}
-      </div>
+      {/* Filtros de tipo/estado ocultos en mobile (pulido UX, oct 2026, item
+          6) — solo viven en desktop/tablet (Dashboard.jsx). El plano sube y
+          aprovecha el espacio que dejan. Los chips todavía se pueden
+          "activar" por código desde las 3 KPI cards de arriba (onToggleFiltro
+          sigue intacto), esto solo saca la UI redundante de filtro manual. */}
 
       {/* Leyenda — explica los 6 indicadores reales (ver PlanoLeyenda.jsx),
           no solo los 3 colores de fondo. */}

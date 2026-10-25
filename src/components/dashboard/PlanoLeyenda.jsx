@@ -16,8 +16,13 @@ const ITEMS = [
 
 export default function PlanoLeyenda({ compact = false }) {
   if (compact) {
+    // Pulido UX (oct 2026, item 6): antes era una sola fila con scroll
+    // horizontal — el último ítem ("Reserva web") quedaba fuera de vista
+    // sin que se notara que había que scrollear, y a mitad de scroll
+    // "Sin confirmar" se veía cortado ("Sin c…"). flex-wrap en dos
+    // renglones prolijos, todo siempre visible, sin scroll.
     return (
-      <div className="flex items-center gap-3 overflow-x-auto scrollbar-none shrink-0">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 shrink-0">
         {ITEMS.map((it, i) => (
           <span key={i} className="flex items-center gap-1.5 shrink-0 text-body-sm text-prius-slate whitespace-nowrap">
             {it.swatch}
