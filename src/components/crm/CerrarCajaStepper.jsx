@@ -1,7 +1,8 @@
-import { useState, useEffect, useId } from 'react'
+import { useState, useEffect, useId, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ChevronLeft, Check } from 'lucide-react'
 import { formatPesos } from '../../lib/format'
+import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import MoneyInput from '../inputs/MoneyInput'
 import IntegerInput from '../inputs/IntegerInput'
 import DateInput from '../inputs/DateInput'
@@ -13,12 +14,18 @@ import LoadingButton from '../ui/LoadingButton'
 const PASOS = ['Arqueo', 'Cierre Z', 'Confirmación']
 
 // Stepper de cierre de caja (Tarea 5), pantalla completa en mobile — 3 pasos:
-// 1) arqueo de efectivo (exige observación si hay diferencia), 2) cierre Z
-// opcional del controlador fiscal, 3) confirmación. Un solo submit final,
-// que llama cerrar_caja (RPC) — nunca escribe nada intermedio.
-export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, onConfirm }) {
+// 1) arqueo (exige observación si hay diferencia en CUALQUIER medio, ítem 1
+// 25/10/2026: antes solo efectivo), 2) cierre Z opcional del controlador
+// fiscal, 3) confirmación. Un solo submit final, que llama cerrar_caja (RPC)
+// — nunca escribe nada intermedio.
+//
+// `porMedio` ({medio, esperado, ...}[]): los medios con movimiento ese día
+// (viene de resumen.por_medio, ya precalculado — no se recalcula acá).
+// Precarga cada campo con su esperado (el cajero solo lo toca si hay
+// diferencia real), excepto efectivo que arranca igual que siempre.
+export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onConfirm }) {
   const [paso, setPaso] = useState(0)
-  const [efectivoContado, setEfectivoContado] = useState(0)
+  const [contadoPorMedio, setContadoPorMedio] = useState({})
   const [observaciones, setObservaciones] = useState('')
   const [tieneZ, setTieneZ] = useState(false)
   const [z, setZ] = useState({
@@ -27,10 +34,23 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
   })
   const [saving, setSaving] = useState(false)
 
+  // Efectivo siempre aparece (hay cajón físico para contar incluso en un
+  // día sin cobros en efectivo); los demás medios solo si tuvieron
+  // movimiento ese día — mismo criterio que ya usaba "Desglose por Medio".
+  const medios = useMemo(() => {
+    const lista = porMedio.map((m) => ({ ...m, esperado: Number(m.neto ?? m.esperado ?? 0) }))
+    if (!lista.some((m) => m.medio === 'efectivo')) {
+      lista.unshift({ medio: 'efectivo', esperado: 0, cantidad: 0 })
+    }
+    return lista
+  }, [porMedio])
+  const efectivoEsperado = medios.find((m) => m.medio === 'efectivo')?.esperado ?? 0
+  const efectivoContado = Number(contadoPorMedio.efectivo ?? 0)
+
   useEffect(() => {
     if (!isOpen) return
     setPaso(0)
-    setEfectivoContado(Number(efectivoEsperado) || 0)
+    setContadoPorMedio(Object.fromEntries(medios.map((m) => [m.medio, m.esperado])))
     setObservaciones('')
     setTieneZ(false)
     setSaving(false)
@@ -44,7 +64,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
   const overlayId = useId()
   const { confirm } = useDialog()
   const isDirty = () =>
-    paso > 0 || Number(efectivoContado) !== Number(efectivoEsperado || 0) || observaciones.trim() !== '' || tieneZ
+    paso > 0 || medios.some((m) => Number(contadoPorMedio[m.medio] ?? 0) !== m.esperado) || observaciones.trim() !== '' || tieneZ
   const requestClose = async () => {
     if (isDirty()) {
       const ok = await confirm('Tenés cambios sin guardar. ¿Descartarlos?', { title: 'Descartar cambios' })
@@ -56,7 +76,8 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
 
   if (!isOpen) return null
 
-  const diferencia = Number(efectivoContado) - Number(efectivoEsperado || 0)
+  const diferenciaPorMedio = medios.map((m) => ({ ...m, contado: Number(contadoPorMedio[m.medio] ?? 0), diferencia: Number(contadoPorMedio[m.medio] ?? 0) - m.esperado }))
+  const diferencia = diferenciaPorMedio.reduce((acc, m) => acc + m.diferencia, 0)
   const necesitaObservacion = diferencia !== 0
 
   const puedeAvanzarPaso1 = !necesitaObservacion || observaciones.trim().length > 0
@@ -66,6 +87,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
     try {
       await onConfirm({
         efectivoContado,
+        contadoPorMedio,
         observaciones: observaciones.trim() || null,
         datosZ: tieneZ ? z : null,
       })
@@ -101,15 +123,34 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
           {paso === 0 && (
             <>
-              <div className="p-4 bg-prius-subtle border border-hairline rounded-xl flex items-center justify-between">
-                <span className="text-xs text-prius-slate uppercase tracking-widest">Efectivo esperado</span>
-                <span className="text-lg font-bold text-black tabular-nums">{formatPesos(efectivoEsperado)}</span>
+              {/* Ítem 1 (25/10/2026): un bloque por medio con movimiento ese
+                  día (siempre incluye efectivo) — Esperado de solo lectura,
+                  Contado editable y precargado con el esperado (el cajero
+                  solo lo toca si hay diferencia real), Diferencia en vivo. */}
+              <div className="space-y-4">
+                {diferenciaPorMedio.map((m) => (
+                  <div key={m.medio} className="space-y-2 pb-4 border-b border-hairline last:border-0 last:pb-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-black uppercase tracking-widest">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                      <span className="text-xs text-prius-slate">Esperado <strong className="text-black tabular-nums">{formatPesos(m.esperado)}</strong></span>
+                    </div>
+                    <MoneyInput
+                      label={`${MEDIO_PAGO_LABEL[m.medio] || m.medio} contado/verificado`}
+                      value={contadoPorMedio[m.medio] ?? 0}
+                      onChange={(v) => setContadoPorMedio((prev) => ({ ...prev, [m.medio]: v }))}
+                    />
+                    {m.diferencia !== 0 && (
+                      <p className={`text-xs font-bold tabular-nums ${m.diferencia > 0 ? 'text-prius-success' : 'text-prius-error'}`}>
+                        Diferencia: {formatPesos(m.diferencia)}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
-              <MoneyInput label="Efectivo contado" value={efectivoContado} onChange={setEfectivoContado} />
               <div className={`p-4 rounded-xl border text-center ${
                 diferencia === 0 ? 'bg-green-500/5 border-green-500/20' : 'bg-gold/5 border-gold/20'
               }`}>
-                <p className="text-[10px] uppercase tracking-widest text-prius-slate">Diferencia</p>
+                <p className="text-[10px] uppercase tracking-widest text-prius-slate">Diferencia total</p>
                 <p className={`text-xl font-bold tabular-nums mt-1 ${diferencia === 0 ? 'text-prius-success' : 'text-gold'}`}>
                   {formatPesos(diferencia)}
                 </p>
@@ -176,12 +217,14 @@ export default function CerrarCajaStepper({ isOpen, onClose, efectivoEsperado, o
           {paso === 2 && (
             <div className="space-y-4">
               <div className="p-5 bg-prius-subtle border border-hairline rounded-xl space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-prius-slate">Efectivo contado</span>
-                  <span className="font-bold text-black tabular-nums">{formatPesos(efectivoContado)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-prius-slate">Diferencia de arqueo</span>
+                {diferenciaPorMedio.map((m) => (
+                  <div key={m.medio} className="flex justify-between text-sm">
+                    <span className="text-prius-slate">{MEDIO_PAGO_LABEL[m.medio] || m.medio} contado</span>
+                    <span className="font-bold text-black tabular-nums">{formatPesos(m.contado)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-sm pt-2 border-t border-hairline">
+                  <span className="text-prius-slate">Diferencia total de arqueo</span>
                   <span className={`font-bold tabular-nums ${diferencia === 0 ? 'text-prius-success' : 'text-gold'}`}>{formatPesos(diferencia)}</span>
                 </div>
                 <div className="flex justify-between text-sm">

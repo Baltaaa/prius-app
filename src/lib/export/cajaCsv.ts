@@ -17,7 +17,7 @@ const RESULTADO_ARQUEO = (diferencia: number): string => {
   return 'Sin diferencia'
 }
 
-/** Neto = Ingresos − Egresos; por_medio suma = Ingresos; Esperado = Inicial + ingresos efectivo − egresos efectivo. Si algo no cierra, warning en consola (no bloquea el export). */
+/** Neto = Ingresos − Egresos; por_medio suma = Ingresos; arqueo.total.esperado = suma de esperado por medio. Si algo no cierra, warning en consola (no bloquea el export). */
 function validarResumen(resumen: any): void {
   const { totales, por_medio, arqueo } = resumen
   const netoEsperado = Number(totales.ingresos) - Number(totales.egresos)
@@ -28,12 +28,10 @@ function validarResumen(resumen: any): void {
   if (sumaPorMedio !== Number(totales.ingresos)) {
     console.warn('[export caja] La suma por medio de pago no coincide con Ingresos', { sumaPorMedio, ingresos: totales.ingresos })
   }
-  if (arqueo.esperado != null) {
-    const ingresosEfectivo = (por_medio || []).find((m: any) => m.medio === 'efectivo')?.ingresos || 0
-    const egresosEfectivo = (por_medio || []).find((m: any) => m.medio === 'efectivo')?.egresos || 0
-    const esperadoCalculado = Number(arqueo.inicial || 0) + Number(ingresosEfectivo) - Number(egresosEfectivo)
-    if (esperadoCalculado !== Number(arqueo.esperado)) {
-      console.warn('[export caja] Esperado no coincide con Inicial + ingresos efectivo − egresos efectivo', { esperadoCalculado, esperado: arqueo.esperado })
+  if (arqueo.total?.esperado != null) {
+    const sumaEsperadoPorMedio = (arqueo.por_medio || []).reduce((acc: number, m: any) => acc + Number(m.esperado || 0), 0)
+    if (sumaEsperadoPorMedio !== Number(arqueo.total.esperado)) {
+      console.warn('[export caja] Total esperado no coincide con la suma de esperado por medio', { sumaEsperadoPorMedio, esperado: arqueo.total.esperado })
     }
   }
 }
@@ -67,21 +65,24 @@ function seccionIngresosPorMedio(resumen: any, movimientosCobro: any[]): Seccion
   }
 }
 
+// Ítem 1 (25/10/2026): el arqueo integra TODOS los medios con movimiento,
+// no solo efectivo — una fila por medio (Esperado/Contado/Diferencia/
+// Declarado) más una fila Total.
 function seccionArqueo(resumen: any): Seccion {
   const { arqueo } = resumen
-  const diferencia = Number(arqueo.diferencia || 0)
+  const porMedio = arqueo.por_medio || []
+  const filas = porMedio.map((m: any) => [
+    etiqueta('medio_pago', m.medio),
+    formatMontoCsv(m.esperado),
+    formatMontoCsv(m.contado),
+    formatMontoCsv(m.diferencia),
+    m.declarado ? 'Sí' : 'No declarado',
+  ])
   return {
-    titulo: 'Arqueo de efectivo',
-    columnas: ['Concepto', 'Monto'],
-    filas: [
-      ['Saldo inicial', formatMontoCsv(arqueo.inicial)],
-      ['Ingresos en efectivo', formatMontoCsv((resumen.por_medio || []).find((m: any) => m.medio === 'efectivo')?.ingresos || 0)],
-      ['Egresos en efectivo', formatMontoCsv((resumen.por_medio || []).find((m: any) => m.medio === 'efectivo')?.egresos || 0)],
-      ['Esperado en caja', formatMontoCsv(arqueo.esperado)],
-      ['Contado', formatMontoCsv(arqueo.contado)],
-      ['Diferencia', formatMontoCsv(diferencia)],
-      ['Resultado', RESULTADO_ARQUEO(diferencia)],
-    ],
+    titulo: 'Arqueo',
+    columnas: ['Medio de pago', 'Esperado', 'Contado/Verificado', 'Diferencia', 'Declarado'],
+    filas,
+    filaTotal: ['Total', formatMontoCsv(arqueo.total?.esperado), formatMontoCsv(arqueo.total?.contado), formatMontoCsv(arqueo.total?.diferencia), RESULTADO_ARQUEO(Number(arqueo.total?.diferencia || 0))],
   }
 }
 

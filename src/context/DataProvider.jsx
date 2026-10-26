@@ -402,11 +402,17 @@ export function DataProvider({ children }) {
   // cerrar) la función hacía `return` en silencio — el stepper de cierre
   // completaba sus 3 pasos y cerraba el modal como si hubiera funcionado,
   // pero no se mandaba ningún RPC y la caja seguía abierta en la base.
-  const cerrarCaja = useCallback(async (cajaId, efectivoContado, datosZ, observaciones) => {
+  // Ítem 1 (25/10/2026): cerrarCaja ahora acepta `contadoPorMedio` ({medio:
+  // monto}, incluye efectivo) — el arqueo integra todos los medios, no solo
+  // efectivo. p_efectivo_contado se sigue mandando igual que siempre (la
+  // RPC lo usa como fuente única de las columnas legacy efectivo_esperado/
+  // efectivo_contado/diferencia); contadoPorMedio es aditivo.
+  const cerrarCaja = useCallback(async (cajaId, efectivoContado, datosZ, observaciones, contadoPorMedio) => {
     if (!cajaId) return
     const { data, error } = await supabase.rpc('cerrar_caja', {
       p_caja_id: cajaId, p_efectivo_contado: Number(efectivoContado) || 0,
       p_datos_z: datosZ || null, p_observaciones: observaciones || null,
+      p_contado_por_medio: contadoPorMedio || null,
     })
     if (error) throw error
     if (cajaHoy?.id === cajaId) setCajaHoy(data)

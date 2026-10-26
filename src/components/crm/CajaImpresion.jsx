@@ -73,11 +73,22 @@ export default function CajaImpresion({ resumen }) {
       <div className="ci-section">
         <h2>Arqueo</h2>
         <table className="ci-table">
+          <thead><tr><th>Medio</th><th className="num">Esperado</th><th className="num">Contado</th><th className="num">Diferencia</th></tr></thead>
           <tbody>
-            <tr><td>Inicial</td><td className="num">{formatPesos(arqueo.inicial)}</td></tr>
-            <tr><td>Esperado</td><td className="num">{formatPesos(arqueo.esperado)}</td></tr>
-            <tr><td>Contado</td><td className="num">{formatPesos(arqueo.contado)}</td></tr>
-            <tr><td>Diferencia</td><td className="num">{formatPesos(arqueo.diferencia)}</td></tr>
+            {(arqueo.por_medio || []).map((m) => (
+              <tr key={m.medio}>
+                <td>{MEDIO_PAGO_LABEL[m.medio] || m.medio}{!m.declarado ? ' (sin declarar)' : ''}</td>
+                <td className="num">{formatPesos(m.esperado)}</td>
+                <td className="num">{formatPesos(m.contado)}</td>
+                <td className="num">{formatPesos(m.diferencia)}</td>
+              </tr>
+            ))}
+            <tr>
+              <td><strong>Total</strong></td>
+              <td className="num"><strong>{formatPesos(arqueo.total?.esperado)}</strong></td>
+              <td className="num"><strong>{formatPesos(arqueo.total?.contado)}</strong></td>
+              <td className="num"><strong>{formatPesos(arqueo.total?.diferencia)}</strong></td>
+            </tr>
           </tbody>
         </table>
       </div>

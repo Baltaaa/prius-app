@@ -44,7 +44,7 @@ const Fila = ({ label, value, tone, cliente }) => (
 export default function ResumenCaja({ resumen }) {
   if (!resumen) return null
   const { cabecera, totales, por_medio, arqueo, z, facturas, recibos, sin_comprobante, gastos, anulados } = resumen
-  const diferenciaArqueo = Number(arqueo.diferencia || 0)
+  const diferenciaArqueo = Number(arqueo.total?.diferencia || 0)
   const balanceCuadrado = diferenciaArqueo === 0
 
   return (
@@ -110,13 +110,48 @@ export default function ResumenCaja({ resumen }) {
             </div>
           </Section>
 
-          <Section title="Arqueo de Efectivo" icon={Banknote}>
-            <Fila label="Inicial" value={formatPesos(arqueo.inicial)} />
-            <Fila label="Esperado" value={formatPesos(arqueo.esperado)} />
-            <Fila label="Contado" value={formatPesos(arqueo.contado)} />
+          {/* Ítem 1 (25/10/2026): el arqueo integra TODOS los medios con
+              movimiento, no solo efectivo — una fila por medio (Esperado/
+              Contado/Diferencia) más el Total. "Sin declarar" marca un
+              medio que no tiene contado propio (cajas cerradas antes de
+              este ítem): se muestra = esperado, nunca se inventa un número. */}
+          <Section title="Arqueo" icon={Banknote}>
+            <div className="divide-y divide-hairline">
+              {(arqueo.por_medio || []).map((m) => (
+                <div key={m.medio} className="py-3 first:pt-0">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="text-sm font-semibold text-black">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                    {!m.declarado && (
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-prius-muted bg-prius-subtle border border-hairline rounded-full px-2 py-0.5">
+                        Sin declarar
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[9px] text-prius-muted uppercase tracking-widest">Esperado</p>
+                      <MontoStat value={m.esperado} size="xs" className="text-black" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] text-prius-muted uppercase tracking-widest">Contado</p>
+                      <MontoStat value={m.contado} size="xs" className="text-black" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[9px] text-prius-muted uppercase tracking-widest">Diferencia</p>
+                      <MontoStat value={m.diferencia} size="xs" className={Number(m.diferencia) === 0 ? 'text-prius-success' : 'text-gold'} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
             <Fila
-              label="Diferencia"
-              value={formatPesos(arqueo.diferencia)}
+              label="Total"
+              value={formatPesos(arqueo.total?.contado)}
+              tone={diferenciaArqueo === 0 ? 'text-prius-success' : 'text-gold'}
+            />
+            <Fila
+              label="Diferencia total"
+              value={formatPesos(arqueo.total?.diferencia)}
               tone={diferenciaArqueo === 0 ? 'text-prius-success' : 'text-gold'}
             />
           </Section>

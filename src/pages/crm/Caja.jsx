@@ -140,7 +140,13 @@ export default function Caja() {
     [movimientos, filtroMedio],
   )
 
-  const efectivoEsperadoPreview = resumen?.arqueo?.esperado ?? 0
+  // Ítem 1 (25/10/2026): "Efectivo esperado" pasa a "Total esperado" — la
+  // suma de Esperado de TODOS los medios con movimiento (antes solo
+  // efectivo), ver arqueo.total en resumen_caja(). El detalle por medio ya
+  // vive en "Desglose por Medio de Pago" (desktop aside / chips mobile)
+  // debajo, así que no se duplica acá — decisión documentada en el reporte
+  // de la tarea.
+  const totalEsperadoPreview = resumen?.arqueo?.total?.esperado ?? 0
 
   // Caja diaria (oct 2026): empieza siempre en 0, no se pregunta monto
   // inicial — la caja se auto-crea sola en el primer cobro/gasto del día.
@@ -158,9 +164,9 @@ export default function Caja() {
     }
   }
 
-  const handleCerrarCaja = async ({ efectivoContado, observaciones, datosZ }) => {
+  const handleCerrarCaja = async ({ efectivoContado, contadoPorMedio, observaciones, datosZ }) => {
     try {
-      await cerrarCaja(cajaSeleccionada.id, efectivoContado, datosZ, observaciones)
+      await cerrarCaja(cajaSeleccionada.id, efectivoContado, datosZ, observaciones, contadoPorMedio)
       toast('Caja cerrada con éxito', { tone: 'success' })
     } catch (err) {
       toast(err.message || 'No se pudo cerrar la caja.', { tone: 'error' })
@@ -358,11 +364,11 @@ export default function Caja() {
             </div>
             <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Efectivo</p>
+                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Total esperado</p>
                 <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Banknote size={16} /></div>
               </div>
-              <MontoStat value={efectivoEsperadoPreview} size="md" className="text-black mb-2" />
-              <p className="text-[10px] text-prius-muted mt-auto truncate">Billetaje esperado en cajón</p>
+              <MontoStat value={totalEsperadoPreview} size="md" className="text-black mb-2" />
+              <p className="text-[10px] text-prius-muted mt-auto truncate">Todos los medios — ver desglose</p>
             </div>
           </div>
 
@@ -694,7 +700,7 @@ export default function Caja() {
       <CerrarCajaStepper
         isOpen={mostrarCierre}
         onClose={() => setMostrarCierre(false)}
-        efectivoEsperado={efectivoEsperadoPreview}
+        porMedio={resumen?.por_medio || []}
         onConfirm={handleCerrarCaja}
       />
 
