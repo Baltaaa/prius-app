@@ -24,12 +24,18 @@ function useIsDesktop() {
 // columna sin ancho en el array (ej. Cliente) se lleva todo el sobrante y
 // es la única que puede wrappear. Sin esta prop, se comporta exactamente
 // igual que antes (auto layout).
-export default function DataTable({ headers, data, renderRow, renderMobileCard, emptyMessage, columnWidths }) {
+// `fillHeight` (mini-prompt 26/10/2026, solo Reservas/Clientes desktop por
+// ahora): la tabla pasa a ocupar el 100% del alto de su contenedor padre
+// (que a su vez ya viene con una altura fija vía flex-1/min-h-0 desde la
+// página) y scrollea POR DENTRO con el encabezado sticky — en vez de que
+// sea la página entera la que scrollee. Sin esta prop, altura automática
+// por contenido, igual que siempre.
+export default function DataTable({ headers, data, renderRow, renderMobileCard, emptyMessage, columnWidths, fillHeight }) {
   const isDesktop = useIsDesktop()
 
   if (!data || data.length === 0) {
     return (
-      <div className="p-12 text-center text-sm tracking-wider text-prius-muted card-light rounded-xl">
+      <div className={`p-12 text-center text-sm tracking-wider text-prius-muted card-light rounded-xl ${fillHeight ? 'lg:h-full' : ''}`}>
         {emptyMessage || 'No se encontraron registros.'}
       </div>
     )
@@ -37,8 +43,9 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
 
   if (isDesktop || !renderMobileCard) {
     return (
-      <div className="w-full">
-        <div className="card-light rounded-xl overflow-x-auto card-light-inner">
+      <div className={`w-full ${fillHeight ? 'lg:h-full' : ''}`}>
+        <div className={`card-light rounded-xl card-light-inner ${fillHeight ? 'lg:h-full lg:flex lg:flex-col lg:overflow-hidden' : 'overflow-x-auto'}`}>
+          <div className={fillHeight ? 'overflow-auto lg:flex-1 lg:min-h-0' : 'overflow-x-auto'}>
           <table className={`w-full text-left border-collapse ${columnWidths ? 'table-fixed' : ''}`}>
             {columnWidths && (
               <colgroup>
@@ -47,7 +54,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
                 ))}
               </colgroup>
             )}
-            <thead>
+            <thead className={fillHeight ? 'lg:sticky lg:top-0 lg:z-10 bg-white' : undefined}>
               <tr className="border-b border-hairline text-[11px] font-bold uppercase tracking-widest text-prius-muted">
                 {headers.map((h, i) => (
                   <th key={i} className={`font-semibold whitespace-nowrap ${columnWidths ? 'px-3 py-4' : 'px-6 py-4'}`}>{h}</th>
@@ -58,6 +65,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
               {data.map((row, i) => renderRow(row, i))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     )

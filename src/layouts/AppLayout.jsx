@@ -27,6 +27,13 @@ export default function AppLayout() {
   // toca — el título se renderiza acá, por fuera del componente del plano.
   const esHome = location.pathname.startsWith('/app/home')
   const section = useSection(location.pathname)
+  // Reservas/Clientes (mini-prompt 26/10/2026): en desktop (≥1024px) estas
+  // dos secciones dejan de scrollear la página — la tabla/lista y la ficha
+  // son dos cajas de igual alto que llenan exactamente el viewport. Acá
+  // arriba solo se decide, por ruta, si esta vista participa de ese layout;
+  // el breakpoint lo resuelve CSS puro (`lg:`) más abajo, no JS, para no
+  // duplicar el estado de ancho que cada página ya trackea por su cuenta.
+  const esSeccionAlturaFija = location.pathname.startsWith('/app/reservas') || location.pathname.startsWith('/app/clientes')
 
   // Pulido UX (oct 2026, item 4): se sacó el bloque visible de título de
   // sección (H1 + subtítulo) de todas las pantallas — ocupaba espacio y era
@@ -77,14 +84,35 @@ export default function AppLayout() {
                 overscroll-behavior: contain acá (no en html/body) para que
                 el scroll propio de esta columna nunca "rebote" hacia el
                 documento. */}
-            <main id="app-main-scroll" className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-bottom-nav-safe md:pb-12 bg-prius-background">
+            {/* Reservas/Clientes en desktop (mini-prompt 26/10/2026): este
+                `main` deja de ser el que scrollea (`lg:overflow-hidden`) —
+                la página entera queda fija al alto del viewport y son las
+                dos cajas de adentro (tabla/lista + ficha) las que scrollean
+                por su cuenta si no entran. Por debajo de `lg` y en el resto
+                de las secciones, sigue scrolleando como siempre
+                (`overflow-y-auto`), sin cambios. El wrapper `flex-1
+                min-h-0` alrededor del `<Outlet/>` es lo que le pasa esa
+                altura disponible a la página — las páginas que no son
+                Reservas/Clientes lo ignoran (siguen con su alto de
+                contenido normal, el wrapper no les fuerza nada por fuera
+                de `lg:`). */}
+            <main
+              id="app-main-scroll"
+              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-bottom-nav-safe md:pb-12 bg-prius-background ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
+            >
               {/* h1 accesible oculto visualmente — el título visible de
                   sección se sacó (item 4), pero un lector de pantalla sigue
                   necesitando un h1 por página. Home tiene el suyo propio
                   ("Hola, {nombre}"), no se duplica acá. */}
               {!esHome && <h1 className="sr-only">{section.name}</h1>}
-              <Outlet />
-              <div className="no-print">
+              <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : undefined}>
+                <Outlet />
+              </div>
+              {/* El footer global empujaría las cajas más allá del viewport
+                  en Reservas/Clientes desktop — acá se oculta desde `lg`
+                  (abajo de eso, mobile y tablet lo siguen viendo igual que
+                  siempre). En el resto de las secciones no se toca. */}
+              <div className={`no-print ${esSeccionAlturaFija ? 'lg:hidden' : ''}`}>
                 <AppFooter />
               </div>
             </main>

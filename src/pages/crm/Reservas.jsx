@@ -394,10 +394,18 @@ export default function Reservas() {
   }
 
   return (
-    <div className="space-y-10 animate-premium-fade font-ui">
+    // Alto fijo al viewport en desktop (mini-prompt 26/10/2026): `lg:h-full`
+    // hereda la altura exacta que le da el wrapper de AppLayout.jsx
+    // (`flex-1 min-h-0` dentro de `#app-main-scroll`, que a su vez dejó de
+    // scrollear en esta sección — ver `esSeccionAlturaFija` ahí). `lg:gap-4`
+    // reemplaza a `space-y-10` SOLO en desktop: con flex+gap el espacio
+    // entre hijos se reparte solo entre los que existen (el div de chips es
+    // condicional y ya no necesita el wrapper-truco de antes para no dejar
+    // un hueco vacío). Por debajo de lg, layout de siempre sin cambios.
+    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 animate-premium-fade font-ui">
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
-      <div className="flex flex-wrap gap-4 items-center">
+      <div className="flex flex-wrap gap-4 items-center lg:shrink-0">
         {/* Buscador propio sacado (testing oct 2026): el global del header ya
             busca cliente/unidad sobre todas las reservas y navega acá con
             ?id=<reserva> — un solo buscador en toda la app, ver CLAUDE.md
@@ -474,7 +482,7 @@ export default function Reservas() {
           contenido real — quedaba un salto vacío entre los filtros y la
           tabla aunque no hubiera ningún chip para mostrar. */}
       {(unidadFiltrada || ((desde || hasta) && !rangoFechaInvalido)) && (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 lg:shrink-0">
         {unidadFiltrada && (
           <button
             onClick={() => setFiltroUnidadId(null)}
@@ -497,7 +505,7 @@ export default function Reservas() {
       </div>
       )}
       {rangoFechaInvalido && (
-        <p className="text-xs font-bold text-prius-error uppercase tracking-widest">
+        <p className="text-xs font-bold text-prius-error uppercase tracking-widest lg:shrink-0">
           "Llegada desde" no puede ser posterior a "Llegada hasta" — corregí el rango para filtrar por fecha.
         </p>
       )}
@@ -525,12 +533,25 @@ export default function Reservas() {
           BottomSheet de más abajo — mismo patrón dual-render que
           UnidadPreviewModal/UnidadDetallePanel del Plano. */}
       {!isMobile && (
-        <div className={isDesktopXL ? 'grid gap-4 items-start' : ''} style={isDesktopXL ? { gridTemplateColumns: '3fr 2fr' } : undefined}>
-          <div className="min-w-0">
+        <div className="lg:flex-1 lg:min-h-0">
+        {/* `gridTemplateRows: minmax(0,1fr)` (mini-prompt 26/10/2026): sin
+            esto, CSS Grid autosizea la única fila al contenido (igual que
+            una fila `auto`) antes de resolverle el `h-full` a los hijos —
+            `height:100%` sobre un item de una fila `auto` es circular por
+            spec, así que el browser lo resuelve contra el contenido, no
+            contra el alto real del grid: la tabla/ficha terminaban más
+            altas que su contenedor y éste desbordaba la página sin que
+            nada lo reflejara en el alto medido del propio grid. El `0` del
+            minmax es el mismo truco que `min-h-0` en flexbox — fuerza la
+            fila a los 100% reales del grid sin importar cuánto contenido
+            tengan adentro (que scrollea por su cuenta). */}
+        <div className={`${isDesktopXL ? 'grid gap-4' : ''} lg:h-full`} style={isDesktopXL ? { gridTemplateColumns: '3fr 2fr', gridTemplateRows: 'minmax(0, 1fr)' } : undefined}>
+          <div className="min-w-0 lg:h-full">
       <DataTable
         headers={headers}
         data={filteredReservas}
         columnWidths={columnWidths}
+        fillHeight
         emptyMessage={filtroUnidadId ? 'No hay reservas registradas para esta unidad.' : 'No hay reservas de período/día con esos filtros.'}
         renderRow={(res) => {
           // Fila de temporada (solo aparece con el deep-link "Ver todas" por
@@ -618,13 +639,17 @@ export default function Reservas() {
       />
           </div>
 
-          {/* Panel fijo 40% — solo ≥1280px (Bloque B). Altura fija (no
-              max-h) + key por id para el crossfade (mismo patrón que
-              Clientes.jsx, ítem 6, oct 2026): nunca cambia de tamaño al
-              elegir/deseleccionar una reserva, y el contenido hace
-              fade+shift de 180ms al cambiar. */}
+          {/* Panel fijo 40% — solo ≥1280px (Bloque B). Altura SIEMPRE igual
+              a la de la tabla (mini-prompt 26/10/2026): ya no es sticky ni
+              calcula su propio alto a mano (`h-[calc(100vh-2rem)]`) — ahora
+              vive dentro del mismo grid `lg:h-full` que la tabla, así que
+              el stretch por default del grid (cross-axis, sin `items-start`)
+              le da exactamente el alto del grid, ni un pixel más. Key por
+              id para el crossfade (mismo patrón que Clientes.jsx, ítem 6,
+              oct 2026): nunca cambia de tamaño al elegir/deseleccionar una
+              reserva, y el contenido hace fade+shift de 180ms al cambiar. */}
           {isDesktopXL && (
-            <aside className="hidden xl:flex min-w-0 card-light rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start h-[calc(100vh-2rem)]">
+            <aside className="hidden xl:flex lg:h-full min-w-0 card-light rounded-2xl p-space-lg flex-col overflow-hidden">
               {selectedReserva ? (
                 <div key={selectedReserva.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
                   <ReservaDetalleContent
@@ -647,6 +672,7 @@ export default function Reservas() {
               )}
             </aside>
           )}
+        </div>
         </div>
       )}
 

@@ -695,7 +695,11 @@ export default function Clientes() {
   }
 
   return (
-    <div className="space-y-10 animate-premium-fade">
+    // Alto fijo al viewport en desktop (mini-prompt 26/10/2026), mismo
+    // patrón que Reservas.jsx: `lg:h-full` hereda la altura que le da
+    // AppLayout.jsx (`#app-main-scroll` dejó de scrollear en esta sección),
+    // `lg:gap-4` reemplaza a `space-y-10` solo en desktop.
+    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 animate-premium-fade">
       {/* Toolbar: buscador a ancho completo arriba, filtro + alta compacta
           abajo (oct 2026) — antes "Nuevo Cliente" era una barra amarilla
           gigante en mobile; ahora es un botón chico (h-10) a la derecha,
@@ -706,7 +710,7 @@ export default function Clientes() {
           Cliente alineado a la derecha — los tres con la misma altura
           (h-10). En mobile/tablet se mantiene el buscador a ancho completo
           arriba y el filtro+alta abajo (mejor para touch). */}
-      <div className={isDesktopLG ? 'flex items-center gap-3' : 'space-y-3'}>
+      <div className={`${isDesktopLG ? 'flex items-center gap-3' : 'space-y-3'} lg:shrink-0`}>
         <SearchInput
           value={searchTerm}
           onChange={setSearchTerm}
@@ -751,14 +755,23 @@ export default function Clientes() {
           compacta a la izquierda (ancho fijo ≥1024px, columna completa
           abajo), detalle en panel fijo / bottom sheet / pantalla completa
           según breakpoint — mismo patrón que Reservas.jsx. */}
-      <div className={isDesktopLG ? 'flex gap-space-lg items-start' : ''}>
+      {/* `items-start` sacado (mini-prompt 26/10/2026): con eso cada columna
+          medía su propio contenido y la ficha terminaba más alta/baja que
+          la lista. Sin esa clase, el stretch por default del flex hace que
+          las dos cajas midan exactamente lo mismo — el alto real lo pone
+          `lg:flex-1 lg:min-h-0` (le pasa al row el alto sobrante del
+          flex-col de más arriba), no un cálculo a mano. */}
+      <div className={`${isDesktopLG ? 'flex gap-space-lg' : ''} lg:flex-1 lg:min-h-0`}>
         {/* w-[480px] fijo (hasta oct 2026) dejaba casi sin aire al panel
             fijo de la derecha justo en el arranque del breakpoint lg
             (1024-1150px aprox, con Sidebar de 256px descontado): el texto
             del panel terminaba partiéndose letra por letra. flex-1 con
             min/max fluido reparte el espacio sobrante con el aside en vez
-            de forzar un ancho fijo que no entra. */}
-        <div className={isDesktopLG ? 'flex-1 min-w-[280px] max-w-[480px] shrink' : 'w-full'}>
+            de forzar un ancho fijo que no entra. `lg:h-full
+            lg:overflow-y-auto` (mini-prompt 26/10/2026): la lista scrollea
+            adentro de su propia caja en vez de empujar la altura de la
+            página. */}
+        <div className={isDesktopLG ? 'flex-1 min-w-[280px] max-w-[480px] shrink lg:h-full lg:overflow-y-auto' : 'w-full'}>
           {clientesVisibles.length === 0 ? (
             <div className="p-12 text-center text-sm tracking-wider text-prius-muted bg-white border border-hairline rounded-xl">
               No se encontraron clientes.
@@ -890,14 +903,15 @@ export default function Clientes() {
           )}
         </div>
 
-        {/* Panel fijo — solo ≥1024px. Altura FIJA (no max-h): el panel
-            nunca cambia de tamaño ni empuja la lista al elegir/deselec­cionar
-            un cliente (ítem 6, oct 2026) — antes con max-h el panel vacío
-            se achicaba al contenido del placeholder. key={clienteId} fuerza
-            un remount que dispara el crossfade (content-crossfade, 180ms,
-            fade + 6px — ver index.css) cada vez que cambia el cliente. */}
+        {/* Panel fijo — solo ≥1024px. Altura SIEMPRE igual a la de la lista
+            (mini-prompt 26/10/2026): ya no es sticky ni calcula su propio
+            alto a mano — vive en el mismo row `lg:flex-1 lg:min-h-0` que la
+            lista, sin `items-start`, así que el stretch por default le da
+            exactamente ese alto. key={clienteId} fuerza un remount que
+            dispara el crossfade (content-crossfade, 180ms, fade + 6px — ver
+            index.css) cada vez que cambia el cliente. */}
         {isDesktopLG && (
-          <aside className="hidden lg:flex flex-1 min-w-[320px] bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start h-[calc(100vh-2rem)]">
+          <aside className="hidden lg:flex lg:h-full flex-1 min-w-[320px] bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden">
             {clienteSeleccionado ? (
               <div key={clienteSeleccionado.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
                 <ClienteDetalleContent
