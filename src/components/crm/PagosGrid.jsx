@@ -184,6 +184,14 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
                 <span className="text-[10px] font-semibold normal-case tracking-normal">
                   {sinVerificar ? <MontoNulo /> : formatPesosVisible(pago.monto)}
                 </span>
+                {/* Ítem 3 (25/10/2026): quién pagó esta cuota — relevante en
+                    reservas con cosocios, donde titular y cosocios pueden
+                    cargar pagos distintos de la misma reserva compartida. */}
+                {pago.clientes?.nombre && (
+                  <span className="text-[8px] text-prius-muted normal-case tracking-normal truncate max-w-full">
+                    {pago.clientes.nombre}
+                  </span>
+                )}
                 {pago.medio === 'tarjeta_credito' && pago.cuotas_tarjeta && (
                   <span className="flex items-center gap-0.5 text-[8px] text-gold font-bold">
                     <CreditCard size={10} /> {pago.cuotas_tarjeta}x

@@ -9,6 +9,7 @@ import { usePermiso } from '../../context/AuthProvider'
 import StatusBadge from './StatusBadge'
 import MontoReserva from './MontoReserva'
 import CambiarEstadoPagoModal from './CambiarEstadoPagoModal'
+import GestionCosociosModal from './GestionCosociosModal'
 
 const TIPO_LABEL = { periodo: 'Período', dia: 'Día', temporada: 'Temporada' }
 
@@ -25,6 +26,7 @@ export default function ReservaDetalleContent({
   const { pagos } = usePagos(reserva?.id)
   const puedeAjustarEstadoPago = usePermiso('ajustar_estado_pago')
   const [mostrarCambiarEstado, setMostrarCambiarEstado] = useState(false)
+  const [mostrarCosocios, setMostrarCosocios] = useState(false)
 
   if (!reserva) return null
 
@@ -146,6 +148,11 @@ export default function ReservaDetalleContent({
                     {p.comprobantes?.length > 0
                       ? p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
                       : 'Sin comprobante'}
+                    {/* Ítem 3 (25/10/2026): quién pagó esta cuota — nombre
+                        chico debajo, relevante con cosocios. */}
+                    {p.clientes?.nombre && (
+                      <span className="block text-[10px] font-normal text-prius-muted truncate">{p.clientes.nombre}</span>
+                    )}
                   </span>
                   <span className={`shrink-0 text-body-sm ${p.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-prius-slate'}`}>
                     {pagoSinVerificar(p) ? 'Sin verificar' : formatPesosVisible(p.monto)}
@@ -188,6 +195,12 @@ export default function ReservaDetalleContent({
           >
             <Edit2 size={16} /> Editar reserva
           </button>
+          <button
+            onClick={() => setMostrarCosocios(true)}
+            className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            <Users size={16} /> Cosocios{socios.length > 0 ? ` (${socios.length})` : ''}
+          </button>
           {puedeAjustarEstadoPago && !reserva.bonificada && (
             <button
               onClick={() => setMostrarCambiarEstado(true)}
@@ -216,6 +229,7 @@ export default function ReservaDetalleContent({
       {puedeAjustarEstadoPago && (
         <CambiarEstadoPagoModal isOpen={mostrarCambiarEstado} onClose={() => setMostrarCambiarEstado(false)} reserva={reserva} />
       )}
+      <GestionCosociosModal isOpen={mostrarCosocios} onClose={() => setMostrarCosocios(false)} reserva={reserva} pagos={pagos} />
     </>
   )
 }

@@ -11,6 +11,7 @@ import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 import Historial from "../crm/Historial"
 import CambiarEstadoPagoModal from "../crm/CambiarEstadoPagoModal"
+import GestionCosociosModal from "../crm/GestionCosociosModal"
 import { linkToCliente, linkToReserva, linkToRecepcion } from "../../lib/deepLinks"
 
 const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
@@ -34,6 +35,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
   const { alert, confirm } = useDialog()
   const puedeAjustarEstadoPago = usePermiso('ajustar_estado_pago')
   const [mostrarCambiarEstado, setMostrarCambiarEstado] = useState(false)
+  const [mostrarCosocios, setMostrarCosocios] = useState(false)
 
   if (!unit) return null
 
@@ -287,6 +289,12 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                   </button>
                 </>
               )}
+              <button
+                onClick={() => setMostrarCosocios(true)}
+                className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+              >
+                <Users size={16} /> Cosocios{socios.length > 0 ? ` (${socios.length})` : ''}
+              </button>
               {puedeAjustarEstadoPago && !reserva.bonificada && (
                 <button
                   onClick={() => setMostrarCambiarEstado(true)}
@@ -316,6 +324,9 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
 
       {puedeAjustarEstadoPago && reserva && (
         <CambiarEstadoPagoModal isOpen={mostrarCambiarEstado} onClose={() => setMostrarCambiarEstado(false)} reserva={reserva} />
+      )}
+      {reserva && (
+        <GestionCosociosModal isOpen={mostrarCosocios} onClose={() => setMostrarCosocios(false)} reserva={reserva} pagos={pagos} />
       )}
     </>
   )

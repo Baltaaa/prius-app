@@ -149,9 +149,14 @@ export function DataProvider({ children }) {
     // pagos.comprobante_id, pensado solo para el flujo en vivo de un
     // comprobante a la vez). PostgREST exige desambiguar: hay dos caminos
     // posibles entre pagos y comprobantes.
+    // clientes(nombre) (ítem 3, 25/10/2026): quién pagó cada cuota — en una
+    // reserva con cosocios, titular y cosocios pueden pagar cuotas distintas
+    // de la misma reserva, así que el comprobante/monto solo no alcanza para
+    // distinguir de un vistazo quién cargó cada una (PagosGrid.jsx,
+    // ReservaDetalleContent.jsx).
     const { data } = await supabase
       .from('pagos')
-      .select('*, comprobantes!comprobantes_pago_id_fkey(id, tipo, punto_venta, numero, fecha, estado, monto_total)')
+      .select('*, comprobantes!comprobantes_pago_id_fkey(id, tipo, punto_venta, numero, fecha, estado, monto_total), clientes(nombre)')
       .order('created_at', { ascending: false })
     setPagos(data || [])
   }, [])
@@ -356,6 +361,27 @@ export function DataProvider({ children }) {
     if (error) throw error
     setUnidades((prev) => prev.filter((u) => u.id !== id))
   }, [])
+
+  // Ítem 3 (25/10/2026): alta/baja de cosocio — tabla puente simple
+  // (reserva_clientes), RLS ya permite insert/delete a cualquier usuario
+  // activo (ver policies), sin RPC propia. `quitarCosocio` no valida acá si
+  // tiene pagos — ese guard vive en la UI (ReservaDetalleContent), que ya
+  // tiene los pagos cargados y puede avisar sin un viaje extra al server;
+  // de todos modos los pagos de ese cliente NO se borran ni se desvinculan
+  // al sacarlo de reserva_clientes (son filas independientes en `pagos`).
+  // fetchReservas() porque reserva_clientes viene embebido en el select de
+  // reservas (RESERVA_SELECT) — no hay una tabla local propia que parchear.
+  const agregarCosocio = useCallback(async (reservaId, clienteId) => {
+    const { error } = await supabase.from('reserva_clientes').insert({ reserva_id: reservaId, cliente_id: clienteId })
+    if (error) throw error
+    await fetchReservas()
+  }, [fetchReservas])
+
+  const quitarCosocio = useCallback(async (reservaId, clienteId) => {
+    const { error } = await supabase.from('reserva_clientes').delete().eq('reserva_id', reservaId).eq('cliente_id', clienteId)
+    if (error) throw error
+    await fetchReservas()
+  }, [fetchReservas])
 
   // Caja Fase 3 (dinero): el CRUD directo sobre caja_diaria/gastos_caja/pagos
   // está revocado a nivel RLS — todo pasa por las funciones RPC de Postgres
@@ -613,7 +639,7 @@ export function DataProvider({ children }) {
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
     eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error, realtimeConectado,
     createReserva, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
-    createCliente, updateCliente, deleteCliente, deleteUnidad,
+    createCliente, updateCliente, deleteCliente, deleteUnidad, agregarCosocio, quitarCosocio,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
     updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
     cambiarEstadoPagoManual, revertirEstadoPagoAutomatico,
@@ -624,7 +650,7 @@ export function DataProvider({ children }) {
     reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
     eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error, realtimeConectado,
     createReserva, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
-    createCliente, updateCliente, deleteCliente, deleteUnidad,
+    createCliente, updateCliente, deleteCliente, deleteUnidad, agregarCosocio, quitarCosocio,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
     updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
     cambiarEstadoPagoManual, revertirEstadoPagoAutomatico,

@@ -547,60 +547,16 @@ export default function Clientes() {
     return map
   }, [todosPagos])
 
-  // Filtro por estado (badge): mismo criterio que el badge del header de cada
-  // fila — un grupo con precio unificado manda por sobre cualquier período
-  // suelto, igual que en el render.
-  const clientesVisibles = useMemo(() => {
-    if (filtroEstado === 'todos') return filteredClientes
-    return filteredClientes.filter((cliente) => {
-      const reservasCliente = reservasPorCliente[cliente.id] || []
-      const grupo = reservasCliente.find((r) => esGrupo(r) && r.estado !== 'cancelada')
-      if (grupo) {
-        return estadoPagoGrupo(saldoGrupo(grupo, reservas, pagosPorReserva), grupo.reserva_grupos) === filtroEstado
-      }
-      const badge = reservaActivaDeTemporada(reservasCliente)
-      return badge ? estadoBadgeStatus(badge) === filtroEstado : false
-    })
-  }, [filteredClientes, filtroEstado, reservasPorCliente, reservas, pagosPorReserva])
-
-  // Saldo total por cliente: SIEMPRE derivado de estado_pago + pagos reales
-  // (saldoNumerico), nunca del campo suelto `reserva.saldo` — para temporada
-  // migrada del excel histórico ese campo quedó siempre vacío/"$-", no es un
-  // valor calculado real (bug detectado con AGUSTIN, Sombrilla #27: badge
-  // "PARCIAL" + "Unidad saldada" al mismo tiempo). Si algún cliente tiene una
-  // reserva con saldo sin verificar (precio ambiguo o pago sin verificar), el
-  // total completo se marca `sinVerificar` — sumar un número real más un
-  // "no sabemos cuánto" daría un total falso.
-  const saldoPorCliente = useMemo(() => {
-    const map = {}
-    const gruposContados = new Set()
-    for (const r of reservas) {
-      if (r.estado === 'cancelada' || !r.cliente_id) continue
-      const entry = (map[r.cliente_id] ||= { total: 0, sinVerificar: false })
-      // Una reserva agrupada (precio unificado, ver lib/reservas.js) no suma
-      // su propio saldo individual — el grupo entero cuenta UNA sola vez,
-      // contra precio_total, nunca contra valor_total de cada período suelto.
-      if (esGrupo(r)) {
-        if (gruposContados.has(r.grupo_id)) continue
-        gruposContados.add(r.grupo_id)
-        const saldo = saldoGrupo(r, reservas, pagosPorReserva)
-        if (saldo === null) entry.sinVerificar = true
-        else entry.total += saldo
-        continue
-      }
-      const saldo = saldoNumerico(r, pagosPorReserva[r.id] || [])
-      if (saldo === null) entry.sinVerificar = true
-      else entry.total += saldo
-    }
-    return map
-  }, [reservas, pagosPorReserva])
-
   // Reservas donde el cliente aparece como CO-SOCIO (reserva_clientes) sin ser
-  // el titular (r.cliente_id) — solo para el badge de unidad de la cabecera:
-  // un co-socio de la Sombrilla 17 tiene que ver esa unidad igual que el
-  // titular, aunque no sea el dueño de la reserva. No se mezcla con
-  // reservasPorCliente (saldo, lista de "Reservas", PagosGrid) para no
-  // duplicar saldo/pagos que le corresponden al titular.
+  // el titular (r.cliente_id). Ítem 3 (25/10/2026): antes solo se usaba para
+  // el badge de unidad de la cabecera, y un cliente que SOLO era cosocio
+  // (nunca titular de nada) quedaba sin badge de estado ni saldo en su
+  // propia ficha/card — ahora se mezcla con reservasPorCliente en
+  // `derivarCliente` para que un cosocio vea exactamente lo mismo que un
+  // titular: misma etiqueta de estado de la reserva compartida, mismo
+  // saldo pendiente, misma lista de reservas/pagos. Nunca hay duplicados:
+  // esta tabla excluye explícitamente al titular de cada reserva (abajo),
+  // así que una reserva nunca cae en los dos mapas para la misma persona.
   const reservasComoCoSocioPorCliente = useMemo(() => {
     const map = {}
     for (const r of reservas) {
@@ -612,17 +568,85 @@ export default function Clientes() {
     return map
   }, [reservas])
 
+  // Filtro por estado (badge): mismo criterio que el badge del header de cada
+  // fila — un grupo con precio unificado manda por sobre cualquier período
+  // suelto, igual que en el render.
+  const clientesVisibles = useMemo(() => {
+    if (filtroEstado === 'todos') return filteredClientes
+    return filteredClientes.filter((cliente) => {
+      const reservasCliente = [
+        ...(reservasPorCliente[cliente.id] || []),
+        ...(reservasComoCoSocioPorCliente[cliente.id] || []),
+      ]
+      const grupo = reservasCliente.find((r) => esGrupo(r) && r.estado !== 'cancelada')
+      if (grupo) {
+        return estadoPagoGrupo(saldoGrupo(grupo, reservas, pagosPorReserva), grupo.reserva_grupos) === filtroEstado
+      }
+      const badge = reservaActivaDeTemporada(reservasCliente)
+      return badge ? estadoBadgeStatus(badge) === filtroEstado : false
+    })
+  }, [filteredClientes, filtroEstado, reservasPorCliente, reservasComoCoSocioPorCliente, reservas, pagosPorReserva])
+
+  // Saldo total por cliente: SIEMPRE derivado de estado_pago + pagos reales
+  // (saldoNumerico), nunca del campo suelto `reserva.saldo` — para temporada
+  // migrada del excel histórico ese campo quedó siempre vacío/"$-", no es un
+  // valor calculado real (bug detectado con AGUSTIN, Sombrilla #27: badge
+  // "PARCIAL" + "Unidad saldada" al mismo tiempo). Si algún cliente tiene una
+  // reserva con saldo sin verificar (precio ambiguo o pago sin verificar), el
+  // total completo se marca `sinVerificar` — sumar un número real más un
+  // "no sabemos cuánto" daría un total falso.
+  // Ítem 3 (25/10/2026): el saldo se acredita al titular Y a cada cosocio de
+  // la reserva (reserva_clientes) — antes solo al titular, así que un
+  // cliente que es SOLO cosocio (nunca titular) quedaba siempre en $0.
+  // `gruposContados` pasa a ser por (cliente, grupo) en vez de solo grupo,
+  // para que cada persona cuente el saldo del grupo una sola vez cada una
+  // (titular y cosocios ven el mismo monto, pero el Set global de antes
+  // habría salteado a un cosocio si el titular ya había "gastado" esa
+  // marca en una vuelta anterior del loop).
+  const saldoPorCliente = useMemo(() => {
+    const map = {}
+    const gruposContados = new Set()
+    const acreditar = (clienteId, r) => {
+      if (!clienteId) return
+      const entry = (map[clienteId] ||= { total: 0, sinVerificar: false })
+      if (esGrupo(r)) {
+        const key = `${clienteId}:${r.grupo_id}`
+        if (gruposContados.has(key)) return
+        gruposContados.add(key)
+        const saldo = saldoGrupo(r, reservas, pagosPorReserva)
+        if (saldo === null) entry.sinVerificar = true
+        else entry.total += saldo
+        return
+      }
+      const saldo = saldoNumerico(r, pagosPorReserva[r.id] || [])
+      if (saldo === null) entry.sinVerificar = true
+      else entry.total += saldo
+    }
+    for (const r of reservas) {
+      if (r.estado === 'cancelada') continue
+      acreditar(r.cliente_id, r)
+      for (const rc of r.reserva_clientes || []) {
+        if (!rc.cliente_id || rc.cliente_id === r.cliente_id) continue
+        acreditar(rc.cliente_id, r)
+      }
+    }
+    return map
+  }, [reservas, pagosPorReserva])
+
   // Toda la información derivada de un cliente puntual (badge, saldo, grupos,
   // reservas sueltas, etc.) — un solo cálculo reusado tanto por la fila
   // compacta de la lista como por el panel/pantalla de detalle
   // (ClienteDetalleContent), así nunca se desincronizan entre sí.
   const derivarCliente = (cliente) => {
-    const reservasCliente = reservasPorCliente[cliente.id] || []
-    const saldoInfo = saldoPorCliente[cliente.id] || { total: 0, sinVerificar: false }
-    const unidadesCliente = unidadesDeReservas([
-      ...reservasCliente,
+    // Ítem 3 (25/10/2026): combina las reservas donde es titular + donde es
+    // cosocio — un cosocio puro (nunca titular de nada) ahora calcula badge/
+    // saldo/pagables igual que un titular, en vez de quedar en $0 sin badge.
+    const reservasCliente = [
+      ...(reservasPorCliente[cliente.id] || []),
       ...(reservasComoCoSocioPorCliente[cliente.id] || []),
-    ])
+    ]
+    const saldoInfo = saldoPorCliente[cliente.id] || { total: 0, sinVerificar: false }
+    const unidadesCliente = unidadesDeReservas(reservasCliente)
     const reservaGrupoCliente = reservasCliente.find((r) => esGrupo(r) && r.estado !== 'cancelada')
     const reservaBadge = reservaGrupoCliente || reservaActivaDeTemporada(reservasCliente)
     const sinPrecio = !reservaGrupoCliente && precioSinDefinir(reservasCliente)
