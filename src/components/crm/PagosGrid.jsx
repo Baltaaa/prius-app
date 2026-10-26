@@ -175,8 +175,10 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
                 {/* Jerarquía (testing oct 2026, item 7): dato principal = el
                     comprobante (identifica el pago), secundario = el monto —
                     antes era al revés. "Sin comprobante" en tono neutro
-                    cuando no hay ninguno cargado. */}
-                <span className="text-sm font-bold truncate max-w-full normal-case tracking-normal">
+                    cuando no hay ninguno cargado. Sin truncar (Bloque B,
+                    ítem 11, 26/10/2026): antes "Sin comprob…" se cortaba con
+                    elipsis en celdas angostas — ahora rompe a otra línea. */}
+                <span className="text-sm font-bold break-words max-w-full normal-case tracking-normal">
                   {pago.comprobantes?.length > 0
                     ? pago.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
                     : <span className="text-prius-muted font-semibold">Sin comprobante</span>}

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatPesosVisible, formatFecha, formatRangoFechas, unidadEmoji } from '../../lib/format'
+import { formatFecha, formatRangoFechas, unidadEmoji } from '../../lib/format'
 import DateInput from '../../components/inputs/DateInput'
 import { coSocios, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
@@ -89,10 +89,21 @@ export default function Reservas() {
   const [filtroUnidadId, setFiltroUnidadId] = useState(null) // deep-link "Ver todas" desde el modal de unidad del Plano
 
   // Rediseño maestro-detalle (oct 2026, mock 03-reservas-*): un solo id
-  // seleccionado, el breakpoint decide cómo se muestra — panel fijo
-  // (≥1024px), bottom sheet (768-1023px) o pantalla completa (<768px).
-  // Mismo patrón de doble matchMedia que ya usa Dashboard.jsx/TopBar.jsx.
+  // seleccionado, el breakpoint decide cómo se muestra — panel fijo 60/40
+  // (≥1280px), drawer superpuesto (1024-1279px, Bloque B 26/10/2026: a esos
+  // anchos la tabla no tiene aire para un panel fijo del 40% sin aplastarse),
+  // bottom sheet (768-1023px) o pantalla completa (<768px). Mismo patrón de
+  // triple matchMedia que ya usa Dashboard.jsx/TopBar.jsx.
   const [selectedReservaId, setSelectedReservaId] = useState(null)
+  const [isDesktopXL, setIsDesktopXL] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 1280px)').matches
+  )
+  // Solo para la columna Origen de la tabla (Bloque B, ítem 10): entre
+  // 1280 y 1366 el 60% de la tabla queda muy justo — ahí Origen se achica a
+  // solo el ícono con tooltip; desde 1440 vuelve a mostrar el texto.
+  const [isDesktop1440, setIsDesktop1440] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 1440px)').matches
+  )
   const [isDesktopLG, setIsDesktopLG] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
   )
@@ -100,13 +111,21 @@ export default function Reservas() {
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
   )
   useEffect(() => {
+    const mqlXl = window.matchMedia('(min-width: 1280px)')
+    const mql1440 = window.matchMedia('(min-width: 1440px)')
     const mqlLg = window.matchMedia('(min-width: 1024px)')
     const mqlMobile = window.matchMedia('(max-width: 767px)')
+    const updateXl = () => setIsDesktopXL(mqlXl.matches)
+    const update1440 = () => setIsDesktop1440(mql1440.matches)
     const updateLg = () => setIsDesktopLG(mqlLg.matches)
     const updateMobile = () => setIsMobile(mqlMobile.matches)
+    mqlXl.addEventListener('change', updateXl)
+    mql1440.addEventListener('change', update1440)
     mqlLg.addEventListener('change', updateLg)
     mqlMobile.addEventListener('change', updateMobile)
     return () => {
+      mqlXl.removeEventListener('change', updateXl)
+      mql1440.removeEventListener('change', update1440)
       mqlLg.removeEventListener('change', updateLg)
       mqlMobile.removeEventListener('change', updateMobile)
     }
@@ -318,6 +337,11 @@ export default function Reservas() {
   // congela la última reserva real mientras dura la animación de cierre
   // (B1) — `selectedReserva` llega en null para señalizar el cierre.
   const mobileDetalleShouldRender = useMountTransition(isMobile && !!selectedReserva)
+  // Drawer 1024-1279px (Bloque B, 26/10/2026): mismo patrón de congelar la
+  // última reserva real durante la animación de cierre.
+  const esRangoDrawer = isDesktopLG && !isDesktopXL
+  const drawerOverlay = useOverlay({ id: 'reservas-drawer', isOpen: esRangoDrawer && !!selectedReserva, onRequestClose: handleCloseDetalle })
+  const drawerShouldRender = useMountTransition(esRangoDrawer && !!selectedReserva)
   const lastDetalleReservaRef = useRef(selectedReserva)
   if (selectedReserva) lastDetalleReservaRef.current = selectedReserva
   const mobileDetalleReserva = selectedReserva ?? lastDetalleReservaRef.current
@@ -328,16 +352,20 @@ export default function Reservas() {
   // Columna "Acciones" sacada (testing oct 2026): esos mismos botones ya
   // viven en la ficha lateral/bottom sheet que abre el click de la fila
   // (ReservaDetalleContent) — tenerlos repetidos en la grilla era redundante.
-  const headers = ['Llegada', 'Cliente', 'Unidad', 'Monto Total', 'Saldo', 'Estado', 'Origen']
-  // Anchos fijos (ítem 7, oct 2026) para que nada se parta a dos líneas en
-  // 1280/1366/1440: todas las columnas salvo "Cliente" quedan en un ancho
-  // fijo que entra con nowrap — "Cliente" (sin ancho acá) se lleva el resto
-  // y es la única que puede wrappear a dos líneas. Con table-fixed el ancho
-  // total de la tabla es SIEMPRE la suma de estos anchos (el contenido que
-  // no entra wrappea/se recorta adentro de su celda, nunca agranda la
-  // tabla) — medido contra el espacio real disponible junto al panel fijo
-  // (que bajó de w-96 a w-80 para esto, ver más abajo) en 1280/1366/1440.
-  const columnWidths = ['80px', undefined, '100px', '108px', '96px', '92px', '88px']
+  // Sin columna Saldo (Bloque B, ítem 9, 26/10/2026): ese dato ya se ve en
+  // la ficha — repetirlo en la tabla era lo que más apretaba el resto de
+  // las columnas (MONTO TOTAL y SALDO casi se pisaban).
+  const headers = ['Llegada', 'Cliente', 'Unidad', 'Monto Total', 'Estado', 'Origen']
+  // Anchos fijos para que nada se parta a dos líneas en 1280/1366/1440:
+  // todas las columnas salvo "Cliente" quedan en un ancho fijo que entra
+  // con nowrap — "Cliente" (sin ancho acá) se lleva el resto y es la única
+  // que puede wrappear a dos líneas. Con table-fixed el ancho total de la
+  // tabla es SIEMPRE la suma de estos anchos — medido contra el 60% real
+  // disponible (grid 3fr/2fr junto al panel, ver más abajo) en
+  // 1280/1366/1440. Origen baja a 56px (solo ícono + tooltip) entre 1280 y
+  // 1366 — ver `origenAngosto` — y sube a 88px desde 1440.
+  const origenAngosto = isDesktopXL && !isDesktop1440
+  const columnWidths = ['80px', undefined, '100px', '144px', '92px', origenAngosto ? '56px' : '88px']
 
   // Unidades con una reserva de TEMPORADA activa: quedan tomadas para toda la
   // temporada sin importar qué fecha se elija, así que ni siquiera aparecen
@@ -489,14 +517,16 @@ export default function Reservas() {
         />
       )}
 
-      {/* Tablet/desktop (≥768px, mock 03-reservas-desktop): tabla maestro a
-          la izquierda + detalle a la derecha. El panel fijo solo se ve en
-          ≥1024px (`hidden lg:flex`); 768-1023px usa el BottomSheet de más
-          abajo en cambio — mismo patrón dual-render que UnidadPreviewModal/
-          UnidadDetallePanel del Plano. */}
+      {/* Tablet/desktop (≥768px, mock 03-reservas-desktop): tabla maestro +
+          detalle. Desde 1280px, grid 60/40 (3fr/2fr) con el panel fijo al
+          lado (Bloque B, 26/10/2026) — entre 1024 y 1279 el panel pasa a
+          drawer superpuesto (más abajo) para no aplastar la tabla, así que
+          acá la tabla ocupa el ancho completo; 768-1023px usa el
+          BottomSheet de más abajo — mismo patrón dual-render que
+          UnidadPreviewModal/UnidadDetallePanel del Plano. */}
       {!isMobile && (
-        <div className="flex gap-4 items-start">
-          <div className="flex-1 min-w-0">
+        <div className={isDesktopXL ? 'grid gap-4 items-start' : ''} style={isDesktopXL ? { gridTemplateColumns: '3fr 2fr' } : undefined}>
+          <div className="min-w-0">
       <DataTable
         headers={headers}
         data={filteredReservas}
@@ -525,22 +555,25 @@ export default function Reservas() {
                 </td>
                 <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
                 <td className="px-3 py-4 align-middle font-bold text-black"><MontoReserva reserva={res} /></td>
-                <td className="px-3 py-4 align-middle font-bold text-prius-error whitespace-nowrap">
-                  {formatPesosVisible(res.saldo)}
-                </td>
-                <td className="px-3 py-4 align-middle">
-                  <div className="flex items-center gap-2">
+                <td className="px-3 py-4 align-middle text-center">
+                  <div className="flex items-center justify-center gap-2">
                     <StatusBadge status={estadoBadgeStatus(res)} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-cyan-400 border border-cyan-400/30 rounded px-1.5 py-0.5">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-cyan-400 border border-cyan-400/30 rounded px-1.5 py-0.5 whitespace-nowrap">
                       Temporada
                     </span>
                   </div>
                 </td>
-                <td className="px-3 py-4 align-middle">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted">
-                    {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
-                    {res.origen === 'web' ? 'Web' : 'Manual'}
-                  </span>
+                <td className="px-3 py-4 align-middle text-center">
+                  {origenAngosto ? (
+                    <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-prius-muted">
+                      {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted whitespace-nowrap">
+                      {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
+                      {res.origen === 'web' ? 'Web' : 'Manual'}
+                    </span>
+                  )}
                 </td>
               </tr>
             )
@@ -562,17 +595,22 @@ export default function Reservas() {
               </td>
               <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
               <td className="px-3 py-4 align-middle font-bold text-black"><MontoReserva reserva={res} /></td>
-              <td className="px-3 py-4 align-middle font-bold text-prius-error whitespace-nowrap">
-                {formatPesosVisible(res.saldo)}
+              <td className="px-3 py-4 align-middle text-center">
+                <div className="flex items-center justify-center">
+                  <StatusBadge status={estadoBadgeStatus(res)} />
+                </div>
               </td>
-              <td className="px-3 py-4 align-middle">
-                <StatusBadge status={estadoBadgeStatus(res)} />
-              </td>
-              <td className="px-3 py-4 align-middle">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted">
-                  {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
-                  {res.origen === 'web' ? 'Web' : 'Manual'}
-                </span>
+              <td className="px-3 py-4 align-middle text-center">
+                {origenAngosto ? (
+                  <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-prius-muted">
+                    {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted whitespace-nowrap">
+                    {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
+                    {res.origen === 'web' ? 'Web' : 'Manual'}
+                  </span>
+                )}
               </td>
             </tr>
           )
@@ -580,32 +618,69 @@ export default function Reservas() {
       />
           </div>
 
-          {/* Panel fijo — solo ≥1024px. Altura fija (no max-h) + key por id
-              para el crossfade (mismo patrón que Clientes.jsx, ítem 6, oct
-              2026): nunca cambia de tamaño al elegir/deseleccionar una
-              reserva, y el contenido hace fade+shift de 180ms al cambiar. */}
-          <aside className="hidden lg:flex w-72 shrink-0 card-light rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start h-[calc(100vh-2rem)]">
-            {selectedReserva ? (
-              <div key={selectedReserva.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
-                <ReservaDetalleContent
-                  reserva={selectedReserva}
-                  fechaLlegada={fechaLlegada}
-                  onClose={handleCloseDetalle}
-                  onRegistrarPago={setPagoReserva}
-                  onEditar={abrirEdicionReserva}
-                  onCancelar={handleCancelarClick}
-                  onEliminar={handleEliminarClick}
-                  onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
-                />
-              </div>
-            ) : (
-              <div key="empty" className="content-crossfade flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
-                <LayoutList size={28} />
-                <p className="text-body-md">Elegí una reserva para ver el detalle</p>
-              </div>
-            )}
-          </aside>
+          {/* Panel fijo 40% — solo ≥1280px (Bloque B). Altura fija (no
+              max-h) + key por id para el crossfade (mismo patrón que
+              Clientes.jsx, ítem 6, oct 2026): nunca cambia de tamaño al
+              elegir/deseleccionar una reserva, y el contenido hace
+              fade+shift de 180ms al cambiar. */}
+          {isDesktopXL && (
+            <aside className="hidden xl:flex min-w-0 card-light rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start h-[calc(100vh-2rem)]">
+              {selectedReserva ? (
+                <div key={selectedReserva.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
+                  <ReservaDetalleContent
+                    reserva={selectedReserva}
+                    fechaLlegada={fechaLlegada}
+                    onClose={handleCloseDetalle}
+                    onRegistrarPago={setPagoReserva}
+                    onEditar={abrirEdicionReserva}
+                    onCancelar={handleCancelarClick}
+                    onEliminar={handleEliminarClick}
+                    onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
+                    wide
+                  />
+                </div>
+              ) : (
+                <div key="empty" className="content-crossfade flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
+                  <LayoutList size={28} />
+                  <p className="text-body-md">Elegí una reserva para ver el detalle</p>
+                </div>
+              )}
+            </aside>
+          )}
         </div>
+      )}
+
+      {/* Drawer 1024-1279px (Bloque B, 26/10/2026): a este ancho el 40% fijo
+          aplastaba la tabla, así que el detalle pasa a un panel superpuesto
+          del 45% con fondo semitransparente — mismo patrón de click-afuera/
+          Escape que ClienteDrawer.jsx (useOverlay + bind en el panel, el
+          backdrop cierra al clickear fuera). */}
+      {esRangoDrawer && drawerShouldRender && createPortal(
+        <div
+          className={`fixed inset-0 z-[995] bg-black/40 flex justify-end ${selectedReserva ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
+          onClick={handleCloseDetalle}
+        >
+          <div
+            ref={drawerOverlay.bind}
+            onClick={(e) => e.stopPropagation()}
+            className={`w-[45%] min-w-[360px] h-full bg-white border-l border-hairline p-space-lg flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}
+          >
+            {selectedReserva && (
+              <ReservaDetalleContent
+                reserva={selectedReserva}
+                fechaLlegada={fechaLlegada}
+                onClose={handleCloseDetalle}
+                onRegistrarPago={setPagoReserva}
+                onEditar={abrirEdicionReserva}
+                onCancelar={handleCancelarClick}
+                onEliminar={handleEliminarClick}
+                onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
+                wide
+              />
+            )}
+          </div>
+        </div>,
+        document.body,
       )}
 
       {/* Tablet (768-1023px): mismo detalle, como bottom sheet — reusa

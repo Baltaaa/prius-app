@@ -20,7 +20,7 @@ const TIPO_LABEL = { periodo: 'Período', dia: 'Día', temporada: 'Temporada' }
 // cambia cómo la envuelve). Mismos handlers que ya usaba la fila de la
 // tabla/tarjeta — nada nuevo, solo reorganizado en cards tipo mock.
 export default function ReservaDetalleContent({
-  reserva, fechaLlegada, onClose, onRegistrarPago, onEditar, onCancelar, onEliminar, onCellClick, showCloseButton = true,
+  reserva, fechaLlegada, onClose, onRegistrarPago, onEditar, onCancelar, onEliminar, onCellClick, showCloseButton = true, wide = false,
 }) {
   const navigate = useNavigate()
   const { pagos } = usePagos(reserva?.id)
@@ -91,60 +91,112 @@ export default function ReservaDetalleContent({
           </div>
         </div>
 
-        {/* Unidad y fechas */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between py-1.5">
-            <span className="text-body-sm text-prius-slate">Llegada</span>
-            <span className="text-body-md text-black font-medium">{formatFecha(fechaLlegada(reserva))}</span>
-          </div>
-          <div className="flex items-center justify-between py-1.5">
-            <span className="text-body-sm text-prius-slate">Fechas</span>
-            <span className="text-body-md text-black font-medium text-right">{fechasLabel}</span>
-          </div>
-          <div className="flex items-center justify-between py-1.5">
-            <span className="text-body-sm text-prius-slate">Origen</span>
-            <span className="text-body-md text-black font-medium flex items-center gap-1.5">
-              {reserva.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
-              {reserva.origen === 'web' ? 'Web' : 'Manual'}
-            </span>
-          </div>
-          {reserva.notas && (
-            <div className="py-1.5">
-              <span className="block text-body-sm text-prius-slate">Notas</span>
-              <span className="text-body-md text-black">{reserva.notas}</span>
+        {/* Unidad y fechas — en el panel ancho (Bloque B, 26/10/2026) pasan
+            a una grilla de dos columnas en vez de lista vertical, para
+            aprovechar el 40% de ancho y bajar la altura total del panel. */}
+        {wide ? (
+          <div className="grid grid-cols-2 gap-x-space-md gap-y-3">
+            <div>
+              <span className="block text-label-md text-prius-muted uppercase tracking-wider mb-0.5">Llegada</span>
+              <span className="text-body-md text-black font-medium">{formatFecha(fechaLlegada(reserva))}</span>
             </div>
-          )}
-        </div>
+            <div>
+              <span className="block text-label-md text-prius-muted uppercase tracking-wider mb-0.5">Fechas</span>
+              <span className="text-body-md text-black font-medium">{fechasLabel}</span>
+            </div>
+            <div>
+              <span className="block text-label-md text-prius-muted uppercase tracking-wider mb-0.5">Origen</span>
+              <span className="text-body-md text-black font-medium flex items-center gap-1.5">
+                {reserva.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
+                {reserva.origen === 'web' ? 'Web' : 'Manual'}
+              </span>
+            </div>
+            {reserva.notas && (
+              <div className="col-span-2">
+                <span className="block text-label-md text-prius-muted uppercase tracking-wider mb-0.5">Notas</span>
+                <span className="text-body-md text-black">{reserva.notas}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between py-1.5">
+              <span className="text-body-sm text-prius-slate">Llegada</span>
+              <span className="text-body-md text-black font-medium">{formatFecha(fechaLlegada(reserva))}</span>
+            </div>
+            <div className="flex items-center justify-between py-1.5">
+              <span className="text-body-sm text-prius-slate">Fechas</span>
+              <span className="text-body-md text-black font-medium text-right">{fechasLabel}</span>
+            </div>
+            <div className="flex items-center justify-between py-1.5">
+              <span className="text-body-sm text-prius-slate">Origen</span>
+              <span className="text-body-md text-black font-medium flex items-center gap-1.5">
+                {reserva.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
+                {reserva.origen === 'web' ? 'Web' : 'Manual'}
+              </span>
+            </div>
+            {reserva.notas && (
+              <div className="py-1.5">
+                <span className="block text-body-sm text-prius-slate">Notas</span>
+                <span className="text-body-md text-black">{reserva.notas}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Pagos: total/pagado/saldo + lista, estilo mock — lectura, el alta
             de un pago nuevo sigue siendo la acción "Registrar pago" de
             abajo (mismo flujo de siempre, RegistrarPago.jsx). */}
         <div className="bg-prius-surface rounded-xl p-space-md flex flex-col gap-space-sm">
           <span className="text-label-md text-prius-slate uppercase tracking-wider">Pagos</span>
-          <div className="flex items-baseline justify-between">
-            <span className="text-body-md text-prius-slate">Total</span>
-            <span className="text-body-md text-black font-medium"><MontoReserva reserva={reserva} /></span>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-body-md text-prius-slate">Saldo</span>
-            <span className={`text-headline-sm font-bold ${saldo === null ? 'text-prius-slate' : saldo > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
-              {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
-            </span>
-          </div>
+          {wide ? (
+            <div className="grid grid-cols-2 gap-space-md">
+              <div>
+                <span className="block text-label-md text-prius-muted uppercase tracking-wider mb-0.5">Total</span>
+                <span className="text-body-md text-black font-medium"><MontoReserva reserva={reserva} /></span>
+              </div>
+              <div>
+                <span className="block text-label-md text-prius-muted uppercase tracking-wider mb-0.5">Saldo</span>
+                <span className={`block text-headline-sm font-bold ${saldo === null ? 'text-prius-slate' : saldo > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
+                  {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-baseline justify-between">
+                <span className="text-body-md text-prius-slate">Total</span>
+                <span className="text-body-md text-black font-medium"><MontoReserva reserva={reserva} /></span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-body-md text-prius-slate">Saldo</span>
+                <span className={`text-headline-sm font-bold ${saldo === null ? 'text-prius-slate' : saldo > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
+                  {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
+                </span>
+              </div>
+            </>
+          )}
           {cuotas.length > 0 && (
-            <div className="pt-2 border-t border-hairline space-y-1.5">
+            <div className={wide ? 'pt-2 border-t border-hairline grid grid-cols-2 gap-2' : 'pt-2 border-t border-hairline space-y-1.5'}>
               {cuotas.map((p) => (
                 <button
                   key={p.id}
                   type="button"
                   data-deeplink-id={`pago-${p.id}`}
                   onClick={() => onCellClick?.(reserva, p)}
-                  className="w-full flex items-center justify-between gap-2 text-left hover:bg-hairline/50 rounded-lg -mx-1 px-1 py-0.5 transition-colors"
+                  className={
+                    wide
+                      ? 'flex flex-col items-start gap-0.5 text-left bg-white hover:bg-hairline/50 rounded-lg px-space-sm py-2 transition-colors min-w-0'
+                      : 'w-full flex items-center justify-between gap-2 text-left hover:bg-hairline/50 rounded-lg -mx-1 px-1 py-0.5 transition-colors'
+                  }
                 >
                   {/* Jerarquía (testing oct 2026, item 7): comprobante como
                       dato principal, monto como secundario — igual criterio
-                      que PagosGrid.jsx (ficha de cliente). */}
-                  <span className={`min-w-0 truncate font-semibold ${p.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-black'}`}>
+                      que PagosGrid.jsx (ficha de cliente). Sin truncar
+                      (Bloque B, ítem 11, 26/10/2026): "Sin comprobante"
+                      entero, no "Sin comprob…" — rompe a otra línea en vez
+                      de cortar con elipsis. */}
+                  <span className={`min-w-0 break-words font-semibold ${p.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-black'}`}>
                     {p.comprobantes?.length > 0
                       ? p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
                       : 'Sin comprobante'}
@@ -164,7 +216,9 @@ export default function ReservaDetalleContent({
         </div>
 
         {/* Acciones — mismos handlers que ya usaba la fila/tarjeta de la
-            lista, nada nuevo. */}
+            lista, nada nuevo. En el panel ancho (Bloque B, 26/10/2026) las
+            secundarias van en una grilla de dos columnas con igual alto;
+            "Registrar pago" sigue ocupando el ancho completo arriba. */}
         <div className="flex flex-col gap-2">
           {estadoBadgeStatus(reserva) === 'preconfirmada' && (
             <button
@@ -183,32 +237,34 @@ export default function ReservaDetalleContent({
               <Wallet size={16} /> Registrar pago
             </button>
           )}
-          <button
-            onClick={() => navigate(linkToComprobante(reserva.id))}
-            className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
-          >
-            <Receipt size={16} /> Ver comprobante
-          </button>
-          <button
-            onClick={() => onEditar?.(reserva)}
-            className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
-          >
-            <Edit2 size={16} /> Editar reserva
-          </button>
-          <button
-            onClick={() => setMostrarCosocios(true)}
-            className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
-          >
-            <Users size={16} /> Cosocios{socios.length > 0 ? ` (${socios.length})` : ''}
-          </button>
-          {puedeAjustarEstadoPago && !reserva.bonificada && (
+          <div className={wide ? 'grid grid-cols-2 gap-2' : 'flex flex-col gap-2'}>
             <button
-              onClick={() => setMostrarCambiarEstado(true)}
+              onClick={() => navigate(linkToComprobante(reserva.id))}
               className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
             >
-              <ShieldAlert size={16} /> Cambiar estado de pago
+              <Receipt size={16} /> Ver comprobante
             </button>
-          )}
+            <button
+              onClick={() => onEditar?.(reserva)}
+              className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+            >
+              <Edit2 size={16} /> Editar reserva
+            </button>
+            <button
+              onClick={() => setMostrarCosocios(true)}
+              className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+            >
+              <Users size={16} /> Cosocios{socios.length > 0 ? ` (${socios.length})` : ''}
+            </button>
+            {puedeAjustarEstadoPago && !reserva.bonificada && (
+              <button
+                onClick={() => setMostrarCambiarEstado(true)}
+                className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+              >
+                <ShieldAlert size={16} /> Cambiar estado de pago
+              </button>
+            )}
+          </div>
           <div className="flex gap-2">
             <button
               onClick={() => onCancelar?.(reserva)}
