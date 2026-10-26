@@ -38,6 +38,10 @@ export const PERMISOS: Record<string, Rol[]> = {
   // Fase 4A (oct 2026): vista previa interna de la variante pública del
   // plano — herramienta de desarrollo, no para uso operativo diario.
   plano_publico_preview: ['superadmin'],
+  // Ítem 2 (25/10/2026): revertir/cambiar a mano el estado_pago calculado
+  // de una reserva — espeja el guard real de cambiar_estado_pago_manual/
+  // revertir_estado_pago_automatico en la base.
+  ajustar_estado_pago: ['superadmin'],
 
   // Operación diaria — explícitas para que quede documentada la matriz
   // completa, aunque el default ya las permitiría para admin.

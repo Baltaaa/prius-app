@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Wallet, Receipt, Edit2, XCircle, Trash2, QrCode, Globe, MonitorSmartphone, Users } from 'lucide-react'
+import { X, Wallet, Receipt, Edit2, XCircle, Trash2, QrCode, Globe, MonitorSmartphone, Users, ShieldAlert } from 'lucide-react'
 import { usePagos } from '../../hooks/usePagos'
 import { coSocios, estadoBadgeStatus, saldoNumerico, pagoSinVerificar } from '../../lib/reservas'
 import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, unidadEmoji } from '../../lib/format'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
+import { usePermiso } from '../../context/AuthProvider'
 import StatusBadge from './StatusBadge'
 import MontoReserva from './MontoReserva'
+import CambiarEstadoPagoModal from './CambiarEstadoPagoModal'
 
 const TIPO_LABEL = { periodo: 'Período', dia: 'Día', temporada: 'Temporada' }
 
@@ -20,6 +23,8 @@ export default function ReservaDetalleContent({
 }) {
   const navigate = useNavigate()
   const { pagos } = usePagos(reserva?.id)
+  const puedeAjustarEstadoPago = usePermiso('ajustar_estado_pago')
+  const [mostrarCambiarEstado, setMostrarCambiarEstado] = useState(false)
 
   if (!reserva) return null
 
@@ -54,6 +59,18 @@ export default function ReservaDetalleContent({
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-space-md">
+        {/* Ítem 2 (25/10/2026): aviso cuando el estado de pago fue ajustado
+            a mano — visible para todos, no solo superadmin (transparencia
+            de por qué el badge no coincide con lo que calcularía el saldo). */}
+        {reserva.estado_pago_manual && (
+          <div className="flex items-start gap-2 p-3 bg-gold/5 border border-gold/20 rounded-xl">
+            <ShieldAlert size={14} className="text-gold shrink-0 mt-0.5" />
+            <p className="text-xs text-prius-slate">
+              Estado ajustado manualmente{reserva.estado_pago_manual_motivo ? ` — ${reserva.estado_pago_manual_motivo}` : ''}.
+            </p>
+          </div>
+        )}
+
         {/* Cliente */}
         <div className="bg-prius-surface rounded-xl p-space-md flex flex-col gap-space-sm">
           <span className="text-label-md text-prius-slate uppercase tracking-wider">Cliente</span>
@@ -171,6 +188,14 @@ export default function ReservaDetalleContent({
           >
             <Edit2 size={16} /> Editar reserva
           </button>
+          {puedeAjustarEstadoPago && !reserva.bonificada && (
+            <button
+              onClick={() => setMostrarCambiarEstado(true)}
+              className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+            >
+              <ShieldAlert size={16} /> Cambiar estado de pago
+            </button>
+          )}
           <div className="flex gap-2">
             <button
               onClick={() => onCancelar?.(reserva)}
@@ -187,6 +212,10 @@ export default function ReservaDetalleContent({
           </div>
         </div>
       </div>
+
+      {puedeAjustarEstadoPago && (
+        <CambiarEstadoPagoModal isOpen={mostrarCambiarEstado} onClose={() => setMostrarCambiarEstado(false)} reserva={reserva} />
+      )}
     </>
   )
 }

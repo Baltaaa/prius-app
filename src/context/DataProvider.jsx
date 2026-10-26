@@ -506,6 +506,28 @@ export function DataProvider({ children }) {
     return data
   }, [fetchPagos])
 
+  // Ítem 2 (25/10/2026): revertir/cambiar a mano el estado_pago de una
+  // reserva — solo superadmin, validado también server-side en la RPC. No
+  // toca pagos/comprobantes, solo reservas.estado_pago* (ver migración
+  // estado_pago_manual_override). fetchReservas() refleja el cambio de
+  // inmediato en esta pestaña; Realtime (ya suscripto a `reservas`)
+  // propaga a Plano/Clientes/Dashboard en cualquier otra pestaña abierta.
+  const cambiarEstadoPagoManual = useCallback(async (reservaId, nuevoEstado, motivo) => {
+    const { data, error } = await supabase.rpc('cambiar_estado_pago_manual', {
+      p_reserva_id: reservaId, p_nuevo_estado: nuevoEstado, p_motivo: motivo,
+    })
+    if (error) throw error
+    await fetchReservas()
+    return data
+  }, [fetchReservas])
+
+  const revertirEstadoPagoAutomatico = useCallback(async (reservaId) => {
+    const { data, error } = await supabase.rpc('revertir_estado_pago_automatico', { p_reserva_id: reservaId })
+    if (error) throw error
+    await fetchReservas()
+    return data
+  }, [fetchReservas])
+
   // Item 15 (testing oct 2026): registra la emisión de un comprobante
   // interno (ComprobanteDocumento.jsx) y devuelve su número correlativo
   // real (asignado en la base, nunca calculado en el front). El snapshot
@@ -588,6 +610,7 @@ export function DataProvider({ children }) {
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
     updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
+    cambiarEstadoPagoManual, revertirEstadoPagoAutomatico,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
@@ -598,6 +621,7 @@ export function DataProvider({ children }) {
     createCliente, updateCliente, deleteCliente, deleteUnidad,
     iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
     updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
+    cambiarEstadoPagoManual, revertirEstadoPagoAutomatico,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
     fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,

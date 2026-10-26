@@ -1,13 +1,16 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { X, Users, ArrowRight } from "lucide-react"
+import { X, Users, ArrowRight, ShieldAlert } from "lucide-react"
 import { usePagos } from "../../hooks/usePagos"
 import { useReservas } from "../../hooks/useReservas"
 import { useDialog } from "../../context/DialogProvider"
+import { usePermiso } from "../../context/AuthProvider"
 import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib/reservas"
 import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from "../../lib/format"
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 import Historial from "../crm/Historial"
+import CambiarEstadoPagoModal from "../crm/CambiarEstadoPagoModal"
 import { linkToCliente, linkToReserva, linkToRecepcion } from "../../lib/deepLinks"
 
 const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
@@ -29,6 +32,8 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
   const { pagos } = usePagos(reserva?.id)
   const { updateReserva, cancelarReserva } = useReservas()
   const { alert, confirm } = useDialog()
+  const puedeAjustarEstadoPago = usePermiso('ajustar_estado_pago')
+  const [mostrarCambiarEstado, setMostrarCambiarEstado] = useState(false)
 
   if (!unit) return null
 
@@ -140,6 +145,17 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
           </div>
         ) : (
           <>
+            {/* Ítem 2 (25/10/2026): aviso de ajuste manual — mismo criterio
+                que ReservaDetalleContent.jsx (ficha de Reservas). */}
+            {reserva.estado_pago_manual && (
+              <div className="flex items-start gap-2 p-3 bg-gold/5 border border-gold/20 rounded-xl">
+                <ShieldAlert size={14} className="text-gold shrink-0 mt-0.5" />
+                <p className="text-body-sm text-prius-slate">
+                  Estado ajustado manualmente{reserva.estado_pago_manual_motivo ? ` — ${reserva.estado_pago_manual_motivo}` : ""}.
+                </p>
+              </div>
+            )}
+
             {/* Titular + cosocios (reserva_clientes) — cada uno navega a su
                 propia ficha (mismo linkToCliente de "Ver ficha del cliente");
                 el titular se distingue visualmente (avatar negro + badge) de
@@ -271,6 +287,14 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                   </button>
                 </>
               )}
+              {puedeAjustarEstadoPago && !reserva.bonificada && (
+                <button
+                  onClick={() => setMostrarCambiarEstado(true)}
+                  className="w-full h-11 bg-prius-surface hover:bg-hairline text-black rounded-xl text-title-md font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                  <ShieldAlert size={16} /> Cambiar estado de pago
+                </button>
+              )}
             </div>
           </>
         )}
@@ -289,6 +313,10 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
           <Historial tipo="unidad" id={unit.dbId} compact />
         </div>
       </div>
+
+      {puedeAjustarEstadoPago && reserva && (
+        <CambiarEstadoPagoModal isOpen={mostrarCambiarEstado} onClose={() => setMostrarCambiarEstado(false)} reserva={reserva} />
+      )}
     </>
   )
 }
