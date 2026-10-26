@@ -230,12 +230,12 @@ export default function Home() {
                 key={a.key}
                 type="button"
                 onClick={a.onClick}
-                className="group flex flex-col items-center lg:items-start justify-center lg:justify-between gap-2 p-space-sm lg:p-space-md rounded-2xl card-light hover:bg-prius-subtle active:scale-95 transition-all text-center lg:text-left"
+                className="group flex flex-col items-center justify-center gap-1.5 p-space-sm lg:px-space-md lg:py-space-sm rounded-2xl card-light hover:bg-prius-subtle active:scale-95 transition-all text-center"
               >
-                <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-xl flex items-center justify-center mb-1.5 lg:mb-0 transition-colors ${a.accent ? 'bg-gold' : 'bg-prius-surface group-hover:bg-gold/20'}`}>
+                <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-xl flex items-center justify-center transition-colors ${a.accent ? 'bg-gold' : 'bg-prius-surface group-hover:bg-gold/20'}`}>
                   <a.icon size={20} className="text-black" />
                 </div>
-                <div className="lg:mt-4 min-w-0 w-full">
+                <div className="min-w-0 w-full">
                   <span className="block text-xs md:text-label-md lg:text-headline-sm text-black leading-tight break-words">{a.label}</span>
                   <span className="hidden lg:block text-body-sm text-prius-slate whitespace-normal">{a.sub}</span>
                 </div>
