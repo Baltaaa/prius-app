@@ -5,6 +5,7 @@ import DateInput from "../inputs/DateInput"
 import PlanoZoomBar from "./PlanoZoomBar"
 import PlanoLeyenda from "./PlanoLeyenda"
 import { pct } from "./PlanoStatsBar"
+import { formatPesosCompacto } from "../../lib/format"
 
 // Plano mobile (<768px, mock 02-plano-mobile) — componente NUEVO y separado
 // del layout desktop/tablet de Dashboard.jsx: nunca edita ni reimplementa
@@ -26,7 +27,7 @@ export default function PlanoMobile({
   const kpis = planoStats && [
     { key: 'ocupacion', label: 'Ocupadas', value: planoStats.ocupacion.count, sub: `${pct(planoStats.ocupacion.pct)}`, progress: planoStats.ocupacion.pct, tone: 'black' },
     { key: 'libres', label: 'Libres', value: planoStats.libres.count, sub: `${pct(planoStats.libres.pct ?? (planoStats.libres.count / Math.max(1, planoStats.ocupacion.total)))}`, progress: planoStats.libres.count / Math.max(1, planoStats.ocupacion.total), tone: 'success' },
-    { key: 'pendientes', label: 'Pendientes', value: planoStats.pendientes.count, sub: planoStats.pendientes.saldo > 0 ? formatCompacto(planoStats.pendientes.saldo) : null, progress: planoStats.pendientes.count / Math.max(1, planoStats.ocupacion.total), tone: 'gold' },
+    { key: 'pendientes', label: 'Pendientes', value: planoStats.pendientes.count, sub: planoStats.pendientes.saldo > 0 ? formatPesosCompacto(planoStats.pendientes.saldo) : null, progress: planoStats.pendientes.count / Math.max(1, planoStats.ocupacion.total), tone: 'gold' },
   ]
 
   return (
@@ -134,8 +135,3 @@ export default function PlanoMobile({
   )
 }
 
-function formatCompacto(n) {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1).replace('.0', '')}M`
-  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`
-  return `$${n}`
-}

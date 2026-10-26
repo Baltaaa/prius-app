@@ -9,7 +9,7 @@ import { useAuth, usePermiso } from '../../context/AuthProvider'
 import { supabase } from '../../lib/supabase'
 import { calcularPlanoStats } from '../../lib/planoStats'
 import { buildUnitsMap } from '../../lib/planoUnits'
-import { formatPesos, formatFechaLarga, formatHora } from '../../lib/format'
+import { formatPesos, formatFechaLarga, formatHora, formatMontosEnTexto, formatPorcentaje } from '../../lib/format'
 import { linkToReserva, linkToCliente } from '../../lib/deepLinks'
 import { isFeatureEnabled } from '../../lib/features'
 import { useClima } from '../../hooks/useClima'
@@ -354,7 +354,7 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <span className="text-label-md text-prius-slate uppercase">Cobranzas Temporada</span>
                   <span className="px-2.5 py-1 rounded-full bg-prius-surface text-prius-success text-label-md font-semibold">
-                    {(pctPercibido * 100).toFixed(1)}% Percibido
+                    {formatPorcentaje(pctPercibido * 100, 1)} Percibido
                   </span>
                 </div>
                 {/* Reportes oculto de momento (oct 2026, flag `reportes`
@@ -484,7 +484,7 @@ export default function Home() {
                       <Icon size={18} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-title-md text-black truncate">{ev.descripcion}</p>
+                      <p className="text-title-md text-black truncate">{formatMontosEnTexto(ev.descripcion)}</p>
                       <p className="text-body-sm text-prius-slate truncate">
                         {ev.actor_nombre || 'Sistema'}{ev.cliente_nombre ? ` · ${ev.cliente_nombre}` : ''}
                       </p>

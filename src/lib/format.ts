@@ -66,6 +66,29 @@ export function formatPesosVisible(n: number | null | undefined): string | null 
   return Number(n) > 0 ? formatPesos(n) : null
 }
 
+/** "$1,2M" / "$850K" / "$ 500" — versión abreviada para espacios chicos (stats compactas del Plano mobile). Por debajo de 1000 cae a formatPesos entero. */
+export function formatPesosCompacto(n: number | null | undefined): string {
+  const num = Number(n) || 0
+  const abs = Math.abs(num)
+  const signo = num < 0 ? MINUS : ''
+  if (abs >= 1_000_000) return `${signo}$${(abs / 1_000_000).toFixed(1).replace('.0', '')}M`
+  if (abs >= 1_000) return `${signo}$${Math.round(abs / 1_000)}K`
+  return formatPesos(num)
+}
+
+/** "US$ 1.200" / "−US$ 50" — mismos separadores de miles que formatPesos, sin centavos. */
+export function formatDolares(n: number | null | undefined): string {
+  const num = Number(n) || 0
+  const abs = Math.round(Math.abs(num))
+  return num < 0 ? `${MINUS}US$ ${pesosFmt.format(abs)}` : `US$ ${pesosFmt.format(abs)}`
+}
+
+/** "87%" / "12,5%" — recibe el valor ya en escala 0-100 (no la fracción 0-1). */
+export function formatPorcentaje(n: number | null | undefined, decimales = 0): string {
+  const num = Number(n) || 0
+  return `${num.toFixed(decimales).replace('.', ',')}%`
+}
+
 /** Entero plano sin separadores, para la columna "monto" del CSV (única excepción al formato con $). */
 export function formatPesosCSV(n: number | null | undefined): string {
   return String(Math.round(Number(n) || 0))
@@ -212,4 +235,19 @@ export function formatTiempoRelativo(d: string | Date | null | undefined): strin
 /** "PRIUS-A3X9K2" — normaliza mayúsculas/prefijo si ya viene bien formado. */
 export function formatCodigoReserva(codigo: string | null | undefined): string {
   return String(codigo ?? '').toUpperCase()
+}
+
+// Registros de `eventos` escritos antes de que fn_log_evento formateara los
+// montos en origen quedaron con texto crudo tipo "Pago editado — $1200000"
+// (dato histórico, no se reescribe). Esto lo arregla SOLO al mostrar: el
+// signo "$" pegado a los dígitos (sin espacio ni separador de miles) es la
+// única marca inequívoca de un monto en este formato — nunca matchea un
+// comprobante ("RB-3661"), un DNI, un número de unidad ("#74") o una fecha
+// ("2026-10-24"), ninguno de los cuales lleva "$" delante.
+const MONTO_CRUDO_RE = /\$(\d+)/g
+
+/** Formatea montos crudos ("$1200000" -> "$ 1.200.000") embebidos en texto libre de Historial, sin tocar el dato guardado. Ya formateados ("$ 1.200.000") quedan igual — no vuelve a matchear. */
+export function formatMontosEnTexto(texto: string | null | undefined): string {
+  if (!texto) return ''
+  return texto.replace(MONTO_CRUDO_RE, (_match, digitos: string) => formatPesos(Number(digitos)))
 }

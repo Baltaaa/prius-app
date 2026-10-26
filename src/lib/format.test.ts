@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   formatPesos, formatPesosVisible, formatPesosCSV, formatFecha, formatFechaHora,
   formatRangoFechas, formatDNI, formatCUIT, formatComprobante, formatUnidad,
+  formatMontosEnTexto, formatPorcentaje, formatPesosCompacto, formatDolares,
 } from './format'
 
 describe('formatPesos', () => {
@@ -89,5 +90,53 @@ describe('formatUnidad', () => {
   it('tipo + número', () => {
     expect(formatUnidad('carpa', 19)).toBe('Carpa 19')
     expect(formatUnidad('sombrilla', 4)).toBe('Sombrilla 4')
+  })
+})
+
+describe('formatMontosEnTexto', () => {
+  it('formatea un monto crudo con $ pegado a los dígitos', () => {
+    expect(formatMontosEnTexto('Pago editado — $1200000')).toBe('Pago editado — $ 1.200.000')
+  })
+  it('formatea varios montos en el mismo texto', () => {
+    expect(formatMontosEnTexto('De $100000 a $250000')).toBe('De $ 100.000 a $ 250.000')
+  })
+  it('es idempotente: un monto ya formateado no vuelve a matchear', () => {
+    expect(formatMontosEnTexto('Pago registrado — $ 1.200.000 efectivo')).toBe('Pago registrado — $ 1.200.000 efectivo')
+  })
+  it('no toca comprobantes, DNI, unidades ni fechas (ningún "$" delante)', () => {
+    expect(formatMontosEnTexto('Comprobante editado — recibo_b 1880')).toBe('Comprobante editado — recibo_b 1880')
+    expect(formatMontosEnTexto('Caja abierta — 2026-10-24')).toBe('Caja abierta — 2026-10-24')
+    expect(formatMontosEnTexto('Unidad carpa #74 → ocupada')).toBe('Unidad carpa #74 → ocupada')
+  })
+  it('vacío/null no rompe', () => {
+    expect(formatMontosEnTexto(null)).toBe('')
+    expect(formatMontosEnTexto(undefined)).toBe('')
+  })
+})
+
+describe('formatPorcentaje', () => {
+  it('entero por defecto', () => {
+    expect(formatPorcentaje(87)).toBe('87%')
+  })
+  it('con decimales, coma como separador (es-AR)', () => {
+    expect(formatPorcentaje(12.5, 1)).toBe('12,5%')
+  })
+})
+
+describe('formatPesosCompacto', () => {
+  it('abrevia millones', () => {
+    expect(formatPesosCompacto(1_500_000)).toBe('$1.5M')
+  })
+  it('abrevia miles', () => {
+    expect(formatPesosCompacto(850_000)).toBe('$850K')
+  })
+  it('por debajo de mil, monto entero sin abreviar', () => {
+    expect(formatPesosCompacto(500)).toBe('$ 500')
+  })
+})
+
+describe('formatDolares', () => {
+  it('con prefijo US$ y separadores de miles', () => {
+    expect(formatDolares(1200)).toBe('US$ 1.200')
   })
 })

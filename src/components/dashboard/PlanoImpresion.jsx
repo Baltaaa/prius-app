@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { CARPAS_LAYOUT, SOMBRILLAS_LAYOUT, PLANO_PASILLO_CENTRAL } from "../plano/planoLayout"
 import { STATUS } from "./constants"
-import { formatFechaCorta } from "../../lib/format"
+import { formatFechaCorta, formatPorcentaje } from "../../lib/format"
 
 // Hoja A4 de 1 sola hoja para los carperos — replica exacta del plano en
 // papel (Plano General Temporada 25-26). Corrección de clipping (oct 2026):
@@ -41,7 +41,7 @@ function tituloTemporada(fechaISO) {
 }
 
 function pctTexto(pct) {
-  return `${Math.round((pct || 0) * 100)}%`
+  return formatPorcentaje((pct || 0) * 100)
 }
 
 // Color de fondo + color de texto explícitos por estado (nunca derivados de

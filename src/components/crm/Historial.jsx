@@ -4,7 +4,7 @@ import {
   CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff,
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
-import { formatFecha, formatFechaLarga, formatHora, formatPesos } from '../../lib/format'
+import { formatFecha, formatFechaLarga, formatHora, formatPesos, formatMontosEnTexto } from '../../lib/format'
 import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
 import DateInput from '../inputs/DateInput'
 import SearchInput from '../inputs/SearchInput'
@@ -85,7 +85,7 @@ function etiquetaFecha(fecha) {
 }
 
 function metaDe(evento) {
-  return TIPO_EVENTO_META[evento.tipo_evento] || { icon: Activity, label: evento.descripcion, color: 'text-prius-slate', filtro: 'otros' }
+  return TIPO_EVENTO_META[evento.tipo_evento] || { icon: Activity, label: formatMontosEnTexto(evento.descripcion), color: 'text-prius-slate', filtro: 'otros' }
 }
 
 // Campos cuyo cambio vale la pena mostrar como "antes → después" (Tarea 4)
@@ -300,7 +300,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
                       <div className={`mt-0.5 shrink-0 ${meta.color}`}><Icon size={16} /></div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-prius-slate flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-black">{actor}</span> {e.descripcion}
+                          <span className="font-bold text-black">{actor}</span> {formatMontosEnTexto(e.descripcion)}
                           {e.cliente_nombre && <span className="text-prius-slate">· {e.cliente_nombre}</span>}
                           {esHistorico && (
                             <span className="text-[9px] font-bold uppercase tracking-widest text-prius-muted bg-prius-subtle border border-hairline rounded-full px-2 py-0.5">

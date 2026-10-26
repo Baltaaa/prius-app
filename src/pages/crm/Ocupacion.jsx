@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useData } from '../../context/DataProvider'
-import { unidadEmoji, formatFecha, formatRangoFechas, formatMesAnio } from '../../lib/format'
+import { unidadEmoji, formatFecha, formatRangoFechas, formatMesAnio, formatPorcentaje } from '../../lib/format'
 import { COLOR_TIPO_ALQUILER, colorReserva } from '../../lib/colors'
 import { linkToPlano } from '../../lib/deepLinks'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
@@ -292,11 +292,11 @@ export default function Ocupacion() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="card-light rounded-2xl p-4">
             <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Ocupación promedio</p>
-            <p className="text-xl font-bold text-black mt-1">{kpisMes.promedio.toFixed(0)}%</p>
+            <p className="text-xl font-bold text-black mt-1">{formatPorcentaje(kpisMes.promedio)}</p>
           </div>
           <div className="card-light rounded-2xl p-4">
             <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Día pico</p>
-            <p className="text-xl font-bold text-black mt-1">{formatFecha(kpisMes.diaPico)} <span className="text-xs text-prius-slate">({kpisMes.pctDiaPico.toFixed(0)}%)</span></p>
+            <p className="text-xl font-bold text-black mt-1">{formatFecha(kpisMes.diaPico)} <span className="text-xs text-prius-slate">({formatPorcentaje(kpisMes.pctDiaPico)})</span></p>
           </div>
           <div className="card-light rounded-2xl p-4">
             <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Unidades libres hoy</p>

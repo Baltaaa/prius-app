@@ -1,14 +1,9 @@
 import { Tent, Umbrella, Warehouse, Lock as LockIcon } from 'lucide-react'
-import { formatFecha, formatFechaHora } from '../../lib/format'
+import { formatFecha, formatFechaHora, formatPesos } from '../../lib/format'
 
 const TIPO_ALQUILER_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 const UNIDAD_ICON = { carpa: Tent, sombrilla: Umbrella, cabina: Warehouse, locker: LockIcon }
 const UNIDAD_LABEL = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina', locker: 'Locker' }
-
-const nf = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
-function formatMonto(n) {
-  return nf.format(Number(n) || 0).replace('ARS', '$').replace(/\s+/, ' ')
-}
 
 // Hoja CSS propia del documento — nunca Tailwind (ese no existe en el
 // `document` del iframe de impresión, ver `lib/imprimirDocumento.js`). Es la
@@ -139,7 +134,7 @@ export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', co
               {datos.pagoUnico.comprobante && <> · Comp. {datos.pagoUnico.comprobante}</>}
               {datos.pagoUnico.nroCuota && <> · Cuota {datos.pagoUnico.nroCuota}</>}
             </span>
-            <span className="cd-pago-monto cd-abonado">{formatMonto(datos.pagoUnico.monto)}</span>
+            <span className="cd-pago-monto cd-abonado">{formatPesos(datos.pagoUnico.monto)}</span>
           </div>
         </div>
       ) : (
@@ -148,7 +143,7 @@ export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', co
             {datos.montoTotal != null && (
               <div className="cd-linea">
                 <span className="cd-linea-label">Monto Total Contratado</span>
-                <span className="cd-linea-valor">{formatMonto(datos.montoTotal)}</span>
+                <span className="cd-linea-valor">{formatPesos(datos.montoTotal)}</span>
               </div>
             )}
             <div className="cd-linea">
@@ -156,14 +151,14 @@ export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', co
               <span className="cd-linea-valor cd-abonado">
                 {datos.montoAbonado == null
                   ? `Sin verificar (${datos.comprobantesSinMontoCount} comprobante${datos.comprobantesSinMontoCount === 1 ? '' : 's'} sin monto)`
-                  : formatMonto(datos.montoAbonado)}
+                  : formatPesos(datos.montoAbonado)}
               </span>
             </div>
           </div>
           <div className={`cd-saldo-row ${saldoDesconocido ? '' : saldoPendiente ? 'cd-pendiente' : 'cd-saldada'}`}>
             <span className="cd-saldo-label">Saldo Pendiente</span>
             <span className={`cd-saldo-valor ${saldoDesconocido ? '' : saldoPendiente ? 'cd-pendiente' : 'cd-saldada'}`}>
-              {saldoDesconocido ? 'Saldo sin verificar' : saldoPendiente ? formatMonto(datos.saldo) : 'Unidad saldada'}
+              {saldoDesconocido ? 'Saldo sin verificar' : saldoPendiente ? formatPesos(datos.saldo) : 'Unidad saldada'}
             </span>
           </div>
 
@@ -177,7 +172,7 @@ export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', co
                     {p.comprobante && <> · Comp. {p.comprobante}</>}
                     {p.nroCuota && <> · Cuota {p.nroCuota}</>}
                   </span>
-                  <span className="cd-pago-monto cd-abonado">{formatMonto(p.monto)}</span>
+                  <span className="cd-pago-monto cd-abonado">{formatPesos(p.monto)}</span>
                 </div>
               ))}
             </div>
