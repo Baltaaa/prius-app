@@ -354,7 +354,8 @@ export default function TopBar() {
           value={searchValue}
           onChange={setSearchValue}
           onKeyDown={handleSearchKeyDown}
-          placeholder="Buscar cliente, reserva, unidad o comprobante..."
+          placeholder="Búsqueda inteligente"
+          className="rounded-xl transition-shadow duration-200 shadow-[0_0_12px_1px_rgba(242,202,80,0.15)] hover:shadow-[0_0_18px_3px_rgba(242,202,80,0.28)] focus-within:shadow-[0_0_20px_4px_rgba(242,202,80,0.32)]"
           inputClassName="bg-prius-surface border-hairline rounded-xl h-9 min-h-0 py-0 text-body-sm"
         />
 
@@ -613,9 +614,9 @@ export default function TopBar() {
             <SearchInput
               value={searchValue}
               onChange={setSearchValue}
-              placeholder="Buscar cliente, reserva, unidad o comprobante..."
+              placeholder="Búsqueda inteligente"
               autoFocus
-              className="flex-1 min-w-0"
+              className="flex-1 min-w-0 rounded-xl transition-shadow duration-200 shadow-[0_0_12px_1px_rgba(242,202,80,0.15)] focus-within:shadow-[0_0_20px_4px_rgba(242,202,80,0.32)]"
             />
             <button
               onClick={closeMobileSearch}
