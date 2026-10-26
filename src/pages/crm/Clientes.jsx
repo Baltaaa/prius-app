@@ -700,15 +700,21 @@ export default function Clientes() {
           abajo (oct 2026) — antes "Nuevo Cliente" era una barra amarilla
           gigante en mobile; ahora es un botón chico (h-10) a la derecha,
           misma fila que el filtro ESTADO, en todos los breakpoints. */}
-      <div className="space-y-3">
+      {/* Topbar de sección en una sola línea en desktop (ítem 6, oct 2026):
+          buscador propio con el MISMO ancho que el buscador global del
+          header (w-48 lg:w-64 xl:w-80), filtro Estado al lado, Nuevo
+          Cliente alineado a la derecha — los tres con la misma altura
+          (h-10). En mobile/tablet se mantiene el buscador a ancho completo
+          arriba y el filtro+alta abajo (mejor para touch). */}
+      <div className={isDesktopLG ? 'flex items-center gap-3' : 'space-y-3'}>
         <SearchInput
           value={searchTerm}
           onChange={setSearchTerm}
           placeholder="Buscar por nombre, DNI, CUIT o unidad (ej. carpa 19)..."
-          className="w-full"
-          inputClassName="focus:border-gold/50 py-3"
+          className={isDesktopLG ? 'w-48 lg:w-64 xl:w-80 min-w-0 shrink' : 'w-full'}
+          inputClassName={isDesktopLG ? 'h-10 min-h-0 py-0 focus:border-gold/50' : 'focus:border-gold/50 py-3'}
         />
-        <div className="flex items-center gap-3">
+        <div className={isDesktopLG ? 'flex items-center gap-3 flex-1 min-w-0' : 'flex items-center gap-3'}>
           <div ref={filtrosOverlay.bind} className="relative">
             <button
               onClick={() => setShowFiltros((v) => !v)}
@@ -884,31 +890,38 @@ export default function Clientes() {
           )}
         </div>
 
-        {/* Panel fijo — solo ≥1024px. */}
+        {/* Panel fijo — solo ≥1024px. Altura FIJA (no max-h): el panel
+            nunca cambia de tamaño ni empuja la lista al elegir/deselec­cionar
+            un cliente (ítem 6, oct 2026) — antes con max-h el panel vacío
+            se achicaba al contenido del placeholder. key={clienteId} fuerza
+            un remount que dispara el crossfade (content-crossfade, 180ms,
+            fade + 6px — ver index.css) cada vez que cambia el cliente. */}
         {isDesktopLG && (
-          <aside className="hidden lg:flex flex-1 min-w-[320px] bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start max-h-[calc(100vh-2rem)]">
+          <aside className="hidden lg:flex flex-1 min-w-[320px] bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start h-[calc(100vh-2rem)]">
             {clienteSeleccionado ? (
-              <ClienteDetalleContent
-                cliente={clienteSeleccionado}
-                derivado={derivadoSeleccionado}
-                reservas={reservas}
-                pagosPorReserva={pagosPorReserva}
-                todosPagos={todosPagos}
-                puedeAjustarPrecio={puedeAjustarPrecio}
-                onClose={handleCloseDetalle}
-                onEditar={() => handleOpenEdit(clienteSeleccionado)}
-                onEliminar={() => setClienteAEliminar(clienteSeleccionado)}
-                onRegistrarPago={() => setPagoCliente(clienteSeleccionado)}
-                onPagoCelda={setPagoCelda}
-                onDefinirPrecio={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
-                onEditarPrecio={(reserva) => { setConfirmarValorTotal(Number(reserva.valor_total) || 0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
-                onAgruparReservas={() => handleAbrirAgrupar(clienteSeleccionado)}
-                onLiberarUnidad={handleLiberarUnidad}
-                onConfirmarTemporada={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
-                wide
-              />
+              <div key={clienteSeleccionado.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
+                <ClienteDetalleContent
+                  cliente={clienteSeleccionado}
+                  derivado={derivadoSeleccionado}
+                  reservas={reservas}
+                  pagosPorReserva={pagosPorReserva}
+                  todosPagos={todosPagos}
+                  puedeAjustarPrecio={puedeAjustarPrecio}
+                  onClose={handleCloseDetalle}
+                  onEditar={() => handleOpenEdit(clienteSeleccionado)}
+                  onEliminar={() => setClienteAEliminar(clienteSeleccionado)}
+                  onRegistrarPago={() => setPagoCliente(clienteSeleccionado)}
+                  onPagoCelda={setPagoCelda}
+                  onDefinirPrecio={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+                  onEditarPrecio={(reserva) => { setConfirmarValorTotal(Number(reserva.valor_total) || 0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+                  onAgruparReservas={() => handleAbrirAgrupar(clienteSeleccionado)}
+                  onLiberarUnidad={handleLiberarUnidad}
+                  onConfirmarTemporada={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
+                  wide
+                />
+              </div>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
+              <div key="empty" className="content-crossfade flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
                 <LayoutList size={28} />
                 <p className="text-body-md">Elegí un cliente para ver la ficha</p>
               </div>

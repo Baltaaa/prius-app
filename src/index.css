@@ -194,6 +194,25 @@ body {
 }
 
 /*
+  Crossfade de contenido al cambiar de item en un panel de detalle fijo
+  (ítem 6, oct 2026: Clientes/Reservas desktop) — fade + desplazamiento
+  chico (6px, dentro del rango 4-8px pedido), nunca un salto de alto: el
+  panel que lo envuelve tiene altura fija, esto solo anima lo que va
+  adentro. Se dispara con un `key` por id en el llamador (remount = nueva
+  animación), no con una librería de transición de layout.
+*/
+@keyframes content-crossfade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@layer utilities {
+  .content-crossfade { animation: content-crossfade 180ms ease-out both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .content-crossfade { animation: none; }
+}
+
+/*
   Animación de apertura/cierre única (B1, oct 2026) para todo lo que se abre
   por interacción — modales, bottom sheets, dropdowns, selects, menús,
   popovers, paneles laterales, pantallas de detalle. Reemplaza las clases
