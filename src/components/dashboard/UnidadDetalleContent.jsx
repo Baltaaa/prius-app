@@ -12,6 +12,7 @@ import StatusBadge from "../crm/StatusBadge"
 import Historial from "../crm/Historial"
 import CambiarEstadoPagoModal from "../crm/CambiarEstadoPagoModal"
 import GestionCosociosModal from "../crm/GestionCosociosModal"
+import { useNuevaReserva } from "../../context/NuevaReservaProvider"
 import { linkToCliente, linkToReserva, linkToRecepcion } from "../../lib/deepLinks"
 
 const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
@@ -34,6 +35,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
   const { updateReserva, cancelarReserva } = useReservas()
   const { alert, confirm } = useDialog()
   const puedeAjustarEstadoPago = usePermiso('ajustar_estado_pago')
+  const { abrirNuevaReserva } = useNuevaReserva()
   const [mostrarCambiarEstado, setMostrarCambiarEstado] = useState(false)
   const [mostrarCosocios, setMostrarCosocios] = useState(false)
 
@@ -56,7 +58,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
 
   const irAClientes = () => navigate(linkToCliente(reserva.cliente_id, { reservaId: reserva.id }))
   const irAReserva = () => navigate(linkToReserva(reserva.id))
-  const nuevaReservaAcotada = () => navigate(`/app/reservas?unidad=${unit.dbId}&tipo=periodo`)
+  const nuevaReservaAcotada = () => abrirNuevaReserva({ unidadId: unit.dbId, tipoAlquiler: 'periodo' })
   const verHistorialCompleto = () => navigate(`/app/reservas?filtroUnidad=${unit.dbId}`)
 
   const handleLiberarUnidad = async () => {

@@ -3,70 +3,34 @@ import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatPesos, formatPesosVisible, formatFecha, formatRangoFechas, unidadEmoji } from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatRangoFechas, unidadEmoji } from '../../lib/format'
 import DateInput from '../../components/inputs/DateInput'
-import BrandSelect from '../../components/ui/BrandSelect'
-import { coSocios, estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } from '../../lib/reservas'
+import { coSocios, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
-import LoadingButton from '../../components/ui/LoadingButton'
-import { usePermiso } from '../../context/AuthProvider'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
 import { registrarVisto } from '../../hooks/useRecientes'
 import { linkToCliente, linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import DataTable from '../../components/crm/DataTable'
-import Modal from '../../components/crm/Modal'
 import RegistrarPago from '../../components/crm/RegistrarPago'
-import PagoComprobanteCampos from '../../components/crm/PagoComprobanteCampos'
-import { usePagoComprobanteForm } from '../../hooks/usePagoComprobanteForm'
 import DetallePago from '../../components/crm/DetallePago'
-import MoneyInput from '../../components/inputs/MoneyInput'
-import ClienteSelector from '../../components/crm/ClienteSelector'
 import StatusBadge from '../../components/crm/StatusBadge'
 import MontoReserva from '../../components/crm/MontoReserva'
-import ReservaCalendar from '../../components/crm/ReservaCalendar'
-import Historial from '../../components/crm/Historial'
 import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
 import { useMountTransition } from '../../hooks/useMountTransition'
-import { useRevealOnCheck } from '../../hooks/useRevealOnCheck'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import ReservaDetalleContent from '../../components/crm/ReservaDetalleContent'
 import ReservaListaMobile from '../../components/crm/ReservaListaMobile'
 import BottomSheet from '../../components/ui-prius/BottomSheet'
-import { Plus, Filter, Check, Globe, MonitorSmartphone, X, Lock, Unlock, ChevronDown, ChevronLeft, LayoutList } from 'lucide-react'
-
-// Título chico de sección dentro del modal de reserva (Tarea 5, oct 2026) —
-// mismo patrón repetido en ambas columnas, separador en vez de mayúscula de
-// borde de color (Glass Dark no usa #E5E5E5 literal, ver CLAUDE.md).
-function SeccionTitulo({ children }) {
-  return (
-    <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">
-      {children}
-    </p>
-  )
-}
-
-// Días (inclusivos) de una reserva período/día, para el resumen fijo del
-// modal — solo display, no se guarda ni valida nada con este número. 27/12
-// al 09/01 son 14 días, no 13: por eso el +1 de abajo (balneario, no hotel
-// — nunca "noches", Tarea 2 oct 2026).
-function diasEntre(desdeIso, hastaIso) {
-  if (!desdeIso || !hastaIso) return null
-  const [y1, m1, d1] = desdeIso.split('-').map(Number)
-  const [y2, m2, d2] = hastaIso.split('-').map(Number)
-  const ms = new Date(y2, m2 - 1, d2) - new Date(y1, m1 - 1, d1)
-  return Math.round(ms / 86400000) + 1
-}
+import { useNuevaReserva } from '../../context/NuevaReservaProvider'
+import { Filter, Check, Globe, MonitorSmartphone, X, ChevronLeft, LayoutList } from 'lucide-react'
 
 // Identificador legible para el gate de tipeo del ConfirmDeleteModal —
 // reservas.codigo no existe en el schema (queda para el sistema de reservas
 // públicas), así que se arma con cliente + unidad.
 const reservaIdentificador = (res) =>
   `${res.clientes?.nombre || 'S/N'} - ${res.unidades?.tipo || 'unidad'} #${res.unidades?.numero ?? '?'}`
-
-// ¿Dos rangos de fechas (yyyy-mm-dd, comparables como string) se superponen?
-const rangosSolapan = (aStart, aEnd, bStart, bEnd) => aStart <= bEnd && bStart <= aEnd
 
 // Reservas es la COLA OPERATIVA de alquileres acotados en el tiempo (período
 // o día) — llegadas recientes, filtrable por fecha/estado. Los clientes de
@@ -103,17 +67,18 @@ const resolverFechaLlegada = (r, temporadasPorId) => {
 }
 
 export default function Reservas() {
-  const { reservas, unidades, temporadas, temporadaActiva, loading: resLoading, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva } = useReservas()
-  const { clientes, loading: cliLoading } = useClientes()
+  const { reservas, unidades, temporadas, loading: resLoading, updateReserva, deleteReserva, cancelarReserva } = useReservas()
+  const { loading: cliLoading } = useClientes()
   const readyReservas = useInitialLoad(resLoading || cliLoading)
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { confirm, alert, toast } = useDialog()
-  const puedeBonificar = usePermiso('bonificar')
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingReserva, setEditingReserva] = useState(null)
-  const [masOpcionesAbierto, setMasOpcionesAbierto] = useState(false) // "Más opciones" del modal de reserva (Tarea 5): notas + historial, cerrado por defecto
+  const { confirm, alert } = useDialog()
+  // Ítem 8 (25/10/2026): el modal de Nueva/Editar Reserva ya no vive acá —
+  // es global (NuevaReservaProvider, montado en AppLayout). Esta página solo
+  // dispara abrirEdicionReserva() para SU flujo de edición (deep-link ?id=,
+  // click de fila); "Nueva Reserva" quedó como botón único en el Sidebar/
+  // bottom nav, se saca el redundante que tenía esta pantalla.
+  const { abrirNuevaReserva, abrirEdicionReserva } = useNuevaReserva()
   const [pagoReserva, setPagoReserva] = useState(null)
   // Item 7 (testing oct 2026): click en una instancia de pago del panel de
   // detalle abre DetallePago (comprobante, monto, fecha, método, cliente) —
@@ -146,229 +111,6 @@ export default function Reservas() {
       mqlMobile.removeEventListener('change', updateMobile)
     }
   }, [])
-
-  // Form state
-  const [clienteId, setClienteId] = useState('')
-  const [unidadId, setUnidadId] = useState('')
-  const [tipoAlquiler, setTipoAlquiler] = useState('periodo')
-  const [fechaInicio, setFechaInicio] = useState('')
-  const [fechaFin, setFechaFin] = useState('')
-  const [fecha, setFecha] = useState('')
-  const [valorTotal, setValorTotal] = useState(0)
-  const [notas, setNotas] = useState('')
-  // Candado (Frente disponibilidad dinámica): con bloqueada=true, fecha/unidad
-  // quedan de solo lectura en este form — cliente y pagos siguen editables
-  // siempre. Se persiste al tocar el candado, no en el submit del form.
-  const [bloqueada, setBloqueada] = useState(false)
-  // Unidad bonificada (sep 2026): al activarla, el precio se fuerza a 0 y
-  // queda deshabilitado — el trigger fn_reserva_recalcula_saldo hace cumplir
-  // esto igual en la base (costo_total=0, estado_pago='pagado'), así que acá
-  // solo se refleja para no confundir al que carga el form.
-  const [bonificada, setBonificada] = useState(false)
-  // Alta all-in-one (item 3, oct 2026): el primer pago (seña o total) con
-  // su comprobante se carga sí o sí en el mismo modal — ya no hay checkbox
-  // "cargar un pago ahora" ni un RegistrarPago encadenado después. Única
-  // excepción: "Cargar más tarde", que oculta la sección y crea la reserva
-  // sin pago (como siempre). Solo tiene sentido en alta nueva, nunca al
-  // editar (ahí ya existe "Registrar pago" desde la ficha).
-  const [cargarMasTarde, setCargarMasTarde] = useState(false)
-  const revealPagoInicialRef = useRevealOnCheck(!cargarMasTarde)
-  // Wizard mobile (<768px, mock 03-reservas-mobile-nueva): mismos 3 campos
-  // reales del form de siempre (Cliente / Unidad+Fechas / Monto+resumen),
-  // solo se muestran de a uno con Siguiente/Atrás — desktop/tablet siguen
-  // viendo el form de dos columnas completo, sin pasos. Nunca se inventan
-  // campos de personas ni precio por método de pago (no existen en este
-  // flujo, ver auditoría previa).
-  const [mobileStep, setMobileStep] = useState(0)
-  const MOBILE_STEPS = ['Cliente', 'Unidad y fechas', 'Monto']
-
-  const resetForm = () => {
-    setClienteId('')
-    setUnidadId('')
-    setTipoAlquiler('periodo')
-    setFechaInicio('')
-    setFechaFin('')
-    setFecha('')
-    setValorTotal(0)
-    setNotas('')
-    setBloqueada(false)
-    setBonificada(false)
-    setCargarMasTarde(false)
-  }
-
-  // Snapshot del form al abrir (Tarea 1, oct 2026) — para que el Modal
-  // pueda preguntar "¿hay cambios sin guardar?" antes de cerrar por click
-  // afuera o Escape. Se compara contra los valores actuales en `isDirty`.
-  const formSnapshotRef = useRef('')
-  const snapshotForm = (f) => JSON.stringify(f)
-
-  const handleOpenCreate = () => {
-    setEditingReserva(null)
-    resetForm()
-    setMasOpcionesAbierto(false)
-    setMobileStep(0)
-    setIsModalOpen(true)
-    formSnapshotRef.current = snapshotForm({
-      clienteId: '', unidadId: '', tipoAlquiler: 'periodo', fechaInicio: '', fechaFin: '',
-      fecha: '', valorTotal: 0, notas: '', bloqueada: false, bonificada: false,
-    })
-  }
-
-  const handleOpenEdit = (res) => {
-    registrarVisto('reserva', res.id) // [feat-4]
-    setMasOpcionesAbierto(false)
-    setMobileStep(0)
-    setEditingReserva(res)
-    setClienteId(res.cliente_id || '')
-    setUnidadId(res.unidad_id || '')
-    setTipoAlquiler(res.tipo_alquiler || 'periodo')
-    setFechaInicio(res.fecha_inicio || '')
-    setFechaFin(res.fecha_fin || '')
-    setFecha(res.fecha || '')
-    setValorTotal(res.valor_total ?? 0)
-    setNotas(res.notas || '')
-    setBloqueada(res.bloqueada || false)
-    setBonificada(res.bonificada || false)
-    setIsModalOpen(true)
-    formSnapshotRef.current = snapshotForm({
-      clienteId: res.cliente_id || '', unidadId: res.unidad_id || '', tipoAlquiler: res.tipo_alquiler || 'periodo',
-      fechaInicio: res.fecha_inicio || '', fechaFin: res.fecha_fin || '', fecha: res.fecha || '',
-      valorTotal: res.valor_total ?? 0, notas: res.notas || '', bloqueada: res.bloqueada || false, bonificada: res.bonificada || false,
-    })
-  }
-
-  const isFormDirty = () => snapshotForm({
-    clienteId, unidadId, tipoAlquiler, fechaInicio, fechaFin, fecha, valorTotal, notas, bloqueada, bonificada,
-  }) !== formSnapshotRef.current || Number(pagoForm.monto) > 0 || !!pagoForm.numero
-
-  const handleToggleBloqueada = async () => {
-    if (!editingReserva) return
-    if (bloqueada) {
-      const ok = await confirm(
-        'Vas a desbloquear esta reserva para poder editar fecha/unidad. ¿Confirmás?',
-        { title: 'Desbloquear reserva' },
-      )
-      if (!ok) return
-    }
-    const nuevoValor = !bloqueada
-    try {
-      await updateReserva(editingReserva.id, { bloqueada: nuevoValor })
-      setBloqueada(nuevoValor)
-      setEditingReserva((prev) => (prev ? { ...prev, bloqueada: nuevoValor } : prev))
-    } catch (err) {
-      await alert('No se pudo actualizar el candado de la reserva.')
-    }
-  }
-
-  const [savingReserva, setSavingReserva] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!clienteId) {
-      await alert('Seleccioná un cliente antes de continuar.')
-      return
-    }
-    // El date picker (Tarea 7) reemplazó los <input type="date" required> —
-    // se valida acá que haya fecha(s) elegida(s), ya sin validación nativa del form.
-    if (!bloqueada) {
-      if (tipoAlquiler === 'periodo' && (!fechaInicio || !fechaFin)) {
-        await alert('Elegí el rango de fechas de la reserva en el calendario.')
-        return
-      }
-      if (tipoAlquiler === 'dia' && !fecha) {
-        await alert('Elegí la fecha de la reserva en el calendario.')
-        return
-      }
-    }
-    if (unidadTieneConflictoDeFechas(unidadId)) {
-      await alert('Esa unidad ya está ocupada en las fechas elegidas por otra reserva. Elegí otra unidad o cambiá las fechas.')
-      return
-    }
-    // Con bloqueada=true, fecha/unidad quedan de solo lectura en el DOM, pero
-    // se refuerza acá para no confiar solo en el disabled del input.
-    const payload = {
-      cliente_id: clienteId,
-      unidad_id: bloqueada && editingReserva ? editingReserva.unidad_id : unidadId,
-      // temporada / temporada_id NO se mandan: en un alta nueva los asigna
-      // solo el trigger fn_reserva_asigna_temporada (temporada activa,
-      // Frente 2); en una edición se omiten para no tocar la temporada
-      // original de una reserva ya creada (una reserva vieja no debe migrar
-      // de temporada por editarla).
-      tipo_alquiler: bloqueada && editingReserva ? editingReserva.tipo_alquiler : tipoAlquiler,
-      estado: 'activa',
-      // Reservas solo da de alta período/día — todavía manual (sin origen web).
-      origen: 'manual',
-      fecha_inicio:
-        bloqueada && editingReserva
-          ? editingReserva.fecha_inicio
-          : tipoAlquiler === 'periodo' ? fechaInicio || null : null,
-      fecha_fin:
-        bloqueada && editingReserva
-          ? editingReserva.fecha_fin
-          : tipoAlquiler === 'periodo' ? fechaFin || null : null,
-      fecha:
-        bloqueada && editingReserva
-          ? editingReserva.fecha
-          : tipoAlquiler === 'dia' ? fecha || null : null,
-      valor_total: bonificada ? 0 : Number(valorTotal || 0),
-      bonificada,
-      // saldo / estado_pago ya no se cargan a mano: los recalcula el trigger
-      // fn_reserva_recalcula_saldo (a partir de valor_total/bonificada y la
-      // suma de `pagos`) — ver RegistrarPago / usePagos.
-      notas,
-    }
-    // Item 3 (oct 2026): el primer pago es obligatorio salvo bonificada o
-    // "Cargar más tarde" — se valida acá antes de disparar la transacción
-    // (el botón ya se deshabilita por esto, ver disabled del submit).
-    const requierePago = !editingReserva && !bonificada && !cargarMasTarde
-    if (requierePago) {
-      if (Number(pagoForm.monto) <= 0) {
-        await alert('Cargá el monto del primer pago, o tildá "Cargar más tarde".')
-        return
-      }
-      if (pagoForm.excedeSaldo) {
-        await alert(`El monto supera el total de la reserva (${formatPesos(valorTotal)}).`)
-        return
-      }
-      if (pagoForm.comprobanteIncompleto) {
-        await alert('El comprobante del primer pago es obligatorio: completá tipo, número y fecha.')
-        return
-      }
-      if (pagoForm.duplicado) {
-        await alert('Ese número de comprobante ya está cargado en otro pago.')
-        return
-      }
-    }
-
-    setSavingReserva(true)
-    try {
-      if (editingReserva) {
-        await updateReserva(editingReserva.id, payload)
-        setIsModalOpen(false)
-        toast('Reserva actualizada con éxito', { tone: 'success' })
-      } else {
-        const pagoPayload = requierePago ? {
-          cliente_id: clienteId,
-          monto: pagoForm.monto,
-          medio: pagoForm.medio,
-          tipo_pago: pagoForm.tipoPago || 'parcial',
-          concepto: pagoForm.concepto,
-          referencia: pagoForm.referencia,
-          comprobante: pagoForm.construirComprobantePayload(),
-          fecha: pagoForm.fechaComprobante,
-        } : null
-        // Reserva + pago en una sola transacción (fn_crear_reserva_con_pago):
-        // si el pago falla, la reserva no queda creada — ver DataProvider.
-        await crearReservaConPago({ reserva: payload, pago: pagoPayload })
-        setIsModalOpen(false)
-        toast(pagoPayload ? 'Reserva y pago registrados' : 'Reserva creada con éxito', { tone: 'success' })
-      }
-    } catch (err) {
-      toast(err.message || 'Error guardando la reserva.', { tone: 'error' })
-    } finally {
-      setSavingReserva(false)
-    }
-  }
 
   // Gate común a cancelar/eliminar: si la reserva está bloqueada, pasa primero
   // por el flujo de desbloqueo existente (mismo que el candado del modal de
@@ -433,21 +175,21 @@ export default function Reservas() {
         navigate(linkToCliente(res.cliente_id, { reservaId: id }))
         return true
       }
-      handleOpenEdit(res)
+      registrarVisto('reserva', res.id) // [feat-4]
+      abrirEdicionReserva(res)
       return true
     },
   })
 
-  // Deep-link desde "Nueva reserva por período o día" en el modal de unidad
-  // del Plano: /app/reservas?unidad=<uuid>&tipo=periodo|dia — abre el alta
-  // con la unidad ya elegida.
+  // Deep-links legacy ?unidad=&tipo= / ?cliente= (oct 2026, ítem 8): quedan
+  // por compatibilidad con links viejos guardados — los triggers actuales
+  // (Clientes.jsx, panel de unidad del Plano) ya llaman directo a
+  // abrirNuevaReserva() con prefill, sin pasar por acá ni navegar.
   useEffect(() => {
     const unidad = searchParams.get('unidad')
     if (!unidad || searchParams.get('id') || resLoading || cliLoading) return
     const tipo = searchParams.get('tipo')
-    handleOpenCreate()
-    setUnidadId(unidad)
-    if (tipo === 'periodo' || tipo === 'dia') setTipoAlquiler(tipo)
+    abrirNuevaReserva({ unidadId: unidad, tipoAlquiler: tipo === 'periodo' || tipo === 'dia' ? tipo : undefined })
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete('unidad')
@@ -457,14 +199,10 @@ export default function Reservas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, resLoading, cliLoading])
 
-  // [feat-2] Deep-link desde "Nueva reserva" en la fila de un cliente
-  // (Clientes.jsx): /app/reservas?cliente=<uuid> — abre el alta con el
-  // cliente ya elegido.
   useEffect(() => {
     const cliente = searchParams.get('cliente')
     if (!cliente || searchParams.get('id') || searchParams.get('unidad') || resLoading || cliLoading) return
-    handleOpenCreate()
-    setClienteId(cliente)
+    abrirNuevaReserva({ clienteId: cliente })
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete('cliente')
@@ -595,94 +333,6 @@ export default function Reservas() {
   // Unidades con una reserva de TEMPORADA activa: quedan tomadas para toda la
   // temporada sin importar qué fecha se elija, así que ni siquiera aparecen
   // como opción para una reserva nueva de período/día — evita un doble
-  // alquiler sobre la unidad de un abonado.
-  const unidadesBloqueadasPorTemporada = useMemo(() => {
-    const set = new Set()
-    for (const r of reservas) {
-      if (r.tipo_alquiler === 'temporada' && r.estado === 'activa' && r.unidad_id) set.add(r.unidad_id)
-    }
-    return set
-  }, [reservas])
-
-  // ¿Esta unidad ya tiene otra reserva de período/día activa que se solapa
-  // con las fechas elegidas en el form? Sin fechas cargadas todavía, no hay
-  // nada que chequear (se habilita a medida que se completan). Item 3 (fix
-  // urgente oct 2026): con tipoAlquiler='temporada' no hay date picker —
-  // el rango candidato es la temporada vigente completa
-  // (temporadaActiva.fecha_inicio/fecha_fin), única fuente de verdad ya
-  // usada en toda la app (ver `temporadas`, CLAUDE.md "Estructura de datos").
-  const unidadTieneConflictoDeFechas = (unidadId) => {
-    const candStart = tipoAlquiler === 'dia' ? fecha : tipoAlquiler === 'temporada' ? temporadaActiva?.fecha_inicio : fechaInicio
-    const candEnd = tipoAlquiler === 'dia' ? fecha : tipoAlquiler === 'temporada' ? temporadaActiva?.fecha_fin : fechaFin
-    if (!candStart || !candEnd) return false
-    return reservas.some((r) => {
-      if (r.unidad_id !== unidadId || r.estado !== 'activa') return false
-      if (editingReserva && r.id === editingReserva.id) return false
-      if (r.tipo_alquiler !== 'periodo' && r.tipo_alquiler !== 'dia') return false
-      const rStart = r.tipo_alquiler === 'dia' ? r.fecha : r.fecha_inicio
-      const rEnd = r.tipo_alquiler === 'dia' ? r.fecha : r.fecha_fin
-      return rStart && rEnd && rangosSolapan(candStart, candEnd, rStart, rEnd)
-    })
-  }
-
-  // Lista de unidades seleccionables: saca las tomadas por temporada y, si ya
-  // hay fechas cargadas, también las que se solapan con otra reserva — salvo
-  // la que ya está elegida, que se conserva siempre para que el <select> no
-  // se quede con un value sin option (y para poder mostrarle el aviso).
-  const unidadesDisponibles = useMemo(
-    () =>
-      unidades.filter(
-        (u) => u.id === unidadId || (!unidadesBloqueadasPorTemporada.has(u.id) && !unidadTieneConflictoDeFechas(u.id)),
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [unidades, unidadesBloqueadasPorTemporada, unidadId, tipoAlquiler, fechaInicio, fechaFin, fecha, reservas, editingReserva, temporadaActiva],
-  )
-
-  const conflictoFechas = unidadId ? unidadTieneConflictoDeFechas(unidadId) : false
-
-  const GRUPO_UNIDAD = { carpa: 'Carpas', sombrilla: 'Sombrillas', cabina: 'Cabinas', locker: 'Lockers' }
-  const opcionesUnidad = useMemo(
-    () =>
-      [...unidadesDisponibles]
-        .sort((a, b) => (GRUPO_UNIDAD[a.tipo] || a.tipo).localeCompare(GRUPO_UNIDAD[b.tipo] || b.tipo) || a.numero - b.numero)
-        .map((u) => ({
-          value: u.id,
-          group: GRUPO_UNIDAD[u.tipo] || u.tipo,
-          label: `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}${u.id === unidadId && conflictoFechas ? ' (ocupada esas fechas)' : ''}`,
-        })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [unidadesDisponibles, unidadId, conflictoFechas],
-  )
-
-  // Item 3 (oct 2026): mismo bloque de campos (monto/medio/comprobante) que
-  // Registrar Pago, inline acá — la reserva todavía no existe, así que
-  // total=saldo=valorTotal y pagado=0 (nada cobrado todavía). `resetKey`
-  // cambia cada vez que se abre el modal en modo alta, para arrancar en
-  // blanco cada vez (nunca al editar, ahí no se usa esta sección).
-  const unidadSeleccionadaLabel = opcionesUnidad.find((o) => o.value === unidadId)?.label || ''
-  const clienteSeleccionado = clientes.find((c) => c.id === clienteId) || null
-  const pagoForm = usePagoComprobanteForm({
-    resetKey: isModalOpen && !editingReserva ? 'nueva-reserva-abierta' : 'cerrado',
-    cliente: clienteSeleccionado,
-    reservaInfo: {
-      total: bonificada ? 0 : Number(valorTotal || 0),
-      saldo: bonificada ? 0 : Number(valorTotal || 0),
-      saldoDesconocido: false,
-      pagado: 0,
-      unidadLabel: unidadSeleccionadaLabel,
-      temporadaOTipo: tipoAlquiler === 'temporada' ? temporadaActiva?.nombre : tipoAlquiler,
-      sinReserva: false,
-    },
-  })
-
-  // Días ya ocupados por otra reserva período/día de la unidad elegida, para
-  // tacharlos/bloquearlos en el date picker del form (Tarea 7) — misma regla
-  // que el exclusion constraint de la base, ver lib/reservas.js.
-  const rangosOcupados = useMemo(
-    () => rangosOcupadosPorUnidad(reservas, unidadId, editingReserva?.id),
-    [reservas, unidadId, editingReserva],
-  )
-
   if (!readyReservas) {
     return (
       <div className="space-y-6 lg:space-y-10 font-ui">
@@ -779,12 +429,6 @@ export default function Reservas() {
               </div>
           )}
         </div>
-        <button
-          onClick={handleOpenCreate}
-          className="bg-gold hover:bg-gold-hover text-black px-6 py-3 min-h-[44px] rounded-xl transition-all flex items-center gap-2 font-bold uppercase text-xs tracking-widest shadow-xl shrink-0 md:ml-auto"
-        >
-          <Plus size={18} /> Nueva Reserva
-        </button>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -927,7 +571,7 @@ export default function Reservas() {
                 fechaLlegada={fechaLlegada}
                 onClose={handleCloseDetalle}
                 onRegistrarPago={setPagoReserva}
-                onEditar={handleOpenEdit}
+                onEditar={abrirEdicionReserva}
                 onCancelar={handleCancelarClick}
                 onEliminar={handleEliminarClick}
                 onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
@@ -952,7 +596,7 @@ export default function Reservas() {
               fechaLlegada={fechaLlegada}
               onClose={handleCloseDetalle}
               onRegistrarPago={setPagoReserva}
-              onEditar={handleOpenEdit}
+              onEditar={abrirEdicionReserva}
               onCancelar={handleCancelarClick}
               onEliminar={handleEliminarClick}
               onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
@@ -988,7 +632,7 @@ export default function Reservas() {
               fechaLlegada={fechaLlegada}
               onClose={handleCloseDetalle}
               onRegistrarPago={setPagoReserva}
-              onEditar={handleOpenEdit}
+              onEditar={abrirEdicionReserva}
               onCancelar={handleCancelarClick}
               onEliminar={handleEliminarClick}
               onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
@@ -998,375 +642,6 @@ export default function Reservas() {
         </div>,
         document.body,
       )}
-
-      {/* Modal Form */}
-      {/* Rediseño Tarea 5 (oct 2026): solo JSX/layout — mismo state, mismos
-          handlers, mismo orden de escritura que antes. Dos columnas en
-          desktop (cliente/unidad/fechas a la izquierda, precio/resumen a la
-          derecha) para que entre completo en 1366x768 sin scroll o con
-          scroll interno mínimo; el submit real sigue siendo el <form>, el
-          botón vive en el footer sticky del Modal vía el atributo HTML
-          `form` (mismo handleSubmit, nada cambia de la lógica). */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingReserva ? 'Editar Reserva' : 'Nueva Reserva'}
-        isDirty={isFormDirty}
-        maxWidthClass="sm:max-w-4xl"
-        footer={
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Total</p>
-              <p className="text-lg font-bold text-black">{formatPesos(bonificada ? 0 : valorTotal)}</p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => (isMobile && mobileStep > 0 ? setMobileStep((s) => s - 1) : setIsModalOpen(false))}
-                className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-slate bg-prius-subtle hover:bg-prius-subtle border border-hairline transition-all"
-              >
-                {isMobile && mobileStep > 0 ? 'Atrás' : 'Cancelar'}
-              </button>
-              {isMobile && mobileStep < MOBILE_STEPS.length - 1 ? (
-                <button
-                  type="button"
-                  onClick={() => setMobileStep((s) => s + 1)}
-                  className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
-                >
-                  Siguiente
-                </button>
-              ) : (
-                <LoadingButton
-                  type="submit"
-                  form="form-reserva"
-                  loading={savingReserva}
-                  loadingText="Guardando..."
-                  disabled={
-                    !editingReserva && !bonificada && !cargarMasTarde
-                    && (Number(pagoForm.monto) <= 0 || pagoForm.excedeSaldo || pagoForm.comprobanteIncompleto || !!pagoForm.duplicado)
-                  }
-                  className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
-                >
-                  {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
-                </LoadingButton>
-              )}
-            </div>
-          </div>
-        }
-      >
-        <form id="form-reserva" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Indicador de paso (mobile, <768px, mock 03-reservas-mobile-nueva)
-              — mismos 3 campos reales del form de siempre, no los 5 pasos
-              inventados del mock (sin personas ni precio por método de
-              pago, ver auditoría). Desktop/tablet no muestran esto: todo el
-              form entra de una vez, como siempre. */}
-          {isMobile && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-gold uppercase tracking-widest">
-                  Paso {mobileStep + 1} de {MOBILE_STEPS.length}
-                </span>
-                <span className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">{MOBILE_STEPS[mobileStep]}</span>
-              </div>
-              <div className="h-1 rounded-full bg-prius-subtle overflow-hidden flex gap-0.5">
-                {MOBILE_STEPS.map((s, i) => (
-                  <div key={s} className={`flex-1 rounded-full ${i <= mobileStep ? 'bg-gold' : 'bg-hairline'}`} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Columna izquierda: quién, dónde, cuándo. En mobile, cada
-              sub-bloque se oculta según `mobileStep` (0=Cliente,
-              1=Unidad y fechas) sin romper la columna única de desktop. */}
-          <div className="space-y-5">
-            <div className={isMobile && mobileStep !== 0 ? 'hidden' : 'space-y-5'}>
-            <SeccionTitulo>{isMobile ? 'Cliente' : 'Cliente y unidad'}</SeccionTitulo>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Seleccionar Cliente</label>
-              <ClienteSelector
-                value={clienteId}
-                onChange={(id) => setClienteId(id)}
-              />
-            </div>
-
-            {editingReserva && (
-              <div className="flex items-center justify-between p-3 bg-prius-subtle border border-hairline rounded-xl">
-                <div className="flex items-center gap-2 text-[10px] text-prius-slate uppercase tracking-widest font-bold">
-                  {bloqueada ? <Lock size={14} className="text-prius-error" /> : <Unlock size={14} className="text-prius-muted" />}
-                  {bloqueada ? 'Fecha y unidad bloqueadas' : 'Fecha y unidad editables'}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleToggleBloqueada}
-                  className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                    bloqueada ? 'bg-red-500/10 text-prius-error hover:bg-red-500/20' : 'bg-prius-subtle text-prius-slate hover:text-black'
-                  }`}
-                >
-                  {bloqueada ? 'Desbloquear' : 'Bloquear'}
-                </button>
-              </div>
-            )}
-            </div>
-
-            <div className={isMobile && mobileStep !== 1 ? 'hidden' : 'space-y-5'}>
-            {isMobile && <SeccionTitulo>Unidad y fechas</SeccionTitulo>}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</label>
-                <BrandSelect
-                  value={unidadId}
-                  onChange={setUnidadId}
-                  disabled={bloqueada}
-                  options={opcionesUnidad}
-                  invalid={conflictoFechas}
-                  searchable
-                  searchPlaceholder="Buscar unidad..."
-                />
-                {conflictoFechas && (
-                  <p className="text-[10px] text-prius-error uppercase tracking-widest font-bold">
-                    Ocupada en esas fechas — elegí otra unidad o cambiá las fechas.
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Temporada</label>
-                <p className="w-full h-9 flex items-center bg-prius-subtle border border-hairline rounded-xl px-4 text-prius-slate text-sm font-bold truncate">
-                  {editingReserva?.temporada || temporadaActiva?.nombre || '—'}
-                </p>
-              </div>
-            </div>
-
-            <SeccionTitulo>Fechas</SeccionTitulo>
-
-            <div className="space-y-2">
-              {/* Item 3 (fix urgente oct 2026): se agrega Temporada, orden
-                  Temporada/Período/Día. Solo en alta nueva — editar una
-                  reserva de temporada sigue viviendo en Clientes (el
-                  deep-link de edición ya redirige para allá, ver
-                  useDeepLinkTarget más abajo). */}
-              <div className={`grid gap-2 ${editingReserva ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                {[
-                  ...(editingReserva ? [] : [{ key: 'temporada', label: 'Temporada' }]),
-                  { key: 'periodo', label: 'Período' },
-                  { key: 'dia', label: 'Día' },
-                ].map((t) => (
-                  <button
-                    key={t.key}
-                    type="button"
-                    disabled={bloqueada}
-                    onClick={() => setTipoAlquiler(t.key)}
-                    className={`h-9 rounded-xl text-[9px] font-bold uppercase tracking-widest border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                      tipoAlquiler === t.key
-                        ? 'bg-gold text-black border-gold'
-                        : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-              {tipoAlquiler === 'temporada' && (
-                <p className="text-[9px] text-prius-muted uppercase tracking-widest">
-                  Se asigna toda la temporada vigente ({temporadaActiva?.nombre || '—'}), sin elegir fechas.
-                </p>
-              )}
-            </div>
-
-            {tipoAlquiler === 'temporada' && (
-              <div className="space-y-2">
-                <div className="bg-prius-subtle border border-hairline rounded-xl p-4 text-center">
-                  <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Temporada vigente</p>
-                  <p className="text-sm font-bold text-black mt-1">{temporadaActiva?.nombre || '—'}</p>
-                </div>
-                {unidadId && conflictoFechas && (
-                  <p className="text-[11px] text-prius-error">
-                    Esa unidad ya tiene una reserva de período o día dentro de esta temporada — no se puede asignar toda la temporada. Elegí otra unidad.
-                  </p>
-                )}
-              </div>
-            )}
-
-            {tipoAlquiler === 'periodo' && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Fechas (Inicio — Fin)</label>
-                  <span className="text-xs font-bold text-gold">
-                    {fechaInicio || '—'} → {fechaFin || '—'}
-                  </span>
-                </div>
-                {!unidadId && (
-                  <p className="text-[10px] text-prius-muted uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
-                )}
-                <div className="bg-prius-subtle border border-hairline rounded-xl p-3 flex justify-center">
-                  <ReservaCalendar
-                    mode="range"
-                    value={{ desde: fechaInicio, hasta: fechaFin }}
-                    onChange={({ desde, hasta }) => {
-                      setFechaInicio(desde)
-                      setFechaFin(hasta)
-                    }}
-                    rangosOcupados={rangosOcupados}
-                    disabled={bloqueada}
-                  />
-                </div>
-              </div>
-            )}
-
-            {tipoAlquiler === 'dia' && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Fecha</label>
-                  <span className="text-xs font-bold text-gold">{fecha || '—'}</span>
-                </div>
-                {!unidadId && (
-                  <p className="text-[10px] text-prius-muted uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
-                )}
-                <div className="bg-prius-subtle border border-hairline rounded-xl p-3 flex justify-center">
-                  <ReservaCalendar mode="single" value={fecha} onChange={setFecha} rangosOcupados={rangosOcupados} disabled={bloqueada} />
-                </div>
-              </div>
-            )}
-            </div>
-          </div>
-
-          {/* Columna derecha: precio, resumen, extras (mobile: paso 2) */}
-          <div className={isMobile && mobileStep !== 2 ? 'hidden' : 'space-y-5'}>
-            <SeccionTitulo>Precio y pago</SeccionTitulo>
-
-            {puedeBonificar && (
-              <div className="flex items-center justify-between p-3 bg-prius-subtle border border-hairline rounded-xl">
-                <label htmlFor="reserva-bonificada" className="text-[10px] font-bold text-prius-slate uppercase tracking-widest cursor-pointer">
-                  Unidad bonificada
-                </label>
-                <input
-                  id="reserva-bonificada"
-                  type="checkbox"
-                  checked={bonificada}
-                  onChange={(e) => setBonificada(e.target.checked)}
-                  className="accent-cyan-400 w-4 h-4 cursor-pointer"
-                />
-              </div>
-            )}
-
-            <MoneyInput
-              label="Monto Total"
-              value={bonificada ? 0 : valorTotal}
-              onChange={setValorTotal}
-              required
-              disabled={bonificada}
-              max={100_000_000}
-              hint={bonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
-            />
-
-            {/* Saldo y estado de pago ya no se cargan a mano: los recalcula el
-                trigger fn_reserva_recalcula_saldo / fn_pago_actualiza_saldo a
-                partir de valor_total/bonificada y los pagos registrados en
-                `pagos`. */}
-            {editingReserva && (
-              <div className="flex items-center justify-between p-4 bg-prius-subtle border border-hairline rounded-xl">
-                <div>
-                  <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Saldo Pendiente</p>
-                  <p className={`text-lg font-bold ${Number(editingReserva.saldo) > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
-                    {estaSaldada(editingReserva) ? 'Unidad saldada' : formatPesos(editingReserva.saldo)}
-                  </p>
-                </div>
-                <StatusBadge status={estadoBadgeStatus(editingReserva)} />
-              </div>
-            )}
-
-            {/* Resumen fijo: unidad, fechas, días, total, saldo — todo lo
-                que ya se eligió a la izquierda, de un vistazo antes de
-                confirmar. Balneario, no hotel: siempre "días" (Tarea 2,
-                oct 2026), nunca "noches". */}
-            <div className="p-4 bg-prius-subtle border border-gold/20 rounded-xl space-y-2">
-              <p className="text-[9px] font-bold text-gold uppercase tracking-[0.2em]">Resumen</p>
-              <div className="grid grid-cols-2 gap-y-1.5 text-xs">
-                <span className="text-prius-muted uppercase tracking-widest">Unidad</span>
-                <span className="text-black font-bold text-right truncate">
-                  {opcionesUnidad.find((o) => o.value === unidadId)?.label || '—'}
-                </span>
-                <span className="text-prius-muted uppercase tracking-widest">Fechas</span>
-                <span className="text-black font-bold text-right truncate">
-                  {tipoAlquiler === 'temporada'
-                    ? temporadaActiva?.nombre || '—'
-                    : tipoAlquiler === 'dia' ? (fecha ? formatFecha(fecha) : '—') : (fechaInicio && fechaFin ? formatRangoFechas(fechaInicio, fechaFin) : '—')}
-                </span>
-                <span className="text-prius-muted uppercase tracking-widest">Días</span>
-                <span className="text-black font-bold text-right">
-                  {tipoAlquiler === 'temporada'
-                    ? 'Temporada completa'
-                    : tipoAlquiler === 'dia' ? (fecha ? 1 : '—') : (diasEntre(fechaInicio, fechaFin) ?? '—')}
-                </span>
-                <span className="text-prius-muted uppercase tracking-widest">Total</span>
-                <span className="text-black font-bold text-right">{formatPesos(bonificada ? 0 : valorTotal)}</span>
-                <span className="text-prius-muted uppercase tracking-widest">Saldo</span>
-                <span className={`font-bold text-right ${editingReserva && Number(editingReserva.saldo) > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
-                  {editingReserva ? (estaSaldada(editingReserva) ? 'Saldado' : formatPesos(editingReserva.saldo)) : '—'}
-                </span>
-              </div>
-            </div>
-
-            {/* Item 3 (oct 2026): el primer pago (seña o total) con su
-                comprobante va siempre acá, inline y obligatorio — nunca más
-                un RegistrarPago encadenado después de crear la reserva.
-                Única excepción: "Cargar más tarde". Solo en alta nueva,
-                nunca al editar (ahí ya existe "Registrar pago" desde la
-                ficha), y nunca si la unidad es bonificada (no admite pagos). */}
-            {!editingReserva && !bonificada && (
-              <div className="space-y-4">
-                {!cargarMasTarde && (
-                  <div ref={revealPagoInicialRef} className="animate-premium-fade">
-                    <PagoComprobanteCampos form={pagoForm} />
-                  </div>
-                )}
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={cargarMasTarde}
-                    onChange={(e) => setCargarMasTarde(e.target.checked)}
-                    className="accent-gold w-4 h-4 cursor-pointer"
-                  />
-                  <span className="text-xs font-bold text-black uppercase tracking-widest">Cargar más tarde</span>
-                </label>
-              </div>
-            )}
-
-            {/* Más opciones: notas + historial, cerrado por defecto — uso
-                poco frecuente, no debería ocupar espacio arriba del fold. */}
-            <div className="border border-hairline rounded-xl overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setMasOpcionesAbierto((v) => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-bold text-prius-slate uppercase tracking-widest hover:text-black transition-all"
-              >
-                Más opciones
-                <ChevronDown size={14} className={`transition-transform ${masOpcionesAbierto ? 'rotate-180' : ''}`} />
-              </button>
-              {masOpcionesAbierto && (
-                <div className="px-4 pb-4 space-y-4 border-t border-hairline pt-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Notas</label>
-                    <textarea
-                      rows={3}
-                      value={notas}
-                      onChange={(e) => setNotas(e.target.value)}
-                      className="w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-sm focus:border-gold/50 outline-none resize-none"
-                    />
-                  </div>
-                  {editingReserva && (
-                    <div>
-                      <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Historial</p>
-                      <Historial tipo="reserva" id={editingReserva.id} compact />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </form>
-      </Modal>
 
       {/* Registrar Pago (Tarea 4) — mismo componente que usa Clientes y el Plano */}
       <RegistrarPago

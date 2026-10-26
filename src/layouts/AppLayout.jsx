@@ -7,6 +7,7 @@ import InactivityWarningModal from '../components/crm/InactivityWarningModal'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
 import { NotificacionesProvider } from '../context/NotificacionesProvider'
+import { NuevaReservaProvider } from '../context/NuevaReservaProvider'
 import { OverlayProvider } from '../context/OverlayProvider'
 import { useInactivityLogout } from '../hooks/useInactivityLogout'
 import { useSection } from '../lib/sectionTitles'
@@ -41,6 +42,7 @@ export default function AppLayout() {
     <DialogProvider>
       <DataProvider>
         <NotificacionesProvider>
+        <NuevaReservaProvider>
         <InactivityWarningModal
           open={warning}
           secondsLeft={secondsLeft}
@@ -88,6 +90,7 @@ export default function AppLayout() {
             </main>
           </div>
         </AppShell>
+        </NuevaReservaProvider>
         </NotificacionesProvider>
       </DataProvider>
     </DialogProvider>

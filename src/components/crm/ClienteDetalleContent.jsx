@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus, Receipt, Users, QrCode, CalendarCheck, Unlock } from 'lucide-react'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
 import { coSocios, esPendienteConfirmacion, estadoBadgeStatus, saldoGrupo, estadoPagoGrupo } from '../../lib/reservas'
-import { linkToComprobante, linkToRecepcion, linkToNuevaReservaCliente } from '../../lib/deepLinks'
+import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
+import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { isFeatureEnabled } from '../../lib/features'
 import { scrollAndHighlight } from '../../lib/highlight'
 import StatusBadge from './StatusBadge'
@@ -24,6 +25,7 @@ export default function ClienteDetalleContent({
   showCloseButton = true, wide = false,
 }) {
   const navigate = useNavigate()
+  const { abrirNuevaReserva } = useNuevaReserva()
   if (!cliente || !derivado) return null
 
   const {
@@ -98,7 +100,7 @@ export default function ClienteDetalleContent({
             </button>
             {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
               <button
-                onClick={() => navigate(linkToNuevaReservaCliente(cliente.id))}
+                onClick={() => abrirNuevaReserva({ clienteId: cliente.id })}
                 className="w-11 h-11 flex items-center justify-center bg-white border border-hairline hover:bg-prius-surface rounded-xl text-prius-slate transition-all"
                 title="Nueva reserva"
               >

@@ -7,7 +7,8 @@ import { useData } from '../../context/DataProvider'
 import { useOverlay } from '../../context/OverlayProvider'
 import { formatPesosVisible, formatTelefono, unidadEmoji } from '../../lib/format'
 import { saldoNumerico, estadoBadgeStatus } from '../../lib/reservas'
-import { linkToCliente, linkToNuevaReservaCliente } from '../../lib/deepLinks'
+import { linkToCliente } from '../../lib/deepLinks'
+import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import StatusBadge from './StatusBadge'
 import Historial from './Historial'
 
@@ -27,6 +28,7 @@ import Historial from './Historial'
 export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
   const navigate = useNavigate()
   const { clientes, reservas, pagos } = useData()
+  const { abrirNuevaReserva } = useNuevaReserva()
   const overlayId = useId()
   const { bind } = useOverlay({ id: `cliente-drawer-${overlayId}`, isOpen: !!clienteId, onRequestClose: () => onClose?.() })
   const shouldRender = useMountTransition(!!clienteId)
@@ -78,7 +80,7 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
               <Wallet size={14} /> Registrar pago
             </button>
             <button
-              onClick={() => { navigate(linkToNuevaReservaCliente(cliente.id)); onClose?.() }}
+              onClick={() => { abrirNuevaReserva({ clienteId: cliente.id }); onClose?.() }}
               className="py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all flex items-center justify-center gap-2"
             >
               <CalendarPlus size={14} /> Nueva reserva

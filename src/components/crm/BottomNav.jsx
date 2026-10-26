@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
 import { useOverlay } from '../../context/OverlayProvider'
+import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import {
   Home, Map, Users, MoreHorizontal, X, Wallet, BarChart2, Plus,
   DoorClosed, Inbox, GanttChartSquare, Activity, FileText, UserCheck, LogOut, QrCode,
@@ -16,9 +17,9 @@ import { useMountTransition } from '../../hooks/useMountTransition'
 // desktop, ver AppLayout.jsx). "Más" abre un bottom sheet con el resto de
 // las secciones + Cerrar sesión, para no amontonar más de 5 ítems abajo
 // (regla de oro de bottom nav: 3 a 5, nunca más). Botón central "Reserva"
-// (oct 2026, mock Stitch): mismo destino que antes (/app/reservas, única
-// pantalla real de alta), solo cambia el look — círculo dorado elevado con
-// "+", no una pestaña plana más.
+// (oct 2026, mock Stitch; ítem 8 25/10/2026): ya no navega a /app/reservas —
+// abre el modal global de Nueva Reserva ahí mismo, en la sección en la que
+// está parado el usuario (NuevaReservaProvider, montado en AppLayout).
 const ITEMS_IZQ = [
   { name: 'Inicio', path: '/app/home', icon: Home },
   { name: 'Plano', path: '/app/plano', icon: Map },
@@ -47,6 +48,7 @@ export default function BottomNav() {
   const shouldRenderMore = useMountTransition(showMore)
   const { sinContactar: leadsSinContactar } = useLeads()
   const { signOut, permiso } = useAuth()
+  const { abrirNuevaReserva } = useNuevaReserva()
 
   const masItems = [
     { name: 'Caja Diaria', path: '/app/caja', icon: Wallet },
@@ -107,7 +109,11 @@ export default function BottomNav() {
             dorado se posiciona absolute por separado, así puede "flotar"
             sobre el borde superior del nav sin afectar ese centrado. Sin
             sombra (Quiet Luxury, pulido mobile oct 2026). */}
-        <NavLink to="/app/reservas" className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px]">
+        <button
+          type="button"
+          onClick={() => abrirNuevaReserva()}
+          className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px]"
+        >
           <span className="w-[22px] h-[22px]" aria-hidden="true" />
           <span className="absolute -top-4 w-12 h-12 rounded-full bg-gold flex items-center justify-center active:scale-95 transition-transform">
             <Plus size={24} className="text-black" />
@@ -117,7 +123,7 @@ export default function BottomNav() {
               destaque de este ítem lo da solo el círculo dorado, nunca el
               label (nunca compite con el resaltado real de la bottom nav). */}
           <span className="text-label-md text-prius-slate">Reserva</span>
-        </NavLink>
+        </button>
 
         {ITEMS_DER.map((item) => (
           <NavLink

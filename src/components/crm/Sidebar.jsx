@@ -2,6 +2,7 @@ import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
+import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import {
   LayoutDashboard,
   CalendarDays,
@@ -31,6 +32,7 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const { sinContactar: leadsSinContactar } = useLeads()
   const { signOut, permiso, perfil, rol } = useAuth()
+  const { abrirNuevaReserva } = useNuevaReserva()
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
   const rolLabel = rol === 'superadmin' ? 'Superadmin' : rol === 'admin' ? 'Admin' : ''
 
@@ -82,7 +84,7 @@ export default function Sidebar() {
             </div>
           </div>
           <button
-            onClick={() => navigate('/app/reservas')}
+            onClick={() => abrirNuevaReserva()}
             className="w-full mt-space-lg h-12 rounded-xl bg-gold text-black text-label-lg flex items-center justify-center gap-space-sm hover:bg-gold-hover transition-colors"
           >
             <Plus size={18} />
