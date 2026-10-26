@@ -38,7 +38,7 @@ export default function MontoReserva({ reserva, className = '' }) {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap ${className}`}>
       {formatPesosVisible(valorTotal)}
       {bonificada && (
         <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">

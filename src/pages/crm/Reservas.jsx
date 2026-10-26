@@ -329,6 +329,15 @@ export default function Reservas() {
   // viven en la ficha lateral/bottom sheet que abre el click de la fila
   // (ReservaDetalleContent) — tenerlos repetidos en la grilla era redundante.
   const headers = ['Llegada', 'Cliente', 'Unidad', 'Monto Total', 'Saldo', 'Estado', 'Origen']
+  // Anchos fijos (ítem 7, oct 2026) para que nada se parta a dos líneas en
+  // 1280/1366/1440: todas las columnas salvo "Cliente" quedan en un ancho
+  // fijo que entra con nowrap — "Cliente" (sin ancho acá) se lleva el resto
+  // y es la única que puede wrappear a dos líneas. Con table-fixed el ancho
+  // total de la tabla es SIEMPRE la suma de estos anchos (el contenido que
+  // no entra wrappea/se recorta adentro de su celda, nunca agranda la
+  // tabla) — medido contra el espacio real disponible junto al panel fijo
+  // (que bajó de w-96 a w-80 para esto, ver más abajo) en 1280/1366/1440.
+  const columnWidths = ['80px', undefined, '100px', '108px', '96px', '92px', '88px']
 
   // Unidades con una reserva de TEMPORADA activa: quedan tomadas para toda la
   // temporada sin importar qué fecha se elija, así que ni siquiera aparecen
@@ -431,6 +440,12 @@ export default function Reservas() {
         </div>
       </div>
 
+      {/* Envoltorio condicional (ítem 7, oct 2026): sin chips activos este
+          div no debe existir, porque el `space-y-10` del contenedor padre
+          le metía el mismo gap de 40px que a cualquier hermano con
+          contenido real — quedaba un salto vacío entre los filtros y la
+          tabla aunque no hubiera ningún chip para mostrar. */}
+      {(unidadFiltrada || ((desde || hasta) && !rangoFechaInvalido)) && (
       <div className="flex flex-wrap gap-2">
         {unidadFiltrada && (
           <button
@@ -452,6 +467,7 @@ export default function Reservas() {
           </button>
         )}
       </div>
+      )}
       {rangoFechaInvalido && (
         <p className="text-xs font-bold text-prius-error uppercase tracking-widest">
           "Llegada desde" no puede ser posterior a "Llegada hasta" — corregí el rango para filtrar por fecha.
@@ -484,6 +500,7 @@ export default function Reservas() {
       <DataTable
         headers={headers}
         data={filteredReservas}
+        columnWidths={columnWidths}
         emptyMessage={filtroUnidadId ? 'No hay reservas registradas para esta unidad.' : 'No hay reservas de período/día con esos filtros.'}
         renderRow={(res) => {
           // Fila de temporada (solo aparece con el deep-link "Ver todas" por
@@ -497,8 +514,8 @@ export default function Reservas() {
                 onClick={() => navigate(linkToCliente(res.cliente_id))}
                 className="hover:bg-prius-subtle transition-all group cursor-pointer"
               >
-                <td className="px-6 py-5 text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-                <td className="px-6 py-5 font-bold text-black uppercase">
+                <td className="px-3 py-4 align-middle text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+                <td className="px-3 py-4 align-middle font-bold text-black uppercase break-words">
                   {res.clientes?.nombre || 'S/N'}
                   {coSocios(res).length > 0 && (
                     <p className="text-[10px] text-prius-muted font-normal normal-case tracking-widest mt-0.5">
@@ -506,12 +523,12 @@ export default function Reservas() {
                     </p>
                   )}
                 </td>
-                <td className="px-6 py-5 font-medium text-prius-slate uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
-                <td className="px-6 py-5 font-bold text-black"><MontoReserva reserva={res} /></td>
-                <td className="px-6 py-5 font-bold text-prius-error">
+                <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
+                <td className="px-3 py-4 align-middle font-bold text-black"><MontoReserva reserva={res} /></td>
+                <td className="px-3 py-4 align-middle font-bold text-prius-error whitespace-nowrap">
                   {formatPesosVisible(res.saldo)}
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-3 py-4 align-middle">
                   <div className="flex items-center gap-2">
                     <StatusBadge status={estadoBadgeStatus(res)} />
                     <span className="text-[9px] font-bold uppercase tracking-widest text-cyan-400 border border-cyan-400/30 rounded px-1.5 py-0.5">
@@ -519,7 +536,7 @@ export default function Reservas() {
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-5">
+                <td className="px-3 py-4 align-middle">
                   <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted">
                     {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                     {res.origen === 'web' ? 'Web' : 'Manual'}
@@ -534,8 +551,8 @@ export default function Reservas() {
               onClick={() => handleOpenDetalle(res)}
               className={`hover:bg-prius-subtle transition-all group cursor-pointer ${selectedReservaId === res.id ? 'bg-prius-subtle' : ''}`}
             >
-              <td className="px-6 py-5 text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-              <td className="px-6 py-5 font-bold text-black uppercase">
+              <td className="px-3 py-4 align-middle text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+              <td className="px-3 py-4 align-middle font-bold text-black uppercase break-words">
                 {res.clientes?.nombre || 'S/N'}
                 {coSocios(res).length > 0 && (
                   <p className="text-[10px] text-prius-muted font-normal normal-case tracking-widest mt-0.5">
@@ -543,15 +560,15 @@ export default function Reservas() {
                   </p>
                 )}
               </td>
-              <td className="px-6 py-5 font-medium text-prius-slate uppercase">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
-              <td className="px-6 py-5 font-bold text-black"><MontoReserva reserva={res} /></td>
-              <td className="px-6 py-5 font-bold text-prius-error">
+              <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
+              <td className="px-3 py-4 align-middle font-bold text-black"><MontoReserva reserva={res} /></td>
+              <td className="px-3 py-4 align-middle font-bold text-prius-error whitespace-nowrap">
                 {formatPesosVisible(res.saldo)}
               </td>
-              <td className="px-6 py-5">
+              <td className="px-3 py-4 align-middle">
                 <StatusBadge status={estadoBadgeStatus(res)} />
               </td>
-              <td className="px-6 py-5">
+              <td className="px-3 py-4 align-middle">
                 <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted">
                   {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                   {res.origen === 'web' ? 'Web' : 'Manual'}
@@ -563,21 +580,26 @@ export default function Reservas() {
       />
           </div>
 
-          {/* Panel fijo — solo ≥1024px. */}
-          <aside className="hidden lg:flex w-96 shrink-0 card-light rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start max-h-[calc(100vh-2rem)]">
+          {/* Panel fijo — solo ≥1024px. Altura fija (no max-h) + key por id
+              para el crossfade (mismo patrón que Clientes.jsx, ítem 6, oct
+              2026): nunca cambia de tamaño al elegir/deseleccionar una
+              reserva, y el contenido hace fade+shift de 180ms al cambiar. */}
+          <aside className="hidden lg:flex w-72 shrink-0 card-light rounded-2xl p-space-lg flex-col overflow-hidden sticky top-4 self-start h-[calc(100vh-2rem)]">
             {selectedReserva ? (
-              <ReservaDetalleContent
-                reserva={selectedReserva}
-                fechaLlegada={fechaLlegada}
-                onClose={handleCloseDetalle}
-                onRegistrarPago={setPagoReserva}
-                onEditar={abrirEdicionReserva}
-                onCancelar={handleCancelarClick}
-                onEliminar={handleEliminarClick}
-                onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
-              />
+              <div key={selectedReserva.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
+                <ReservaDetalleContent
+                  reserva={selectedReserva}
+                  fechaLlegada={fechaLlegada}
+                  onClose={handleCloseDetalle}
+                  onRegistrarPago={setPagoReserva}
+                  onEditar={abrirEdicionReserva}
+                  onCancelar={handleCancelarClick}
+                  onEliminar={handleEliminarClick}
+                  onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
+                />
+              </div>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
+              <div key="empty" className="content-crossfade flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
                 <LayoutList size={28} />
                 <p className="text-body-md">Elegí una reserva para ver el detalle</p>
               </div>

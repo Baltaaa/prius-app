@@ -17,7 +17,14 @@ function useIsDesktop() {
   return useSyncExternalStore(subscribe, () => mql?.matches ?? true, () => true)
 }
 
-export default function DataTable({ headers, data, renderRow, renderMobileCard, emptyMessage }) {
+// `columnWidths` (ítem 7, oct 2026, opcional — solo Reservas.jsx lo usa por
+// ahora): un ancho CSS por header, mismo orden que `headers`. Con esto la
+// tabla pasa a `table-fixed` y cada columna sin texto libre (fecha, unidad,
+// montos, chips) queda en un ancho fijo que nunca rompe a dos líneas; la
+// columna sin ancho en el array (ej. Cliente) se lleva todo el sobrante y
+// es la única que puede wrappear. Sin esta prop, se comporta exactamente
+// igual que antes (auto layout).
+export default function DataTable({ headers, data, renderRow, renderMobileCard, emptyMessage, columnWidths }) {
   const isDesktop = useIsDesktop()
 
   if (!data || data.length === 0) {
@@ -32,15 +39,22 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
     return (
       <div className="w-full">
         <div className="card-light rounded-xl overflow-x-auto card-light-inner">
-          <table className="w-full text-left border-collapse">
+          <table className={`w-full text-left border-collapse ${columnWidths ? 'table-fixed' : ''}`}>
+            {columnWidths && (
+              <colgroup>
+                {headers.map((_, i) => (
+                  <col key={i} style={columnWidths[i] ? { width: columnWidths[i] } : undefined} />
+                ))}
+              </colgroup>
+            )}
             <thead>
               <tr className="border-b border-hairline text-[11px] font-bold uppercase tracking-widest text-prius-muted">
                 {headers.map((h, i) => (
-                  <th key={i} className="px-6 py-4 font-semibold whitespace-nowrap">{h}</th>
+                  <th key={i} className={`font-semibold whitespace-nowrap ${columnWidths ? 'px-3 py-4' : 'px-6 py-4'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-hairline text-sm text-prius-slate">
+            <tbody className={`divide-y divide-hairline text-prius-slate ${columnWidths ? 'text-xs' : 'text-sm'}`}>
               {data.map((row, i) => renderRow(row, i))}
             </tbody>
           </table>
