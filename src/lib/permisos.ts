@@ -42,6 +42,10 @@ export const PERMISOS: Record<string, Rol[]> = {
   // de una reserva — espeja el guard real de cambiar_estado_pago_manual/
   // revertir_estado_pago_automatico en la base.
   ajustar_estado_pago: ['superadmin'],
+  // Mini-prompt 26/10/2026, cambio de criterio explícito: antes cualquier
+  // usuario activo podía sacar un cosocio (RLS usuario_activo()); ahora es
+  // superadmin + contraseña, como cualquier otro hard-delete.
+  quitar_cosocio: ['superadmin'],
 
   // Operación diaria — explícitas para que quede documentada la matriz
   // completa, aunque el default ya las permitiría para admin.

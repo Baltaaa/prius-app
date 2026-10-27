@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 import { X, Umbrella, Home, MessageSquare } from "lucide-react"
-import ConfirmDeleteModal from "../crm/ConfirmDeleteModal"
+import ConfirmarSuperadminModal from "../crm/ConfirmarSuperadminModal"
 import { unidadEmoji } from "../../lib/format"
 
 // Carga rápida de reserva desde el plano (CRM interno, no pasa por Edge Function).
@@ -295,13 +295,13 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
       </div>
     </div>
 
-      <ConfirmDeleteModal
+      <ConfirmarSuperadminModal
         isOpen={showLiberarConfirm}
         onClose={() => setShowLiberarConfirm(false)}
         onConfirm={handleConfirmLiberar}
-        tipo="reserva"
-        identificador={unit?.clientName || ''}
-        detalle={`Se elimina la reserva de ${unidadEmoji(unit?.type)} ${unit?.type === "sombrilla" ? "la sombrilla" : "la carpa"} #${unit?.number} y sus pagos asociados. No se puede deshacer.`}
+        titulo="Eliminar reserva"
+        afectaLinea={`Reserva de ${unit?.clientName || 'S/N'} · ${unidadEmoji(unit?.type)} ${unit?.type === "sombrilla" ? "la sombrilla" : "la carpa"} #${unit?.number} y sus pagos asociados. No se puede deshacer.`}
+        confirmLabel="Eliminar definitivamente"
       />
     </>,
     document.body,

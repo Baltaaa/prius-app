@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { ShieldAlert } from 'lucide-react'
 import Modal from './Modal'
+import ConfirmarSuperadminModal from './ConfirmarSuperadminModal'
 import StatusBadge from './StatusBadge'
 import BrandSelect from '../ui/BrandSelect'
 import TextInput from '../inputs/TextInput'
-import LoadingButton from '../ui/LoadingButton'
 import { useData } from '../../context/DataProvider'
 import { useDialog } from '../../context/DialogProvider'
 
@@ -26,43 +26,40 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
   const { toast } = useDialog()
   const [nuevoEstado, setNuevoEstado] = useState('')
   const [motivo, setMotivo] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [revirtiendo, setRevirtiendo] = useState(false)
+  // Mini-prompt 26/10/2026: las dos acciones de este modal piden contraseña
+  // de superadmin — "Guardar ajuste" solo ABRE el gate si el motivo ya está
+  // cargado; "Volver al estado automático" lo abre directo. El loading
+  // durante la verificación lo muestra ConfirmarSuperadminModal, no este botón.
+  const [confirmarAjuste, setConfirmarAjuste] = useState(false)
+  const [confirmarRevertir, setConfirmarRevertir] = useState(false)
 
   useEffect(() => {
     if (!isOpen || !reserva) return
     setNuevoEstado(reserva.estado_pago || 'pendiente')
     setMotivo('')
-    setSaving(false)
   }, [isOpen, reserva])
 
   if (!reserva) return null
 
-  const handleConfirmar = async () => {
+  const handleConfirmar = () => {
     if (!motivo.trim()) return
-    setSaving(true)
-    try {
-      await cambiarEstadoPagoManual(reserva.id, nuevoEstado, motivo.trim())
-      toast('Estado de pago actualizado', { tone: 'success' })
-      onClose()
-    } catch (err) {
-      toast(err.message || 'No se pudo cambiar el estado de pago.', { tone: 'error' })
-    } finally {
-      setSaving(false)
-    }
+    setConfirmarAjuste(true)
   }
 
-  const handleVolverAutomatico = async () => {
-    setRevirtiendo(true)
-    try {
-      await revertirEstadoPagoAutomatico(reserva.id)
-      toast('Vuelve a calcularse automático', { tone: 'success' })
-      onClose()
-    } catch (err) {
-      toast(err.message || 'No se pudo revertir el ajuste.', { tone: 'error' })
-    } finally {
-      setRevirtiendo(false)
-    }
+  const handleConfirmAjuste = async (password) => {
+    await cambiarEstadoPagoManual(reserva.id, nuevoEstado, motivo.trim(), password)
+    toast('Estado de pago actualizado', { tone: 'success' })
+    setConfirmarAjuste(false)
+    onClose()
+  }
+
+  const handleVolverAutomatico = () => setConfirmarRevertir(true)
+
+  const handleConfirmRevertir = async (password) => {
+    await revertirEstadoPagoAutomatico(reserva.id, password)
+    toast('Vuelve a calcularse automático', { tone: 'success' })
+    setConfirmarRevertir(false)
+    onClose()
   }
 
   return (
@@ -72,15 +69,14 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
       title="Cambiar estado de pago"
       maxWidthClass="sm:max-w-sm"
       footer={
-        <LoadingButton
-          loading={saving}
-          loadingText="Guardando..."
+        <button
+          type="button"
           disabled={!motivo.trim()}
           onClick={handleConfirmar}
           className="w-full py-3 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all"
         >
           Guardar ajuste
-        </LoadingButton>
+        </button>
       }
     >
       <div className="flex items-start gap-2 p-3 bg-gold/5 border border-gold/20 rounded-xl">
@@ -98,10 +94,9 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
           <button
             type="button"
             onClick={handleVolverAutomatico}
-            disabled={revirtiendo}
-            className="text-[11px] font-bold uppercase tracking-widest text-gold hover:text-black transition-colors disabled:opacity-50"
+            className="text-[11px] font-bold uppercase tracking-widest text-gold hover:text-black transition-colors"
           >
-            {revirtiendo ? 'Revirtiendo...' : 'Volver al estado automático'}
+            Volver al estado automático
           </button>
         </div>
       )}
@@ -125,6 +120,23 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
         maxLength={300}
         placeholder="Ej. Acordamos un plan de pago distinto con el cliente"
         required
+      />
+
+      <ConfirmarSuperadminModal
+        isOpen={confirmarAjuste}
+        onClose={() => setConfirmarAjuste(false)}
+        onConfirm={handleConfirmAjuste}
+        titulo="Cambiar estado de pago"
+        afectaLinea={`Nuevo estado: ${OPCIONES_ESTADO.find((o) => o.value === nuevoEstado)?.label || nuevoEstado} — ${motivo.trim()}`}
+        confirmLabel="Guardar ajuste"
+      />
+      <ConfirmarSuperadminModal
+        isOpen={confirmarRevertir}
+        onClose={() => setConfirmarRevertir(false)}
+        onConfirm={handleConfirmRevertir}
+        titulo="Volver al estado automático"
+        afectaLinea="El estado de pago vuelve a calcularse solo, a partir de los pagos reales."
+        confirmLabel="Confirmar"
       />
     </Modal>
   )

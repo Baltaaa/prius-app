@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { ejecutarAccionSuperadmin } from '../lib/superadminAction'
 
 /*
   Fuente única de datos del CRM.
@@ -287,9 +288,12 @@ export function DataProvider({ children }) {
   // pagos.reserva_id / ingresos_caja.*) sus pagos e ingresos de caja
   // asociados, todo en la misma transacción implícita del DELETE. Nunca toca
   // clientes (reservas.cliente_id es ON DELETE SET NULL).
-  const deleteReserva = useCallback(async (id) => {
-    const { error } = await supabase.from('reservas').delete().eq('id', id)
-    if (error) throw error
+  // Mini-prompt 26/10/2026: ya no es un `supabase.from('reservas').delete()`
+  // directo — esa policy de RLS permitía borrar a CUALQUIER usuario activo
+  // (no solo superadmin), un hueco real. Ahora pasa por
+  // ConfirmarSuperadminModal + fn_eliminar_reserva (dispatcher).
+  const deleteReserva = useCallback(async (id, password) => {
+    await ejecutarAccionSuperadmin('eliminar_reserva', { reserva_id: id }, password)
     // El trigger libera la unidad al borrarse la reserva; Realtime concilia.
     setReservas((prev) => prev.filter((r) => r.id !== id))
   }, [])
@@ -348,9 +352,10 @@ export function DataProvider({ children }) {
   // pero la reserva seguía 'activa', ocupando la unidad para siempre sin
   // cliente. Pagos reales (pagos.cliente_id es NO ACTION) siguen bloqueando
   // el borrado — eso es a propósito, nunca se pierde historial de dinero.
-  const deleteCliente = useCallback(async (id) => {
-    const { error } = await supabase.from('clientes').delete().eq('id', id)
-    if (error) throw error
+  // Mismo cambio que deleteReserva (mini-prompt 26/10/2026): antes
+  // cualquier usuario activo podía borrar un cliente directo por RLS.
+  const deleteCliente = useCallback(async (id, password) => {
+    await ejecutarAccionSuperadmin('eliminar_cliente', { cliente_id: id }, password)
     setClientes((prev) => prev.filter((c) => c.id !== id))
   }, [])
 
@@ -377,9 +382,12 @@ export function DataProvider({ children }) {
     await fetchReservas()
   }, [fetchReservas])
 
-  const quitarCosocio = useCallback(async (reservaId, clienteId) => {
-    const { error } = await supabase.from('reserva_clientes').delete().eq('reserva_id', reservaId).eq('cliente_id', clienteId)
-    if (error) throw error
+  // Mini-prompt 26/10/2026, cambio de criterio explícito: antes cualquier
+  // usuario activo podía sacar un cosocio (RLS `usuario_activo()`); ahora
+  // es una acción de superadmin con contraseña, igual que eliminar un
+  // cliente. fn_quitar_cosocio vía el dispatcher.
+  const quitarCosocio = useCallback(async (reservaId, clienteId, password) => {
+    await ejecutarAccionSuperadmin('quitar_cosocio', { reserva_id: reservaId, cliente_id: clienteId }, password)
     await fetchReservas()
   }, [fetchReservas])
 
@@ -446,9 +454,13 @@ export function DataProvider({ children }) {
     return data
   }, [cajaHoy])
 
-  const reabrirCaja = useCallback(async (cajaId, motivo) => {
-    const { data, error } = await supabase.rpc('reabrir_caja', { p_caja_id: cajaId, p_motivo: motivo })
-    if (error) throw error
+  // Mini-prompt 26/10/2026: ya no es un rpc() directo — `reabrir_caja`
+  // perdió el EXECUTE de `authenticated` (ver migración
+  // superadmin_password_confirmacion), solo el dispatcher de la Edge
+  // Function `superadmin-action` puede llamarla. `password` la pide
+  // ConfirmarSuperadminModal, nunca se guarda acá.
+  const reabrirCaja = useCallback(async (cajaId, motivo, password) => {
+    const data = await ejecutarAccionSuperadmin('reabrir_caja', { caja_id: cajaId, motivo }, password)
     await fetchCaja()
     return data
   }, [fetchCaja])
@@ -478,9 +490,8 @@ export function DataProvider({ children }) {
     return data
   }, [fetchPagos, fetchReservas, fetchCaja])
 
-  const anularPago = useCallback(async (pagoId, motivo) => {
-    const { data, error } = await supabase.rpc('anular_pago', { p_pago_id: pagoId, p_motivo: motivo })
-    if (error) throw error
+  const anularPago = useCallback(async (pagoId, motivo, password) => {
+    const data = await ejecutarAccionSuperadmin('anular_pago', { pago_id: pagoId, motivo }, password)
     await fetchPagos()
     await fetchReservas()
     await fetchCaja()
@@ -529,11 +540,12 @@ export function DataProvider({ children }) {
     return data
   }, [fetchPagos, fetchReservas, fetchCaja, fetchIngresosCaja])
 
-  const editarComprobante = useCallback(async (comprobanteId, monto, fecha, tipo) => {
-    const { data, error } = await supabase.rpc('editar_comprobante', {
-      p_comprobante_id: comprobanteId, p_monto: monto, p_fecha: fecha || null, p_tipo: tipo || null,
-    })
-    if (error) throw error
+  const editarComprobante = useCallback(async (comprobanteId, monto, fecha, tipo, password) => {
+    const data = await ejecutarAccionSuperadmin(
+      'editar_comprobante',
+      { comprobante_id: comprobanteId, monto, fecha: fecha || null, tipo: tipo || null },
+      password,
+    )
     await fetchPagos()
     return data
   }, [fetchPagos])
@@ -544,18 +556,18 @@ export function DataProvider({ children }) {
   // estado_pago_manual_override). fetchReservas() refleja el cambio de
   // inmediato en esta pestaña; Realtime (ya suscripto a `reservas`)
   // propaga a Plano/Clientes/Dashboard en cualquier otra pestaña abierta.
-  const cambiarEstadoPagoManual = useCallback(async (reservaId, nuevoEstado, motivo) => {
-    const { data, error } = await supabase.rpc('cambiar_estado_pago_manual', {
-      p_reserva_id: reservaId, p_nuevo_estado: nuevoEstado, p_motivo: motivo,
-    })
-    if (error) throw error
+  const cambiarEstadoPagoManual = useCallback(async (reservaId, nuevoEstado, motivo, password) => {
+    const data = await ejecutarAccionSuperadmin(
+      'cambiar_estado_pago_manual',
+      { reserva_id: reservaId, nuevo_estado: nuevoEstado, motivo },
+      password,
+    )
     await fetchReservas()
     return data
   }, [fetchReservas])
 
-  const revertirEstadoPagoAutomatico = useCallback(async (reservaId) => {
-    const { data, error } = await supabase.rpc('revertir_estado_pago_automatico', { p_reserva_id: reservaId })
-    if (error) throw error
+  const revertirEstadoPagoAutomatico = useCallback(async (reservaId, password) => {
+    const data = await ejecutarAccionSuperadmin('revertir_estado_pago_automatico', { reserva_id: reservaId }, password)
     await fetchReservas()
     return data
   }, [fetchReservas])
@@ -578,11 +590,12 @@ export function DataProvider({ children }) {
   // solo superadmin (validado en el RPC, no solo acá). Distinto de
   // editarMontoPago (arriba de esta sección), que es para cargar el monto
   // de un recibo migrado que todavía está en null.
-  const editarMontoPagoVigente = useCallback(async (pagoId, monto) => {
-    const { data, error } = await supabase.rpc('fn_editar_monto_pago_vigente', {
-      p_pago_id: pagoId, p_monto: Number(monto),
-    })
-    if (error) throw error
+  const editarMontoPagoVigente = useCallback(async (pagoId, monto, password) => {
+    const data = await ejecutarAccionSuperadmin(
+      'editar_monto_pago_vigente',
+      { pago_id: pagoId, monto: Number(monto) },
+      password,
+    )
     await fetchPagos()
     await fetchReservas()
     return data
@@ -599,12 +612,12 @@ export function DataProvider({ children }) {
   }, [fetchLeads])
 
   // Hard delete de un lead (oct 2026): solo tiene sentido sobre un lead ya
-  // descartado (hay leads de prueba que ensucian la bandeja) — la policy de
-  // RLS ya lo restringe a superadmin (es_superadmin()), acá no hace falta
-  // una RPC porque leads no es una tabla de dinero.
-  const deleteLead = useCallback(async (id) => {
-    const { error } = await supabase.from('leads').delete().eq('id', id)
-    if (error) throw error
+  // descartado (hay leads de prueba que ensucian la bandeja). Mini-prompt
+  // 26/10/2026: pasa a pedir contraseña de superadmin (antes solo RLS,
+  // `es_superadmin()`, sin confirmación) — vía fn_eliminar_lead, llamada
+  // desde el dispatcher de la Edge Function.
+  const deleteLead = useCallback(async (id, password) => {
+    await ejecutarAccionSuperadmin('eliminar_lead', { lead_id: id }, password)
     setLeads((prev) => prev.filter((l) => l.id !== id))
   }, [])
 

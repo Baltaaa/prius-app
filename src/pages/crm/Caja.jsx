@@ -20,6 +20,7 @@ import { usePermiso, useAuth } from '../../context/AuthProvider'
 import RegistrarGasto from '../../components/crm/RegistrarGasto'
 import DetalleGasto from '../../components/crm/DetalleGasto'
 import DetallePago from '../../components/crm/DetallePago'
+import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
 import ResumenCaja from '../../components/crm/ResumenCaja'
 import CajaImpresion from '../../components/crm/CajaImpresion'
 import CerrarCajaStepper from '../../components/crm/CerrarCajaStepper'
@@ -174,20 +175,17 @@ export default function Caja() {
     }
   }
 
-  const [reabriendoSaving, setReabriendoSaving] = useState(false)
-  const handleReabrir = async () => {
+  const [confirmarReabrir, setConfirmarReabrir] = useState(false)
+  const handleReabrir = () => {
     if (!motivoReapertura.trim()) return
-    setReabriendoSaving(true)
-    try {
-      await reabrirCaja(cajaSeleccionada.id, motivoReapertura.trim())
-      setReabriendo(false)
-      setMotivoReapertura('')
-      toast('Caja reabierta con éxito', { tone: 'success' })
-    } catch (err) {
-      toast(err.message || 'No se pudo reabrir la caja.', { tone: 'error' })
-    } finally {
-      setReabriendoSaving(false)
-    }
+    setConfirmarReabrir(true)
+  }
+  const handleConfirmReabrir = async (password) => {
+    await reabrirCaja(cajaSeleccionada.id, motivoReapertura.trim(), password)
+    setReabriendo(false)
+    setMotivoReapertura('')
+    setConfirmarReabrir(false)
+    toast('Caja reabierta con éxito', { tone: 'success' })
   }
 
   const abrirDetalleMovimiento = (m) => {
@@ -675,6 +673,15 @@ export default function Caja() {
               </button>
             </div>
           )}
+
+          <ConfirmarSuperadminModal
+            isOpen={confirmarReabrir}
+            onClose={() => setConfirmarReabrir(false)}
+            onConfirm={handleConfirmReabrir}
+            titulo="Reabrir caja"
+            afectaLinea={`Caja de ${formatFecha(selectedDate)} — ${motivoReapertura.trim()}`}
+            confirmLabel="Reabrir caja"
+          />
 
           <div className="no-print">
             {resumenLoading ? <p className="text-xs text-prius-muted uppercase tracking-widest">Cargando resumen...</p> : <ResumenCaja resumen={resumen} />}

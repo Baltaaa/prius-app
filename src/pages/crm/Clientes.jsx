@@ -38,7 +38,7 @@ import SelectChips from '../../components/inputs/SelectChips'
 import SearchInput from '../../components/inputs/SearchInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import StatusBadge from '../../components/crm/StatusBadge'
-import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
+import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import { Plus, Filter, Check, ChevronLeft, LayoutList } from 'lucide-react'
@@ -372,14 +372,10 @@ export default function Clientes() {
     }
   }
 
-  const handleConfirmDeleteCliente = async () => {
+  const handleConfirmDeleteCliente = async (password) => {
     if (!clienteAEliminar) return
-    try {
-      await deleteCliente(clienteAEliminar.id)
-      setClienteAEliminar(null)
-    } catch (err) {
-      await alert('No se pudo borrar el cliente.')
-    }
+    await deleteCliente(clienteAEliminar.id, password)
+    setClienteAEliminar(null)
   }
 
   // Click manual en una fila (no deep-link): al expandir, centra la fila en
@@ -1325,13 +1321,13 @@ export default function Clientes() {
         </div>
       </Modal>
 
-      <ConfirmDeleteModal
+      <ConfirmarSuperadminModal
         isOpen={!!clienteAEliminar}
         onClose={() => setClienteAEliminar(null)}
         onConfirm={handleConfirmDeleteCliente}
-        tipo="cliente"
-        identificador={clienteAEliminar?.nombre || ''}
-        detalle="Sus reservas no se borran: quedan sin cliente asociado."
+        titulo="Eliminar cliente"
+        afectaLinea={`${clienteAEliminar?.nombre || 'Este cliente'} — sus reservas no se borran, quedan sin cliente asociado.`}
+        confirmLabel="Eliminar definitivamente"
       />
 
       <ScrollToTopButton />

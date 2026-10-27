@@ -8,6 +8,7 @@ import {
 } from '../../lib/pagos'
 import { pagoSinVerificar } from '../../lib/reservas'
 import Modal from './Modal'
+import ConfirmarSuperadminModal from './ConfirmarSuperadminModal'
 import IntegerInput from '../inputs/IntegerInput'
 import DateInput from '../inputs/DateInput'
 import MoneyInput from '../inputs/MoneyInput'
@@ -61,6 +62,16 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
   const [anulando, setAnulando] = useState(false)
   const [motivo, setMotivo] = useState('')
 
+  // Mini-prompt 26/10/2026: las tres acciones de superadmin de este modal
+  // (anular pago, editar comprobante, editar monto vigente) pasan a pedir
+  // contraseña — cada botón de "Guardar/Confirmar" de más abajo deja de
+  // llamar la acción directo y en cambio abre ConfirmarSuperadminModal; el
+  // motivo/monto/tipo ya cargados en el form quedan en estado hasta que la
+  // contraseña se verifica.
+  const [confirmarAnular, setConfirmarAnular] = useState(false)
+  const [confirmarEditarComprobante, setConfirmarEditarComprobante] = useState(false)
+  const [confirmarEditarMonto, setConfirmarEditarMonto] = useState(false)
+
   // Oct 2026 (pendiente pago_sin_monto, "Cargar monto con datos completos"):
   // ya no hay un mini-form propio acá — "Cargar monto" delega en el padre
   // (`onEditarMonto`), que abre RegistrarPago en modo edición (mismo form
@@ -109,44 +120,36 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
     setEditTipo(comprobante.tipo || null)
   }
 
-  const handleGuardarEdicion = async () => {
-    setSaving(true)
-    try {
-      await editarComprobante(editandoId, editMonto, editFecha, editTipo)
-      setEditandoId(null)
-    } catch (err) {
-      await alert(err.message || 'No se pudo editar el comprobante.')
-    } finally {
-      setSaving(false)
-    }
+  const handleGuardarEdicion = () => setConfirmarEditarComprobante(true)
+
+  const handleConfirmEditarComprobante = async (password) => {
+    await editarComprobante(editandoId, editMonto, editFecha, editTipo, password)
+    setEditandoId(null)
+    setConfirmarEditarComprobante(false)
   }
 
   // Item 9 (testing oct 2026): corrige el monto de ESTE pago (no de su
   // comprobante) — ej. error de tipeo del administrador al cargarlo.
-  const handleGuardarMontoPago = async () => {
+  const handleGuardarMontoPago = () => {
     if (!editMontoPago || Number(editMontoPago) <= 0) return
-    setSaving(true)
-    try {
-      await editarMontoPagoVigente(pago.id, editMontoPago)
-      setEditandoMontoPago(false)
-    } catch (err) {
-      await alert(err.message || 'No se pudo editar el monto del pago.')
-    } finally {
-      setSaving(false)
-    }
+    setConfirmarEditarMonto(true)
   }
 
-  const handleAnular = async () => {
+  const handleConfirmEditarMonto = async (password) => {
+    await editarMontoPagoVigente(pago.id, editMontoPago, password)
+    setEditandoMontoPago(false)
+    setConfirmarEditarMonto(false)
+  }
+
+  const handleAnular = () => {
     if (!motivo.trim()) return
-    setSaving(true)
-    try {
-      await anularPago(pago.id, motivo.trim())
-      onClose()
-    } catch (err) {
-      await alert(err.message || 'No se pudo anular el pago.')
-    } finally {
-      setSaving(false)
-    }
+    setConfirmarAnular(true)
+  }
+
+  const handleConfirmAnular = async (password) => {
+    await anularPago(pago.id, motivo.trim(), password)
+    setConfirmarAnular(false)
+    onClose()
   }
 
   // Ítem 4 (oct 2026): la suma de los comprobantes de este pago puede no
@@ -432,6 +435,31 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
           </div>
         )}
       </div>
+
+      <ConfirmarSuperadminModal
+        isOpen={confirmarAnular}
+        onClose={() => setConfirmarAnular(false)}
+        onConfirm={handleConfirmAnular}
+        titulo="Anular pago"
+        afectaLinea={`${formatPesos(pago.monto)} · ${motivo.trim()}`}
+        confirmLabel="Anular"
+      />
+      <ConfirmarSuperadminModal
+        isOpen={confirmarEditarComprobante}
+        onClose={() => setConfirmarEditarComprobante(false)}
+        onConfirm={handleConfirmEditarComprobante}
+        titulo="Editar comprobante"
+        afectaLinea="Cambia el monto, la fecha o el tipo de este comprobante."
+        confirmLabel="Guardar"
+      />
+      <ConfirmarSuperadminModal
+        isOpen={confirmarEditarMonto}
+        onClose={() => setConfirmarEditarMonto(false)}
+        onConfirm={handleConfirmEditarMonto}
+        titulo="Editar monto del pago"
+        afectaLinea={`Nuevo monto: ${formatPesos(editMontoPago)}`}
+        confirmLabel="Guardar"
+      />
     </Modal>
   )
 }

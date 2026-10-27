@@ -1,24 +1,30 @@
 import { useState } from 'react'
 import { Trash2, UserPlus } from 'lucide-react'
 import Modal from './Modal'
+import ConfirmarSuperadminModal from './ConfirmarSuperadminModal'
 import ClienteSelector from './ClienteSelector'
 import LoadingButton from '../ui/LoadingButton'
 import { useData } from '../../context/DataProvider'
 import { useDialog } from '../../context/DialogProvider'
+import { usePermiso } from '../../context/AuthProvider'
 import { coSocios } from '../../lib/reservas'
 
 // Ítem 3 (25/10/2026): agregar/quitar cosocios de una reserva, desde la
 // ficha de Reservas y el panel de unidad del Plano (mismo modal en los dos
 // lugares). Agregar: cliente existente o alta rápida (ClienteSelector, ya
-// valida con el módulo único). Quitar: bloqueado si ese cosocio ya tiene
-// algún pago vigente registrado en esta reserva — no se puede desvincular
-// a alguien que ya puso plata ahí sin perder el rastro de quién pagó qué.
+// valida con el módulo único) — sigue sin restricción de rol. Quitar pasó a
+// ser una acción de superadmin con contraseña (mini-prompt 26/10/2026,
+// cambio de criterio explícito: antes cualquier usuario activo podía
+// hacerlo) — bloqueado además si ese cosocio ya tiene algún pago vigente
+// registrado en esta reserva, no se puede desvincular a alguien que ya
+// puso plata ahí sin perder el rastro de quién pagó qué.
 export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos = [] }) {
   const { agregarCosocio, quitarCosocio } = useData()
-  const { toast, confirm, alert } = useDialog()
+  const { toast, alert } = useDialog()
+  const puedeQuitarCosocio = usePermiso('quitar_cosocio')
   const [nuevoId, setNuevoId] = useState('')
   const [agregando, setAgregando] = useState(false)
-  const [quitandoId, setQuitandoId] = useState(null)
+  const [cosocioAQuitar, setCosocioAQuitar] = useState(null)
 
   if (!reserva) return null
   const socios = coSocios(reserva)
@@ -39,22 +45,19 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
     }
   }
 
-  const handleQuitar = async (cliente) => {
+  const handleQuitarClick = async (cliente) => {
     if (tienePagos(cliente.id)) {
       await alert(`${cliente.nombre} ya tiene pagos registrados en esta reserva — no se puede quitar.`, { title: 'No se puede quitar' })
       return
     }
-    const ok = await confirm(`¿Quitar a ${cliente.nombre} de esta reserva?`, { title: 'Quitar cosocio' })
-    if (!ok) return
-    setQuitandoId(cliente.id)
-    try {
-      await quitarCosocio(reserva.id, cliente.id)
-      toast('Cosocio quitado', { tone: 'success' })
-    } catch (err) {
-      toast(err.message || 'No se pudo quitar el cosocio.', { tone: 'error' })
-    } finally {
-      setQuitandoId(null)
-    }
+    setCosocioAQuitar(cliente)
+  }
+
+  const handleConfirmQuitar = async (password) => {
+    if (!cosocioAQuitar) return
+    await quitarCosocio(reserva.id, cosocioAQuitar.id, password)
+    toast('Cosocio quitado', { tone: 'success' })
+    setCosocioAQuitar(null)
   }
 
   return (
@@ -75,15 +78,16 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
             {socios.map((s) => (
               <div key={s.id} className="flex items-center justify-between gap-2 px-3 py-2.5 bg-prius-subtle border border-hairline rounded-xl">
                 <span className="text-sm font-semibold text-black truncate">{s.nombre}</span>
-                <button
-                  type="button"
-                  onClick={() => handleQuitar(s)}
-                  disabled={quitandoId === s.id}
-                  title={tienePagos(s.id) ? 'Tiene pagos registrados — no se puede quitar' : 'Quitar'}
-                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-prius-error hover:bg-red-50 disabled:opacity-40 transition-colors"
-                >
-                  <Trash2 size={14} />
-                </button>
+                {puedeQuitarCosocio && (
+                  <button
+                    type="button"
+                    onClick={() => handleQuitarClick(s)}
+                    title={tienePagos(s.id) ? 'Tiene pagos registrados — no se puede quitar' : 'Quitar (pide contraseña de superadmin)'}
+                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-prius-error hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -103,6 +107,15 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
           <UserPlus size={14} /> Agregar
         </LoadingButton>
       </div>
+
+      <ConfirmarSuperadminModal
+        isOpen={!!cosocioAQuitar}
+        onClose={() => setCosocioAQuitar(null)}
+        onConfirm={handleConfirmQuitar}
+        titulo="Quitar cosocio"
+        afectaLinea={`${cosocioAQuitar?.nombre || 'Este cosocio'} deja de estar vinculado a esta reserva.`}
+        confirmLabel="Quitar"
+      />
     </Modal>
   )
 }

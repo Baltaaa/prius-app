@@ -16,7 +16,7 @@ import RegistrarPago from '../../components/crm/RegistrarPago'
 import DetallePago from '../../components/crm/DetallePago'
 import StatusBadge from '../../components/crm/StatusBadge'
 import MontoReserva from '../../components/crm/MontoReserva'
-import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
+import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
 import { useMountTransition } from '../../hooks/useMountTransition'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
@@ -26,9 +26,9 @@ import BottomSheet from '../../components/ui-prius/BottomSheet'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { Filter, Check, Globe, MonitorSmartphone, X, ChevronLeft, LayoutList } from 'lucide-react'
 
-// Identificador legible para el gate de tipeo del ConfirmDeleteModal —
-// reservas.codigo no existe en el schema (queda para el sistema de reservas
-// públicas), así que se arma con cliente + unidad.
+// Identificador legible para la línea "qué se va a afectar" del modal de
+// confirmación — reservas.codigo no existe en el schema (queda para el
+// sistema de reservas públicas), así que se arma con cliente + unidad.
 const reservaIdentificador = (res) =>
   `${res.clientes?.nombre || 'S/N'} - ${res.unidades?.tipo || 'unidad'} #${res.unidades?.numero ?? '?'}`
 
@@ -152,29 +152,35 @@ export default function Reservas() {
     }
   }
 
+  // Cancelar (mini-prompt 26/10/2026): NO es una acción de superadmin
+  // (admin también puede, ver permisos.ts) — se saca del gate de
+  // contraseña y pasa a un confirm simple, sin el peso de "escribí el
+  // nombre" que nunca tuvo sentido para un soft-delete reversible.
   const handleCancelarClick = async (res) => {
     if (!(await asegurarDesbloqueada(res))) return
-    setConfirmAction({ accion: 'cancelar', reserva: { ...res, bloqueada: false } })
+    const ok = await confirm(
+      `¿Cancelar la reserva de ${res.clientes?.nombre || 'S/N'} — ${res.unidades?.tipo || 'unidad'} #${res.unidades?.numero ?? '?'}? La unidad y las fechas quedan libres. Los pagos y el historial no se borran.`,
+      { title: 'Cancelar reserva' },
+    )
+    if (!ok) return
+    try {
+      await cancelarReserva(res.id)
+    } catch (err) {
+      await alert('No se pudo cancelar la reserva.')
+    }
   }
 
+  // Eliminar SÍ es superadmin (hard delete) — pide contraseña vía
+  // ConfirmarSuperadminModal (ver `confirmAction` + render más abajo).
   const handleEliminarClick = async (res) => {
     if (!(await asegurarDesbloqueada(res))) return
-    setConfirmAction({ accion: 'eliminar', reserva: { ...res, bloqueada: false } })
+    setConfirmAction({ reserva: { ...res, bloqueada: false } })
   }
 
-  const handleConfirmAction = async () => {
+  const handleConfirmEliminar = async (password) => {
     if (!confirmAction) return
-    const { accion, reserva } = confirmAction
-    try {
-      if (accion === 'cancelar') {
-        await cancelarReserva(reserva.id)
-      } else {
-        await deleteReserva(reserva.id)
-      }
-      setConfirmAction(null)
-    } catch (err) {
-      await alert(accion === 'cancelar' ? 'No se pudo cancelar la reserva.' : 'No se pudo eliminar la reserva.')
-    }
+    await deleteReserva(confirmAction.reserva.id, password)
+    setConfirmAction(null)
   }
 
   // Deep-link vía linkToReserva() (Tarea 1, oct 2026): abre directo el modal
@@ -786,18 +792,13 @@ export default function Reservas() {
         reserva={pagoDetalle?.reserva}
       />
 
-      <ConfirmDeleteModal
+      <ConfirmarSuperadminModal
         isOpen={!!confirmAction}
         onClose={() => setConfirmAction(null)}
-        onConfirm={handleConfirmAction}
-        accion={confirmAction?.accion}
-        tipo="reserva"
-        identificador={confirmAction ? reservaIdentificador(confirmAction.reserva) : ''}
-        detalle={
-          confirmAction?.accion === 'eliminar'
-            ? 'Se borran también todos los pagos asociados a esta reserva. No se puede deshacer.'
-            : 'La unidad y las fechas quedan libres. Los pagos y el historial no se borran.'
-        }
+        onConfirm={handleConfirmEliminar}
+        titulo="Eliminar reserva"
+        afectaLinea={confirmAction ? `${reservaIdentificador(confirmAction.reserva)} y sus pagos asociados. No se puede deshacer.` : ''}
+        confirmLabel="Eliminar definitivamente"
       />
     </div>
   )

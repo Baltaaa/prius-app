@@ -4,8 +4,7 @@ import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useLeads, waLink } from '../../hooks/useLeads'
 import { formatFechaHora } from '../../lib/format'
 import { usePermiso } from '../../context/AuthProvider'
-import { useDialog } from '../../context/DialogProvider'
-import ConfirmDeleteModal from '../../components/crm/ConfirmDeleteModal'
+import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
 import { Mail, Phone, Check, X, RotateCcw, Inbox, Trash2 } from 'lucide-react'
 
 // Logo real de WhatsApp (no hay en lucide-react, se agrega inline para no sumar
@@ -41,7 +40,6 @@ const fmt = formatFechaHora
 export default function Leads() {
   const { leads, loading, sinContactar, updateLead, deleteLead } = useLeads()
   const puedeEliminar = usePermiso('eliminar_lead')
-  const { alert } = useDialog()
   // [feat-8] filtro "Sin contactar/Todos" persistido en la URL (apagable
   // en lib/features.ts).
   const [filtro, setFiltro] = useFeatureUrlState('feat-8-leads-filtro-url', 'estado', 'todos')
@@ -74,13 +72,9 @@ export default function Leads() {
 
   const setEstado = (lead, estado) => updateLead(lead.id, { estado }).catch(() => {})
 
-  const confirmarEliminar = async () => {
-    try {
-      await deleteLead(leadAEliminar.id)
-      setLeadAEliminar(null)
-    } catch (err) {
-      await alert(err.message || 'No se pudo eliminar el lead.')
-    }
+  const confirmarEliminar = async (password) => {
+    await deleteLead(leadAEliminar.id, password)
+    setLeadAEliminar(null)
   }
 
   if (loading) {
@@ -217,13 +211,13 @@ export default function Leads() {
         })}
       </div>
 
-      <ConfirmDeleteModal
+      <ConfirmarSuperadminModal
         isOpen={!!leadAEliminar}
         onClose={() => setLeadAEliminar(null)}
         onConfirm={confirmarEliminar}
-        tipo="lead"
-        identificador={leadAEliminar?.nombre || ''}
-        detalle="Esto borra el lead para siempre — pensado para leads de prueba, no para leads reales descartados por error (esos quedan con 'Reabrir')."
+        titulo="Eliminar lead"
+        afectaLinea={`${leadAEliminar?.nombre || 'Este lead'} — se borra para siempre, pensado para leads de prueba (uno real descartado por error queda con "Reabrir").`}
+        confirmLabel="Eliminar definitivamente"
       />
     </div>
   )
