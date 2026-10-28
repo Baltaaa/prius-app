@@ -34,6 +34,14 @@ export default function AppLayout() {
   // el breakpoint lo resuelve CSS puro (`lg:`) más abajo, no JS, para no
   // duplicar el estado de ancho que cada página ya trackea por su cuenta.
   const esSeccionAlturaFija = location.pathname.startsWith('/app/reservas') || location.pathname.startsWith('/app/clientes')
+  // Plano (fix 28/10/2026): mismo problema que Reservas/Clientes tenían antes
+  // de ese mini-prompt — el wrapper del Outlet no tenía altura/flex propios,
+  // así que el `h-full` de Dashboard.jsx no tenía de qué ser "full" (el plano
+  // quedaba chico, encogido al contenido) y el footer global quedaba flotando
+  // a mitad de página en vez de pegado abajo. A diferencia de Reservas/
+  // Clientes, acá el footer NO se oculta (se quiere visible siempre, pegado
+  // abajo) y el fix aplica en todos los anchos, no solo desde `lg`.
+  const esPlano = location.pathname.startsWith('/app/plano')
 
   // Pulido UX (oct 2026, item 4): se sacó el bloque visible de título de
   // sección (H1 + subtítulo) de todas las pantallas — ocupaba espacio y era
@@ -105,7 +113,7 @@ export default function AppLayout() {
                   necesitando un h1 por página. Home tiene el suyo propio
                   ("Hola, {nombre}"), no se duplica acá. */}
               {!esHome && <h1 className="sr-only">{section.name}</h1>}
-              <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : undefined}>
+              <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : esPlano ? 'flex-1 min-h-0 flex flex-col' : undefined}>
                 <Outlet />
               </div>
               {/* El footer global empujaría las cajas más allá del viewport
