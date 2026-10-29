@@ -193,13 +193,24 @@ export default function TopBar() {
   // Clientes — una reserva cancelada no vincula al cliente con ninguna unidad
   // (ver el fix del caso Beatriz Ayala / carpa 11). Si no tiene reserva
   // vigente devuelve null y no se renderiza nada.
+  //
+  // Incluye al titular Y a los cosocios (`reserva_clientes`, mismo recorrido
+  // que `reservasComoCoSocioPorCliente` en Clientes.jsx): un cosocio está
+  // vinculado a la unidad igual que el titular, así que en el buscador tiene
+  // que verla igual. El titular tiene prioridad si alguien fuera las dos
+  // cosas en reservas distintas.
   const unidadPorClienteId = useMemo(() => {
     const map = {}
+    const cosocios = {}
     for (const r of reservas) {
-      if (!r.cliente_id || r.estado === 'cancelada' || !r.unidades) continue
-      if (!map[r.cliente_id]) map[r.cliente_id] = r.unidades
+      if (r.estado === 'cancelada' || !r.unidades) continue
+      if (r.cliente_id && !map[r.cliente_id]) map[r.cliente_id] = r.unidades
+      for (const rc of r.reserva_clientes || []) {
+        if (!rc.cliente_id || rc.cliente_id === r.cliente_id) continue
+        if (!cosocios[rc.cliente_id]) cosocios[rc.cliente_id] = r.unidades
+      }
     }
-    return map
+    return { ...cosocios, ...map }
   }, [reservas])
   const unidadDeCliente = (cliente) => unidadPorClienteId[cliente.id] || null
 
