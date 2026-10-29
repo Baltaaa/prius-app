@@ -6,7 +6,7 @@ import { useReservas } from "../../hooks/useReservas"
 import { useDialog } from "../../context/DialogProvider"
 import { usePermiso } from "../../context/AuthProvider"
 import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib/reservas"
-import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji } from "../../lib/format"
+import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji, formatUnidad} from "../../lib/format"
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 import Historial from "../crm/Historial"
@@ -77,7 +77,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
       }
     }
     const ok = await confirm(
-      `Se va a liberar ${unidadEmoji(unit.type)} ${unit.type} #${unit.number} y desvincular a este cliente de la reserva. La reserva pasa a "cancelada" (no se borra, queda en el historial) y la unidad queda disponible para asignar a otro cliente. ¿Confirmar?`,
+      `Se va a liberar ${unidadEmoji(unit.type)} ${formatUnidad(unit.type, unit.number)} y desvincular a este cliente de la reserva. La reserva pasa a "cancelada" (no se borra, queda en el historial) y la unidad queda disponible para asignar a otro cliente. ¿Confirmar?`,
       { title: 'Liberar unidad' },
     )
     if (!ok) return

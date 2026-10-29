@@ -127,7 +127,13 @@ export default function Dashboard() {
   const [isDragging, setIsDragging] = useState(false)
 
   const round1 = (n) => Math.round(n * 10) / 10
-  const PLANO_PAD = 24
+  // Aire alrededor del plano dentro de su caja. Bajado de 24 a 8 (29/10/2026,
+  // pedido del administrador: "que el plano se vea más grande, los números se
+  // leen chiquitos"). Sigue siendo un fit real — el plano entra COMPLETO, sin
+  // cortar ninguna punta — solo deja de desperdiciar 48px de margen por eje.
+  // El resto del agrandamiento viene de la franja superior compactada (abajo),
+  // que le devuelve alto a la caja del mapa.
+  const PLANO_PAD = 8
   // Mobile (<768px, hotfix oct 2026): nunca se auto-achica para entrar en
   // los dos ejes — eso era la causa real de las celdas microscópicas ("el
   // componente desktop escalado" que reportó el dueño). El plano mobile
@@ -606,12 +612,12 @@ export default function Dashboard() {
     const diaSemana = new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-AR', { weekday: 'short' }).toUpperCase().replace('.', '')
 
     return (
-      <div className="flex-1 min-h-0 flex flex-col gap-4">
+      <div className="flex-1 min-h-0 flex flex-col gap-2.5">
         {/* Franja superior */}
-        <div className="card-light rounded-2xl p-3 md:p-space-md flex flex-col gap-3 shrink-0">
-          <div className="flex items-center gap-3 flex-wrap xl:flex-nowrap">
+        <div className="card-light rounded-2xl p-2.5 md:p-3 flex flex-col gap-2 shrink-0">
+          <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap">
             {/* Selector de fecha */}
-            <div className="flex items-center gap-1 bg-prius-subtle p-1 rounded-xl shrink-0">
+            <div className="flex items-center gap-0.5 bg-prius-subtle p-0.5 rounded-xl shrink-0">
               <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-9 h-9 flex items-center justify-center rounded-lg bg-white text-prius-slate hover:bg-hairline transition-colors" title="Día anterior">
                 <ChevronLeft size={16} />
               </button>
@@ -633,8 +639,8 @@ export default function Dashboard() {
             {/* 3 KPIs reales: Ocupadas / Libres / Pendientes */}
             {planoStats && (
               <div className="grid grid-cols-3 md:flex gap-2 flex-1 md:max-w-2xl">
-                <button onClick={() => toggleStatsFiltro('ocupacion')} className={`flex-1 min-w-0 md:min-w-[170px] p-2.5 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'ocupacion' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
-                  <span className="w-9 h-9 shrink-0 rounded-lg bg-black text-white flex items-center justify-center"><CalendarDays size={16} /></span>
+                <button onClick={() => toggleStatsFiltro('ocupacion')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'ocupacion' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
+                  <span className="w-8 h-8 shrink-0 rounded-lg bg-black text-white flex items-center justify-center"><CalendarDays size={16} /></span>
                   <span className="min-w-0">
                     <span className="block text-label-md text-prius-slate uppercase truncate">Ocupadas</span>
                     <span className="flex items-baseline gap-1.5">
@@ -643,8 +649,8 @@ export default function Dashboard() {
                     </span>
                   </span>
                 </button>
-                <button onClick={() => toggleStatsFiltro('libres')} className={`flex-1 min-w-0 md:min-w-[170px] p-2.5 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'libres' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
-                  <span className="w-9 h-9 shrink-0 rounded-lg bg-green-100 text-prius-success flex items-center justify-center"><CheckCircle2 size={16} /></span>
+                <button onClick={() => toggleStatsFiltro('libres')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'libres' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
+                  <span className="w-8 h-8 shrink-0 rounded-lg bg-green-100 text-prius-success flex items-center justify-center"><CheckCircle2 size={16} /></span>
                   <span className="min-w-0">
                     <span className="block text-label-md text-prius-slate uppercase truncate">Libres</span>
                     <span className="flex items-baseline gap-1.5">
@@ -653,8 +659,8 @@ export default function Dashboard() {
                     </span>
                   </span>
                 </button>
-                <button onClick={() => toggleStatsFiltro('pendientes')} className={`flex-1 min-w-0 md:min-w-[210px] p-2.5 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'pendientes' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
-                  <span className="w-9 h-9 shrink-0 rounded-lg bg-gold text-black flex items-center justify-center"><Clock size={16} /></span>
+                <button onClick={() => toggleStatsFiltro('pendientes')} className={`flex-1 min-w-0 md:min-w-[210px] p-2 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'pendientes' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
+                  <span className="w-8 h-8 shrink-0 rounded-lg bg-gold text-black flex items-center justify-center"><Clock size={16} /></span>
                   <span className="min-w-0">
                     <span className="block text-label-md text-prius-slate uppercase truncate">Pendientes ({planoStats.pendientes.count})</span>
                     <span className="block text-headline-sm text-black tabular-nums truncate">{planoStats.pendientes.saldo > 0 ? formatPesos(planoStats.pendientes.saldo) : '—'}</span>
@@ -663,19 +669,19 @@ export default function Dashboard() {
               </div>
             )}
 
-            <button onClick={() => window.print()} className="h-11 px-4 bg-prius-surface hover:bg-hairline text-black rounded-xl flex items-center gap-2 text-title-md shrink-0 transition-colors">
+            <button onClick={() => window.print()} className="h-10 px-3.5 bg-prius-surface hover:bg-hairline text-black rounded-xl flex items-center gap-2 text-title-md shrink-0 transition-colors">
               <Printer size={16} /> <span className="hidden sm:inline">Imprimir A4</span>
             </button>
           </div>
 
           {/* Filtros: tipo + estado + leyenda */}
-          <div className="flex items-center gap-3 overflow-x-auto md:flex-wrap pb-0.5 md:pb-0 scrollbar-none">
+          <div className="flex items-center gap-2 overflow-x-auto md:flex-wrap pb-0.5 md:pb-0 scrollbar-none">
             <div className="flex items-center bg-prius-subtle p-1 rounded-full gap-1 shrink-0">
               {[['todo', 'Todo', planoStats?.ocupacion.total], ['carpas', 'Carpas', planoStats?.carpas.total], ['sombrillas', 'Sombrillas', planoStats?.sombrillas.total]].map(([key, label, total]) => (
                 <button
                   key={key}
                   onClick={() => key === 'todo' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
-                  className={`px-3.5 py-1 rounded-full text-label-lg whitespace-nowrap transition-colors ${
+                  className={`px-3 py-0.5 rounded-full text-label-lg whitespace-nowrap transition-colors ${
                     (key === 'todo' ? !statsFiltro : statsFiltro === key) ? 'bg-black text-white' : 'text-prius-slate hover:text-black'
                   }`}
                 >
@@ -689,7 +695,7 @@ export default function Dashboard() {
                 <button
                   key={key}
                   onClick={() => key === 'todas' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
-                  className={`h-8 px-3 rounded-full text-label-md uppercase whitespace-nowrap transition-colors ${
+                  className={`h-7 px-3 rounded-full text-label-md uppercase whitespace-nowrap transition-colors ${
                     (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-gold text-black' : 'bg-prius-surface text-black hover:bg-hairline'
                   }`}
                 >
@@ -704,9 +710,9 @@ export default function Dashboard() {
         </div>
 
         {/* Workspace: grid (sin tocar) + panel lateral fijo (desktop) */}
-        <div className="flex-1 min-h-0 flex gap-4">
+        <div className="flex-1 min-h-0 flex gap-3">
           <section className="flex-1 card-light rounded-2xl card-light-inner relative overflow-hidden flex flex-col">
-            <div className="px-4 md:px-space-lg pt-3 md:pt-space-md flex items-center justify-between gap-2 shrink-0">
+            <div className="px-3 md:px-4 pt-2 flex items-center justify-between gap-2 shrink-0">
               <span className="flex items-center gap-2 text-prius-slate">
                 <Layers size={16} />
                 <span className="text-label-lg uppercase tracking-wider">Pasillo A · Pasillo B · Pasillo C</span>

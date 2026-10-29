@@ -5,10 +5,17 @@ import { APP_VERSION } from '../../lib/appVersion'
 // TODAS las pantallas, montado una sola vez en AppLayout.jsx. Desktop/tablet:
 // fila con borde superior. Mobile: card gris (mismo bloque que el mock trae
 // al pie de Home), con margen para no quedar tapada por el BottomNav fijo.
-export default function AppFooter() {
+// `compacto` (29/10/2026): el Plano necesita todo el alto posible para que el
+// mapa se encuadre más grande (pedido del administrador) — ahí el footer se
+// monta igual, pegado abajo y con el mismo contenido, pero sin el pb/mt
+// grandes que en esa pantalla valen ~40px de mapa. El resto de las secciones
+// no cambia un píxel.
+export default function AppFooter({ compacto = false }) {
   return (
     <>
-      <footer className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-2 pt-space-sm pb-space-xl mt-space-lg border-t border-hairline text-label-md text-prius-slate">
+      <footer className={`hidden md:flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-hairline text-label-md text-prius-slate ${
+        compacto ? 'pt-2 pb-2 mt-2' : 'pt-space-sm pb-space-xl mt-space-lg'
+      }`}>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-gold" />
           <span className="text-black">Prius Playa Grande</span>

@@ -218,6 +218,32 @@ export function unidadEmoji(tipo: string): string {
   return UNIDAD_EMOJI[tipo] || ''
 }
 
+/**
+ * Fechas de una reserva en una línea corta, para listados y resultados de
+ * búsqueda (29/10/2026): período -> "05/01 → 20/01/2027" (el año solo al
+ * final, no se repite), día -> "12/01/2027", temporada -> "" (la temporada
+ * se identifica por su nombre, nunca por sus fechas — ver CLAUDE.md).
+ */
+export function formatFechasReserva(reserva: {
+  tipo_alquiler?: string | null
+  fecha?: string | null
+  fecha_inicio?: string | null
+  fecha_fin?: string | null
+} | null | undefined): string {
+  if (!reserva) return ''
+  if (reserva.tipo_alquiler === 'dia') return formatFecha(reserva.fecha)
+  if (reserva.tipo_alquiler === 'periodo') {
+    const desde = formatFecha(reserva.fecha_inicio)
+    const hasta = formatFecha(reserva.fecha_fin)
+    if (!desde || !hasta) return desde || hasta
+    // "05/01/2027 → 20/01/2027" se acorta a "05/01 → 20/01/2027" cuando los
+    // dos extremos caen en el mismo año (el caso normal de un período).
+    const desdeCorto = desde.slice(0, 5)
+    return desde.slice(6) === hasta.slice(6) ? `${desdeCorto} → ${hasta}` : `${desde} → ${hasta}`
+  }
+  return ''
+}
+
 /** "hace 5 min" / "hace 2 h" / "hace 3 d" — notificaciones recientes; más allá de 7 días cae a formatFecha. */
 export function formatTiempoRelativo(d: string | Date | null | undefined): string {
   const f = aFechaSegura(d)

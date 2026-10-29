@@ -8,7 +8,7 @@ import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, unidadEmoji, formatComprobante } from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, unidadEmoji, formatComprobante, formatUnidad} from '../../lib/format'
 import MontoStat from '../../components/ui/MontoStat'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
@@ -58,12 +58,23 @@ import { Plus, Filter, Check, ChevronLeft, LayoutList } from 'lucide-react'
 const inputClass =
   'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-cyan-400/50 outline-none font-bold'
 
-// Unidades únicas asociadas a un cliente a partir de sus reservas (co-socio en
-// varias unidades, o histórico de varias temporadas: puede haber más de una).
+// Unidades únicas asociadas a un cliente a partir de sus reservas VIGENTES
+// (co-socio en varias unidades, o histórico de varias temporadas: puede haber
+// más de una).
+//
+// Bug real (29/10/2026, caso Beatriz Ayala / carpa 11): acá NO se filtraba por
+// estado, así que una reserva cancelada seguía aportando su unidad. El Plano
+// mostraba la carpa libre (lee `unidades.estado`, que el trigger de Postgres
+// sí actualiza al cancelar) pero Clientes la seguía mostrando vinculada —
+// las dos pantallas leen la misma fuente de verdad y tienen que coincidir.
+// Mismo criterio que `reservasPagables` más abajo. La reserva cancelada sigue
+// visible en la lista de reservas del cliente y en el Historial con su chip
+// CANCELADA: lo único que deja de hacer es contar como unidad asignada.
 const unidadesDeReservas = (reservasCliente) => {
   const vistas = new Set()
   const out = []
   for (const r of reservasCliente) {
+    if (r.estado === 'cancelada') continue
     const u = r.unidades
     if (!u) continue
     const key = u.id ?? `${u.tipo}-${u.numero}`
@@ -124,7 +135,7 @@ export default function Clientes() {
     () =>
       [...unidades]
         .sort((a, b) => (GRUPO_UNIDAD_CLIENTES[a.tipo] || a.tipo).localeCompare(GRUPO_UNIDAD_CLIENTES[b.tipo] || b.tipo) || a.numero - b.numero)
-        .map((u) => ({ value: u.id, group: GRUPO_UNIDAD_CLIENTES[u.tipo] || u.tipo, label: `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}` })),
+        .map((u) => ({ value: u.id, group: GRUPO_UNIDAD_CLIENTES[u.tipo] || u.tipo, label: `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}` })),
     [unidades],
   )
   const puedeBonificar = usePermiso('bonificar')
@@ -325,7 +336,7 @@ export default function Clientes() {
         return
       }
     }
-    const unidadLabel = r.unidades ? `${r.unidades.tipo} #${r.unidades.numero}` : 'la unidad'
+    const unidadLabel = r.unidades ? formatUnidad(r.unidades.tipo, r.unidades.numero) : 'la unidad'
     const ok = await confirm(
       `Se va a liberar ${unidadLabel} y desvincular a este cliente de la reserva. La reserva pasa a "cancelada" (no se borra, queda en el historial) y la unidad queda disponible para asignar a otro cliente. ¿Confirmar?`,
       { title: 'Liberar unidad' },
@@ -823,9 +834,17 @@ export default function Clientes() {
                         siempre, sin tocar el mapeo). */}
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-black truncate">{cliente.nombre}</p>
-                      <div className="mt-1 min-h-[18px]">
-                        {d.badgeStatus && <StatusBadge status={d.badgeStatus} />}
-                      </div>
+                      {/* 29/10/2026: el wrapper del badge solo se monta si HAY
+                          badge. Antes iba siempre con `min-h-[18px]`, así que
+                          un cliente sin estado (ej. BEATRIZ AYALA) igual
+                          ocupaba dos renglones y el `items-center` de la fila
+                          centraba el avatar contra el nombre + ese hueco
+                          vacío, dejándolo visualmente desalineado del nombre. */}
+                      {d.badgeStatus && (
+                        <div className="mt-1 min-h-[18px]">
+                          <StatusBadge status={d.badgeStatus} />
+                        </div>
+                      )}
                       {d.comprobanteMatch && (
                         <button
                           type="button"
@@ -870,7 +889,7 @@ export default function Clientes() {
 
                       <div
                         className="flex items-baseline justify-end gap-1 tabular-nums"
-                        title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}
+                        title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}`).join(', ')}
                       >
                         {d.unidadesCliente.length === 0 ? (
                           <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
@@ -1301,7 +1320,7 @@ export default function Clientes() {
                       className="accent-cyan-400 w-4 h-4"
                     />
                     <span className="text-prius-slate">
-                      {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero} ·{' '}
+                      {unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)} ·{' '}
                       {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
                     </span>
                   </label>

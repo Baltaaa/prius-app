@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
-import { unidadEmoji, normalizeText, formatComprobante, formatFechaLarga } from '../../lib/format'
+import { unidadEmoji, normalizeText, formatComprobante, formatFechaLarga, formatUnidad, formatFechasReserva } from '../../lib/format'
 import { parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToPlano, linkToRecepcion } from '../../lib/deepLinks'
@@ -187,6 +187,21 @@ export default function TopBar() {
       })
       .slice(0, 5)
   }, [reservas, term, unidadQuery, activo])
+
+  // Unidad vigente de un cliente para el resultado de búsqueda (29/10/2026):
+  // sale SOLO de una reserva no cancelada, mismo criterio que la ficha de
+  // Clientes — una reserva cancelada no vincula al cliente con ninguna unidad
+  // (ver el fix del caso Beatriz Ayala / carpa 11). Si no tiene reserva
+  // vigente devuelve null y no se renderiza nada.
+  const unidadPorClienteId = useMemo(() => {
+    const map = {}
+    for (const r of reservas) {
+      if (!r.cliente_id || r.estado === 'cancelada' || !r.unidades) continue
+      if (!map[r.cliente_id]) map[r.cliente_id] = r.unidades
+    }
+    return map
+  }, [reservas])
+  const unidadDeCliente = (cliente) => unidadPorClienteId[cliente.id] || null
 
   // [feat-1] unidades por número ("18", "c.19", "sombrilla 14") — antes el
   // search global solo encontraba una unidad indirectamente, si tenía una
@@ -377,6 +392,11 @@ export default function TopBar() {
                           className="w-full text-left px-4 py-2.5 hover:bg-prius-subtle transition-colors"
                         >
                           <p className="text-xs font-bold text-black truncate">{cliente.nombre}</p>
+                          {unidadDeCliente(cliente) && (
+                            <p className="text-[11px] text-prius-muted uppercase truncate">
+                              {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
+                            </p>
+                          )}
                           {cliente.telefono && <p className="text-[11px] text-prius-muted">{cliente.telefono}</p>}
                         </button>
                       ))}
@@ -392,7 +412,7 @@ export default function TopBar() {
                           onClick={() => irAResultado({ tipo: 'unidad', data: u })}
                           className="w-full text-left px-4 py-2.5 hover:bg-prius-subtle transition-colors uppercase text-xs font-bold text-black"
                         >
-                          {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
+                          {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
                         </button>
                       ))}
                     </div>
@@ -410,7 +430,8 @@ export default function TopBar() {
                           <span className="min-w-0">
                             <span className="block text-xs font-bold text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
                             <span className="block text-[11px] text-prius-muted uppercase truncate">
-                              {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}
+                              {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
+                              {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
                             </span>
                           </span>
                           <StatusBadge status={estadoBadgeStatus(reserva)} />
@@ -644,6 +665,11 @@ export default function TopBar() {
                         className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-prius-subtle transition-colors border-b border-hairline"
                       >
                         <p className="text-sm font-bold text-black truncate">{cliente.nombre}</p>
+                        {unidadDeCliente(cliente) && (
+                          <p className="text-xs text-prius-muted uppercase truncate">
+                            {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
+                          </p>
+                        )}
                         {cliente.telefono && <p className="text-xs text-prius-muted">{cliente.telefono}</p>}
                       </button>
                     ))}
@@ -658,7 +684,7 @@ export default function TopBar() {
                         onClick={() => { irAResultado({ tipo: 'unidad', data: u }); setMobileSearchOpen(false) }}
                         className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-prius-subtle transition-colors border-b border-hairline uppercase text-sm font-bold text-black"
                       >
-                        {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
+                        {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
                       </button>
                     ))}
                   </div>
@@ -675,7 +701,8 @@ export default function TopBar() {
                         <span className="min-w-0">
                           <span className="block text-sm font-bold text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
                           <span className="block text-xs text-prius-muted uppercase truncate">
-                            {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}
+                            {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
+                            {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
                           </span>
                         </span>
                         <StatusBadge status={estadoBadgeStatus(reserva)} />

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatFecha, formatRangoFechas, unidadEmoji } from '../../lib/format'
+import { formatFecha, formatRangoFechas, unidadEmoji, formatUnidad} from '../../lib/format'
 import DateInput from '../../components/inputs/DateInput'
 import { coSocios, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
@@ -30,7 +30,7 @@ import { Filter, Check, Globe, MonitorSmartphone, X, ChevronLeft, LayoutList } f
 // confirmación — reservas.codigo no existe en el schema (queda para el
 // sistema de reservas públicas), así que se arma con cliente + unidad.
 const reservaIdentificador = (res) =>
-  `${res.clientes?.nombre || 'S/N'} - ${res.unidades?.tipo || 'unidad'} #${res.unidades?.numero ?? '?'}`
+  `${res.clientes?.nombre || 'S/N'} - ${res.unidades ? formatUnidad(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}`
 
 // Reservas es la COLA OPERATIVA de alquileres acotados en el tiempo (período
 // o día) — llegadas recientes, filtrable por fecha/estado. Los clientes de
@@ -159,7 +159,7 @@ export default function Reservas() {
   const handleCancelarClick = async (res) => {
     if (!(await asegurarDesbloqueada(res))) return
     const ok = await confirm(
-      `¿Cancelar la reserva de ${res.clientes?.nombre || 'S/N'} — ${res.unidades?.tipo || 'unidad'} #${res.unidades?.numero ?? '?'}? La unidad y las fechas quedan libres. Los pagos y el historial no se borran.`,
+      `¿Cancelar la reserva de ${res.clientes?.nombre || 'S/N'} — ${res.unidades ? formatUnidad(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}? La unidad y las fechas quedan libres. Los pagos y el historial no se borran.`,
       { title: 'Cancelar reserva' },
     )
     if (!ok) return
@@ -495,7 +495,7 @@ export default function Reservas() {
             className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 text-gold px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gold/20 transition-all"
             title="Quitar filtro de unidad"
           >
-            {unidadEmoji(unidadFiltrada.tipo)} {unidadFiltrada.tipo} #{unidadFiltrada.numero} <X size={12} />
+            {unidadEmoji(unidadFiltrada.tipo)} {formatUnidad(unidadFiltrada.tipo, unidadFiltrada.numero)} <X size={12} />
           </button>
         )}
         {(desde || hasta) && !rangoFechaInvalido && (
@@ -580,7 +580,7 @@ export default function Reservas() {
                     </p>
                   )}
                 </td>
-                <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
+                <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
                 <td className="px-3 py-4 align-middle font-bold text-black"><MontoReserva reserva={res} /></td>
                 <td className="px-3 py-4 align-middle text-center">
                   <div className="flex items-center justify-center gap-2">
@@ -620,7 +620,7 @@ export default function Reservas() {
                   </p>
                 )}
               </td>
-              <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
+              <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
               <td className="px-3 py-4 align-middle font-bold text-black"><MontoReserva reserva={res} /></td>
               <td className="px-3 py-4 align-middle text-center">
                 <div className="flex items-center justify-center">

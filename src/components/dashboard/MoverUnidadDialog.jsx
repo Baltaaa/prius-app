@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useDialog } from '../../context/DialogProvider'
 import Modal from '../crm/Modal'
 import BrandSelect from '../ui/BrandSelect'
-import { unidadEmoji } from '../../lib/format'
+import { unidadEmoji, formatUnidad} from '../../lib/format'
 
 // Mover un cliente de temporada de una unidad a otra, desde el Plano (ítem 5,
 // oct 2026) — exige la contraseña del superadmin logueado. La validación de
@@ -20,7 +20,7 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
 
   const opciones = useMemo(() => (unidadesLibres || []).filter((u) => u.tipo === unidadOrigen?.type), [unidadesLibres, unidadOrigen])
   const opcionesCombo = useMemo(
-    () => [...opciones].sort((a, b) => a.numero - b.numero).map((u) => ({ value: u.id, label: `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}` })),
+    () => [...opciones].sort((a, b) => a.numero - b.numero).map((u) => ({ value: u.id, label: `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}` })),
     [opciones],
   )
 
@@ -53,7 +53,7 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
       <form onSubmit={handleConfirmar} className="space-y-6">
         <div className="p-4 bg-prius-subtle border border-hairline rounded-xl space-y-2 text-xs">
           <p><span className="text-prius-muted uppercase tracking-widest">Cliente:</span> <span className="text-black font-bold">{reserva.clientes?.nombre || 'S/N'}</span></p>
-          <p><span className="text-prius-muted uppercase tracking-widest">Origen:</span> <span className="text-black">{unidadEmoji(unidadOrigen.type)} {unidadOrigen.type} #{unidadOrigen.number}</span></p>
+          <p><span className="text-prius-muted uppercase tracking-widest">Origen:</span> <span className="text-black">{unidadEmoji(unidadOrigen.type)} {formatUnidad(unidadOrigen.type, unidadOrigen.number)}</span></p>
         </div>
 
         <div className="space-y-2">

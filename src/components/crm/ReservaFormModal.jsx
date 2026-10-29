@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatPesos, formatRangoFechas, formatFecha, unidadEmoji } from '../../lib/format'
+import { formatPesos, formatRangoFechas, formatFecha, unidadEmoji, formatUnidad} from '../../lib/format'
 import { estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
@@ -195,7 +195,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
         .map((u) => ({
           value: u.id,
           group: GRUPO_UNIDAD[u.tipo] || u.tipo,
-          label: `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}${u.id === unidadId && conflictoFechas ? ' (ocupada esas fechas)' : ''}`,
+          label: `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}${u.id === unidadId && conflictoFechas ? ' (ocupada esas fechas)' : ''}`,
         })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [unidadesDisponibles, unidadId, conflictoFechas],

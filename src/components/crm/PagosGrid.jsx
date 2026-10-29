@@ -1,4 +1,4 @@
-import { formatPesosVisible, unidadEmoji, formatComprobante } from '../../lib/format'
+import { formatPesosVisible, unidadEmoji, formatComprobante, formatUnidad} from '../../lib/format'
 import { esPendienteConfirmacion, pagoSinVerificar, saldoNumerico } from '../../lib/reservas'
 import { CreditCard, Hourglass, Gift, Pencil } from 'lucide-react'
 
@@ -36,7 +36,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-[10px] text-prius-muted uppercase tracking-widest">
           <span className="text-cyan-400 font-bold">{reserva.temporada}</span>
-          <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}</span>
+          <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}</span>
         </div>
         <div className="flex items-center gap-2 px-4 py-3 bg-cyan-400/5 border border-dashed border-cyan-400/20 rounded-lg text-xs text-cyan-300">
           <Gift size={14} className="shrink-0" />
@@ -56,7 +56,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-[10px] text-prius-muted uppercase tracking-widest">
           <span className="text-cyan-400 font-bold">{reserva.temporada}</span>
-          <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}</span>
+          <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}</span>
         </div>
         <div className="flex items-center gap-2 px-4 py-3 bg-prius-subtle border border-dashed border-hairline rounded-lg text-xs text-prius-slate">
           <Hourglass size={14} className="text-prius-muted shrink-0" />
@@ -115,7 +115,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
     <div className="space-y-1">
       <div className="flex items-center gap-2 text-[10px] text-prius-muted uppercase tracking-widest">
         <span className="text-cyan-400 font-bold">{reserva.temporada}</span>
-        <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}</span>
+        <span>&bull; {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}</span>
       </div>
       <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))' }}>
           {/* Precio de venta — informativo, no clickeable. Nunca se

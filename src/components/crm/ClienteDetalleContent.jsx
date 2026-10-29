@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus, Receipt, Users, QrCode, CalendarCheck, Unlock } from 'lucide-react'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante } from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante, formatUnidad} from '../../lib/format'
 import { coSocios, esPendienteConfirmacion, estadoBadgeStatus, saldoGrupo, estadoPagoGrupo } from '../../lib/reservas'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
@@ -34,6 +34,8 @@ export default function ClienteDetalleContent({
     comprobanteMatch,
   } = derivado
 
+  const reservasSueltasCobrables = reservasSueltas.filter((r) => r.estado !== 'cancelada')
+
   return (
     <>
       <div className="flex items-start justify-between pb-space-md shrink-0">
@@ -49,7 +51,7 @@ export default function ClienteDetalleContent({
             <p className="text-body-sm text-prius-slate mt-1 truncate">
               {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-prius-muted">Sin teléfono</span>}
               {unidadesCliente.length > 0 && (
-                <> · {unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${u.tipo} #${u.numero}`).join(', ')}</>
+                <> · {unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}`).join(', ')}</>
               )}
             </p>
             {comprobanteMatch && (
@@ -185,7 +187,7 @@ export default function ClienteDetalleContent({
                 <p className="text-label-md text-prius-slate uppercase tracking-wider">Períodos</p>
                 {reservasGrupo.map((r) => (
                   <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-prius-slate">
-                    <span>{unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}</span>
+                    <span>{unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)}</span>
                     <span className="text-prius-muted">
                       {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
                     </span>
@@ -267,7 +269,7 @@ export default function ClienteDetalleContent({
                         {TIPO_LABEL[r.tipo_alquiler] || r.tipo_alquiler}
                       </span>
                       <span className="text-xs text-prius-slate flex items-center gap-1.5">
-                        {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}
+                        {unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)}
                         <span className="text-prius-muted">{fechas}</span>
                       </span>
                       {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase text-[10px]">Cancelada</span>}
@@ -308,14 +310,17 @@ export default function ClienteDetalleContent({
       </div>
 
       <div className="space-y-space-md">
-        {/* Pagos por reserva */}
+        {/* Pagos por reserva — solo las vigentes (29/10/2026): una reserva
+            cancelada no tiene nada para cobrar, mostrarla acá la dejaba como
+            "pendiente"/"sin confirmar" para siempre. Sigue visible arriba en
+            "Reservas (N)" con su chip CANCELADA y en el Historial. */}
         <div>
           <p className="text-label-md text-prius-slate uppercase tracking-wider mb-2">Pagos por Reserva</p>
-          {reservasSueltas.length === 0 ? (
+          {reservasSueltasCobrables.length === 0 ? (
             <p className="text-xs text-prius-muted uppercase tracking-wider">Sin reservas sueltas — nada para cobrar acá (ver pagos del grupo arriba).</p>
           ) : (
             <div className="space-y-4">
-              {reservasSueltas.map((r) => (
+              {reservasSueltasCobrables.map((r) => (
                 <div key={r.id} data-deeplink-id={`reserva-${r.id}`}>
                   <PagosGrid
                     reserva={r}

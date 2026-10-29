@@ -4,7 +4,7 @@ import { useReservas } from '../../hooks/useReservas'
 import { Download, BarChart3 } from 'lucide-react'
 import KpiCard from '../../components/crm/KpiCard'
 import BrandSelect from '../../components/ui/BrandSelect'
-import { formatPesos, unidadEmoji, formatFecha } from '../../lib/format'
+import { formatPesos, unidadEmoji, formatFecha, formatUnidad} from '../../lib/format'
 import { linkToCliente } from '../../lib/deepLinks'
 import { crearDocumentoCsv } from '../../lib/export/csvBuilder'
 import { descargarCsv, nombreArchivoCsv } from '../../lib/export/descargarCsv'
@@ -125,7 +125,7 @@ export default function Reportes() {
             >
               <div className="min-w-0">
                 <p className="font-bold uppercase text-black truncate">{res.clientes?.nombre}</p>
-                <p className="text-xs text-prius-slate uppercase mt-0.5">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</p>
+                <p className="text-xs text-prius-slate uppercase mt-0.5">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</p>
               </div>
               <p className="font-bold text-gold shrink-0">{formatPesos(res.valor_total)}</p>
             </button>
@@ -150,7 +150,7 @@ export default function Reportes() {
                 className="hover:bg-prius-subtle transition-all cursor-pointer"
               >
                 <td className="px-6 py-4 font-bold uppercase text-black">{res.clientes?.nombre}</td>
-                <td className="px-6 py-4 uppercase font-medium">{unidadEmoji(res.unidades?.tipo)} {res.unidades?.tipo} #{res.unidades?.numero}</td>
+                <td className="px-6 py-4 uppercase font-medium">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
                 <td className="px-6 py-4 text-right font-bold text-gold">{formatPesos(res.valor_total)}</td>
               </tr>
             ))}

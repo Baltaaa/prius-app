@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 import { X, Umbrella, Home, MessageSquare } from "lucide-react"
 import ConfirmarSuperadminModal from "../crm/ConfirmarSuperadminModal"
-import { unidadEmoji } from "../../lib/format"
+import { unidadEmoji, formatUnidad} from "../../lib/format"
 
 // Carga rápida de reserva desde el plano (CRM interno, no pasa por Edge Function).
 // Al confirmar devuelve un payload plano; Dashboard.jsx hace el INSERT en reservas
@@ -80,7 +80,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
           : `Del ${fechaInicio} al ${fechaFin}`
     const text =
       `Hola ${clienteNombre || "Cliente"}, te confirmamos tu reserva en Prius Playa Grande:\n\n` +
-      `📍 Unidad: ${unidadEmoji(unit?.type)} ${unit?.type === "sombrilla" ? "Sombrilla" : "Carpa"} #${unit?.number}\n` +
+      `📍 Unidad: ${unidadEmoji(unit?.type)} ${formatUnidad(unit?.type, unit?.number)}\n` +
       `📅 ${detalleFechas}\n` +
       `💳 Estado de Pago: ${pagado ? "PAGADO" : "PENDIENTE"}\n\n` +
       `¡Te esperamos para disfrutar de la mejor experiencia de costa! 🌊☀️`
@@ -103,7 +103,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
         <div className="flex items-center justify-between p-6 border-b border-hairline bg-prius-subtle">
           <h2 className="text-sm font-bold flex items-center gap-2 uppercase tracking-[0.2em] text-gold">
             {unit?.type === "sombrilla" ? <Umbrella size={18} /> : <Home size={18} />}
-            {unidadEmoji(unit?.type)} {unit?.type === "sombrilla" ? "Sombrilla" : "Carpa"} #{unit?.number}
+            {unidadEmoji(unit?.type)} {formatUnidad(unit?.type, unit?.number)}
           </h2>
           <button
             onClick={onClose}
@@ -300,7 +300,7 @@ export default function UnitModal({ unit, clientes = [], onClose, onSave }) {
         onClose={() => setShowLiberarConfirm(false)}
         onConfirm={handleConfirmLiberar}
         titulo="Eliminar reserva"
-        afectaLinea={`Reserva de ${unit?.clientName || 'S/N'} · ${unidadEmoji(unit?.type)} ${unit?.type === "sombrilla" ? "la sombrilla" : "la carpa"} #${unit?.number} y sus pagos asociados. No se puede deshacer.`}
+        afectaLinea={`Reserva de ${unit?.clientName || 'S/N'} · ${unidadEmoji(unit?.type)} ${formatUnidad(unit?.type, unit?.number)} y sus pagos asociados. No se puede deshacer.`}
         confirmLabel="Eliminar definitivamente"
       />
     </>,

@@ -106,7 +106,7 @@ export default function AppLayout() {
                 de `lg:`). */}
             <main
               id="app-main-scroll"
-              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 py-4 md:py-8 w-full pb-bottom-nav-safe md:pb-12 bg-prius-background ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
+              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 w-full pb-bottom-nav-safe bg-prius-background ${esPlano ? 'py-4 md:py-3 md:pb-3' : 'py-4 md:py-8 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
             >
               {/* h1 accesible oculto visualmente — el título visible de
                   sección se sacó (item 4), pero un lector de pantalla sigue
@@ -121,7 +121,7 @@ export default function AppLayout() {
                   (abajo de eso, mobile y tablet lo siguen viendo igual que
                   siempre). En el resto de las secciones no se toca. */}
               <div className={`no-print ${esSeccionAlturaFija ? 'lg:hidden' : ''}`}>
-                <AppFooter />
+                <AppFooter compacto={esPlano} />
               </div>
             </main>
           </div>

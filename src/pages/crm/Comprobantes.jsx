@@ -89,7 +89,7 @@ export default function Comprobantes() {
   const opcionesReserva = useMemo(
     () => reservasConPagos.map((r) => ({
       value: r.id,
-      label: `${r.clientes?.nombre || 'S/N'} — ${UNIDAD_LABEL[r.unidades?.tipo] || r.unidades?.tipo} #${r.unidades?.numero} — DNI/CUIT ${r.clientes?.dni || r.clientes?.cuit || 's/d'} — ${numeroComprobante(r)}`,
+      label: `${r.clientes?.nombre || 'S/N'} — ${UNIDAD_LABEL[r.unidades?.tipo] || r.unidades?.tipo} ${r.unidades?.numero} — DNI/CUIT ${r.clientes?.dni || r.clientes?.cuit || 's/d'} — ${numeroComprobante(r)}`,
     })),
     [reservasConPagos],
   )

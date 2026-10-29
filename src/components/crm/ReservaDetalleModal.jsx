@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { usePagos } from '../../hooks/usePagos'
-import { formatPesos, formatFecha, unidadEmoji } from '../../lib/format'
+import { formatPesos, formatFecha, unidadEmoji, formatUnidad} from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { coSocios, pagoSinVerificar, estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToComprobante } from '../../lib/deepLinks'
@@ -57,7 +57,7 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</p>
-            <p className="text-sm text-black mt-1 uppercase">{unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero}</p>
+            <p className="text-sm text-black mt-1 uppercase">{unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}</p>
           </div>
           <div>
             <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Tipo de alquiler</p>

@@ -8,7 +8,7 @@ import { useDialog } from '../context/DialogProvider'
 import { usePermiso } from '../context/AuthProvider'
 import { reservaActiva, estadoBadgeStatus, coSocios } from '../lib/reservas'
 import { normalizarCodigoReserva, codigoReservaValido } from '../lib/parse'
-import { formatPesos, formatPesosVisible, formatFecha, formatFechaHora, formatRangoFechas, formatTelefono, unidadEmoji } from '../lib/format'
+import { formatPesos, formatPesosVisible, formatFecha, formatFechaHora, formatRangoFechas, formatTelefono, unidadEmoji, formatUnidad} from '../lib/format'
 import { MEDIO_PAGO_LABEL, ERROR_CAJA_CERRADA } from '../lib/pagos'
 import { linkToComprobante } from '../lib/deepLinks'
 import StatusBadge from '../components/crm/StatusBadge'
@@ -180,7 +180,7 @@ export default function Recepcion() {
       })
       if (!data.ok) { setErrorCobro(data); return }
       setExito({
-        unidadesLabel: reservasGrupo.map((r) => `${unidadEmoji(r.unidades?.tipo)} ${r.unidades?.tipo} #${r.unidades?.numero}`).join(' + '),
+        unidadesLabel: reservasGrupo.map((r) => `${unidadEmoji(r.unidades?.tipo)} ${formatUnidad(r.unidades?.tipo, r.unidades?.numero)}`).join(' + '),
         total: data.total_cobrado,
         pagos: data.pagos,
       })
@@ -283,7 +283,7 @@ export default function Recepcion() {
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-black uppercase truncate">{item.titular}</p>
                       <p className="text-[10px] text-prius-muted uppercase tracking-widest">
-                        {item.codigo} · {item.reservas.map((r) => `${unidadEmoji(r.unidades?.tipo)} #${r.unidades?.numero}`).join(' ')}
+                        {item.codigo} · {item.reservas.map((r) => `${unidadEmoji(r.unidades?.tipo)} ${r.unidades?.numero}`).join(' ')}
                       </p>
                     </div>
                     {item.saldo > 0 && <span className="shrink-0 text-xs font-bold text-prius-error">{formatPesos(item.saldo)}</span>}
@@ -347,7 +347,7 @@ export default function Recepcion() {
               <div className="flex flex-wrap items-center gap-2">
                 {reservasGrupo.map((r) => (
                   <span key={r.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-prius-subtle border border-hairline rounded-lg text-xs text-black">
-                    {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}
+                    {unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)}
                   </span>
                 ))}
               </div>

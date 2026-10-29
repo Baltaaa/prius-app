@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useData } from '../../context/DataProvider'
-import { unidadEmoji, formatFecha, formatRangoFechas, formatMesAnio, formatPorcentaje } from '../../lib/format'
+import { unidadEmoji, formatFecha, formatRangoFechas, formatMesAnio, formatPorcentaje, formatUnidad} from '../../lib/format'
 import { COLOR_TIPO_ALQUILER, colorReserva } from '../../lib/colors'
 import { linkToPlano } from '../../lib/deepLinks'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
@@ -356,7 +356,7 @@ export default function Ocupacion() {
                   return (
                     <div key={u.id} className="flex items-stretch hover:bg-prius-subtle transition-all">
                       <div className="w-36 shrink-0 px-4 py-2.5 flex items-center gap-1.5 text-xs font-bold text-prius-slate uppercase">
-                        {unidadEmoji(u.tipo)} {u.tipo} #{u.numero}
+                        {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
                       </div>
                       <div className="flex-1 relative h-9 my-auto">
                         {marcas.map((m) => (

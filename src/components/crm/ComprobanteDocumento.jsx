@@ -111,7 +111,7 @@ export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', co
           <p className="cd-label">Detalle del Alquiler</p>
           <p className="cd-value">
             {UnidadIcon && <UnidadIcon size={13} className="cd-unidad-icon" />}
-            {unidadLabel} #{datos.unidad.numero}
+            {unidadLabel} {datos.unidad.numero}
           </p>
           <p className="cd-detail">
             Temporada: {datos.temporada}<br />

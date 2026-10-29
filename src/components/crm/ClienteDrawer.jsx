@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Wallet, CalendarPlus, ArrowRight, Phone, Mail } from 'lucide-react'
 import { useData } from '../../context/DataProvider'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesosVisible, formatTelefono, unidadEmoji } from '../../lib/format'
+import { formatPesosVisible, formatTelefono, unidadEmoji, formatUnidad} from '../../lib/format'
 import { saldoNumerico, estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente } from '../../lib/deepLinks'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
@@ -99,7 +99,7 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
                     <div key={r.id} className="p-3 bg-prius-subtle border border-hairline rounded-xl flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-black uppercase truncate">
-                          {unidadEmoji(r.unidades?.tipo)} {r.unidades?.tipo} #{r.unidades?.numero}
+                          {unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)}
                         </p>
                         <StatusBadge status={estadoBadgeStatus(r)} />
                       </div>

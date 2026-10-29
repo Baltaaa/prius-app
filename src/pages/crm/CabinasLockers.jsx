@@ -98,7 +98,7 @@ export default function CabinasLockers() {
             )}
             <div className="flex items-center gap-2">
               {item.tipo === 'cabina' ? <DoorClosed size={16} className="text-prius-slate" /> : <Lock size={16} className="text-prius-slate" />}
-              <p className="font-bold text-black uppercase text-sm">{TIPO_LABEL[item.tipo]} #{item.numero}</p>
+              <p className="font-bold text-black uppercase text-sm">{TIPO_LABEL[item.tipo]} {item.numero}</p>
             </div>
             <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase border ${
               item.estado === 'libre'

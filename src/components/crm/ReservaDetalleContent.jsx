@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Wallet, Receipt, Edit2, XCircle, Trash2, QrCode, Globe, MonitorSmartphone, Users, ShieldAlert } from 'lucide-react'
 import { usePagos } from '../../hooks/usePagos'
 import { coSocios, estadoBadgeStatus, saldoNumerico, pagoSinVerificar } from '../../lib/reservas'
-import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, unidadEmoji } from '../../lib/format'
+import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, unidadEmoji, formatUnidad} from '../../lib/format'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { usePermiso } from '../../context/AuthProvider'
 import StatusBadge from './StatusBadge'
@@ -46,7 +46,7 @@ export default function ReservaDetalleContent({
             <StatusBadge status={estadoBadgeStatus(reserva)} />
           </div>
           <p className="text-body-sm text-prius-slate mt-1">
-            {unidadEmoji(reserva.unidades?.tipo)} {reserva.unidades?.tipo} #{reserva.unidades?.numero} · {TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}
+            {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)} · {TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}
           </p>
         </div>
         {showCloseButton && (
