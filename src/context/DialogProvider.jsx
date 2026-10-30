@@ -26,11 +26,21 @@ export function DialogProvider({ children }) {
   // para que un guardado exitoso y un error se distingan de un vistazo sin
   // tener que leer el texto. Sigue siendo el único sistema de toast de la
   // app (no se suma sonner/shadcn ni un segundo mecanismo en paralelo).
+  // `action` (30/10/2026, punto 8): { label, onClick } opcional — un toast
+  // accionable, para avisos donde además hay algo para hacer (ej. "reserva
+  // escaneada desde el celular" -> "Abrir en Recepción"). Dura más que un
+  // toast normal, porque hay que llegar a clickearlo.
   const toast = useCallback((message, opts = {}) => {
     const id = ++toastIdRef.current
     const tone = opts.tone || 'info'
-    setToasts((prev) => [...prev, { id, message, tone }])
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), tone === 'error' ? 6000 : 4000)
+    const action = opts.action || null
+    setToasts((prev) => [...prev, { id, message, tone, action }])
+    const ms = action ? 10000 : tone === 'error' ? 6000 : 4000
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), ms)
+  }, [])
+
+  const cerrarToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
   const confirm = useCallback((message, opts = {}) => {
@@ -87,7 +97,16 @@ export function DialogProvider({ children }) {
             >
               {t.tone === 'success' && <CheckCircle2 size={16} className="shrink-0 mt-0.5" />}
               {t.tone === 'error' && <AlertTriangle size={16} className="shrink-0 mt-0.5" />}
-              <span className="text-black">{t.message}</span>
+              <span className="text-black flex-1 min-w-0">{t.message}</span>
+              {t.action && (
+                <button
+                  type="button"
+                  onClick={() => { t.action.onClick?.(); cerrarToast(t.id) }}
+                  className="shrink-0 self-center px-2.5 py-1 rounded-lg bg-gold hover:bg-gold-hover text-black text-[11px] font-bold uppercase tracking-wider transition-colors"
+                >
+                  {t.action.label}
+                </button>
+              )}
             </div>
           ))}
         </div>,

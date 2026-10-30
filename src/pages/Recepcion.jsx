@@ -161,6 +161,17 @@ export default function Recepcion() {
   const handleScan = (texto) => {
     setScannerOpen(false)
     cargarCodigo(texto)
+    // Punto 8 (30/10/2026): además de abrirla acá, se avisa al resto de los
+    // dispositivos del MISMO usuario (típico: se escanea con el celular y la
+    // compu, que está en Recepción, abre la reserva sola). RLS limita la
+    // tabla al propio user_id, así que esto nunca cruza cuentas.
+    // Best-effort: si falla, el escaneo local ya funcionó igual.
+    supabase
+      .from('recepcion_eventos')
+      .insert({ codigo: String(texto || '').trim() || null, tipo: 'qr_scan' })
+      .then(({ error }) => {
+        if (error) console.warn('No se pudo avisar a los otros dispositivos:', error.message)
+      })
   }
 
   const volverAlInicio = () => {

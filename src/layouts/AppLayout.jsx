@@ -10,11 +10,20 @@ import { NotificacionesProvider } from '../context/NotificacionesProvider'
 import { NuevaReservaProvider } from '../context/NuevaReservaProvider'
 import { OverlayProvider } from '../context/OverlayProvider'
 import { useInactivityLogout } from '../hooks/useInactivityLogout'
+import { useRecepcionRemota } from '../hooks/useRecepcionRemota'
 import { useSection } from '../lib/sectionTitles'
 
 // Mobile-first (sept 2026): el Sidebar con drawer quedó solo para desktop —
 // en mobile la navegación completa vive en BottomNav (5 ítems + "Más"), así
 // que no hace falta abrir/cerrar nada acá arriba.
+// El hook usa useDialog() y useAuth(), así que tiene que vivir DENTRO de los
+// providers — por eso este componente intermedio en vez de llamarlo en
+// AppLayout directo. No renderiza nada.
+function PuenteRecepcionRemota() {
+  useRecepcionRemota()
+  return null
+}
+
 export default function AppLayout() {
   // Tarea 3 (oct 2026): única instancia del hook de inactividad, montada
   // acá porque este layout solo se renderiza para el CRM autenticado.
@@ -58,6 +67,7 @@ export default function AppLayout() {
       <DataProvider>
         <NotificacionesProvider>
         <NuevaReservaProvider>
+        <PuenteRecepcionRemota />
         <InactivityWarningModal
           open={warning}
           secondsLeft={secondsLeft}
