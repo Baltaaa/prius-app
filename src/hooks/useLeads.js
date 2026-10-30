@@ -22,16 +22,7 @@ export function useLeads() {
   }
 }
 
-// Normaliza un teléfono argentino a link wa.me (formato internacional 549...).
-// Heurística pragmática: descarta prefijos 0 / 54 / 9 y el 15 de celular local.
-// Devuelve null si no hay dígitos suficientes.
-export function waLink(telefono) {
-  let d = String(telefono || '').replace(/\D/g, '')
-  if (!d) return null
-  if (d.startsWith('54')) d = d.slice(2)
-  if (d.startsWith('9')) d = d.slice(1)
-  if (d.startsWith('0')) d = d.slice(1)
-  d = d.replace(/^(\d{2,4})15(\d{6,8})$/, '$1$2')
-  if (d.length < 8) return null
-  return `https://wa.me/549${d}`
-}
+// `waLink` vive ahora en src/lib/telefono.ts (libphonenumber-js, un solo
+// normalizador para toda la app). Se re-exporta desde acá nada más para no
+// romper imports viejos; los call sites nuevos deberían importarlo de ahí.
+export { waLink } from '../lib/telefono'

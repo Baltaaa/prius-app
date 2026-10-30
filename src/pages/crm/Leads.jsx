@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
-import { useLeads, waLink } from '../../hooks/useLeads'
+import { useLeads } from '../../hooks/useLeads'
+import { normalizarTelefonoAR, waLink } from '../../lib/telefono'
 import { formatFechaHora } from '../../lib/format'
 import { usePermiso } from '../../context/AuthProvider'
 import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
@@ -63,7 +64,9 @@ export default function Leads() {
   }, [leads, filtro])
 
   const contactar = (lead) => {
-    const url = waLink(lead.telefono)
+    const url = lead.telefono_normalizado
+      ? `https://wa.me/${lead.telefono_normalizado.replace('+', '')}`
+      : waLink(lead.telefono)
     if (url) window.open(url, '_blank', 'noopener,noreferrer')
     if ((lead.estado || 'nuevo') === 'nuevo') {
       updateLead(lead.id, { estado: 'contactado' }).catch(() => {})
@@ -121,7 +124,13 @@ export default function Leads() {
         {visibles.map((lead) => {
           const estado = lead.estado || 'nuevo'
           const meta = ESTADO_META[estado] || ESTADO_META.nuevo
-          const wa = waLink(lead.telefono)
+          // Punto 5 (30/10/2026): se prioriza `telefono_normalizado` (E.164
+          // calculado al dar de alta el lead + backfill). Si está en null el
+          // número quedó "a revisar" y el botón de WhatsApp no se habilita.
+          const tel = normalizarTelefonoAR(lead.telefono)
+          const e164 = lead.telefono_normalizado || tel.e164
+          const wa = e164 ? `https://wa.me/${e164.replace('+', '')}` : null
+          const telMostrado = tel.valido ? tel.display : lead.telefono
           return (
             <div
               key={lead.id}
@@ -152,7 +161,12 @@ export default function Leads() {
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 text-xs text-prius-slate">
                 <span className="inline-flex items-center gap-1.5 break-all">
-                  <Phone size={12} className="text-prius-muted shrink-0" /> {lead.telefono}
+                  <Phone size={12} className="text-prius-muted shrink-0" /> {telMostrado}
+                  {!wa && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-gold/15 text-[9px] font-bold uppercase tracking-wider text-black shrink-0">
+                      A revisar
+                    </span>
+                  )}
                 </span>
                 <a href={`mailto:${lead.email}`} className="inline-flex items-center gap-1.5 hover:text-black break-all">
                   <Mail size={12} className="text-prius-muted shrink-0" /> {lead.email}
@@ -163,10 +177,11 @@ export default function Leads() {
                 <button
                   onClick={() => contactar(lead)}
                   disabled={!wa}
+                  title={wa ? 'Contactar por WhatsApp' : 'Número a revisar'}
                   className="inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-xl text-xs font-bold bg-green-500 text-white hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
                 >
                   <WhatsAppIcon size={14} />
-                  {wa ? 'Contactar por WhatsApp' : 'Teléfono inválido'}
+                  {wa ? 'Contactar por WhatsApp' : 'Número a revisar'}
                 </button>
 
                 <div className="flex gap-2">
