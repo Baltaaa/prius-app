@@ -11,7 +11,7 @@ export default function StatusBadge({ status }) {
     },
     parcial: {
       bg: 'bg-amber-50 text-amber-700 border-amber-200',
-      label: 'Seña parcial'
+      label: 'Pago parcial'
     },
     pendiente: {
       bg: 'bg-red-50 text-red-700 border-red-200',

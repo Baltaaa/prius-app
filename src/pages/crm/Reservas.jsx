@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
+import ScrollFade from '../../components/ui/ScrollFade'
 import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
@@ -420,7 +421,7 @@ export default function Reservas() {
         <div className="flex items-center gap-1">
           <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-44" />
           {desde && (
-            <button type="button" onClick={() => setDesde('')} className="p-2 text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada desde'">
+            <button type="button" onClick={() => setDesde('')} aria-label="Limpiar 'Llegada desde'" className="shrink-0 w-11 h-11 flex items-center justify-center text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada desde'">
               <X size={14} />
             </button>
           )}
@@ -428,7 +429,7 @@ export default function Reservas() {
         <div className="flex items-center gap-1">
           <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-44" />
           {hasta && (
-            <button type="button" onClick={() => setHasta('')} className="p-2 text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada hasta'">
+            <button type="button" onClick={() => setHasta('')} aria-label="Limpiar 'Llegada hasta'" className="shrink-0 w-11 h-11 flex items-center justify-center text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada hasta'">
               <X size={14} />
             </button>
           )}
@@ -755,7 +756,7 @@ export default function Reservas() {
             </button>
             <h1 className="text-sm font-bold uppercase tracking-widest text-black">Detalle Reserva</h1>
           </div>
-          <div className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
+          <ScrollFade className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
             <ReservaDetalleContent
               reserva={mobileDetalleReserva}
               fechaLlegada={fechaLlegada}
@@ -767,7 +768,7 @@ export default function Reservas() {
               onCellClick={(res, pago) => setPagoDetalle({ reserva: res, pago })}
               showCloseButton={false}
             />
-          </div>
+          </ScrollFade>
         </div>,
         document.body,
       )}

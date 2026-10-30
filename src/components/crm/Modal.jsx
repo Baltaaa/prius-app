@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useDialog } from '../../context/DialogProvider'
 import { useMountTransition } from '../../hooks/useMountTransition'
+import ScrollFade from '../ui/ScrollFade'
 
 // Se monta en un portal sobre document.body: las páginas del CRM viven dentro
 // de contenedores con `transform` (animate-premium-fade), y un `position: fixed`
@@ -79,9 +80,9 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain p-6 sm:p-8 space-y-6">
+        <ScrollFade className="flex-1 overflow-y-auto overscroll-contain p-6 sm:p-8 space-y-6">
           {children}
-        </div>
+        </ScrollFade>
 
         {/* Footer sticky (pulido mobile iPhone, oct 2026): safe-area-inset-bottom
             para que el botón de confirmar nunca quede tapado por la barra de

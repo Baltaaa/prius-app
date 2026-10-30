@@ -64,8 +64,15 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
     <Modal isOpen={isOpen} onClose={onClose} title="Cosocios" maxWidthClass="sm:max-w-sm">
       <div className="space-y-2">
         <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Titular</p>
-        <div className="px-3 py-2.5 bg-prius-subtle border border-hairline rounded-xl text-sm font-semibold text-black">
-          {reserva.clientes?.nombre || 'S/N'}
+        {/* 30/10/2026: el titular no se puede editar desde acá, así que dejó
+            de mostrarse en una caja con pinta de input (confundía: parecía
+            editable). Ahora es un bloque de solo lectura con avatar de
+            iniciales, mismo lenguaje visual que las cards de Clientes. */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
+            {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
+          </div>
+          <span className="font-bold text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
         </div>
       </div>
 

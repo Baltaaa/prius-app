@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
+import ScrollFade from '../../components/ui/ScrollFade'
 import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useClientes } from '../../hooks/useClientes'
@@ -90,7 +91,7 @@ const MAX_UNIDADES_VISIBLES = 3
 const FILTROS_ESTADO_CLIENTE = [
   { value: 'todos', label: 'Todos' },
   { value: 'pagado', label: 'Pagado' },
-  { value: 'parcial', label: 'Seña parcial' },
+  { value: 'parcial', label: 'Pago parcial' },
   { value: 'pendiente', label: 'Sin pago' },
   { value: 'pendiente_confirmacion', label: 'Sin confirmar' },
   { value: 'bonificada', label: 'Bonificada' },
@@ -778,7 +779,7 @@ export default function Clientes() {
             lg:overflow-y-auto` (mini-prompt 26/10/2026): la lista scrollea
             adentro de su propia caja en vez de empujar la altura de la
             página. */}
-        <div className={isDesktopLG ? 'flex-1 min-w-[280px] max-w-[480px] shrink lg:h-full lg:overflow-y-auto' : 'w-full'}>
+        <ScrollFade className={isDesktopLG ? 'flex-1 min-w-[280px] max-w-[480px] shrink lg:h-full lg:overflow-y-auto' : 'w-full'}>
           {clientesVisibles.length === 0 ? (
             <div className="p-12 text-center text-sm tracking-wider text-prius-muted bg-white border border-hairline rounded-xl">
               No se encontraron clientes.
@@ -916,7 +917,7 @@ export default function Clientes() {
               })}
             </div>
           )}
-        </div>
+        </ScrollFade>
 
         {/* Panel fijo — solo ≥1024px. Altura SIEMPRE igual a la de la lista
             (mini-prompt 26/10/2026): ya no es sticky ni calcula su propio
@@ -1003,7 +1004,7 @@ export default function Clientes() {
             </button>
             <h1 className="text-sm font-bold uppercase tracking-widest text-black">Ficha de Cliente</h1>
           </div>
-          <div className="flex-1 overflow-y-auto px-space-lg pt-space-md pb-space-lg flex flex-col min-h-0">
+          <ScrollFade className="flex-1 overflow-y-auto px-space-lg pt-space-md pb-space-lg flex flex-col min-h-0">
             {mobileDetalleCliente && (
               <ClienteDetalleContent
                 cliente={mobileDetalleCliente}
@@ -1025,7 +1026,7 @@ export default function Clientes() {
                 showCloseButton={false}
               />
             )}
-          </div>
+          </ScrollFade>
         </div>,
         document.body,
       )}

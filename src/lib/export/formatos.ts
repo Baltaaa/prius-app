@@ -36,7 +36,7 @@ export function formatMontoCsv(n: number | null | undefined): string {
 
 const ESTADO_PAGO_LABEL: Record<string, string> = {
   pendiente: 'Sin pago',
-  parcial: 'Seña parcial',
+  parcial: 'Pago parcial',
   pagado: 'Pagado',
   pendiente_confirmacion: 'Sin confirmar',
 }

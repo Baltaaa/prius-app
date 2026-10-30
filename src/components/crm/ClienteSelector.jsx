@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { UserPlus, X } from 'lucide-react'
 import { useData } from '../../context/DataProvider'
 import { normalizeText } from '../../lib/format'
@@ -6,6 +7,7 @@ import { validarClienteForm } from '../../lib/validators/cliente'
 import TextInput from '../inputs/TextInput'
 import PhoneInput from '../inputs/PhoneInput'
 import DniInput from '../inputs/DniInput'
+import ScrollFade from '../ui/ScrollFade'
 import CuitInput from '../inputs/CuitInput'
 
 // Combobox de cliente + alta inline ("Crear cliente nuevo") — componente
@@ -19,6 +21,13 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
   const { clientes, createCliente } = useData()
   const [inputValue, setInputValue] = useState(() => clientes.find((c) => c.id === value)?.nombre || '')
   const [showDropdown, setShowDropdown] = useState(false)
+  // 30/10/2026: el panel se renderiza en un portal a document.body con
+  // position:fixed (mismo patrón que BrandSelect.tsx y DateInput.tsx). Antes
+  // era `absolute` dentro del wrapper `relative`, así que adentro de un modal
+  // (Modal.jsx, body con overflow-y-auto) quedaba recortado y no se veía —
+  // bug real en el modal de Cosocios, que es bajo.
+  const anchorRef = useRef(null)
+  const [coords, setCoords] = useState(null)
   const [showNuevo, setShowNuevo] = useState(false)
   const [nombre, setNombre] = useState('')
   const [telefono, setTelefono] = useState(null)
@@ -34,6 +43,32 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
     const lista = term ? clientes.filter((c) => normalizeText(c.nombre).includes(term)) : clientes
     return lista.slice(0, 8)
   }, [clientes, inputValue])
+
+  const PANEL_MAX_H = 288 // 16rem de lista + la fila "Crear cliente nuevo"
+  const computePosition = useCallback(() => {
+    const rect = anchorRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const alto = Math.min(PANEL_MAX_H, (clientesFiltrados.length || 1) * 42 + 48)
+    const espacioAbajo = window.innerHeight - rect.bottom
+    const abrirArriba = espacioAbajo < alto && rect.top > alto
+    setCoords({
+      top: abrirArriba ? rect.top - alto - 8 : rect.bottom + 8,
+      left: rect.left,
+      width: rect.width,
+      maxHeight: abrirArriba ? Math.min(alto, rect.top - 16) : Math.min(alto, espacioAbajo - 16),
+    })
+  }, [clientesFiltrados.length])
+
+  useEffect(() => {
+    if (!showDropdown) return
+    computePosition()
+    window.addEventListener('resize', computePosition)
+    window.addEventListener('scroll', computePosition, true)
+    return () => {
+      window.removeEventListener('resize', computePosition)
+      window.removeEventListener('scroll', computePosition, true)
+    }
+  }, [showDropdown, computePosition])
 
   const errors = validarClienteForm({ nombre, telefono, condicionIva: 'consumidor_final', cuit: '', dni, mail })
   if (cuit && cuit.length === 11) {
@@ -117,7 +152,7 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={anchorRef}>
       <input
         type="text"
         autoFocus={autoFocus}
@@ -135,14 +170,19 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
         }}
         className="w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-gold/50 outline-none uppercase font-bold"
       />
-      {showDropdown && (
+      {showDropdown && coords && createPortal(
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+          <div className="fixed inset-0 z-[1000]" onClick={() => setShowDropdown(false)} />
           {/* bg-white opaco a propósito, no card-light: este panel flota
               encima de contenido (ej. Temporada/Monto total/Asignar unidad
               en AsignarUnidadModal) y card-light es semi-transparente por
-              diseño — tapaba mal lo que había detrás (bug reportado). */}
-          <div className="absolute left-0 right-0 mt-2 bg-white border border-hairline rounded-xl overflow-hidden z-50 max-h-64 overflow-y-auto shadow-2xl">
+              diseño — tapaba mal lo que había detrás (bug reportado).
+              z-[1001] > z-[999] de Modal.jsx: nunca queda detrás del modal. */}
+          <ScrollFade
+            as="div"
+            style={{ position: 'fixed', top: coords.top, left: coords.left, width: coords.width, maxHeight: coords.maxHeight }}
+            className="bg-white border border-hairline rounded-xl overflow-y-auto z-[1001] shadow-2xl"
+          >
             {clientesFiltrados.length === 0 ? (
               <p className="px-4 py-3 text-xs text-prius-muted uppercase tracking-widest">Sin resultados</p>
             ) : (
@@ -171,8 +211,9 @@ export default function ClienteSelector({ value, onChange, autoFocus }) {
             >
               <UserPlus size={14} /> Crear cliente nuevo
             </button>
-          </div>
-        </>
+          </ScrollFade>
+        </>,
+        document.body,
       )}
     </div>
   )

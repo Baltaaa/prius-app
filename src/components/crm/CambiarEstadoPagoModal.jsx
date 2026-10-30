@@ -10,7 +10,7 @@ import { useDialog } from '../../context/DialogProvider'
 
 const OPCIONES_ESTADO = [
   { value: 'pendiente', label: 'Sin pago' },
-  { value: 'parcial', label: 'Seña parcial' },
+  { value: 'parcial', label: 'Pago parcial' },
   { value: 'pagado', label: 'Pagado' },
   { value: 'pendiente_confirmacion', label: 'Sin confirmar' },
 ]

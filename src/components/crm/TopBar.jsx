@@ -27,6 +27,7 @@ import {
 // 20261018082719_modo_incognito_perfiles.sql.
 const USER_ID_MODO_INCOGNITO = 'ccae0faf-3b4c-402b-902e-b0cd3c5dc1e8'
 import StatusBadge from './StatusBadge'
+import ScrollFade from '../ui/ScrollFade'
 import { useSection } from '../../lib/sectionTitles'
 
 const normalize = normalizeText
@@ -386,7 +387,7 @@ export default function TopBar() {
         />
 
         {showDropdown && (
-            <div className="absolute left-0 right-0 mt-2 popover-light rounded-xl overflow-hidden z-50 max-h-96 overflow-y-auto ui-open">
+            <ScrollFade className="absolute left-0 right-0 mt-2 popover-light rounded-xl z-50 max-h-96 overflow-y-auto ui-open">
               {!activo ? (
                 <p className="px-4 py-6 text-center text-xs text-prius-muted">Seguí escribiendo (mínimo 2 caracteres)...</p>
               ) : resultadosFlat.length === 0 ? (
@@ -467,7 +468,7 @@ export default function TopBar() {
                   )}
                 </>
               )}
-            </div>
+            </ScrollFade>
         )}
         </div>
       </div>
@@ -657,7 +658,7 @@ export default function TopBar() {
               <X size={20} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <ScrollFade className="flex-1 overflow-y-auto">
             {!showDropdown ? (
               <p className="px-6 py-8 text-center text-xs text-prius-muted">Escribí para buscar un cliente, una reserva o una unidad (ej. "carpa 19").</p>
             ) : !activo ? (
@@ -737,7 +738,7 @@ export default function TopBar() {
                 )}
               </>
             )}
-          </div>
+          </ScrollFade>
         </div>,
         document.body,
       )}
