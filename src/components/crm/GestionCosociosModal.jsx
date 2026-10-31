@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatNombre } from '../../lib/format'
 import { Trash2, UserPlus } from 'lucide-react'
 import Modal from './Modal'
 import ConfirmarSuperadminModal from './ConfirmarSuperadminModal'
@@ -47,7 +48,7 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
 
   const handleQuitarClick = async (cliente) => {
     if (tienePagos(cliente.id)) {
-      await alert(`${cliente.nombre} ya tiene pagos registrados en esta reserva — no se puede quitar.`, { title: 'No se puede quitar' })
+      await alert(`${formatNombre(cliente.nombre)} ya tiene pagos registrados en esta reserva — no se puede quitar.`, { title: 'No se puede quitar' })
       return
     }
     setCosocioAQuitar(cliente)
@@ -72,7 +73,7 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
           <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
             {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
           </div>
-          <span className="font-bold text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
+          <span className="font-bold text-black truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
         </div>
       </div>
 

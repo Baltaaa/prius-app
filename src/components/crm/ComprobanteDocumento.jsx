@@ -1,5 +1,5 @@
 import { Tent, Umbrella, Warehouse, Lock as LockIcon } from 'lucide-react'
-import { formatFecha, formatFechaHora, formatPesos } from '../../lib/format'
+import { formatFecha, formatFechaHora, formatPesos, formatNombre} from '../../lib/format'
 
 const TIPO_ALQUILER_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 const UNIDAD_ICON = { carpa: Tent, sombrilla: Umbrella, cabina: Warehouse, locker: LockIcon }
@@ -105,7 +105,7 @@ export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', co
       <div className="cd-grid">
         <div>
           <p className="cd-label">Datos del Titular</p>
-          <p className="cd-value">{datos.cliente.nombre || 'S/N'}</p>
+          <p className="cd-value">{formatNombre(datos.cliente.nombre) || 'S/N'}</p>
         </div>
         <div>
           <p className="cd-label">Detalle del Alquiler</p>

@@ -1,4 +1,4 @@
-import { formatPesosVisible, unidadEmoji, formatComprobante, formatUnidad} from '../../lib/format'
+import { formatPesosVisible, unidadEmoji, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
 import { esPendienteConfirmacion, pagoSinVerificar, saldoNumerico } from '../../lib/reservas'
 import { CreditCard, Hourglass, Gift, Pencil } from 'lucide-react'
 
@@ -191,7 +191,7 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
                     cargar pagos distintos de la misma reserva compartida. */}
                 {pago.clientes?.nombre && (
                   <span className="text-[8px] text-prius-muted normal-case tracking-normal truncate max-w-full">
-                    {pago.clientes.nombre}
+                    {formatNombre(pago.clientes.nombre)}
                   </span>
                 )}
                 {pago.medio === 'tarjeta_credito' && pago.cuotas_tarjeta && (

@@ -7,7 +7,7 @@ import { useDialog } from '../../context/DialogProvider'
 import { useData } from '../../context/DataProvider'
 import { usePreferenciaUsuario } from '../../hooks/usePreferenciaUsuario'
 import { isFeatureEnabled } from '../../lib/features'
-import { formatFecha, formatPesos, formatComprobante } from '../../lib/format'
+import { formatFecha, formatPesos, formatComprobante, formatNombre} from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { pagoSinVerificar, tieneAlgunPagoReal } from '../../lib/reservas'
 import { numeroComprobante, armarDatosComprobante, validarComprobante } from '../../lib/comprobante'
@@ -89,7 +89,7 @@ export default function Comprobantes() {
   const opcionesReserva = useMemo(
     () => reservasConPagos.map((r) => ({
       value: r.id,
-      label: `${r.clientes?.nombre || 'S/N'} — ${UNIDAD_LABEL[r.unidades?.tipo] || r.unidades?.tipo} ${r.unidades?.numero} — DNI/CUIT ${r.clientes?.dni || r.clientes?.cuit || 's/d'} — ${numeroComprobante(r)}`,
+      label: `${formatNombre(r.clientes?.nombre) || 'S/N'} — ${UNIDAD_LABEL[r.unidades?.tipo] || r.unidades?.tipo} ${r.unidades?.numero} — DNI/CUIT ${r.clientes?.dni || r.clientes?.cuit || 's/d'} — ${numeroComprobante(r)}`,
     })),
     [reservasConPagos],
   )

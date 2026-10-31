@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useData } from '../../context/DataProvider'
-import { unidadEmoji, formatFecha, formatRangoFechas, formatMesAnio, formatPorcentaje, formatUnidad} from '../../lib/format'
+import { unidadEmoji, formatFecha, formatRangoFechas, formatMesAnio, formatPorcentaje, formatUnidad, formatNombre} from '../../lib/format'
 import { COLOR_TIPO_ALQUILER, colorReserva } from '../../lib/colors'
 import { linkToPlano } from '../../lib/deepLinks'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
@@ -370,7 +370,7 @@ export default function Ocupacion() {
                             key={`${b.reserva.id}-${i}`}
                             type="button"
                             onClick={() => setReservaDetalle(b.reserva)}
-                            title={`${b.reserva.clientes?.nombre || 'S/N'} — ${formatFecha(b.reserva.fecha_inicio || b.reserva.fecha)} a ${formatFecha(b.reserva.fecha_fin || b.reserva.fecha)}`}
+                            title={`${formatNombre(b.reserva.clientes?.nombre) || 'S/N'} — ${formatFecha(b.reserva.fecha_inicio || b.reserva.fecha)} a ${formatFecha(b.reserva.fecha_fin || b.reserva.fecha)}`}
                             className={`absolute top-1.5 h-6 border text-[9px] font-bold uppercase truncate px-1.5 flex items-center gap-1 transition-all hover:brightness-110 ${b.color} ${
                               b.pendienteConfirmacion ? 'border-dashed border-2' : ''
                             } ${b.recortadaIzq ? 'rounded-l-none' : 'rounded-l-md'} ${b.recortadaDer ? 'rounded-r-none' : 'rounded-r-md'}`}

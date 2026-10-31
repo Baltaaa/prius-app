@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus, Receipt, Users, QrCode, CalendarCheck, Unlock } from 'lucide-react'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante, formatUnidad} from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
 import { coSocios, esPendienteConfirmacion, estadoBadgeStatus, saldoGrupo, estadoPagoGrupo } from '../../lib/reservas'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
@@ -45,7 +45,7 @@ export default function ClienteDetalleContent({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-headline-sm text-black truncate">{cliente.nombre}</span>
+              <span className="text-headline-sm text-black truncate">{formatNombre(cliente.nombre)}</span>
               {badgeStatus && <StatusBadge status={badgeStatus} />}
             </div>
             <p className="text-body-sm text-prius-slate mt-1 truncate">

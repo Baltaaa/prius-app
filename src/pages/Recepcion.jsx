@@ -8,7 +8,7 @@ import { useDialog } from '../context/DialogProvider'
 import { usePermiso } from '../context/AuthProvider'
 import { reservaActiva, estadoBadgeStatus, coSocios } from '../lib/reservas'
 import { normalizarCodigoReserva, codigoReservaValido } from '../lib/parse'
-import { formatPesos, formatPesosVisible, formatFecha, formatFechaHora, formatRangoFechas, formatTelefono, unidadEmoji, formatUnidad} from '../lib/format'
+import { formatPesos, formatPesosVisible, formatFecha, formatFechaHora, formatRangoFechas, formatTelefono, unidadEmoji, formatUnidad, formatNombre} from '../lib/format'
 import { MEDIO_PAGO_LABEL, ERROR_CAJA_CERRADA } from '../lib/pagos'
 import { linkToComprobante } from '../lib/deepLinks'
 import StatusBadge from '../components/crm/StatusBadge'
@@ -348,7 +348,7 @@ export default function Recepcion() {
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">{codigoRow.codigo}</p>
                   <h2 className="text-base font-bold text-black uppercase truncate">
-                    {primera.clientes?.nombre} {primera.clientes?.apellido}
+                    {formatNombre(primera.clientes?.nombre)} {primera.clientes?.apellido}
                   </h2>
                   <p className="text-xs text-prius-slate">{formatTelefono(primera.clientes?.telefono)}</p>
                 </div>

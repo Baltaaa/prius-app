@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Wallet, CalendarPlus, ArrowRight, Phone, Mail } from 'lucide-react'
 import { useData } from '../../context/DataProvider'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesosVisible, formatTelefono, unidadEmoji, formatUnidad} from '../../lib/format'
+import { formatPesosVisible, formatTelefono, unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
 import { saldoNumerico, estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente } from '../../lib/deepLinks'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
@@ -60,7 +60,7 @@ export default function ClienteDrawer({ clienteId, onClose, onRegistrarPago }) {
         </div>
         <div className="flex items-center justify-between p-6 border-b border-hairline bg-prius-subtle shrink-0">
           <div className="min-w-0">
-            <h2 className="text-sm uppercase font-bold tracking-widest text-black truncate">{cliente.nombre}</h2>
+            <h2 className="text-sm uppercase font-bold tracking-widest text-black truncate">{formatNombre(cliente.nombre)}</h2>
             {cliente.telefono && (
               <p className="text-xs text-prius-slate mt-1 flex items-center gap-1.5"><Phone size={11} /> {formatTelefono(cliente.telefono)}</p>
             )}

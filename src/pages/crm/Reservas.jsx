@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatFecha, formatRangoFechas, unidadEmoji, formatUnidad} from '../../lib/format'
+import { formatFecha, formatRangoFechas, unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
 import DateInput from '../../components/inputs/DateInput'
 import { coSocios, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
@@ -31,7 +31,7 @@ import { Filter, Check, Globe, MonitorSmartphone, X, ChevronLeft, LayoutList } f
 // confirmación — reservas.codigo no existe en el schema (queda para el
 // sistema de reservas públicas), así que se arma con cliente + unidad.
 const reservaIdentificador = (res) =>
-  `${res.clientes?.nombre || 'S/N'} - ${res.unidades ? formatUnidad(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}`
+  `${formatNombre(res.clientes?.nombre) || 'S/N'} - ${res.unidades ? formatUnidad(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}`
 
 // Reservas es la COLA OPERATIVA de alquileres acotados en el tiempo (período
 // o día) — llegadas recientes, filtrable por fecha/estado. Los clientes de
@@ -160,7 +160,7 @@ export default function Reservas() {
   const handleCancelarClick = async (res) => {
     if (!(await asegurarDesbloqueada(res))) return
     const ok = await confirm(
-      `¿Cancelar la reserva de ${res.clientes?.nombre || 'S/N'} — ${res.unidades ? formatUnidad(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}? La unidad y las fechas quedan libres. Los pagos y el historial no se borran.`,
+      `¿Cancelar la reserva de ${formatNombre(res.clientes?.nombre) || 'S/N'} — ${res.unidades ? formatUnidad(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}? La unidad y las fechas quedan libres. Los pagos y el historial no se borran.`,
       { title: 'Cancelar reserva' },
     )
     if (!ok) return
@@ -574,7 +574,7 @@ export default function Reservas() {
               >
                 <td className="px-3 py-4 align-middle text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
                 <td className="px-3 py-4 align-middle font-bold text-black uppercase break-words">
-                  {res.clientes?.nombre || 'S/N'}
+                  {formatNombre(res.clientes?.nombre) || 'S/N'}
                   {coSocios(res).length > 0 && (
                     <p className="text-[10px] text-prius-muted font-normal normal-case tracking-widest mt-0.5">
                       Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
@@ -614,7 +614,7 @@ export default function Reservas() {
             >
               <td className="px-3 py-4 align-middle text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
               <td className="px-3 py-4 align-middle font-bold text-black uppercase break-words">
-                {res.clientes?.nombre || 'S/N'}
+                {formatNombre(res.clientes?.nombre) || 'S/N'}
                 {coSocios(res).length > 0 && (
                   <p className="text-[10px] text-prius-muted font-normal normal-case tracking-widest mt-0.5">
                     Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}

@@ -9,7 +9,7 @@ import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, unidadEmoji, formatComprobante, formatUnidad} from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, unidadEmoji, formatComprobante, formatUnidad, formatNombre, normalizeText} from '../../lib/format'
 import MontoStat from '../../components/ui/MontoStat'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
@@ -515,13 +515,17 @@ export default function Clientes() {
   }, [todosPagos, debouncedSearch])
 
   const filteredClientes = useMemo(() => {
-    const term = debouncedSearch.trim().toLowerCase()
+    // normalizeText (no .toLowerCase()): además de la caja, saca las tildes
+    // de los DOS lados. Bug real encontrado el 31/10/2026 al verificar
+    // formatNombre: buscar "AGUSTÍN" devolvía 0 resultados mientras que
+    // "agustin" devolvía 4, porque en la base están sin tilde.
+    const term = normalizeText(debouncedSearch).trim()
     if (term.length < 2) return clientes
     const dniTerm = parseDNI(debouncedSearch)
     const unidadQuery = parseUnidadQuery(term)
     return clientes.filter((c) => {
-      if (c.nombre.toLowerCase().includes(term)) return true
-      if (c.apellido && c.apellido.toLowerCase().includes(term)) return true
+      if (normalizeText(c.nombre).includes(term)) return true
+      if (c.apellido && normalizeText(c.apellido).includes(term)) return true
       if (c.cuit && c.cuit.includes(debouncedSearch)) return true
       if (dniTerm.length >= 7 && c.dni && c.dni.includes(dniTerm)) return true
       if (comprobanteMatchPorCliente[c.id]) return true
@@ -834,7 +838,7 @@ export default function Clientes() {
                         el badge de estado (mismo estadoBadgeStatus de
                         siempre, sin tocar el mapeo). */}
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-black truncate">{cliente.nombre}</p>
+                      <p className="font-bold text-black truncate">{formatNombre(cliente.nombre)}</p>
                       {/* 29/10/2026: el wrapper del badge solo se monta si HAY
                           badge. Antes iba siempre con `min-h-[18px]`, así que
                           un cliente sin estado (ej. BEATRIZ AYALA) igual
@@ -1221,7 +1225,7 @@ export default function Clientes() {
         <form onSubmit={handleSubmitConfirmarReserva} className="space-y-6">
           <div>
             <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Cliente</p>
-            <p className="text-sm text-black font-bold uppercase mt-1">{confirmarReserva?.cliente?.nombre}</p>
+            <p className="text-sm text-black font-bold uppercase mt-1">{formatNombre(confirmarReserva?.cliente?.nombre)}</p>
           </div>
           <MoneyInput label="Monto Total" value={confirmarValorTotal} onChange={setConfirmarValorTotal} required max={100_000_000} />
           <button

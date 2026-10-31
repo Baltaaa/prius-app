@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useDialog } from '../../context/DialogProvider'
 import Modal from '../crm/Modal'
 import BrandSelect from '../ui/BrandSelect'
-import { unidadEmoji, formatUnidad} from '../../lib/format'
+import { unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
 
 // Mover un cliente de temporada de una unidad a otra, desde el Plano (ítem 5,
 // oct 2026) — exige la contraseña del superadmin logueado. La validación de
@@ -52,7 +52,7 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
     <Modal isOpen={isOpen} onClose={onClose} title="Mover Cliente de Temporada">
       <form onSubmit={handleConfirmar} className="space-y-6">
         <div className="p-4 bg-prius-subtle border border-hairline rounded-xl space-y-2 text-xs">
-          <p><span className="text-prius-muted uppercase tracking-widest">Cliente:</span> <span className="text-black font-bold">{reserva.clientes?.nombre || 'S/N'}</span></p>
+          <p><span className="text-prius-muted uppercase tracking-widest">Cliente:</span> <span className="text-black font-bold">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span></p>
           <p><span className="text-prius-muted uppercase tracking-widest">Origen:</span> <span className="text-black">{unidadEmoji(unidadOrigen.type)} {formatUnidad(unidadOrigen.type, unidadOrigen.number)}</span></p>
         </div>
 

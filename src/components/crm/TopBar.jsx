@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
-import { unidadEmoji, normalizeText, formatComprobante, formatFechaLarga, formatUnidad, formatFechasReserva } from '../../lib/format'
+import { unidadEmoji, normalizeText, formatComprobante, formatFechaLarga, formatUnidad, formatFechasReserva, formatNombre} from '../../lib/format'
 import { parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToPlano, linkToRecepcion } from '../../lib/deepLinks'
@@ -403,7 +403,7 @@ export default function TopBar() {
                           onClick={() => goToCliente(cliente)}
                           className="w-full text-left px-4 py-2.5 hover:bg-prius-subtle transition-colors"
                         >
-                          <p className="text-xs font-bold text-black truncate">{cliente.nombre}</p>
+                          <p className="text-xs font-bold text-black truncate">{formatNombre(cliente.nombre)}</p>
                           {unidadDeCliente(cliente) && (
                             <p className="text-[11px] text-prius-muted uppercase truncate">
                               {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
@@ -440,7 +440,7 @@ export default function TopBar() {
                           className="w-full text-left px-4 py-2.5 hover:bg-prius-subtle transition-colors flex items-center justify-between gap-3"
                         >
                           <span className="min-w-0">
-                            <span className="block text-xs font-bold text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
+                            <span className="block text-xs font-bold text-black truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
                             <span className="block text-[11px] text-prius-muted uppercase truncate">
                               {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
                               {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
@@ -676,7 +676,7 @@ export default function TopBar() {
                         onClick={() => { goToCliente(cliente); setMobileSearchOpen(false) }}
                         className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-prius-subtle transition-colors border-b border-hairline"
                       >
-                        <p className="text-sm font-bold text-black truncate">{cliente.nombre}</p>
+                        <p className="text-sm font-bold text-black truncate">{formatNombre(cliente.nombre)}</p>
                         {unidadDeCliente(cliente) && (
                           <p className="text-xs text-prius-muted uppercase truncate">
                             {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
@@ -711,7 +711,7 @@ export default function TopBar() {
                         className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-prius-subtle transition-colors border-b border-hairline flex items-center justify-between gap-3"
                       >
                         <span className="min-w-0">
-                          <span className="block text-sm font-bold text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
+                          <span className="block text-sm font-bold text-black truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
                           <span className="block text-xs text-prius-muted uppercase truncate">
                             {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
                             {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}

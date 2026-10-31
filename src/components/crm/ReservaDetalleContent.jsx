@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Wallet, Receipt, Edit2, XCircle, Trash2, QrCode, Globe, MonitorSmartphone, Users, ShieldAlert } from 'lucide-react'
 import { usePagos } from '../../hooks/usePagos'
 import { coSocios, estadoBadgeStatus, saldoNumerico, pagoSinVerificar } from '../../lib/reservas'
-import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, unidadEmoji, formatUnidad} from '../../lib/format'
+import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { usePermiso } from '../../context/AuthProvider'
 import StatusBadge from './StatusBadge'
@@ -42,7 +42,7 @@ export default function ReservaDetalleContent({
       <div className="flex items-start justify-between pb-space-md shrink-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-headline-sm text-black truncate">{reserva.clientes?.nombre || 'S/N'}</span>
+            <span className="text-headline-sm text-black truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
             <StatusBadge status={estadoBadgeStatus(reserva)} />
           </div>
           <p className="text-body-sm text-prius-slate mt-1">
@@ -81,7 +81,7 @@ export default function ReservaDetalleContent({
               {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-title-md text-black truncate">{reserva.clientes?.nombre || 'S/N'}</p>
+              <p className="text-title-md text-black truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</p>
               {socios.length > 0 && (
                 <p className="text-body-sm text-prius-slate truncate flex items-center gap-1">
                   <Users size={12} className="shrink-0" /> {socios.map((s) => s.nombre).join(', ')}
@@ -203,7 +203,7 @@ export default function ReservaDetalleContent({
                     {/* Ítem 3 (25/10/2026): quién pagó esta cuota — nombre
                         chico debajo, relevante con cosocios. */}
                     {p.clientes?.nombre && (
-                      <span className="block text-[10px] font-normal text-prius-muted truncate">{p.clientes.nombre}</span>
+                      <span className="block text-[10px] font-normal text-prius-muted truncate">{formatNombre(p.clientes.nombre)}</span>
                     )}
                   </span>
                   <span className={`shrink-0 text-body-sm ${p.estado === 'anulado' ? 'text-prius-muted line-through' : 'text-prius-slate'}`}>

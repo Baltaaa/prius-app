@@ -1,6 +1,6 @@
 import { Wallet, Receipt, Edit2, XCircle, Trash2, QrCode } from 'lucide-react'
 import { coSocios, estadoBadgeStatus } from '../../lib/reservas'
-import { formatFecha, formatPesosVisible, unidadEmoji, formatUnidad} from '../../lib/format'
+import { formatFecha, formatPesosVisible, unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
 import StatusBadge from './StatusBadge'
 import MontoReserva from './MontoReserva'
 
@@ -42,7 +42,7 @@ export default function ReservaListaMobile({ reservas, fechaLlegada, onOpenDetal
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-title-md text-black truncate">{res.clientes?.nombre || 'S/N'}</p>
+                      <p className="text-title-md text-black truncate">{formatNombre(res.clientes?.nombre) || 'S/N'}</p>
                       <p className="text-body-sm text-prius-slate mt-0.5">
                         {unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}
                         {esTemporada ? ' · Temporada' : ''}

@@ -206,6 +206,47 @@ export function formatComprobante(tipo: string, numero: number | string): string
   return `${sigla}-${String(numero ?? '').trim()}`
 }
 
+/**
+ * Nombre propio en formato normal (31/10/2026). La base guarda los nombres
+ * como vinieron cargados —muchos en MAYÚSCULAS ("ALICIA BENITES"), otros en
+ * minúscula ("ana maria iacono")— y esto los normaliza SOLO al renderizar:
+ * nunca se tocan los datos guardados, y las búsquedas siguen siendo
+ * case-insensitive y sin tildes (ver normalizeText).
+ *
+ * Soporta español: tildes y ñ (se respeta la letra original, solo cambia la
+ * caja), nombres compuestos, guiones ("Sáenz-Peña") y apóstrofes
+ * ("D'Agostino", "O'Brien"). Las partículas de/del/la/las/los/y van en
+ * minúscula salvo al principio ("Ana de la Cruz", pero "De la Cruz, Ana").
+ */
+const PARTICULAS = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'e', 'da', 'das', 'do', 'dos', 'van', 'von'])
+
+function capitalizarPalabra(palabra: string): string {
+  if (!palabra) return palabra
+  // Separadores internos que también arrancan "palabra nueva": guion y
+  // apóstrofe. Se conservan tal cual en la salida.
+  return palabra
+    .split(/([-'’])/)
+    .map((parte, i) => {
+      if (i % 2 === 1) return parte // el separador
+      if (!parte) return parte
+      return parte.charAt(0).toLocaleUpperCase('es-AR') + parte.slice(1).toLocaleLowerCase('es-AR')
+    })
+    .join('')
+}
+
+export function formatNombre(nombre: string | null | undefined): string {
+  const limpio = String(nombre ?? '').trim().replace(/\s+/g, ' ')
+  if (!limpio) return ''
+  return limpio
+    .split(' ')
+    .map((palabra, i) => {
+      const bajo = palabra.toLocaleLowerCase('es-AR')
+      if (i > 0 && PARTICULAS.has(bajo)) return bajo
+      return capitalizarPalabra(palabra)
+    })
+    .join(' ')
+}
+
 const UNIDAD_LABEL: Record<string, string> = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina', locker: 'Locker' }
 const UNIDAD_EMOJI: Record<string, string> = { carpa: '🏠', sombrilla: '🏖️' }
 
