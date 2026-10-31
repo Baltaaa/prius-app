@@ -22,6 +22,23 @@ export const CATEGORIA_GASTO_LABEL: Record<string, string> = {
   otros: 'Otros',
 }
 
+/**
+ * Emoji por categoría de gasto (31/10/2026) — para que el select de
+ * "Registrar Gasto" tenga el mismo lenguaje visual que el de medio de pago
+ * en "Registrar Pago" (ver MEDIO_PAGO_EMOJI en lib/pagos.js). Solo adorno de
+ * UI: no se exporta a CSV ni se imprime.
+ */
+export const CATEGORIA_GASTO_EMOJI: Record<string, string> = {
+  proveedores: '📦',
+  sueldos_adelantos: '👷',
+  mantenimiento: '🔧',
+  limpieza: '🧹',
+  insumos: '🧺',
+  servicios: '💡',
+  retiro_dueno: '🏦',
+  otros: '📌',
+}
+
 /** DD/MM/AAAA */
 export const formatFechaCsv = formatFecha
 

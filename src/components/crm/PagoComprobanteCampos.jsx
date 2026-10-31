@@ -26,7 +26,11 @@ export default function PagoComprobanteCampos({ form }) {
     duplicado, anuladoPrevio, verificandoDuplicado, verificarDuplicado, limpiarDuplicado,
     excedeSaldo, tipoPago, esHistorico, comprobanteIncompleto,
     pagosConComprobante, saldo, saldoDesconocido,
+    moneda, setMoneda, montoUsd, setMontoUsd,
+    tipoCambio, setTipoCambioManual, montoArsEquivalente,
+    cotizacionStale, cotizacionFecha, cotizacionTipo, cotizacionLado,
   } = form
+  const esUsd = moneda === 'USD'
 
   const tipoLabel = tipoPago
     ? ({ sena: 'Seña', parcial: 'Pago parcial', saldo: 'Saldo', total: 'Pago total', servicio: 'Servicio', otro: 'Otro' }[tipoPago] || 'Pago')
@@ -34,20 +38,81 @@ export default function PagoComprobanteCampos({ form }) {
 
   return (
     <div className="space-y-6">
-      {/* Monto */}
+      {/* Monto. Toggle ARS/USD (31/10/2026): el peso sigue siendo la moneda
+          principal — en USD se carga el importe en dólares y abajo se ve, en
+          vivo, el equivalente en pesos que se imputa al saldo. La cotización
+          se puede corregir a mano; el servidor igual recalcula y rechaza una
+          que se aleje más de 30% de la del día. */}
       <div>
-        <MoneyInput
-          label="Monto"
-          value={monto}
-          onChange={setMonto}
-          required
-          max={100_000_000}
-          error={excedeSaldo ? `El monto supera el saldo pendiente (${formatPesos(saldo)})` : undefined}
-          chips={!saldoDesconocido && saldo > 0 ? [
-            { label: 'Saldo total', value: saldo },
-            { label: '50%', value: Math.round(saldo / 2) },
-          ] : undefined}
-        />
+        <div className="flex items-center gap-1 bg-prius-subtle p-1 rounded-xl w-fit mb-2.5">
+          {['ARS', 'USD'].map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMoneda(m)}
+              className={`px-3.5 py-1.5 rounded-lg text-label-md font-bold transition-colors ${
+                moneda === m ? 'bg-white text-black shadow-sm' : 'text-prius-slate hover:text-black'
+              }`}
+            >
+              {m === 'ARS' ? '🇦🇷 Pesos' : '🇺🇸 Dólares'}
+            </button>
+          ))}
+        </div>
+
+        {esUsd ? (
+          <>
+            <MoneyInput
+              label="Monto en dólares"
+              value={montoUsd}
+              onChange={setMontoUsd}
+              required
+              max={1_000_000}
+              simbolo="US$"
+              error={excedeSaldo ? `El equivalente en pesos supera el saldo pendiente (${formatPesos(saldo)})` : undefined}
+            />
+            <div className="mt-2.5 p-3 bg-prius-subtle border border-hairline rounded-xl space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest shrink-0">
+                  Cotización
+                </label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="0.01"
+                  value={tipoCambio ?? ''}
+                  onChange={(e) => setTipoCambioManual(e.target.value === '' ? null : Number(e.target.value))}
+                  placeholder="—"
+                  className="w-32 text-right bg-white border border-hairline rounded-lg px-2.5 py-1.5 text-base md:text-sm font-bold text-black outline-none focus:border-gold/50"
+                />
+              </div>
+              <p className="text-[11px] text-prius-muted">
+                {cotizacionTipo} · {cotizacionLado}
+                {cotizacionFecha ? ` · ${formatFecha(cotizacionFecha)}` : ''}
+                {cotizacionStale && <span className="text-amber-500 font-semibold"> · no es de hoy</span>}
+              </p>
+              <div className="flex items-baseline justify-between gap-2 pt-1 border-t border-hairline">
+                <span className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Se imputa</span>
+                <span className="text-headline-sm text-black tabular-nums">
+                  {montoArsEquivalente ? formatPesos(montoArsEquivalente) : '—'}
+                </span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <MoneyInput
+            label="Monto"
+            value={monto}
+            onChange={setMonto}
+            required
+            max={100_000_000}
+            error={excedeSaldo ? `El monto supera el saldo pendiente (${formatPesos(saldo)})` : undefined}
+            chips={!saldoDesconocido && saldo > 0 ? [
+              { label: 'Saldo total', value: saldo },
+              { label: '50%', value: Math.round(saldo / 2) },
+            ] : undefined}
+          />
+        )}
         {!excedeSaldo && Number(monto) > 0 && (
           <p className="text-[11px] text-prius-slate mt-1.5">
             Se registrará como: <span className="text-prius-slate font-semibold">{tipoLabel}</span>

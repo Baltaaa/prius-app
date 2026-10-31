@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useTipoCambio, usdAPesos } from './useTipoCambio'
 import {
   calcularTipoPagoAutomatico, construirConceptoAutomatico, comprobanteTipoDefault, esPagoHistorico,
 } from '../lib/pagos'
@@ -16,6 +17,25 @@ import {
 // cálculos automáticos (tipo de pago, concepto) igual que antes.
 export function usePagoComprobanteForm({ resetKey, cliente, reservaInfo, pagosConComprobante = [] }) {
   const [monto, setMonto] = useState(0)
+  // Pagos en USD (31/10/2026). `monto` SIGUE siendo siempre el importe en
+  // PESOS: es lo que miran todas las validaciones de abajo (excedeSaldo,
+  // tipoPago, concepto) y lo que imputa el servidor al saldo. Cuando la
+  // moneda es USD, el usuario edita `montoUsd` y `monto` pasa a ser un
+  // derivado (montoUsd x cotización) — así no hubo que tocar ninguna de esas
+  // validaciones. Al enviar, igual se manda el importe en dólares y el
+  // servidor recalcula: el front nunca dicta el monto en pesos.
+  const [moneda, setMoneda] = useState('ARS')
+  const [montoUsd, setMontoUsd] = useState(0)
+  const [tipoCambioManual, setTipoCambioManual] = useState(null)
+  const tc = useTipoCambio()
+  const tipoCambio = tipoCambioManual ?? tc.valor
+  const montoArsEquivalente = usdAPesos(montoUsd, tipoCambio)
+
+  useEffect(() => {
+    if (moneda !== 'USD') return
+    setMonto(montoArsEquivalente || 0)
+  }, [moneda, montoArsEquivalente])
+
   const [medio, setMedio] = useState('efectivo')
   const [referencia, setReferencia] = useState('')
   const [comprobanteTipo, setComprobanteTipo] = useState('factura_b')
@@ -29,6 +49,9 @@ export function usePagoComprobanteForm({ resetKey, cliente, reservaInfo, pagosCo
 
   useEffect(() => {
     setMonto(0)
+    setMoneda('ARS')
+    setMontoUsd(0)
+    setTipoCambioManual(null)
     setMedio('efectivo')
     setReferencia('')
     setComprobanteTipo(comprobanteTipoDefault(cliente?.condicion_iva))
@@ -90,7 +113,12 @@ export function usePagoComprobanteForm({ resetKey, cliente, reservaInfo, pagosCo
   const limpiarDuplicado = () => { setDuplicado(null); setAnuladoPrevio(false) }
 
   return {
-    monto, setMonto, medio, setMedio, referencia, setReferencia,
+    monto, setMonto,
+    moneda, setMoneda, montoUsd, setMontoUsd,
+    tipoCambio, setTipoCambioManual, tipoCambioManual,
+    cotizacionDelDia: tc.valor, cotizacionStale: tc.stale, cotizacionFecha: tc.fecha,
+    cotizacionTipo: tc.tipo, cotizacionLado: tc.lado,
+    montoArsEquivalente, medio, setMedio, referencia, setReferencia,
     comprobanteTipo, setComprobanteTipo, puntoVenta, numero, setNumero,
     fechaComprobante, setFechaComprobante, mismoComprobanteDe, setMismoComprobanteDe,
     duplicado, anuladoPrevio, verificandoDuplicado, verificarDuplicado, limpiarDuplicado,

@@ -4,5 +4,5 @@
 // única de etiquetas legibles); se reexporta acá para no romper los
 // imports existentes de RegistrarGasto/CajaImpresion/DetalleGasto/
 // ResumenCaja/Caja.jsx.
-export { CATEGORIA_GASTO_LABEL } from './export/formatos'
+export { CATEGORIA_GASTO_LABEL, CATEGORIA_GASTO_EMOJI } from './export/formatos'
 export { formatHora } from './format'

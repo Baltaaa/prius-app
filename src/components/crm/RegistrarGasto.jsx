@@ -4,13 +4,20 @@ import { useDialog } from '../../context/DialogProvider'
 import Modal from './Modal'
 import MoneyInput from '../inputs/MoneyInput'
 import TextInput from '../inputs/TextInput'
-import SelectChips from '../inputs/SelectChips'
-import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
-import { CATEGORIA_GASTO_LABEL } from '../../lib/caja'
+import BrandSelect from '../ui/BrandSelect'
+import { MEDIO_PAGO_LABEL, MEDIO_PAGO_EMOJI } from '../../lib/pagos'
+import { CATEGORIA_GASTO_LABEL, CATEGORIA_GASTO_EMOJI } from '../../lib/caja'
 import LoadingButton from '../ui/LoadingButton'
 
-const MEDIO_OPTIONS = Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => ({ value, label }))
-const CATEGORIA_OPTIONS = Object.entries(CATEGORIA_GASTO_LABEL).map(([value, label]) => ({ value, label }))
+// 31/10/2026: mismo lenguaje visual que Registrar Pago — BrandSelect con
+// emoji por opción en vez de SelectChips sin ícono. Los emojis salen de los
+// módulos únicos (lib/pagos, lib/caja), no hardcodeados acá.
+const MEDIO_OPTIONS = Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => ({
+  value, label: `${MEDIO_PAGO_EMOJI[value] || ''} ${label}`.trim(),
+}))
+const CATEGORIA_OPTIONS = Object.entries(CATEGORIA_GASTO_LABEL).map(([value, label]) => ({
+  value, label: `${CATEGORIA_GASTO_EMOJI[value] || ''} ${label}`.trim(),
+}))
 
 // Único punto de alta de egresos (Tarea 5) — es lo único de dinero que se
 // carga desde Caja. FAB en mobile / botón primario en desktop, ver Caja.jsx.
@@ -63,11 +70,17 @@ export default function RegistrarGasto({ isOpen, onClose }) {
           error={concepto && !conceptoValido ? 'Entre 3 y 120 caracteres' : undefined}
         />
 
-        <SelectChips label="Categoría" options={CATEGORIA_OPTIONS} value={categoria} onChange={setCategoria} required />
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Categoría</label>
+          <BrandSelect value={categoria} onChange={setCategoria} options={CATEGORIA_OPTIONS} />
+        </div>
 
         <MoneyInput label="Monto" required value={monto} onChange={setMonto} max={100_000_000} />
 
-        <SelectChips label="Medio de pago" options={MEDIO_OPTIONS} value={medioPago} onChange={setMedioPago} required />
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de pago</label>
+          <BrandSelect value={medioPago} onChange={setMedioPago} options={MEDIO_OPTIONS} />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <TextInput label="Proveedor (opcional)" value={proveedor} onChange={setProveedor} maxLength={80} />

@@ -33,6 +33,8 @@ export interface MoneyInputProps {
   loading?: boolean
   required?: boolean
   chips?: { label: string; value: number }[]
+  /** Símbolo a la izquierda. Default "$" — "US$" para montos en dólares (31/10/2026). */
+  simbolo?: string
   className?: string
   id?: string
 }
@@ -40,7 +42,7 @@ export interface MoneyInputProps {
 const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyInput(
   {
     label, hint, error, value, onChange, onBlur, min, max, permitirNegativo = false, permitirCero = true,
-    placeholder = '0', disabled, loading, required, chips, className = '', id,
+    placeholder = '0', disabled, loading, required, chips, className = '', id, simbolo = '$',
   },
   forwardedRef,
 ) {
@@ -128,7 +130,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
         </label>
       )}
       <div className="relative">
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-prius-muted text-base md:text-sm font-bold pointer-events-none select-none">$</span>
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-prius-muted text-base md:text-sm font-bold pointer-events-none select-none">{simbolo}</span>
         <input
           ref={setRef}
           id={inputId}
@@ -147,7 +149,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
           placeholder={placeholder}
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
-          className={`w-full min-h-[44px] pl-8 pr-4 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
+          className={`w-full min-h-[44px] ${simbolo.length > 1 ? 'pl-12' : 'pl-8'} pr-4 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
             error ? 'border-red-500/60 focus:border-red-500' : 'border-hairline focus:border-gold/50'
           }`}
         />

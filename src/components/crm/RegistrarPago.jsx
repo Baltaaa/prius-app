@@ -71,6 +71,7 @@ export default function RegistrarPago({
     monto, setMonto, medio, referencia, comprobanteTipo, setComprobanteTipo, numero, setNumero,
     fechaComprobante, setFechaComprobante, excedeSaldo, tipoPago, concepto, esHistorico,
     comprobanteIncompleto, construirComprobantePayload, duplicado,
+    moneda, montoUsd, tipoCambio,
   } = form
 
   useEffect(() => {
@@ -137,6 +138,10 @@ export default function RegistrarPago({
         clienteId: cliente.id, monto, medio, tipoPago: tipoPagoFinal, concepto,
         reservaId: reservaId || null, referencia, comprobante: construirComprobantePayload(),
         permitirExcedente, fecha: fechaPago,
+        // USD: se manda el importe en dólares + la cotización; el equivalente
+        // en pesos lo calcula el servidor (ver fn_registrar_pago_interno).
+        moneda, montoOriginal: moneda === 'USD' ? montoUsd : null,
+        tipoCambio: moneda === 'USD' ? tipoCambio : null,
       })
       setExito({ monto, noAfectaCajaHoy })
       onSuccess?.(pago)

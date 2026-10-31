@@ -471,14 +471,23 @@ export function DataProvider({ children }) {
   // `fecha` (opcional, default hoy en la RPC): si es anterior a
   // fn_caja_inicio() el pago queda histórico — sin caja_id, no exige caja
   // abierta y no aparece en ningún resumen de caja (ver lib/pagos.js).
+  // `moneda`/`montoOriginal`/`tipoCambio` (31/10/2026, pagos en USD): para ARS
+  // no se mandan y el RPC se comporta igual que siempre. Para USD se manda el
+  // importe EN DÓLARES — el equivalente en pesos lo calcula el servidor, el
+  // front nunca dicta el monto imputado al saldo.
   const registrarPago = useCallback(async ({
     clienteId, monto, medio, tipoPago, concepto, reservaId, referencia, comprobante, permitirExcedente, fecha,
+    moneda, montoOriginal, tipoCambio,
   }) => {
+    const esUsd = moneda === 'USD'
     const { data, error } = await supabase.rpc('registrar_pago', {
-      p_cliente_id: clienteId, p_monto: Number(monto), p_medio: medio, p_tipo_pago: tipoPago,
+      p_cliente_id: clienteId, p_monto: esUsd ? null : Number(monto), p_medio: medio, p_tipo_pago: tipoPago,
       p_concepto: concepto, p_reserva_id: reservaId || null, p_referencia: referencia || null,
       p_comprobante: comprobante || null, p_permitir_excedente: !!permitirExcedente,
       p_fecha: fecha || undefined,
+      p_moneda: moneda || 'ARS',
+      p_monto_original: esUsd ? Number(montoOriginal) : null,
+      p_tipo_cambio: esUsd && tipoCambio ? Number(tipoCambio) : null,
     })
     if (error) throw error
     // fetchPagos (no un merge optimista con `data`) para que el pago nuevo
