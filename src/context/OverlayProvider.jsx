@@ -30,6 +30,22 @@ const OverlayContext = createContext(null)
  * DateInput.tsx — este mecanismo lo generaliza para no repetirlo ahí ni en
  * ningún overlay nuevo).
  */
+/**
+ * Id del overlay "padre" según el ÁRBOL DE REACT (31/10/2026).
+ *
+ * Bug real que resuelve: `esHijoDe()` detecta el anidado con `contains()` del
+ * DOM, y un dropdown renderizado en portal (ClienteSelector, BrandSelect,
+ * DateInput) NO está dentro del modal en el DOM. Entonces `notifyOpen` lo
+ * tomaba como un overlay nuevo de primer nivel y cerraba todo lo abierto —
+ * es decir, abrir un select adentro de un modal CERRABA EL MODAL.
+ *
+ * El contexto de React sí atraviesa portales, así que un overlay montado en
+ * el subárbol de un modal hereda su id como padre aunque su nodo viva en
+ * document.body. Lo setea cada contenedor modal; `useOverlay` lo toma como
+ * default de `parentId`.
+ */
+export const OverlayParentContext = createContext(null)
+
 export function OverlayProvider({ children }) {
   const overlaysRef = useRef(new Map()) // id -> { nodes: Set<Element>, onRequestClose: () => void }
   const stackRef = useRef([]) // ids, orden de apertura — el último es el de más arriba
@@ -141,6 +157,10 @@ export function OverlayProvider({ children }) {
 export function useOverlay({ id, isOpen, onRequestClose, parentId = undefined }) {
   const ctx = useContext(OverlayContext)
   if (!ctx) throw new Error('useOverlay debe usarse dentro de <OverlayProvider>')
+  // Padre por árbol de React (atraviesa portales) — ver OverlayParentContext.
+  // Un `parentId` explícito sigue teniendo prioridad.
+  const parentFromTree = useContext(OverlayParentContext)
+  const parentFinal = parentId ?? parentFromTree ?? undefined
   const nodesRef = useRef(new Set())
   const onRequestCloseRef = useRef(onRequestClose)
   onRequestCloseRef.current = onRequestClose
@@ -151,13 +171,13 @@ export function useOverlay({ id, isOpen, onRequestClose, parentId = undefined })
       nodes: nodesRef.current,
       onRequestClose: () => onRequestCloseRef.current?.(),
     })
-    ctx.notifyOpen(id, parentId)
+    ctx.notifyOpen(id, parentFinal)
     return () => {
       ctx.unregister(id)
       ctx.notifyClose(id)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, id, parentId])
+  }, [isOpen, id, parentFinal])
 
   const bind = useCallback((el) => {
     if (el) nodesRef.current.add(el)

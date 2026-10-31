@@ -1,7 +1,7 @@
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
-import { useOverlay } from '../../context/OverlayProvider'
+import { useOverlay, OverlayParentContext } from '../../context/OverlayProvider'
 import { useDialog } from '../../context/DialogProvider'
 import { useMountTransition } from '../../hooks/useMountTransition'
 import ScrollFade from '../ui/ScrollFade'
@@ -36,7 +36,23 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
   // siempre se trata como overlay de primer nivel salvo que el manager
   // detecte que su trigger quedó adentro de otro ya abierto (ej. abrir un
   // ConfirmDeleteModal desde dentro de este Modal).
-  const { bind } = useOverlay({ id: `modal-${overlayId}`, isOpen, onRequestClose: requestClose })
+  const modalOverlayId = `modal-${overlayId}`
+  const { bind } = useOverlay({ id: modalOverlayId, isOpen, onRequestClose: requestClose })
+
+  // Regla única de cierre por overlay (31/10/2026): solo cierra si el
+  // mousedown Y el mouseup ocurren sobre el overlay mismo. Antes era un
+  // `onClick={requestClose}` en el overlay, y como los eventos de React se
+  // propagan por el ÁRBOL DE REACT (no el DOM), un click dentro de un
+  // dropdown en portal —que es hijo React del modal— subía hasta acá y
+  // cerraba el modal entero. También cubre el caso de arrastrar desde
+  // adentro del modal y soltar afuera, que no debe cerrar.
+  const mouseDownEnOverlayRef = useRef(false)
+  const handleOverlayMouseDown = (e) => { mouseDownEnOverlayRef.current = e.target === e.currentTarget }
+  const handleOverlayMouseUp = (e) => {
+    const cierra = mouseDownEnOverlayRef.current && e.target === e.currentTarget
+    mouseDownEnOverlayRef.current = false
+    if (cierra) requestClose()
+  }
 
   useEffect(() => {
     if (!isOpen) return
@@ -52,14 +68,15 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
   // UnidadPreviewModal.jsx — gesto de cierre arriba, esquinas redondeadas
   // solo arriba, scroll interno). Desktop: modal centrado sin cambios.
   return createPortal(
+    <OverlayParentContext.Provider value={modalOverlayId}>
     <div
       className={`fixed inset-0 z-[999] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-md ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
-      onClick={requestClose}
+      onMouseDown={handleOverlayMouseDown}
+      onMouseUp={handleOverlayMouseUp}
     >
       <div
         ref={bind}
         className={`card-light w-full ${maxWidthClass} max-h-[92dvh] sm:max-h-[90dvh] rounded-t-3xl sm:rounded-2xl flex flex-col overflow-hidden border border-hairline shadow-2xl ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Gesto de cierre (mobile) */}
         <div className="sm:hidden flex justify-center pt-3 pb-1 shrink-0">
@@ -96,7 +113,8 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
           </div>
         )}
       </div>
-    </div>,
+    </div>
+    </OverlayParentContext.Provider>,
     document.body,
   )
 }

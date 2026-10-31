@@ -1,7 +1,7 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AlertTriangle, Eye, EyeOff, X } from 'lucide-react'
-import { useOverlay } from '../../context/OverlayProvider'
+import { useOverlay, OverlayParentContext } from '../../context/OverlayProvider'
 import { useMountTransition } from '../../hooks/useMountTransition'
 
 // Confirmación única para TODA acción de superadmin (mini-prompt
@@ -45,8 +45,12 @@ export default function ConfirmarSuperadminModal({
     onClose?.()
   }
 
+  const confirmOverlayId = `confirmar-superadmin-${overlayId}`
+  // Misma regla de cierre que Modal.jsx (31/10/2026): mousedown Y mouseup
+  // sobre el overlay mismo. Ver el comentario largo allá.
+  const mouseDownEnOverlayRef = useRef(false)
   const { bind } = useOverlay({
-    id: `confirmar-superadmin-${overlayId}`,
+    id: confirmOverlayId,
     isOpen,
     onRequestClose: handleClose,
   })
@@ -82,9 +86,15 @@ export default function ConfirmarSuperadminModal({
   }
 
   return createPortal(
+    <OverlayParentContext.Provider value={confirmOverlayId}>
     <div
       className={`fixed inset-0 z-[1000] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-md ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
-      onClick={handleClose}
+      onMouseDown={(e) => { mouseDownEnOverlayRef.current = e.target === e.currentTarget }}
+      onMouseUp={(e) => {
+        const cierra = mouseDownEnOverlayRef.current && e.target === e.currentTarget
+        mouseDownEnOverlayRef.current = false
+        if (cierra) handleClose()
+      }}
     >
       {/* Footer de botones (ítem 2, mini-prompt 26/10/2026): SIEMPRE dentro
           del mismo `p-6` que el resto del contenido — nunca un wrapper con
@@ -94,7 +104,6 @@ export default function ConfirmarSuperadminModal({
       <div
         ref={bind}
         className={`card-light w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl border border-red-500/20 shadow-2xl p-6 space-y-5 ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
-        onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
       >
         <div className="flex items-start gap-3">
@@ -159,7 +168,8 @@ export default function ConfirmarSuperadminModal({
           </button>
         </div>
       </div>
-    </div>,
+    </div>
+    </OverlayParentContext.Provider>,
     document.body,
   )
 }
