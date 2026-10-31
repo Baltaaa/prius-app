@@ -85,7 +85,7 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
           <div className="space-y-2">
             {socios.map((s) => (
               <div key={s.id} className="flex items-center justify-between gap-2 px-3 py-2.5 bg-prius-subtle border border-hairline rounded-xl">
-                <span className="text-sm font-semibold text-black truncate">{s.nombre}</span>
+                <span className="text-sm font-semibold text-black truncate">{formatNombre(s.nombre)}</span>
                 {puedeQuitarCosocio && (
                   <button
                     type="button"

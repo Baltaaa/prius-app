@@ -316,5 +316,22 @@ const MONTO_CRUDO_RE = /\$(\d+)/g
 /** Formatea montos crudos ("$1200000" -> "$ 1.200.000") embebidos en texto libre de Historial, sin tocar el dato guardado. Ya formateados ("$ 1.200.000") quedan igual — no vuelve a matchear. */
 export function formatMontosEnTexto(texto: string | null | undefined): string {
   if (!texto) return ''
-  return texto.replace(MONTO_CRUDO_RE, (_match, digitos: string) => formatPesos(Number(digitos)))
+  return limpiarNumeralUnidad(
+    texto.replace(MONTO_CRUDO_RE, (_match, digitos: string) => formatPesos(Number(digitos))),
+  )
+}
+
+/**
+ * Saca el "#" de los textos de unidad ya GUARDADOS en la base (31/10/2026).
+ *
+ * El `#` se eliminó de toda la UI, pero los eventos de Historial escritos
+ * antes quedaron con él ("Unidad carpa #11 → libre"). Esto lo limpia al
+ * renderizar, sin tocar los registros históricos. Solo actúa sobre
+ * "<palabra> #<número>", nunca sobre un "#" suelto o un color hex.
+ */
+const NUMERAL_UNIDAD_RE = /\b(carpa|sombrilla|cabina|locker|unidad)\s+#(\d+)/gi
+
+export function limpiarNumeralUnidad(texto: string | null | undefined): string {
+  if (!texto) return ''
+  return texto.replace(NUMERAL_UNIDAD_RE, (_m, palabra: string, numero: string) => `${palabra} ${numero}`)
 }

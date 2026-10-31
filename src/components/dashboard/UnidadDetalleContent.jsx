@@ -6,7 +6,7 @@ import { useReservas } from "../../hooks/useReservas"
 import { useDialog } from "../../context/DialogProvider"
 import { usePermiso } from "../../context/AuthProvider"
 import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib/reservas"
-import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji, formatUnidad} from "../../lib/format"
+import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji, formatUnidad, formatNombre} from "../../lib/format"
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 import Historial from "../crm/Historial"
@@ -194,7 +194,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                       <div className="w-8 h-8 rounded-lg bg-prius-slate/30 text-prius-slate flex items-center justify-center text-body-md font-semibold shrink-0">
                         {(s.nombre || "S/N").trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase()}
                       </div>
-                      <p className="min-w-0 flex-1 text-body-md text-black truncate">{s.nombre || "S/N"}</p>
+                      <p className="min-w-0 flex-1 text-body-md text-black truncate">{formatNombre(s.nombre) || "S/N"}</p>
                     </button>
                   ))}
                 </div>

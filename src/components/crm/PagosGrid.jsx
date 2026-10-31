@@ -8,8 +8,14 @@ import { CreditCard, Hourglass, Gift, Pencil } from 'lucide-react'
 // línea, para que quepa cómodo dentro de una celda angosta de la grilla.
 // `texto` (oct 2026): la celda de Saldo usa "Saldo sin verificar" en vez de
 // "Monto nulo" — mismo componente, dos textos según el contexto.
-const MontoNulo = ({ texto = 'Monto nulo' }) => (
-  <span className="text-prius-error text-[8px] font-bold uppercase tracking-widest whitespace-nowrap">{texto}</span>
+// 31/10/2026: los 32 pagos con monto null son placeholders de la migración
+// del Excel (origen='migracion', monto_pendiente_verificacion=true): el
+// Excel registraba que la cuota existía pero no se pudo leer el importe.
+// No son basura ni están anulados — hay que cargarles el monto, y para eso
+// ya existe el flujo `editar_monto_pago`. Por eso en vez de un "Monto nulo"
+// rojo que parece un error, se muestra como una acción pendiente.
+const MontoNulo = ({ texto = 'Falta cargar el monto' }) => (
+  <span className="text-gold text-[8px] font-bold uppercase tracking-widest whitespace-nowrap">{texto}</span>
 )
 
 // Grilla de pagos por reserva, estilo el cuadro que ya usa el administrador
@@ -88,7 +94,13 @@ export default function PagosGrid({ reserva, pagos, onCellClick, onDefinirPrecio
   }
 
   // Cuotas ya registradas, en el orden real en que se cargaron.
-  const cuotas = [...pagos].sort((a, b) => (a.nro_cuota || 0) - (b.nro_cuota || 0))
+  // Los pagos ANULADOS no se listan (31/10/2026). Antes aparecían como una
+  // celda tachada que no aporta nada al operador y ensuciaba la ficha; el
+  // registro NO se borra: sigue en la base y en el Historial, que es donde
+  // corresponde auditarlo.
+  const cuotas = [...pagos]
+    .filter((p) => p.estado !== 'anulado')
+    .sort((a, b) => (a.nro_cuota || 0) - (b.nro_cuota || 0))
   const nextCuota = cuotas.length + 1
 
   // "Saldada" = estado_pago ya calculado en la base (fuente única, oct

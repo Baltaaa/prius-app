@@ -84,7 +84,7 @@ export default function ReservaDetalleContent({
               <p className="text-title-md text-black truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</p>
               {socios.length > 0 && (
                 <p className="text-body-sm text-prius-slate truncate flex items-center gap-1">
-                  <Users size={12} className="shrink-0" /> {socios.map((s) => s.nombre).join(', ')}
+                  <Users size={12} className="shrink-0" /> {socios.map((s) => formatNombre(s.nombre)).join(', ')}
                 </p>
               )}
             </div>

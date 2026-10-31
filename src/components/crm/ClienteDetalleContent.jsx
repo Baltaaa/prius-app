@@ -9,6 +9,7 @@ import { scrollAndHighlight } from '../../lib/highlight'
 import StatusBadge from './StatusBadge'
 import PagosGrid from './PagosGrid'
 import Historial from './Historial'
+import ScrollFade from '../ui/ScrollFade'
 
 const TIPO_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 
@@ -73,7 +74,11 @@ export default function ClienteDetalleContent({
         )}
       </div>
 
-      <div className={`flex-1 overflow-y-auto ${wide ? 'lg:grid lg:grid-cols-2 lg:gap-space-md lg:items-start space-y-space-md lg:space-y-0' : 'space-y-space-md'}`}>
+      {/* Scroll (31/10/2026): en desktop (`wide`) la ficha NO scrollea como un
+          todo. La columna izquierda queda fija y la ÚNICA zona scrolleable es
+          la lista del Historial, a la derecha. Por debajo de `lg` sigue
+          scrolleando entera, como siempre. */}
+      <div className={`flex-1 min-h-0 ${wide ? 'lg:grid lg:grid-cols-2 lg:gap-space-md lg:items-stretch lg:overflow-hidden overflow-y-auto space-y-space-md lg:space-y-0' : 'overflow-y-auto space-y-space-md'}`}>
       <div className="space-y-space-md">
         {/* Saldo + acciones rápidas */}
         <div className="bg-prius-surface rounded-xl p-space-md flex items-center justify-between gap-space-sm flex-wrap">
@@ -276,7 +281,7 @@ export default function ClienteDetalleContent({
                     </div>
                     {socios.length > 0 && (
                       <p className="text-body-sm text-prius-slate flex items-center gap-1">
-                        <Users size={11} className="shrink-0" /> Co-socios: {socios.map((s) => s.nombre).join(', ')}
+                        <Users size={11} className="shrink-0" /> Co-socios: {socios.map((s) => formatNombre(s.nombre)).join(', ')}
                       </p>
                     )}
                     {acciones.length > 0 && (
@@ -307,9 +312,6 @@ export default function ClienteDetalleContent({
           )}
         </div>
 
-      </div>
-
-      <div className="space-y-space-md">
         {/* Pagos por reserva — solo las vigentes (29/10/2026): una reserva
             cancelada no tiene nada para cobrar, mostrarla acá la dejaba como
             "pendiente"/"sin confirmar" para siempre. Sigue visible arriba en
@@ -335,11 +337,14 @@ export default function ClienteDetalleContent({
           )}
         </div>
 
-        {/* Historial */}
-        <div>
-          <p className="text-label-md text-prius-slate uppercase tracking-wider mb-2">Historial</p>
+      </div>
+
+      {/* Columna derecha: SOLO Historial, y es lo único que scrollea. */}
+      <div className={wide ? 'lg:flex lg:flex-col lg:min-h-0 lg:h-full' : ''}>
+        <p className="text-label-md text-prius-slate uppercase tracking-wider mb-2 shrink-0">Historial</p>
+        <ScrollFade className={wide ? 'lg:flex-1 lg:min-h-0 lg:overflow-y-auto' : ''}>
           <Historial tipo="cliente" id={cliente.id} compact />
-        </div>
+        </ScrollFade>
       </div>
       </div>
     </>

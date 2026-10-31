@@ -48,7 +48,7 @@ export default function ReservaListaMobile({ reservas, fechaLlegada, onOpenDetal
                         {esTemporada ? ' · Temporada' : ''}
                       </p>
                       {coSocios(res).length > 0 && (
-                        <p className="text-body-sm text-prius-muted truncate">Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}</p>
+                        <p className="text-body-sm text-prius-muted truncate">Co-socios: {coSocios(res).map((s) => formatNombre(s.nombre)).join(', ')}</p>
                       )}
                     </div>
                     <StatusBadge status={estadoBadgeStatus(res)} />

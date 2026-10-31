@@ -49,7 +49,7 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
           )}
           {socios.length > 0 && (
             <p className="text-[11px] text-cyan-400 uppercase tracking-widest mt-2">
-              Co-socios: {socios.map((s) => s.nombre).join(', ')}
+              Co-socios: {socios.map((s) => formatNombre(s.nombre)).join(', ')}
             </p>
           )}
         </div>

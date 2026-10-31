@@ -367,7 +367,7 @@ export default function Recepcion() {
               )}
               {coSocios(primera).length > 0 && (
                 <p className="text-[11px] text-prius-slate uppercase tracking-widest flex items-center gap-1.5">
-                  <UsersIcon size={12} /> Co-socios: {coSocios(primera).map((s) => s.nombre).join(', ')}
+                  <UsersIcon size={12} /> Co-socios: {coSocios(primera).map((s) => formatNombre(s.nombre)).join(', ')}
                 </p>
               )}
 

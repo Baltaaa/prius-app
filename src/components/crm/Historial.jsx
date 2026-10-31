@@ -4,7 +4,8 @@ import {
   CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff,
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
-import { formatFecha, formatFechaLarga, formatHora, formatPesos, formatMontosEnTexto } from '../../lib/format'
+import { formatFecha, formatFechaLarga, formatHora, formatPesos, formatMontosEnTexto, formatUnidad } from '../../lib/format'
+import { useData } from '../../context/DataProvider'
 import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
 import DateInput from '../inputs/DateInput'
 import SearchInput from '../inputs/SearchInput'
@@ -96,24 +97,31 @@ const CAMPOS_DIFF = {
     { campo: 'fecha_fin', label: 'Fecha fin', fmt: formatFecha },
     { campo: 'fecha', label: 'Fecha', fmt: formatFecha },
     { campo: 'valor_total', label: 'Monto', fmt: formatPesos },
-    { campo: 'unidad_id', label: 'Unidad' },
+    // `fmtUnidad` (no `fmt`): necesita el mapa de unidades, que solo existe
+    // en runtime. Sin esto el Historial mostraba el UUID crudo
+    // ("Unidad: 249cb18c-… → 524e8f62-…") — 31/10/2026.
+    { campo: 'unidad_id', label: 'Unidad', fmtUnidad: true },
   ],
   pagos: [{ campo: 'monto', label: 'Monto', fmt: formatPesos }, { campo: 'medio', label: 'Medio' }],
 }
 
-function diffTexto(evento) {
+function diffTexto(evento, unidadesPorId = {}) {
   const campos = CAMPOS_DIFF[evento.tabla]
   if (!campos) return null
   const before = evento.datos?.before
   const after = evento.datos?.after
   if (!before || !after) return null
+  const resolverUnidad = (id) => {
+    const u = unidadesPorId[id]
+    return u ? formatUnidad(u.tipo, u.numero) : 'otra unidad'
+  }
   const cambios = []
-  for (const { campo, label, fmt } of campos) {
+  for (const { campo, label, fmt, fmtUnidad } of campos) {
     const a = before[campo]
     const b = after[campo]
     if (a === b || a == null || b == null) continue
-    const fa = fmt ? fmt(a) : a
-    const fb = fmt ? fmt(b) : b
+    const fa = fmtUnidad ? resolverUnidad(a) : fmt ? fmt(a) : a
+    const fb = fmtUnidad ? resolverUnidad(b) : fmt ? fmt(b) : b
     if (fa === fb) continue
     cambios.push(`${label}: ${fa} → ${fb}`)
   }
@@ -124,6 +132,14 @@ function diffTexto(evento) {
 // (ignorado en 'global'). onEventoClick(evento) es opcional — si no se pasa,
 // el evento se muestra pero no navega a ningún lado.
 export default function Historial({ tipo = 'global', id, onEventoClick, compact = false }) {
+  // Mapa id -> unidad, para que el diff muestre "Carpa 12 → Carpa 58" en vez
+  // del UUID crudo (31/10/2026). Las unidades ya están en memoria.
+  const { unidades } = useData()
+  const unidadesPorId = useMemo(() => {
+    const map = {}
+    for (const u of unidades || []) map[u.id] = u
+    return map
+  }, [unidades])
   const [filtro, setFiltro] = useState('todos')
   const navigate = useNavigate()
 
@@ -283,7 +299,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
                   const clienteId = e.cliente_id || e.datos?.after?.cliente_id || e.datos?.before?.cliente_id
                   const clickable = !!onEventoClick || e.tabla === 'reservas' || e.tabla === 'clientes' || !!clienteId
                   const Tag = clickable ? 'button' : 'div'
-                  const diff = diffTexto(e)
+                  const diff = diffTexto(e, unidadesPorId)
                   // "Marcelo Madotta registró pago de $85.000 de Alejandro
                   // Carballo" (Tarea 4): actor + descripción + cliente, acá
                   // actor/cliente son snapshot (eventos.actor_nombre/
