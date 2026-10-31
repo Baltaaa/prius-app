@@ -32,7 +32,7 @@ export const FEATURES = {
   // todavía no están terminados (Reportes más que nada). El código y las
   // rutas siguen existiendo tal cual, esto es solo un kill-switch de
   // nav — poner en `true` cuando estén listas, sin tocar nada más.
-  reportes: false,
+  reportes: true,
   ocupacion: false,
 } as const
 
