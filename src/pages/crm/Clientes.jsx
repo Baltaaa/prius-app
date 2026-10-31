@@ -35,7 +35,6 @@ import TextInput from '../../components/inputs/TextInput'
 import PhoneInput from '../../components/inputs/PhoneInput'
 import DniInput from '../../components/inputs/DniInput'
 import CuitInput from '../../components/inputs/CuitInput'
-import SelectChips from '../../components/inputs/SelectChips'
 import SearchInput from '../../components/inputs/SearchInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import StatusBadge from '../../components/crm/StatusBadge'
@@ -1097,18 +1096,21 @@ export default function Clientes() {
 
           <div className="space-y-5">
             <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Datos fiscales</p>
-            <SelectChips
-              label="Condición IVA"
-              required
-              value={condicionIva}
-              onChange={setCondicionIva}
-              options={[
-                { value: 'consumidor_final', label: 'Consumidor Final' },
-                { value: 'monotributo', label: 'Monotributo' },
-                { value: 'responsable_inscripto', label: 'Responsable Inscripto' },
-                { value: 'exento', label: 'Exento' },
-              ]}
-            />
+            {/* 31/10/2026: último SelectChips de la app -> BrandSelect, el
+                select único (portal, buscador, teclado, mismo look). */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Condición IVA</label>
+              <BrandSelect
+                value={condicionIva}
+                onChange={setCondicionIva}
+                options={[
+                  { value: 'consumidor_final', label: '🧾 Consumidor Final' },
+                  { value: 'monotributo', label: '📋 Monotributo' },
+                  { value: 'responsable_inscripto', label: '🏢 Responsable Inscripto' },
+                  { value: 'exento', label: '🪪 Exento' },
+                ]}
+              />
+            </div>
             <CuitInput
               label={requiereCuit ? 'CUIT' : 'CUIT (opcional)'}
               required={requiereCuit}
