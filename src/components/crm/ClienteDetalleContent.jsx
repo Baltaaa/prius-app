@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom'
-import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus, Receipt, Users, QrCode, CalendarCheck, Unlock } from 'lucide-react'
+import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus } from 'lucide-react'
 import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
-import { coSocios, esPendienteConfirmacion, estadoBadgeStatus, saldoGrupo, estadoPagoGrupo } from '../../lib/reservas'
+import { vistaDeGrupo, vistaDeReserva } from '../../lib/reservas'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { isFeatureEnabled } from '../../lib/features'
 import { scrollAndHighlight } from '../../lib/highlight'
 import StatusBadge from './StatusBadge'
-import PagosGrid from './PagosGrid'
+import ReservaPagosCard from './ReservaPagosCard'
 import Historial from './Historial'
 import ScrollFade from '../ui/ScrollFade'
 
@@ -35,7 +35,14 @@ export default function ClienteDetalleContent({
     comprobanteMatch,
   } = derivado
 
-  const reservasSueltasCobrables = reservasSueltas.filter((r) => r.estado !== 'cancelada')
+  // Una vista normalizada por tarjeta: primero los grupos con precio
+  // unificado, después las reservas sueltas, y las canceladas al final
+  // (atenuadas) para que no empujen lo operativo hacia abajo.
+  const vistasReservas = [
+    ...Object.entries(gruposCliente).map(([grupoId, reservasGrupo]) =>
+      vistaDeGrupo({ grupoId, reservasGrupo, reservas, pagosPorReserva, formatFecha })),
+    ...reservasSueltas.map((reserva) => vistaDeReserva({ reserva, pagosPorReserva, formatFecha })),
+  ].sort((a, b) => Number(a.cancelada) - Number(b.cancelada))
 
   return (
     <>
@@ -79,9 +86,9 @@ export default function ClienteDetalleContent({
           la lista del Historial, a la derecha. Por debajo de `lg` sigue
           scrolleando entera, como siempre. */}
       <div className={`flex-1 min-h-0 ${wide ? 'lg:grid lg:grid-cols-2 lg:gap-space-md lg:items-stretch lg:overflow-hidden overflow-y-auto space-y-space-md lg:space-y-0' : 'overflow-y-auto space-y-space-md'}`}>
-      <div className="space-y-space-md">
+      <div className="cq space-y-2.5 lg:flex lg:flex-col lg:min-h-0 lg:h-full lg:space-y-0 lg:gap-2.5">
         {/* Saldo + acciones rápidas */}
-        <div className="bg-prius-surface rounded-xl p-space-md flex items-center justify-between gap-space-sm flex-wrap">
+        <div className="bg-prius-surface rounded-xl px-3 py-2.5 flex items-center justify-between gap-space-sm flex-wrap">
           <div>
             <span className="text-label-md text-prius-slate uppercase tracking-wider">Saldo</span>
             <p className={`text-headline-sm mt-0.5 ${saldoInfo.sinVerificar && !saldoHeaderSaldado ? 'text-prius-error' : sinPrecio ? 'text-prius-slate' : 'text-black'}`}>
@@ -130,8 +137,14 @@ export default function ClienteDetalleContent({
             viewport, no al contenedor, así que md:grid-cols-4 metía 4
             columnas en ~365px reales (aside del breakpoint lg más angosto)
             y el email terminaba partido letra por letra por el break-all. */}
-        <div className="bg-prius-surface rounded-xl p-space-md grid grid-cols-2 gap-4">
-          <div className="col-span-2">
+        {/* 31/10/2026: una fila de 4 datos en vez de grid 2x2 con padding
+            grande — la columna izquierda tiene que entrar entera en
+            1366x768 y este bloque se llevaba 172px para 4 campos cortos. */}
+        {/* 31/10/2026 bis: las 4 columnas se piden con container query (`cq-cols-4`,
+            ver index.css), no con `sm:` — a 1366x768 esta columna mide ~300px
+            reales y un breakpoint de viewport volvía a pisar los campos. */}
+        <div className="bg-prius-surface rounded-xl px-3 py-2.5 grid grid-cols-2 cq-cols-4 gap-x-3 gap-y-2">
+          <div className="col-span-2 cq-span-1 min-w-0">
             <p className="text-label-md text-prius-slate uppercase tracking-wider flex items-center gap-1"><Mail size={11} /> Email</p>
             <p className="text-body-sm text-black mt-1 lowercase break-all">{cliente.mail || <span className="text-prius-muted normal-case whitespace-nowrap">Sin cargar</span>}</p>
           </div>
@@ -155,188 +168,47 @@ export default function ClienteDetalleContent({
           )}
         </div>
 
-        {/* Grupos con precio unificado */}
-        {Object.entries(gruposCliente).map(([grupoId, reservasGrupo]) => {
-          const grupo = reservasGrupo[0].reserva_grupos
-          const saldo = saldoGrupo(reservasGrupo[0], reservas, pagosPorReserva)
-          const estado = estadoPagoGrupo(saldo, grupo)
-          const pagoGrupo = reservasGrupo.flatMap((r) => (pagosPorReserva[r.id] || []).map((p) => ({ ...p, __reserva: r })))
-            .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
-          const pagado = Math.max(Number(grupo.precio_total || 0) - (saldo ?? 0), 0)
-          const primeraReservaActiva = reservasGrupo.find((r) => r.estado !== 'cancelada') || reservasGrupo[0]
-          return (
-            <div key={grupoId} className="bg-white border border-hairline rounded-xl p-space-md space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-label-md text-gold uppercase tracking-wider font-bold">
-                  Reserva con precio unificado{grupo.temporada ? ` · ${grupo.temporada}` : ''}
-                </p>
-                {estado && <StatusBadge status={estado} />}
-              </div>
-              <div className="grid grid-cols-3 gap-4 text-xs">
-                <div>
-                  <p className="text-label-md text-prius-slate uppercase tracking-wider">Precio total</p>
-                  <p className="text-body-md font-bold text-black mt-1">{formatPesosVisible(grupo.precio_total)}</p>
-                </div>
-                <div>
-                  <p className="text-label-md text-prius-slate uppercase tracking-wider">Pagado</p>
-                  <p className="text-body-md font-bold text-prius-success mt-1">{formatPesosVisible(pagado)}</p>
-                </div>
-                <div>
-                  <p className="text-label-md text-prius-slate uppercase tracking-wider">Saldo</p>
-                  <p className={`text-body-md font-bold mt-1 ${saldo === null ? 'text-prius-error' : saldo > 0 ? 'text-prius-error' : 'text-prius-success'}`}>
-                    {saldo === null ? 'Saldo sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Unidad saldada'}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <p className="text-label-md text-prius-slate uppercase tracking-wider">Períodos</p>
-                {reservasGrupo.map((r) => (
-                  <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-prius-slate">
-                    <span>{unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)}</span>
-                    <span className="text-prius-muted">
-                      {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
-                    </span>
-                    {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase text-[10px]">Cancelada</span>}
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <p className="text-label-md text-prius-slate uppercase tracking-wider">Pagos</p>
-                  <button
-                    type="button"
-                    onClick={() => onPagoCelda({ reserva: { ...primeraReservaActiva, clientes: cliente }, pago: null })}
-                    className="text-label-md font-bold uppercase tracking-wider text-prius-success hover:text-green-700 transition-all"
-                  >
-                    + Cargar pago
-                  </button>
-                </div>
-                {pagoGrupo.length === 0 ? (
-                  <p className="text-xs text-prius-muted">Sin pagos registrados.</p>
-                ) : (
-                  pagoGrupo.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => onPagoCelda({ reserva: { ...p.__reserva, clientes: cliente }, pago: p })}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs ${
-                        p.estado === 'anulado' ? 'bg-prius-surface text-prius-muted line-through' : 'bg-prius-surface text-black hover:bg-hairline'
-                      }`}
-                    >
-                      <span>{formatFecha(p.fecha)}</span>
-                      <span className="font-bold">{p.monto == null ? 'Monto nulo' : formatPesosVisible(p.monto)}</span>
-                      <span className="text-prius-muted">
-                        {p.comprobantes?.length > 0 ? p.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ') : 'Sin comprobante'}
-                      </span>
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-          )
-        })}
-
-        {/* Reservas activas / sueltas */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-label-md text-prius-slate uppercase tracking-wider">Reservas ({reservasSueltas.length})</p>
+        {/* Reservas y pagos — UNA sola tarjeta para todo (31/10/2026):
+            grupo con precio unificado, temporada, período y día. Antes había
+            dos diseños distintos (la tarjeta rica solo para grupos, una pobre
+            para las sueltas) más la grilla ReservaPagosCard en la otra columna. */}
+        {/* La lista de reservas se queda con el alto sobrante y scrollea por
+            dentro (31/10/2026). Así la columna izquierda entra SIEMPRE en el
+            viewport, sin importar cuántas reservas tenga el cliente, y la
+            ficha nunca scrollea como un todo. */}
+        <div className="lg:flex-1 lg:min-h-0 lg:flex lg:flex-col">
+          <div className="flex items-center justify-between mb-2 shrink-0">
+            <p className="text-label-md text-prius-slate uppercase tracking-wider">
+              Reservas ({vistasReservas.length})
+            </p>
             {reservasSueltas.filter((r) => r.estado !== 'cancelada').length >= 2 && (
               <button onClick={onAgruparReservas} className="text-label-md font-bold uppercase tracking-wider text-gold hover:text-gold-hover transition-all">
                 Agrupar reservas
               </button>
             )}
           </div>
-          {reservasSueltas.length === 0 ? (
-            <p className="text-xs text-prius-muted uppercase tracking-wider">Sin reservas sueltas.</p>
+          {vistasReservas.length === 0 ? (
+            <p className="text-xs text-prius-muted uppercase tracking-wider">Sin reservas.</p>
           ) : (
-            <div className="space-y-2">
-              {reservasSueltas.map((r) => {
-                const socios = coSocios(r)
-                const badge = estadoBadgeStatus(r)
-                const fechas = r.tipo_alquiler === 'temporada'
-                  ? r.temporada
-                  : r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`
-                // Mismos handlers/condiciones de siempre, solo unificados en
-                // un único estilo de botón (oct 2026) — antes cada acción
-                // tenía su propio color suelto (amarillo/verde/negro/
-                // naranja), ahora todas son #F4F3F3 + texto/ícono negro.
-                const acciones = [
-                  badge === 'preconfirmada' && { label: 'Hacer check-in', icon: QrCode, onClick: () => navigate(linkToRecepcion(r.codigo)) },
-                  r.estado !== 'cancelada' && !r.bonificada && esPendienteConfirmacion(r) && { label: 'Confirmar temporada', icon: CalendarCheck, onClick: () => onConfirmarTemporada(r) },
-                  r.estado !== 'cancelada' && !r.bonificada && (r.estado_pago === 'parcial' || r.estado_pago === 'pendiente') && { label: 'Registrar pago', icon: Wallet, onClick: () => onPagoCelda({ reserva: { ...r, clientes: cliente }, pago: null }) },
-                  r.estado !== 'cancelada' && { label: 'Comprobante', icon: Receipt, onClick: () => navigate(linkToComprobante(r.id)) },
-                  r.estado !== 'cancelada' && { label: 'Liberar unidad', icon: Unlock, onClick: () => onLiberarUnidad(r) },
-                ].filter(Boolean)
-                return (
-                  <div key={r.id} className="bg-white border border-hairline rounded-xl px-4 py-3 space-y-2.5">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="px-2.5 py-1 rounded-full bg-prius-surface text-[10px] font-bold uppercase tracking-wider text-prius-slate">
-                        {TIPO_LABEL[r.tipo_alquiler] || r.tipo_alquiler}
-                      </span>
-                      <span className="text-xs text-prius-slate flex items-center gap-1.5">
-                        {unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)}
-                        <span className="text-prius-muted">{fechas}</span>
-                      </span>
-                      {r.estado === 'cancelada' && <span className="text-prius-error font-bold uppercase text-[10px]">Cancelada</span>}
-                    </div>
-                    {socios.length > 0 && (
-                      <p className="text-body-sm text-prius-slate flex items-center gap-1">
-                        <Users size={11} className="shrink-0" /> Co-socios: {socios.map((s) => formatNombre(s.nombre)).join(', ')}
-                      </p>
-                    )}
-                    {acciones.length > 0 && (
-                      // flex-wrap en vez de grid de 3 columnas fijas: en la
-                      // ficha ancha de desktop (2 columnas internas, oct
-                      // 2026) esta tarjeta vive en una columna angosta —
-                      // un grid a 3 cols por viewport width truncaba los
-                      // labels ("Confir…", "Libera…"). Con flex-wrap cada
-                      // botón pide su ancho mínimo real y los que no entran
-                      // bajan de línea solos, sin importar cuán angosto sea
-                      // el contenedor.
-                      <div className="flex flex-wrap gap-2">
-                        {acciones.map(({ label, icon: Icon, onClick }) => (
-                          <button
-                            key={label}
-                            onClick={onClick}
-                            className="h-10 px-4 rounded-xl bg-prius-surface hover:bg-hairline text-black text-[13px] sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-all flex-1 min-w-[132px] whitespace-nowrap"
-                          >
-                            <Icon size={14} className="shrink-0" /> {label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Pagos por reserva — solo las vigentes (29/10/2026): una reserva
-            cancelada no tiene nada para cobrar, mostrarla acá la dejaba como
-            "pendiente"/"sin confirmar" para siempre. Sigue visible arriba en
-            "Reservas (N)" con su chip CANCELADA y en el Historial. */}
-        <div>
-          <p className="text-label-md text-prius-slate uppercase tracking-wider mb-2">Pagos por Reserva</p>
-          {reservasSueltasCobrables.length === 0 ? (
-            <p className="text-xs text-prius-muted uppercase tracking-wider">Sin reservas sueltas — nada para cobrar acá (ver pagos del grupo arriba).</p>
-          ) : (
-            <div className="space-y-4">
-              {reservasSueltasCobrables.map((r) => (
-                <div key={r.id} data-deeplink-id={`reserva-${r.id}`}>
-                  <PagosGrid
-                    reserva={r}
-                    pagos={todosPagos.filter((p) => p.reserva_id === r.id)}
-                    onCellClick={(reserva, pago) => onPagoCelda({ reserva: { ...reserva, clientes: cliente }, pago })}
-                    onDefinirPrecio={(reserva) => onDefinirPrecio(reserva)}
-                    onEditarPrecio={puedeAjustarPrecio ? (reserva) => onEditarPrecio(reserva) : undefined}
-                  />
-                </div>
+            <ScrollFade className="space-y-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+              {vistasReservas.map((vista) => (
+                <ReservaPagosCard
+                  key={vista.key}
+                  vista={vista}
+                  cliente={cliente}
+                  onPagoCelda={onPagoCelda}
+                  onCargarMonto={onPagoCelda}
+                  onLiberarUnidad={onLiberarUnidad}
+                  onConfirmarTemporada={onConfirmarTemporada}
+                  onDefinirPrecio={onDefinirPrecio}
+                  onEditarPrecio={puedeAjustarPrecio ? onEditarPrecio : undefined}
+                  onIrAComprobante={(r) => navigate(linkToComprobante(r.id))}
+                  onCheckin={(r) => navigate(linkToRecepcion(r.codigo))}
+                />
               ))}
-            </div>
+            </ScrollFade>
           )}
         </div>
-
       </div>
 
       {/* Columna derecha: SOLO Historial, y es lo único que scrollea. */}

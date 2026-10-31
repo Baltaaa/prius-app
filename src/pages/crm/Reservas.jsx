@@ -83,7 +83,7 @@ export default function Reservas() {
   const [pagoReserva, setPagoReserva] = useState(null)
   // Item 7 (testing oct 2026): click en una instancia de pago del panel de
   // detalle abre DetallePago (comprobante, monto, fecha, método, cliente) —
-  // mismo componente que ya usa Clientes.jsx para las celdas de PagosGrid.
+  // mismo componente que ya usa Clientes.jsx para las celdas de ReservaPagosCard.
   const [pagoDetalle, setPagoDetalle] = useState(null)
   const [showFiltros, setShowFiltros] = useState(false)
   const filtrosOverlay = useOverlay({ id: 'reservas-filtros', isOpen: showFiltros, onRequestClose: () => setShowFiltros(false) })

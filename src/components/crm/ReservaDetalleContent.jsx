@@ -192,7 +192,7 @@ export default function ReservaDetalleContent({
                 >
                   {/* Jerarquía (testing oct 2026, item 7): comprobante como
                       dato principal, monto como secundario — igual criterio
-                      que PagosGrid.jsx (ficha de cliente). Sin truncar
+                      que ReservaPagosCard.jsx (ficha de cliente). Sin truncar
                       (Bloque B, ítem 11, 26/10/2026): "Sin comprobante"
                       entero, no "Sin comprob…" — rompe a otra línea en vez
                       de cortar con elipsis. */}

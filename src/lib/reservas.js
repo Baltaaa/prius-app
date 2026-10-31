@@ -205,3 +205,90 @@ export function coSocios(reserva) {
   }
   return result
 }
+
+// ---------------------------------------------------------------------------
+// Vistas para ReservaPagosCard (31/10/2026)
+//
+// La ficha de cliente muestra una sola tarjeta para TODO: grupo con precio
+// unificado, temporada, período y día. Estas dos funciones normalizan esos
+// dos casos a la misma forma, así el componente no tiene que saber cuál está
+// dibujando.
+// ---------------------------------------------------------------------------
+
+const _fechasDe = (r, fmt) => {
+  // "Temporada completa", no la temporada otra vez: el año ya está en el
+  // encabezado de la tarjeta y repetirlo no agrega nada.
+  if (r.tipo_alquiler === 'temporada') return 'Temporada completa'
+  if (r.tipo_alquiler === 'dia') return fmt(r.fecha)
+  return `${fmt(r.fecha_inicio)} — ${fmt(r.fecha_fin)}`
+}
+
+/** Los pagos anulados nunca se listan: viven en el Historial, no en la ficha. */
+const _pagosVigentes = (lista = []) => [...lista]
+  .filter((p) => p.estado !== 'anulado')
+  .sort((a, b) => String(a.fecha || '').localeCompare(String(b.fecha || '')))
+
+export function vistaDeGrupo({ grupoId, reservasGrupo, reservas, pagosPorReserva, formatFecha }) {
+  const grupo = reservasGrupo[0].reserva_grupos
+  const saldo = saldoGrupo(reservasGrupo[0], reservas, pagosPorReserva)
+  const pagado = Math.max(Number(grupo?.precio_total || 0) - (saldo ?? 0), 0)
+  const pagos = _pagosVigentes(
+    reservasGrupo.flatMap((r) => (pagosPorReserva[r.id] || []).map((p) => ({ ...p, __reserva: r }))),
+  )
+  const principal = reservasGrupo.find((r) => r.estado !== 'cancelada') || reservasGrupo[0]
+  return {
+    key: `grupo-${grupoId}`,
+    esGrupo: true,
+    tipo: principal.tipo_alquiler,
+    temporada: grupo?.temporada || principal.temporada,
+    estadoBadge: estadoPagoGrupo(saldo, grupo),
+    precioTotal: grupo?.precio_total,
+    pagado,
+    saldo,
+    sinPrecio: !(Number(grupo?.precio_total) > 0),
+    cancelada: reservasGrupo.every((r) => r.estado === 'cancelada'),
+    preconfirmada: false,
+    pendienteConfirmacion: false,
+    unidades: reservasGrupo.map((r) => ({
+      key: r.id,
+      tipo: r.unidades?.tipo,
+      numero: r.unidades?.numero,
+      fechas: _fechasDe(r, formatFecha),
+      cancelada: r.estado === 'cancelada',
+    })),
+    pagos,
+    socios: coSocios(principal),
+    reservaPrincipal: principal,
+  }
+}
+
+export function vistaDeReserva({ reserva, pagosPorReserva, formatFecha }) {
+  const pagos = _pagosVigentes((pagosPorReserva[reserva.id] || []).map((p) => ({ ...p, __reserva: reserva })))
+  const saldo = saldoNumerico(reserva, pagosPorReserva[reserva.id] || [])
+  const { valorTotal, pendiente, bonificada } = montoInfo(reserva)
+  const total = Number(valorTotal) || 0
+  return {
+    key: `reserva-${reserva.id}`,
+    esGrupo: false,
+    tipo: reserva.tipo_alquiler,
+    temporada: reserva.temporada,
+    estadoBadge: estadoBadgeStatus(reserva),
+    precioTotal: total,
+    pagado: saldo == null ? null : Math.max(total - saldo, 0),
+    saldo,
+    sinPrecio: !pendiente && !bonificada && !(total > 0),
+    cancelada: reserva.estado === 'cancelada',
+    preconfirmada: estadoBadgeStatus(reserva) === 'preconfirmada',
+    pendienteConfirmacion: esPendienteConfirmacion(reserva),
+    unidades: [{
+      key: reserva.id,
+      tipo: reserva.unidades?.tipo,
+      numero: reserva.unidades?.numero,
+      fechas: _fechasDe(reserva, formatFecha),
+      cancelada: reserva.estado === 'cancelada',
+    }],
+    pagos,
+    socios: coSocios(reserva),
+    reservaPrincipal: reserva,
+  }
+}

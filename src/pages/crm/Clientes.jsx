@@ -152,7 +152,7 @@ export default function Clientes() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCliente, setEditingCliente] = useState(null)
   const [pagoCliente, setPagoCliente] = useState(null)
-  const [pagoCelda, setPagoCelda] = useState(null) // { reserva, pago } | null — click en PagosGrid
+  const [pagoCelda, setPagoCelda] = useState(null) // { reserva, pago } | null — click en ReservaPagosCard
   const [expandedId, setExpandedId] = useState(null) // cliente seleccionado — un solo detalle a la vez
   // Breakpoints de maestro-detalle (mismo patrón que Reservas.jsx): desktop
   // ≥1024px panel fijo, tablet 768-1023px bottom sheet, mobile <768px
@@ -464,7 +464,7 @@ export default function Clientes() {
       }
       // accion=asignar_precio (oct 2026, notificación "Asignar monto total
       // de unidad"): abre directo "Definir precio" para esa reserva — mismo
-      // modal que ya usa PagosGrid ("Definir precio") y el botón de la fila
+      // modal que ya usa ReservaPagosCard ("Definir precio") y el botón de la fila
       // de RESERVAS, sin crear uno nuevo.
       if (accion === 'asignar_precio' && reserva) {
         const reservaObj = (reservasPorCliente[cliente.id] || []).find((r) => r.id === reserva)
@@ -1247,7 +1247,7 @@ export default function Clientes() {
           de la reserva compartida (registrar_pago ya admite esa combinación,
           el saldo que valida es el de la reserva, no el del titular). No se
           mezcla con `reservasPorCliente` en ningún otro lado (saldo del
-          header, PagosGrid) a propósito, ver reservasComoCoSocioPorCliente. */}
+          header, ReservaPagosCard) a propósito, ver reservasComoCoSocioPorCliente. */}
       <RegistrarPago
         isOpen={!!pagoCliente}
         onClose={() => setPagoCliente(null)}
@@ -1262,7 +1262,7 @@ export default function Clientes() {
         }
       />
 
-      {/* Disparado desde una celda de PagosGrid: reserva ya fija. Si la celda
+      {/* Disparado desde una celda de ReservaPagosCard: reserva ya fija. Si la celda
           tenía un pago cargado, se abre en modo consulta (DetallePago); si
           era la celda "+ Cargar", se abre el alta (RegistrarPago). Oct 2026
           (`editando`): "Cargar monto" desde DetallePago reusa esta MISMA

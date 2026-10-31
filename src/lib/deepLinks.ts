@@ -22,7 +22,7 @@ export function linkToCliente(
   // para ese cliente — usado desde la notificación de saldo pendiente.
   // accion=cargar_monto (oct 2026): abre DetallePago con el campo de monto
   // ya en edición — usado desde la notificación pago_sin_monto (un pago
-  // puntual, ej. click directo en una celda de PagosGrid).
+  // puntual, ej. click directo en una celda de ReservaPagosCard).
   // accion=cargar_recibos (oct 2026): recorre en secuencia TODOS los
   // recibos sin monto de `reservaId` ("Recibo 1 de N" → ... ), vía el mismo
   // form de RegistrarPago en modo edición — usado desde la notificación

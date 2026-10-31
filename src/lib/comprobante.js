@@ -26,7 +26,7 @@ export function numeroComprobante(reserva) {
 // columna siempre queda en null, así que el comprobante real (tipo +
 // número, en `p.comprobantes[]` vía el join de fetchPagos) nunca se
 // mostraba acá ni en el documento impreso. Mismo criterio que ya usan
-// PagosGrid/DetallePago/ReservaDetalleContent: formatComprobante() sobre
+// ReservaPagosCard/DetallePago/ReservaDetalleContent: formatComprobante() sobre
 // los comprobantes vigentes vinculados, con fallback a la columna vieja
 // solo para no perder la referencia de los pagos migrados que SÍ la tienen
 // y no tienen fila en `comprobantes`.

@@ -153,7 +153,7 @@ export function DataProvider({ children }) {
     // clientes(nombre) (ítem 3, 25/10/2026): quién pagó cada cuota — en una
     // reserva con cosocios, titular y cosocios pueden pagar cuotas distintas
     // de la misma reserva, así que el comprobante/monto solo no alcanza para
-    // distinguir de un vistazo quién cargó cada una (PagosGrid.jsx,
+    // distinguir de un vistazo quién cargó cada una (ReservaPagosCard.jsx,
     // ReservaDetalleContent.jsx).
     const { data } = await supabase
       .from('pagos')

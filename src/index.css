@@ -213,6 +213,29 @@ body {
 }
 
 /*
+  Container queries para los paneles de detalle (31/10/2026).
+
+  Los breakpoints de Tailwind miden el VIEWPORT, y las fichas de Clientes y
+  Reservas viven en una columna que a 1366x768 ronda los 300px aunque el
+  viewport sea ancho. Usar `sm:`/`md:` ahí mete 4 columnas en 237px reales y
+  el contenido se pisa. Estas clases miden el contenedor, que es el ancho que
+  realmente importa.
+
+  Uso: `cq` en el padre que define el ancho, `cq-cols-4` / `cq-cols-3` en la
+  grilla hija (que arranca en grid-cols-2 / grid-cols-1 por defecto).
+*/
+@layer utilities {
+  .cq { container-type: inline-size; }
+}
+@container (min-width: 420px) {
+  .cq-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cq-span-1 { grid-column: span 1 / span 1; }
+}
+@container (min-width: 300px) {
+  .cq-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/*
   Animación de apertura/cierre única (B1, oct 2026) para todo lo que se abre
   por interacción — modales, bottom sheets, dropdowns, selects, menús,
   popovers, paneles laterales, pantallas de detalle. Reemplaza las clases
