@@ -27,6 +27,7 @@ import CerrarCajaStepper from '../../components/crm/CerrarCajaStepper'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import MontoStat from '../../components/ui/MontoStat'
+import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
 
 const FILTROS_MEDIO = [
   { value: 'todos', label: 'Todos los medios' },
@@ -61,6 +62,10 @@ export default function Caja() {
   const { cajaHoy, historialCajas, todosGastos, loading, iniciarCaja, cerrarCaja, reabrirCaja } = useCaja()
   const readyCaja = useInitialLoad(loading)
   const puedeReabrir = usePermiso('reabrir_caja')
+  // Switch Pesos/Dólares (31/10/2026): solo presentación — los montos que
+  // llegan de la base ya están en pesos; `fmtM` los convierte para mostrar.
+  const mv = useMonedaVista()
+  const fmtM = mv.fmt
   const { pagos } = useData()
   const { alert, toast } = useDialog()
 
@@ -236,6 +241,10 @@ export default function Caja() {
             Volver a Hoy
           </button>
         )}
+        <MonedaSwitch
+          moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion}
+          fecha={mv.fecha} stale={mv.stale} compacto
+        />
         {cajaSeleccionada && (
           <span className={`hidden sm:inline-block px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-red-500/10 text-prius-error border-red-500/20' : 'bg-green-500/10 text-prius-success border-green-500/20'}`}>
             {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
@@ -279,9 +288,9 @@ export default function Caja() {
             >
               <span className="text-sm text-prius-slate">{formatFecha(c.fecha)}</span>
               <span className="flex items-center gap-4 text-xs">
-                <span className="font-bold text-black tabular-nums">{formatPesos(c.total_neto)}</span>
+                <span className="font-bold text-black tabular-nums">{fmtM(c.total_neto)}</span>
                 {c.diferencia != null && Number(c.diferencia) !== 0 && (
-                  <span className="text-gold tabular-nums">dif. {formatPesos(c.diferencia)}</span>
+                  <span className="text-gold tabular-nums">dif. {fmtM(c.diferencia)}</span>
                 )}
               </span>
             </button>
@@ -338,7 +347,7 @@ export default function Caja() {
                 <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Neto en caja</p>
                 <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Wallet size={16} /></div>
               </div>
-              <MontoStat value={cajaSeleccionada.total_neto} className="text-black mb-2" />
+              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_neto} className="text-black mb-2" />
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-prius-success text-[10px] font-medium max-w-full overflow-hidden mt-auto">
                 <span className="w-1.5 h-1.5 rounded-full bg-prius-success shrink-0" />
                 <span className="truncate">Arqueado en tiempo real</span>
@@ -349,7 +358,7 @@ export default function Caja() {
                 <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Ingresos</p>
                 <div className="shrink-0 w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center text-prius-success"><ArrowDownRight size={16} /></div>
               </div>
-              <MontoStat value={cajaSeleccionada.total_cobros} size="md" className="text-prius-success mb-2" />
+              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_cobros} size="md" className="text-prius-success mb-2" />
               <p className="text-[10px] text-prius-muted mt-auto truncate">{movimientos.filter((m) => m.tipo_movimiento === 'ingreso' && m.estado !== 'anulado').length} cobro{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'} acreditado{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'}</p>
             </div>
             <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
@@ -357,7 +366,7 @@ export default function Caja() {
                 <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Egresos</p>
                 <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><ArrowUpRight size={16} /></div>
               </div>
-              <MontoStat value={cajaSeleccionada.total_gastos} size="md" className="text-black mb-2" />
+              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_gastos} size="md" className="text-black mb-2" />
               <p className="text-[10px] text-prius-muted mt-auto truncate">{todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id && g.estado !== 'anulado').length > 0 ? `${todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length} gasto(s) cargado(s)` : 'Sin retiros cargados'}</p>
             </div>
             <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
@@ -365,7 +374,7 @@ export default function Caja() {
                 <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Total esperado</p>
                 <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Banknote size={16} /></div>
               </div>
-              <MontoStat value={totalEsperadoPreview} size="md" className="text-black mb-2" />
+              <MontoStat fmt={fmtM} value={totalEsperadoPreview} size="md" className="text-black mb-2" />
               <p className="text-[10px] text-prius-muted mt-auto truncate">Todos los medios — ver desglose</p>
             </div>
           </div>
@@ -441,7 +450,7 @@ export default function Caja() {
                                   )}
                                 </td>
                                 <td className="py-3 px-2 whitespace-nowrap text-prius-slate">{MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago}</td>
-                                <td className={`py-3 px-2 text-right font-bold tabular-nums whitespace-nowrap ${m.monto < 0 ? 'text-prius-error' : 'text-black'}`}>{formatPesos(m.monto)}</td>
+                                <td className={`py-3 px-2 text-right font-bold tabular-nums whitespace-nowrap ${m.monto < 0 ? 'text-prius-error' : 'text-black'}`}>{fmtM(m.monto)}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -469,7 +478,7 @@ export default function Caja() {
                                 </span>
                                 <p className={`text-sm font-bold text-black truncate min-w-0 ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
                               </div>
-                              <span className={`text-sm font-bold tabular-nums whitespace-nowrap shrink-0 ${m.monto < 0 ? 'text-prius-error' : 'text-prius-success'}`}>{formatPesos(m.monto)}</span>
+                              <span className={`text-sm font-bold tabular-nums whitespace-nowrap shrink-0 ${m.monto < 0 ? 'text-prius-error' : 'text-prius-success'}`}>{fmtM(m.monto)}</span>
                             </div>
                             <p className="text-[10px] text-prius-muted uppercase tracking-wider truncate pl-8">
                               {m.cliente_proveedor}{m.unidad ? ` · ${m.unidad}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
@@ -490,7 +499,7 @@ export default function Caja() {
                       {resumen.facturas.map((f) => (
                         <div key={f.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
                           <span className="text-sm text-prius-slate">{f.etiqueta}</span>
-                          <span className="text-sm font-bold text-black tabular-nums">{formatPesos(f.monto_total)}</span>
+                          <span className="text-sm font-bold text-black tabular-nums">{fmtM(f.monto_total)}</span>
                         </div>
                       ))}
                     </div>
@@ -503,7 +512,7 @@ export default function Caja() {
                       {resumen.recibos.map((r) => (
                         <div key={r.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
                           <span className="text-sm text-prius-slate">{r.etiqueta}</span>
-                          <span className="text-sm font-bold text-black tabular-nums">{formatPesos(r.monto_total)}</span>
+                          <span className="text-sm font-bold text-black tabular-nums">{fmtM(r.monto_total)}</span>
                         </div>
                       ))}
                     </div>
@@ -520,7 +529,7 @@ export default function Caja() {
                           className="w-full flex justify-between py-2 px-2 border-b border-hairline last:border-0 hover:bg-prius-surface rounded-lg text-left"
                         >
                           <span className="text-sm text-prius-slate">{p.cliente || 'S/N'} — {p.concepto}</span>
-                          <span className="text-sm font-bold text-black tabular-nums">{formatPesos(p.monto)}</span>
+                          <span className="text-sm font-bold text-black tabular-nums">{fmtM(p.monto)}</span>
                         </button>
                       ))}
                     </div>
@@ -540,7 +549,7 @@ export default function Caja() {
                             <p className={`text-sm font-bold text-prius-slate truncate ${g.estado === 'anulado' ? 'line-through' : ''}`}>{g.descripcion}</p>
                             <p className="text-[10px] text-prius-muted uppercase tracking-widest">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
                           </div>
-                          <span className="text-sm font-bold text-prius-error tabular-nums shrink-0 ml-3">{formatPesos(g.monto)}</span>
+                          <span className="text-sm font-bold text-prius-error tabular-nums shrink-0 ml-3">{fmtM(g.monto)}</span>
                         </button>
                       ))}
                     </div>
@@ -555,7 +564,7 @@ export default function Caja() {
                     {resumen.por_medio.map((m) => (
                       <div key={m.medio} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-prius-surface text-xs whitespace-nowrap shrink-0">
                         <span className="text-prius-slate">{MEDIO_PAGO_LABEL[m.medio] || m.medio}:</span>
-                        <span className="font-bold text-black tabular-nums">{formatPesos(m.neto)}</span>
+                        <span className="font-bold text-black tabular-nums">{fmtM(m.neto)}</span>
                       </div>
                     ))}
                   </div>
@@ -611,7 +620,7 @@ export default function Caja() {
                             </div>
                             <span className="text-sm font-semibold text-black">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
                           </div>
-                          <span className="text-sm font-bold text-black tabular-nums">{formatPesos(m.neto)}</span>
+                          <span className="text-sm font-bold text-black tabular-nums">{fmtM(m.neto)}</span>
                         </div>
                       )
                     })}

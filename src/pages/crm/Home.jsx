@@ -10,6 +10,7 @@ import { supabase } from '../../lib/supabase'
 import { calcularPlanoStats } from '../../lib/planoStats'
 import { buildUnitsMap } from '../../lib/planoUnits'
 import { formatPesos, formatFechaLarga, formatHora, formatMontosEnTexto, formatPorcentaje } from '../../lib/format'
+import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
 import { linkToReserva, linkToCliente } from '../../lib/deepLinks'
 import { isFeatureEnabled } from '../../lib/features'
 import { useClima } from '../../hooks/useClima'
@@ -46,6 +47,9 @@ function Bar({ pct, tone = 'gold' }) {
 }
 
 export default function Home() {
+  // Switch Pesos/Dólares (31/10/2026) — solo presentación, ver MonedaSwitch.
+  const mv = useMonedaVista()
+  const fmtM = mv.fmt
   const navigate = useNavigate()
   const { perfil } = useAuth()
   const puedeVerReportes = usePermiso('reportes_globales')
@@ -201,6 +205,10 @@ export default function Home() {
 
         {/* Badges KPI — solo desktop (mobile los muestra como chips más abajo) */}
         <div className="hidden lg:flex items-center gap-space-sm">
+          <MonedaSwitch
+            moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion}
+            fecha={mv.fecha} stale={mv.stale} compacto
+          />
           <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-space-md py-2.5 rounded-xl card-light hover:bg-prius-subtle transition-colors text-left">
             <CircleCheck size={18} className="text-prius-success" />
             <div>
@@ -367,11 +375,11 @@ export default function Home() {
                 >
                   <div className="min-w-0">
                     <span className="block text-label-md text-prius-slate uppercase">Total Recaudado</span>
-                    <span className="text-metric-xl text-black">{formatPesos(totalCobrado)}</span>
+                    <span className="text-metric-xl text-black">{fmtM(totalCobrado)}</span>
                   </div>
                   <div className="min-w-0 sm:text-right">
                     <span className="text-title-md text-prius-slate">Meta presupuestada</span>
-                    <span className="block text-body-sm text-prius-slate">{formatPesos(facturacionBruta)}</span>
+                    <span className="block text-body-sm text-prius-slate">{fmtM(facturacionBruta)}</span>
                   </div>
                 </button>
                 <div className="mt-3"><Bar pct={pctPercibido} tone="success" /></div>
@@ -390,7 +398,7 @@ export default function Home() {
                 <span className="flex items-center gap-1.5 text-label-md text-prius-slate uppercase"><AlertTriangle size={14} className="text-prius-error" /> Pendientes</span>
               </div>
               <div className="mt-2">
-                <span className="text-headline-sm text-black">{stats.pendientes.saldo > 0 ? formatPesos(stats.pendientes.saldo) : formatPesos(0)}</span>
+                <span className="text-headline-sm text-black">{fmtM(stats.pendientes.saldo > 0 ? stats.pendientes.saldo : 0)}</span>
                 <p className="text-body-sm text-prius-slate mt-0.5">{stats.pendientes.count} reservas con saldo</p>
               </div>
             </button>
@@ -399,7 +407,7 @@ export default function Home() {
                 <span className="flex items-center gap-1.5 text-label-md text-prius-slate uppercase"><Wallet size={14} className="text-prius-success" /> Caja Hoy</span>
               </div>
               <div className="mt-2">
-                <span className="text-headline-sm text-black">{stats.ingresosDelDia != null ? formatPesos(stats.ingresosDelDia) : formatPesos(0)}</span>
+                <span className="text-headline-sm text-black">{fmtM(stats.ingresosDelDia != null ? stats.ingresosDelDia : 0)}</span>
                 <p className="text-body-sm text-prius-slate mt-0.5">Ingresos del día</p>
               </div>
             </button>
@@ -412,7 +420,7 @@ export default function Home() {
                 <AlertTriangle size={16} className="text-prius-error" />
                 <span className="text-body-sm text-black font-medium">{stats.pendientes.count} reservas con deuda</span>
               </div>
-              <span className="text-title-md font-bold text-prius-error">{formatPesos(deudaExterna)}</span>
+              <span className="text-title-md font-bold text-prius-error">{fmtM(deudaExterna)}</span>
             </button>
           )}
         </div>

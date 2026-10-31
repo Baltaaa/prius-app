@@ -28,10 +28,13 @@ const SIZE_CLASS = {
   xs: 'text-[clamp(11px,3.6vw,14px)] font-bold leading-tight',
 }
 
-export default function MontoStat({ value, size = 'lg', className = '', as: Tag = 'p' }) {
+// `fmt` (31/10/2026): formateador opcional. Default formatPesos, así nada
+// cambia donde ya se usaba; las pantallas con switch Pesos/Dólares le pasan
+// el `fmt` de useMonedaVista() para mostrar el mismo monto convertido.
+export default function MontoStat({ value, size = 'lg', className = '', as: Tag = 'p', fmt = formatPesos }) {
   return (
     <Tag className={`${SIZE_CLASS[size] || SIZE_CLASS.lg} tabular-nums whitespace-nowrap ${className}`}>
-      {formatPesos(value)}
+      {fmt(value)}
     </Tag>
   )
 }
