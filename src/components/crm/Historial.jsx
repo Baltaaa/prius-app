@@ -501,8 +501,8 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
         grupos.map(([fecha, items]) => (
           <div key={fecha}>
             {/* Encabezado de día sticky, con contador (mock 07). */}
-            <div className={`flex items-center justify-between gap-2 py-2 bg-prius-background ${
-              mostrarFiltrosGlobales ? 'sticky top-0 z-10' : ''
+            <div className={`flex items-center justify-between gap-2 py-2 ${
+              mostrarFiltrosGlobales ? 'sticky top-0 z-10 sticky-blur' : 'bg-prius-background'
             }`}>
               <h3 className="text-label-lg uppercase tracking-wider text-black capitalize truncate">
                 {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
@@ -561,7 +561,13 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
     <div className="anim-fade-up-page">
       {/* Barra de filtros. En mobile queda fija arriba y los controles finos
           se despliegan; en desktop está todo a la vista. */}
-      <div className="sticky top-0 z-20 -mx-4 px-4 md:mx-0 md:px-0 md:static bg-prius-background pb-3">
+      {/* sticky-blur: fondo semi-opaco + backdrop-filter para que el
+          contenido que scrollea por detrás se difumine en vez de cortar
+          en seco. El ::after (solo mobile) extiende el fade al área de
+          pb-3 bajo la card de filtros. En md:static el blur no tiene
+          efecto visual (nada scrollea por detrás de un elemento estático
+          en flujo normal). */}
+      <div className="sticky top-0 z-20 -mx-4 px-4 md:mx-0 md:px-0 md:static pb-3 sticky-blur">
         <div className="bg-white border border-hairline rounded-2xl p-3 space-y-3">
           <div className="flex items-center gap-2">
             <SearchInput

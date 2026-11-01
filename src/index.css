@@ -520,3 +520,41 @@ button, a {
    Clase reutilizable, aplicada en los contenedores con scroll propio
    (#app-main-scroll, Modal.jsx, bottom sheets). */
 .overscroll-contain { overscroll-behavior: contain; }
+
+/*
+  Blur de header sticky (nov 2026).
+
+  Cuando un elemento es `sticky` y el contenido scrollea por detrás, un
+  fondo sólido corta el contenido de golpe. Este tratamiento suaviza el
+  borde con backdrop-filter + fondo semi-opaco + gradiente de fade al pie.
+
+  Unlayered a propósito: necesita ganar sobre bg-prius-background y
+  similares que están en @layer utilities.
+
+  Solo se aplica en Historial (barra de filtros) — no en el Plano
+  (sus tooltips usan .glass-tooltip con tema oscuro).
+
+  El ::after solo activa en mobile (<768px) donde la barra es `sticky`;
+  en desktop pasa a `md:static` y el gradiente sería ruido.
+*/
+.sticky-blur {
+  background-color: rgba(249, 249, 249, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+@media (max-width: 767px) {
+  .sticky-blur::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 16px;
+    background: linear-gradient(to bottom, rgba(249, 249, 249, 0.7) 0%, transparent 100%);
+    pointer-events: none;
+  }
+}
+/* Fallback: donde backdrop-filter no está soportado, fondo sólido. */
+@supports not (backdrop-filter: blur(1px)) {
+  .sticky-blur { background-color: #F9F9F9; }
+}
