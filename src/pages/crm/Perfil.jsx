@@ -105,7 +105,7 @@ export default function Perfil() {
   return (
     // pb-bottom-nav-safe: en mobile la bottom nav es fija y sin esto tapaba
     // el botón de "Guardar cotización", que es el último de la página.
-    <div className="space-y-3 anim-fade-up pb-bottom-nav-safe md:pb-0">
+    <div className="space-y-3 anim-fade-up-page pb-bottom-nav-safe md:pb-0">
       {/* Perfil compacto */}
       <section className="bg-white border border-hairline rounded-2xl p-4 md:p-5">
         <div className="flex flex-col md:flex-row md:items-center gap-4">

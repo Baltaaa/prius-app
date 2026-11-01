@@ -409,7 +409,7 @@ export default function Reservas() {
     // entre hijos se reparte solo entre los que existen (el div de chips es
     // condicional y ya no necesita el wrapper-truco de antes para no dejar
     // un hueco vacío). Por debajo de lg, layout de siempre sin cambios.
-    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 animate-premium-fade font-ui">
+    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 anim-fade-up-page font-ui">
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
       <div className="flex flex-wrap gap-4 items-center lg:shrink-0">
@@ -450,7 +450,7 @@ export default function Reservas() {
                     <button
                       key={f.value}
                       onClick={() => setFiltroEstado(f.value)}
-                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle flex items-center justify-between rounded-lg"
+                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle anim-colors flex items-center justify-between rounded-lg"
                     >
                       {f.label}
                       {filtroEstado === f.value && <Check size={14} className="text-gold" />}
@@ -463,7 +463,7 @@ export default function Reservas() {
                     <button
                       key={f.value}
                       onClick={() => setFiltroTipo(f.value)}
-                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle flex items-center justify-between rounded-lg"
+                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle anim-colors flex items-center justify-between rounded-lg"
                     >
                       {f.label}
                       {filtroTipo === f.value && <Check size={14} className="text-gold" />}
@@ -570,7 +570,7 @@ export default function Reservas() {
               <tr
                 key={res.id}
                 onClick={() => navigate(linkToCliente(res.cliente_id))}
-                className="hover:bg-prius-subtle transition-all group cursor-pointer"
+                className="hover:bg-prius-subtle anim-colors transition-all group cursor-pointer"
               >
                 <td className="px-3 py-4 align-middle text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
                 <td className="px-3 py-4 align-middle font-bold text-black uppercase break-words">
@@ -610,7 +610,7 @@ export default function Reservas() {
             <tr
               key={res.id}
               onClick={() => handleOpenDetalle(res)}
-              className={`hover:bg-prius-subtle transition-all group cursor-pointer ${selectedReservaId === res.id ? 'bg-prius-subtle' : ''}`}
+              className={`hover:bg-prius-subtle anim-colors transition-all group cursor-pointer ${selectedReservaId === res.id ? 'bg-prius-subtle' : ''}`}
             >
               <td className="px-3 py-4 align-middle text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
               <td className="px-3 py-4 align-middle font-bold text-black uppercase break-words">
@@ -740,7 +740,7 @@ export default function Reservas() {
           con flecha de volver, acciones fijas abajo (adentro de
           ReservaDetalleContent). Vía portal a document.body (fix oct 2026,
           detectado al construir el mismo patrón en Clientes.jsx): el
-          wrapper raíz de esta página usa `animate-premium-fade`, cuya
+          wrapper raíz de esta página usa `anim-fade-up-page`, cuya
           animación deja un `transform` aplicado (fill-mode `both`) después
           de terminar — eso lo convierte en containing block de cualquier
           `position:fixed` anidado adentro (mismo bug ya documentado en

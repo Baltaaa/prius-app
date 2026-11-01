@@ -7,7 +7,7 @@ import Historial from '../../components/crm/Historial'
 // acotar a ninguna entidad.
 export default function Actividad() {
   return (
-    <div className="animate-premium-fade">
+    <div className="anim-fade-up-page">
       <Historial tipo="global" />
     </div>
   )

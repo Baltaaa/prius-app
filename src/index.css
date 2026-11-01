@@ -323,9 +323,26 @@ body {
 }
 
 @layer utilities {
-  /* Entrada de página y de sección. */
+  /* Entrada de sección (nodos internos, sin `position:fixed` adentro). */
   .anim-fade-up { animation: fade-up 260ms cubic-bezier(.22, 1, .36, 1) both; }
   .anim-fade-in { animation: ui-backdrop-open 200ms ease-out both; }
+
+  /*
+    Entrada de PÁGINA. Igual que `.anim-fade-up` pero con fill-mode
+    `backwards` en vez de `both`, y la diferencia no es cosmética:
+    con `both` el elemento se queda con el `transform` del último keyframe
+    aplicado para siempre, y un ancestro con transform es containing block
+    de cualquier `position:fixed` que cuelgue adentro — un overlay a pantalla
+    completa termina recortado al alto de la página en vez de cubrir el
+    viewport (bug real ya documentado en Clientes.jsx y Reservas.jsx, que
+    por eso sacaron sus overlays a un portal).
+
+    Con `backwards` el estado inicial se aplica antes de arrancar y al
+    terminar no queda ninguna propiedad puesta: `transform: none`, sin
+    containing block. Los portales siguen donde están — cubren además la
+    ventana de 260ms en que la animación sí está corriendo.
+  */
+  .anim-fade-up-page { animation: fade-up 260ms cubic-bezier(.22, 1, .36, 1) backwards; }
 
   /* Entrada escalonada de listas. El delay lo pone el llamador con
      `style={{ animationDelay }}` tomado de `staggerDelay()`
@@ -402,7 +419,7 @@ textarea.focus-ring:focus-visible {
   /* Nada de desplazamiento ni escala: solo opacidad, y sin duración
      perceptible. Cubre también las variantes con breakpoint que genera el
      JIT (`sm:anim-fade-up`, etc.). */
-  .anim-fade-up, .anim-fade-in, .anim-stagger,
+  .anim-fade-up, .anim-fade-up-page, .anim-fade-in, .anim-stagger,
   [class*="anim-fade-up"], [class*="anim-stagger"] {
     animation-name: ui-backdrop-open !important;
     animation-duration: 1ms !important;

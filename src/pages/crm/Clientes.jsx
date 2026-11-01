@@ -710,7 +710,7 @@ export default function Clientes() {
     // patrón que Reservas.jsx: `lg:h-full` hereda la altura que le da
     // AppLayout.jsx (`#app-main-scroll` dejó de scrollear en esta sección),
     // `lg:gap-4` reemplaza a `space-y-10` solo en desktop.
-    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 animate-premium-fade">
+    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 anim-fade-up-page">
       {/* Toolbar: buscador a ancho completo arriba, filtro + alta compacta
           abajo (oct 2026) — antes "Nuevo Cliente" era una barra amarilla
           gigante en mobile; ahora es un botón chico (h-10) a la derecha,
@@ -755,7 +755,7 @@ export default function Clientes() {
           <div className="flex-1" />
           <button
             onClick={handleOpenCreate}
-            className="h-10 px-4 bg-gold hover:bg-gold-hover text-black rounded-xl transition-all flex items-center gap-2 font-semibold text-label-lg shrink-0"
+            className="h-10 px-4 bg-gold hover:bg-gold-hover anim-press text-black rounded-xl transition-all flex items-center gap-2 font-semibold text-label-lg shrink-0"
           >
             <Plus size={16} /> <span className="hidden sm:inline">Nuevo Cliente</span><span className="sm:hidden">Nuevo</span>
           </button>
@@ -992,7 +992,7 @@ export default function Clientes() {
 
       {/* Mobile (<768px, mock 04-clientes-mobile-ficha): pantalla completa,
           vía portal a document.body — igual que BottomSheet.jsx. Necesario:
-          el wrapper raíz de esta página usa `animate-premium-fade`, cuya
+          el wrapper raíz de esta página usa `anim-fade-up-page`, cuya
           animación deja un `transform` aplicado (fill-mode `both`) incluso
           después de terminar — eso convierte a ese wrapper en containing
           block de cualquier `position:fixed` anidado adentro (mismo bug
@@ -1050,7 +1050,7 @@ export default function Clientes() {
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-slate bg-prius-subtle hover:bg-prius-subtle border border-hairline transition-all"
+              className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-slate bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline transition-all"
             >
               Cancelar
             </button>
@@ -1059,7 +1059,7 @@ export default function Clientes() {
               form="form-cliente"
               loading={savingCliente}
               loadingText="Guardando..."
-              className="px-6 py-3 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
+              className="px-6 py-3 bg-gold hover:bg-gold-hover anim-press text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
             >
               {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
             </LoadingButton>
@@ -1160,7 +1160,7 @@ export default function Clientes() {
               </label>
 
               {agregarTemporadaNueva && (
-                <div ref={revealTemporadaNuevaRef} className="animate-premium-fade space-y-4 pl-1">
+                <div ref={revealTemporadaNuevaRef} className="anim-fade-up-page space-y-4 pl-1">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</label>
@@ -1233,7 +1233,7 @@ export default function Clientes() {
           <button
             type="submit"
             disabled={savingConfirmacion}
-            className="w-full py-4 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-gold-hover anim-press disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {savingConfirmacion ? 'Guardando...' : 'Confirmar'}
           </button>
@@ -1340,7 +1340,7 @@ export default function Clientes() {
             type="button"
             disabled={agruparSeleccion.size < 2 || !agruparPrecioTotal || savingGrupo}
             onClick={handleCrearGrupo}
-            className="w-full py-4 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-gold-hover anim-press disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
           >
             {savingGrupo ? 'Agrupando...' : 'Agrupar y Definir Precio'}
           </button>

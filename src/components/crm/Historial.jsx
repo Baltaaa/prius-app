@@ -535,7 +535,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
 
   // ─────────────────────────── Historial global ───────────────────────────
   return (
-    <div className="anim-fade-up">
+    <div className="anim-fade-up-page">
       {/* Barra de filtros. En mobile queda fija arriba y los controles finos
           se despliegan; en desktop está todo a la vista. */}
       <div className="sticky top-0 z-20 -mx-4 px-4 md:mx-0 md:px-0 md:static bg-prius-background pb-3">

@@ -213,7 +213,7 @@ export default function Caja() {
   }
 
   return (
-    <div className="space-y-8 animate-premium-fade">
+    <div className="space-y-8 anim-fade-up-page">
       {/* Barra de navegación por fecha + historial. Pulido mobile iPhone (oct
           2026): en mobile la navegación de fecha pasa a ser su propia fila
           simétrica de ancho completo (flecha | fecha | flecha, las dos
@@ -224,7 +224,7 @@ export default function Caja() {
           única de siempre. */}
       <div className="no-print space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <div className="flex items-center gap-3 sm:contents">
-          <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
+          <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
             <ChevronLeft size={16} />
           </button>
           {/* w-36 (144px) no entraba la fecha completa en mobile (texto 16px ahí
@@ -232,7 +232,7 @@ export default function Caja() {
               del Plano, oct 2026. flex-1 en mobile para que la fecha ocupe el
               centro de la fila simétrica; ancho fijo en desktop (sin cambios). */}
           <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="flex-1 min-w-0 sm:flex-none sm:w-[164px]" />
-          <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 bg-prius-subtle hover:bg-prius-subtle disabled:opacity-30 disabled:cursor-not-allowed border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
+          <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 bg-prius-subtle hover:bg-prius-subtle anim-colors disabled:opacity-30 disabled:cursor-not-allowed border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
             <ChevronRight size={16} />
           </button>
         </div>
@@ -253,7 +253,7 @@ export default function Caja() {
         <div className="hidden sm:block sm:flex-1" />
         <button
           onClick={() => setMostrarHistorial((v) => !v)}
-          className="hidden sm:flex items-center gap-2 px-4 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all min-h-[44px]"
+          className="hidden sm:flex items-center gap-2 px-4 py-3 bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all min-h-[44px]"
         >
           <History size={14} /> Historial
         </button>
@@ -268,7 +268,7 @@ export default function Caja() {
           </span>
           <button
             onClick={() => setMostrarHistorial((v) => !v)}
-            className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all"
+            className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all"
           >
             <History size={14} /> Historial
           </button>
@@ -284,7 +284,7 @@ export default function Caja() {
             <button
               key={c.id}
               onClick={() => { setSelectedDate(c.fecha); setMostrarHistorial(false) }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-prius-subtle transition-all text-left"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-prius-subtle anim-colors transition-all text-left"
             >
               <span className="text-sm text-prius-slate">{formatFecha(c.fecha)}</span>
               <span className="flex items-center gap-4 text-xs">
@@ -312,7 +312,7 @@ export default function Caja() {
                 onClick={handleAbrirCaja}
                 loading={abriendo}
                 loadingText="Abriendo..."
-                className="w-full bg-gold hover:bg-gold-hover text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl"
+                className="w-full bg-gold hover:bg-gold-hover anim-press text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl"
               >
                 Abrir Caja de Hoy
               </LoadingButton>
@@ -652,10 +652,10 @@ export default function Caja() {
       {cajaSeleccionada && cajaSeleccionada.estado === 'cerrada' && (
         <>
           <div className="no-print flex flex-wrap gap-3">
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all">
+            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-3 bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all">
               <Printer size={14} /> Imprimir A4
             </button>
-            <button onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })} disabled={!resumen} className="flex items-center gap-2 px-5 py-3 bg-prius-subtle hover:bg-prius-subtle border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40">
+            <button onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })} disabled={!resumen} className="flex items-center gap-2 px-5 py-3 bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40">
               <Download size={14} /> Exportar CSV
             </button>
             <div className="flex-1" />
@@ -677,7 +677,7 @@ export default function Caja() {
                 placeholder="Motivo de la reapertura (obligatorio)"
                 className="w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm outline-none focus:border-gold/50 resize-none"
               />
-              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all">
+              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-gold hover:bg-gold-hover anim-press disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all">
                 Confirmar reapertura
               </button>
             </div>

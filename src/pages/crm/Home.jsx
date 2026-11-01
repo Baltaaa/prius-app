@@ -186,7 +186,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="flex flex-col gap-space-lg font-ui -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0 px-4 sm:px-6 md:px-8 lg:px-0 animate-premium-fade">
+    <div className="flex flex-col gap-space-lg font-ui -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0 px-4 sm:px-6 md:px-8 lg:px-0 anim-fade-up-page">
       {/* Fila 0: saludo + estado + badges KPI (desktop) */}
       <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
         <div>
@@ -209,7 +209,7 @@ export default function Home() {
             moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion}
             fecha={mv.fecha} stale={mv.stale} compacto
           />
-          <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-space-md py-2.5 rounded-xl card-light hover:bg-prius-subtle transition-colors text-left">
+          <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-space-md py-2.5 rounded-xl card-light hover:bg-prius-subtle anim-colors transition-colors text-left">
             <CircleCheck size={18} className="text-prius-success" />
             <div>
               <span className="block text-label-md text-prius-slate uppercase">Leads sin contactar</span>
@@ -238,7 +238,7 @@ export default function Home() {
                 key={a.key}
                 type="button"
                 onClick={a.onClick}
-                className="group flex flex-col items-center justify-center gap-1.5 p-space-sm lg:px-space-md lg:py-space-sm rounded-2xl card-light hover:bg-prius-subtle active:scale-95 transition-all text-center"
+                className="group flex flex-col items-center justify-center gap-1.5 p-space-sm lg:px-space-md lg:py-space-sm rounded-2xl card-light hover:bg-prius-subtle anim-colors active:scale-95 transition-all text-center"
               >
                 <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-xl flex items-center justify-center transition-colors ${a.accent ? 'bg-gold' : 'bg-prius-surface group-hover:bg-gold/20'}`}>
                   <a.icon size={20} className="text-black" />
@@ -431,7 +431,7 @@ export default function Home() {
         <section className="hidden lg:block">
           <button
             onClick={() => navigate('/app/recepcion')}
-            className="w-full card-light rounded-2xl p-space-md flex items-center justify-between hover:bg-prius-subtle transition-colors"
+            className="w-full card-light rounded-2xl p-space-md flex items-center justify-between hover:bg-prius-subtle anim-colors transition-colors"
           >
             <div className="flex items-center gap-2.5">
               <QrCode size={20} className="text-black" />
@@ -485,7 +485,7 @@ export default function Home() {
                     if (ev.tabla === 'reservas' && ev.registro_id) navigate(linkToReserva(ev.registro_id))
                     else if (ev.cliente_id) navigate(linkToCliente(ev.cliente_id))
                   }}
-                  className="w-full flex items-center justify-between gap-3 py-2.5 lg:py-3.5 text-left hover:bg-prius-subtle rounded-xl px-2 -mx-2 transition-colors lg:border-b lg:border-hairline lg:last:border-b-0"
+                  className="w-full flex items-center justify-between gap-3 py-2.5 lg:py-3.5 text-left hover:bg-prius-subtle anim-colors rounded-xl px-2 -mx-2 transition-colors lg:border-b lg:border-hairline lg:last:border-b-0"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-prius-surface flex items-center justify-center shrink-0 text-black">
