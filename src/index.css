@@ -428,6 +428,9 @@ textarea.focus-ring:focus-visible {
   .anim-press, .anim-colors, .hover-row { transition: none !important; }
   .anim-press:active { transform: none !important; }
   .skeleton-shimmer::after { animation: none !important; }
+  /* El pulso de opacidad de Tailwind tampoco: con la preferencia activa no
+     queda nada moviéndose en pantalla, ni siquiera un latido. */
+  .animate-pulse { animation: none !important; }
 }
 
 /*
