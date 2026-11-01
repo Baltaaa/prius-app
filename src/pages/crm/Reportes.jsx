@@ -112,7 +112,7 @@ export default function Reportes() {
 
   const handleWhatsApp = () => {
     if (!linkWa) {
-      toast('Cargá tu teléfono en Perfil y Tarifas para poder enviarte el reporte.', { tone: 'error' })
+      toast('Cargá tu teléfono en Mi cuenta para poder enviarte el reporte.', { tone: 'error' })
       return
     }
     window.open(linkWa, '_blank', 'noopener,noreferrer')
@@ -171,7 +171,7 @@ export default function Reportes() {
 
         <div className="flex-1" />
 
-        <button onClick={handleWhatsApp} disabled={!linkWa} title={linkWa ? 'Enviar a mi WhatsApp' : 'Cargá tu teléfono en Perfil y Tarifas'}
+        <button onClick={handleWhatsApp} disabled={!linkWa} title={linkWa ? 'Enviar a mi WhatsApp' : 'Cargá tu teléfono en Mi cuenta'}
           className="h-10 px-3.5 rounded-xl bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center gap-2 text-title-md transition-colors">
           <WhatsAppIcon size={15} /> <span className="hidden sm:inline">WhatsApp</span>
         </button>

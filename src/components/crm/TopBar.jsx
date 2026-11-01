@@ -616,7 +616,7 @@ export default function TopBar() {
                   onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
                   className="w-full text-left px-4 py-2.5 text-xs text-prius-slate hover:bg-prius-subtle flex items-center gap-2 rounded-lg"
                 >
-                  <User size={14} /> Perfil
+                  <User size={14} /> Mi cuenta
                 </button>
                 {puedeVerModoIncognito && (
                   <button

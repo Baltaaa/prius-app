@@ -16,7 +16,7 @@ export const SECTION_TITLES = [
   { path: '/app/historial', name: 'Historial', subtitle: 'Toda acción sobre reservas, pagos, clientes y unidades.' },
   { path: '/app/notificaciones', name: 'Notificaciones', shortName: 'Avisos', subtitle: 'Alertas de sistema, saldos y operaciones diarias.' },
   { path: '/app/comprobantes', name: 'Comprobantes', subtitle: 'Generación de recibos oficiales para clientes.' },
-  { path: '/app/perfil', name: 'Perfil y Tarifas', shortName: 'Perfil', subtitle: 'Configuración de cuenta y valores de temporada.' },
+  { path: '/app/perfil', name: 'Mi cuenta', shortName: 'Mi cuenta', subtitle: 'Configuración de cuenta y valores de temporada.' },
   { path: '/app/recepcion', name: 'Recepción', subtitle: 'Check-in de reservas web por QR o código.' },
   { path: '/app/ocupacion', name: 'Ocupación', subtitle: 'Vista semanal y mensual de ocupación por unidad.' },
 ]

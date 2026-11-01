@@ -59,7 +59,7 @@ export default function BottomNav() {
     ...(isFeatureEnabled('ocupacion') ? [{ name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare }] : []),
     { name: 'Historial', path: '/app/historial', icon: Activity },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },
-    { name: 'Perfil y Tarifas', path: '/app/perfil', icon: UserCheck },
+    { name: 'Mi cuenta', path: '/app/perfil', icon: UserCheck },
   ]
 
   const handleLogout = async () => {

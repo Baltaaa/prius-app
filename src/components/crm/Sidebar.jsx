@@ -57,7 +57,7 @@ export default function Sidebar() {
     ...(isFeatureEnabled('ocupacion') ? [{ name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare }] : []),
     { name: 'Historial', path: '/app/historial', icon: Activity },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },
-    { name: 'Perfil y Tarifas', path: '/app/perfil', icon: UserCheck }
+    { name: 'Mi cuenta', path: '/app/perfil', icon: UserCheck }
   ]
 
   // Estilo de ítem activo/inactivo del mock (Stitch 01-home-desktop): borde
