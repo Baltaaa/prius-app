@@ -297,6 +297,104 @@ body {
 }
 
 /*
+  ───────────────────────────────────────────────────────────────────────────
+  Sistema de movimiento (nov 2026, Bloque 1 del rebranding Stitch).
+
+  Reglas que se respetan en TODAS las utilidades de abajo:
+  - solo se animan `transform` y `opacity` (compuestas por GPU). Nunca
+    width/height/top/left: eso dispara layout en cada frame y además mueve
+    lo que está alrededor (CLS).
+  - duraciones 150-300ms. Entradas con cubic-bezier(.22,1,.36,1) (salida
+    rápida, frenada suave); salidas con ease-out.
+  - `prefers-reduced-motion: reduce` apaga todo el movimiento y deja solo el
+    cambio de opacidad, instantáneo (ver el bloque al final).
+  - el hover vive detrás de `@media (hover:hover)`: en touch el navegador
+    emula :hover y el estado queda "pegado" después del tap.
+
+  Sin librerías nuevas: todo es CSS, igual que `ui-open`/`ui-close` de arriba.
+*/
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+@layer utilities {
+  /* Entrada de página y de sección. */
+  .anim-fade-up { animation: fade-up 260ms cubic-bezier(.22, 1, .36, 1) both; }
+  .anim-fade-in { animation: ui-backdrop-open 200ms ease-out both; }
+
+  /* Entrada escalonada de listas. El delay lo pone el llamador con
+     `style={{ animationDelay }}` tomado de `staggerDelay()`
+     (src/lib/motion.js), que corta en 12 ítems y 30ms — más que eso se
+     percibe como lentitud, no como pulido. */
+  .anim-stagger { animation: fade-up 240ms cubic-bezier(.22, 1, .36, 1) both; }
+
+  /* Press de botones: 0.98 es perceptible sin que el texto se vea borroso.
+     `active:` de Tailwind no alcanza acá porque también queremos la vuelta
+     animada, no solo el estado presionado. */
+  .anim-press { transition: transform 150ms cubic-bezier(.22, 1, .36, 1); }
+  .anim-press:active { transform: scale(0.98); }
+
+  /* Chips y filas: solo color, sin mover nada. */
+  .anim-colors {
+    transition: background-color 180ms ease-out, color 180ms ease-out,
+                border-color 180ms ease-out;
+  }
+
+  /* Skeleton con shimmer. El brillo es un pseudo-elemento que se desplaza
+     con translateX dentro de un contenedor con overflow hidden: el
+     `background-position` animado de la versión típica no es compuesta por
+     GPU y en listas largas se nota. */
+  .skeleton-shimmer { position: relative; overflow: hidden; }
+  .skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .6), transparent);
+    animation: shimmer 1.4s infinite;
+  }
+}
+
+/* Hover solo donde el puntero realmente puede hacer hover. */
+@media (hover: hover) {
+  .hover-row { transition: background-color 180ms ease-out; }
+  .hover-row:hover { background-color: #F9F9F9; }
+  .hover-accent:hover { background-color: #FFF6D6; }
+}
+
+/*
+  Foco visible único: ring amarillo del acento. Reemplaza el outline azul del
+  navegador sin sacarle el foco al teclado (`:focus-visible`, no `:focus`:
+  el click con mouse no lo dispara).
+*/
+.focus-ring:focus-visible,
+input.focus-ring:focus-visible,
+select.focus-ring:focus-visible,
+textarea.focus-ring:focus-visible {
+  outline: 2px solid #F2CA50;
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Nada de desplazamiento ni escala: solo opacidad, y sin duración
+     perceptible. Cubre también las variantes con breakpoint que genera el
+     JIT (`sm:anim-fade-up`, etc.). */
+  .anim-fade-up, .anim-fade-in, .anim-stagger,
+  [class*="anim-fade-up"], [class*="anim-stagger"] {
+    animation-name: ui-backdrop-open !important;
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+  .anim-press, .anim-colors, .hover-row { transition: none !important; }
+  .anim-press:active { transform: none !important; }
+  .skeleton-shimmer::after { animation: none !important; }
+}
+
+/*
   Resaltado de destino de deep-link (useDeepLinkTarget, oct 2026): borde
   #F2CA50 de 2px que se desvanece solo, sin sombra (Quiet Luxury). border en
   vez de outline para no competir con el que ya usan las tarjetas con focus.

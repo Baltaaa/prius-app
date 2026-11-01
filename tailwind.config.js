@@ -24,7 +24,20 @@ export default {
           success: '#16A34A',
           warning: '#D97706',
           error: '#DC2626',
-        }
+        },
+        // Paleta semántica (nov 2026, rebranding Stitch 06/07/08). Cada
+        // familia trae la terna `DEFAULT` (color sólido, para íconos y
+        // bordes), `soft` (tinte de fondo) e `ink` (texto sobre ese tinte).
+        // Los pares soft/ink están verificados a contraste AA ≥ 4.5:1 —
+        // #15803D sobre #E7F6EC daba 4.49 y quedó descartado por eso, de ahí
+        // que `success.ink` sea #166534 (6.38) y no el verde de `prius`.
+        // Se usan en los tiles de ícono por tipo de evento del Historial,
+        // chips de estado, avisos y estados hover/activo de filas y chips.
+        accent: { DEFAULT: '#F2CA50', soft: '#FFF6D6', ink: '#6B4E00' },
+        success: { DEFAULT: '#16A34A', soft: '#E7F6EC', ink: '#166534' },
+        warning: { DEFAULT: '#D97706', soft: '#FEF3E2', ink: '#92400E' },
+        danger: { DEFAULT: '#DC2626', soft: '#FDECEC', ink: '#B91C1C' },
+        info: { DEFAULT: '#475569', soft: '#EEF2F6', ink: '#334155' },
       },
       // `display` es la fuente de marca para títulos H1 de pantalla (todas
       // las pantallas del CRM + Login) — antes cada página heredaba
