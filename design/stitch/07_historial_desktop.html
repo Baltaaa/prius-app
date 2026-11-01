@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary-fixed-dim": "#c6c6c6", "error-container": "#ffdad6", "on-secondary-fixed-variant": "#474747", "on-tertiary-fixed-variant": "#005320", "on-tertiary": "#ffffff", "primary": "#745b00", "primary-fixed-dim": "#eac249", "surface-tint": "#745b00", "inverse-surface": "#2f3131", "tertiary": "#006e2d", "on-secondary": "#ffffff", "on-surface-variant": "#4d4635", "surface-container-lowest": "#ffffff", "on-background": "#1a1c1c", "on-primary": "#ffffff", "on-tertiary-fixed": "#002109", "background": "#f9f9f9", "on-primary-container": "#6b5500", "surface-container-high": "#e8e8e8", "surface": "#f9f9f9", "primary-fixed": "#ffe08a", "tertiary-fixed-dim": "#62df7d", "surface-bright": "#f9f9f9", "on-secondary-container": "#646464", "tertiary-container": "#6ae785", "inverse-primary": "#eac249", "surface-container-highest": "#e2e2e2", "surface-variant": "#e2e2e2", "on-error-container": "#93000a", "surface-container": "#eeeeee", "on-secondary-fixed": "#1b1b1b", "on-tertiary-container": "#00662a", "on-primary-fixed": "#241a00", "on-error": "#ffffff", "surface-container-low": "#f4f3f3", "primary-container": "#f2ca50", "error": "#ba1a1a", "inverse-on-surface": "#f1f1f1", "on-primary-fixed-variant": "#574400", "on-surface": "#1a1c1c", "outline": "#7f7663", "tertiary-fixed": "#7ffc97", "outline-variant": "#d0c5af", "secondary-fixed": "#e2e2e2", "secondary-container": "#e2e2e2", "secondary": "#5e5e5e", "surface-dim": "#dadada" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "space-xl": "2.25rem", "gutter": "1rem", "margin-tablet": "2rem", "margin": "1.25rem", "gutter-sm": "0.75rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "gutter-lg": "1.5rem", "margin-mobile": "1rem" }, "fontFamily": { "body-sm": ["Inter"], "label-md": ["Inter"], "headline-md": ["Inter"], "headline-lg-mobile": ["Inter"], "display-lg": ["Inter"], "label-lg": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "headline-lg": ["Inter"], "metric-xl": ["Inter"], "title-md": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "metric-xl": ["34px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest border-r border-surface-container-highest z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="h-16 flex items-center justify-between px-space-lg border-b border-surface-container-highest"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded-lg bg-on-surface flex items-center justify-center"><span class="material-symbols-outlined text-surface-container-lowest text-[18px]">beach_access</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">Prius CRM</span><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Balneario Ops</span></div></div><span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary-container text-on-primary-fixed">PRO</span></div><div class="px-space-md pt-space-lg"><div class="px-space-sm pb-space-xs"><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Gestión Operativa</span></div><nav class="space-y-1 flex flex-col" data-active-classes="bg-primary-container text-on-primary-fixed font-semibold"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">grid_view</span><span>Dashboard</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="plano-de-playa" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">map</span><span>Plano de Playa</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="reservas" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">calendar_month</span><span>Reservas</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="clientes" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">group</span><span>Clientes</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="caja-diaria" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">point_of_sale</span><span>Caja Diaria</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="reportes" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">bar_chart</span><span>Reportes</span></a></nav></div><div class="px-space-md pt-space-lg"><div class="px-space-sm pb-space-xs"><span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Módulos Adicionales</span></div><nav class="space-y-1 flex flex-col" data-active-classes="bg-primary-container text-on-primary-fixed font-semibold"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="leads" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">filter_alt</span><span>Leads</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl transition-colors bg-primary-container text-on-primary-fixed font-semibold" data-path="historial" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">history</span><span>Historial</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="comprobantes" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">receipt_long</span><span>Comprobantes</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-xl text-on-surface hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md" data-path="perfil-y-tarifas" href="#"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">tune</span><span>Perfil y Tarifas</span></a></nav></div></div><div class="p-space-md border-t border-surface-container-highest"><div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low mb-space-xs"><div class="flex items-center gap-space-sm overflow-hidden"><div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="flex flex-col min-w-0"><span class="font-title-md text-body-sm text-on-surface font-semibold truncate">Baltasar Bruschetti</span><span class="font-label-md text-label-md text-on-surface-variant truncate">SuperAdmin</span></div></div><a class="text-on-surface-variant hover:text-error transition-colors p-1 flex-shrink-0" data-path="logout" href="#" title="Cerrar sesión"><span class="material-symbols-outlined text-[20px]">logout</span></a></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-md border-b border-surface-container-highest z-40 px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs bg-surface-container-low px-3 py-1.5 rounded-full border border-surface-container-highest"><span class="w-2 h-2 rounded-full bg-tertiary"></span><span class="font-label-lg text-label-lg text-on-surface font-semibold">Playa Grande</span><span class="text-on-surface-variant">·</span><span class="font-label-md text-label-md text-on-tertiary-container uppercase tracking-wider font-semibold">OPERATIVO</span></div><div class="relative w-80"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span><input class="w-full h-10 pl-10 pr-4 bg-surface rounded-xl border border-surface-container-highest font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-on-surface transition-colors" placeholder="Buscar carpa, reserva, DNI..." type="search"/></div></div><div class="flex items-center gap-space-lg"><div class="hidden md:flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[18px]">calendar_today</span><span>Hoy, 24 Feb 2025</span></div><div class="flex items-center gap-space-sm"><button class="w-9 h-9 rounded-xl border border-surface-container-highest bg-surface-container-lowest flex items-center justify-center text-on-surface hover:bg-surface-container-low transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Interactive View Switcher Bar (Auditoría Context) -->
+<div class="w-full bg-surface-container-lowest border-b border-surface-container-highest px-8 py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+        Vista de Simulación UI:
+      </span>
+<div class="inline-flex p-0.5 bg-surface-container rounded-lg border border-surface-container-highest" id="view-mode-tabs">
+<button class="view-tab-btn px-3 py-1 rounded-md text-xs font-semibold text-on-surface bg-surface-container-lowest shadow-none transition-colors" data-state="normal" onclick="setViewState('normal')" type="button">
+          1. Normal (Seleccionado)
+        </button>
+<button class="view-tab-btn px-3 py-1 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-state="unselected" onclick="setViewState('unselected')" type="button">
+          2. Sin Selección
+        </button>
+<button class="view-tab-btn px-3 py-1 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-state="loading" onclick="setViewState('loading')" type="button">
+          3. Cargando (Skeleton)
+        </button>
+<button class="view-tab-btn px-3 py-1 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-state="empty" onclick="setViewState('empty')" type="button">
+          4. Sin Resultados
+        </button>
+</div>
+</div>
+<div class="flex items-center gap-4 text-xs text-on-surface-variant">
+<span class="flex items-center gap-1 font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-tertiary">verified_user</span>
+        Logs inmutables auditados (SHA-256)
+      </span>
+<span class="text-surface-container-highest">|</span>
+<span class="font-mono text-body-sm text-on-surface-variant">Servidor: mdq-edge-01.prius.ar</span>
+</div>
+</div>
+<!-- Main Work Surface -->
+<div class="p-8 max-w-[1540px] mx-auto w-full space-y-6">
+<!-- HEADER DE SECCIÓN Y BARRA UNIFICADA EN UNA SOLA FRANJA (Sin métricas / Sin banners) -->
+<header class="bg-surface-container-lowest border border-surface-container-highest rounded-2xl p-5 space-y-4">
+<!-- Title + Quick Actions Row -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-3">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight" style="font-family: 'Manrope', 'Inter', sans-serif;">
+              Historial de Operaciones
+            </h1>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant border border-surface-container-highest">
+              Auditoría en Vivo
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+            Registro cronológico de actividades, transacciones y auditoría del sistema de Playa Grande.
+          </p>
+</div>
+<div class="flex items-center gap-3 flex-wrap">
+<!-- Live search box -->
+<div class="relative min-w-[340px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full h-10 pl-9 pr-14 bg-surface rounded-xl border border-surface-container-highest text-xs text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-on-surface transition-colors" id="log-search-input" placeholder="Buscar por usuario, cliente, comprobante o unidad..." type="text"/>
+<span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded border border-surface-container-highest">⌘K</span>
+</div>
+<!-- Export Log Button -->
+<button class="h-10 px-4 rounded-xl border border-surface-container-highest bg-surface-container-lowest text-on-surface font-semibold text-xs flex items-center gap-2 hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">ios_share</span>
+<span>Exportar log</span>
+</button>
+<!-- Refresh Button -->
+<button class="w-10 h-10 rounded-xl border border-surface-container-highest bg-surface-container-lowest text-on-surface flex items-center justify-center hover:bg-surface-container-low transition-colors" title="Refrescar auditoría" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">refresh</span>
+</button>
+</div>
+</div>
+<!-- Unified Filters Strip -->
+<div class="pt-3 border-t border-surface-container-highest flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
+<!-- Module pills filter -->
+<div class="flex items-center gap-1.5 overflow-x-auto w-full xl:w-auto pb-1 xl:pb-0" id="module-pills">
+<button class="px-3 py-1.5 rounded-full text-xs font-semibold bg-on-surface text-surface-container-lowest flex items-center gap-1.5 shrink-0" type="button">
+<span>Todo</span>
+<span class="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-lowest/20">20</span>
+</button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium text-on-surface-variant bg-surface border border-surface-container-highest hover:text-on-surface hover:bg-surface-container transition shrink-0" type="button">
+<span>Reservas</span>
+<span class="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-high text-on-surface">9</span>
+</button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium text-on-surface-variant bg-surface border border-surface-container-highest hover:text-on-surface hover:bg-surface-container transition shrink-0" type="button">
+<span>Pagos</span>
+<span class="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-high text-on-surface">5</span>
+</button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium text-on-surface-variant bg-surface border border-surface-container-highest hover:text-on-surface hover:bg-surface-container transition shrink-0" type="button">
+<span>Comprobantes</span>
+<span class="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-high text-on-surface">4</span>
+</button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium text-on-surface-variant bg-surface border border-surface-container-highest hover:text-on-surface hover:bg-surface-container transition shrink-0" type="button">
+<span>Caja</span>
+<span class="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-high text-on-surface">2</span>
+</button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium text-on-surface-variant/60 bg-surface border border-surface-container-highest opacity-70 shrink-0" type="button">
+<span>Anulaciones</span>
+<span class="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-high text-on-surface-variant">0</span>
+</button>
+<button class="px-3 py-1.5 rounded-full text-xs font-medium text-on-surface-variant/60 bg-surface border border-surface-container-highest opacity-70 shrink-0" type="button">
+<span>Notas</span>
+<span class="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-high text-on-surface-variant">0</span>
+</button>
+</div>
+<!-- Date Range + User Dropdown Controls -->
+<div class="flex items-center gap-3 flex-wrap shrink-0">
+<!-- Date shortcut segment -->
+<div class="inline-flex p-0.5 bg-surface rounded-lg border border-surface-container-highest text-xs">
+<button class="px-2.5 py-1 rounded font-medium text-on-surface-variant hover:text-on-surface">Hoy</button>
+<button class="px-2.5 py-1 rounded font-semibold bg-surface-container-lowest text-on-surface">7 días</button>
+<button class="px-2.5 py-1 rounded font-medium text-on-surface-variant hover:text-on-surface">Mes</button>
+<button class="px-2.5 py-1 rounded font-medium text-on-surface-variant hover:text-on-surface">Personalizado</button>
+</div>
+<!-- Date Selector pill -->
+<div class="h-9 px-3 rounded-lg border border-surface-container-highest bg-surface-container-lowest text-on-surface text-xs font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_today</span>
+<span>25/10/2026 → 01/11/2026</span>
+</div>
+<!-- User Dropdown Filter -->
+<div class="relative">
+<select class="h-9 pl-3 pr-8 rounded-lg border border-surface-container-highest bg-surface-container-lowest text-on-surface text-xs font-medium appearance-none focus:outline-none focus:border-on-surface cursor-pointer">
+<option selected="">Todos los operadores (4)</option>
+<option>Marcelo Madotta (SuperAdmin)</option>
+<option>Baltasar Bruschetti (Administrador)</option>
+<option>Mariana Rossi (Cajero T. Mañana)</option>
+<option>Ignacio Peña (Recepción)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px] pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+</header>
+<!-- MAIN TWO-COLUMN SPLIT AUDITORÍA -->
+<div class="w-full">
+<!-- STATE 1 & 2: DUAL COLUMN (NORMAL / UNSELECTED) -->
+<div class="grid grid-cols-12 gap-8 items-start" id="view-normal-container">
+<!-- COLUMNA IZQUIERDA (62% ANCHO / 7.5 col -> cols-7) -->
+<div class="col-span-12 lg:col-span-7 flex flex-col space-y-6">
+<!-- GRUPO: HOY -->
+<section class="space-y-2.5">
+<!-- Sticky Section Header -->
+<div class="sticky top-20 z-10 bg-surface/95 backdrop-blur-sm py-2 flex items-center justify-between border-b border-surface-container-highest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">today</span>
+<span class="font-headline-sm text-body-lg font-bold text-on-surface tracking-tight" style="font-family: 'Manrope', 'Inter', sans-serif;">
+                  Hoy — Sábado 17 de Octubre de 2026
+                </span>
+</div>
+<span class="text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+                14 movimientos
+              </span>
+</div>
+<!-- Listado de actividad - Tarjetas -->
+<div class="space-y-2.5 pt-1">
+<!-- ITEM 1: SELECCIONADO (Pago editado) -->
+<div class="group bg-surface-container-lowest border-2 border-primary-container rounded-xl p-3.5 flex items-center justify-between hover:bg-surface-container-low/40 transition cursor-pointer relative overflow-hidden" id="item-selected-card" onclick="selectEvent('pago-editado')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-[#ECFDF5] text-[#059669] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-title-md text-body-md text-on-surface font-bold">Marcelo Madotta</span>
+<span class="text-[11px] px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface-variant font-mono">SuperAdmin</span>
+<span class="text-on-surface-variant text-xs">·</span>
+<span class="text-xs font-semibold text-[#059669]">Pago editado</span>
+</div>
+<div class="text-xs text-on-surface-variant truncate mt-0.5 flex items-center gap-1.5">
+<span class="font-bold text-on-surface font-mono">$ 1.100.000</span>
+<span>·</span>
+<span class="font-semibold text-on-surface">SILVINA SASSO</span>
+<span class="px-1.5 py-0.2 bg-surface-container rounded text-[11px] text-on-surface">Carpa #74</span>
+<span>·</span>
+<span class="font-mono text-on-surface-variant">RB-3696</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0 pl-2">
+<span class="font-mono text-xs text-on-surface-variant font-medium">16:33 hs</span>
+<span class="material-symbols-outlined text-[18px] text-on-primary-container">chevron_right</span>
+</div>
+</div>
+<!-- ITEM 2: Comprobante editado -->
+<div class="group bg-surface-container-lowest border border-surface-container-highest rounded-xl p-3.5 flex items-center justify-between hover:border-primary-container hover:bg-surface-container-low/40 transition cursor-pointer" onclick="selectEvent('comprobante-editado')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-body-md text-on-surface font-semibold">Marcelo Madotta</span>
+<span class="text-on-surface-variant text-xs">·</span>
+<span class="text-xs font-medium text-[#D97706]">Comprobante modificado</span>
+</div>
+<div class="text-xs text-on-surface-variant truncate mt-0.5">
+                      Reimpresión y ajuste de cuit fiscal en <span class="font-mono font-medium text-on-surface">recibo_b 3696</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0 pl-2">
+<span class="font-mono text-xs text-on-surface-variant">16:33 hs</span>
+<span class="material-symbols-outlined text-[18px] text-surface-container-highest group-hover:text-on-surface transition">chevron_right</span>
+</div>
+</div>
+<!-- ITEM 3: Caja cerrada -->
+<div class="group bg-surface-container-lowest border border-surface-container-highest rounded-xl p-3.5 flex items-center justify-between hover:border-primary-container hover:bg-surface-container-low/40 transition cursor-pointer" onclick="selectEvent('caja-cerrada')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-[#F3F4F6] text-[#374151] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-body-md text-on-surface font-semibold">Marcelo Madotta</span>
+<span class="text-on-surface-variant text-xs">·</span>
+<span class="text-xs font-medium text-on-surface">Cierre de Caja Turno Tarde</span>
+</div>
+<div class="text-xs text-on-surface-variant truncate mt-0.5 flex items-center gap-1.5">
+<span>Total arqueo:</span>
+<span class="font-mono font-bold text-on-surface">$ 2.525.000</span>
+<span>·</span>
+<span class="text-[#059669] font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Arqueo cuadrado
+                      </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0 pl-2">
+<span class="font-mono text-xs text-on-surface-variant">16:33 hs</span>
+<span class="material-symbols-outlined text-[18px] text-surface-container-highest group-hover:text-on-surface transition">chevron_right</span>
+</div>
+</div>
+<!-- ITEM 4: Reserva editada -->
+<div class="group bg-surface-container-lowest border border-surface-container-highest rounded-xl p-3.5 flex items-center justify-between hover:border-primary-container hover:bg-surface-container-low/40 transition cursor-pointer" onclick="selectEvent('reserva-editada')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">edit_calendar</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-body-md text-on-surface font-semibold">Marcelo Madotta</span>
+<span class="text-on-surface-variant text-xs">·</span>
+<span class="text-xs font-medium text-[#2563EB]">Reserva editada</span>
+</div>
+<div class="text-xs text-on-surface-variant truncate mt-0.5">
+                      Ampliación de estadía quincena 1 a mes completo · <span class="font-medium text-on-surface">SILVINA SASSO</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0 pl-2">
+<span class="font-mono text-xs text-on-surface-variant">16:33 hs</span>
+<span class="material-symbols-outlined text-[18px] text-surface-container-highest group-hover:text-on-surface transition">chevron_right</span>
+</div>
+</div>
+<!-- ITEM 5: Inicio de sesión -->
+<div class="group bg-surface-container-lowest border border-surface-container-highest rounded-xl p-3.5 flex items-center justify-between hover:border-primary-container hover:bg-surface-container-low/40 transition cursor-pointer" onclick="selectEvent('login')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-[#F0FDF4] text-[#16A34A] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">login</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-body-md text-on-surface font-semibold">Baltasar Bruschetti</span>
+<span class="text-on-surface-variant text-xs">·</span>
+<span class="text-xs font-medium text-[#16A34A]">Inicio de sesión exitoso</span>
+</div>
+<div class="text-xs text-on-surface-variant truncate mt-0.5 font-mono">
+                      IP Balneario 192.168.1.44 · Chrome macOS · 2FA Confirmado
+                    </div>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0 pl-2">
+<span class="font-mono text-xs text-on-surface-variant">18:11 hs</span>
+<span class="material-symbols-outlined text-[18px] text-surface-container-highest group-hover:text-on-surface transition">chevron_right</span>
+</div>
+</div>
+<!-- ITEM 6: Cambio de unidad -->
+<div class="group bg-surface-container-lowest border border-surface-container-highest rounded-xl p-3.5 flex items-center justify-between hover:border-primary-container hover:bg-surface-container-low/40 transition cursor-pointer" onclick="selectEvent('cambio-unidad')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-[#FAF5FF] text-[#7E22CE] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">beach_access</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-body-md text-on-surface font-semibold">Marcelo Madotta</span>
+<span class="text-on-surface-variant text-xs">·</span>
+<span class="text-xs font-medium text-[#7E22CE]">Reubicación de unidad</span>
+</div>
+<div class="text-xs text-on-surface-variant truncate mt-0.5 flex items-center gap-1.5">
+<span class="line-through text-on-surface-variant">Sombrilla #27</span>
+<span class="material-symbols-outlined text-[14px]">trending_flat</span>
+<span class="font-bold text-on-surface px-1.5 py-0.2 bg-primary-container/30 rounded">Carpa #74</span>
+<span>(Sector Norte)</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0 pl-2">
+<span class="font-mono text-xs text-on-surface-variant">15:40 hs</span>
+<span class="material-symbols-outlined text-[18px] text-surface-container-highest group-hover:text-on-surface transition">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- GRUPO: AYER -->
+<section class="space-y-2.5 pt-2">
+<!-- Sticky Section Header -->
+<div class="sticky top-20 z-10 bg-surface/95 backdrop-blur-sm py-2 flex items-center justify-between border-b border-surface-container-highest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">history</span>
+<span class="font-headline-sm text-body-lg font-bold text-on-surface tracking-tight" style="font-family: 'Manrope', 'Inter', sans-serif;">
+                  Ayer — Viernes 16 de Octubre de 2026
+                </span>
+</div>
+<span class="text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+                6 movimientos
+              </span>
+</div>
+<!-- Listado de actividad - Tarjetas Ayer -->
+<div class="space-y-2.5 pt-1">
+<!-- ITEM 7: Anulación de seña -->
+<div class="group bg-surface-container-lowest border border-surface-container-highest rounded-xl p-3.5 flex items-center justify-between hover:border-primary-container hover:bg-surface-container-low/40 transition cursor-pointer" onclick="selectEvent('anulacion')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-[#FEF2F2] text-[#DC2626] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">cancel</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-body-md text-on-surface font-semibold">Baltasar Bruschetti</span>
+<span class="text-on-surface-variant text-xs">·</span>
+<span class="text-xs font-semibold text-[#DC2626]">Anulación de seña</span>
+</div>
+<div class="text-xs text-on-surface-variant truncate mt-0.5">
+                      Cancelación preventiva por clima · Sombrilla #12 · Devolución en cuenta
+                    </div>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0 pl-2">
+<span class="font-mono text-xs text-on-surface-variant">11:20 hs</span>
+<span class="material-symbols-outlined text-[18px] text-surface-container-highest group-hover:text-on-surface transition">chevron_right</span>
+</div>
+</div>
+<!-- ITEM 8: Caja abierta -->
+<div class="group bg-surface-container-lowest border border-surface-container-highest rounded-xl p-3.5 flex items-center justify-between hover:border-primary-container hover:bg-surface-container-low/40 transition cursor-pointer" onclick="selectEvent('caja-abierta')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-[#F3F4F6] text-[#374151] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">lock_open</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-body-md text-on-surface font-semibold">Marcelo Madotta</span>
+<span class="text-on-surface-variant text-xs">·</span>
+<span class="text-xs font-medium text-on-surface">Apertura de Caja Operativa</span>
+</div>
+<div class="text-xs text-on-surface-variant truncate mt-0.5">
+                      Saldo inicial declarado: <span class="font-mono font-medium text-on-surface">$ 0</span> · Turno Matutino habilitado
+                    </div>
+</div>
+</div>
+<div class="flex items-center gap-3 shrink-0 pl-2">
+<span class="font-mono text-xs text-on-surface-variant">08:30 hs</span>
+<span class="material-symbols-outlined text-[18px] text-surface-container-highest group-hover:text-on-surface transition">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- COLUMNA DERECHA (38% ANCHO / 5 col -> cols-5) -->
+<div class="col-span-12 lg:col-span-5">
+<!-- PANEL DETALLE: ESTADO ACTIVO / SELECCIONADO -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-2xl p-6 sticky top-20 space-y-6" id="side-panel-selected">
+<!-- Encabezado del Evento -->
+<div class="space-y-2 border-b border-surface-container-highest pb-5">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide bg-[#ECFDF5] text-[#059669]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#059669]"></span>
+                  PAGO EDITADO
+                </span>
+<span class="font-mono text-xs text-on-surface-variant">ID: EVT-982410</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight" style="font-family: 'Manrope', 'Inter', sans-serif;">
+                  Modificación de Cobro Registrado
+                </h2>
+<div class="flex items-center gap-2 text-xs text-on-surface-variant mt-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>17/10/2026 · 16:33 hs (hace 2 horas)</span>
+</div>
+</div>
+</div>
+<!-- Card de Usuario Operador -->
+<div class="p-3.5 bg-surface-container-low rounded-xl border border-surface-container-highest flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-on-surface text-surface-container-lowest flex items-center justify-center font-bold text-sm tracking-wider">
+                  MM
+                </div>
+<div class="flex flex-col">
+<span class="font-title-md text-body-md font-bold text-on-surface">Marcelo Madotta</span>
+<span class="text-xs text-on-surface-variant">SuperAdmin / Cajero Principal</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[11px] font-mono text-on-surface-variant bg-surface-container px-2 py-0.5 rounded border border-surface-container-highest">
+                  Terminal 01 - Adm
+                </span>
+</div>
+</div>
+<!-- Tabla comparativa "Detalle de Cambios (Antes vs Después)" -->
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold">
+                  Detalle de Cambios (Antes vs Después)
+                </span>
+<span class="text-[11px] text-on-surface-variant">3 atributos alterados</span>
+</div>
+<div class="bg-surface-container-low border border-surface-container-highest rounded-xl p-4 space-y-3">
+<!-- Row 1: Monto cobrado -->
+<div class="flex flex-col gap-1.5 pb-3 border-b border-surface-container-highest">
+<span class="text-xs font-semibold text-on-surface-variant">Monto cobrado</span>
+<div class="grid grid-cols-2 gap-2 text-xs items-center">
+<div class="p-2 rounded bg-surface-container-lowest border border-surface-container-highest text-on-surface-variant line-through font-mono">
+                      $ 600.000
+                    </div>
+<div class="p-2 rounded bg-surface-container-lowest border-2 border-primary-container text-on-surface font-mono font-bold flex items-center justify-between">
+<span>$ 1.100.000</span>
+<span class="text-[10px] text-[#059669] font-semibold">(+$500.000)</span>
+</div>
+</div>
+</div>
+<!-- Row 2: Medio de pago -->
+<div class="flex flex-col gap-1.5 pb-3 border-b border-surface-container-highest">
+<span class="text-xs font-semibold text-on-surface-variant">Medio de pago</span>
+<div class="grid grid-cols-2 gap-2 text-xs items-center">
+<div class="p-2 rounded bg-surface-container-lowest border border-surface-container-highest text-on-surface-variant line-through">
+                      Transferencia bancaria
+                    </div>
+<div class="p-2 rounded bg-surface-container-lowest border border-surface-container-highest text-on-surface font-bold flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>Efectivo en caja</span>
+</div>
+</div>
+</div>
+<!-- Row 3: Estado de cobro -->
+<div class="flex flex-col gap-1.5">
+<span class="text-xs font-semibold text-on-surface-variant">Estado de cobro</span>
+<div class="grid grid-cols-2 gap-2 text-xs items-center">
+<div class="p-2 rounded bg-surface-container-lowest border border-surface-container-highest text-on-surface-variant">
+                      Seña parcial
+                    </div>
+<div class="p-2 rounded bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] font-bold">
+                      Confirmado / Cancelado
+                    </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Referencias del Balneario -->
+<div class="space-y-2.5">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold">
+                Referencias Vinculadas
+              </span>
+<div class="grid grid-cols-3 gap-2">
+<div class="p-3 bg-surface rounded-xl border border-surface-container-highest flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase font-semibold">Cliente</span>
+<span class="font-title-md text-xs font-bold text-on-surface truncate mt-1">Silvina Sasso</span>
+<span class="text-[10px] font-mono text-on-surface-variant">CLI-0842</span>
+</div>
+<div class="p-3 bg-surface rounded-xl border border-surface-container-highest flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase font-semibold">Unidad</span>
+<span class="font-title-md text-xs font-bold text-on-surface truncate mt-1">Carpa #74</span>
+<span class="text-[10px] text-on-surface-variant">Sector Norte</span>
+</div>
+<div class="p-3 bg-surface rounded-xl border border-surface-container-highest flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase font-semibold">Comprobante</span>
+<span class="font-title-md text-xs font-mono font-bold text-on-surface truncate mt-1">RB-3696</span>
+<span class="text-[10px] text-[#059669] font-medium">Emitido</span>
+</div>
+</div>
+</div>
+<!-- Acciones Contextuales -->
+<div class="space-y-2 pt-2 border-t border-surface-container-highest">
+<button class="w-full h-11 rounded-xl bg-primary-container text-on-surface font-bold text-xs flex items-center justify-center gap-2 hover:brightness-95 transition" type="button">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span>Ver Ficha de Silvina Sasso</span>
+</button>
+<div class="grid grid-cols-2 gap-2">
+<button class="h-10 rounded-xl bg-surface-container-lowest border border-surface-container-highest text-on-surface font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-surface-container-low transition" type="button">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">receipt</span>
+<span>Abrir RB-3696</span>
+</button>
+<button class="h-10 rounded-xl bg-surface-container-lowest border border-surface-container-highest text-on-surface font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-surface-container-low transition" type="button">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">point_of_sale</span>
+<span>Ver en Caja Diaria</span>
+</button>
+</div>
+</div>
+</div>
+<!-- PANEL DETALLE: ESTADO SIN SELECCIÓN (Hidden by default, shown via switcher) -->
+<div class="hidden bg-surface-container-lowest border border-surface-container-highest rounded-2xl p-10 sticky top-20 text-center flex-col items-center justify-center min-h-[520px]" id="side-panel-unselected">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-on-surface-variant mb-4">
+<span class="material-symbols-outlined text-[32px]">manage_search</span>
+</div>
+<h3 class="font-headline-sm text-body-lg font-bold text-on-surface mb-2" style="font-family: 'Manrope', 'Inter', sans-serif;">
+              Seleccioná un evento del listado
+            </h3>
+<p class="text-xs text-on-surface-variant max-w-[280px] leading-relaxed mb-6">
+              Hacé clic en cualquier registro cronológico de la izquierda para inspeccionar valores anteriores, operador responsable y comprobantes asociados.
+            </p>
+<div class="flex items-center gap-2 text-xs font-mono text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-lg border border-surface-container-highest">
+<span class="material-symbols-outlined text-[16px]">touch_app</span>
+<span>Esperando selección...</span>
+</div>
+</div>
+</div>
+</div>
+<!-- STATE 3: CARGANDO (SKELETON PLACEHOLDERS) -->
+<div class="hidden grid grid-cols-12 gap-8 items-start" id="view-loading-container">
+<!-- Skeleton Left Column -->
+<div class="col-span-12 lg:col-span-7 space-y-4">
+<div class="h-8 bg-surface-container-high rounded-lg w-72 animate-pulse"></div>
+<div class="space-y-3">
+<div class="h-20 bg-surface-container-lowest border border-surface-container-highest rounded-xl p-4 animate-pulse flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high"></div>
+<div class="space-y-2">
+<div class="h-3.5 bg-surface-container-high rounded w-48"></div>
+<div class="h-3 bg-surface-container rounded w-64"></div>
+</div>
+</div>
+<div class="h-4 bg-surface-container-high rounded w-16"></div>
+</div>
+<div class="h-20 bg-surface-container-lowest border border-surface-container-highest rounded-xl p-4 animate-pulse flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high"></div>
+<div class="space-y-2">
+<div class="h-3.5 bg-surface-container-high rounded w-40"></div>
+<div class="h-3 bg-surface-container rounded w-56"></div>
+</div>
+</div>
+<div class="h-4 bg-surface-container-high rounded w-16"></div>
+</div>
+<div class="h-20 bg-surface-container-lowest border border-surface-container-highest rounded-xl p-4 animate-pulse flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high"></div>
+<div class="space-y-2">
+<div class="h-3.5 bg-surface-container-high rounded w-52"></div>
+<div class="h-3 bg-surface-container rounded w-72"></div>
+</div>
+</div>
+<div class="h-4 bg-surface-container-high rounded w-16"></div>
+</div>
+</div>
+</div>
+<!-- Skeleton Right Column -->
+<div class="col-span-12 lg:col-span-5">
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-2xl p-6 space-y-6 animate-pulse">
+<div class="space-y-3 pb-5 border-b border-surface-container-highest">
+<div class="h-5 bg-surface-container-high rounded w-28"></div>
+<div class="h-7 bg-surface-container-high rounded w-64"></div>
+<div class="h-3 bg-surface-container rounded w-40"></div>
+</div>
+<div class="h-16 bg-surface-container-low rounded-xl"></div>
+<div class="h-36 bg-surface-container-low rounded-xl"></div>
+<div class="h-12 bg-surface-container-high rounded-xl"></div>
+</div>
+</div>
+</div>
+<!-- STATE 4: SIN RESULTADOS (EMPTY STATE) -->
+<div class="hidden bg-surface-container-lowest border border-surface-container-highest rounded-2xl p-16 text-center flex flex-col items-center justify-center min-h-[460px]" id="view-empty-container">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-low border border-surface-container-highest flex items-center justify-center text-on-surface-variant mb-5">
+<span class="material-symbols-outlined text-[40px]">filter_alt_off</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface mb-2" style="font-family: 'Manrope', 'Inter', sans-serif;">
+          No se encontraron movimientos registrados
+        </h3>
+<p class="text-sm text-on-surface-variant max-w-md leading-relaxed mb-6">
+          No existen registros para los filtros seleccionados entre el 25/10 y el 01/11. Probá seleccionando otro rango de fechas o limpiando el término de búsqueda.
+        </p>
+<div class="flex items-center gap-3">
+<button class="h-10 px-5 rounded-xl bg-on-surface text-surface-container-lowest font-semibold text-xs flex items-center gap-2 hover:bg-on-surface/90 transition" onclick="setViewState('normal')" type="button">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+<span>Limpiar todos los filtros</span>
+</button>
+<button class="h-10 px-4 rounded-xl border border-surface-container-highest bg-surface-container-lowest text-on-surface font-semibold text-xs hover:bg-surface-container-low transition" type="button">
+<span>Ver últimos 30 días</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function setViewState(state) {
+    const normalContainer = document.getElementById('view-normal-container');
+    const loadingContainer = document.getElementById('view-loading-container');
+    const emptyContainer = document.getElementById('view-empty-container');
+    const sideSelected = document.getElementById('side-panel-selected');
+    const sideUnselected = document.getElementById('side-panel-unselected');
+    
+    // Update tabs
+    const buttons = document.querySelectorAll('.view-tab-btn');
+    buttons.forEach(btn => {
+      if (btn.getAttribute('data-state') === state) {
+        btn.classList.add('bg-surface-container-lowest', 'text-on-surface', 'font-semibold');
+        btn.classList.remove('text-on-surface-variant', 'font-medium');
+      } else {
+        btn.classList.remove('bg-surface-container-lowest', 'text-on-surface', 'font-semibold');
+        btn.classList.add('text-on-surface-variant', 'font-medium');
+      }
+    });
+
+    // Reset visibility
+    normalContainer.classList.add('hidden');
+    loadingContainer.classList.add('hidden');
+    emptyContainer.classList.add('hidden');
+
+    if (state === 'normal') {
+      normalContainer.classList.remove('hidden');
+      sideSelected.classList.remove('hidden');
+      sideUnselected.classList.add('hidden');
+    } else if (state === 'unselected') {
+      normalContainer.classList.remove('hidden');
+      sideSelected.classList.add('hidden');
+      sideUnselected.classList.remove('hidden');
+      sideUnselected.classList.add('flex');
+    } else if (state === 'loading') {
+      loadingContainer.classList.remove('hidden');
+    } else if (state === 'empty') {
+      emptyContainer.classList.remove('hidden');
+    }
+  }
+
+  function selectEvent(eventId) {
+    setViewState('normal');
+    // Highlight effect simulation
+    const selectedCard = document.getElementById('item-selected-card');
+    if (selectedCard) {
+      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+</script></main></div></body></html>

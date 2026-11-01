@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary-fixed-dim": "#c6c6c6", "error-container": "#ffdad6", "on-secondary-fixed-variant": "#474747", "on-tertiary-fixed-variant": "#005320", "on-tertiary": "#ffffff", "primary": "#745b00", "primary-fixed-dim": "#eac249", "surface-tint": "#745b00", "inverse-surface": "#2f3131", "tertiary": "#006e2d", "on-secondary": "#ffffff", "on-surface-variant": "#4d4635", "surface-container-lowest": "#ffffff", "on-background": "#1a1c1c", "on-primary": "#ffffff", "on-tertiary-fixed": "#002109", "background": "#f9f9f9", "on-primary-container": "#6b5500", "surface-container-high": "#e8e8e8", "surface": "#f9f9f9", "primary-fixed": "#ffe08a", "tertiary-fixed-dim": "#62df7d", "surface-bright": "#f9f9f9", "on-secondary-container": "#646464", "tertiary-container": "#6ae785", "inverse-primary": "#eac249", "surface-container-highest": "#e2e2e2", "surface-variant": "#e2e2e2", "on-error-container": "#93000a", "surface-container": "#eeeeee", "on-secondary-fixed": "#1b1b1b", "on-tertiary-container": "#00662a", "on-primary-fixed": "#241a00", "on-error": "#ffffff", "surface-container-low": "#f4f3f3", "primary-container": "#f2ca50", "error": "#ba1a1a", "inverse-on-surface": "#f1f1f1", "on-primary-fixed-variant": "#574400", "on-surface": "#1a1c1c", "outline": "#7f7663", "tertiary-fixed": "#7ffc97", "outline-variant": "#d0c5af", "secondary-fixed": "#e2e2e2", "secondary-container": "#e2e2e2", "secondary": "#5e5e5e", "surface-dim": "#dadada" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-md": "1rem", "space-xl": "2.25rem", "gutter": "1rem", "margin-tablet": "2rem", "margin": "1.25rem", "gutter-sm": "0.75rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "gutter-lg": "1.5rem", "margin-mobile": "1rem" }, fontFamily: { "body-sm": ["Inter"], "label-md": ["Inter"], "headline-md": ["Inter"], "headline-lg-mobile": ["Inter"], "display-lg": ["Inter"], "label-lg": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "headline-lg": ["Inter"], "metric-xl": ["Inter"], "title-md": ["Inter"], "headline-sm": ["Inter"] }, fontSize: { "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "metric-xl": ["34px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;min-height:100%;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl"><div class="h-16 px-margin-mobile flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><div class="flex items-center justify-center w-8 h-8 rounded-lg bg-inverse-surface text-surface-container-lowest font-headline-sm text-headline-sm select-none">P</div><div class="flex flex-col min-w-0"><span class="font-label-md text-label-md uppercase tracking-wider text-on-surface truncate">Prius CRM</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Historial</span></div></div><div class="flex items-center gap-space-xs shrink-0"><button aria-label="Escanear código" class="w-11 h-11 flex items-center justify-center rounded-xl text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">qr_code_scanner</span></button><button aria-label="Buscar" class="w-11 h-11 flex items-center justify-center rounded-xl text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">search</span></button><button aria-label="Notificaciones" class="w-11 h-11 flex items-center justify-center rounded-xl text-on-surface hover:bg-surface-container-high transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-primary-container"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center select-none"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface px-margin-mobile"><div class="flex flex-col w-full text-[#000000] font-['Inter',sans-serif]">
+<!-- Top Control Bar & State Switcher (Interactive Prototype Helper) -->
+<div class="sticky top-0 z-30 bg-[#F9F9F9]/95 backdrop-blur-md pb-2 pt-1 border-b border-[#E5E5E5] px-1">
+<!-- Header Title & Subtitle -->
+<div class="mb-3">
+<div class="flex items-center justify-between">
+<h1 class="font-['Manrope',sans-serif] font-bold text-[22px] leading-tight text-[#000000]">Historial de Actividad</h1>
+<span class="inline-flex items-center gap-1.5 bg-[#FFFFFF] border border-[#E5E5E5] px-2.5 py-1 rounded-full text-[11px] font-medium text-[#6B7280]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+          En vivo
+        </span>
+</div>
+<p class="text-[13px] text-[#6B7280] mt-0.5">Auditoría de acciones y movimientos del balneario</p>
+</div>
+<!-- Quick State Switcher Pills (Para inspección UX requerida) -->
+<div class="flex items-center justify-between bg-[#F4F3F3] p-1 rounded-xl mb-3 text-[11px] font-semibold text-[#6B7280]">
+<button class="flex-1 py-1 rounded-lg text-center transition-all bg-[#FFFFFF] text-[#000000] shadow-sm" id="tab-normal" onclick="switchView('normal')" type="button">Normal</button>
+<button class="flex-1 py-1 rounded-lg text-center transition-all hover:text-[#000000]" id="tab-loading" onclick="switchView('loading')" type="button">Cargando</button>
+<button class="flex-1 py-1 rounded-lg text-center transition-all hover:text-[#000000]" id="tab-empty" onclick="switchView('empty')" type="button">Sin datos</button>
+<button class="flex-1 py-1 rounded-lg text-center transition-all text-[#B45309] font-bold" id="tab-sheet" onclick="toggleSheet(true)" type="button">Ver Sheet</button>
+</div>
+<!-- Buscador Ancho Completo -->
+<div class="relative mb-2.5">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#6B7280]">search</span>
+<input class="w-full h-11 pl-10 pr-9 bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl text-[13px] text-[#000000] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F2CA50] transition-colors" id="searchInput" placeholder="Buscar por usuario, cliente o comprobante..." type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#000000] p-1 flex items-center justify-center" onclick="document.getElementById('searchInput').value=''" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Filtros de Rango & Selector de Operador -->
+<div class="flex items-center justify-between gap-2 mb-2.5">
+<div class="flex items-center gap-1 bg-[#FFFFFF] p-1 rounded-xl border border-[#E5E5E5] shrink-0">
+<button class="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[#000000] text-[#FFFFFF] flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F2CA50]"></span> Hoy
+        </button>
+<button class="px-2.5 py-1 text-[11px] font-medium text-[#6B7280] hover:text-[#000000] rounded-lg" type="button">7 días</button>
+<button class="px-2.5 py-1 text-[11px] font-medium text-[#6B7280] hover:text-[#000000] rounded-lg" type="button">Mes</button>
+<button class="px-2 py-1 text-[11px] font-medium text-[#6B7280] hover:text-[#000000] rounded-lg flex items-center" type="button">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+</button>
+</div>
+<div class="relative flex-1 min-w-0">
+<button class="w-full h-[34px] px-2.5 bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl text-[11px] font-medium text-[#000000] flex items-center justify-between gap-1" type="button">
+<span class="truncate">Todos los usuarios (6)</span>
+<span class="material-symbols-outlined text-[16px] text-[#6B7280] shrink-0">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Fila Horizontal de Chips de Eventos -->
+<div class="overflow-x-auto flex gap-1.5 pb-1 -mx-1 px-1" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+<button class="bg-[#F2CA50] text-[#000000] font-semibold rounded-full px-3 py-1.5 text-xs whitespace-nowrap" type="button">Todo</button>
+<button class="bg-[#FFFFFF] border border-[#E5E5E5] text-[#000000] font-medium rounded-full px-3 py-1.5 text-xs whitespace-nowrap" type="button">Reservas</button>
+<button class="bg-[#FFFFFF] border border-[#E5E5E5] text-[#000000] font-medium rounded-full px-3 py-1.5 text-xs whitespace-nowrap" type="button">Pagos</button>
+<button class="bg-[#FFFFFF] border border-[#E5E5E5] text-[#000000] font-medium rounded-full px-3 py-1.5 text-xs whitespace-nowrap" type="button">Comprobantes</button>
+<button class="bg-[#FFFFFF] border border-[#E5E5E5] text-[#000000] font-medium rounded-full px-3 py-1.5 text-xs whitespace-nowrap" type="button">Cambios de unidad</button>
+<button class="bg-[#FFFFFF] border border-[#E5E5E5] text-[#000000] font-medium rounded-full px-3 py-1.5 text-xs whitespace-nowrap" type="button">Caja</button>
+<button class="bg-[#FFFFFF] border border-[#E5E5E5] text-[#000000] font-medium rounded-full px-3 py-1.5 text-xs whitespace-nowrap" type="button">Anulaciones</button>
+<button class="bg-[#FFFFFF] border border-[#E5E5E5] text-[#000000] font-medium rounded-full px-3 py-1.5 text-xs whitespace-nowrap" type="button">Notas</button>
+</div>
+</div>
+<!-- CONTENEDOR PRINCIPAL: ESTADO NORMAL -->
+<div class="flex flex-col pt-3" id="view-normal">
+<!-- Grupo: HOY -->
+<div class="flex items-center justify-between pb-2 mb-2 border-b border-[#E5E5E5]">
+<div class="flex items-center gap-2">
+<h2 class="font-['Manrope',sans-serif] font-bold text-[15px] text-[#000000]">Hoy</h2>
+<span class="bg-[#F4F3F3] text-[#6B7280] text-[11px] font-medium px-2 py-0.5 rounded-full border border-[#E5E5E5]">14 eventos</span>
+</div>
+<span class="text-[11px] text-[#6B7280]">Sábado 17 Octubre</span>
+</div>
+<!-- Evento 1: Pago Editado (Abre Bottom Sheet) -->
+<div class="cursor-pointer bg-[#FFFFFF] border border-[#E5E5E5] hover:border-[#F2CA50] rounded-xl p-3 mb-2 flex items-start gap-3 transition-colors active:bg-[#F9F9F9]" onclick="toggleSheet(true)">
+<div class="w-9 h-9 rounded-xl bg-[#ECFDF5] text-[#059669] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[19px]">account_balance_wallet</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1">
+<span class="font-bold text-[13px] text-[#000000] truncate">Marcelo Madotta</span>
+<span class="text-[11px] text-[#6B7280] font-mono shrink-0">16:33</span>
+</div>
+<p class="text-[12px] text-[#000000] mt-0.5 leading-snug">
+<span class="font-semibold text-[#059669]">Pago editado</span>
+<span class="text-[#6B7280]">— $ 1.100.000 · SILVINA SASSO</span>
+</p>
+<div class="mt-1 flex items-center gap-2">
+<span class="inline-flex items-center gap-1 text-[10px] font-medium bg-[#F4F3F3] text-[#6B7280] px-1.5 py-0.5 rounded">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F2CA50]"></span> Carpa #74
+          </span>
+<span class="text-[10px] text-[#059669] font-medium">Ver desglose →</span>
+</div>
+</div>
+</div>
+<!-- Evento 2: Comprobante Editado -->
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 mb-2 flex items-start gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[19px]">receipt_long</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1">
+<span class="font-bold text-[13px] text-[#000000] truncate">Marcelo Madotta</span>
+<span class="text-[11px] text-[#6B7280] font-mono shrink-0">16:33</span>
+</div>
+<p class="text-[12px] text-[#000000] mt-0.5 leading-snug">
+<span class="font-semibold">Comprobante editado</span>
+<span class="text-[#6B7280]">— recibo_b 3696</span>
+</p>
+<span class="mt-1 inline-block text-[10px] font-mono text-[#6B7280] bg-[#F4F3F3] px-1.5 py-0.5 rounded">CAE: 74921098231</span>
+</div>
+</div>
+<!-- Evento 3: Caja Cerrada -->
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 mb-2 flex items-start gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[19px]">lock</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1">
+<span class="font-bold text-[13px] text-[#000000] truncate">Marcelo Madotta</span>
+<span class="text-[11px] text-[#6B7280] font-mono shrink-0">16:33</span>
+</div>
+<p class="text-[12px] text-[#000000] mt-0.5 leading-snug">
+<span class="font-semibold">Caja cerrada</span>
+<span class="text-[#6B7280]">— Total $ 2.525.000</span>
+</p>
+<div class="mt-1 flex items-center gap-1.5 text-[10px] text-[#6B7280]">
+<span>Turno tarde · Balneario Prius</span>
+</div>
+</div>
+</div>
+<!-- Evento 4: Reserva Editada -->
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 mb-2 flex items-start gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[19px]">calendar_month</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1">
+<span class="font-bold text-[13px] text-[#000000] truncate">Marcelo Madotta</span>
+<span class="text-[11px] text-[#6B7280] font-mono shrink-0">16:33</span>
+</div>
+<p class="text-[12px] text-[#000000] mt-0.5 leading-snug">
+<span class="font-semibold text-[#2563EB]">Reserva editada</span>
+<span class="text-[#6B7280]">· SILVINA SASSO (Carpa #44 → #74)</span>
+</p>
+<span class="mt-1 inline-flex items-center text-[10px] text-[#6B7280] bg-[#F4F3F3] px-1.5 py-0.5 rounded">Sector Central Frente al Mar</span>
+</div>
+</div>
+<!-- Evento 5: Inicio de Sesión -->
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 mb-2 flex items-start gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#F0FDF4] text-[#16A34A] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[19px]">login</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1">
+<span class="font-bold text-[13px] text-[#000000] truncate">Baltasar Bruschetti</span>
+<span class="text-[11px] text-[#6B7280] font-mono shrink-0">18:11</span>
+</div>
+<p class="text-[12px] text-[#000000] mt-0.5 leading-snug">
+<span class="font-semibold">Inicio de sesión</span>
+<span class="text-[#6B7280]">en Punto de Venta #2</span>
+</p>
+<span class="mt-1 text-[10px] text-[#9CA3AF] block font-mono">IP: 190.188.42.12 (Terminal Playa)</span>
+</div>
+</div>
+<!-- Grupo: AYER -->
+<div class="flex items-center justify-between pb-2 mb-2 mt-4 border-b border-[#E5E5E5]">
+<div class="flex items-center gap-2">
+<h2 class="font-['Manrope',sans-serif] font-bold text-[15px] text-[#000000]">Ayer</h2>
+<span class="bg-[#F4F3F3] text-[#6B7280] text-[11px] font-medium px-2 py-0.5 rounded-full border border-[#E5E5E5]">8 eventos</span>
+</div>
+<span class="text-[11px] text-[#6B7280]">Viernes 16 Octubre</span>
+</div>
+<!-- Evento 6: Caja Editada -->
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 mb-2 flex items-start gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[19px]">point_of_sale</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1">
+<span class="font-bold text-[13px] text-[#000000] truncate">Marcelo Madotta</span>
+<span class="text-[11px] text-[#6B7280] font-mono shrink-0">08:15</span>
+</div>
+<p class="text-[12px] text-[#000000] mt-0.5 leading-snug">
+<span class="font-semibold">Caja editada</span>
+<span class="text-[#6B7280]">— Apertura manual con fondo inicial $ 50.000</span>
+</p>
+</div>
+</div>
+<!-- Evento 7: Anulación -->
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 mb-2 flex items-start gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#FEF2F2] text-[#DC2626] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[19px]">cancel</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between gap-1">
+<span class="font-bold text-[13px] text-[#000000] truncate">Baltasar Bruschetti</span>
+<span class="text-[11px] text-[#6B7280] font-mono shrink-0">11:20</span>
+</div>
+<p class="text-[12px] text-[#000000] mt-0.5 leading-snug">
+<span class="font-semibold text-[#DC2626]">Anulación de seña</span>
+<span class="text-[#6B7280]">— Sombrilla #12 (Clima adverso)</span>
+</p>
+<span class="mt-1 inline-block text-[10px] text-[#DC2626] font-medium bg-[#FEF2F2] px-1.5 py-0.5 rounded border border-[#FEE2E2]">Reintegro procesado</span>
+</div>
+</div>
+<!-- Final del feed sutil -->
+<div class="text-center py-4">
+<span class="text-[12px] text-[#9CA3AF] flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">history</span>
+        Auditoría inmutable protegida por Prius Cloud
+      </span>
+</div>
+</div>
+<!-- CONTENEDOR ESTADO: CARGANDO (SKELETON SHIMMER) -->
+<div class="hidden flex flex-col pt-3 animate-pulse" id="view-loading">
+<div class="flex items-center justify-between pb-2 mb-3 border-b border-[#E5E5E5]">
+<div class="h-4 bg-[#E5E5E5] rounded w-24"></div>
+<div class="h-3 bg-[#E5E5E5] rounded w-16"></div>
+</div>
+<div class="space-y-2.5">
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 flex gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#E5E5E5] shrink-0"></div>
+<div class="flex-1 space-y-2">
+<div class="h-3.5 bg-[#E5E5E5] rounded w-1/3"></div>
+<div class="h-3 bg-[#E5E5E5] rounded w-3/4"></div>
+<div class="h-2.5 bg-[#E5E5E5] rounded w-1/4"></div>
+</div>
+</div>
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 flex gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#E5E5E5] shrink-0"></div>
+<div class="flex-1 space-y-2">
+<div class="h-3.5 bg-[#E5E5E5] rounded w-2/5"></div>
+<div class="h-3 bg-[#E5E5E5] rounded w-2/3"></div>
+<div class="h-2.5 bg-[#E5E5E5] rounded w-1/3"></div>
+</div>
+</div>
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 flex gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#E5E5E5] shrink-0"></div>
+<div class="flex-1 space-y-2">
+<div class="h-3.5 bg-[#E5E5E5] rounded w-1/4"></div>
+<div class="h-3 bg-[#E5E5E5] rounded w-4/5"></div>
+</div>
+</div>
+<div class="bg-[#FFFFFF] border border-[#E5E5E5] rounded-xl p-3 flex gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#E5E5E5] shrink-0"></div>
+<div class="flex-1 space-y-2">
+<div class="h-3.5 bg-[#E5E5E5] rounded w-1/3"></div>
+<div class="h-3 bg-[#E5E5E5] rounded w-1/2"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- CONTENEDOR ESTADO: SIN RESULTADOS -->
+<div class="hidden flex flex-col items-center justify-center py-16 px-4 text-center" id="view-empty">
+<div class="w-16 h-16 rounded-2xl bg-[#F4F3F3] border border-[#E5E5E5] flex items-center justify-center text-[#6B7280] mb-3">
+<span class="material-symbols-outlined text-[32px]">filter_list_off</span>
+</div>
+<h3 class="font-['Manrope',sans-serif] font-bold text-[17px] text-[#000000]">Sin movimientos registrados</h3>
+<p class="text-[13px] text-[#6B7280] max-w-xs mt-1">No se encontraron eventos para el filtro seleccionado en este período del balneario.</p>
+<button class="mt-4 px-4 py-2 bg-[#F2CA50] text-[#000000] text-[12px] font-bold rounded-xl active:bg-[#eac249] transition-colors" onclick="switchView('normal')" type="button">
+      Restablecer filtros
+    </button>
+</div>
+<!-- BOTTOM SHEET DETALLE DE EVENTO (INTERACTIVO / PREVIEW SOLICITADO) -->
+<div class="fixed inset-0 z-50 bg-[#000000]/40 backdrop-blur-sm transition-opacity opacity-0 pointer-events-none flex flex-col justify-end" id="bottomSheetScrim" onclick="toggleSheet(false)">
+<div class="w-full bg-[#FFFFFF] rounded-t-3xl border-t border-[#E5E5E5] p-5 pb-8 max-h-[751px] overflow-y-auto transform translate-y-full transition-transform duration-300" onclick="event.stopPropagation()">
+<!-- Grab Handle -->
+<div class="w-10 h-1 rounded-full bg-[#E5E5E5] mx-auto mb-4"></div>
+<!-- Header del Detalle -->
+<div class="flex items-center justify-between pb-3 border-b border-[#E5E5E5]">
+<div class="flex items-center gap-2">
+<h2 class="font-['Manrope',sans-serif] font-bold text-[18px] text-[#000000]">Detalle de Evento</h2>
+<span class="bg-[#ECFDF5] text-[#059669] text-[11px] font-semibold px-2 py-0.5 rounded-full border border-[#A7F3D0]">Pago editado</span>
+</div>
+<button class="w-8 h-8 rounded-full bg-[#F4F3F3] text-[#000000] flex items-center justify-center hover:bg-[#E5E5E5] transition-colors" onclick="toggleSheet(false)" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Metadatos de Auditoría -->
+<div class="bg-[#F4F3F3] rounded-2xl p-3.5 my-4 border border-[#E5E5E5] grid grid-cols-2 gap-3 text-[12px]">
+<div>
+<span class="text-[#6B7280] block text-[11px]">Operador responsable</span>
+<span class="font-bold text-[#000000]">Marcelo Madotta</span>
+<span class="text-[10px] text-[#6B7280] block font-mono">SuperAdmin · Balneario</span>
+</div>
+<div>
+<span class="text-[#6B7280] block text-[11px]">Fecha y hora</span>
+<span class="font-semibold text-[#000000]">Sábado 17/10/2026</span>
+<span class="text-[10px] text-[#6B7280] block font-mono">16:33:14 hs</span>
+</div>
+<div class="col-span-2 pt-2 border-t border-[#E5E5E5] flex justify-between items-center text-[11px]">
+<span class="text-[#6B7280]">Módulo afectado</span>
+<span class="font-semibold bg-[#FFFFFF] px-2 py-0.5 rounded border border-[#E5E5E5] text-[#000000]">Caja &amp; Clientes</span>
+</div>
+</div>
+<!-- Comparativa Antes y Después -->
+<div class="mb-4">
+<h4 class="text-[11px] font-bold uppercase tracking-wider text-[#6B7280] mb-2">Modificación de Valores</h4>
+<div class="grid grid-cols-2 gap-2">
+<!-- Antes -->
+<div class="p-3 bg-[#FFFFFF] rounded-xl border border-[#E5E5E5]">
+<span class="text-[10px] font-bold uppercase text-[#6B7280] tracking-wide block mb-1">Antes</span>
+<div class="text-[13px] text-[#4B5563]">Monto: <span class="line-through">$ 600.000</span></div>
+<div class="text-[11px] text-[#6B7280] mt-0.5">Efectivo</div>
+<span class="inline-block mt-2 text-[10px] bg-[#FEF3C7] text-[#D97706] font-semibold px-2 py-0.5 rounded">Parcial</span>
+</div>
+<!-- Después -->
+<div class="p-3 bg-[#F0FDF4] rounded-xl border border-[#86EFAC]">
+<span class="text-[10px] font-bold uppercase text-[#059669] tracking-wide block mb-1">Después</span>
+<div class="text-[14px] font-bold text-[#059669]">Monto: $ 1.100.000</div>
+<div class="text-[11px] text-[#059669] mt-0.5 font-medium">Efectivo (Ingreso)</div>
+<span class="inline-block mt-2 text-[10px] bg-[#059669] text-[#FFFFFF] font-bold px-2 py-0.5 rounded">Confirmado</span>
+</div>
+</div>
+</div>
+<!-- Referencias Cruzadas -->
+<div class="border border-[#E5E5E5] rounded-xl p-3 mb-5 space-y-2 text-[12px]">
+<div class="flex justify-between items-center">
+<span class="text-[#6B7280]">Cliente</span>
+<span class="font-bold text-[#000000] flex items-center gap-1">
+            Silvina Sasso
+            <span class="material-symbols-outlined text-[14px] text-[#2563EB]">verified</span>
+</span>
+</div>
+<div class="flex justify-between items-center pt-1 border-t border-[#F4F3F3]">
+<span class="text-[#6B7280]">Unidad asignada</span>
+<span class="font-semibold text-[#000000] bg-[#F2CA50]/30 px-2 py-0.5 rounded">Carpa #74 (Sector 1)</span>
+</div>
+<div class="flex justify-between items-center pt-1 border-t border-[#F4F3F3]">
+<span class="text-[#6B7280]">Comprobante asociado</span>
+<span class="font-mono text-[#000000]">RB-3696</span>
+</div>
+</div>
+<!-- Botones de Acción Directa -->
+<div class="flex flex-col gap-2">
+<button class="w-full h-11 bg-[#F2CA50] text-[#000000] font-bold text-[13px] rounded-xl hover:bg-[#eac249] transition-colors flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">person</span>
+          Ver Ficha de Cliente
+        </button>
+<button class="w-full h-11 bg-[#FFFFFF] border border-[#E5E5E5] text-[#000000] font-semibold text-[13px] rounded-xl hover:bg-[#F9F9F9] transition-colors flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">point_of_sale</span>
+          Ir a Caja Diaria
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function switchView(mode) {
+    const normalView = document.getElementById('view-normal');
+    const loadingView = document.getElementById('view-loading');
+    const emptyView = document.getElementById('view-empty');
+
+    const tabNormal = document.getElementById('tab-normal');
+    const tabLoading = document.getElementById('tab-loading');
+    const tabEmpty = document.getElementById('tab-empty');
+
+    normalView.classList.add('hidden');
+    loadingView.classList.add('hidden');
+    emptyView.classList.add('hidden');
+
+    [tabNormal, tabLoading, tabEmpty].forEach(t => {
+      t.className = "flex-1 py-1 rounded-lg text-center transition-all text-[#6B7280]";
+    });
+
+    if (mode === 'normal') {
+      normalView.classList.remove('hidden');
+      tabNormal.className = "flex-1 py-1 rounded-lg text-center transition-all bg-[#FFFFFF] text-[#000000] shadow-sm font-semibold";
+    } else if (mode === 'loading') {
+      loadingView.classList.remove('hidden');
+      tabLoading.className = "flex-1 py-1 rounded-lg text-center transition-all bg-[#FFFFFF] text-[#000000] shadow-sm font-semibold";
+    } else if (mode === 'empty') {
+      emptyView.classList.remove('hidden');
+      tabEmpty.className = "flex-1 py-1 rounded-lg text-center transition-all bg-[#FFFFFF] text-[#000000] shadow-sm font-semibold";
+    }
+  }
+
+  function toggleSheet(open) {
+    const scrim = document.getElementById('bottomSheetScrim');
+    const sheet = scrim.firstElementChild;
+    if (open) {
+      scrim.classList.remove('pointer-events-none');
+      scrim.classList.remove('opacity-0');
+      scrim.classList.add('opacity-100');
+      sheet.classList.remove('translate-y-full');
+      sheet.classList.add('translate-y-0');
+    } else {
+      scrim.classList.add('opacity-0');
+      scrim.classList.remove('opacity-100');
+      sheet.classList.add('translate-y-full');
+      sheet.classList.remove('translate-y-0');
+      setTimeout(() => {
+        scrim.classList.add('pointer-events-none');
+      }, 250);
+    }
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/80 backdrop-blur-xl" data-active-classes="text-on-surface font-semibold"><div class="h-16 px-gutter flex items-center justify-around"><a class="flex flex-col items-center justify-center w-12 h-12 text-secondary hover:text-on-surface transition-colors" data-path="inicio" href="#"><span class="material-symbols-outlined text-[22px]">cottage</span><span class="font-label-md text-label-md mt-0.5">Inicio</span></a><a class="flex flex-col items-center justify-center w-12 h-12 text-secondary hover:text-on-surface transition-colors" data-path="plano" href="#"><span class="material-symbols-outlined text-[22px]">beach_access</span><span class="font-label-md text-label-md mt-0.5">Plano</span></a><a class="flex flex-col items-center justify-center w-12 h-12 -mt-4 rounded-full bg-primary-container text-on-primary-fixed hover:bg-primary-fixed-dim transition-colors" data-path="reserva" href="#"><span class="material-symbols-outlined text-[24px]">add</span><span class="font-label-md text-label-md">Reserva</span></a><a class="flex flex-col items-center justify-center w-12 h-12 text-secondary hover:text-on-surface transition-colors" data-path="clientes" href="#"><span class="material-symbols-outlined text-[22px]">groups</span><span class="font-label-md text-label-md mt-0.5">Clientes</span></a><a class="flex flex-col items-center justify-center w-12 h-12 text-secondary hover:text-on-surface transition-colors" data-path="mas" href="#"><span class="material-symbols-outlined text-[22px]">tune</span><span class="font-label-md text-label-md mt-0.5">Más</span></a></div></nav></body></html>
