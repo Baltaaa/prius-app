@@ -248,9 +248,6 @@ function descripcionExtra(evento, meta) {
   return texto
 }
 
-const cambiosATexto = (cambios) =>
-  cambios.length ? cambios.map((c) => `${c.label}: ${c.antes} → ${c.despues}`).join(' · ') : null
-
 // Atajos de rango del mock (07): Hoy / 7 días / Mes / Personalizado.
 // "Personalizado" no fija fechas: solo revela los dos date pickers.
 const ATAJOS = [
@@ -288,7 +285,12 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
       <span className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${TONOS[meta.tono] || TONOS.info}`}>
         <Icon size={16} />
       </span>
-      <div className="min-w-0 flex-1">
+      {/* min-w-0 + [overflow-wrap:anywhere]: impide que strings largos sin
+          espacios (e.g. un comprobante, "Cierredesesion…") expandan la fila
+          más allá del viewport. `break-words` (overflow-wrap: break-word)
+          solo rompe cuando no hay otra opción; `anywhere` rompe siempre y
+          previene el scroll horizontal en mobile. */}
+      <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
         <div className="flex items-start justify-between gap-2">
           <p className="text-body-md text-black font-semibold truncate">{evento.actor_nombre || 'Sistema'}</p>
           <span className="text-body-sm text-prius-muted shrink-0 tabular-nums">{formatHora(evento.ts)}</span>
@@ -296,20 +298,41 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
         {/* La descripción solo se agrega si dice algo distinto de la
             etiqueta del tipo: para los eventos de auth las dos son "Inicio
             de sesión" y quedaba repetido. */}
-        <p className="text-body-md text-prius-slate mt-0.5 break-words">
+        <p className="text-body-md text-prius-slate mt-0.5">
           <span className="text-black">{meta.label}</span>
           {descripcionExtra(evento, meta) ? <> — {descripcionExtra(evento, meta)}</> : null}
         </p>
-        {/* Solo los datos que el evento realmente tiene. */}
+        {/* Solo los datos que el evento realmente tiene. max-w-full para que
+            ningún chip empuje más allá del contenedor. */}
         {secundario.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             {secundario.map((s) => (
-              <span key={s} className="text-body-sm text-prius-slate bg-prius-surface rounded-lg px-2 py-0.5">{s}</span>
+              <span key={s} className="text-body-sm text-prius-slate bg-prius-surface rounded-lg px-2 py-0.5 max-w-full">{s}</span>
             ))}
           </div>
         )}
+        {/* Cambios como chips individuales (antes: una sola línea larga
+            que podía exceder el ancho en mobile). Se muestran los 2
+            primeros; si hay más, un chip "+N más" lleva al detalle. */}
         {cambios.length > 0 && (
-          <p className="text-body-sm text-info-ink mt-1 break-words">{cambiosATexto(cambios)}</p>
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {cambios.slice(0, 2).map((c) => (
+              <span
+                key={c.label}
+                className="inline-flex flex-wrap items-baseline gap-x-1 text-body-sm bg-info-soft rounded-lg px-2 py-0.5 max-w-full"
+              >
+                <span className="text-prius-muted font-medium">{c.label}:</span>
+                <span className="text-prius-muted line-through tabular-nums">{c.antes}</span>
+                <span className="text-info-ink">→</span>
+                <span className="text-info-ink font-semibold tabular-nums">{c.despues}</span>
+              </span>
+            ))}
+            {cambios.length > 2 && (
+              <span className="text-body-sm text-prius-muted bg-prius-surface rounded-lg px-2 py-0.5">
+                +{cambios.length - 2} más
+              </span>
+            )}
+          </div>
         )}
         {esHistorico && (
           <span className="inline-block text-[9px] font-bold uppercase tracking-widest text-prius-muted bg-prius-surface border border-hairline rounded-full px-2 py-0.5 mt-1.5">

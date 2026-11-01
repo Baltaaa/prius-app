@@ -114,9 +114,13 @@ export default function AppLayout() {
                 Reservas/Clientes lo ignoran (siguen con su alto de
                 contenido normal, el wrapper no les fuerza nada por fuera
                 de `lg:`). */}
+            {/* [overflow-x:clip]: red de seguridad contra el scroll horizontal
+                (ej. texto largo sin espacios en Historial). `clip` no crea
+                un nuevo scroll container (a diferencia de `hidden`), así que
+                los hijos sticky siguen funcionando. */}
             <main
               id="app-main-scroll"
-              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 w-full pb-bottom-nav-safe bg-prius-background ${esPlano ? 'py-4 md:py-3 md:pb-3' : 'py-4 md:py-8 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
+              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 w-full pb-bottom-nav-safe bg-prius-background [overflow-x:clip] ${esPlano ? 'py-4 md:py-3 md:pb-3' : 'py-4 md:py-8 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
             >
               {/* h1 accesible oculto visualmente — el título visible de
                   sección se sacó (item 4), pero un lector de pantalla sigue
