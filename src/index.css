@@ -359,6 +359,25 @@ body {
   }
 }
 
+/*
+  Autofill de Chrome/Safari (Bloque 2, Login): el navegador pinta los inputs
+  autocompletados de celeste con un `background-color` que no se puede pisar
+  con `background` normal (es un estilo de UA de altísima prioridad). El
+  truco estándar es `box-shadow: inset` del tamaño del campo, que sí gana, y
+  `-webkit-text-fill-color` para el texto. `transition: background-color` con
+  un delay enorme evita el flash celeste del primer frame.
+*/
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+  box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+  -webkit-text-fill-color: #000000 !important;
+  caret-color: #000000;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 /* Hover solo donde el puntero realmente puede hacer hover. */
 @media (hover: hover) {
   .hover-row { transition: background-color 180ms ease-out; }

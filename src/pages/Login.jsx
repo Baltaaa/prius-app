@@ -240,6 +240,12 @@ export default function Login({ modo }) {
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/40 md:bg-gradient-to-br md:from-black/85 md:via-black/55 md:to-black/35" />
+          {/* Scrim propio del wordmark (Bloque 2, nov 2026). El gradiente de
+              arriba deja la franja superior en negro al 40% en mobile, y
+              sobre un cielo claro el blanco del logo quedaba en ~3.8:1 — por
+              debajo de AA. Esta banda sube esa zona a negro ~72% y lleva el
+              texto a 10:1 largos, sin oscurecer el resto de la foto. */}
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/75 to-transparent md:hidden" />
 
           <div className="relative h-full flex flex-col justify-between p-6 md:p-12">
             {/* Wordmark — logo real de la app (/images/prius-icon.png),
@@ -280,8 +286,13 @@ export default function Login({ modo }) {
             botón "Ingresar" fuera de la pantalla. */}
         <main className="flex-1 min-h-0 flex flex-col md:items-center md:justify-center bg-white md:bg-prius-background overflow-hidden">
           <div className="flex-1 min-h-0 w-full overflow-y-auto overscroll-contain md:flex md:items-center md:justify-center md:py-10">
+            {/* Entrada (Bloque 1/2, nov 2026): el sheet sube desde abajo en
+                mobile y el formulario entra con fade-up en desktop — dos
+                animaciones distintas sobre el mismo nodo vía la variante
+                `md:`. Ambas son solo transform+opacity y se apagan con
+                prefers-reduced-motion desde index.css. */}
             <div
-              className="w-full md:max-w-[440px] rounded-t-3xl md:rounded-2xl md:border md:border-[#E5E5E5] md:shadow-[0_8px_30px_rgba(0,0,0,0.08)] bg-white px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-10 animate-premium-fade"
+              className="w-full md:max-w-[440px] rounded-t-3xl md:rounded-2xl md:border md:border-[#E5E5E5] md:shadow-[0_8px_30px_rgba(0,0,0,0.08)] bg-white px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-10 ui-open-sheet md:anim-fade-up"
             >
               {/* Gesto visual de bottom sheet (mobile) */}
               <div className="md:hidden flex justify-center mb-4">
