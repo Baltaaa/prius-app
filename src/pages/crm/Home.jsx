@@ -377,10 +377,6 @@ export default function Home() {
                     <span className="block text-label-md text-prius-slate uppercase">Total Recaudado</span>
                     <span className="text-metric-xl text-black">{fmtM(totalCobrado)}</span>
                   </div>
-                  <div className="min-w-0 sm:text-right">
-                    <span className="text-title-md text-prius-slate">Meta presupuestada</span>
-                    <span className="block text-body-sm text-prius-slate">{fmtM(facturacionBruta)}</span>
-                  </div>
                 </button>
                 <div className="mt-3"><Bar pct={pctPercibido} tone="success" /></div>
               </>
