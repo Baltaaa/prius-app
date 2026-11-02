@@ -169,17 +169,17 @@ export default function RegistrarPago({
     return (
       <Modal isOpen={isOpen} onClose={onClose} title={tituloOverride || 'Registrar Pago'}>
         <div className="flex flex-col items-center text-center gap-4 py-6">
-          <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
-            <CheckCircle2 className="text-prius-success" size={32} />
+          <div className="w-16 h-16 rounded-full bg-success-soft border border-success/30 flex items-center justify-center">
+            <CheckCircle2 className="text-success-ink" size={32} />
           </div>
           <div>
-            <p className="text-lg font-bold text-black">{formatPesos(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
+            <p className="text-lg font-bold text-ink">{formatPesos(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
             {/* Item 11 (testing oct 2026): se sacó el aviso para el caso
                 normal (el pago SÍ afecta la caja de hoy — es lo esperable,
                 no hace falta avisarlo). Solo queda el aviso cuando NO la
                 afecta (histórico, o con fecha de otro día). */}
             {exito.noAfectaCajaHoy && (
-              <p className="text-xs text-prius-slate uppercase tracking-widest mt-1">
+              <p className="text-xs text-ink-2 uppercase tracking-widest mt-1">
                 El cobro ya está reflejado en la reserva. No impacta en la caja de hoy — queda imputado a la fecha del pago.
               </p>
             )}
@@ -187,7 +187,7 @@ export default function RegistrarPago({
           <div className="flex gap-3 pt-2">
             <button
               onClick={onClose}
-              className="px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold text-black hover:bg-gold-hover transition-all"
+              className="px-6 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-gold text-ink hover:bg-gold-400 transition-all"
             >
               Listo
             </button>
@@ -218,7 +218,7 @@ export default function RegistrarPago({
         monto <= 0 || excedeSaldo || comprobanteIncompleto || !!duplicado
         || (!editingPago && !reservaId && !allowSinReserva) || (!editingPago && !cliente?.id)
       }
-      className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
+      className="w-full py-4 bg-gold hover:bg-gold-400 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs"
     >
       {editingPago
         ? `Guardar ${monto > 0 ? formatPesos(monto) : ''}`.trim()
@@ -240,7 +240,7 @@ export default function RegistrarPago({
         {/* Reserva */}
         {reservasOptions.length > 1 || allowSinReserva ? (
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Reserva</label>
+            <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Reserva</label>
             <BrandSelect
               value={reservaId}
               onChange={setReservaId}
@@ -260,32 +260,32 @@ export default function RegistrarPago({
             />
           </div>
         ) : reservaSeleccionada ? (
-          <div className="p-4 bg-prius-subtle border border-hairline rounded-xl">
-            <p className="text-sm font-bold text-black uppercase">{unidadLabel}</p>
+          <div className="p-4 bg-surface border border-line rounded-inner">
+            <p className="text-body font-bold text-ink uppercase">{unidadLabel}</p>
           </div>
         ) : null}
 
         {/* Resumen */}
         {reservaSeleccionada && (
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
-              <p className="text-[9px] text-prius-muted uppercase tracking-widest">Total</p>
-              <MontoStat value={total} size="xs" className="text-black mt-1" />
+            <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
+              <p className="text-[9px] text-ink-2 uppercase tracking-widest">Total</p>
+              <MontoStat value={total} size="xs" className="text-ink mt-1" />
             </div>
-            <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
-              <p className="text-[9px] text-prius-muted uppercase tracking-widest">Pagado</p>
+            <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
+              <p className="text-[9px] text-ink-2 uppercase tracking-widest">Pagado</p>
               {saldoDesconocido ? (
-                <p className="text-sm font-bold text-prius-slate normal-case mt-1">Sin verificar</p>
+                <p className="text-body font-bold text-ink-2 normal-case mt-1">Sin verificar</p>
               ) : (
-                <MontoStat value={pagado} size="xs" className="text-prius-success mt-1" />
+                <MontoStat value={pagado} size="xs" className="text-success-ink mt-1" />
               )}
             </div>
-            <div className="p-2.5 sm:p-3 bg-prius-subtle border border-hairline rounded-xl text-center min-w-0">
-              <p className="text-[9px] text-prius-muted uppercase tracking-widest">Saldo</p>
+            <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
+              <p className="text-[9px] text-ink-2 uppercase tracking-widest">Saldo</p>
               {saldoDesconocido ? (
-                <p className="text-sm font-bold text-prius-slate normal-case mt-1">Sin verificar</p>
+                <p className="text-body font-bold text-ink-2 normal-case mt-1">Sin verificar</p>
               ) : (
-                <MontoStat value={saldo} size="xs" className="text-gold mt-1" />
+                <MontoStat value={saldo} size="xs" className="text-ink mt-1" />
               )}
             </div>
           </div>

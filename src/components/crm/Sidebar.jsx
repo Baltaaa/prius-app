@@ -64,28 +64,28 @@ export default function Sidebar() {
   // derecho dorado + fondo prius-surface cuando está activo, en vez del
   // borde izquierdo + prius-subtle que tenía antes.
   const linkClass = ({ isActive }) => `
-    flex items-center justify-between gap-2 px-space-md py-space-sm rounded-l-lg text-title-md transition-colors
+    flex items-center justify-between gap-2 px-space-md py-space-sm rounded-l-icon text-body transition-colors
     ${isActive
-      ? 'bg-prius-surface text-black border-r-2 border-gold'
-      : 'text-prius-slate hover:bg-prius-surface hover:text-black'
+      ? 'bg-surface text-ink border-r-2 border-gold'
+      : 'text-ink-2 hover:bg-surface hover:text-ink'
     }
   `
 
   return (
-    <aside className="no-print hidden lg:flex w-64 h-dvh bg-white border-r border-hairline flex-col justify-between shrink-0 sticky top-0 left-0 z-30 font-ui">
+    <aside className="no-print hidden lg:flex w-64 h-dvh bg-card border-r border-line flex-col justify-between shrink-0 sticky top-0 left-0 z-30">
       <div className="flex flex-col overflow-hidden">
         {/* Brand Header — logo/ícono reales del proyecto, nunca el placeholder del mock */}
-        <div className="p-space-lg border-b border-hairline">
+        <div className="p-space-lg border-b border-line">
           <div className="flex items-center gap-space-sm">
             <img src="/images/prius-icon.png" alt="Prius" className="w-8 h-8 object-contain shrink-0" />
             <div className="min-w-0">
-              <div className="text-headline-sm text-black leading-none truncate">Prius</div>
-              <div className="text-label-md text-prius-slate uppercase mt-1 truncate">Playa Grande · APP</div>
+              <div className="text-body text-ink leading-none truncate">Prius</div>
+              <div className="text-label text-ink-2 uppercase mt-1 truncate">Playa Grande · APP</div>
             </div>
           </div>
           <button
             onClick={() => abrirNuevaReserva()}
-            className="w-full mt-space-lg h-12 rounded-xl bg-gold text-black text-label-lg flex items-center justify-center gap-space-sm hover:bg-gold-hover transition-colors"
+            className="w-full mt-space-lg h-12 rounded-inner bg-gold text-ink text-label flex items-center justify-center gap-space-sm hover:bg-gold-400 transition-colors"
           >
             <Plus size={18} />
             <span>Nueva reserva</span>
@@ -95,7 +95,7 @@ export default function Sidebar() {
         {/* Navigation Content */}
         <div className="flex-1 overflow-y-auto px-3 py-space-md space-y-space-lg">
           <div>
-            <h2 className="px-space-md text-label-md text-prius-slate uppercase mb-2">
+            <h2 className="px-space-md text-label text-ink-2 uppercase mb-2">
               Gestión Operativa
             </h2>
             <nav className="space-y-0.5">
@@ -106,7 +106,7 @@ export default function Sidebar() {
                     <span className="truncate">{item.name}</span>
                   </div>
                   {item.comingSoon && (
-                    <span className="shrink-0 px-1.5 py-0.5 text-[8px] font-bold bg-prius-surface text-prius-slate rounded uppercase tracking-wider">
+                    <span className="shrink-0 px-1.5 py-0.5 text-[8px] font-bold bg-surface text-ink-2 rounded-swatch uppercase tracking-wider">
                       Pronto
                     </span>
                   )}
@@ -116,7 +116,7 @@ export default function Sidebar() {
           </div>
 
           <div>
-            <h2 className="px-space-md text-label-md text-prius-slate uppercase mb-2">
+            <h2 className="px-space-md text-label text-ink-2 uppercase mb-2">
               Módulos Adicionales
             </h2>
             <nav className="space-y-0.5">
@@ -127,7 +127,7 @@ export default function Sidebar() {
                     <span>{item.name}</span>
                   </div>
                   {item.badge > 0 && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-gold text-black rounded-full">
+                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-gold text-ink rounded-full">
                       {item.badge}
                     </span>
                   )}
@@ -139,25 +139,25 @@ export default function Sidebar() {
       </div>
 
       {/* Footer: tarjeta de usuario (mock) + cerrar sesión + versión */}
-      <div className="p-space-md border-t border-hairline">
-        <button onClick={() => navigate('/app/perfil')} className="w-full flex items-center gap-space-sm p-space-sm rounded-xl bg-prius-surface hover:bg-hairline transition-colors text-left">
-          <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center shrink-0">
-            <User size={16} className="text-white" />
+      <div className="p-space-md border-t border-line">
+        <button onClick={() => navigate('/app/perfil')} className="w-full flex items-center gap-space-sm p-space-sm rounded-inner bg-surface hover:bg-line transition-colors text-left">
+          <div className="w-8 h-8 rounded-full bg-ink flex items-center justify-center shrink-0">
+            <User size={16} className="text-on-ink" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-label-lg text-black truncate">{nombreMostrado}</p>
-            <p className="text-label-md text-prius-slate truncate">{rolLabel || 'Guardia Sur'}</p>
+            <p className="text-label text-ink truncate">{nombreMostrado}</p>
+            <p className="text-label text-ink-2 truncate">{rolLabel || 'Guardia Sur'}</p>
           </div>
         </button>
         <div className="mt-space-sm px-space-xs flex items-center justify-between">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-label-md text-prius-slate hover:text-black transition-colors"
+            className="flex items-center gap-2 text-label text-ink-2 hover:text-ink transition-colors"
           >
             <LogOut size={14} />
             Cerrar sesión
           </button>
-          <span className="w-2 h-2 rounded-full bg-prius-success" title={APP_VERSION} />
+          <span className="w-2 h-2 rounded-full bg-success" title={APP_VERSION} />
         </div>
       </div>
     </aside>

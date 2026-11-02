@@ -554,11 +554,11 @@ export default function Dashboard() {
     // botón ahora vive DENTRO de esa barra, no flotando sobre el mapa.
     const extraButtonsViewport = (
       fullscreen ? (
-        <button onClick={() => setFullscreenOpen(false)} className="w-9 h-9 rounded-lg bg-prius-subtle hover:bg-[#EEEEEE] text-black flex items-center justify-center transition-colors" title="Cerrar pantalla completa">
+        <button onClick={() => setFullscreenOpen(false)} className="w-9 h-9 rounded-icon bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Cerrar pantalla completa">
           <Shrink size={16} />
         </button>
       ) : (
-        <button onClick={() => setFullscreenOpen(true)} className="w-9 h-9 rounded-lg bg-prius-subtle hover:bg-[#EEEEEE] text-black flex items-center justify-center transition-colors" title="Ver en pantalla completa">
+        <button onClick={() => setFullscreenOpen(true)} className="w-9 h-9 rounded-icon bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Ver en pantalla completa">
           <Expand size={16} />
         </button>
       )
@@ -614,11 +614,11 @@ export default function Dashboard() {
     return (
       <div className="flex-1 min-h-0 flex flex-col gap-2.5">
         {/* Franja superior */}
-        <div className="card-light rounded-2xl p-2.5 md:p-3 flex flex-col gap-2 shrink-0">
+        <div className="card-light rounded-card p-2.5 md:p-3 flex flex-col gap-2 shrink-0">
           <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap">
             {/* Selector de fecha */}
-            <div className="flex items-center gap-0.5 bg-prius-subtle p-0.5 rounded-xl shrink-0">
-              <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-9 h-9 flex items-center justify-center rounded-lg bg-white text-prius-slate hover:bg-hairline transition-colors" title="Día anterior">
+            <div className="flex items-center gap-0.5 bg-surface p-0.5 rounded-inner shrink-0">
+              <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-9 h-9 flex items-center justify-center rounded-icon bg-card text-ink-2 hover:bg-line transition-colors" title="Día anterior">
                 <ChevronLeft size={16} />
               </button>
               <div className="flex items-center gap-1.5 px-1">
@@ -626,12 +626,12 @@ export default function Dashboard() {
                     look del mock (texto + día de semana) en vez del input
                     con borde por defecto — "el mismo selector y handler". */}
                 <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} calendarOnly className="w-[148px]" />
-                <span className="text-label-md text-prius-slate uppercase shrink-0">{diaSemana}</span>
+                <span className="text-label text-ink-2 uppercase shrink-0">{diaSemana}</span>
                 {!esHoy && (
-                  <button onClick={() => goToDate(todayStr())} className="text-label-md text-gold hover:text-black font-bold uppercase ml-1 shrink-0">Hoy</button>
+                  <button onClick={() => goToDate(todayStr())} className="text-label text-ink hover:text-ink font-bold uppercase ml-1 shrink-0">Hoy</button>
                 )}
               </div>
-              <button onClick={() => goToDate(shiftDate(selectedDate, 1))} className="w-9 h-9 flex items-center justify-center rounded-lg bg-white text-prius-slate hover:bg-hairline transition-colors" title="Día siguiente">
+              <button onClick={() => goToDate(shiftDate(selectedDate, 1))} className="w-9 h-9 flex items-center justify-center rounded-icon bg-card text-ink-2 hover:bg-line transition-colors" title="Día siguiente">
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -639,64 +639,64 @@ export default function Dashboard() {
             {/* 3 KPIs reales: Ocupadas / Libres / Pendientes */}
             {planoStats && (
               <div className="grid grid-cols-3 md:flex gap-2 flex-1 md:max-w-2xl">
-                <button onClick={() => toggleStatsFiltro('ocupacion')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'ocupacion' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
-                  <span className="w-8 h-8 shrink-0 rounded-lg bg-black text-white flex items-center justify-center"><CalendarDays size={16} /></span>
+                <button onClick={() => toggleStatsFiltro('ocupacion')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'ocupacion' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
+                  <span className="w-8 h-8 shrink-0 rounded-icon bg-ink text-on-ink flex items-center justify-center"><CalendarDays size={16} /></span>
                   <span className="min-w-0">
-                    <span className="block text-label-md text-prius-slate uppercase truncate">Ocupadas</span>
+                    <span className="block text-label text-ink-2 uppercase truncate">Ocupadas</span>
                     <span className="flex items-baseline gap-1.5">
-                      <span className="text-headline-sm text-black tabular-nums">{planoStats.ocupacion.count}</span>
-                      <span className="text-body-sm text-prius-slate">{pct(planoStats.ocupacion.pct)}</span>
+                      <span className="text-body text-ink tabular-nums">{planoStats.ocupacion.count}</span>
+                      <span className="text-label text-ink-2">{pct(planoStats.ocupacion.pct)}</span>
                     </span>
                   </span>
                 </button>
-                <button onClick={() => toggleStatsFiltro('libres')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'libres' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
-                  <span className="w-8 h-8 shrink-0 rounded-lg bg-green-100 text-prius-success flex items-center justify-center"><CheckCircle2 size={16} /></span>
+                <button onClick={() => toggleStatsFiltro('libres')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'libres' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
+                  <span className="w-8 h-8 shrink-0 rounded-icon bg-success-soft text-success-ink flex items-center justify-center"><CheckCircle2 size={16} /></span>
                   <span className="min-w-0">
-                    <span className="block text-label-md text-prius-slate uppercase truncate">Libres</span>
+                    <span className="block text-label text-ink-2 uppercase truncate">Libres</span>
                     <span className="flex items-baseline gap-1.5">
-                      <span className="text-headline-sm text-black tabular-nums">{planoStats.libres.count}</span>
-                      <span className="text-body-sm text-prius-success font-semibold">{pct(planoStats.libres.count / Math.max(1, planoStats.ocupacion.total))}</span>
+                      <span className="text-body text-ink tabular-nums">{planoStats.libres.count}</span>
+                      <span className="text-label text-success-ink font-semibold">{pct(planoStats.libres.count / Math.max(1, planoStats.ocupacion.total))}</span>
                     </span>
                   </span>
                 </button>
-                <button onClick={() => toggleStatsFiltro('pendientes')} className={`flex-1 min-w-0 md:min-w-[210px] p-2 rounded-xl flex items-center gap-2 text-left transition-colors ${statsFiltro === 'pendientes' ? 'bg-gold/10 ring-1 ring-gold/50' : 'bg-prius-subtle'}`}>
-                  <span className="w-8 h-8 shrink-0 rounded-lg bg-gold text-black flex items-center justify-center"><Clock size={16} /></span>
+                <button onClick={() => toggleStatsFiltro('pendientes')} className={`flex-1 min-w-0 md:min-w-[210px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'pendientes' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
+                  <span className="w-8 h-8 shrink-0 rounded-icon bg-gold text-ink flex items-center justify-center"><Clock size={16} /></span>
                   <span className="min-w-0">
-                    <span className="block text-label-md text-prius-slate uppercase truncate">Pendientes ({planoStats.pendientes.count})</span>
-                    <span className="block text-headline-sm text-black tabular-nums truncate">{planoStats.pendientes.saldo > 0 ? formatPesos(planoStats.pendientes.saldo) : '—'}</span>
+                    <span className="block text-label text-ink-2 uppercase truncate">Pendientes ({planoStats.pendientes.count})</span>
+                    <span className="block text-body text-ink tabular-nums truncate">{planoStats.pendientes.saldo > 0 ? formatPesos(planoStats.pendientes.saldo) : '—'}</span>
                   </span>
                 </button>
               </div>
             )}
 
-            <button onClick={() => window.print()} className="h-10 px-3.5 bg-prius-surface hover:bg-hairline text-black rounded-xl flex items-center gap-2 text-title-md shrink-0 transition-colors">
+            <button onClick={() => window.print()} className="h-10 px-3.5 bg-surface hover:bg-line text-ink rounded-inner flex items-center gap-2 text-body shrink-0 transition-colors">
               <Printer size={16} /> <span className="hidden sm:inline">Imprimir A4</span>
             </button>
           </div>
 
           {/* Filtros: tipo + estado + leyenda */}
           <div className="flex items-center gap-2 overflow-x-auto md:flex-wrap pb-0.5 md:pb-0 scrollbar-none">
-            <div className="flex items-center bg-prius-subtle p-1 rounded-full gap-1 shrink-0">
+            <div className="flex items-center bg-surface p-1 rounded-full gap-1 shrink-0">
               {[['todo', 'Todo', planoStats?.ocupacion.total], ['carpas', 'Carpas', planoStats?.carpas.total], ['sombrillas', 'Sombrillas', planoStats?.sombrillas.total]].map(([key, label, total]) => (
                 <button
                   key={key}
                   onClick={() => key === 'todo' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
-                  className={`px-3 py-0.5 rounded-full text-label-lg whitespace-nowrap transition-colors ${
-                    (key === 'todo' ? !statsFiltro : statsFiltro === key) ? 'bg-black text-white' : 'text-prius-slate hover:text-black'
+                  className={`px-3 py-0.5 rounded-full text-label whitespace-nowrap transition-colors ${
+                    (key === 'todo' ? !statsFiltro : statsFiltro === key) ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
                   }`}
                 >
                   {label}{total != null ? ` (${total})` : ''}
                 </button>
               ))}
             </div>
-            <div className="w-px h-5 bg-hairline shrink-0 hidden sm:block" />
+            <div className="w-px h-5 bg-line shrink-0 hidden sm:block" />
             <div className="flex items-center gap-1.5 shrink-0">
               {[['todas', 'Todas', null], ['libres', 'Libres', planoStats?.libres.count], ['ocupacion', 'Ocupadas', planoStats?.ocupacion.count], ['pendientes', 'Pendientes', planoStats?.pendientes.count]].map(([key, label, count]) => (
                 <button
                   key={key}
                   onClick={() => key === 'todas' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
-                  className={`h-7 px-3 rounded-full text-label-md uppercase whitespace-nowrap transition-colors ${
-                    (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-gold text-black' : 'bg-prius-surface text-black hover:bg-hairline'
+                  className={`h-7 px-3 rounded-full text-label uppercase whitespace-nowrap transition-colors ${
+                    (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-gold text-ink' : 'bg-surface text-ink hover:bg-line'
                   }`}
                 >
                   {label}{count != null ? ` (${count})` : ''}
@@ -711,21 +711,21 @@ export default function Dashboard() {
 
         {/* Workspace: grid (sin tocar) + panel lateral fijo (desktop) */}
         <div className="flex-1 min-h-0 flex gap-3">
-          <section className="flex-1 card-light rounded-2xl card-light-inner relative overflow-hidden flex flex-col">
+          <section className="flex-1 card-light rounded-card card-light-inner relative overflow-hidden flex flex-col">
             <div className="px-3 md:px-4 pt-2 flex items-center justify-between gap-2 shrink-0">
-              <span className="flex items-center gap-2 text-prius-slate">
+              <span className="flex items-center gap-2 text-ink-2">
                 <Layers size={16} />
-                <span className="text-label-lg uppercase tracking-wider">Pasillo A · Pasillo B · Pasillo C</span>
+                <span className="text-label uppercase tracking-wider">Pasillo A · Pasillo B · Pasillo C</span>
               </span>
               {realtimeConectado && (
-                <span className="hidden sm:inline-flex items-center gap-1.5 bg-prius-subtle px-3 py-1 rounded-full text-prius-slate">
-                  <span className="w-2 h-2 rounded-full bg-prius-success" />
-                  <span className="text-label-md uppercase">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 bg-surface px-3 py-1 rounded-full text-ink-2">
+                  <span className="w-2 h-2 rounded-full bg-success" />
+                  <span className="text-label uppercase">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
                 </span>
               )}
             </div>
             {loading ? (
-              <div className="flex-1 flex items-center justify-center text-prius-muted text-[10px] font-bold uppercase tracking-widest">
+              <div className="flex-1 flex items-center justify-center text-ink-2 text-[10px] font-bold uppercase tracking-widest">
                 Cargando plano…
               </div>
             ) : (
@@ -776,7 +776,7 @@ export default function Dashboard() {
 
   if (!readyPlano) {
     return (
-      <div className="h-full flex flex-col overflow-hidden font-ui p-4 gap-4">
+      <div className="h-full flex flex-col overflow-hidden p-4 gap-4">
         <Skeleton className="h-24 shrink-0" />
         <div className="flex-1 flex gap-4 min-h-0">
           <Skeleton className="flex-1" />
@@ -787,19 +787,19 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="h-full flex flex-col animate-premium-fade overflow-hidden font-ui">
+    <div className="h-full flex flex-col animate-premium-fade overflow-hidden">
     <div className="no-print flex-1 flex flex-col space-y-4 overflow-hidden pb-4">
       {!fullscreenOpen && renderPlanoBody(false)}
 
       {fullscreenOpen && createPortal(
         <div
-          className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-200"
+          className="fixed inset-0 z-[999] bg-overlay backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200"
           onClick={() => setFullscreenOpen(false)}
         >
           <div
             ref={bindFullscreen}
             onClick={(e) => e.stopPropagation()}
-            className="plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90vh] card-light sm:rounded-3xl overflow-hidden border border-hairline flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
+            className="plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90vh] card-light sm:rounded-card overflow-hidden border border-line flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
           >
             {renderPlanoBody(true)}
           </div>

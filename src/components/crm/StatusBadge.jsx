@@ -6,50 +6,50 @@ export default function StatusBadge({ status }) {
   // reserva: un solo indicador"). Labels fijados sep. 2026.
   const config = {
     pagado: {
-      bg: 'bg-green-50 text-green-700 border-green-200',
+      bg: 'bg-success-soft text-success-ink border-success/30',
       label: 'Pagado'
     },
     parcial: {
-      bg: 'bg-amber-50 text-amber-700 border-amber-200',
+      bg: 'bg-gold-100 text-ink border-gold-300',
       label: 'Pago parcial'
     },
     pendiente: {
-      bg: 'bg-red-50 text-red-700 border-red-200',
+      bg: 'bg-danger-soft text-danger-ink border-danger/30',
       label: 'Sin pago'
     },
     // Cliente de la temporada pasada sin confirmar todavía para la actual —
     // nunca se debe ver igual que "pendiente" (ese es precio ya acordado sin
     // cobrar del todo). Tono neutro/informativo, no rojo (no es una deuda).
     pendiente_confirmacion: {
-      bg: 'bg-slate-100 text-slate-700 border-slate-300',
+      bg: 'bg-surface text-ink-2 border-line',
       label: 'Sin confirmar'
     },
     // Reemplaza al badge de estado_pago, nunca convive con él — ver
     // lib/reservas.js `estadoBadgeStatus`, el único lugar que decide cuál de
     // los dos mostrar.
     bonificada: {
-      bg: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+      bg: 'bg-surface text-ink-2 border-line',
       label: 'Bonificada'
     },
     // Fase 3 (Recepción, D7): reserva web sin compromiso todavía — reemplaza
     // al badge de estado_pago mientras esté vigente, mismo mecanismo que
     // "Bonificada" (ver lib/reservas.js `estadoBadgeStatus`).
     preconfirmada: {
-      bg: 'bg-sky-50 text-sky-700 border-sky-200',
+      bg: 'bg-surface text-ink-2 border-line',
       label: 'Preconfirmada'
     },
     // Venció por vence_at sin check-in — la unidad ya se liberó, sin acción
     // primaria posible (nunca convive con otro badge de esa misma reserva).
     vencida: {
-      bg: 'bg-neutral-100 text-neutral-500 border-neutral-300',
+      bg: 'bg-surface text-ink-2 border-line',
       label: 'Vencida'
     }
   }
 
-  const current = config[status?.toLowerCase()] || { bg: 'bg-neutral-100 text-neutral-700 border-neutral-200', label: status }
+  const current = config[status?.toLowerCase()] || { bg: 'bg-surface text-ink-2 border-line', label: status }
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase border whitespace-nowrap ${current.bg}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-swatch text-[11px] font-bold tracking-wider uppercase border whitespace-nowrap ${current.bg}`}>
       {current.label}
     </span>
   )

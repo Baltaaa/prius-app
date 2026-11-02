@@ -71,14 +71,14 @@ export default function RegistrarGasto({ isOpen, onClose }) {
         />
 
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Categoría</label>
+          <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Categoría</label>
           <BrandSelect value={categoria} onChange={setCategoria} options={CATEGORIA_OPTIONS} />
         </div>
 
         <MoneyInput label="Monto" required value={monto} onChange={setMonto} max={100_000_000} />
 
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de pago</label>
+          <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Medio de pago</label>
           <BrandSelect value={medioPago} onChange={setMedioPago} options={MEDIO_OPTIONS} />
         </div>
 
@@ -92,7 +92,7 @@ export default function RegistrarGasto({ isOpen, onClose }) {
           loading={saving}
           loadingText="Registrando..."
           disabled={!conceptoValido || !montoValido}
-          className="w-full py-4 bg-gold hover:bg-gold-hover text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
+          className="w-full py-4 bg-gold hover:bg-gold-400 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs"
         >
           Registrar Gasto
         </LoadingButton>

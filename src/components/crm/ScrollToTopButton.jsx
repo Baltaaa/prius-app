@@ -47,7 +47,7 @@ export default function ScrollToTopButton() {
       type="button"
       onClick={handleClick}
       aria-label="Volver arriba"
-      className={`hidden md:flex fixed right-8 bottom-6 z-40 w-11 h-11 rounded-full bg-[#F2CA50] text-black
+      className={`hidden md:flex fixed right-8 bottom-6 z-40 w-11 h-11 rounded-full bg-gold text-ink
                   items-center justify-center transition-opacity duration-300
                   ${visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
     >

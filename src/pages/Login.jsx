@@ -174,8 +174,8 @@ export default function Login({ modo }) {
   // — el placeholder "P" amarillo y las fotos de relleno de esos mocks NO
   // se usan, siempre el logo/imagen reales de la app.
   const inputBase =
-    "w-full h-12 px-4 rounded-md border border-[#E5E5E5] bg-white text-black placeholder:text-black/30 outline-none transition-colors motion-reduce:transition-none focus:border-[#F2CA50] focus:ring-2 focus:ring-[#F2CA50]/30"
-  const labelBase = "block text-xs font-semibold text-black/60 mb-1.5"
+    "w-full h-12 px-4 rounded-swatch border border-line bg-card text-ink placeholder:text-ink-2 outline-none transition-colors motion-reduce:transition-none focus:border-gold focus:ring-2 focus:ring-gold"
+  const labelBase = "block text-xs font-semibold text-ink-2 mb-1.5"
 
   // Aviso de inactividad/error — mismo bloque, se renderiza en DOS lugares
   // distintos según breakpoint (desktop: arriba de los campos; mobile:
@@ -184,34 +184,34 @@ export default function Login({ modo }) {
   const aviso = (
     <div aria-live="polite" className="space-y-3">
       {motivo === "inactividad" && !error && !isLocked && (
-        <div className="p-3 bg-black/[0.03] border border-[#E5E5E5] rounded-md flex items-center gap-2.5">
-          <AlertCircle size={16} className="text-black/40 shrink-0" />
-          <span className="text-xs font-medium text-black/60">
+        <div className="p-3 bg-surface border border-line rounded-swatch flex items-center gap-2.5">
+          <AlertCircle size={16} className="text-ink-2 shrink-0" />
+          <span className="text-xs font-medium text-ink-2">
             Cerramos tu sesión por inactividad. Volvé a ingresar para continuar.
           </span>
         </div>
       )}
 
       {isLocked && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2.5">
-          <AlertCircle size={16} className="text-red-600 shrink-0" />
-          <span className="text-xs font-semibold text-red-700">
+        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <span className="text-xs font-semibold text-danger-ink">
             Demasiados intentos. Probá de nuevo en {lockCountdown}s.
           </span>
         </div>
       )}
 
       {error && !isLocked && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
-          <AlertCircle size={16} className="text-red-600 shrink-0" />
-          <span className="text-xs font-semibold text-red-700">{error}</span>
+        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <span className="text-xs font-semibold text-danger-ink">{error}</span>
         </div>
       )}
     </div>
   )
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-black font-sans selection:bg-[#F2CA50] selection:text-black">
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-ink selection:bg-gold selection:text-ink">
       {isSuccess && <GlobalLoader message="Iniciando sesión segura" />}
 
       {/* Shell: columna en mobile (imagen arriba, sheet abajo) / fila en
@@ -253,26 +253,26 @@ export default function Login({ modo }) {
             <div className="flex items-center gap-2 md:gap-3 pt-[max(0.5rem,env(safe-area-inset-top))]">
               <img src="/images/prius-icon.png" alt="" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
               <div className="leading-tight">
-                <p className="text-white font-display font-extrabold text-lg md:text-xl tracking-tight">Prius</p>
-                <p className="text-white/70 text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] -mt-0.5">Playa Grande</p>
+                <p className="text-on-ink font-extrabold text-lg md:text-xl tracking-tight">Prius</p>
+                <p className="text-on-ink/70 text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] -mt-0.5">Playa Grande</p>
               </div>
             </div>
 
             {/* Bloque central — solo desktop (mock 06-login-desktop) */}
             <div className="hidden md:block max-w-md">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F2CA50]" /> Panel de Gestión y Operaciones
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-on-ink/10 border border-on-ink/20 text-on-ink text-xs font-semibold mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold" /> Panel de Gestión y Operaciones
               </span>
-              <h2 className="text-4xl lg:text-[44px] font-display font-extrabold text-white tracking-tight leading-[1.05]">
-                Prius <span className="text-[#F2CA50]">Playa Grande</span>
+              <h2 className="text-4xl lg:text-[44px] font-extrabold text-on-ink tracking-tight leading-[1.05]">
+                Prius <span className="text-gold">Playa Grande</span>
               </h2>
-              <p className="text-white/70 text-base mt-4 leading-relaxed">
+              <p className="text-on-ink/70 text-base mt-4 leading-relaxed">
                 Gestión operativa inteligente para carpas, sombrillas y servicios de balneario.
               </p>
             </div>
 
             {/* Pie — solo desktop */}
-            <div className="hidden md:flex items-center justify-between text-white/50 text-xs border-t border-white/10 pt-6">
+            <div className="hidden md:flex items-center justify-between text-on-ink/50 text-xs border-t border-on-ink/10 pt-6">
               <span>Sistema CRM Interno</span>
               <span>Mar del Plata, Argentina</span>
             </div>
@@ -284,7 +284,7 @@ export default function Login({ modo }) {
             achica el dvh disponible por debajo de lo que mide el
             formulario, el sheet scrollea internamente en vez de empujar el
             botón "Ingresar" fuera de la pantalla. */}
-        <main className="flex-1 min-h-0 flex flex-col md:items-center md:justify-center bg-white md:bg-prius-background overflow-hidden">
+        <main className="flex-1 min-h-0 flex flex-col md:items-center md:justify-center bg-card md:bg-canvas overflow-hidden">
           <div className="flex-1 min-h-0 w-full overflow-y-auto overscroll-contain md:flex md:items-center md:justify-center md:py-10">
             {/* Entrada (Bloque 1/2, nov 2026): el sheet sube desde abajo en
                 mobile y el formulario entra con fade-up en desktop — dos
@@ -292,23 +292,23 @@ export default function Login({ modo }) {
                 `md:`. Ambas son solo transform+opacity y se apagan con
                 prefers-reduced-motion desde index.css. */}
             <div
-              className="w-full md:max-w-[440px] rounded-t-3xl md:rounded-2xl md:border md:border-[#E5E5E5] md:shadow-[0_8px_30px_rgba(0,0,0,0.08)] bg-white px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-10 ui-open-sheet md:anim-fade-up"
+              className="w-full md:max-w-[440px] rounded-t-card md:rounded-card md:border md:border-line bg-card px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-10 ui-open-sheet md:anim-fade-up"
             >
               {/* Gesto visual de bottom sheet (mobile) */}
               <div className="md:hidden flex justify-center mb-4">
-                <div className="w-10 h-1 rounded-full bg-black/10" />
+                <div className="w-10 h-1 rounded-full bg-line" />
               </div>
 
               {/* Pill — solo desktop (mock): "Prius App · Panel de Gestión" */}
-              <span className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/[0.04] border border-[#E5E5E5] text-black/70 text-xs font-semibold mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F2CA50]" /> Prius App · Panel de Gestión
+              <span className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface border border-line text-ink-2 text-xs font-semibold mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold" /> Prius App · Panel de Gestión
               </span>
 
               {mode === "login" ? (
                 <div className="space-y-5">
                   <div>
-                    <h1 className="text-2xl md:text-xl font-display font-extrabold text-black tracking-tight">Iniciar sesión</h1>
-                    <p className="text-black/50 text-sm mt-1">Acceso exclusivo para el equipo Prius.</p>
+                    <h1 className="text-2xl md:text-xl font-extrabold text-ink tracking-tight">Iniciar sesión</h1>
+                    <p className="text-ink-2 text-body mt-1">Acceso exclusivo para el equipo Prius.</p>
                   </div>
 
                   {/* Aviso — desktop, arriba de los campos (mock desktop) */}
@@ -338,7 +338,7 @@ export default function Login({ modo }) {
                         <button
                           type="button"
                           onClick={() => setMode("recover")}
-                          className="text-xs font-semibold text-black/50 hover:text-black transition-colors motion-reduce:transition-none underline underline-offset-2"
+                          className="text-xs font-semibold text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none underline underline-offset-2"
                         >
                           ¿Olvidaste tu contraseña?
                         </button>
@@ -362,24 +362,24 @@ export default function Login({ modo }) {
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
                           aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40 hover:text-black transition-colors motion-reduce:transition-none p-1"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none p-1"
                         >
                           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                       </div>
                       {capsLockOn && (
-                        <p className="text-xs text-amber-700 mt-1.5 flex items-center gap-1" aria-live="polite">
+                        <p className="text-xs text-ink mt-1.5 flex items-center gap-1" aria-live="polite">
                           <AlertCircle size={12} /> Bloq Mayús activado
                         </p>
                       )}
                     </div>
 
-                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-black/60 select-none">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-ink-2 select-none">
                       <input
                         type="checkbox"
                         checked={remember}
                         onChange={(e) => setRemember(e.target.checked)}
-                        className="w-4 h-4 rounded border-[#E5E5E5] text-[#F2CA50] focus:ring-[#F2CA50]/40 accent-[#F2CA50]"
+                        className="w-4 h-4 rounded-swatch border-line text-gold focus:ring-gold accent-gold"
                       />
                       Recordar equipo en este dispositivo
                     </label>
@@ -390,7 +390,7 @@ export default function Login({ modo }) {
                     <button
                       type="submit"
                       disabled={isLoading || awaitingContext || isLocked}
-                      className="w-full h-12 bg-[#F2CA50] hover:bg-[#E5BF45] active:scale-[0.98] text-black font-bold text-sm rounded-md transition-all duration-150 motion-reduce:transition-none motion-reduce:active:scale-100 flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100"
+                      className="w-full h-12 bg-gold hover:bg-gold-400 active:scale-[0.98] text-ink font-bold text-body rounded-swatch transition-all duration-150 motion-reduce:transition-none motion-reduce:active:scale-100 flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100"
                     >
                       {isLoading || awaitingContext ? (
                         <>
@@ -407,20 +407,20 @@ export default function Login({ modo }) {
               ) : (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-xl font-display font-extrabold text-black tracking-tight">Recuperar cuenta</h2>
-                    <p className="text-black/50 text-sm mt-1">Te enviamos un enlace seguro a tu email.</p>
+                    <h2 className="text-xl font-extrabold text-ink tracking-tight">Recuperar cuenta</h2>
+                    <p className="text-ink-2 text-body mt-1">Te enviamos un enlace seguro a tu email.</p>
                   </div>
 
                   {recoverStatus === "sent" ? (
-                    <div className="p-5 bg-green-50 border border-green-200 rounded-md space-y-3">
-                      <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
+                    <div className="p-5 bg-success-soft border border-success/30 rounded-swatch space-y-3">
+                      <div className="flex items-center gap-2 text-success-ink font-semibold text-body">
                         <CheckCircle2 size={16} />
                         <span>Correo enviado con éxito</span>
                       </div>
-                      <p className="text-green-700/80 text-xs leading-relaxed">Revisá tu casilla para continuar con la restauración.</p>
+                      <p className="text-success-ink text-xs leading-relaxed">Revisá tu casilla para continuar con la restauración.</p>
                       <button
                         onClick={() => setMode("login")}
-                        className="text-xs font-semibold text-black underline underline-offset-2"
+                        className="text-xs font-semibold text-ink underline underline-offset-2"
                       >
                         Volver al login
                       </button>
@@ -445,16 +445,16 @@ export default function Login({ modo }) {
                       </div>
 
                       {recoverStatus === "error" && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2.5" aria-live="polite">
-                          <AlertCircle size={16} className="text-red-600 shrink-0" />
-                          <span className="text-xs font-semibold text-red-700">No pudimos enviar el correo. Probá de nuevo.</span>
+                        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5" aria-live="polite">
+                          <AlertCircle size={16} className="text-danger shrink-0" />
+                          <span className="text-xs font-semibold text-danger-ink">No pudimos enviar el correo. Probá de nuevo.</span>
                         </div>
                       )}
 
                       <button
                         type="submit"
                         disabled={recoverStatus === "sending"}
-                        className="w-full h-12 bg-[#F2CA50] hover:bg-[#E5BF45] text-black font-bold text-sm rounded-md transition-all duration-150 motion-reduce:transition-none flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full h-12 bg-gold hover:bg-gold-400 text-ink font-bold text-body rounded-swatch transition-all duration-150 motion-reduce:transition-none flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         {recoverStatus === "sending" ? <Loader2 size={18} className="animate-spin motion-reduce:animate-none" /> : "Enviar instrucciones"}
                       </button>
@@ -462,7 +462,7 @@ export default function Login({ modo }) {
                       <button
                         type="button"
                         onClick={() => setMode("login")}
-                        className="w-full text-center text-xs font-semibold text-black/50 hover:text-black transition-colors motion-reduce:transition-none flex items-center justify-center gap-1.5"
+                        className="w-full text-center text-xs font-semibold text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none flex items-center justify-center gap-1.5"
                       >
                         <ArrowLeft size={14} /> Volver
                       </button>
@@ -471,7 +471,7 @@ export default function Login({ modo }) {
                 </div>
               )}
 
-              <p className="text-center text-[11px] text-black/30 font-medium mt-8">
+              <p className="text-center text-[11px] text-ink-2 font-medium mt-8">
                 <span className="md:hidden">Prius Balneario Playa Grande · CRM v1.0</span>
                 <span className="hidden md:inline">Prius Balneario Playa Grande · CRM Interno</span>
               </p>

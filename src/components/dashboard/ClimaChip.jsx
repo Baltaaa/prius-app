@@ -13,14 +13,14 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
   // durante ese rato se veía como una tarjeta vacía/rota, no "cargando".
   if (loading) {
     return (
-      <div className={`shrink-0 rounded-2xl border border-hairline bg-white/[0.04] p-3.5 animate-pulse ${className}`}>
+      <div className={`shrink-0 rounded-card border border-line bg-surface p-3.5 animate-pulse ${className}`}>
         <div className="flex items-center gap-2 mb-2.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center border border-hairline bg-prius-subtle shrink-0">
-            <Cloud size={14} className="text-prius-muted" />
+          <div className="w-7 h-7 rounded-icon flex items-center justify-center border border-line bg-surface shrink-0">
+            <Cloud size={14} className="text-ink-2" />
           </div>
-          <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest">Clima</p>
+          <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Clima</p>
         </div>
-        <div className="h-6 w-16 rounded bg-prius-subtle" />
+        <div className="h-6 w-16 rounded-swatch bg-surface" />
       </div>
     )
   }
@@ -32,15 +32,15 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
       <button
         type="button"
         onClick={onClick}
-        className={`group shrink-0 snap-start rounded-2xl border border-hairline bg-white/[0.04] hover:bg-white/[0.07] hover:border-hairline transition-all p-3.5 text-left ${className}`}
+        className={`group shrink-0 snap-start rounded-card border border-line bg-surface hover:bg-surface hover:border-line transition-all p-3.5 text-left ${className}`}
       >
         <div className="flex items-center gap-2 mb-2.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center border border-hairline bg-prius-subtle shrink-0">
-            <Cloud size={14} className="text-prius-slate" />
+          <div className="w-7 h-7 rounded-icon flex items-center justify-center border border-line bg-surface shrink-0">
+            <Cloud size={14} className="text-ink-2" />
           </div>
-          <p className="text-[9px] font-bold text-prius-slate uppercase tracking-widest">Clima</p>
+          <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Clima</p>
         </div>
-        <p className="text-sm font-bold text-prius-muted uppercase tracking-wide">Sin pronóstico</p>
+        <p className="text-body font-bold text-ink-2 uppercase tracking-wide">Sin pronóstico</p>
       </button>
     )
   }
@@ -58,33 +58,33 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
     <button
       type="button"
       onClick={onClick}
-      className={`group shrink-0 snap-start rounded-2xl border transition-all p-3.5 text-left ${className} ${
+      className={`group shrink-0 snap-start rounded-card border transition-all p-3.5 text-left ${className} ${
         alerta
-          ? 'border-amber-500/40 bg-amber-500/[0.08] hover:bg-amber-500/[0.12]'
-          : 'border-hairline bg-white/[0.04] hover:bg-white/[0.07] hover:border-hairline'
+          ? 'border-gold-300 bg-gold-100 hover:bg-gold-100'
+          : 'border-line bg-surface hover:bg-surface hover:border-line'
       }`}
       title={alerta ? 'Viento fuerte — tocar para ver el detalle' : 'Clima — tocar para ver el detalle'}
     >
       <div className="flex items-center gap-2 mb-2.5">
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border shrink-0 ${
-          alerta ? 'border-amber-500/40 bg-amber-500/10' : 'border-hairline bg-prius-subtle'
+        <div className={`w-7 h-7 rounded-icon flex items-center justify-center border shrink-0 ${
+          alerta ? 'border-gold-300 bg-gold-100' : 'border-line bg-surface'
         }`}>
-          <IconoClima size={14} className={alerta ? 'text-amber-300' : 'text-prius-slate'} />
+          <IconoClima size={14} className={alerta ? 'text-ink' : 'text-ink-2'} />
         </div>
-        <p className={`text-[9px] font-bold uppercase tracking-widest ${alerta ? 'text-amber-300' : 'text-prius-slate'}`}>
+        <p className={`text-[9px] font-bold uppercase tracking-widest ${alerta ? 'text-ink' : 'text-ink-2'}`}>
           {alerta ? 'Viento fuerte' : 'Clima'}
         </p>
       </div>
       <div className="flex items-end gap-3">
-        <p className="text-2xl font-bold text-black tabular-nums leading-none">
+        <p className="text-2xl font-bold text-ink tabular-nums leading-none">
           {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
         </p>
-        <div className="flex items-center gap-1 text-xs font-bold tabular-nums text-prius-slate pb-0.5">
+        <div className="flex items-center gap-1 text-xs font-bold tabular-nums text-ink-2 pb-0.5">
           <ArrowUp size={12} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
           {actual.viento != null ? Math.round(actual.viento) : '--'} km/h
         </div>
       </div>
-      <p className={`text-[10px] tabular-nums mt-1 ${alerta ? 'text-amber-300/90 font-bold' : 'text-prius-muted'}`}>
+      <p className={`text-[10px] tabular-nums mt-1 ${alerta ? 'text-ink font-bold' : 'text-ink-2'}`}>
         ráfaga {Math.round(rafagaMax)} km/h{actual.olaAltura != null ? ` · ola ${Number(actual.olaAltura).toFixed(1)} m` : ''}
       </p>
     </button>

@@ -17,30 +17,30 @@ export default function BottomSheet({ isOpen, onClose, title, children, maxHeigh
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[998] flex items-end justify-center bg-black/40 ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
+      className={`fixed inset-0 z-[998] flex items-end justify-center bg-overlay ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={() => onClose?.()}
     >
       <div
         ref={bind}
-        className={`w-full sm:max-w-md bg-white border-t border-hairline sm:border sm:rounded-2xl rounded-t-2xl flex flex-col overflow-hidden ${maxHeightClass} ${isOpen ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+        className={`w-full sm:max-w-md bg-card border-t border-line sm:border sm:rounded-card rounded-t-card flex flex-col overflow-hidden ${maxHeightClass} ${isOpen ? 'ui-open-sheet' : 'ui-close-sheet'}`}
         onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-hairline" />
+          <div className="w-10 h-1 rounded-full bg-line" />
         </div>
         {title && (
           <div className="flex items-center justify-between px-5 py-3 shrink-0">
-            <h2 className="text-label-lg uppercase text-black font-ui">{title}</h2>
+            <h2 className="text-label uppercase text-ink">{title}</h2>
             <button
               onClick={() => onClose?.()}
-              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-xl text-prius-slate"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-inner text-ink-2"
             >
               <X size={18} />
             </button>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4 font-ui">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4">
           {children}
         </div>
       </div>

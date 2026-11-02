@@ -64,34 +64,34 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Cosocios" maxWidthClass="sm:max-w-sm">
       <div className="space-y-2">
-        <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Titular</p>
+        <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Titular</p>
         {/* 30/10/2026: el titular no se puede editar desde acá, así que dejó
             de mostrarse en una caja con pinta de input (confundía: parecía
             editable). Ahora es un bloque de solo lectura con avatar de
             iniciales, mismo lenguaje visual que las cards de Clientes. */}
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
+          <div className="w-9 h-9 rounded-full bg-ink text-on-ink flex items-center justify-center text-xs font-bold shrink-0">
             {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
           </div>
-          <span className="font-bold text-black truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
+          <span className="font-bold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
         </div>
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Cosocios ({socios.length})</p>
+        <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Cosocios ({socios.length})</p>
         {socios.length === 0 ? (
-          <p className="text-xs text-prius-muted">Sin cosocios todavía.</p>
+          <p className="text-xs text-ink-2">Sin cosocios todavía.</p>
         ) : (
           <div className="space-y-2">
             {socios.map((s) => (
-              <div key={s.id} className="flex items-center justify-between gap-2 px-3 py-2.5 bg-prius-subtle border border-hairline rounded-xl">
-                <span className="text-sm font-semibold text-black truncate">{formatNombre(s.nombre)}</span>
+              <div key={s.id} className="flex items-center justify-between gap-2 px-3 py-2.5 bg-surface border border-line rounded-inner">
+                <span className="text-body font-semibold text-ink truncate">{formatNombre(s.nombre)}</span>
                 {puedeQuitarCosocio && (
                   <button
                     type="button"
                     onClick={() => handleQuitarClick(s)}
                     title={tienePagos(s.id) ? 'Tiene pagos registrados — no se puede quitar' : 'Quitar (pide contraseña de superadmin)'}
-                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-prius-error hover:bg-red-50 transition-colors"
+                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-icon text-danger hover:bg-danger-soft transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -103,14 +103,14 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Agregar cosocio</p>
+        <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Agregar cosocio</p>
         <ClienteBuscador value={nuevoId} onChange={(id) => setNuevoId(id)} />
         <LoadingButton
           loading={agregando}
           loadingText="Agregando..."
           disabled={!nuevoId}
           onClick={handleAgregar}
-          className="w-full py-3 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 bg-gold hover:bg-gold-400 disabled:opacity-50 text-ink font-bold uppercase tracking-widest text-xs rounded-inner transition-all flex items-center justify-center gap-2"
         >
           <UserPlus size={14} /> Agregar
         </LoadingButton>

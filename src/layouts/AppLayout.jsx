@@ -120,7 +120,7 @@ export default function AppLayout() {
                 los hijos sticky siguen funcionando. */}
             <main
               id="app-main-scroll"
-              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 w-full pb-bottom-nav-safe bg-prius-background [overflow-x:clip] ${esPlano ? 'py-4 md:py-3 md:pb-3' : 'py-4 md:py-8 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
+              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] ${esPlano ? 'py-4 md:py-3 md:pb-3' : 'py-4 md:py-8 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
             >
               {/* h1 accesible oculto visualmente — el título visible de
                   sección se sacó (item 4), pero un lector de pantalla sigue

@@ -75,7 +75,7 @@ export default function BottomNav() {
   return (
     <>
       <nav
-        className="no-print md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-hairline flex items-stretch font-ui"
+        className="no-print md:hidden fixed bottom-0 left-0 right-0 z-30 bg-card border-t border-line flex items-stretch"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {ITEMS_IZQ.map((item) => (
@@ -84,14 +84,14 @@ export default function BottomNav() {
             to={item.path}
             onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors duration-150 ${
-                isActive ? 'text-black font-semibold' : 'text-prius-slate hover:text-black'
+              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label transition-colors duration-150 ${
+                isActive ? 'text-ink font-semibold' : 'text-ink-2 hover:text-ink'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${isActive ? 'bg-gold/20' : ''}`}>
+                <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${isActive ? 'bg-gold-100' : ''}`}>
                   <item.icon size={22} />
                 </span>
                 {item.name}
@@ -116,13 +116,13 @@ export default function BottomNav() {
         >
           <span className="w-[22px] h-[22px]" aria-hidden="true" />
           <span className="absolute -top-4 w-12 h-12 rounded-full bg-gold flex items-center justify-center active:scale-95 transition-transform">
-            <Plus size={24} className="text-black" />
+            <Plus size={24} className="text-ink" />
           </span>
           {/* Label siempre neutro (pulido UX, oct 2026, item 5): antes era
-              text-black fijo, se veía "activo" en cualquier sección — el
+              text-ink fijo, se veía "activo" en cualquier sección — el
               destaque de este ítem lo da solo el círculo dorado, nunca el
               label (nunca compite con el resaltado real de la bottom nav). */}
-          <span className="text-label-md text-prius-slate">Reserva</span>
+          <span className="text-label text-ink-2">Reserva</span>
         </button>
 
         {ITEMS_DER.map((item) => (
@@ -131,14 +131,14 @@ export default function BottomNav() {
             to={item.path}
             onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors duration-150 ${
-                isActive ? 'text-black font-semibold' : 'text-prius-slate hover:text-black'
+              `flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label transition-colors duration-150 ${
+                isActive ? 'text-ink font-semibold' : 'text-ink-2 hover:text-ink'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${isActive ? 'bg-gold/20' : ''}`}>
+                <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${isActive ? 'bg-gold-100' : ''}`}>
                   <item.icon size={22} />
                 </span>
                 {item.name}
@@ -152,11 +152,11 @@ export default function BottomNav() {
             aunque no sea un NavLink real (abre el sheet, no navega). */}
         <button
           onClick={() => setShowMore(true)}
-          className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label-md transition-colors duration-150 ${
-            masActivo ? 'text-black font-semibold' : 'text-prius-slate hover:text-black'
+          className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-label transition-colors duration-150 ${
+            masActivo ? 'text-ink font-semibold' : 'text-ink-2 hover:text-ink'
           }`}
         >
-          <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${masActivo ? 'bg-gold/20' : ''}`}>
+          <span className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors duration-150 ${masActivo ? 'bg-gold-100' : ''}`}>
             <MoreHorizontal size={22} />
           </span>
           Más
@@ -165,23 +165,23 @@ export default function BottomNav() {
 
       {shouldRenderMore && createPortal(
         <div
-          className={`md:hidden fixed inset-0 z-[998] flex items-end bg-black/70 backdrop-blur-md ${showMore ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
+          className={`md:hidden fixed inset-0 z-[998] flex items-end bg-overlay backdrop-blur-sm ${showMore ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
           onClick={() => setShowMore(false)}
         >
           <div
             ref={bindMore}
-            className={`w-full max-h-[85dvh] bg-white border-t border-hairline rounded-t-3xl flex flex-col overflow-hidden ${showMore ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+            className={`w-full max-h-[85dvh] bg-card border-t border-line rounded-t-card flex flex-col overflow-hidden ${showMore ? 'ui-open-sheet' : 'ui-close-sheet'}`}
             onClick={(e) => e.stopPropagation()}
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex justify-center pt-3 pb-1 shrink-0">
-              <div className="w-10 h-1 rounded-full bg-prius-subtle" />
+              <div className="w-10 h-1 rounded-full bg-surface" />
             </div>
             <div className="flex items-center justify-between px-6 py-3 shrink-0">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-black">Más secciones</h2>
+              <h2 className="text-body font-bold uppercase tracking-widest text-ink">Más secciones</h2>
               <button
                 onClick={() => setShowMore(false)}
-                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-prius-muted"
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-icon text-ink-2"
               >
                 <X size={20} />
               </button>
@@ -193,8 +193,8 @@ export default function BottomNav() {
                   to={item.path}
                   onClick={() => setShowMore(false)}
                   className={({ isActive }) =>
-                    `flex items-center justify-between gap-3 px-3 py-3 min-h-[44px] rounded-xl text-sm font-medium transition-all ${
-                      isActive ? 'bg-prius-subtle text-gold' : 'text-prius-slate hover:bg-prius-subtle'
+                    `flex items-center justify-between gap-3 px-3 py-3 min-h-[44px] rounded-inner text-body font-medium transition-all ${
+                      isActive ? 'bg-surface text-ink' : 'text-ink-2 hover:bg-surface'
                     }`
                   }
                 >
@@ -203,16 +203,16 @@ export default function BottomNav() {
                     <span className="truncate">{item.name}</span>
                   </div>
                   {item.comingSoon && (
-                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-prius-subtle text-prius-slate rounded uppercase tracking-wider">Pronto</span>
+                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-surface text-ink-2 rounded-swatch uppercase tracking-wider">Pronto</span>
                   )}
                   {!item.comingSoon && item.badge > 0 && (
-                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-gold text-black rounded-full">{item.badge}</span>
+                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-bold bg-gold text-ink rounded-full">{item.badge}</span>
                   )}
                 </NavLink>
               ))}
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-xl text-sm font-medium text-prius-error hover:bg-red-400/10 transition-all"
+                className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] rounded-inner text-body font-medium text-danger hover:bg-danger-soft transition-all"
               >
                 <LogOut size={18} />
                 Cerrar Sesión

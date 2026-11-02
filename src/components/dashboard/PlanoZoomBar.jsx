@@ -9,7 +9,7 @@ import { Plus, Minus, Scan } from "lucide-react"
 // a una celda ni al texto de sincronización — llama a las mismas
 // `onZoomIn`/`onZoomOut`/`onEncuadrar` que ya calcula Dashboard.jsx.
 export default function PlanoZoomBar({ onZoomIn, onZoomOut, onEncuadrar, extraButtons }) {
-  const btnClass = "w-9 h-9 rounded-lg bg-prius-subtle hover:bg-[#EEEEEE] text-black flex items-center justify-center transition-colors shrink-0"
+  const btnClass = "w-9 h-9 rounded-icon bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors shrink-0"
   return (
     <div className="flex flex-col gap-2 shrink-0">
       <button onClick={onZoomIn} className={btnClass} title="Acercar">

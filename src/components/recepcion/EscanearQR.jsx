@@ -48,13 +48,13 @@ export default function EscanearQR({ isOpen, onClose, onScan }) {
   if (!shouldRender) return null
 
   return createPortal(
-    <div className={`fixed inset-0 z-[999] bg-black flex flex-col ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}>
+    <div className={`fixed inset-0 z-[999] bg-ink flex flex-col ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}>
       <div ref={bind} className="flex-1 flex flex-col">
         <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] shrink-0">
-          <h2 className="text-sm uppercase font-bold tracking-[0.2em] text-gold">Escanear QR</h2>
+          <h2 className="text-body uppercase font-bold tracking-[0.2em] text-gold">Escanear QR</h2>
           <button
             onClick={() => onClose?.()}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-prius-subtle rounded-lg text-prius-slate hover:text-black transition-all"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-icon text-ink-2 hover:text-ink transition-all"
           >
             <X size={20} />
           </button>
@@ -63,13 +63,13 @@ export default function EscanearQR({ isOpen, onClose, onScan }) {
         <div className="flex-1 flex items-center justify-center px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {permisoDenegado ? (
             <div className="text-center space-y-3 max-w-sm">
-              <CameraOff className="mx-auto text-prius-muted" size={32} />
-              <p className="text-sm text-prius-slate">
+              <CameraOff className="mx-auto text-ink-2" size={32} />
+              <p className="text-body text-ink-2">
                 No pudimos acceder a la cámara. Revisá los permisos del navegador, o tipeá el código a mano.
               </p>
             </div>
           ) : (
-            <div id={elementId} className="w-full max-w-sm rounded-2xl overflow-hidden" />
+            <div id={elementId} className="w-full max-w-sm rounded-card overflow-hidden" />
           )}
         </div>
       </div>

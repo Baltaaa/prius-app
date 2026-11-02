@@ -379,7 +379,7 @@ export default function Reservas() {
   // como opción para una reserva nueva de período/día — evita un doble
   if (!readyReservas) {
     return (
-      <div className="space-y-6 lg:space-y-10 font-ui">
+      <div className="space-y-6 lg:space-y-10">
         <div className="flex flex-wrap gap-4">
           <Skeleton className="flex-1 min-w-[160px] h-12" />
           <Skeleton className="w-40 h-12" />
@@ -409,7 +409,7 @@ export default function Reservas() {
     // entre hijos se reparte solo entre los que existen (el div de chips es
     // condicional y ya no necesita el wrapper-truco de antes para no dejar
     // un hueco vacío). Por debajo de lg, layout de siempre sin cambios.
-    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 anim-fade-up-page font-ui">
+    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 anim-fade-up-page">
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
       <div className="flex flex-wrap gap-4 items-center lg:shrink-0">
@@ -421,7 +421,7 @@ export default function Reservas() {
         <div className="flex items-center gap-1">
           <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-44" />
           {desde && (
-            <button type="button" onClick={() => setDesde('')} aria-label="Limpiar 'Llegada desde'" className="shrink-0 w-11 h-11 flex items-center justify-center text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada desde'">
+            <button type="button" onClick={() => setDesde('')} aria-label="Limpiar 'Llegada desde'" className="shrink-0 w-11 h-11 flex items-center justify-center text-ink-2 hover:text-ink transition-all" title="Limpiar 'Llegada desde'">
               <X size={14} />
             </button>
           )}
@@ -429,7 +429,7 @@ export default function Reservas() {
         <div className="flex items-center gap-1">
           <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-44" />
           {hasta && (
-            <button type="button" onClick={() => setHasta('')} aria-label="Limpiar 'Llegada hasta'" className="shrink-0 w-11 h-11 flex items-center justify-center text-prius-muted hover:text-black transition-all" title="Limpiar 'Llegada hasta'">
+            <button type="button" onClick={() => setHasta('')} aria-label="Limpiar 'Llegada hasta'" className="shrink-0 w-11 h-11 flex items-center justify-center text-ink-2 hover:text-ink transition-all" title="Limpiar 'Llegada hasta'">
               <X size={14} />
             </button>
           )}
@@ -437,43 +437,43 @@ export default function Reservas() {
         <div ref={filtrosOverlay.bind} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
-            className={`card-light px-4 py-3 min-h-[44px] rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-gold' : 'text-prius-slate hover:text-black'}`}
+            className={`card-light px-4 py-3 min-h-[44px] rounded-inner flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
           >
             <Filter size={16} /> Filtros {filtrosActivos ? 'Activos' : ''}
           </button>
 
           {showFiltros && (
-              <div className="absolute right-0 mt-2 w-56 card-light rounded-xl overflow-hidden z-50 p-3 space-y-3">
+              <div className="absolute right-0 mt-2 w-56 card-light rounded-inner overflow-hidden z-50 p-3 space-y-3">
                 <div>
-                  <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest mb-1 px-1">Estado de pago</p>
+                  <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest mb-1 px-1">Estado de pago</p>
                   {FILTROS_ESTADO.map((f) => (
                     <button
                       key={f.value}
                       onClick={() => setFiltroEstado(f.value)}
-                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle anim-colors flex items-center justify-between rounded-lg"
+                      className="w-full text-left px-3 py-2 text-xs text-ink-2 hover:bg-surface anim-colors flex items-center justify-between rounded-icon"
                     >
                       {f.label}
-                      {filtroEstado === f.value && <Check size={14} className="text-gold" />}
+                      {filtroEstado === f.value && <Check size={14} className="text-ink" />}
                     </button>
                   ))}
                 </div>
-                <div className="border-t border-hairline pt-2">
-                  <p className="text-[9px] font-bold text-prius-muted uppercase tracking-widest mb-1 px-1">Tipo de alquiler</p>
+                <div className="border-t border-line pt-2">
+                  <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest mb-1 px-1">Tipo de alquiler</p>
                   {FILTROS_TIPO.map((f) => (
                     <button
                       key={f.value}
                       onClick={() => setFiltroTipo(f.value)}
-                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-subtle anim-colors flex items-center justify-between rounded-lg"
+                      className="w-full text-left px-3 py-2 text-xs text-ink-2 hover:bg-surface anim-colors flex items-center justify-between rounded-icon"
                     >
                       {f.label}
-                      {filtroTipo === f.value && <Check size={14} className="text-gold" />}
+                      {filtroTipo === f.value && <Check size={14} className="text-ink" />}
                     </button>
                   ))}
                 </div>
                 {filtrosActivos && (
                   <button
                     onClick={() => { limpiarFiltros(); setShowFiltros(false) }}
-                    className="w-full text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-prius-error hover:bg-red-500/10 rounded-lg border-t border-hairline pt-3"
+                    className="w-full text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-danger hover:bg-danger-soft rounded-icon border-t border-line pt-3"
                   >
                     Limpiar todos los filtros
                   </button>
@@ -493,7 +493,7 @@ export default function Reservas() {
         {unidadFiltrada && (
           <button
             onClick={() => setFiltroUnidadId(null)}
-            className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 text-gold px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gold/20 transition-all"
+            className="inline-flex items-center gap-2 bg-gold-100 border border-gold-300 text-ink px-4 py-2 rounded-inner text-[10px] font-bold uppercase tracking-widest hover:bg-gold-100 transition-all"
             title="Quitar filtro de unidad"
           >
             {unidadEmoji(unidadFiltrada.tipo)} {formatUnidad(unidadFiltrada.tipo, unidadFiltrada.numero)} <X size={12} />
@@ -502,7 +502,7 @@ export default function Reservas() {
         {(desde || hasta) && !rangoFechaInvalido && (
           <button
             onClick={() => { setDesde(''); setHasta('') }}
-            className="inline-flex items-center gap-2 bg-cyan-400/10 border border-cyan-400/30 text-cyan-300 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-cyan-400/20 transition-all"
+            className="inline-flex items-center gap-2 bg-surface border border-line text-ink-2 px-4 py-2 rounded-inner text-[10px] font-bold uppercase tracking-widest hover:bg-surface transition-all"
             title="Quitar filtro de llegada"
           >
             Llegada {desde && hasta ? formatRangoFechas(desde, hasta, true) : desde ? `desde ${formatFecha(desde)}` : `hasta ${formatFecha(hasta)}`}
@@ -512,7 +512,7 @@ export default function Reservas() {
       </div>
       )}
       {rangoFechaInvalido && (
-        <p className="text-xs font-bold text-prius-error uppercase tracking-widest lg:shrink-0">
+        <p className="text-xs font-bold text-danger uppercase tracking-widest lg:shrink-0">
           "Llegada desde" no puede ser posterior a "Llegada hasta" — corregí el rango para filtrar por fecha.
         </p>
       )}
@@ -570,34 +570,34 @@ export default function Reservas() {
               <tr
                 key={res.id}
                 onClick={() => navigate(linkToCliente(res.cliente_id))}
-                className="hover:bg-prius-subtle anim-colors transition-all group cursor-pointer"
+                className="hover:bg-surface anim-colors transition-all group cursor-pointer"
               >
-                <td className="px-3 py-4 align-middle text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-                <td className="px-3 py-4 align-middle font-bold text-black uppercase break-words">
+                <td className="px-3 py-4 align-middle text-ink-2 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+                <td className="px-3 py-4 align-middle font-bold text-ink uppercase break-words">
                   {formatNombre(res.clientes?.nombre) || 'S/N'}
                   {coSocios(res).length > 0 && (
-                    <p className="text-[10px] text-prius-muted font-normal normal-case tracking-widest mt-0.5">
+                    <p className="text-[10px] text-ink-2 font-normal normal-case tracking-widest mt-0.5">
                       Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                     </p>
                   )}
                 </td>
-                <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
-                <td className="px-3 py-4 align-middle font-bold text-black"><MontoReserva reserva={res} /></td>
+                <td className="px-3 py-4 align-middle font-medium text-ink-2 uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
+                <td className="px-3 py-4 align-middle font-bold text-ink"><MontoReserva reserva={res} /></td>
                 <td className="px-3 py-4 align-middle text-center">
                   <div className="flex items-center justify-center gap-2">
                     <StatusBadge status={estadoBadgeStatus(res)} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-cyan-400 border border-cyan-400/30 rounded px-1.5 py-0.5 whitespace-nowrap">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-ink-2 border border-line rounded-swatch px-1.5 py-0.5 whitespace-nowrap">
                       Temporada
                     </span>
                   </div>
                 </td>
                 <td className="px-3 py-4 align-middle text-center">
                   {origenAngosto ? (
-                    <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-prius-muted">
+                    <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-ink-2">
                       {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
                     </span>
                   ) : (
-                    <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted whitespace-nowrap">
+                    <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-2 whitespace-nowrap">
                       {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                       {res.origen === 'web' ? 'Web' : 'Manual'}
                     </span>
@@ -610,19 +610,19 @@ export default function Reservas() {
             <tr
               key={res.id}
               onClick={() => handleOpenDetalle(res)}
-              className={`hover:bg-prius-subtle anim-colors transition-all group cursor-pointer ${selectedReservaId === res.id ? 'bg-prius-subtle' : ''}`}
+              className={`hover:bg-surface anim-colors transition-all group cursor-pointer ${selectedReservaId === res.id ? 'bg-surface' : ''}`}
             >
-              <td className="px-3 py-4 align-middle text-prius-slate font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-              <td className="px-3 py-4 align-middle font-bold text-black uppercase break-words">
+              <td className="px-3 py-4 align-middle text-ink-2 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+              <td className="px-3 py-4 align-middle font-bold text-ink uppercase break-words">
                 {formatNombre(res.clientes?.nombre) || 'S/N'}
                 {coSocios(res).length > 0 && (
-                  <p className="text-[10px] text-prius-muted font-normal normal-case tracking-widest mt-0.5">
+                  <p className="text-[10px] text-ink-2 font-normal normal-case tracking-widest mt-0.5">
                     Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                   </p>
                 )}
               </td>
-              <td className="px-3 py-4 align-middle font-medium text-prius-slate uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
-              <td className="px-3 py-4 align-middle font-bold text-black"><MontoReserva reserva={res} /></td>
+              <td className="px-3 py-4 align-middle font-medium text-ink-2 uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
+              <td className="px-3 py-4 align-middle font-bold text-ink"><MontoReserva reserva={res} /></td>
               <td className="px-3 py-4 align-middle text-center">
                 <div className="flex items-center justify-center">
                   <StatusBadge status={estadoBadgeStatus(res)} />
@@ -630,11 +630,11 @@ export default function Reservas() {
               </td>
               <td className="px-3 py-4 align-middle text-center">
                 {origenAngosto ? (
-                  <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-prius-muted">
+                  <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-ink-2">
                     {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-prius-muted whitespace-nowrap">
+                  <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-2 whitespace-nowrap">
                     {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                     {res.origen === 'web' ? 'Web' : 'Manual'}
                   </span>
@@ -656,7 +656,7 @@ export default function Reservas() {
               oct 2026): nunca cambia de tamaño al elegir/deseleccionar una
               reserva, y el contenido hace fade+shift de 180ms al cambiar. */}
           {isDesktopXL && (
-            <aside className="hidden xl:flex lg:h-full min-w-0 card-light rounded-2xl p-space-lg flex-col overflow-hidden">
+            <aside className="hidden xl:flex lg:h-full min-w-0 card-light rounded-card p-space-lg flex-col overflow-hidden">
               {selectedReserva ? (
                 <div key={selectedReserva.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
                   <ReservaDetalleContent
@@ -672,9 +672,9 @@ export default function Reservas() {
                   />
                 </div>
               ) : (
-                <div key="empty" className="content-crossfade flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
+                <div key="empty" className="content-crossfade flex-1 flex flex-col items-center justify-center text-center gap-3 text-ink-2">
                   <LayoutList size={28} />
-                  <p className="text-body-md">Elegí una reserva para ver el detalle</p>
+                  <p className="text-body">Elegí una reserva para ver el detalle</p>
                 </div>
               )}
             </aside>
@@ -690,13 +690,13 @@ export default function Reservas() {
           backdrop cierra al clickear fuera). */}
       {esRangoDrawer && drawerShouldRender && createPortal(
         <div
-          className={`fixed inset-0 z-[995] bg-black/40 flex justify-end ${selectedReserva ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
+          className={`fixed inset-0 z-[995] bg-overlay flex justify-end ${selectedReserva ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
           onClick={handleCloseDetalle}
         >
           <div
             ref={drawerOverlay.bind}
             onClick={(e) => e.stopPropagation()}
-            className={`w-[45%] min-w-[360px] h-full bg-white border-l border-hairline p-space-lg flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}
+            className={`w-[45%] min-w-[360px] h-full bg-card border-l border-line p-space-lg flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}
           >
             {selectedReserva && (
               <ReservaDetalleContent
@@ -749,12 +749,12 @@ export default function Reservas() {
           la página en vez de cubrir el viewport real, dejando el BottomNav
           visible encima del detalle. */}
       {isMobile && mobileDetalleShouldRender && createPortal(
-        <div className={`fixed inset-0 z-[995] bg-white flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}>
-          <div className="flex items-center gap-2 px-2 h-16 border-b border-hairline shrink-0">
-            <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-slate hover:text-black">
+        <div className={`fixed inset-0 z-[995] bg-card flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}>
+          <div className="flex items-center gap-2 px-2 h-16 border-b border-line shrink-0">
+            <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-2 hover:text-ink">
               <ChevronLeft size={20} />
             </button>
-            <h1 className="text-sm font-bold uppercase tracking-widest text-black">Detalle Reserva</h1>
+            <h1 className="text-body font-bold uppercase tracking-widest text-ink">Detalle Reserva</h1>
           </div>
           <ScrollFade className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
             <ReservaDetalleContent

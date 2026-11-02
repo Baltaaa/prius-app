@@ -51,18 +51,18 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Mover Cliente de Temporada">
       <form onSubmit={handleConfirmar} className="space-y-6">
-        <div className="p-4 bg-prius-subtle border border-hairline rounded-xl space-y-2 text-xs">
-          <p><span className="text-prius-muted uppercase tracking-widest">Cliente:</span> <span className="text-black font-bold">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span></p>
-          <p><span className="text-prius-muted uppercase tracking-widest">Origen:</span> <span className="text-black">{unidadEmoji(unidadOrigen.type)} {formatUnidad(unidadOrigen.type, unidadOrigen.number)}</span></p>
+        <div className="p-4 bg-surface border border-line rounded-inner space-y-2 text-xs">
+          <p><span className="text-ink-2 uppercase tracking-widest">Cliente:</span> <span className="text-ink font-bold">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span></p>
+          <p><span className="text-ink-2 uppercase tracking-widest">Origen:</span> <span className="text-ink">{unidadEmoji(unidadOrigen.type)} {formatUnidad(unidadOrigen.type, unidadOrigen.number)}</span></p>
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad destino</label>
+          <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Unidad destino</label>
           <BrandSelect value={unidadDestinoId} onChange={setUnidadDestinoId} options={opcionesCombo} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-prius-error uppercase tracking-widest">
+          <label className="text-[10px] font-bold text-danger uppercase tracking-widest">
             Confirmá con tu contraseña de superadmin
           </label>
           <input
@@ -70,16 +70,16 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full min-h-[44px] px-4 py-3 bg-prius-subtle border border-hairline rounded-xl text-black text-sm outline-none focus:border-red-500/50"
+            className="w-full min-h-[44px] px-4 py-3 bg-surface border border-line rounded-inner text-ink text-body outline-none focus:border-danger/30"
           />
         </div>
 
-        {error && <p className="text-[11px] text-prius-error">{error}</p>}
+        {error && <p className="text-[11px] text-danger">{error}</p>}
 
         <button
           type="submit"
           disabled={!unidadDestinoId || !password || saving}
-          className="w-full py-4 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+          className="w-full py-4 bg-danger hover:bg-danger-ink disabled:opacity-50 text-on-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs transition-all"
         >
           {saving ? 'Moviendo...' : 'Confirmar Movimiento'}
         </button>

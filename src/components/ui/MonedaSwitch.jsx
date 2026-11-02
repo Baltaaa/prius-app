@@ -54,14 +54,14 @@ export function useMonedaVista() {
 export default function MonedaSwitch({ moneda, onChange, cotizacion, fecha, stale, compacto = false }) {
   return (
     <div className="flex items-center gap-2 shrink-0">
-      <div className="flex items-center gap-1 bg-prius-subtle p-1 rounded-xl">
+      <div className="flex items-center gap-1 bg-surface p-1 rounded-inner">
         {['ARS', 'USD'].map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => onChange(m)}
-            className={`px-2.5 py-1 rounded-lg text-label-md font-bold transition-colors ${
-              moneda === m ? 'bg-white text-black shadow-sm' : 'text-prius-slate hover:text-black'
+            className={`px-2.5 py-1 rounded-icon text-label font-bold transition-colors ${
+              moneda === m ? 'bg-card text-ink' : 'text-ink-2 hover:text-ink'
             }`}
           >
             {m === 'ARS' ? '🇦🇷' : '🇺🇸'}{compacto ? '' : ` ${m === 'ARS' ? 'Pesos' : 'Dólares'}`}
@@ -70,11 +70,11 @@ export default function MonedaSwitch({ moneda, onChange, cotizacion, fecha, stal
       </div>
       {moneda === 'USD' && (
         <span
-          className="text-label-md text-prius-slate tabular-nums whitespace-nowrap"
+          className="text-label text-ink-2 tabular-nums whitespace-nowrap"
           title={fecha ? `Cotización del ${formatFecha(fecha)}` : undefined}
         >
           {cotizacion ? formatPesos(cotizacion) : 'sin cotización'}
-          {stale && <span className="text-amber-500 font-semibold"> · vieja</span>}
+          {stale && <span className="text-ink font-semibold"> · vieja</span>}
         </span>
       )}
     </div>

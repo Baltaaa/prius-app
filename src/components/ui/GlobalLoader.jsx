@@ -11,7 +11,7 @@ import { Loader2 } from 'lucide-react'
 // `animate-premium-fade`, no hace falta nada acá para eso).
 export default function GlobalLoader({ message = 'Sincronizando...' }) {
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-ink">
       <div className="flex flex-col items-center">
         <img
           src="/images/prius-icon.png"
@@ -20,8 +20,8 @@ export default function GlobalLoader({ message = 'Sincronizando...' }) {
         />
 
         <div className="mt-8 flex flex-col items-center gap-4">
-          <Loader2 className="w-6 h-6 text-[#F2CA50] animate-spin" />
-          <p className="text-label-md text-[#F2CA50] uppercase tracking-[0.3em] text-center">
+          <Loader2 className="w-6 h-6 text-gold animate-spin" />
+          <p className="text-label text-gold uppercase tracking-[0.3em] text-center">
             {message}
           </p>
         </div>

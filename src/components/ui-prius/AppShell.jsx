@@ -9,7 +9,7 @@ import NavRail from './NavRail'
 // (TopBar + Outlet), a cargo de AppLayout.jsx.
 export default function AppShell({ children }) {
   return (
-    <div className="h-dvh w-screen flex bg-white text-black font-ui overflow-hidden">
+    <div className="h-dvh w-screen flex bg-card text-ink overflow-hidden">
       <Sidebar />
       <NavRail />
       {children}

@@ -16,24 +16,24 @@ const MEDIO_ICONO = {
 }
 
 const Section = ({ title, icon: Icon, children }) => (
-  <div className="bg-white border border-hairline rounded-2xl p-6 space-y-4">
-    <h3 className="text-sm font-bold text-black flex items-center gap-2">
-      {Icon && <Icon size={16} className="text-prius-slate" />} {title}
+  <div className="bg-card border border-line rounded-card p-6 space-y-4">
+    <h3 className="text-body font-bold text-ink flex items-center gap-2">
+      {Icon && <Icon size={16} className="text-ink-2" />} {title}
     </h3>
     {children}
   </div>
 )
 
 const Fila = ({ label, value, tone, cliente }) => (
-  <div className="flex items-center justify-between py-2 border-b border-hairline last:border-0 gap-3">
-    <span className="text-sm text-prius-slate min-w-0">
+  <div className="flex items-center justify-between py-2 border-b border-line last:border-0 gap-3">
+    <span className="text-body text-ink-2 min-w-0">
       {label}
       {/* Item 16 (testing oct 2026): nombre del cliente a cargo del
           comprobante, en chico — resumen_caja() ya lo traía, solo faltaba
           mostrarlo acá. */}
-      {cliente && <span className="block text-[10px] text-prius-muted truncate">{cliente}</span>}
+      {cliente && <span className="block text-[10px] text-ink-2 truncate">{cliente}</span>}
     </span>
-    <span className={`text-sm font-bold tabular-nums shrink-0 ${tone || 'text-black'}`}>{value}</span>
+    <span className={`text-body font-bold tabular-nums shrink-0 ${tone || 'text-ink'}`}>{value}</span>
   </div>
 )
 
@@ -50,22 +50,22 @@ export default function ResumenCaja({ resumen }) {
   return (
     <div className="space-y-6">
       {/* Banner de confirmación de balance (mock 05-caja-desktop-cerrada) */}
-      <div className={`rounded-2xl border p-4 flex items-center justify-between gap-3 flex-wrap ${balanceCuadrado ? 'bg-green-50/40 border-green-200' : 'bg-gold/5 border-gold/20'}`}>
+      <div className={`rounded-card border p-4 flex items-center justify-between gap-3 flex-wrap ${balanceCuadrado ? 'bg-success-soft border-success/30' : 'bg-gold-100 border-gold-300'}`}>
         <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${balanceCuadrado ? 'bg-green-100 text-prius-success' : 'bg-gold/10 text-gold'}`}>
+          <div className={`w-9 h-9 rounded-inner flex items-center justify-center shrink-0 ${balanceCuadrado ? 'bg-success-soft text-success-ink' : 'bg-gold-100 text-ink'}`}>
             <CheckCircle2 size={18} />
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-            <span className={`text-sm font-bold ${balanceCuadrado ? 'text-green-900' : 'text-black'}`}>
+            <span className={`text-body font-bold ${balanceCuadrado ? 'text-success-ink' : 'text-ink'}`}>
               {balanceCuadrado ? 'Jornada cerrada — Balance cuadrado sin diferencias' : 'Jornada cerrada con diferencia de arqueo'}
             </span>
-            <span className={`text-xs ${balanceCuadrado ? 'text-green-700' : 'text-prius-slate'}`}>
+            <span className={`text-xs ${balanceCuadrado ? 'text-success-ink' : 'text-ink-2'}`}>
               Operaciones del {formatFecha(cabecera.fecha)} conciliadas y archivadas.
             </span>
           </div>
         </div>
         {balanceCuadrado && (
-          <span className="text-[10px] font-bold uppercase tracking-widest text-prius-success bg-white border border-green-200 px-3 py-1 rounded-full">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-success-ink bg-card border border-success/30 px-3 py-1 rounded-full">
             Balance auditado
           </span>
         )}
@@ -92,20 +92,20 @@ export default function ResumenCaja({ resumen }) {
                 (clamp 14-18px, tope en 18px = mismo tamaño que el text-lg
                 fijo de siempre en desktop/tablet) en las tres. */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="col-span-2 sm:col-span-1 sm:order-3 bg-prius-surface rounded-xl p-4 text-center border border-gold/20 min-w-0">
-                <Scale className="text-gold mx-auto mb-2" size={18} />
-                <p className="text-[10px] text-prius-muted uppercase tracking-widest">Neto</p>
-                <MontoStat value={totales.neto} size="sm" className="text-gold mt-1 mx-auto" />
+              <div className="col-span-2 sm:col-span-1 sm:order-3 bg-surface rounded-inner p-4 text-center border border-gold-300 min-w-0">
+                <Scale className="text-ink mx-auto mb-2" size={18} />
+                <p className="text-[10px] text-ink-2 uppercase tracking-widest">Neto</p>
+                <MontoStat value={totales.neto} size="sm" className="text-ink mt-1 mx-auto" />
               </div>
-              <div className="sm:order-1 bg-prius-surface rounded-xl p-4 text-center min-w-0">
-                <ArrowUpRight className="text-prius-success mx-auto mb-2" size={18} />
-                <p className="text-[10px] text-prius-muted uppercase tracking-widest">Ingresos</p>
-                <MontoStat value={totales.ingresos} size="sm" className="text-prius-success mt-1 mx-auto" />
+              <div className="sm:order-1 bg-surface rounded-inner p-4 text-center min-w-0">
+                <ArrowUpRight className="text-success-ink mx-auto mb-2" size={18} />
+                <p className="text-[10px] text-ink-2 uppercase tracking-widest">Ingresos</p>
+                <MontoStat value={totales.ingresos} size="sm" className="text-success-ink mt-1 mx-auto" />
               </div>
-              <div className="sm:order-2 bg-prius-surface rounded-xl p-4 text-center min-w-0">
-                <ArrowDownRight className="text-prius-error mx-auto mb-2" size={18} />
-                <p className="text-[10px] text-prius-muted uppercase tracking-widest">Egresos</p>
-                <MontoStat value={totales.egresos} size="sm" className="text-prius-error mt-1 mx-auto" />
+              <div className="sm:order-2 bg-surface rounded-inner p-4 text-center min-w-0">
+                <ArrowDownRight className="text-danger mx-auto mb-2" size={18} />
+                <p className="text-[10px] text-ink-2 uppercase tracking-widest">Egresos</p>
+                <MontoStat value={totales.egresos} size="sm" className="text-danger mt-1 mx-auto" />
               </div>
             </div>
           </Section>
@@ -116,29 +116,29 @@ export default function ResumenCaja({ resumen }) {
               medio que no tiene contado propio (cajas cerradas antes de
               este ítem): se muestra = esperado, nunca se inventa un número. */}
           <Section title="Arqueo" icon={Banknote}>
-            <div className="divide-y divide-hairline">
+            <div className="divide-y divide-divider">
               {(arqueo.por_medio || []).map((m) => (
                 <div key={m.medio} className="py-3 first:pt-0">
                   <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-sm font-semibold text-black">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                    <span className="text-body font-semibold text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
                     {!m.declarado && (
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-prius-muted bg-prius-subtle border border-hairline rounded-full px-2 py-0.5">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-ink-2 bg-surface border border-line rounded-full px-2 py-0.5">
                         Sin declarar
                       </span>
                     )}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div className="min-w-0">
-                      <p className="text-[9px] text-prius-muted uppercase tracking-widest">Esperado</p>
-                      <MontoStat value={m.esperado} size="xs" className="text-black" />
+                      <p className="text-[9px] text-ink-2 uppercase tracking-widest">Esperado</p>
+                      <MontoStat value={m.esperado} size="xs" className="text-ink" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] text-prius-muted uppercase tracking-widest">Contado</p>
-                      <MontoStat value={m.contado} size="xs" className="text-black" />
+                      <p className="text-[9px] text-ink-2 uppercase tracking-widest">Contado</p>
+                      <MontoStat value={m.contado} size="xs" className="text-ink" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] text-prius-muted uppercase tracking-widest">Diferencia</p>
-                      <MontoStat value={m.diferencia} size="xs" className={Number(m.diferencia) === 0 ? 'text-prius-success' : 'text-gold'} />
+                      <p className="text-[9px] text-ink-2 uppercase tracking-widest">Diferencia</p>
+                      <MontoStat value={m.diferencia} size="xs" className={Number(m.diferencia) === 0 ? 'text-success-ink' : 'text-ink'} />
                     </div>
                   </div>
                 </div>
@@ -147,12 +147,12 @@ export default function ResumenCaja({ resumen }) {
             <Fila
               label="Total"
               value={formatPesos(arqueo.total?.contado)}
-              tone={diferenciaArqueo === 0 ? 'text-prius-success' : 'text-gold'}
+              tone={diferenciaArqueo === 0 ? 'text-success-ink' : 'text-ink'}
             />
             <Fila
               label="Diferencia total"
               value={formatPesos(arqueo.total?.diferencia)}
-              tone={diferenciaArqueo === 0 ? 'text-prius-success' : 'text-gold'}
+              tone={diferenciaArqueo === 0 ? 'text-success-ink' : 'text-ink'}
             />
           </Section>
 
@@ -165,9 +165,9 @@ export default function ResumenCaja({ resumen }) {
               <Fila label="Cantidad de comprobantes" value={z.cantidad_comprobantes ?? '—'} />
               <Fila label="Primer / último comprobante" value={`${z.primer_comprobante || '—'} / ${z.ultimo_comprobante || '—'}`} />
               {(Number(z.comparacion?.diferencia_total) !== 0 || Number(z.comparacion?.diferencia_cantidad) !== 0) && (
-                <div className="flex items-start gap-2 mt-2 p-3 bg-gold/5 border border-gold/20 rounded-xl">
-                  <AlertTriangle className="text-gold shrink-0 mt-0.5" size={14} />
-                  <p className="text-xs text-prius-slate">
+                <div className="flex items-start gap-2 mt-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
+                  <AlertTriangle className="text-ink shrink-0 mt-0.5" size={14} />
+                  <p className="text-xs text-ink-2">
                     Diferencia vs. lo registrado en el sistema: {formatPesos(z.comparacion.diferencia_total)} en monto,
                     {' '}{z.comparacion.diferencia_cantidad} en cantidad de comprobantes.
                   </p>
@@ -186,33 +186,33 @@ export default function ResumenCaja({ resumen }) {
               transferencia o un swipe de tarjeta). */}
           <Section title="Total General — Todos los Medios" icon={Scale}>
             <Fila label="Movimientos" value={totales.cantidad ?? '—'} />
-            <Fila label="Ingresos" value={formatPesos(totales.ingresos)} tone="text-prius-success" />
-            <Fila label="Gastos" value={formatPesos(totales.egresos)} tone="text-prius-error" />
-            <Fila label="Neto" value={formatPesos(totales.neto)} tone="text-gold" />
+            <Fila label="Ingresos" value={formatPesos(totales.ingresos)} tone="text-success-ink" />
+            <Fila label="Gastos" value={formatPesos(totales.egresos)} tone="text-danger" />
+            <Fila label="Neto" value={formatPesos(totales.neto)} tone="text-ink" />
           </Section>
 
           <Section title="Desglose por Medio de Pago" icon={CreditCard}>
             {(por_medio || []).length === 0 ? (
-              <p className="text-xs text-prius-muted uppercase tracking-widest">Sin movimientos.</p>
+              <p className="text-xs text-ink-2 uppercase tracking-widest">Sin movimientos.</p>
             ) : (
               <div className="space-y-2.5">
                 {por_medio.map((m) => {
                   const Icono = MEDIO_ICONO[m.medio] || Banknote
                   return (
-                    <div key={m.medio} className="bg-prius-surface rounded-xl p-3.5 flex items-center justify-between gap-3">
+                    <div key={m.medio} className="bg-surface rounded-inner p-3.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-prius-slate shrink-0">
+                        <div className="w-9 h-9 rounded-icon bg-card flex items-center justify-center text-ink-2 shrink-0">
                           <Icono size={16} />
                         </div>
                         <div className="min-w-0">
-                          <span className="block text-sm font-semibold text-black">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
-                          <span className="block text-[11px] text-prius-muted">
+                          <span className="block text-body font-semibold text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                          <span className="block text-[11px] text-ink-2">
                             {m.cantidad} movimiento{Number(m.cantidad) === 1 ? '' : 's'}
                             {Number(m.egresos) > 0 && <> · Ingresos {formatPesos(m.ingresos)} · Gastos {formatPesos(m.egresos)}</>}
                           </span>
                         </div>
                       </div>
-                      <span className={`text-sm font-bold tabular-nums shrink-0 ${Number(m.neto) < 0 ? 'text-prius-error' : 'text-black'}`}>{formatPesos(m.neto)}</span>
+                      <span className={`text-body font-bold tabular-nums shrink-0 ${Number(m.neto) < 0 ? 'text-danger' : 'text-ink'}`}>{formatPesos(m.neto)}</span>
                     </div>
                   )
                 })}
@@ -223,27 +223,27 @@ export default function ResumenCaja({ resumen }) {
           <Section title="Comprobantes de la Jornada" icon={FileCheck2}>
             <div className="space-y-4">
               <div>
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Recibos ({(recibos || []).length})</p>
+                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest mb-2">Recibos ({(recibos || []).length})</p>
                 {(recibos || []).length === 0 ? (
-                  <p className="text-xs text-prius-muted bg-prius-surface rounded-xl p-3">Sin recibos en esta caja.</p>
+                  <p className="text-xs text-ink-2 bg-surface rounded-inner p-3">Sin recibos en esta caja.</p>
                 ) : recibos.map((r) => (
-                  <Fila key={r.etiqueta} label={r.etiqueta} cliente={r.cliente} value={formatPesos(r.monto_total)} tone={r.estado === 'anulado' ? 'text-prius-muted line-through' : undefined} />
+                  <Fila key={r.etiqueta} label={r.etiqueta} cliente={r.cliente} value={formatPesos(r.monto_total)} tone={r.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
                 ))}
               </div>
               <div>
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Facturas ({(facturas || []).length})</p>
+                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest mb-2">Facturas ({(facturas || []).length})</p>
                 {(facturas || []).length === 0 ? (
-                  <p className="text-xs text-prius-muted bg-prius-surface rounded-xl p-3">Sin facturas emitidas en esta jornada.</p>
+                  <p className="text-xs text-ink-2 bg-surface rounded-inner p-3">Sin facturas emitidas en esta jornada.</p>
                 ) : facturas.map((f) => (
-                  <Fila key={f.etiqueta} label={f.etiqueta} cliente={f.cliente} value={formatPesos(f.monto_total)} tone={f.estado === 'anulado' ? 'text-prius-muted line-through' : undefined} />
+                  <Fila key={f.etiqueta} label={f.etiqueta} cliente={f.cliente} value={formatPesos(f.monto_total)} tone={f.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
                 ))}
               </div>
               <div>
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest mb-2">Gastos por categoría</p>
+                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest mb-2">Gastos por categoría</p>
                 {(gastos?.por_categoria || []).length === 0 ? (
-                  <p className="text-xs text-prius-muted bg-prius-surface rounded-xl p-3">Sin gastos registrados en esta caja.</p>
+                  <p className="text-xs text-ink-2 bg-surface rounded-inner p-3">Sin gastos registrados en esta caja.</p>
                 ) : gastos.por_categoria.map((g) => (
-                  <Fila key={g.categoria} label={CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} value={formatPesos(g.total)} tone="text-prius-error" />
+                  <Fila key={g.categoria} label={CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} value={formatPesos(g.total)} tone="text-danger" />
                 ))}
               </div>
             </div>
@@ -252,12 +252,12 @@ export default function ResumenCaja({ resumen }) {
           {(sin_comprobante || []).length > 0 && (
             <Section title={`Pagos sin comprobante (${sin_comprobante.length})`} icon={FileText}>
               {sin_comprobante.map((p) => (
-                <div key={p.pago_id} className="flex items-center justify-between py-2 border-b border-hairline last:border-0 gap-3">
+                <div key={p.pago_id} className="flex items-center justify-between py-2 border-b border-line last:border-0 gap-3">
                   <div className="flex items-center gap-2 min-w-0">
-                    <FileText size={14} className="text-prius-muted shrink-0" />
-                    <span className="text-sm text-prius-slate truncate">{p.cliente || 'S/N'} — {p.concepto}</span>
+                    <FileText size={14} className="text-ink-2 shrink-0" />
+                    <span className="text-body text-ink-2 truncate">{p.cliente || 'S/N'} — {p.concepto}</span>
                   </div>
-                  <span className="text-sm font-bold text-black tabular-nums shrink-0">{formatPesos(p.monto)}</span>
+                  <span className="text-body font-bold text-ink tabular-nums shrink-0">{formatPesos(p.monto)}</span>
                 </div>
               ))}
             </Section>
@@ -266,10 +266,10 @@ export default function ResumenCaja({ resumen }) {
           {((anulados?.pagos || []).length > 0 || (anulados?.gastos || []).length > 0) && (
             <Section title="Anulados">
               {(anulados.pagos || []).map((p) => (
-                <Fila key={`p-${p.pago_id}`} label={`Pago — ${p.motivo}`} value={formatPesos(p.monto)} tone="text-prius-muted line-through" />
+                <Fila key={`p-${p.pago_id}`} label={`Pago — ${p.motivo}`} value={formatPesos(p.monto)} tone="text-ink-2 line-through" />
               ))}
               {(anulados.gastos || []).map((g) => (
-                <Fila key={`g-${g.gasto_id}`} label={`Gasto — ${g.motivo}`} value={formatPesos(g.monto)} tone="text-prius-muted line-through" />
+                <Fila key={`g-${g.gasto_id}`} label={`Gasto — ${g.motivo}`} value={formatPesos(g.monto)} tone="text-ink-2 line-through" />
               ))}
             </Section>
           )}
@@ -277,11 +277,11 @@ export default function ResumenCaja({ resumen }) {
       </div>
 
       <div className="grid grid-cols-2 gap-8 pt-6">
-        <div className="border-t border-hairline pt-3 text-center">
-          <p className="text-[10px] text-prius-muted uppercase tracking-widest">Cajero</p>
+        <div className="border-t border-line pt-3 text-center">
+          <p className="text-[10px] text-ink-2 uppercase tracking-widest">Cajero</p>
         </div>
-        <div className="border-t border-hairline pt-3 text-center">
-          <p className="text-[10px] text-prius-muted uppercase tracking-widest">Administración</p>
+        <div className="border-t border-line pt-3 text-center">
+          <p className="text-[10px] text-ink-2 uppercase tracking-widest">Administración</p>
         </div>
       </div>
     </div>

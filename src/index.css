@@ -2,25 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Bloque 2 (oct 2026): display/headline/metric pasan a Manrope — el plugin
-   fontSize de Tailwind no soporta la key `fontFamily` dentro de la tupla de
-   tamaño (la descarta en silencio), así que se declara acá, después de
-   @tailwind utilities, para ganarle en el cascade a `font-ui`/`font-sans`
-   (Inter) del contenedor de la app. metric-xl además fuerza tabular-nums
-   por lo mismo — Tailwind tampoco soporta fontVariantNumeric ahí. */
-.text-display-lg, .text-headline-lg, .text-headline-lg-mobile,
-.text-headline-md, .text-headline-sm, .text-metric-xl {
-  font-family: "Manrope Variable", Manrope, sans-serif;
-}
-.text-metric-xl {
-  font-variant-numeric: tabular-nums;
-}
-
-
+/*
+  Tokens del sistema de diseño (design/DESIGN.md). Se guardan como canales RGB
+  para que tailwind.config.js pueda aplicarles opacidad (`bg-card/90`). Mismos
+  nombres que usa shadcn por convención.
+*/
 :root {
-  --prius-accent: #F2CA50;
-  --prius-dark: #111520;
-  --prius-darker: #0a0d14;
+  --background: 248 247 242;
+  --card: 255 255 255;
+  --primary: 0 0 0;
+  --primary-foreground: 255 255 255;
+  --secondary: 242 241 236;
+  --muted: 242 241 236;
+  --muted-foreground: 107 107 107;
+  --accent: 242 202 80;
+  --accent-foreground: 0 0 0;
+  --border: 229 229 229;
+  --input: 242 241 236;
+  --ring: 242 202 80;
+  --radius: 24px;
 }
 
 * {
@@ -60,22 +60,21 @@ button {
   white-space: nowrap;
 }
 
-/* Rediseño "Playa Privada" (oct 2026): fondo blanco plano, sin gradiente ni
-   glassmorphism — reemplaza el tema "Glass Dark" anterior. */
+/* tabular-nums global: todas las cifras de la app se alinean en columna, sin
+   tener que acordarse de la clase en cada monto. */
 body {
-  font-family: 'Inter Variable', 'Inter', sans-serif;
-  background-color: #FFFFFF;
-  color: #000000;
+  font-family: 'Manrope Variable', Manrope, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  background-color: rgb(var(--background));
+  color: rgb(var(--primary));
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
 
 /*
-  Glassmorphism SIN backdrop-filter.
-  El blur en tiempo real fuerza al compositor a re-rasterizar toda la zona
-  del panel en cada hover/scroll; con decenas de .glass-card (muchas anidadas)
-  eso es la causa principal del lag. Un fondo sólido semi-opaco se ve
-  prácticamente igual sobre un tema oscuro y cuesta cero.
+  Plano congelado. El mapa de desktop/tablet no sigue el sistema de diseño:
+  queda idéntico a propósito, con estos valores propios. Lo usan Cell.jsx y
+  PlanoViewport.jsx. No cambiar sin regenerar los snapshots visuales.
 */
 .glass-card {
   background: rgba(23, 32, 48, 0.92);
@@ -87,12 +86,6 @@ body {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
-/*
-  Variante para los popovers aislados del header (búsqueda, notificaciones,
-  perfil): nunca más de uno montado a la vez y sin anidamiento, así que acá sí
-  vale el backdrop-filter que se sacó de .glass-card más arriba. El fondo
-  semi-opaco liso se veía sucio con contenido de color detrás.
-*/
 .glass-popover {
   background: rgba(23, 32, 48, 0.7);
   backdrop-filter: blur(24px);
@@ -101,12 +94,6 @@ body {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
 }
 
-/*
-  Tooltip del Plano de Playa (Cell.jsx): a diferencia de .glass-popover (fondo
-  del header, sobre el gradiente liso de <body>), este flota sobre decenas de
-  celdas de color sólido — con 0.7 de opacidad se seguía transparentando. Casi
-  opaco de base + blur solo de remate para lo poco que se filtra en los bordes.
-*/
 .glass-tooltip {
   background: rgba(10, 13, 20, 0.97);
   backdrop-filter: blur(20px);
@@ -115,17 +102,11 @@ body {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/*
-  Rediseño "Playa Privada" (oct 2026): reemplazo plano de .glass-card/
-  .glass-popover para toda pantalla migrada — blanco sólido, borde hairline
-  1px, sin sombra ni blur (regla de diseño: cero sombras/gradientes).
-  .glass-card/.glass-tooltip de arriba quedan intactas a propósito: las sigue
-  usando PlanoViewport.jsx y Cell.jsx (archivos del Plano, prohibido tocarlos
-  ni siquiera indirectamente vía CSS compartido).
-*/
+/* Transición: las pantallas todavía no migradas a brand/Card (Fase 4). Se
+   borran en la auditoría final, junto con el borde. */
 .card-light {
-  background: #FFFFFF;
-  border: 1px solid #E5E5E5;
+  background: rgb(var(--card));
+  border: 1px solid rgb(var(--border));
 }
 
 .card-light-inner {
@@ -133,8 +114,8 @@ body {
 }
 
 .popover-light {
-  background: #FFFFFF;
-  border: 1px solid #E5E5E5;
+  background: rgb(var(--card));
+  border: 1px solid rgb(var(--border));
 }
 
 /*
@@ -163,11 +144,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(var(--primary) / 0.15);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--prius-accent);
+  background: rgb(var(--accent));
 }
 
 /* Scroll horizontal sin barra visible (PlanoStatsBar, tiras de chips) —
@@ -371,7 +352,7 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .6), transparent);
+    background: linear-gradient(90deg, transparent, rgb(var(--card) / .6), transparent);
     animation: shimmer 1.4s infinite;
   }
 }
@@ -388,18 +369,18 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
-  box-shadow: 0 0 0 1000px #FFFFFF inset !important;
-  -webkit-text-fill-color: #000000 !important;
-  caret-color: #000000;
+  -webkit-box-shadow: 0 0 0 1000px rgb(var(--card)) inset !important;
+  box-shadow: 0 0 0 1000px rgb(var(--card)) inset !important;
+  -webkit-text-fill-color: rgb(var(--primary)) !important;
+  caret-color: rgb(var(--primary));
   transition: background-color 9999s ease-in-out 0s;
 }
 
 /* Hover solo donde el puntero realmente puede hacer hover. */
 @media (hover: hover) {
   .hover-row { transition: background-color 180ms ease-out; }
-  .hover-row:hover { background-color: #F9F9F9; }
-  .hover-accent:hover { background-color: #FFF6D6; }
+  .hover-row:hover { background-color: theme(colors.row-hover); }
+  .hover-accent:hover { background-color: theme(colors.gold.100); }
 }
 
 /*
@@ -411,7 +392,7 @@ input:-webkit-autofill:active {
 input.focus-ring:focus-visible,
 select.focus-ring:focus-visible,
 textarea.focus-ring:focus-visible {
-  outline: 2px solid #F2CA50;
+  outline: 2px solid rgb(var(--ring));
   outline-offset: 1px;
 }
 
@@ -435,11 +416,10 @@ textarea.focus-ring:focus-visible {
 
 /*
   Resaltado de destino de deep-link (useDeepLinkTarget, oct 2026): borde
-  #F2CA50 de 2px que se desvanece solo, sin sombra (Quiet Luxury). border en
-  vez de outline para no competir con el que ya usan las tarjetas con focus.
+  dorado de 2px que se desvanece solo. border en vez de outline para no competir con el que ya usan las tarjetas con focus.
 */
 @keyframes deep-link-highlight {
-  from { border-color: #F2CA50; }
+  from { border-color: rgb(var(--accent)); }
   to   { border-color: transparent; }
 }
 .deep-link-highlight {
@@ -538,7 +518,7 @@ button, a {
   en desktop pasa a `md:static` y el gradiente sería ruido.
 */
 .sticky-blur {
-  background-color: rgba(249, 249, 249, 0.88);
+  background-color: rgb(var(--background) / 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -550,11 +530,11 @@ button, a {
     left: 0;
     right: 0;
     height: 16px;
-    background: linear-gradient(to bottom, rgba(249, 249, 249, 0.7) 0%, transparent 100%);
+    background: linear-gradient(to bottom, rgb(var(--background) / 0.7) 0%, transparent 100%);
     pointer-events: none;
   }
 }
 /* Fallback: donde backdrop-filter no está soportado, fondo sólido. */
 @supports not (backdrop-filter: blur(1px)) {
-  .sticky-blur { background-color: #F9F9F9; }
+  .sticky-blur { background-color: rgb(var(--background)); }
 }

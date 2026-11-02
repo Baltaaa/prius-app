@@ -88,7 +88,7 @@ export default function ConfirmarSuperadminModal({
   return createPortal(
     <OverlayParentContext.Provider value={confirmOverlayId}>
     <div
-      className={`fixed inset-0 z-[1000] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-md ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
+      className={`fixed inset-0 z-[1000] flex items-end sm:items-center justify-center sm:p-4 bg-overlay backdrop-blur-sm ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onMouseDown={(e) => { mouseDownEnOverlayRef.current = e.target === e.currentTarget }}
       onMouseUp={(e) => {
         const cierra = mouseDownEnOverlayRef.current && e.target === e.currentTarget
@@ -103,27 +103,27 @@ export default function ConfirmarSuperadminModal({
           apilados. Desktop (sm+): dos columnas de igual ancho/alto. */}
       <div
         ref={bind}
-        className={`card-light w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl border border-red-500/20 shadow-2xl p-6 space-y-5 ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
+        className={`card-light w-full sm:max-w-md rounded-t-card sm:rounded-card border border-danger/30 p-6 space-y-5 ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
         style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
       >
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-red-500/10 text-prius-error">
+          <div className="w-9 h-9 rounded-inner flex items-center justify-center shrink-0 bg-danger-soft text-danger">
             <AlertTriangle size={18} />
           </div>
           <div className="pt-1 min-w-0 flex-1">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-black">{titulo}</h3>
-            {afectaLinea && <p className="text-sm text-prius-slate mt-2 break-words">{afectaLinea}</p>}
+            <h3 className="text-body font-bold uppercase tracking-widest text-ink">{titulo}</h3>
+            {afectaLinea && <p className="text-body text-ink-2 mt-2 break-words">{afectaLinea}</p>}
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 hover:bg-prius-subtle rounded-lg text-prius-muted hover:text-black transition-all shrink-0"
+            className="p-1.5 hover:bg-surface rounded-icon text-ink-2 hover:text-ink transition-all shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest text-prius-slate mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-widest text-ink-2 mb-1.5">
             Contraseña de superadmin
           </label>
           <div className="relative">
@@ -135,34 +135,34 @@ export default function ConfirmarSuperadminModal({
               disabled={loading}
               autoFocus
               autoComplete="current-password"
-              className={`w-full px-4 py-3 pr-12 bg-prius-subtle border rounded-xl outline-none text-base md:text-sm text-black placeholder-prius-muted ${error ? 'border-prius-error' : 'border-hairline focus:border-red-500/50'}`}
+              className={`w-full px-4 py-3 pr-12 bg-surface border rounded-inner outline-none text-base md:text-body text-ink placeholder-ink-2 ${error ? 'border-danger' : 'border-line focus:border-danger/30'}`}
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setMostrarPassword((v) => !v)}
               tabIndex={-1}
-              className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-prius-muted hover:text-black transition-colors"
+              className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-ink-2 hover:text-ink transition-colors"
               title={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             >
               {mostrarPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          {error && <p className="text-xs text-prius-error mt-1.5">{error}</p>}
+          {error && <p className="text-xs text-danger mt-1.5">{error}</p>}
         </div>
 
         <div className="flex flex-col-reverse sm:grid sm:grid-cols-2 gap-3">
           <button
             onClick={handleClose}
             disabled={loading}
-            className="h-11 px-2 rounded-xl text-xs font-bold uppercase tracking-wide text-prius-slate bg-prius-subtle hover:bg-prius-subtle border border-hairline transition-all disabled:opacity-50"
+            className="h-11 px-2 rounded-inner text-xs font-bold uppercase tracking-wide text-ink-2 bg-surface hover:bg-surface border border-line transition-all disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={handleConfirm}
             disabled={!password || loading}
-            className="h-11 px-2 rounded-xl text-[11px] font-bold uppercase tracking-wide transition-all bg-red-500 hover:bg-red-400 text-white disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-red-500 whitespace-nowrap overflow-hidden"
+            className="h-11 px-2 rounded-inner text-[11px] font-bold uppercase tracking-wide transition-all bg-danger hover:bg-danger text-on-ink disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-danger whitespace-nowrap overflow-hidden"
           >
             {loading ? 'Verificando...' : confirmLabel}
           </button>

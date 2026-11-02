@@ -54,17 +54,17 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
 
   return createPortal(
     <div
-      className={`lg:hidden fixed inset-0 z-[999] flex items-end justify-center bg-black/40 ${unit ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
+      className={`lg:hidden fixed inset-0 z-[999] flex items-end justify-center bg-overlay ${unit ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={() => onClose?.()}
     >
       <div
         ref={bind}
-        className={`w-full max-h-[85vh] bg-white rounded-t-3xl flex flex-col overflow-hidden border-t border-hairline ${unit ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+        className={`w-full max-h-[85vh] bg-card rounded-t-card flex flex-col overflow-hidden border-t border-line ${unit ? 'ui-open-sheet' : 'ui-close-sheet'}`}
         onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-hairline" />
+          <div className="w-10 h-1 rounded-full bg-line" />
         </div>
         <div className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
           <UnidadDetalleContent

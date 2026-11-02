@@ -34,8 +34,8 @@ export default function PlanoMobile({
     <div className="flex-1 min-h-0 flex flex-col gap-3">
       {/* Fecha + Imprimir */}
       <div className="flex items-center gap-2 shrink-0">
-        <div className="flex items-center gap-1 bg-prius-subtle p-1 rounded-xl flex-1 min-w-0">
-          <button onClick={onPrevDay} className="w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-white text-prius-slate" title="Día anterior">
+        <div className="flex items-center gap-1 bg-surface p-1 rounded-inner flex-1 min-w-0">
+          <button onClick={onPrevDay} className="w-9 h-9 shrink-0 flex items-center justify-center rounded-icon bg-card text-ink-2" title="Día anterior">
             <ChevronLeft size={16} />
           </button>
           <div className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-1">
@@ -44,14 +44,14 @@ export default function PlanoMobile({
                 de la tarea. */}
             <DateInput value={selectedDate} onChange={(v) => v && onDateChange(v)} calendarOnly className="w-[164px]" />
             {!esHoy && (
-              <button onClick={onHoy} className="text-label-md text-gold font-bold uppercase shrink-0">Hoy</button>
+              <button onClick={onHoy} className="text-label text-ink font-bold uppercase shrink-0">Hoy</button>
             )}
           </div>
-          <button onClick={onNextDay} className="w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-white text-prius-slate" title="Día siguiente">
+          <button onClick={onNextDay} className="w-9 h-9 shrink-0 flex items-center justify-center rounded-icon bg-card text-ink-2" title="Día siguiente">
             <ChevronRight size={16} />
           </button>
         </div>
-        <button onClick={() => window.print()} className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl card-light text-prius-slate" title="Imprimir A4">
+        <button onClick={() => window.print()} className="w-11 h-11 shrink-0 flex items-center justify-center rounded-inner card-light text-ink-2" title="Imprimir A4">
           <Printer size={18} />
         </button>
       </div>
@@ -63,16 +63,16 @@ export default function PlanoMobile({
             <button
               key={k.key}
               onClick={() => onToggleFiltro(k.key)}
-              className={`text-left rounded-xl p-2.5 border transition-colors ${statsFiltro === k.key ? 'border-gold/50 bg-gold/10' : 'border-hairline bg-white'}`}
+              className={`text-left rounded-inner p-2.5 border transition-colors ${statsFiltro === k.key ? 'border-gold-300 bg-gold-100' : 'border-line bg-card'}`}
             >
-              <span className="block text-label-md text-prius-slate uppercase truncate">{k.label}</span>
+              <span className="block text-label text-ink-2 uppercase truncate">{k.label}</span>
               <div className="flex items-baseline gap-1">
-                <span className="text-headline-sm text-black tabular-nums">{k.value}</span>
-                {k.sub && <span className="text-body-sm text-prius-slate truncate">{k.sub}</span>}
+                <span className="text-body text-ink tabular-nums">{k.value}</span>
+                {k.sub && <span className="text-label text-ink-2 truncate">{k.sub}</span>}
               </div>
-              <div className="mt-1.5 h-1 rounded-full bg-prius-surface overflow-hidden">
+              <div className="mt-1.5 h-1 rounded-full bg-surface overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${k.tone === 'success' ? 'bg-prius-success' : k.tone === 'gold' ? 'bg-gold' : 'bg-black'}`}
+                  className={`h-full rounded-full ${k.tone === 'success' ? 'bg-success' : k.tone === 'gold' ? 'bg-gold' : 'bg-ink'}`}
                   style={{ width: `${Math.min(100, Math.round((k.progress || 0) * 100))}%` }}
                 />
               </div>
@@ -92,13 +92,13 @@ export default function PlanoMobile({
       <PlanoLeyenda compact />
 
       {/* Card del plano — PlanoGrid/PlanoViewport SIN modificar */}
-      <section className="flex-1 min-h-0 card-light rounded-2xl card-light-inner relative overflow-hidden flex flex-col">
-        <div className="px-3 pt-2.5 flex items-center gap-1.5 text-prius-slate shrink-0">
+      <section className="flex-1 min-h-0 card-light rounded-card card-light-inner relative overflow-hidden flex flex-col">
+        <div className="px-3 pt-2.5 flex items-center gap-1.5 text-ink-2 shrink-0">
           <Layers size={14} />
-          <span className="text-label-md uppercase tracking-wider">Pasillo A · B · C</span>
+          <span className="text-label uppercase tracking-wider">Pasillo A · B · C</span>
         </div>
         {loading ? (
-          <div className="flex-1 flex items-center justify-center text-prius-muted text-label-md">Cargando plano…</div>
+          <div className="flex-1 flex items-center justify-center text-ink-2 text-label">Cargando plano…</div>
         ) : (
           <div className="flex-1 min-h-0 flex gap-2 px-2 pb-2">
             {/* Misma técnica que Dashboard.jsx desktop: la barra de zoom

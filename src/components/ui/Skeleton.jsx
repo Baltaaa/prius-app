@@ -8,5 +8,5 @@
 // bloque con translateX, compuesto por GPU. Se apaga solo con
 // prefers-reduced-motion, igual que el resto de las animaciones.
 export default function Skeleton({ className = '' }) {
-  return <div className={`bg-prius-surface rounded-2xl animate-pulse skeleton-shimmer ${className}`} />
+  return <div className={`bg-surface rounded-card animate-pulse skeleton-shimmer ${className}`} />
 }

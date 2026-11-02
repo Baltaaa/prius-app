@@ -180,8 +180,8 @@ export default function DateInput({
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-prius-muted uppercase tracking-widest block mb-2">
-          {label}{required && <span className="text-prius-error ml-0.5">*</span>}
+        <label htmlFor={inputId} className="text-[11px] font-bold text-ink-2 uppercase tracking-widest block mb-2">
+          {label}{required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
       <div className="relative" ref={bindWrap}>
@@ -201,31 +201,31 @@ export default function DateInput({
           onBlur={handleTextBlur}
           placeholder={placeholder}
           aria-invalid={!!error}
-          className={`w-full min-h-[44px] pl-4 pr-10 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
+          className={`w-full min-h-[44px] pl-4 pr-10 py-3 bg-surface border rounded-inner text-ink text-base md:text-body font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
             calendarOnly ? 'cursor-pointer' : ''
-          } ${error ? 'border-red-500/60 focus:border-red-500' : 'border-hairline focus:border-gold/50'}`}
+          } ${error ? 'border-danger/30 focus:border-danger' : 'border-line focus:border-gold-300'}`}
         />
         <button
           type="button"
           tabIndex={-1}
           disabled={disabled}
           onClick={() => (abierto ? setAbierto(false) : abrir())}
-          className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-muted hover:text-gold transition-colors"
+          className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-2 hover:text-ink transition-colors"
         >
           <CalendarDays size={18} />
         </button>
       </div>
-      {error ? <p className="text-[11px] text-prius-error mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-prius-muted mt-1.5">{hint}</p> : null}
+      {error ? <p className="text-[11px] text-danger mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-ink-2 mt-1.5">{hint}</p> : null}
 
       {abierto && pos && createPortal(
         <>
           {calendarOnly && (
-            <div ref={bind} className="fixed inset-0 z-[1000] bg-black/60" onClick={() => setAbierto(false)} />
+            <div ref={bind} className="fixed inset-0 z-[1000] bg-overlay" onClick={() => setAbierto(false)} />
           )}
           <div
             ref={bindPopover}
             className="fixed z-[1001] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0
-                       bg-[#111520] border border-hairline rounded-2xl shadow-2xl p-2 dp-dark"
+                       bg-ink border border-line rounded-card p-2 dp-dark"
             style={window.innerWidth >= 640 ? { top: pos.top, left: pos.left, minWidth: pos.width } : undefined}
           >
             <DayPicker

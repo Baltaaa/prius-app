@@ -47,16 +47,16 @@ export default function TextInput({
     placeholder,
     onBlur: handleBlur,
     'aria-invalid': !!error,
-    className: `w-full min-h-[44px] px-4 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm outline-none transition-all disabled:opacity-50 resize-none ${
-      error ? 'border-red-500/60 focus:border-red-500' : 'border-hairline focus:border-gold/50'
+    className: `w-full min-h-[44px] px-4 py-3 bg-surface border rounded-inner text-ink text-base md:text-body outline-none transition-all disabled:opacity-50 resize-none ${
+      error ? 'border-danger/30 focus:border-danger' : 'border-line focus:border-gold-300'
     }`,
   }
 
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-prius-muted uppercase tracking-widest block mb-2">
-          {label}{required && <span className="text-prius-error ml-0.5">*</span>}
+        <label htmlFor={inputId} className="text-[11px] font-bold text-ink-2 uppercase tracking-widest block mb-2">
+          {label}{required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
       {as === 'textarea' ? (
@@ -66,11 +66,11 @@ export default function TextInput({
       )}
       <div className="flex justify-between mt-1.5">
         {error ? (
-          <p className="text-[11px] text-prius-error">{error}</p>
+          <p className="text-[11px] text-danger">{error}</p>
         ) : hint ? (
-          <p className="text-[11px] text-prius-muted">{hint}</p>
+          <p className="text-[11px] text-ink-2">{hint}</p>
         ) : <span />}
-        {maxLength && <p className="text-[11px] text-prius-muted tabular-nums shrink-0">{value.length}/{maxLength}</p>}
+        {maxLength && <p className="text-[11px] text-ink-2 tabular-nums shrink-0">{value.length}/{maxLength}</p>}
       </div>
     </div>
   )

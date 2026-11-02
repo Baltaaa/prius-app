@@ -28,29 +28,29 @@ const formatWeekdayName = (date) => DIAS[(date.getDay() + 6) % 7]
 // botones de mes quedaban posicionados contra un ancestro lejano y no se
 // veían — de ahí que el calendario pareciera "sin navegación".
 const classNames = {
-  root: 'text-black',
+  root: 'text-ink',
   months: 'block',
   month: 'grid grid-cols-[auto_1fr_auto] grid-rows-[auto_auto] items-center gap-y-1',
   month_caption: 'col-start-2 row-start-1 flex items-center justify-center h-9',
-  caption_label: 'text-xs font-bold uppercase tracking-widest text-black',
+  caption_label: 'text-xs font-bold uppercase tracking-widest text-ink',
   button_previous:
-    'col-start-1 row-start-1 justify-self-start min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-prius-slate hover:text-black hover:bg-prius-subtle transition-colors disabled:opacity-30 disabled:pointer-events-none',
+    'col-start-1 row-start-1 justify-self-start min-w-[44px] min-h-[44px] flex items-center justify-center rounded-icon text-ink-2 hover:text-ink hover:bg-surface transition-colors disabled:opacity-30 disabled:pointer-events-none',
   button_next:
-    'col-start-3 row-start-1 justify-self-end min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-prius-slate hover:text-black hover:bg-prius-subtle transition-colors disabled:opacity-30 disabled:pointer-events-none',
+    'col-start-3 row-start-1 justify-self-end min-w-[44px] min-h-[44px] flex items-center justify-center rounded-icon text-ink-2 hover:text-ink hover:bg-surface transition-colors disabled:opacity-30 disabled:pointer-events-none',
   month_grid: 'col-span-3 row-start-2 w-full border-collapse mt-2',
   weekdays: 'flex',
-  weekday: 'w-9 h-9 text-[10px] font-bold uppercase tracking-widest text-prius-muted flex items-center justify-center',
+  weekday: 'w-9 h-9 text-[10px] font-bold uppercase tracking-widest text-ink-2 flex items-center justify-center',
   week: 'flex',
   day: 'w-9 h-9 p-0 text-center align-middle',
   day_button:
-    'w-9 h-9 rounded-lg text-sm font-semibold text-prius-slate hover:bg-prius-subtle transition-colors outline-none focus-visible:ring-1 focus-visible:ring-[#FDE047]/50',
-  today: '[&_button]:border [&_button]:border-gold/40',
-  outside: '[&_button]:text-prius-slate',
-  disabled: '[&_button]:text-prius-muted [&_button]:hover:bg-transparent [&_button]:cursor-not-allowed [&_button]:opacity-40',
-  selected: '[&_button]:bg-gold [&_button]:text-black [&_button]:hover:bg-gold',
-  range_start: '[&_button]:bg-gold [&_button]:text-black [&_button]:hover:bg-gold',
-  range_end: '[&_button]:bg-gold [&_button]:text-black [&_button]:hover:bg-gold',
-  range_middle: '[&_button]:bg-gold/20 [&_button]:text-black [&_button]:rounded-none',
+    'w-9 h-9 rounded-icon text-body font-semibold text-ink-2 hover:bg-surface transition-colors outline-none focus-visible:ring-1 focus-visible:ring-gold',
+  today: '[&_button]:border [&_button]:border-gold-300',
+  outside: '[&_button]:text-ink-2',
+  disabled: '[&_button]:text-ink-2 [&_button]:hover:bg-transparent [&_button]:cursor-not-allowed [&_button]:opacity-40',
+  selected: '[&_button]:bg-gold [&_button]:text-ink [&_button]:hover:bg-gold',
+  range_start: '[&_button]:bg-gold [&_button]:text-ink [&_button]:hover:bg-gold',
+  range_end: '[&_button]:bg-gold [&_button]:text-ink [&_button]:hover:bg-gold',
+  range_middle: '[&_button]:bg-gold-100 [&_button]:text-ink [&_button]:rounded-none',
 }
 
 const modifiersClassNames = {

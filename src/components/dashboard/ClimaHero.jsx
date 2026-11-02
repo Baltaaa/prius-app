@@ -33,16 +33,16 @@ export default function ClimaHero({ fecha, clima, loading }) {
   const resumen = resumenDiaClima(clima)
 
   if (loading) {
-    return <div className="card-light rounded-2xl p-space-md sm:p-space-lg h-[220px] animate-pulse" />
+    return <div className="card-light rounded-card p-space-md sm:p-space-lg h-[220px] animate-pulse" />
   }
 
   if (!resumen) {
     return (
-      <div className="card-light rounded-2xl p-space-md sm:p-space-lg flex items-center gap-space-md">
-        <Cloud size={28} className="text-prius-muted" />
+      <div className="card-light rounded-card p-space-md sm:p-space-lg flex items-center gap-space-md">
+        <Cloud size={28} className="text-ink-2" />
         <div>
-          <p className="text-label-md text-prius-slate uppercase">Clima</p>
-          <p className="text-body-sm text-prius-muted mt-1">Sin pronóstico para hoy.</p>
+          <p className="text-label text-ink-2 uppercase">Clima</p>
+          <p className="text-label text-ink-2 mt-1">Sin pronóstico para hoy.</p>
         </div>
       </div>
     )
@@ -59,29 +59,29 @@ export default function ClimaHero({ fecha, clima, loading }) {
 
   return (
     <>
-      <div className="card-light rounded-2xl p-space-md sm:p-space-lg flex flex-col justify-between min-w-0 font-ui">
+      <div className="card-light rounded-card p-space-md sm:p-space-lg flex flex-col justify-between min-w-0">
         <div>
           {/* Encabezado: eyebrow + acciones (Windguru / Ver pronóstico) */}
           <div className="flex items-center justify-between pb-space-md">
             <div className="flex items-center gap-2">
-              <Wind size={16} className="text-prius-slate" />
-              <span className="text-label-md text-prius-slate uppercase hidden sm:inline">Condiciones Marítimas · Biología Costera</span>
-              <span className="text-label-md text-prius-slate uppercase sm:hidden">Clima</span>
+              <Wind size={16} className="text-ink-2" />
+              <span className="text-label text-ink-2 uppercase hidden sm:inline">Condiciones Marítimas · Biología Costera</span>
+              <span className="text-label text-ink-2 uppercase sm:hidden">Clima</span>
             </div>
             <div className="flex items-center gap-3">
               <a
                 href={WINDGURU_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-label-md text-black hover:underline flex items-center gap-1"
+                className="text-label text-ink hover:underline flex items-center gap-1"
               >
                 Windguru <ExternalLink size={12} />
               </a>
-              <span className="text-hairline hidden sm:inline">•</span>
+              <span className="text-line hidden sm:inline">•</span>
               <button
                 type="button"
                 onClick={() => setPanelOpen(true)}
-                className="text-[13px] sm:text-sm font-semibold text-prius-slate hover:text-black transition-colors hidden sm:inline"
+                className="text-[13px] sm:text-body font-semibold text-ink-2 hover:text-ink transition-colors hidden sm:inline"
               >
                 Ver pronóstico
               </button>
@@ -91,18 +91,18 @@ export default function ClimaHero({ fecha, clima, loading }) {
           {/* Hero: temperatura + ubicación + alerta de viento */}
           <div className="flex flex-wrap items-baseline justify-between gap-3 py-1">
             <button type="button" onClick={() => setPanelOpen(true)} className="flex items-baseline gap-2 sm:hidden">
-              <span className="text-metric-xl text-black tracking-tighter tabular-nums">
+              <span className="text-stat text-ink tracking-tighter tabular-nums">
                 {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
               </span>
-              <span className="text-title-md text-prius-slate font-medium">Playa Grande</span>
+              <span className="text-body text-ink-2 font-medium">Playa Grande</span>
             </button>
             <div className="hidden sm:flex items-baseline gap-3">
-              <span className="text-[44px] leading-none font-semibold text-black tracking-tighter tabular-nums">
+              <span className="text-[44px] leading-none font-semibold text-ink tracking-tighter tabular-nums">
                 {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
               </span>
-              <span className="text-headline-sm text-prius-slate">Playa Grande</span>
+              <span className="text-body text-ink-2">Playa Grande</span>
             </div>
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-body-sm ${alerta ? 'bg-red-50 text-prius-error' : 'bg-prius-surface text-black'}`}>
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-label ${alerta ? 'bg-danger-soft text-danger' : 'bg-surface text-ink'}`}>
               <ArrowUp size={14} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
               {alerta ? 'Viento fuerte' : 'Viento'} del {gradosARumbo(actual.direccion)}
             </div>
@@ -110,36 +110,36 @@ export default function ClimaHero({ fecha, clima, loading }) {
 
           {/* Grilla de métricas reales (sin tile de agua/pleamar: no hay dato) */}
           <div className="grid grid-cols-3 gap-space-sm mt-space-md">
-            <div className="p-space-sm sm:p-space-md rounded-xl bg-prius-surface flex flex-col justify-between">
-              <div className="flex items-center justify-between text-prius-slate">
-                <span className="text-label-md uppercase">Viento</span>
+            <div className="p-space-sm sm:p-space-md rounded-inner bg-surface flex flex-col justify-between">
+              <div className="flex items-center justify-between text-ink-2">
+                <span className="text-label uppercase">Viento</span>
                 <Wind size={16} />
               </div>
               <div className="mt-2">
-                <span className="text-title-md sm:text-headline-md text-black tabular-nums">
-                  {actual.viento != null ? Math.round(actual.viento) : '--'} <span className="text-body-sm font-normal text-prius-slate">km/h</span>
+                <span className="text-body sm:text-card-title text-ink tabular-nums">
+                  {actual.viento != null ? Math.round(actual.viento) : '--'} <span className="text-label font-normal text-ink-2">km/h</span>
                 </span>
               </div>
             </div>
-            <div className="p-space-sm sm:p-space-md rounded-xl bg-prius-surface flex flex-col justify-between">
-              <div className="flex items-center justify-between text-prius-slate">
-                <span className="text-label-md uppercase">Ráfaga</span>
+            <div className="p-space-sm sm:p-space-md rounded-inner bg-surface flex flex-col justify-between">
+              <div className="flex items-center justify-between text-ink-2">
+                <span className="text-label uppercase">Ráfaga</span>
                 <Gauge size={16} />
               </div>
               <div className="mt-2">
-                <span className={`text-title-md sm:text-headline-md tabular-nums ${alerta ? 'text-prius-error' : 'text-black'}`}>
-                  {Math.round(rafagaMax)} <span className="text-body-sm font-normal text-prius-slate">km/h</span>
+                <span className={`text-body sm:text-card-title tabular-nums ${alerta ? 'text-danger' : 'text-ink'}`}>
+                  {Math.round(rafagaMax)} <span className="text-label font-normal text-ink-2">km/h</span>
                 </span>
               </div>
             </div>
-            <div className="p-space-sm sm:p-space-md rounded-xl bg-prius-surface flex flex-col justify-between">
-              <div className="flex items-center justify-between text-prius-slate">
-                <span className="text-label-md uppercase">Olas Mar</span>
+            <div className="p-space-sm sm:p-space-md rounded-inner bg-surface flex flex-col justify-between">
+              <div className="flex items-center justify-between text-ink-2">
+                <span className="text-label uppercase">Olas Mar</span>
                 <Waves size={16} />
               </div>
               <div className="mt-2">
-                <span className="text-title-md sm:text-headline-md text-black tabular-nums">
-                  {actual.olaAltura != null ? Number(actual.olaAltura).toFixed(1) : '--'} <span className="text-body-sm font-normal text-prius-slate">m</span>
+                <span className="text-body sm:text-card-title text-ink tabular-nums">
+                  {actual.olaAltura != null ? Number(actual.olaAltura).toFixed(1) : '--'} <span className="text-label font-normal text-ink-2">m</span>
                 </span>
               </div>
             </div>
@@ -147,13 +147,13 @@ export default function ClimaHero({ fecha, clima, loading }) {
 
           {/* Tira horaria */}
           {proximasHoras.length > 0 && (
-            <div className="mt-space-md pt-space-sm border-t border-hairline">
+            <div className="mt-space-md pt-space-sm border-t border-line">
               <div className="flex items-center justify-between gap-1.5 overflow-x-auto scrollbar-none">
                 {proximasHoras.map((h) => (
-                  <div key={h.hora} className="flex-1 min-w-[48px] text-center py-1.5 px-1 rounded-lg bg-prius-surface">
-                    <p className="text-label-md text-prius-slate">{h.hora.slice(0, 2)}h</p>
-                    <Cloud size={16} className="text-prius-slate my-1 mx-auto" />
-                    <p className="text-title-md text-black tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
+                  <div key={h.hora} className="flex-1 min-w-[48px] text-center py-1.5 px-1 rounded-icon bg-surface">
+                    <p className="text-label text-ink-2">{h.hora.slice(0, 2)}h</p>
+                    <Cloud size={16} className="text-ink-2 my-1 mx-auto" />
+                    <p className="text-body text-ink tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
                   </div>
                 ))}
               </div>
@@ -164,7 +164,7 @@ export default function ClimaHero({ fecha, clima, loading }) {
         <button
           type="button"
           onClick={() => setPanelOpen(true)}
-          className="sm:hidden mt-space-md h-9 px-4 rounded-xl bg-prius-surface text-black text-[13px] font-semibold hover:bg-hairline transition-colors"
+          className="sm:hidden mt-space-md h-9 px-4 rounded-inner bg-surface text-ink text-[13px] font-semibold hover:bg-line transition-colors"
         >
           Ver pronóstico
         </button>

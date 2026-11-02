@@ -17,11 +17,11 @@ import { usePermiso } from '../../context/AuthProvider'
 import { FileText, AlertTriangle, Pencil } from 'lucide-react'
 
 const inputClass =
-  'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-gold/50 outline-none font-bold'
+  'w-full bg-surface border border-line rounded-inner px-4 py-3 text-ink text-base md:text-body focus:border-gold-300 outline-none font-bold'
 
 const chipClass = (active) =>
-  `px-3 py-2.5 rounded-lg text-xs font-bold border transition-all min-h-[44px] ${
-    active ? 'bg-gold text-black border-gold' : 'bg-prius-subtle text-prius-slate border-hairline hover:text-black'
+  `px-3 py-2.5 rounded-icon text-xs font-bold border transition-all min-h-[44px] ${
+    active ? 'bg-gold text-ink border-gold' : 'bg-surface text-ink-2 border-line hover:text-ink'
   }`
 
 // Detalle de un pago ya registrado (Tarea 4): mismo patrón sheet/drawer que
@@ -164,8 +164,8 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
     <Modal isOpen={isOpen} onClose={onClose} title={`Pago N.° ${pago.nro_cuota || ''}`}>
       <div className="space-y-6">
         {reserva && (
-          <div className="p-4 bg-prius-subtle border border-hairline rounded-xl">
-            <p className="text-sm font-bold text-black uppercase">{unidadLabel}</p>
+          <div className="p-4 bg-surface border border-line rounded-inner">
+            <p className="text-body font-bold text-ink uppercase">{unidadLabel}</p>
           </div>
         )}
 
@@ -176,35 +176,35 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
           <button
             type="button"
             onClick={() => { onClose?.(); navigate(linkToCliente(pago.cliente_id, { pagoId: pago.id })) }}
-            className="text-[10px] font-bold uppercase tracking-widest text-gold hover:underline"
+            className="text-[10px] font-bold uppercase tracking-widest text-ink hover:underline"
           >
             Ver cliente →
           </button>
         )}
 
         {pago.estado === 'anulado' && (
-          <div className="flex items-start gap-3 p-4 bg-red-500/5 border border-red-500/20 rounded-xl">
-            <AlertTriangle className="text-prius-error shrink-0 mt-0.5" size={18} />
+          <div className="flex items-start gap-3 p-4 bg-danger-soft border border-danger/30 rounded-inner">
+            <AlertTriangle className="text-danger shrink-0 mt-0.5" size={18} />
             <div>
-              <p className="text-sm font-bold text-prius-error uppercase tracking-widest">Pago anulado</p>
-              <p className="text-xs text-prius-slate mt-1">{pago.anulado_motivo}</p>
-              {pago.anulado_at && <p className="text-[10px] text-prius-muted mt-1">{formatFecha(pago.anulado_at)}</p>}
+              <p className="text-body font-bold text-danger uppercase tracking-widest">Pago anulado</p>
+              <p className="text-xs text-ink-2 mt-1">{pago.anulado_motivo}</p>
+              {pago.anulado_at && <p className="text-[10px] text-ink-2 mt-1">{formatFecha(pago.anulado_at)}</p>}
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Monto</p>
+            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Monto</p>
             <div className="flex items-center gap-3 mt-1">
-              <p className={`text-lg font-bold ${pago.estado === 'anulado' ? 'text-prius-muted line-through' : pagoSinVerificar(pago) ? 'text-prius-error' : 'text-prius-success'}`}>
+              <p className={`text-lg font-bold ${pago.estado === 'anulado' ? 'text-ink-2 line-through' : pagoSinVerificar(pago) ? 'text-danger' : 'text-success-ink'}`}>
                 {pagoSinVerificar(pago) ? 'Monto nulo' : formatPesos(pago.monto)}
               </p>
               {pagoSinVerificar(pago) && pago.estado !== 'anulado' && puedeEditarMontoPago && (
                 <button
                   type="button"
                   onClick={() => onEditarMonto?.(pago)}
-                  className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-black"
+                  className="text-[10px] font-bold uppercase tracking-widest text-ink hover:text-ink"
                 >
                   Cargar monto
                 </button>
@@ -216,7 +216,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                 <button
                   type="button"
                   onClick={() => { setEditandoMontoPago(true); setEditMontoPago(pago.monto) }}
-                  className="text-prius-muted hover:text-gold transition-all p-1 -m-1"
+                  className="text-ink-2 hover:text-ink transition-all p-1 -m-1"
                   title="Editar monto"
                 >
                   <Pencil size={14} />
@@ -224,13 +224,13 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               )}
             </div>
             {editandoMontoPago && (
-              <div className="mt-3 space-y-2 p-3 bg-prius-subtle border border-hairline rounded-xl">
+              <div className="mt-3 space-y-2 p-3 bg-surface border border-line rounded-inner">
                 <MoneyInput label="Nuevo monto" value={editMontoPago} onChange={setEditMontoPago} max={100_000_000} />
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => setEditandoMontoPago(false)} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-white text-prius-slate border border-hairline">
+                  <button type="button" onClick={() => setEditandoMontoPago(false)} className="flex-1 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest bg-card text-ink-2 border border-line">
                     Cancelar
                   </button>
-                  <button type="button" disabled={saving} onClick={handleGuardarMontoPago} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-gold text-black disabled:opacity-50">
+                  <button type="button" disabled={saving} onClick={handleGuardarMontoPago} className="flex-1 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest bg-gold text-ink disabled:opacity-50">
                     Guardar
                   </button>
                 </div>
@@ -238,41 +238,41 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
             )}
           </div>
           <div>
-            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Medio de Pago</p>
-            <p className="text-sm font-bold text-black mt-1">{formatMedioPago(pago)}</p>
+            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Medio de Pago</p>
+            <p className="text-body font-bold text-ink mt-1">{formatMedioPago(pago)}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Tipo</p>
-            <p className="text-sm text-black mt-1">{TIPO_PAGO_LABEL[pago.tipo_pago] || '—'}</p>
+            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Tipo</p>
+            <p className="text-body text-ink mt-1">{TIPO_PAGO_LABEL[pago.tipo_pago] || '—'}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Fecha</p>
+            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Fecha</p>
             {/* pago.fecha es la fecha real del pago (editable, la del
                 comprobante si vino con uno) — nunca fecha_hora, que es solo
                 el timestamp de carga en el sistema (auditoría). */}
-            <p className="text-sm text-black mt-1">{formatFecha(pago.fecha)}</p>
+            <p className="text-body text-ink mt-1">{formatFecha(pago.fecha)}</p>
             {pago.fecha_hora && (
-              <p className="text-[10px] text-prius-muted mt-0.5">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
+              <p className="text-[10px] text-ink-2 mt-0.5">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
             )}
           </div>
           {pago.concepto && (
             <div className="col-span-2">
-              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Concepto</p>
-              <p className="text-sm text-black mt-1">{pago.concepto}</p>
+              <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Concepto</p>
+              <p className="text-body text-ink mt-1">{pago.concepto}</p>
             </div>
           )}
           {pago.referencia && (
             <div className="col-span-2">
-              <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Referencia</p>
-              <p className="text-sm text-black mt-1">{pago.referencia}</p>
+              <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Referencia</p>
+              <p className="text-body text-ink mt-1">{pago.referencia}</p>
             </div>
           )}
         </div>
 
         {/* Comprobante: etiqueta si ya existe, o form para cargarlo/corregirlo */}
-        <div className="border border-hairline rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 bg-prius-subtle">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-prius-slate">
+        <div className="border border-line rounded-inner overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 bg-surface">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-ink-2">
               <FileText size={14} />
               {comprobantes.length === 0 && 'Sin comprobante'}
             </div>
@@ -280,7 +280,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               <button
                 type="button"
                 onClick={() => setCargandoComprobante(true)}
-                className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-black"
+                className="text-[10px] font-bold uppercase tracking-widest text-ink hover:text-ink"
               >
                 {comprobantes.length > 0 ? 'Agregar otro' : 'Cargar'}
               </button>
@@ -288,7 +288,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
           </div>
 
           {comprobantes.length > 0 && (
-            <div className="divide-y divide-hairline">
+            <div className="divide-y divide-divider">
               {comprobantes.map((c) => (
                 <div key={c.id} className="px-4 py-3 flex items-center justify-between gap-3">
                   {editandoId === c.id ? (
@@ -313,10 +313,10 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                         <DateInput label="Fecha" value={editFecha} onChange={setEditFecha} max={new Date().toISOString().split('T')[0]} calendarOnly />
                       </div>
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => setEditandoId(null)} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-prius-subtle text-prius-slate border border-hairline">
+                        <button type="button" onClick={() => setEditandoId(null)} className="flex-1 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest bg-surface text-ink-2 border border-line">
                           Cancelar
                         </button>
-                        <button type="button" disabled={saving} onClick={handleGuardarEdicion} className="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-gold text-black disabled:opacity-50">
+                        <button type="button" disabled={saving} onClick={handleGuardarEdicion} className="flex-1 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest bg-gold text-ink disabled:opacity-50">
                           Guardar
                         </button>
                       </div>
@@ -324,9 +324,9 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                   ) : (
                     <>
                       <div className="text-xs">
-                        <span className="font-bold text-black uppercase tracking-widest">{formatComprobante(c.tipo, c.numero)}</span>
-                        {c.fecha && <span className="text-prius-muted"> · {formatFecha(c.fecha)}</span>}
-                        <span className={`ml-2 font-bold ${c.monto_total == null ? 'text-prius-error' : 'text-prius-success'}`}>
+                        <span className="font-bold text-ink uppercase tracking-widest">{formatComprobante(c.tipo, c.numero)}</span>
+                        {c.fecha && <span className="text-ink-2"> · {formatFecha(c.fecha)}</span>}
+                        <span className={`ml-2 font-bold ${c.monto_total == null ? 'text-danger' : 'text-success-ink'}`}>
                           {c.monto_total == null ? 'Sin monto' : formatPesos(c.monto_total)}
                         </span>
                       </div>
@@ -334,7 +334,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                         <button
                           type="button"
                           onClick={() => abrirEdicion(c)}
-                          className="shrink-0 text-prius-muted hover:text-gold transition-all p-2 -m-2"
+                          className="shrink-0 text-ink-2 hover:text-ink transition-all p-2 -m-2"
                         >
                           <Pencil size={14} />
                         </button>
@@ -344,22 +344,22 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                 </div>
               ))}
               {sumaNoCoincide && (
-                <div className="flex items-start gap-2 px-4 py-3 bg-amber-500/5">
-                  <AlertTriangle className="text-amber-400 shrink-0 mt-0.5" size={14} />
-                  <p className="text-[11px] text-amber-400">
+                <div className="flex items-start gap-2 px-4 py-3 bg-gold-100">
+                  <AlertTriangle className="text-ink shrink-0 mt-0.5" size={14} />
+                  <p className="text-[11px] text-ink">
                     La suma de comprobantes ({formatPesos(sumaComprobantes)}) no coincide con el monto del pago ({formatPesos(pago.monto)}).
                   </p>
                 </div>
               )}
               {comprobantesPendientes > 0 && (
-                <p className="px-4 py-2 text-[10px] text-prius-muted uppercase tracking-widest">
+                <p className="px-4 py-2 text-[10px] text-ink-2 uppercase tracking-widest">
                   {comprobantesPendientes} comprobante{comprobantesPendientes > 1 ? 's' : ''} sin monto cargado
                 </p>
               )}
             </div>
           )}
           {cargandoComprobante && (
-            <div className="p-4 space-y-4 bg-black/20">
+            <div className="p-4 space-y-4 bg-surface">
               <div className="flex flex-wrap gap-2">
                 {Object.entries(COMPROBANTE_TIPO_SIGLA).map(([value, sigla]) => (
                   <button
@@ -379,14 +379,14 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               </div>
               <DateInput value={fecha} onChange={setFecha} max={new Date().toISOString().split('T')[0]} />
               <div className="flex gap-3">
-                <button type="button" onClick={() => setCargandoComprobante(false)} className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-prius-subtle text-prius-slate border border-hairline">
+                <button type="button" onClick={() => setCargandoComprobante(false)} className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-surface text-ink-2 border border-line">
                   Cancelar
                 </button>
                 <button
                   type="button"
                   disabled={saving || !comprobanteTipo || !puntoVenta || !numero}
                   onClick={handleGuardarComprobante}
-                  className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-gold text-black disabled:opacity-50"
+                  className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-gold text-ink disabled:opacity-50"
                 >
                   Guardar
                 </button>
@@ -398,18 +398,18 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
         {/* Item 10 (testing oct 2026): anular un pago requiere superadmin —
             antes el botón se mostraba a cualquier usuario autenticado. */}
         {pago.estado === 'vigente' && puedeAnularPago && (
-          <div className="border-t border-hairline pt-6">
+          <div className="border-t border-line pt-6">
             {!anulando ? (
               <button
                 type="button"
                 onClick={() => setAnulando(true)}
-                className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-error border border-red-500/20 hover:bg-red-500/5 transition-all"
+                className="w-full py-3 rounded-inner text-xs font-bold uppercase tracking-widest text-danger border border-danger/30 hover:bg-danger-soft transition-all"
               >
                 Anular pago
               </button>
             ) : (
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-prius-error uppercase tracking-widest">Motivo de la anulación (obligatorio)</label>
+                <label className="text-[10px] font-bold text-danger uppercase tracking-widest">Motivo de la anulación (obligatorio)</label>
                 <textarea
                   rows={2}
                   value={motivo}
@@ -418,14 +418,14 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                   className={`${inputClass} resize-none`}
                 />
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => { setAnulando(false); setMotivo('') }} className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-prius-subtle text-prius-slate border border-hairline">
+                  <button type="button" onClick={() => { setAnulando(false); setMotivo('') }} className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-surface text-ink-2 border border-line">
                     Volver
                   </button>
                   <button
                     type="button"
                     disabled={saving || !motivo.trim()}
                     onClick={handleAnular}
-                    className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                    className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-danger text-on-ink hover:bg-danger-ink disabled:opacity-50"
                   >
                     Confirmar anulación
                   </button>

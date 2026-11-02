@@ -25,14 +25,14 @@ import { formatPesos, formatFecha, formatNombre } from '../../lib/format'
 /** Tarjeta blanca de sección, con su ícono y bajada. */
 function BloqueAccion({ icono: Icono, titulo, bajada, children }) {
   return (
-    <section className="bg-white border border-hairline rounded-2xl p-4 md:p-5 flex flex-col gap-4 anim-fade-up">
+    <section className="bg-card border border-line rounded-card p-4 md:p-5 flex flex-col gap-4 anim-fade-up">
       <header className="flex items-start gap-3">
-        <span className="shrink-0 w-10 h-10 rounded-xl bg-prius-surface text-black flex items-center justify-center">
+        <span className="shrink-0 w-10 h-10 rounded-inner bg-surface text-ink flex items-center justify-center">
           <Icono size={18} />
         </span>
         <div className="min-w-0">
-          <h2 className="text-headline-sm text-black">{titulo}</h2>
-          <p className="text-body-sm text-prius-slate mt-0.5">{bajada}</p>
+          <h2 className="text-body text-ink">{titulo}</h2>
+          <p className="text-label text-ink-2 mt-0.5">{bajada}</p>
         </div>
       </header>
       {children}
@@ -100,38 +100,38 @@ export default function Perfil() {
   const inicial = (nombreMostrado[0] || 'P').toUpperCase()
 
   const botonPrimario =
-    'w-full h-12 rounded-xl font-bold text-sm flex items-center justify-center gap-2 anim-press anim-colors disabled:opacity-40 disabled:cursor-not-allowed'
+    'w-full h-12 rounded-inner font-bold text-body flex items-center justify-center gap-2 anim-press anim-colors disabled:opacity-40 disabled:cursor-not-allowed'
 
   return (
     // pb-bottom-nav-safe: en mobile la bottom nav es fija y sin esto tapaba
     // el botón de "Guardar cotización", que es el último de la página.
     <div className="space-y-3 anim-fade-up-page pb-bottom-nav-safe md:pb-0">
       {/* Perfil compacto */}
-      <section className="bg-white border border-hairline rounded-2xl p-4 md:p-5">
+      <section className="bg-card border border-line rounded-card p-4 md:p-5">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex items-center gap-3 min-w-0 md:flex-1">
-            <span className="shrink-0 w-14 h-14 rounded-2xl bg-gold text-black flex items-center justify-center font-display font-bold text-2xl">
+            <span className="shrink-0 w-14 h-14 rounded-card bg-gold text-ink flex items-center justify-center font-bold text-2xl">
               {inicial}
             </span>
             <div className="min-w-0">
-              <h1 className="text-headline-md text-black truncate">{nombreMostrado}</h1>
-              <p className="text-label-md uppercase tracking-wider text-prius-slate mt-0.5">Administración general</p>
+              <h1 className="text-card-title text-ink truncate">{nombreMostrado}</h1>
+              <p className="text-label uppercase tracking-wider text-ink-2 mt-0.5">Administración general</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center gap-2 md:shrink-0">
-            <div className="bg-prius-surface rounded-xl px-3 py-2 min-w-0">
-              <p className="text-label-md uppercase tracking-wider text-prius-slate">Email</p>
-              <p className="text-body-md text-black truncate">{userEmail || '—'}</p>
+            <div className="bg-surface rounded-inner px-3 py-2 min-w-0">
+              <p className="text-label uppercase tracking-wider text-ink-2">Email</p>
+              <p className="text-body text-ink truncate">{userEmail || '—'}</p>
             </div>
-            <div className="bg-prius-surface rounded-xl px-3 py-2 flex items-center justify-between gap-3">
-              <p className="text-label-md uppercase tracking-wider text-prius-slate">Seguridad</p>
-              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-success-soft text-success-ink text-label-md uppercase tracking-wider">
+            <div className="bg-surface rounded-inner px-3 py-2 flex items-center justify-between gap-3">
+              <p className="text-label uppercase tracking-wider text-ink-2">Seguridad</p>
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-icon bg-success-soft text-success-ink text-label uppercase tracking-wider">
                 <Shield size={11} /> Protegida
               </span>
             </div>
             {perfil?.rol && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-black text-white text-label-md uppercase tracking-wider justify-center">
+              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-inner bg-ink text-on-ink text-label uppercase tracking-wider justify-center">
                 {perfil.rol}
               </span>
             )}
@@ -151,8 +151,8 @@ export default function Perfil() {
             <MoneyInput label="⛱️ Precio base sombrilla" value={tarifaSombrilla} onChange={setTarifaSombrilla} max={100_000_000} />
           </div>
 
-          <p className="text-body-sm text-prius-slate flex items-start gap-2">
-            <Info size={13} className="shrink-0 mt-0.5 text-prius-muted" />
+          <p className="text-label text-ink-2 flex items-start gap-2">
+            <Info size={13} className="shrink-0 mt-0.5 text-ink-2" />
             Las tarifas actualizadas impactan en las nuevas reservas del plano y en el cálculo de presupuestos.
           </p>
 
@@ -160,7 +160,7 @@ export default function Perfil() {
             onClick={handleGuardarTarifas}
             disabled={!tarifasSucias && !saved}
             className={`${botonPrimario} ${
-              saved ? 'bg-success-soft text-success-ink' : 'bg-gold hover:bg-gold-hover text-black'
+              saved ? 'bg-success-soft text-success-ink' : 'bg-gold hover:bg-gold-400 text-ink'
             }`}
           >
             {saved ? <><Check size={16} /> Tarifas guardadas</> : <><Save size={16} /> Actualizar tarifas</>}
@@ -175,7 +175,7 @@ export default function Perfil() {
         >
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5 min-w-0">
-              <label className="text-label-md uppercase tracking-wider text-prius-slate">Fuente</label>
+              <label className="text-label uppercase tracking-wider text-ink-2">Fuente</label>
               <BrandSelect
                 value={tcTipo}
                 onChange={setTcTipo}
@@ -184,7 +184,7 @@ export default function Perfil() {
               />
             </div>
             <div className="space-y-1.5 min-w-0">
-              <label className="text-label-md uppercase tracking-wider text-prius-slate">Valor</label>
+              <label className="text-label uppercase tracking-wider text-ink-2">Valor</label>
               <BrandSelect
                 value={tcLado}
                 onChange={setTcLado}
@@ -194,18 +194,18 @@ export default function Perfil() {
             </div>
           </div>
 
-          <div className="bg-prius-surface rounded-xl p-3">
+          <div className="bg-surface rounded-inner p-3">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-label-md uppercase tracking-wider text-prius-slate">Cotización utilizada</p>
-              <span className="text-body-sm text-prius-muted">ARS / USD</span>
+              <p className="text-label uppercase tracking-wider text-ink-2">Cotización utilizada</p>
+              <span className="text-label text-ink-2">ARS / USD</span>
             </div>
             <div className="flex items-center justify-between gap-2 flex-wrap mt-1.5">
-              <p className="text-headline-md text-black tabular-nums">{tc.valor ? formatPesos(tc.valor) : '—'}</p>
+              <p className="text-card-title text-ink tabular-nums">{tc.valor ? formatPesos(tc.valor) : '—'}</p>
               {/* Chip ámbar si la cotización no es de hoy, verde si está al día. */}
               {tc.fecha && (
                 <span
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-label-md uppercase tracking-wider ${
-                    tc.stale ? 'bg-warning-soft text-warning-ink' : 'bg-success-soft text-success-ink'
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-icon text-label uppercase tracking-wider ${
+                    tc.stale ? 'bg-gold-100 text-ink' : 'bg-success-soft text-success-ink'
                   }`}
                 >
                   <Clock size={11} /> {formatFecha(tc.fecha)} · {tc.stale ? 'No es de hoy' : 'Al día'}
@@ -220,7 +220,7 @@ export default function Perfil() {
               loadingText="Guardando…"
               onClick={handleGuardarCotizacion}
               disabled={!cotizacionSucia}
-              className={`${botonPrimario} bg-gold hover:bg-gold-hover text-black`}
+              className={`${botonPrimario} bg-gold hover:bg-gold-400 text-ink`}
             >
               <Save size={16} /> Guardar cotización
             </LoadingButton>

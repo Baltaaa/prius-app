@@ -28,11 +28,11 @@ import HistorialDetalle from './HistorialDetalle'
 // AA (ver tailwind.config.js). Reemplaza los `text-sky-400`/`text-purple-400`
 // sueltos, que venían del tema oscuro viejo y sobre blanco quedaban lavados.
 const TONOS = {
-  acento: 'bg-accent-soft text-accent-ink',
+  acento: 'bg-gold-100 text-ink',
   exito: 'bg-success-soft text-success-ink',
-  aviso: 'bg-warning-soft text-warning-ink',
+  aviso: 'bg-gold-100 text-ink',
   peligro: 'bg-danger-soft text-danger-ink',
-  info: 'bg-info-soft text-info-ink',
+  info: 'bg-surface text-ink-2',
 }
 
 const TIPO_EVENTO_META = {
@@ -277,12 +277,12 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       style={{ animationDelay: staggerDelay(indice, total) }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left rounded-xl anim-colors anim-stagger ${
+      className={`w-full flex items-start gap-3 px-3 py-3 text-left rounded-inner anim-colors anim-stagger ${
         onClick ? 'hover-row' : ''
-      } ${activo ? 'bg-accent-soft' : ''}`}
+      } ${activo ? 'bg-gold-100' : ''}`}
     >
       {/* Tile de ícono por tipo de evento, con el tinte de su familia. */}
-      <span className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${TONOS[meta.tono] || TONOS.info}`}>
+      <span className={`shrink-0 w-9 h-9 rounded-inner flex items-center justify-center ${TONOS[meta.tono] || TONOS.info}`}>
         <Icon size={16} />
       </span>
       {/* min-w-0 + [overflow-wrap:anywhere]: impide que strings largos sin
@@ -292,14 +292,14 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
           previene el scroll horizontal en mobile. */}
       <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-body-md text-black font-semibold truncate">{evento.actor_nombre || 'Sistema'}</p>
-          <span className="text-body-sm text-prius-muted shrink-0 tabular-nums">{formatHora(evento.ts)}</span>
+          <p className="text-body text-ink font-semibold truncate">{evento.actor_nombre || 'Sistema'}</p>
+          <span className="text-label text-ink-2 shrink-0 tabular-nums">{formatHora(evento.ts)}</span>
         </div>
         {/* La descripción solo se agrega si dice algo distinto de la
             etiqueta del tipo: para los eventos de auth las dos son "Inicio
             de sesión" y quedaba repetido. */}
-        <p className="text-body-md text-prius-slate mt-0.5">
-          <span className="text-black">{meta.label}</span>
+        <p className="text-body text-ink-2 mt-0.5">
+          <span className="text-ink">{meta.label}</span>
           {descripcionExtra(evento, meta) ? <> — {descripcionExtra(evento, meta)}</> : null}
         </p>
         {/* Solo los datos que el evento realmente tiene. max-w-full para que
@@ -307,7 +307,7 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
         {secundario.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             {secundario.map((s) => (
-              <span key={s} className="text-body-sm text-prius-slate bg-prius-surface rounded-lg px-2 py-0.5 max-w-full">{s}</span>
+              <span key={s} className="text-label text-ink-2 bg-surface rounded-icon px-2 py-0.5 max-w-full">{s}</span>
             ))}
           </div>
         )}
@@ -319,23 +319,23 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
             {cambios.slice(0, 2).map((c) => (
               <span
                 key={c.label}
-                className="inline-flex flex-wrap items-baseline gap-x-1 text-body-sm bg-info-soft rounded-lg px-2 py-0.5 max-w-full"
+                className="inline-flex flex-wrap items-baseline gap-x-1 text-label bg-surface rounded-icon px-2 py-0.5 max-w-full"
               >
-                <span className="text-prius-muted font-medium">{c.label}:</span>
-                <span className="text-prius-muted line-through tabular-nums">{c.antes}</span>
-                <span className="text-info-ink">→</span>
-                <span className="text-info-ink font-semibold tabular-nums">{c.despues}</span>
+                <span className="text-ink-2 font-medium">{c.label}:</span>
+                <span className="text-ink-2 line-through tabular-nums">{c.antes}</span>
+                <span className="text-ink-2">→</span>
+                <span className="text-ink-2 font-semibold tabular-nums">{c.despues}</span>
               </span>
             ))}
             {cambios.length > 2 && (
-              <span className="text-body-sm text-prius-muted bg-prius-surface rounded-lg px-2 py-0.5">
+              <span className="text-label text-ink-2 bg-surface rounded-icon px-2 py-0.5">
                 +{cambios.length - 2} más
               </span>
             )}
           </div>
         )}
         {esHistorico && (
-          <span className="inline-block text-[9px] font-bold uppercase tracking-widest text-prius-muted bg-prius-surface border border-hairline rounded-full px-2 py-0.5 mt-1.5">
+          <span className="inline-block text-[9px] font-bold uppercase tracking-widest text-ink-2 bg-surface border border-line rounded-full px-2 py-0.5 mt-1.5">
             Histórico
           </span>
         )}
@@ -350,14 +350,14 @@ function HistorialSkeleton() {
     <div className="space-y-4" aria-busy="true" aria-label="Cargando historial">
       {[0, 1].map((g) => (
         <div key={g} className="space-y-2">
-          <Skeleton className="h-4 w-40 rounded-lg" />
-          <div className="bg-white border border-hairline rounded-2xl p-2 space-y-1">
+          <Skeleton className="h-4 w-40 rounded-icon" />
+          <div className="bg-card border border-line rounded-card p-2 space-y-1">
             {[0, 1, 2].map((i) => (
               <div key={i} className="flex items-start gap-3 px-3 py-3">
-                <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
+                <Skeleton className="w-9 h-9 rounded-inner shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <Skeleton className="h-3.5 w-1/3 rounded-md" />
-                  <Skeleton className="h-3.5 w-2/3 rounded-md" />
+                  <Skeleton className="h-3.5 w-1/3 rounded-swatch" />
+                  <Skeleton className="h-3.5 w-2/3 rounded-swatch" />
                 </div>
               </div>
             ))}
@@ -481,19 +481,19 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
   if (loading && todos.length === 0) {
     return mostrarFiltrosGlobales
       ? <HistorialSkeleton />
-      : <p className="text-xs text-prius-muted uppercase tracking-widest animate-pulse">Cargando historial...</p>
+      : <p className="text-xs text-ink-2 uppercase tracking-widest animate-pulse">Cargando historial...</p>
   }
 
   // ───────────────────────── listado (compartido) ─────────────────────────
   const listado = (
     <div className="space-y-4">
       {grupos.length === 0 ? (
-        <div className="bg-white border border-hairline rounded-2xl p-10 text-center flex flex-col items-center gap-3 anim-fade-up">
-          <span className="w-12 h-12 rounded-2xl bg-prius-surface flex items-center justify-center">
-            <History size={20} className="text-prius-muted" />
+        <div className="bg-card border border-line rounded-card p-10 text-center flex flex-col items-center gap-3 anim-fade-up">
+          <span className="w-12 h-12 rounded-card bg-surface flex items-center justify-center">
+            <History size={20} className="text-ink-2" />
           </span>
-          <p className="text-body-md font-semibold text-black">Sin movimientos</p>
-          <p className="text-body-sm text-prius-slate max-w-xs">
+          <p className="text-body font-semibold text-ink">Sin movimientos</p>
+          <p className="text-label text-ink-2 max-w-xs">
             No hay eventos para los filtros elegidos. Probá ampliar el rango de fechas o sacar los filtros.
           </p>
         </div>
@@ -502,16 +502,16 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
           <div key={fecha}>
             {/* Encabezado de día sticky, con contador (mock 07). */}
             <div className={`flex items-center justify-between gap-2 py-2 ${
-              mostrarFiltrosGlobales ? 'sticky top-0 z-10 sticky-blur' : 'bg-prius-background'
+              mostrarFiltrosGlobales ? 'sticky top-0 z-10 sticky-blur' : 'bg-canvas'
             }`}>
-              <h3 className="text-label-lg uppercase tracking-wider text-black capitalize truncate">
+              <h3 className="text-label uppercase tracking-wider text-ink capitalize truncate">
                 {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
               </h3>
-              <span className="shrink-0 text-label-md uppercase tracking-wider text-prius-slate bg-prius-surface rounded-full px-2.5 py-1">
+              <span className="shrink-0 text-label uppercase tracking-wider text-ink-2 bg-surface rounded-full px-2.5 py-1">
                 {items.length} {items.length === 1 ? 'evento' : 'eventos'}
               </span>
             </div>
-            <div className="bg-white border border-hairline rounded-2xl p-2 space-y-1">
+            <div className="bg-card border border-line rounded-card p-2 space-y-1">
               {items.map((e, i) => {
                 const meta = metaDe(e)
                 const abrible = mostrarFiltrosGlobales || puedeNavegar(e)
@@ -543,7 +543,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
           type="button"
           onClick={loadMore}
           disabled={loading}
-          className="w-full h-12 rounded-xl text-label-lg uppercase tracking-wider bg-white border border-hairline text-prius-slate hover:bg-prius-surface disabled:opacity-50 anim-press anim-colors"
+          className="w-full h-12 rounded-inner text-label uppercase tracking-wider bg-card border border-line text-ink-2 hover:bg-surface disabled:opacity-50 anim-press anim-colors"
         >
           {loading ? 'Cargando…' : 'Cargar más'}
         </button>
@@ -568,7 +568,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
           efecto visual (nada scrollea por detrás de un elemento estático
           en flujo normal). */}
       <div className="sticky top-0 z-20 -mx-4 px-4 md:mx-0 md:px-0 md:static pb-3 sticky-blur">
-        <div className="bg-white border border-hairline rounded-2xl p-3 space-y-3">
+        <div className="bg-card border border-line rounded-card p-3 space-y-3">
           <div className="flex items-center gap-2">
             <SearchInput
               value={q}
@@ -581,8 +581,8 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
               onClick={() => setFiltrosAbiertos((v) => !v)}
               aria-expanded={filtrosAbiertos}
               aria-label="Mostrar filtros"
-              className={`md:hidden shrink-0 w-11 h-11 rounded-xl border flex items-center justify-center anim-colors anim-press ${
-                filtrosAbiertos ? 'bg-accent-soft border-gold text-accent-ink' : 'bg-white border-hairline text-prius-slate'
+              className={`md:hidden shrink-0 w-11 h-11 rounded-inner border flex items-center justify-center anim-colors anim-press ${
+                filtrosAbiertos ? 'bg-gold-100 border-gold text-ink' : 'bg-card border-line text-ink-2'
               }`}
             >
               <SlidersHorizontal size={16} />
@@ -591,7 +591,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
 
           {/* Rango + usuario: siempre visible en desktop, desplegable en mobile. */}
           <div className={`${filtrosAbiertos ? 'grid' : 'hidden'} md:grid gap-2 grid-cols-2 md:flex md:flex-wrap md:items-center`}>
-            <div className="col-span-2 flex items-center gap-1 bg-prius-surface rounded-xl p-1 overflow-x-auto md:col-auto">
+            <div className="col-span-2 flex items-center gap-1 bg-surface rounded-inner p-1 overflow-x-auto md:col-auto">
               {ATAJOS.map((a) => {
                 const activo = atajoActivo(desde, hasta) === a.key
                 return (
@@ -608,8 +608,8 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
                         return next
                       }, { replace: true })
                     }}
-                    className={`shrink-0 px-3 h-9 rounded-lg text-label-md uppercase tracking-wider anim-colors ${
-                      activo ? 'bg-black text-white' : 'text-prius-slate hover:text-black'
+                    className={`shrink-0 px-3 h-9 rounded-icon text-label uppercase tracking-wider anim-colors ${
+                      activo ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
                     }`}
                   >
                     {a.label}
@@ -629,15 +629,15 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
       {/* Lista + panel de detalle (desktop). */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-4 lg:items-start">
         <div className="min-w-0">{listado}</div>
-        <aside className="hidden lg:block sticky top-4 max-h-[calc(100dvh-8rem)] bg-white border border-hairline rounded-2xl p-4">
+        <aside className="hidden lg:block sticky top-4 max-h-[calc(100dvh-8rem)] bg-card border border-line rounded-card p-4">
           {detalle ? (
             <div key={detalle.evento.id} className="content-crossfade h-full">
               <HistorialDetalle {...detalle} onCerrar={() => setSeleccionado(null)} />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center text-center gap-3 py-16 text-prius-muted">
+            <div className="flex flex-col items-center justify-center text-center gap-3 py-16 text-ink-2">
               <History size={22} />
-              <p className="text-body-sm max-w-[200px]">Elegí un movimiento para ver el detalle.</p>
+              <p className="text-label max-w-[200px]">Elegí un movimiento para ver el detalle.</p>
             </div>
           )}
         </aside>
@@ -666,10 +666,10 @@ function ChipsTipo({ filtro, setFiltro }) {
           key={f.key}
           onClick={() => setFiltro(f.key)}
           aria-pressed={filtro === f.key}
-          className={`shrink-0 px-3 h-9 rounded-xl text-label-md uppercase tracking-wider border anim-colors anim-press ${
+          className={`shrink-0 px-3 h-9 rounded-inner text-label uppercase tracking-wider border anim-colors anim-press ${
             filtro === f.key
-              ? 'bg-gold text-black border-gold'
-              : 'bg-white text-prius-slate border-hairline hover:text-black hover-accent'
+              ? 'bg-gold text-ink border-gold'
+              : 'bg-card text-ink-2 border-line hover:text-ink hover-accent'
           }`}
         >
           {f.label}

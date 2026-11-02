@@ -20,8 +20,8 @@ import { formatHora, formatFechaLarga } from '../../lib/format'
 function Campo({ label, children }) {
   return (
     <div>
-      <p className="text-label-md uppercase tracking-wider text-prius-slate">{label}</p>
-      <div className="text-body-md text-black mt-1">{children}</div>
+      <p className="text-label uppercase tracking-wider text-ink-2">{label}</p>
+      <div className="text-body text-ink mt-1">{children}</div>
     </div>
   )
 }
@@ -44,8 +44,8 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
           <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${meta.tile}`}>
             <Icon size={11} /> {meta.label}
           </span>
-          <h3 className="text-headline-sm text-black mt-2 break-words">{meta.titulo}</h3>
-          <p className="text-body-sm text-prius-slate mt-1">
+          <h3 className="text-body text-ink mt-2 break-words">{meta.titulo}</h3>
+          <p className="text-label text-ink-2 mt-1">
             {formatFechaLarga(evento.fecha_ref)} · {formatHora(evento.ts)} hs
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
           <button
             onClick={onCerrar}
             aria-label="Cerrar detalle"
-            className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-prius-slate hover:bg-prius-surface anim-colors"
+            className="shrink-0 w-9 h-9 rounded-inner flex items-center justify-center text-ink-2 hover:bg-surface anim-colors"
           >
             <X size={16} />
           </button>
@@ -62,34 +62,34 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
 
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain mt-4 space-y-4">
         {/* Quién lo hizo */}
-        <div className="bg-prius-surface rounded-xl p-3 flex items-center gap-3">
-          <span className="w-9 h-9 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center shrink-0">
+        <div className="bg-surface rounded-inner p-3 flex items-center gap-3">
+          <span className="w-9 h-9 rounded-full bg-ink text-on-ink text-xs font-bold flex items-center justify-center shrink-0">
             {(evento.actor_nombre || 'S').slice(0, 2).toUpperCase()}
           </span>
           <div className="min-w-0">
-            <p className="text-body-md font-semibold text-black truncate">{evento.actor_nombre || 'Sistema'}</p>
-            <p className="text-body-sm text-prius-slate">{evento.tabla}</p>
+            <p className="text-body font-semibold text-ink truncate">{evento.actor_nombre || 'Sistema'}</p>
+            <p className="text-label text-ink-2">{evento.tabla}</p>
           </div>
         </div>
 
         {/* Antes vs después */}
         <div>
-          <p className="text-label-md uppercase tracking-wider text-prius-slate mb-2">
-            Detalle de cambios {cambios.length > 0 && <span className="text-prius-muted">· {cambios.length}</span>}
+          <p className="text-label uppercase tracking-wider text-ink-2 mb-2">
+            Detalle de cambios {cambios.length > 0 && <span className="text-ink-2">· {cambios.length}</span>}
           </p>
           {cambios.length === 0 ? (
-            <p className="text-body-sm text-prius-muted bg-prius-surface rounded-xl p-3">
+            <p className="text-label text-ink-2 bg-surface rounded-inner p-3">
               Este evento no registró cambios campo por campo.
             </p>
           ) : (
             <div className="space-y-2">
               {cambios.map((c) => (
-                <div key={c.label} className="bg-prius-surface rounded-xl p-3">
-                  <p className="text-label-md uppercase tracking-wider text-prius-slate">{c.label}</p>
+                <div key={c.label} className="bg-surface rounded-inner p-3">
+                  <p className="text-label uppercase tracking-wider text-ink-2">{c.label}</p>
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <span className="text-body-sm text-prius-muted line-through break-all">{c.antes}</span>
-                    <ArrowRight size={12} className="text-prius-slate shrink-0" />
-                    <span className="text-body-md font-semibold text-black bg-accent-soft rounded-lg px-2 py-0.5 break-all">
+                    <span className="text-label text-ink-2 line-through break-all">{c.antes}</span>
+                    <ArrowRight size={12} className="text-ink-2 shrink-0" />
+                    <span className="text-body font-semibold text-ink bg-gold-100 rounded-icon px-2 py-0.5 break-all">
                       {c.despues}
                     </span>
                   </div>
@@ -102,10 +102,10 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
         {/* Referencias — solo las que el evento realmente trae */}
         {referencias.length > 0 && (
           <div>
-            <p className="text-label-md uppercase tracking-wider text-prius-slate mb-2">Referencias</p>
+            <p className="text-label uppercase tracking-wider text-ink-2 mb-2">Referencias</p>
             <div className="grid grid-cols-2 gap-2">
               {referencias.map((r) => (
-                <div key={r.label} className="bg-prius-surface rounded-xl p-3 min-w-0">
+                <div key={r.label} className="bg-surface rounded-inner p-3 min-w-0">
                   <Campo label={r.label}><span className="break-words font-semibold">{r.valor}</span></Campo>
                 </div>
               ))}
@@ -115,8 +115,8 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
 
         {meta.descripcion && (
           <div>
-            <p className="text-label-md uppercase tracking-wider text-prius-slate mb-2">Descripción</p>
-            <p className="text-body-md text-black break-words">{meta.descripcion}</p>
+            <p className="text-label uppercase tracking-wider text-ink-2 mb-2">Descripción</p>
+            <p className="text-body text-ink break-words">{meta.descripcion}</p>
           </div>
         )}
       </div>
@@ -128,7 +128,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
         <div className="shrink-0 pt-3">
           <button
             onClick={onIr}
-            className="w-full h-12 rounded-xl bg-gold hover:bg-gold-hover text-black font-bold text-sm flex items-center justify-center gap-2 anim-press anim-colors"
+            className="w-full h-12 rounded-inner bg-gold hover:bg-gold-400 text-ink font-bold text-body flex items-center justify-center gap-2 anim-press anim-colors"
           >
             {meta.accionLabel}
           </button>

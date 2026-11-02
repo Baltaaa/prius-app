@@ -33,7 +33,7 @@ function CellMobile({ number, unit, onClick, isHighlighted, isDimmed }) {
   const letra = isTemporada ? "T" : isPeriodo ? "P" : isDia ? "D" : null
 
   const bgClass = isPendienteConfirmacion || !isOcupada
-    ? "bg-white border border-hairline text-black"
+    ? "bg-white border border-plano-line text-black"
     : unit?.isPaid
       ? "bg-black border border-black text-white"
       : "bg-[#F2CA50] border border-[#F2CA50] text-black"
@@ -45,12 +45,12 @@ function CellMobile({ number, unit, onClick, isHighlighted, isDimmed }) {
     <button
       data-deeplink-id={unit?.dbId}
       onClick={() => onClick(unit)}
-      className={`relative w-11 h-9 min-w-[44px] min-h-[36px] shrink-0 rounded-md flex items-center justify-center font-semibold text-[13px] tabular-nums transition-colors ${bgClass} ${opacityClass} ${highlightClass}`}
+      className={`relative w-11 h-9 min-w-[44px] min-h-[36px] shrink-0 rounded-plano-md flex items-center justify-center font-semibold text-[13px] tabular-nums transition-colors ${bgClass} ${opacityClass} ${highlightClass}`}
     >
       {number}
 
       {isPendienteConfirmacion && (
-        <Hourglass size={12} className="absolute top-0.5 right-0.5 text-prius-slate" />
+        <Hourglass size={12} className="absolute top-0.5 right-0.5 text-plano-slate" />
       )}
       {letra && !isPendienteConfirmacion && (
         <span className="absolute top-0 right-0.5 text-[10px] font-bold leading-none">{letra}</span>

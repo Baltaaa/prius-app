@@ -29,18 +29,18 @@ const todayStr = () => new Date().toISOString().split('T')[0]
 // valor, sin ícono, sin acento.
 function MiniStat({ label, value }) {
   return (
-    <div className="flex items-center justify-between text-body-sm">
-      <span className="text-prius-slate">{label}</span>
-      <span className="text-black font-semibold tabular-nums">{value}</span>
+    <div className="flex items-center justify-between text-label">
+      <span className="text-ink-2">{label}</span>
+      <span className="text-ink font-semibold tabular-nums">{value}</span>
     </div>
   )
 }
 
 // Barra de progreso fina dorada/negra reutilizada en las cards de capacidad.
 function Bar({ pct, tone = 'gold' }) {
-  const fill = tone === 'success' ? 'bg-prius-success' : tone === 'black' ? 'bg-black' : 'bg-gold'
+  const fill = tone === 'success' ? 'bg-success' : tone === 'black' ? 'bg-ink' : 'bg-gold'
   return (
-    <div className="w-full h-3 rounded-full bg-prius-surface overflow-hidden">
+    <div className="w-full h-3 rounded-full bg-surface overflow-hidden">
       <div className={`h-full rounded-full ${fill}`} style={{ width: `${Math.min(100, Math.max(0, Math.round(pct * 100)))}%` }} />
     </div>
   )
@@ -146,7 +146,7 @@ export default function Home() {
 
   if (!ready) {
     return (
-      <div className="space-y-6 lg:space-y-10 font-ui">
+      <div className="space-y-6 lg:space-y-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
           <Skeleton className="lg:col-span-7 h-[220px]" />
           <div className="lg:col-span-5 flex flex-col gap-gutter-lg">
@@ -186,21 +186,21 @@ export default function Home() {
   ]
 
   return (
-    <div className="flex flex-col gap-space-lg font-ui -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0 px-4 sm:px-6 md:px-8 lg:px-0 anim-fade-up-page">
+    <div className="flex flex-col gap-space-lg -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0 px-4 sm:px-6 md:px-8 lg:px-0 anim-fade-up-page">
       {/* Fila 0: saludo + estado + badges KPI (desktop) */}
       <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
         <div>
           <div className="flex items-center gap-space-sm mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-prius-surface text-prius-success text-label-md uppercase">
-              <span className="w-2 h-2 rounded-full bg-prius-success animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface text-success-ink text-label uppercase">
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
               Guardia Sur · Activo
             </span>
-            <span className="hidden lg:inline text-prius-slate text-body-sm">|</span>
-            <span className="hidden lg:inline text-prius-slate text-body-sm">{formatFechaLarga(hoy)}</span>
+            <span className="hidden lg:inline text-ink-2 text-label">|</span>
+            <span className="hidden lg:inline text-ink-2 text-label">{formatFechaLarga(hoy)}</span>
           </div>
-          <h1 className="text-headline-lg-mobile lg:text-display-lg text-black tracking-tight">Hola, {primerNombre}</h1>
-          <p className="lg:hidden text-body-sm text-prius-slate mt-0.5">{formatFechaLarga(hoy)}</p>
-          <p className="hidden lg:block text-body-md text-prius-slate mt-1">Gestión operativa de playa, cobranzas y accesos en tiempo real.</p>
+          <h1 className="text-page lg:text-page text-ink tracking-tight">Hola, {primerNombre}</h1>
+          <p className="lg:hidden text-label text-ink-2 mt-0.5">{formatFechaLarga(hoy)}</p>
+          <p className="hidden lg:block text-body text-ink-2 mt-1">Gestión operativa de playa, cobranzas y accesos en tiempo real.</p>
         </div>
 
         {/* Badges KPI — solo desktop (mobile los muestra como chips más abajo) */}
@@ -209,11 +209,11 @@ export default function Home() {
             moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion}
             fecha={mv.fecha} stale={mv.stale} compacto
           />
-          <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-space-md py-2.5 rounded-xl card-light hover:bg-prius-subtle anim-colors transition-colors text-left">
-            <CircleCheck size={18} className="text-prius-success" />
+          <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-space-md py-2.5 rounded-inner card-light hover:bg-surface anim-colors transition-colors text-left">
+            <CircleCheck size={18} className="text-success-ink" />
             <div>
-              <span className="block text-label-md text-prius-slate uppercase">Leads sin contactar</span>
-              <span className="text-title-md text-black">{leadsLoading ? '—' : leadsSinContactar} al día</span>
+              <span className="block text-label text-ink-2 uppercase">Leads sin contactar</span>
+              <span className="text-body text-ink">{leadsLoading ? '—' : leadsSinContactar} al día</span>
             </div>
           </button>
         </div>
@@ -238,41 +238,41 @@ export default function Home() {
                 key={a.key}
                 type="button"
                 onClick={a.onClick}
-                className="group flex flex-col items-center justify-center gap-1.5 p-space-sm lg:px-space-md lg:py-space-sm rounded-2xl card-light hover:bg-prius-subtle anim-colors active:scale-95 transition-all text-center"
+                className="group flex flex-col items-center justify-center gap-1.5 p-space-sm lg:px-space-md lg:py-space-sm rounded-card card-light hover:bg-surface anim-colors active:scale-95 transition-all text-center"
               >
-                <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-xl flex items-center justify-center transition-colors ${a.accent ? 'bg-gold' : 'bg-prius-surface group-hover:bg-gold/20'}`}>
-                  <a.icon size={20} className="text-black" />
+                <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-inner flex items-center justify-center transition-colors ${a.accent ? 'bg-gold' : 'bg-surface group-hover:bg-gold-100'}`}>
+                  <a.icon size={20} className="text-ink" />
                 </div>
                 <div className="min-w-0 w-full">
-                  <span className="block text-xs md:text-label-md lg:text-headline-sm text-black leading-tight break-words">{a.label}</span>
-                  <span className="hidden lg:block text-body-sm text-prius-slate whitespace-normal">{a.sub}</span>
+                  <span className="block text-xs md:text-label lg:text-body text-ink leading-tight break-words">{a.label}</span>
+                  <span className="hidden lg:block text-label text-ink-2 whitespace-normal">{a.sub}</span>
                 </div>
               </button>
             ))}
           </div>
 
           {/* Caja: estado + abrir */}
-          <div className="p-space-md rounded-2xl card-light flex items-center justify-between gap-3">
+          <div className="p-space-md rounded-card card-light flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full lg:rounded-xl bg-prius-surface flex items-center justify-center shrink-0 text-prius-slate">
+              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full lg:rounded-inner bg-surface flex items-center justify-center shrink-0 text-ink-2">
                 {cajaHoy ? <Unlock size={18} /> : <Lock size={18} />}
               </div>
               <div className="truncate">
-                <p className="text-title-md text-black truncate">{cajaHoy ? 'Caja abierta' : 'Caja sin iniciar'}</p>
+                <p className="text-body text-ink truncate">{cajaHoy ? 'Caja abierta' : 'Caja sin iniciar'}</p>
                 {/* B6 (oct 2026): si falta la hora o el usuario que la abrió,
                     se oculta la línea entera en vez de mostrar "—" — un
                     dato a medias no aporta nada acá. */}
                 {cajaHoy && cajaHoy.abierta_at && perfilesPorId[cajaHoy.abierta_por] ? (
-                  <p className="text-body-sm text-prius-slate truncate">
+                  <p className="text-label text-ink-2 truncate">
                     Desde {formatHora(cajaHoy.abierta_at)} · {perfilesPorId[cajaHoy.abierta_por]}
                   </p>
                 ) : !cajaHoy ? (
-                  <p className="text-body-sm text-prius-slate truncate">Turno no registrado aún</p>
+                  <p className="text-label text-ink-2 truncate">Turno no registrado aún</p>
                 ) : null}
               </div>
             </div>
             {!cajaHoy && (
-              <button onClick={() => navigate('/app/caja')} className="h-9 px-3 rounded-xl bg-black text-white text-label-lg shrink-0 active:scale-95 transition-transform flex items-center gap-1">
+              <button onClick={() => navigate('/app/caja')} className="h-9 px-3 rounded-inner bg-ink text-on-ink text-label shrink-0 active:scale-95 transition-transform flex items-center gap-1">
                 Abrir <ArrowRight size={14} />
               </button>
             )}
@@ -282,16 +282,16 @@ export default function Home() {
 
       {/* Fila 2 mobile: chips de actividad en vivo (scroll horizontal) — en desktop ya están arriba como badges */}
       <section className="lg:hidden -mx-4 px-4 overflow-x-auto scrollbar-none flex items-center gap-2">
-        <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-3 py-2 rounded-xl card-light shrink-0">
-          <span className="w-2 h-2 rounded-full bg-prius-slate" />
-          <span className="text-body-sm text-prius-slate">Leads sin contactar:</span>
-          <span className="text-title-md text-black">{leadsLoading ? '—' : leadsSinContactar}</span>
+        <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-3 py-2 rounded-inner card-light shrink-0">
+          <span className="w-2 h-2 rounded-full bg-ink-2" />
+          <span className="text-label text-ink-2">Leads sin contactar:</span>
+          <span className="text-body text-ink">{leadsLoading ? '—' : leadsSinContactar}</span>
         </button>
         {recepcionOn && (
-          <button onClick={() => navigate('/app/recepcion')} className="flex items-center gap-2 px-3 py-2 rounded-xl card-light shrink-0">
-            <span className="w-2 h-2 rounded-full bg-prius-success" />
-            <span className="text-body-sm text-prius-slate">Llegan hoy:</span>
-            <span className="text-title-md text-black">{llegadasHoy.length}</span>
+          <button onClick={() => navigate('/app/recepcion')} className="flex items-center gap-2 px-3 py-2 rounded-inner card-light shrink-0">
+            <span className="w-2 h-2 rounded-full bg-success" />
+            <span className="text-label text-ink-2">Llegan hoy:</span>
+            <span className="text-body text-ink">{llegadasHoy.length}</span>
           </button>
         )}
       </section>
@@ -304,64 +304,64 @@ export default function Home() {
           estirar. */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-gutter-lg items-start">
         {/* Capacidad diaria (antes "Operación de hoy") */}
-        <div className="card-light rounded-2xl p-space-lg flex flex-col justify-between min-w-0">
+        <div className="card-light rounded-card p-space-lg flex flex-col justify-between min-w-0">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-label-md text-prius-slate uppercase">Capacidad Diaria</span>
-              <button onClick={() => navigate('/app/plano')} className="px-2.5 py-1 rounded-full bg-prius-surface text-prius-success text-label-md">
+              <span className="text-label text-ink-2 uppercase">Capacidad Diaria</span>
+              <button onClick={() => navigate('/app/plano')} className="px-2.5 py-1 rounded-full bg-surface text-success-ink text-label">
                 {stats.libres.count} disponibles para hoy
               </button>
             </div>
             <button onClick={() => navigate('/app/plano')} className="w-full mt-space-md flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between text-left whitespace-normal">
               <div className="min-w-0">
-                <span className="block text-label-md text-prius-slate uppercase">Ocupación General</span>
-                <span className="text-metric-xl text-black">{Math.round(stats.ocupacion.pct * 100)}%</span>
+                <span className="block text-label text-ink-2 uppercase">Ocupación General</span>
+                <span className="text-stat text-ink">{Math.round(stats.ocupacion.pct * 100)}%</span>
               </div>
               <div className="min-w-0 sm:text-right">
-                <span className="text-title-md text-black">{stats.ocupacion.count} ocupadas</span>
-                <span className="block text-body-sm text-prius-slate">de {stats.ocupacion.total} unidades totales</span>
+                <span className="text-body text-ink">{stats.ocupacion.count} ocupadas</span>
+                <span className="block text-label text-ink-2">de {stats.ocupacion.total} unidades totales</span>
               </div>
             </button>
             <div className="mt-3"><Bar pct={stats.ocupacion.pct} /></div>
           </div>
 
-          <div className="grid grid-cols-2 gap-space-md mt-space-lg pt-space-md border-t border-hairline">
-            <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-xl bg-prius-surface text-left">
+          <div className="grid grid-cols-2 gap-space-md mt-space-lg pt-space-md border-t border-line">
+            <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-inner bg-surface text-left">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-title-md text-black"><Tent size={14} /> Carpas</span>
-                <span className="text-label-md text-black font-semibold">{Math.round(stats.carpas.pct * 100)}%</span>
+                <span className="flex items-center gap-1.5 text-body text-ink"><Tent size={14} /> Carpas</span>
+                <span className="text-label text-ink font-semibold">{Math.round(stats.carpas.pct * 100)}%</span>
               </div>
               <div className="mt-2 flex items-baseline justify-between">
-                <span className="text-headline-sm text-black">{stats.carpas.count} <span className="text-body-sm font-normal text-prius-slate">/ {stats.carpas.total}</span></span>
+                <span className="text-body text-ink">{stats.carpas.count} <span className="text-label font-normal text-ink-2">/ {stats.carpas.total}</span></span>
               </div>
               <div className="mt-2"><Bar pct={stats.carpas.pct} tone="black" /></div>
             </button>
-            <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-xl bg-prius-surface text-left">
+            <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-inner bg-surface text-left">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-title-md text-black"><Umbrella size={14} /> Sombrillas</span>
-                <span className="text-label-md text-black font-semibold">{Math.round(stats.sombrillas.pct * 100)}%</span>
+                <span className="flex items-center gap-1.5 text-body text-ink"><Umbrella size={14} /> Sombrillas</span>
+                <span className="text-label text-ink font-semibold">{Math.round(stats.sombrillas.pct * 100)}%</span>
               </div>
               <div className="mt-2 flex items-baseline justify-between">
-                <span className="text-headline-sm text-black">{stats.sombrillas.count} <span className="text-body-sm font-normal text-prius-slate">/ {stats.sombrillas.total}</span></span>
+                <span className="text-body text-ink">{stats.sombrillas.count} <span className="text-label font-normal text-ink-2">/ {stats.sombrillas.total}</span></span>
               </div>
               <div className="mt-2"><Bar pct={stats.sombrillas.pct} /></div>
             </button>
           </div>
 
-          <div className="flex flex-col gap-1.5 mt-space-md pt-space-md border-t border-hairline">
+          <div className="flex flex-col gap-1.5 mt-space-md pt-space-md border-t border-line">
             <MiniStat label="Mix Temporada / Período / Día" value={`${stats.mix.temporada}/${stats.mix.periodo}/${stats.mix.dia}`} />
             <MiniStat label="Sin confirmar" value={stats.pendientes.sinVerificar ? `${stats.pendientes.count}+` : stats.pendientes.count} />
           </div>
         </div>
 
         {/* Cobranzas temporada (antes "Caja y dinero") */}
-        <div className="card-light rounded-2xl p-space-lg flex flex-col justify-between min-w-0">
+        <div className="card-light rounded-card p-space-lg flex flex-col justify-between min-w-0">
           <div>
             {puedeVerReportes && (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-label-md text-prius-slate uppercase">Cobranzas Temporada</span>
-                  <span className="px-2.5 py-1 rounded-full bg-prius-surface text-prius-success text-label-md font-semibold">
+                  <span className="text-label text-ink-2 uppercase">Cobranzas Temporada</span>
+                  <span className="px-2.5 py-1 rounded-full bg-surface text-success-ink text-label font-semibold">
                     {formatPorcentaje(pctPercibido * 100, 1)} Percibido
                   </span>
                 </div>
@@ -374,8 +374,8 @@ export default function Home() {
                   className={`w-full mt-space-md flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between text-left whitespace-normal ${isFeatureEnabled('reportes') ? '' : 'cursor-default'}`}
                 >
                   <div className="min-w-0">
-                    <span className="block text-label-md text-prius-slate uppercase">Total Recaudado</span>
-                    <span className="text-metric-xl text-black">{fmtM(totalCobrado)}</span>
+                    <span className="block text-label text-ink-2 uppercase">Total Recaudado</span>
+                    <span className="text-stat text-ink">{fmtM(totalCobrado)}</span>
                   </div>
                 </button>
                 <div className="mt-3"><Bar pct={pctPercibido} tone="success" /></div>
@@ -383,40 +383,40 @@ export default function Home() {
             )}
             {!puedeVerReportes && (
               <div className="flex items-center justify-between">
-                <span className="text-label-md text-prius-slate uppercase">Caja y Cobranzas</span>
+                <span className="text-label text-ink-2 uppercase">Caja y Cobranzas</span>
               </div>
             )}
           </div>
 
-          <div className={`grid grid-cols-2 gap-space-md ${puedeVerReportes ? 'mt-space-lg pt-space-md border-t border-hairline' : 'mt-space-md'}`}>
-            <button onClick={() => navigate('/app/reservas')} className="p-space-md rounded-xl bg-prius-surface text-left flex flex-col justify-between">
+          <div className={`grid grid-cols-2 gap-space-md ${puedeVerReportes ? 'mt-space-lg pt-space-md border-t border-line' : 'mt-space-md'}`}>
+            <button onClick={() => navigate('/app/reservas')} className="p-space-md rounded-inner bg-surface text-left flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-label-md text-prius-slate uppercase"><AlertTriangle size={14} className="text-prius-error" /> Pendientes</span>
+                <span className="flex items-center gap-1.5 text-label text-ink-2 uppercase"><AlertTriangle size={14} className="text-danger" /> Pendientes</span>
               </div>
               <div className="mt-2">
-                <span className="text-headline-sm text-black">{fmtM(stats.pendientes.saldo > 0 ? stats.pendientes.saldo : 0)}</span>
-                <p className="text-body-sm text-prius-slate mt-0.5">{stats.pendientes.count} reservas con saldo</p>
+                <span className="text-body text-ink">{fmtM(stats.pendientes.saldo > 0 ? stats.pendientes.saldo : 0)}</span>
+                <p className="text-label text-ink-2 mt-0.5">{stats.pendientes.count} reservas con saldo</p>
               </div>
             </button>
-            <button onClick={() => navigate('/app/caja')} className="p-space-md rounded-xl bg-prius-surface text-left flex flex-col justify-between">
+            <button onClick={() => navigate('/app/caja')} className="p-space-md rounded-inner bg-surface text-left flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-label-md text-prius-slate uppercase"><Wallet size={14} className="text-prius-success" /> Caja Hoy</span>
+                <span className="flex items-center gap-1.5 text-label text-ink-2 uppercase"><Wallet size={14} className="text-success-ink" /> Caja Hoy</span>
               </div>
               <div className="mt-2">
-                <span className="text-headline-sm text-black">{fmtM(stats.ingresosDelDia != null ? stats.ingresosDelDia : 0)}</span>
-                <p className="text-body-sm text-prius-slate mt-0.5">Ingresos del día</p>
+                <span className="text-body text-ink">{fmtM(stats.ingresosDelDia != null ? stats.ingresosDelDia : 0)}</span>
+                <p className="text-label text-ink-2 mt-0.5">Ingresos del día</p>
               </div>
             </button>
           </div>
 
           {/* Alerta de deuda — mobile, como en el mock */}
           {puedeVerReportes && deudaExterna > 0 && (
-            <button onClick={() => navigate('/app/reservas')} className="lg:hidden p-2.5 rounded-xl bg-red-50 flex items-center justify-between mt-space-sm">
+            <button onClick={() => navigate('/app/reservas')} className="lg:hidden p-2.5 rounded-inner bg-danger-soft flex items-center justify-between mt-space-sm">
               <div className="flex items-center gap-1.5">
-                <AlertTriangle size={16} className="text-prius-error" />
-                <span className="text-body-sm text-black font-medium">{stats.pendientes.count} reservas con deuda</span>
+                <AlertTriangle size={16} className="text-danger" />
+                <span className="text-label text-ink font-medium">{stats.pendientes.count} reservas con deuda</span>
               </div>
-              <span className="text-title-md font-bold text-prius-error">{fmtM(deudaExterna)}</span>
+              <span className="text-body font-bold text-danger">{fmtM(deudaExterna)}</span>
             </button>
           )}
         </div>
@@ -427,51 +427,51 @@ export default function Home() {
         <section className="hidden lg:block">
           <button
             onClick={() => navigate('/app/recepcion')}
-            className="w-full card-light rounded-2xl p-space-md flex items-center justify-between hover:bg-prius-subtle anim-colors transition-colors"
+            className="w-full card-light rounded-card p-space-md flex items-center justify-between hover:bg-surface anim-colors transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <QrCode size={20} className="text-black" />
-              <span className="text-title-md text-black">Llegan hoy</span>
+              <QrCode size={20} className="text-ink" />
+              <span className="text-body text-ink">Llegan hoy</span>
             </div>
-            <span className="text-headline-sm text-black">{llegadasHoy.length}</span>
+            <span className="text-body text-ink">{llegadasHoy.length}</span>
           </button>
         </section>
       )}
 
       {/* Fila 5: últimos movimientos */}
-      <section className="card-light rounded-2xl p-space-md lg:p-space-lg">
+      <section className="card-light rounded-card p-space-md lg:p-space-lg">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md">
           <div>
-            <h2 className="text-headline-sm text-black flex items-center gap-2">
+            <h2 className="text-body text-ink flex items-center gap-2">
               Últimos movimientos
-              <span className="w-1.5 h-1.5 rounded-full bg-prius-success" />
+              <span className="w-1.5 h-1.5 rounded-full bg-success" />
             </h2>
-            <p className="hidden lg:block text-body-sm text-prius-slate">Registro auditable de accesos, modificaciones y transacciones</p>
+            <p className="hidden lg:block text-label text-ink-2">Registro auditable de accesos, modificaciones y transacciones</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="hidden lg:flex items-center p-1 rounded-xl bg-prius-surface">
+            <div className="hidden lg:flex items-center p-1 rounded-inner bg-surface">
               {TABS_MOVIMIENTOS.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setTabMovimientos(t.key)}
-                  className={`px-3 py-1 rounded-lg text-label-md transition-colors ${tabMovimientos === t.key ? 'bg-white text-black' : 'text-prius-slate hover:text-black'}`}
+                  className={`px-3 py-1 rounded-icon text-label transition-colors ${tabMovimientos === t.key ? 'bg-card text-ink' : 'text-ink-2 hover:text-ink'}`}
                 >
                   {t.label}
                 </button>
               ))}
             </div>
-            <button onClick={() => navigate('/app/historial')} className="text-label-lg text-prius-slate hover:text-black transition-colors flex items-center gap-1">
+            <button onClick={() => navigate('/app/historial')} className="text-label text-ink-2 hover:text-ink transition-colors flex items-center gap-1">
               Ver todo <ArrowRight size={14} />
             </button>
           </div>
         </div>
 
         {historialLoading ? (
-          <p className="text-body-sm text-prius-muted uppercase tracking-widest animate-pulse py-4 text-center">Cargando...</p>
+          <p className="text-label text-ink-2 uppercase tracking-widest animate-pulse py-4 text-center">Cargando...</p>
         ) : movimientosFiltrados.length === 0 ? (
-          <p className="text-body-sm text-prius-muted py-4 text-center">Sin movimientos recientes.</p>
+          <p className="text-label text-ink-2 py-4 text-center">Sin movimientos recientes.</p>
         ) : (
-          <div className="flex flex-col divide-y divide-hairline lg:divide-y-0">
+          <div className="flex flex-col divide-y divide-divider lg:divide-y-0">
             {movimientosFiltrados.map((ev) => {
               const Icon = iconoMovimiento(ev)
               return (
@@ -481,20 +481,20 @@ export default function Home() {
                     if (ev.tabla === 'reservas' && ev.registro_id) navigate(linkToReserva(ev.registro_id))
                     else if (ev.cliente_id) navigate(linkToCliente(ev.cliente_id))
                   }}
-                  className="w-full flex items-center justify-between gap-3 py-2.5 lg:py-3.5 text-left hover:bg-prius-subtle anim-colors rounded-xl px-2 -mx-2 transition-colors lg:border-b lg:border-hairline lg:last:border-b-0"
+                  className="w-full flex items-center justify-between gap-3 py-2.5 lg:py-3.5 text-left hover:bg-surface anim-colors rounded-inner px-2 -mx-2 transition-colors lg:border-b lg:border-line lg:last:border-b-0"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-prius-surface flex items-center justify-center shrink-0 text-black">
+                    <div className="w-10 h-10 rounded-inner bg-surface flex items-center justify-center shrink-0 text-ink">
                       <Icon size={18} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-title-md text-black truncate">{formatMontosEnTexto(ev.descripcion)}</p>
-                      <p className="text-body-sm text-prius-slate truncate">
+                      <p className="text-body text-ink truncate">{formatMontosEnTexto(ev.descripcion)}</p>
+                      <p className="text-label text-ink-2 truncate">
                         {ev.actor_nombre || 'Sistema'}{ev.cliente_nombre ? ` · ${ev.cliente_nombre}` : ''}
                       </p>
                     </div>
                   </div>
-                  <span className="text-label-md text-prius-slate tabular-nums shrink-0">{formatHora(ev.ts)}</span>
+                  <span className="text-label text-ink-2 tabular-nums shrink-0">{formatHora(ev.ts)}</span>
                 </button>
               )
             })}

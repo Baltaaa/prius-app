@@ -205,7 +205,7 @@ export default function Caja() {
 
   if (!readyCaja) {
     return (
-      <div className="space-y-4 font-ui">
+      <div className="space-y-4">
         <Skeleton className="h-12 w-64" />
         <Skeleton className="h-80" />
       </div>
@@ -224,7 +224,7 @@ export default function Caja() {
           única de siempre. */}
       <div className="no-print space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <div className="flex items-center gap-3 sm:contents">
-          <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
+          <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 bg-surface hover:bg-surface anim-colors border border-line rounded-inner text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
             <ChevronLeft size={16} />
           </button>
           {/* w-36 (144px) no entraba la fecha completa en mobile (texto 16px ahí
@@ -232,12 +232,12 @@ export default function Caja() {
               del Plano, oct 2026. flex-1 en mobile para que la fecha ocupe el
               centro de la fila simétrica; ancho fijo en desktop (sin cambios). */}
           <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="flex-1 min-w-0 sm:flex-none sm:w-[164px]" />
-          <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 bg-prius-subtle hover:bg-prius-subtle anim-colors disabled:opacity-30 disabled:cursor-not-allowed border border-hairline rounded-xl text-prius-slate transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
+          <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 bg-surface hover:bg-surface anim-colors disabled:opacity-30 disabled:cursor-not-allowed border border-line rounded-inner text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
             <ChevronRight size={16} />
           </button>
         </div>
         {!esHoy && (
-          <button onClick={() => setSelectedDate(todayStr())} className="w-full sm:w-auto px-4 py-3 bg-gold/10 hover:bg-gold/20 border border-gold/20 rounded-xl text-gold text-xs font-bold uppercase tracking-widest transition-all">
+          <button onClick={() => setSelectedDate(todayStr())} className="w-full sm:w-auto px-4 py-3 bg-gold-100 hover:bg-gold-100 border border-gold-300 rounded-inner text-ink text-xs font-bold uppercase tracking-widest transition-all">
             Volver a Hoy
           </button>
         )}
@@ -246,14 +246,14 @@ export default function Caja() {
           fecha={mv.fecha} stale={mv.stale} compacto
         />
         {cajaSeleccionada && (
-          <span className={`hidden sm:inline-block px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-red-500/10 text-prius-error border-red-500/20' : 'bg-green-500/10 text-prius-success border-green-500/20'}`}>
+          <span className={`hidden sm:inline-block px-4 py-2 rounded-inner text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
             {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
           </span>
         )}
         <div className="hidden sm:block sm:flex-1" />
         <button
           onClick={() => setMostrarHistorial((v) => !v)}
-          className="hidden sm:flex items-center gap-2 px-4 py-3 bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all min-h-[44px]"
+          className="hidden sm:flex items-center gap-2 px-4 py-3 bg-surface hover:bg-surface anim-colors border border-line rounded-inner text-ink-2 text-xs font-bold uppercase tracking-widest transition-all min-h-[44px]"
         >
           <History size={14} /> Historial
         </button>
@@ -263,12 +263,12 @@ export default function Caja() {
           ya los muestra arriba en la fila de siempre). */}
       {cajaSeleccionada && (
         <div className="no-print sm:hidden grid grid-cols-2 gap-3">
-          <span className={`flex items-center justify-center px-4 py-3 min-h-[44px] rounded-xl text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-red-500/10 text-prius-error border-red-500/20' : 'bg-green-500/10 text-prius-success border-green-500/20'}`}>
+          <span className={`flex items-center justify-center px-4 py-3 min-h-[44px] rounded-inner text-[10px] font-bold tracking-widest uppercase border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
             {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
           </span>
           <button
             onClick={() => setMostrarHistorial((v) => !v)}
-            className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all"
+            className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-surface hover:bg-surface anim-colors border border-line rounded-inner text-ink-2 text-xs font-bold uppercase tracking-widest transition-all"
           >
             <History size={14} /> Historial
           </button>
@@ -276,21 +276,21 @@ export default function Caja() {
       )}
 
       {mostrarHistorial && (
-        <div className="no-print card-light p-6 rounded-2xl card-light-inner space-y-2">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-prius-slate mb-3">Historial de cajas</h3>
+        <div className="no-print card-light p-6 rounded-card card-light-inner space-y-2">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-ink-2 mb-3">Historial de cajas</h3>
           {historialCajas.length === 0 ? (
-            <p className="text-xs text-prius-muted uppercase tracking-widest">Sin cajas registradas todavía.</p>
+            <p className="text-xs text-ink-2 uppercase tracking-widest">Sin cajas registradas todavía.</p>
           ) : historialCajas.map((c) => (
             <button
               key={c.id}
               onClick={() => { setSelectedDate(c.fecha); setMostrarHistorial(false) }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-prius-subtle anim-colors transition-all text-left"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-inner hover:bg-surface anim-colors transition-all text-left"
             >
-              <span className="text-sm text-prius-slate">{formatFecha(c.fecha)}</span>
+              <span className="text-body text-ink-2">{formatFecha(c.fecha)}</span>
               <span className="flex items-center gap-4 text-xs">
-                <span className="font-bold text-black tabular-nums">{fmtM(c.total_neto)}</span>
+                <span className="font-bold text-ink tabular-nums">{fmtM(c.total_neto)}</span>
                 {c.diferencia != null && Number(c.diferencia) !== 0 && (
-                  <span className="text-gold tabular-nums">dif. {fmtM(c.diferencia)}</span>
+                  <span className="text-ink tabular-nums">dif. {fmtM(c.diferencia)}</span>
                 )}
               </span>
             </button>
@@ -301,26 +301,26 @@ export default function Caja() {
       {/* Estado A: sin caja */}
       {!cajaSeleccionada && (
         esHoy ? (
-          <div className="no-print card-light p-20 text-center rounded-3xl card-light-inner space-y-6">
-            <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/20">
-              <Wallet className="w-10 h-10 text-gold" />
+          <div className="no-print card-light p-20 text-center rounded-card card-light-inner space-y-6">
+            <div className="w-20 h-20 bg-gold-100 rounded-full flex items-center justify-center mx-auto border border-gold-300">
+              <Wallet className="w-10 h-10 text-ink" />
             </div>
-            <h2 className="text-xl font-bold text-black uppercase tracking-wider">Caja no iniciada</h2>
-            <p className="text-prius-slate text-sm max-w-md mx-auto">Abrí la caja del día para empezar a registrar cobros y gastos. Siempre arranca en $0.</p>
+            <h2 className="text-xl font-bold text-ink uppercase tracking-wider">Caja no iniciada</h2>
+            <p className="text-ink-2 text-body max-w-md mx-auto">Abrí la caja del día para empezar a registrar cobros y gastos. Siempre arranca en $0.</p>
             <div className="max-w-xs mx-auto">
               <LoadingButton
                 onClick={handleAbrirCaja}
                 loading={abriendo}
                 loadingText="Abriendo..."
-                className="w-full bg-gold hover:bg-gold-hover anim-press text-black px-8 py-4 rounded-xl font-bold uppercase text-xs tracking-widest shadow-2xl"
+                className="w-full bg-gold hover:bg-gold-400 anim-press text-ink px-8 py-4 rounded-inner font-bold uppercase text-xs tracking-widest"
               >
                 Abrir Caja de Hoy
               </LoadingButton>
             </div>
           </div>
         ) : (
-          <div className="no-print card-light p-20 text-center rounded-3xl card-light-inner">
-            <p className="text-prius-slate text-sm uppercase tracking-widest font-bold">Sin movimientos registrados este día.</p>
+          <div className="no-print card-light p-20 text-center rounded-card card-light-inner">
+            <p className="text-ink-2 text-body uppercase tracking-widest font-bold">Sin movimientos registrados este día.</p>
           </div>
         )
       )}
@@ -335,62 +335,62 @@ export default function Caja() {
         <div className="no-print space-y-6">
           {/* 4 KPI cards — grilla 2x2 en mobile (pulido mobile iPhone, oct
               2026): las 4 usan el mismo componente de monto (MontoStat,
-              clamp + nowrap) en vez de 1 con text-metric-xl y 3 con
+              clamp + nowrap) en vez de 1 con text-stat y 3 con
               text-2xl fijo — eso partía los montos largos ($ 239.947.560)
               en dos renglones en 375px. Título siempre en una línea
               (truncate), ícono 32px arriba a la derecha igual en las
               cuatro, el pill de la primera con overflow-hidden/truncate
               para que nunca se salga de la card. */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
+            <div className="bg-card border border-line rounded-card p-4 sm:p-5 min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Neto en caja</p>
-                <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Wallet size={16} /></div>
+                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest truncate">Neto en caja</p>
+                <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><Wallet size={16} /></div>
               </div>
-              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_neto} className="text-black mb-2" />
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-prius-success text-[10px] font-medium max-w-full overflow-hidden mt-auto">
-                <span className="w-1.5 h-1.5 rounded-full bg-prius-success shrink-0" />
+              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_neto} className="text-ink mb-2" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-soft text-success-ink text-[10px] font-medium max-w-full overflow-hidden mt-auto">
+                <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
                 <span className="truncate">Arqueado en tiempo real</span>
               </span>
             </div>
-            <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
+            <div className="bg-card border border-line rounded-card p-4 sm:p-5 min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Ingresos</p>
-                <div className="shrink-0 w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center text-prius-success"><ArrowDownRight size={16} /></div>
+                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest truncate">Ingresos</p>
+                <div className="shrink-0 w-8 h-8 rounded-inner bg-success-soft flex items-center justify-center text-success-ink"><ArrowDownRight size={16} /></div>
               </div>
-              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_cobros} size="md" className="text-prius-success mb-2" />
-              <p className="text-[10px] text-prius-muted mt-auto truncate">{movimientos.filter((m) => m.tipo_movimiento === 'ingreso' && m.estado !== 'anulado').length} cobro{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'} acreditado{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'}</p>
+              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_cobros} size="md" className="text-success-ink mb-2" />
+              <p className="text-[10px] text-ink-2 mt-auto truncate">{movimientos.filter((m) => m.tipo_movimiento === 'ingreso' && m.estado !== 'anulado').length} cobro{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'} acreditado{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'}</p>
             </div>
-            <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
+            <div className="bg-card border border-line rounded-card p-4 sm:p-5 min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Egresos</p>
-                <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><ArrowUpRight size={16} /></div>
+                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest truncate">Egresos</p>
+                <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><ArrowUpRight size={16} /></div>
               </div>
-              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_gastos} size="md" className="text-black mb-2" />
-              <p className="text-[10px] text-prius-muted mt-auto truncate">{todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id && g.estado !== 'anulado').length > 0 ? `${todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length} gasto(s) cargado(s)` : 'Sin retiros cargados'}</p>
+              <MontoStat fmt={fmtM} value={cajaSeleccionada.total_gastos} size="md" className="text-ink mb-2" />
+              <p className="text-[10px] text-ink-2 mt-auto truncate">{todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id && g.estado !== 'anulado').length > 0 ? `${todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length} gasto(s) cargado(s)` : 'Sin retiros cargados'}</p>
             </div>
-            <div className="bg-white border border-hairline rounded-2xl p-4 sm:p-5 min-w-0 flex flex-col">
+            <div className="bg-card border border-line rounded-card p-4 sm:p-5 min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest truncate">Total esperado</p>
-                <div className="shrink-0 w-8 h-8 rounded-xl bg-prius-surface flex items-center justify-center text-prius-slate"><Banknote size={16} /></div>
+                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest truncate">Total esperado</p>
+                <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><Banknote size={16} /></div>
               </div>
-              <MontoStat fmt={fmtM} value={totalEsperadoPreview} size="md" className="text-black mb-2" />
-              <p className="text-[10px] text-prius-muted mt-auto truncate">Todos los medios — ver desglose</p>
+              <MontoStat fmt={fmtM} value={totalEsperadoPreview} size="md" className="text-ink mb-2" />
+              <p className="text-[10px] text-ink-2 mt-auto truncate">Todos los medios — ver desglose</p>
             </div>
           </div>
 
           <div className="lg:flex lg:gap-6 lg:items-start">
             {/* Columna izquierda: tabs + movimientos */}
             <div className="lg:flex-1 lg:min-w-0 space-y-4">
-              <div className="bg-white border border-hairline rounded-2xl p-6 sm:p-7 space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-hairline">
+              <div className="bg-card border border-line rounded-card p-6 sm:p-7 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
                   <div className="flex items-center gap-1.5 overflow-x-auto">
                     {TABS.map((t) => (
                       <button
                         key={t.value}
                         onClick={() => setTab(t.value)}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all min-h-[40px] ${
-                          tab === t.value ? 'bg-gold text-black' : 'bg-prius-surface text-prius-slate hover:bg-hairline'
+                        className={`px-4 py-2 rounded-inner text-xs font-bold whitespace-nowrap transition-all min-h-[40px] ${
+                          tab === t.value ? 'bg-gold text-ink' : 'bg-surface text-ink-2 hover:bg-line'
                         }`}
                       >
                         {t.label}
@@ -406,14 +406,14 @@ export default function Caja() {
 
                 {tab === 'movimientos' && (
                   movimientosFiltrados.length === 0 ? (
-                    <p className="text-xs text-prius-muted uppercase tracking-widest">Sin movimientos con este filtro.</p>
+                    <p className="text-xs text-ink-2 uppercase tracking-widest">Sin movimientos con este filtro.</p>
                   ) : (
                     <>
                       {/* Desktop: tabla real (mock) */}
                       <div className="hidden lg:block overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                           <thead>
-                            <tr className="text-[10px] font-bold text-prius-muted uppercase tracking-widest border-b border-hairline">
+                            <tr className="text-[10px] font-bold text-ink-2 uppercase tracking-widest border-b border-line">
                               <th className="pb-3 px-2">Hora</th>
                               <th className="pb-3 px-2">Tipo</th>
                               <th className="pb-3 px-2">Cliente / Unidad</th>
@@ -423,34 +423,34 @@ export default function Caja() {
                               <th className="pb-3 px-2 text-right">Monto</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-hairline text-xs">
+                          <tbody className="divide-y divide-divider text-xs">
                             {movimientosFiltrados.map((m) => (
                               <tr
                                 key={`${m.tipo_movimiento}-${m.movimiento_id}`}
                                 onClick={() => abrirDetalleMovimiento(m)}
-                                className={`hover:bg-prius-surface cursor-pointer transition-colors ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
+                                className={`hover:bg-surface cursor-pointer transition-colors ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
                               >
-                                <td className="py-3 px-2 text-prius-slate font-medium whitespace-nowrap">{formatHora(m.fecha_hora)}</td>
+                                <td className="py-3 px-2 text-ink-2 font-medium whitespace-nowrap">{formatHora(m.fecha_hora)}</td>
                                 <td className="py-3 px-2 whitespace-nowrap">
-                                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${m.tipo_movimiento === 'ingreso' ? 'bg-green-50 text-prius-success' : 'bg-red-50 text-prius-error'}`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${m.tipo_movimiento === 'ingreso' ? 'bg-prius-success' : 'bg-prius-error'}`} />
+                                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${m.tipo_movimiento === 'ingreso' ? 'bg-success-soft text-success-ink' : 'bg-danger-soft text-danger'}`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${m.tipo_movimiento === 'ingreso' ? 'bg-success' : 'bg-danger'}`} />
                                     {m.tipo_movimiento === 'ingreso' ? 'Ingreso' : 'Egreso'}
                                   </span>
                                 </td>
                                 <td className="py-3 px-2 whitespace-nowrap">
-                                  <span className={`font-bold text-black ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.cliente_proveedor || 'S/N'}</span>
-                                  {m.unidad && <span className="text-prius-muted"> • {m.unidad}</span>}
+                                  <span className={`font-bold text-ink ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.cliente_proveedor || 'S/N'}</span>
+                                  {m.unidad && <span className="text-ink-2"> • {m.unidad}</span>}
                                 </td>
-                                <td className="py-3 px-2 text-prius-slate">{m.concepto}</td>
+                                <td className="py-3 px-2 text-ink-2">{m.concepto}</td>
                                 <td className="py-3 px-2 whitespace-nowrap">
                                   {m.comprobante ? (
-                                    <span className="px-2 py-1 rounded-lg bg-prius-surface text-prius-slate font-mono text-[10px] font-semibold">{m.comprobante}</span>
+                                    <span className="px-2 py-1 rounded-icon bg-surface text-ink-2 text-[10px] font-semibold">{m.comprobante}</span>
                                   ) : (
-                                    <span className="text-prius-muted text-[10px]">Sin comprobante</span>
+                                    <span className="text-ink-2 text-[10px]">Sin comprobante</span>
                                   )}
                                 </td>
-                                <td className="py-3 px-2 whitespace-nowrap text-prius-slate">{MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago}</td>
-                                <td className={`py-3 px-2 text-right font-bold tabular-nums whitespace-nowrap ${m.monto < 0 ? 'text-prius-error' : 'text-black'}`}>{fmtM(m.monto)}</td>
+                                <td className="py-3 px-2 whitespace-nowrap text-ink-2">{MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago}</td>
+                                <td className={`py-3 px-2 text-right font-bold tabular-nums whitespace-nowrap ${m.monto < 0 ? 'text-danger' : 'text-ink'}`}>{fmtM(m.monto)}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -469,22 +469,22 @@ export default function Caja() {
                           <button
                             key={`${m.tipo_movimiento}-${m.movimiento_id}`}
                             onClick={() => abrirDetalleMovimiento(m)}
-                            className={`w-full flex flex-col gap-1 p-3 bg-prius-surface rounded-xl text-left transition-all ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
+                            className={`w-full flex flex-col gap-1 p-3 bg-surface rounded-inner text-left transition-all ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className={`shrink-0 w-6 h-6 rounded-md bg-white flex items-center justify-center ${m.tipo_movimiento === 'ingreso' ? 'text-prius-success' : 'text-prius-error'}`}>
+                                <span className={`shrink-0 w-6 h-6 rounded-swatch bg-card flex items-center justify-center ${m.tipo_movimiento === 'ingreso' ? 'text-success-ink' : 'text-danger'}`}>
                                   {m.tipo_movimiento === 'ingreso' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                                 </span>
-                                <p className={`text-sm font-bold text-black truncate min-w-0 ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
+                                <p className={`text-body font-bold text-ink truncate min-w-0 ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
                               </div>
-                              <span className={`text-sm font-bold tabular-nums whitespace-nowrap shrink-0 ${m.monto < 0 ? 'text-prius-error' : 'text-prius-success'}`}>{fmtM(m.monto)}</span>
+                              <span className={`text-body font-bold tabular-nums whitespace-nowrap shrink-0 ${m.monto < 0 ? 'text-danger' : 'text-success-ink'}`}>{fmtM(m.monto)}</span>
                             </div>
-                            <p className="text-[10px] text-prius-muted uppercase tracking-wider truncate pl-8">
+                            <p className="text-[10px] text-ink-2 uppercase tracking-wider truncate pl-8">
                               {m.cliente_proveedor}{m.unidad ? ` · ${m.unidad}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
                             </p>
                             {m.comprobante && (
-                              <span className="inline-block self-start ml-8 px-2 py-0.5 rounded bg-white text-[10px] font-mono font-semibold text-prius-slate">{m.comprobante}</span>
+                              <span className="inline-block self-start ml-8 px-2 py-0.5 rounded-swatch bg-card text-[10px] font-semibold text-ink-2">{m.comprobante}</span>
                             )}
                           </button>
                         ))}
@@ -494,12 +494,12 @@ export default function Caja() {
                 )}
 
                 {tab === 'facturas' && (
-                  (resumen?.facturas || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin facturas todavía.</p> : (
+                  (resumen?.facturas || []).length === 0 ? <p className="text-xs text-ink-2 uppercase tracking-widest">Sin facturas todavía.</p> : (
                     <div className="space-y-2">
                       {resumen.facturas.map((f) => (
-                        <div key={f.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
-                          <span className="text-sm text-prius-slate">{f.etiqueta}</span>
-                          <span className="text-sm font-bold text-black tabular-nums">{fmtM(f.monto_total)}</span>
+                        <div key={f.etiqueta} className="flex justify-between py-2 border-b border-line last:border-0">
+                          <span className="text-body text-ink-2">{f.etiqueta}</span>
+                          <span className="text-body font-bold text-ink tabular-nums">{fmtM(f.monto_total)}</span>
                         </div>
                       ))}
                     </div>
@@ -507,12 +507,12 @@ export default function Caja() {
                 )}
 
                 {tab === 'recibos' && (
-                  (resumen?.recibos || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin recibos todavía.</p> : (
+                  (resumen?.recibos || []).length === 0 ? <p className="text-xs text-ink-2 uppercase tracking-widest">Sin recibos todavía.</p> : (
                     <div className="space-y-2">
                       {resumen.recibos.map((r) => (
-                        <div key={r.etiqueta} className="flex justify-between py-2 border-b border-hairline last:border-0">
-                          <span className="text-sm text-prius-slate">{r.etiqueta}</span>
-                          <span className="text-sm font-bold text-black tabular-nums">{fmtM(r.monto_total)}</span>
+                        <div key={r.etiqueta} className="flex justify-between py-2 border-b border-line last:border-0">
+                          <span className="text-body text-ink-2">{r.etiqueta}</span>
+                          <span className="text-body font-bold text-ink tabular-nums">{fmtM(r.monto_total)}</span>
                         </div>
                       ))}
                     </div>
@@ -520,16 +520,16 @@ export default function Caja() {
                 )}
 
                 {tab === 'sin_comprobante' && (
-                  (resumen?.sin_comprobante || []).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Todos los pagos tienen comprobante.</p> : (
+                  (resumen?.sin_comprobante || []).length === 0 ? <p className="text-xs text-ink-2 uppercase tracking-widest">Todos los pagos tienen comprobante.</p> : (
                     <div className="space-y-2">
                       {resumen.sin_comprobante.map((p) => (
                         <button
                           key={p.pago_id}
                           onClick={() => { const pago = pagos.find((x) => x.id === p.pago_id); if (pago) setPagoSeleccionado(pago) }}
-                          className="w-full flex justify-between py-2 px-2 border-b border-hairline last:border-0 hover:bg-prius-surface rounded-lg text-left"
+                          className="w-full flex justify-between py-2 px-2 border-b border-line last:border-0 hover:bg-surface rounded-icon text-left"
                         >
-                          <span className="text-sm text-prius-slate">{p.cliente || 'S/N'} — {p.concepto}</span>
-                          <span className="text-sm font-bold text-black tabular-nums">{fmtM(p.monto)}</span>
+                          <span className="text-body text-ink-2">{p.cliente || 'S/N'} — {p.concepto}</span>
+                          <span className="text-body font-bold text-ink tabular-nums">{fmtM(p.monto)}</span>
                         </button>
                       ))}
                     </div>
@@ -537,19 +537,19 @@ export default function Caja() {
                 )}
 
                 {tab === 'gastos' && (
-                  todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length === 0 ? <p className="text-xs text-prius-muted uppercase tracking-widest">Sin gastos todavía.</p> : (
+                  todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length === 0 ? <p className="text-xs text-ink-2 uppercase tracking-widest">Sin gastos todavía.</p> : (
                     <div className="space-y-2">
                       {todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).map((g) => (
                         <button
                           key={g.id}
                           onClick={() => setGastoSeleccionado(g)}
-                          className={`w-full flex justify-between items-center py-3 px-2 border-b border-hairline last:border-0 hover:bg-prius-surface rounded-lg text-left ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
+                          className={`w-full flex justify-between items-center py-3 px-2 border-b border-line last:border-0 hover:bg-surface rounded-icon text-left ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
                         >
                           <div className="min-w-0">
-                            <p className={`text-sm font-bold text-prius-slate truncate ${g.estado === 'anulado' ? 'line-through' : ''}`}>{g.descripcion}</p>
-                            <p className="text-[10px] text-prius-muted uppercase tracking-widest">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
+                            <p className={`text-body font-bold text-ink-2 truncate ${g.estado === 'anulado' ? 'line-through' : ''}`}>{g.descripcion}</p>
+                            <p className="text-[10px] text-ink-2 uppercase tracking-widest">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
                           </div>
-                          <span className="text-sm font-bold text-prius-error tabular-nums shrink-0 ml-3">{fmtM(g.monto)}</span>
+                          <span className="text-body font-bold text-danger tabular-nums shrink-0 ml-3">{fmtM(g.monto)}</span>
                         </button>
                       ))}
                     </div>
@@ -562,26 +562,26 @@ export default function Caja() {
                 {resumen?.por_medio?.length > 0 && (
                   <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
                     {resumen.por_medio.map((m) => (
-                      <div key={m.medio} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-prius-surface text-xs whitespace-nowrap shrink-0">
-                        <span className="text-prius-slate">{MEDIO_PAGO_LABEL[m.medio] || m.medio}:</span>
-                        <span className="font-bold text-black tabular-nums">{fmtM(m.neto)}</span>
+                      <div key={m.medio} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-surface text-xs whitespace-nowrap shrink-0">
+                        <span className="text-ink-2">{MEDIO_PAGO_LABEL[m.medio] || m.medio}:</span>
+                        <span className="font-bold text-ink tabular-nums">{fmtM(m.neto)}</span>
                       </div>
                     ))}
                   </div>
                 )}
                 {resumen?.sin_comprobante?.length > 0 && (
-                  <div className="flex items-start gap-3 p-4 bg-gold/5 border border-gold/20 rounded-xl">
-                    <AlertTriangle className="text-gold shrink-0 mt-0.5" size={16} />
-                    <p className="text-xs text-prius-slate">
+                  <div className="flex items-start gap-3 p-4 bg-gold-100 border border-gold-300 rounded-inner">
+                    <AlertTriangle className="text-ink shrink-0 mt-0.5" size={16} />
+                    <p className="text-xs text-ink-2">
                       Hay {resumen.sin_comprobante.length} pago{resumen.sin_comprobante.length > 1 ? 's' : ''} sin comprobante cargado todavía.
                     </p>
                   </div>
                 )}
                 <div className="hidden md:flex gap-4">
-                  <button onClick={() => setMostrarGasto(true)} className="flex items-center gap-2 px-6 py-3 bg-prius-surface hover:bg-hairline text-black rounded-xl font-bold uppercase text-xs tracking-widest border border-hairline transition-all">
+                  <button onClick={() => setMostrarGasto(true)} className="flex items-center gap-2 px-6 py-3 bg-surface hover:bg-line text-ink rounded-inner font-bold uppercase text-xs tracking-widest border border-line transition-all">
                     <Plus size={16} /> Registrar Gasto
                   </button>
-                  <button onClick={() => setMostrarCierre(true)} className="flex items-center gap-2 px-6 py-3 bg-black hover:bg-gray-800 text-white rounded-xl font-bold uppercase text-xs tracking-widest transition-all">
+                  <button onClick={() => setMostrarCierre(true)} className="flex items-center gap-2 px-6 py-3 bg-ink hover:bg-ink text-on-ink rounded-inner font-bold uppercase text-xs tracking-widest transition-all">
                     <Lock size={16} /> Cerrar Caja
                   </button>
                 </div>
@@ -595,10 +595,10 @@ export default function Caja() {
                   bottom nav (Nueva reserva). Esta acción pasa a un botón de
                   ancho completo, mismo estilo que su par de desktop. */}
               <div className="md:hidden space-y-3">
-                <button onClick={() => setMostrarGasto(true)} className="w-full py-4 bg-prius-surface hover:bg-hairline border border-hairline text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]">
+                <button onClick={() => setMostrarGasto(true)} className="w-full py-4 bg-surface hover:bg-line border border-line text-ink font-bold uppercase tracking-widest text-xs rounded-inner transition-all flex items-center justify-center gap-2 min-h-[44px]">
                   <Plus size={16} /> Registrar Gasto
                 </button>
-                <button onClick={() => setMostrarCierre(true)} className="w-full py-4 bg-black hover:bg-gray-800 text-white font-bold uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]">
+                <button onClick={() => setMostrarCierre(true)} className="w-full py-4 bg-ink hover:bg-ink text-on-ink font-bold uppercase tracking-widest text-xs rounded-inner transition-all flex items-center justify-center gap-2 min-h-[44px]">
                   <Lock size={16} /> Cerrar Caja de Hoy
                 </button>
               </div>
@@ -607,20 +607,20 @@ export default function Caja() {
             {/* Columna derecha — solo >=1024px: desglose por medio con tiles + acciones (mock). */}
             <aside className="hidden lg:flex lg:w-80 lg:shrink-0 flex-col gap-4 sticky top-4 self-start">
               {resumen?.por_medio?.length > 0 && (
-                <div className="bg-white border border-hairline rounded-2xl p-6 space-y-4">
-                  <h3 className="text-base font-bold text-black">Desglose por Medio de Pago</h3>
+                <div className="bg-card border border-line rounded-card p-6 space-y-4">
+                  <h3 className="text-base font-bold text-ink">Desglose por Medio de Pago</h3>
                   <div className="space-y-3">
                     {resumen.por_medio.map((m) => {
                       const IconoMedio = MEDIO_ICONO[m.medio] || Banknote
                       return (
-                        <div key={m.medio} className="bg-prius-surface rounded-xl p-4 flex items-center justify-between">
+                        <div key={m.medio} className="bg-surface rounded-inner p-4 flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-prius-slate">
+                            <div className="w-9 h-9 rounded-icon bg-card flex items-center justify-center text-ink-2">
                               <IconoMedio size={18} />
                             </div>
-                            <span className="text-sm font-semibold text-black">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                            <span className="text-body font-semibold text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
                           </div>
-                          <span className="text-sm font-bold text-black tabular-nums">{fmtM(m.neto)}</span>
+                          <span className="text-body font-bold text-ink tabular-nums">{fmtM(m.neto)}</span>
                         </div>
                       )
                     })}
@@ -629,18 +629,18 @@ export default function Caja() {
               )}
 
               {resumen?.sin_comprobante?.length > 0 && (
-                <div className="flex items-start gap-3 p-4 bg-gold/5 border border-gold/20 rounded-xl">
-                  <AlertTriangle className="text-gold shrink-0 mt-0.5" size={16} />
-                  <p className="text-xs text-prius-slate">
+                <div className="flex items-start gap-3 p-4 bg-gold-100 border border-gold-300 rounded-inner">
+                  <AlertTriangle className="text-ink shrink-0 mt-0.5" size={16} />
+                  <p className="text-xs text-ink-2">
                     Hay {resumen.sin_comprobante.length} pago{resumen.sin_comprobante.length > 1 ? 's' : ''} sin comprobante cargado todavía.
                   </p>
                 </div>
               )}
 
-              <button onClick={() => setMostrarGasto(true)} className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-hairline hover:bg-prius-surface text-black rounded-xl font-medium text-sm transition-all">
-                <Plus size={18} className="text-prius-slate" /> Registrar gasto
+              <button onClick={() => setMostrarGasto(true)} className="flex items-center justify-center gap-2 px-6 py-3.5 bg-card border border-line hover:bg-surface text-ink rounded-inner font-medium text-body transition-all">
+                <Plus size={18} className="text-ink-2" /> Registrar gasto
               </button>
-              <button onClick={() => setMostrarCierre(true)} className="flex items-center justify-center gap-2 px-6 py-3.5 bg-black hover:bg-gray-800 text-white rounded-xl font-medium text-sm transition-all">
+              <button onClick={() => setMostrarCierre(true)} className="flex items-center justify-center gap-2 px-6 py-3.5 bg-ink hover:bg-ink text-on-ink rounded-inner font-medium text-body transition-all">
                 <Lock size={18} /> Cerrar caja diaria
               </button>
             </aside>
@@ -652,32 +652,32 @@ export default function Caja() {
       {cajaSeleccionada && cajaSeleccionada.estado === 'cerrada' && (
         <>
           <div className="no-print flex flex-wrap gap-3">
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-3 bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all">
+            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-3 bg-surface hover:bg-surface anim-colors border border-line rounded-inner text-ink-2 text-xs font-bold uppercase tracking-widest transition-all">
               <Printer size={14} /> Imprimir A4
             </button>
-            <button onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })} disabled={!resumen} className="flex items-center gap-2 px-5 py-3 bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline rounded-xl text-prius-slate text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40">
+            <button onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })} disabled={!resumen} className="flex items-center gap-2 px-5 py-3 bg-surface hover:bg-surface anim-colors border border-line rounded-inner text-ink-2 text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-40">
               <Download size={14} /> Exportar CSV
             </button>
             <div className="flex-1" />
             {!reabriendo && puedeReabrir ? (
-              <button onClick={() => setReabriendo(true)} className="flex items-center gap-2 px-5 py-3 bg-gold/10 hover:bg-gold/20 border border-gold/20 rounded-xl text-gold text-xs font-bold uppercase tracking-widest transition-all">
+              <button onClick={() => setReabriendo(true)} className="flex items-center gap-2 px-5 py-3 bg-gold-100 hover:bg-gold-100 border border-gold-300 rounded-inner text-ink text-xs font-bold uppercase tracking-widest transition-all">
                 Reabrir Caja
               </button>
             ) : null}
           </div>
 
           {reabriendo && puedeReabrir && (
-            <div className="no-print card-light p-6 rounded-2xl card-light-inner space-y-4 border border-gold/20">
+            <div className="no-print card-light p-6 rounded-card card-light-inner space-y-4 border border-gold-300">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-gold">Reabrir caja</h3>
-                <button onClick={() => { setReabriendo(false); setMotivoReapertura('') }} className="text-prius-muted hover:text-black"><X size={18} /></button>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-ink">Reabrir caja</h3>
+                <button onClick={() => { setReabriendo(false); setMotivoReapertura('') }} className="text-ink-2 hover:text-ink"><X size={18} /></button>
               </div>
               <textarea
                 rows={2} value={motivoReapertura} onChange={(e) => setMotivoReapertura(e.target.value)}
                 placeholder="Motivo de la reapertura (obligatorio)"
-                className="w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm outline-none focus:border-gold/50 resize-none"
+                className="w-full bg-surface border border-line rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none focus:border-gold-300 resize-none"
               />
-              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-gold hover:bg-gold-hover anim-press disabled:opacity-50 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all">
+              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="w-full py-3 bg-gold hover:bg-gold-400 anim-press disabled:opacity-50 text-ink font-bold uppercase tracking-widest text-xs rounded-inner transition-all">
                 Confirmar reapertura
               </button>
             </div>
@@ -693,7 +693,7 @@ export default function Caja() {
           />
 
           <div className="no-print">
-            {resumenLoading ? <p className="text-xs text-prius-muted uppercase tracking-widest">Cargando resumen...</p> : <ResumenCaja resumen={resumen} />}
+            {resumenLoading ? <p className="text-xs text-ink-2 uppercase tracking-widest">Cargando resumen...</p> : <ResumenCaja resumen={resumen} />}
           </div>
           <CajaImpresion resumen={resumen} />
         </>

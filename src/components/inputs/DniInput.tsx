@@ -38,8 +38,8 @@ export default function DniInput({ label, hint, error, value, onChange, onBlur, 
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-prius-muted uppercase tracking-widest block mb-2">
-          {label}{required && <span className="text-prius-error ml-0.5">*</span>}
+        <label htmlFor={inputId} className="text-[11px] font-bold text-ink-2 uppercase tracking-widest block mb-2">
+          {label}{required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
       <input
@@ -55,11 +55,11 @@ export default function DniInput({ label, hint, error, value, onChange, onBlur, 
         onBlur={onBlur}
         placeholder="Ej: 30.123.456"
         aria-invalid={!!error}
-        className={`w-full min-h-[44px] px-4 py-3 bg-prius-subtle border rounded-xl text-black text-base md:text-sm font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
-          error ? 'border-red-500/60 focus:border-red-500' : 'border-hairline focus:border-gold/50'
+        className={`w-full min-h-[44px] px-4 py-3 bg-surface border rounded-inner text-ink text-base md:text-body font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
+          error ? 'border-danger/30 focus:border-danger' : 'border-line focus:border-gold-300'
         }`}
       />
-      {error ? <p className="text-[11px] text-prius-error mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-prius-muted mt-1.5">{hint}</p> : null}
+      {error ? <p className="text-[11px] text-danger mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-ink-2 mt-1.5">{hint}</p> : null}
     </div>
   )
 }

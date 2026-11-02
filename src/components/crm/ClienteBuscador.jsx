@@ -159,13 +159,13 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
       .join('')
       .toUpperCase()
     return (
-      <div className="flex items-center gap-3 p-3 bg-prius-subtle border border-hairline rounded-xl">
-        <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center shrink-0 select-none">
-          <span className="text-white text-xs font-bold">{initials}</span>
+      <div className="flex items-center gap-3 p-3 bg-surface border border-line rounded-inner">
+        <div className="w-8 h-8 rounded-full bg-ink flex items-center justify-center shrink-0 select-none">
+          <span className="text-on-ink text-xs font-bold">{initials}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-black truncate">{clienteSeleccionado.nombre}</p>
-          {unidadLabel && <p className="text-xs text-prius-muted truncate">{unidadLabel}</p>}
+          <p className="text-body font-bold text-ink truncate">{clienteSeleccionado.nombre}</p>
+          {unidadLabel && <p className="text-xs text-ink-2 truncate">{unidadLabel}</p>}
         </div>
         <button
           type="button"
@@ -174,7 +174,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
             setQuery('')
             setTimeout(() => inputRef.current?.focus(), 50)
           }}
-          className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-prius-muted hover:text-black transition-all"
+          className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-ink-2 hover:text-ink transition-all"
           aria-label="Quitar cliente"
         >
           <X size={16} />
@@ -186,13 +186,13 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
   // — Estado: formulario nuevo cliente —
   if (showNuevo) {
     return (
-      <div className="space-y-3 p-4 bg-prius-subtle border border-gold/30 rounded-xl">
+      <div className="space-y-3 p-4 bg-surface border border-gold-300 rounded-inner">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] font-bold text-gold uppercase tracking-widest">Cliente Nuevo</p>
+          <p className="text-[10px] font-bold text-ink uppercase tracking-widest">Cliente Nuevo</p>
           <button
             type="button"
             onClick={resetNuevo}
-            className="text-prius-muted hover:text-black transition-all"
+            className="text-ink-2 hover:text-ink transition-all"
           >
             <X size={16} />
           </button>
@@ -234,12 +234,12 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
           onChange={(v) => setMail(v.toLowerCase())}
           error={intentado ? errorsNuevo.mail : undefined}
         />
-        {error && <p className="text-[11px] text-prius-error">{error}</p>}
+        {error && <p className="text-[11px] text-danger">{error}</p>}
         <button
           type="button"
           onClick={handleGuardar}
           disabled={saving}
-          className="w-full py-2.5 bg-gold hover:bg-gold-hover disabled:opacity-50 text-black font-bold uppercase tracking-widest text-[10px] rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full py-2.5 bg-gold hover:bg-gold-400 disabled:opacity-50 text-ink font-bold uppercase tracking-widest text-[10px] rounded-inner transition-all flex items-center justify-center gap-2"
         >
           <UserPlus size={14} />
           {saving ? 'Guardando...' : 'Guardar Cliente'}
@@ -255,7 +255,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
         <div className="relative flex-1">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-prius-muted pointer-events-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-2 pointer-events-none"
           />
           <input
             ref={inputRef}
@@ -274,13 +274,13 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
               if (query.length >= 2) setShowResults(true)
             }}
             onKeyDown={handleKeyDown}
-            className="w-full bg-prius-subtle border border-hairline rounded-xl pl-9 pr-4 py-3 text-black text-base md:text-sm focus:border-gold/50 outline-none uppercase font-bold"
+            className="w-full bg-surface border border-line rounded-inner pl-9 pr-4 py-3 text-ink text-base md:text-body focus:border-gold-300 outline-none uppercase font-bold"
           />
         </div>
         <button
           type="button"
           onClick={() => setShowNuevo(true)}
-          className="px-3 py-3 bg-prius-subtle border border-hairline rounded-xl text-[10px] font-bold text-prius-slate hover:text-black hover:border-gold/50 transition-all flex items-center gap-1.5 shrink-0 uppercase tracking-widest whitespace-nowrap"
+          className="px-3 py-3 bg-surface border border-line rounded-inner text-[10px] font-bold text-ink-2 hover:text-ink hover:border-gold-300 transition-all flex items-center gap-1.5 shrink-0 uppercase tracking-widest whitespace-nowrap"
         >
           <UserPlus size={14} />
           <span>+ Nuevo</span>
@@ -288,9 +288,9 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
       </div>
 
       {showResults && (
-        <div className="mt-1 border border-hairline rounded-xl overflow-hidden bg-white">
+        <div className="mt-1 border border-line rounded-inner overflow-hidden bg-card">
           {resultados.length === 0 ? (
-            <p className="px-4 py-3 text-xs text-prius-muted uppercase tracking-widest">Sin resultados</p>
+            <p className="px-4 py-3 text-xs text-ink-2 uppercase tracking-widest">Sin resultados</p>
           ) : (
             resultados.map((c, i) => {
               const unidadLabel = unidadPorCliente[c.id]
@@ -300,12 +300,12 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
                   type="button"
                   onClick={() => handleSelect(c)}
                   className={`w-full text-left px-4 py-2.5 flex items-center justify-between gap-2 transition-all ${
-                    i > 0 ? 'border-t border-hairline' : ''
-                  } ${i === focusedIndex ? 'bg-prius-subtle' : 'hover:bg-prius-subtle'}`}
+                    i > 0 ? 'border-t border-line' : ''
+                  } ${i === focusedIndex ? 'bg-surface' : 'hover:bg-surface'}`}
                 >
-                  <span className="text-sm text-black font-bold uppercase truncate">{c.nombre}</span>
+                  <span className="text-body text-ink font-bold uppercase truncate">{c.nombre}</span>
                   {unidadLabel && (
-                    <span className="text-xs text-prius-muted shrink-0">{unidadLabel}</span>
+                    <span className="text-xs text-ink-2 shrink-0">{unidadLabel}</span>
                   )}
                 </button>
               )

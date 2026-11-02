@@ -16,7 +16,7 @@ import { formatPesos } from '../../lib/format'
 // cambia ahí), y se achica solo por debajo de ~480px de ancho para no
 // partirse en dos líneas.
 const SIZE_CLASS = {
-  lg: 'text-metric-xl',
+  lg: 'text-stat',
   md: 'text-[clamp(18px,5vw,24px)] font-bold leading-tight',
   // `sm`: cards más chicas (ej. "Totales Operativos" de ResumenCaja), tope
   // en 18px = mismo tamaño que el text-lg fijo que usaban en desktop (sin

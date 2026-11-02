@@ -56,7 +56,7 @@ import { Plus, Filter, Check, ChevronLeft, LayoutList } from 'lucide-react'
 // pantallas no se confundan a simple vista, dentro de la misma paleta Glass
 // Dark ya estandarizada.
 const inputClass =
-  'w-full bg-prius-subtle border border-hairline rounded-xl px-4 py-3 text-black text-base md:text-sm focus:border-cyan-400/50 outline-none font-bold'
+  'w-full bg-surface border border-line rounded-inner px-4 py-3 text-ink text-base md:text-body focus:border-line outline-none font-bold'
 
 // Unidades únicas asociadas a un cliente a partir de sus reservas VIGENTES
 // (co-socio en varias unidades, o histórico de varias temporadas: puede haber
@@ -696,7 +696,7 @@ export default function Clientes() {
 
   if (!readyClientes) {
     return (
-      <div className="space-y-6 font-ui">
+      <div className="space-y-6">
         <Skeleton className="h-12" />
         <div className="space-y-2">
           {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-16" />)}
@@ -727,26 +727,26 @@ export default function Clientes() {
           onChange={setSearchTerm}
           placeholder="Buscar por nombre, DNI, CUIT o unidad (ej. carpa 19)..."
           className={isDesktopLG ? 'w-48 lg:w-64 xl:w-80 min-w-0 shrink' : 'w-full'}
-          inputClassName={isDesktopLG ? 'h-10 min-h-0 py-0 focus:border-gold/50' : 'focus:border-gold/50 py-3'}
+          inputClassName={isDesktopLG ? 'h-10 min-h-0 py-0 focus:border-gold-300' : 'focus:border-gold-300 py-3'}
         />
         <div className={isDesktopLG ? 'flex items-center gap-3 flex-1 min-w-0' : 'flex items-center gap-3'}>
           <div ref={filtrosOverlay.bind} className="relative">
             <button
               onClick={() => setShowFiltros((v) => !v)}
-              className={`h-10 px-4 bg-white border border-hairline rounded-xl flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-gold' : 'text-prius-slate hover:text-black'}`}
+              className={`h-10 px-4 bg-card border border-line rounded-inner flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtroEstado !== 'todos' ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
             >
               <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
             </button>
             {showFiltros && (
-                <div className="absolute left-0 mt-2 w-48 bg-white border border-hairline rounded-xl overflow-hidden z-50 p-3 shadow-sm">
+                <div className="absolute left-0 mt-2 w-48 bg-card border border-line rounded-inner overflow-hidden z-50 p-3">
                   {FILTROS_ESTADO_CLIENTE.map((f) => (
                     <button
                       key={f.value}
                       onClick={() => { setFiltroEstado(f.value); setShowFiltros(false) }}
-                      className="w-full text-left px-3 py-2 text-xs text-prius-slate hover:bg-prius-surface flex items-center justify-between rounded-lg"
+                      className="w-full text-left px-3 py-2 text-xs text-ink-2 hover:bg-surface flex items-center justify-between rounded-icon"
                     >
                       {f.label}
-                      {filtroEstado === f.value && <Check size={14} className="text-gold" />}
+                      {filtroEstado === f.value && <Check size={14} className="text-ink" />}
                     </button>
                   ))}
                 </div>
@@ -755,7 +755,7 @@ export default function Clientes() {
           <div className="flex-1" />
           <button
             onClick={handleOpenCreate}
-            className="h-10 px-4 bg-gold hover:bg-gold-hover anim-press text-black rounded-xl transition-all flex items-center gap-2 font-semibold text-label-lg shrink-0"
+            className="h-10 px-4 bg-gold hover:bg-gold-400 anim-press text-ink rounded-inner transition-all flex items-center gap-2 font-semibold text-label shrink-0"
           >
             <Plus size={16} /> <span className="hidden sm:inline">Nuevo Cliente</span><span className="sm:hidden">Nuevo</span>
           </button>
@@ -784,7 +784,7 @@ export default function Clientes() {
             página. */}
         <ScrollFade className={isDesktopLG ? 'flex-1 min-w-[280px] max-w-[480px] shrink lg:h-full lg:overflow-y-auto' : 'w-full'}>
           {clientesVisibles.length === 0 ? (
-            <div className="p-12 text-center text-sm tracking-wider text-prius-muted bg-white border border-hairline rounded-xl">
+            <div className="p-12 text-center text-body tracking-wider text-ink-2 bg-card border border-line rounded-inner">
               No se encontraron clientes.
             </div>
           ) : (
@@ -804,7 +804,7 @@ export default function Clientes() {
                 return (
                   <React.Fragment key={cliente.id}>
                   {mostrarGrupo && (
-                    <p className="text-label-md font-bold text-prius-slate uppercase tracking-wider pt-2 first:pt-0">
+                    <p className="text-label font-bold text-ink-2 uppercase tracking-wider pt-2 first:pt-0">
                       {letra} · {totalGrupo} cliente{totalGrupo > 1 ? 's' : ''}
                     </p>
                   )}
@@ -821,11 +821,11 @@ export default function Clientes() {
                     // ancho fijo en las columnas de la derecha se comporta
                     // como se espera: el nombre (flex-1 min-w-0) se lleva
                     // todo el sobrante real.
-                    className={`bg-white rounded-xl border px-4 py-4 min-h-[76px] flex items-center gap-x-2 cursor-pointer transition-all ${
-                      isSelected ? 'border-gold bg-prius-surface' : 'border-hairline hover:bg-prius-surface'
+                    className={`bg-card rounded-inner border px-4 py-4 min-h-[76px] flex items-center gap-x-2 cursor-pointer transition-all ${
+                      isSelected ? 'border-gold bg-surface' : 'border-line hover:bg-surface'
                     }`}
                   >
-                    <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-ink text-on-ink flex items-center justify-center text-xs font-bold shrink-0">
                       {cliente.nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
                     </div>
 
@@ -837,7 +837,7 @@ export default function Clientes() {
                         el badge de estado (mismo estadoBadgeStatus de
                         siempre, sin tocar el mapeo). */}
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-black truncate">{formatNombre(cliente.nombre)}</p>
+                      <p className="font-bold text-ink truncate">{formatNombre(cliente.nombre)}</p>
                       {/* 29/10/2026: el wrapper del badge solo se monta si HAY
                           badge. Antes iba siempre con `min-h-[18px]`, así que
                           un cliente sin estado (ej. BEATRIZ AYALA) igual
@@ -857,7 +857,7 @@ export default function Clientes() {
                             setExpandedId(cliente.id)
                             scrollAndHighlight(`pago-${d.comprobanteMatch.pago.id}`)
                           }}
-                          className="text-[10px] text-gold font-bold mt-1 hover:underline truncate block max-w-full text-left"
+                          className="text-[10px] text-ink font-bold mt-1 hover:underline truncate block max-w-full text-left"
                         >
                           Comprobante {formatComprobante(d.comprobanteMatch.comprobante.tipo, d.comprobanteMatch.comprobante.numero)}
                           {formatPesosVisible(d.comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(d.comprobanteMatch.pago.monto)}` : ''}
@@ -875,19 +875,19 @@ export default function Clientes() {
                       {d.saldoInfo.sinVerificar ? (
                         d.saldoHeaderSaldado ? null : (
                           <div className="text-right">
-                            <p className="text-prius-error text-[9px] font-bold uppercase tracking-wide whitespace-nowrap">Saldo sin verificar</p>
+                            <p className="text-danger text-[9px] font-bold uppercase tracking-wide whitespace-nowrap">Saldo sin verificar</p>
                             {d.comprobantesPendientesCliente > 0 && (
-                              <p className="text-prius-muted font-normal normal-case tracking-normal text-[10px] truncate">
+                              <p className="text-ink-2 font-normal normal-case tracking-normal text-[10px] truncate">
                                 {d.comprobantesPendientesCliente} comprobante{d.comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
                               </p>
                             )}
                           </div>
                         )
                       ) : d.sinPrecio ? (
-                        <span className="text-prius-slate text-[10px] uppercase tracking-widest font-bold whitespace-nowrap">Sin precio</span>
+                        <span className="text-ink-2 text-[10px] uppercase tracking-widest font-bold whitespace-nowrap">Sin precio</span>
                       ) : (
                         formatPesosVisible(d.saldoInfo.total) && (
-                          <MontoStat value={d.saldoInfo.total} size="xs" className="text-prius-error" />
+                          <MontoStat value={d.saldoInfo.total} size="xs" className="text-danger" />
                         )
                       )}
 
@@ -896,17 +896,17 @@ export default function Clientes() {
                         title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}`).join(', ')}
                       >
                         {d.unidadesCliente.length === 0 ? (
-                          <span className="text-[11px] text-prius-muted font-bold tracking-widest">Sin unidad</span>
+                          <span className="text-[11px] text-ink-2 font-bold tracking-widest">Sin unidad</span>
                         ) : (
                           <>
                             {d.unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
                               <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
                                 <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
-                                <span className="text-base font-extrabold text-black leading-none">{u.numero}</span>
+                                <span className="text-base font-extrabold text-ink leading-none">{u.numero}</span>
                               </span>
                             ))}
                             {d.unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
-                              <span className="text-[10px] text-prius-muted font-bold tracking-widest">
+                              <span className="text-[10px] text-ink-2 font-bold tracking-widest">
                                 +{d.unidadesCliente.length - MAX_UNIDADES_VISIBLES}
                               </span>
                             )}
@@ -930,7 +930,7 @@ export default function Clientes() {
             dispara el crossfade (content-crossfade, 180ms, fade + 6px — ver
             index.css) cada vez que cambia el cliente. */}
         {isDesktopLG && (
-          <aside className="hidden lg:flex lg:h-full flex-1 min-w-[320px] bg-white border border-hairline rounded-2xl p-space-lg flex-col overflow-hidden">
+          <aside className="hidden lg:flex lg:h-full flex-1 min-w-[320px] bg-card border border-line rounded-card p-space-lg flex-col overflow-hidden">
             {clienteSeleccionado ? (
               <div key={clienteSeleccionado.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
                 <ClienteDetalleContent
@@ -954,9 +954,9 @@ export default function Clientes() {
                 />
               </div>
             ) : (
-              <div key="empty" className="content-crossfade flex-1 flex flex-col items-center justify-center text-center gap-3 text-prius-muted">
+              <div key="empty" className="content-crossfade flex-1 flex flex-col items-center justify-center text-center gap-3 text-ink-2">
                 <LayoutList size={28} />
-                <p className="text-body-md">Elegí un cliente para ver la ficha</p>
+                <p className="text-body">Elegí un cliente para ver la ficha</p>
               </div>
             )}
           </aside>
@@ -1000,12 +1000,12 @@ export default function Clientes() {
           sin portal este overlay quedaba recortado a la altura del
           contenido scrolleable en vez de cubrir el viewport real. */}
       {isMobile && mobileDetalleShouldRender && createPortal(
-        <div className={`fixed inset-0 z-[995] bg-white flex flex-col ${clienteSeleccionado ? 'ui-open' : 'ui-close'}`}>
-          <div className="flex items-center gap-2 px-2 h-16 border-b border-hairline shrink-0">
-            <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-prius-slate hover:text-black">
+        <div className={`fixed inset-0 z-[995] bg-card flex flex-col ${clienteSeleccionado ? 'ui-open' : 'ui-close'}`}>
+          <div className="flex items-center gap-2 px-2 h-16 border-b border-line shrink-0">
+            <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-2 hover:text-ink">
               <ChevronLeft size={20} />
             </button>
-            <h1 className="text-sm font-bold uppercase tracking-widest text-black">Ficha de Cliente</h1>
+            <h1 className="text-body font-bold uppercase tracking-widest text-ink">Ficha de Cliente</h1>
           </div>
           <ScrollFade className="flex-1 overflow-y-auto px-space-lg pt-space-md pb-space-lg flex flex-col min-h-0">
             {mobileDetalleCliente && (
@@ -1050,7 +1050,7 @@ export default function Clientes() {
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-prius-slate bg-prius-subtle hover:bg-prius-subtle anim-colors border border-hairline transition-all"
+              className="px-5 py-3 rounded-inner text-xs font-bold uppercase tracking-widest text-ink-2 bg-surface hover:bg-surface anim-colors border border-line transition-all"
             >
               Cancelar
             </button>
@@ -1059,7 +1059,7 @@ export default function Clientes() {
               form="form-cliente"
               loading={savingCliente}
               loadingText="Guardando..."
-              className="px-6 py-3 bg-gold hover:bg-gold-hover anim-press text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs shadow-xl"
+              className="px-6 py-3 bg-gold hover:bg-gold-400 anim-press text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs"
             >
               {editingCliente ? 'Guardar Cambios' : 'Registrar Cliente'}
             </LoadingButton>
@@ -1068,7 +1068,7 @@ export default function Clientes() {
       >
         <form id="form-cliente" onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-5">
-            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Cliente</p>
+            <p className="text-[9px] font-bold text-ink-2 uppercase tracking-[0.2em] border-b border-line pb-2">Cliente</p>
             <TextInput
               label="Nombre Completo"
               required
@@ -1095,11 +1095,11 @@ export default function Clientes() {
           </div>
 
           <div className="space-y-5">
-            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Datos fiscales</p>
+            <p className="text-[9px] font-bold text-ink-2 uppercase tracking-[0.2em] border-b border-line pb-2">Datos fiscales</p>
             {/* 31/10/2026: último SelectChips de la app -> BrandSelect, el
                 select único (portal, buscador, teclado, mismo look). */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Condición IVA</label>
+              <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Condición IVA</label>
               <BrandSelect
                 value={condicionIva}
                 onChange={setCondicionIva}
@@ -1131,7 +1131,7 @@ export default function Clientes() {
           </div>
 
           <div className="space-y-5">
-            <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Notas</p>
+            <p className="text-[9px] font-bold text-ink-2 uppercase tracking-[0.2em] border-b border-line pb-2">Notas</p>
             <TextInput
               as="textarea"
               label="Notas / Comentarios"
@@ -1148,8 +1148,8 @@ export default function Clientes() {
               para clientes ya existentes. */}
           {!editingCliente && (
             <div className="space-y-5">
-              <p className="text-[9px] font-bold text-prius-muted uppercase tracking-[0.2em] border-b border-hairline pb-2">Reserva de temporada (opcional)</p>
-              <label className="flex items-center gap-2 text-xs text-prius-slate cursor-pointer">
+              <p className="text-[9px] font-bold text-ink-2 uppercase tracking-[0.2em] border-b border-line pb-2">Reserva de temporada (opcional)</p>
+              <label className="flex items-center gap-2 text-xs text-ink-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={agregarTemporadaNueva}
@@ -1163,17 +1163,17 @@ export default function Clientes() {
                 <div ref={revealTemporadaNuevaRef} className="anim-fade-up-page space-y-4 pl-1">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Unidad</label>
+                      <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Unidad</label>
                       <BrandSelect value={tUnidadId} onChange={setTUnidadId} options={opcionesUnidadTemporada} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Temporada</label>
-                      <p className={`${inputClass} text-prius-slate`}>{temporadaActiva?.nombre || '—'}</p>
+                      <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Temporada</label>
+                      <p className={`${inputClass} text-ink-2`}>{temporadaActiva?.nombre || '—'}</p>
                     </div>
                   </div>
                   {puedeBonificar && (
-                    <div className="flex items-center justify-between p-3 bg-prius-subtle border border-hairline rounded-xl">
-                      <label htmlFor="cliente-temporada-bonificada" className="text-[10px] font-bold text-prius-slate uppercase tracking-widest cursor-pointer">
+                    <div className="flex items-center justify-between p-3 bg-surface border border-line rounded-inner">
+                      <label htmlFor="cliente-temporada-bonificada" className="text-[10px] font-bold text-ink-2 uppercase tracking-widest cursor-pointer">
                         Unidad bonificada
                       </label>
                       <input
@@ -1194,7 +1194,7 @@ export default function Clientes() {
                     hint={tBonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
                   />
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Notas de la reserva</label>
+                    <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Notas de la reserva</label>
                     <textarea
                       rows={2}
                       value={tNotas}
@@ -1226,14 +1226,14 @@ export default function Clientes() {
       >
         <form onSubmit={handleSubmitConfirmarReserva} className="space-y-6">
           <div>
-            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Cliente</p>
-            <p className="text-sm text-black font-bold uppercase mt-1">{formatNombre(confirmarReserva?.cliente?.nombre)}</p>
+            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Cliente</p>
+            <p className="text-body text-ink font-bold uppercase mt-1">{formatNombre(confirmarReserva?.cliente?.nombre)}</p>
           </div>
           <MoneyInput label="Monto Total" value={confirmarValorTotal} onChange={setConfirmarValorTotal} required max={100_000_000} />
           <button
             type="submit"
             disabled={savingConfirmacion}
-            className="w-full py-4 bg-gold hover:bg-gold-hover anim-press disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-gold-400 anim-press disabled:opacity-50 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs transition-all"
           >
             {savingConfirmacion ? 'Guardando...' : 'Confirmar'}
           </button>
@@ -1312,21 +1312,21 @@ export default function Clientes() {
       >
         <div className="space-y-6">
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">
               Elegí 2 o más períodos para unificar bajo un solo precio total
             </p>
             <div className="space-y-2">
               {(reservasPorCliente[agruparCliente?.id] || [])
                 .filter((r) => !r.grupo_id && r.estado !== 'cancelada')
                 .map((r) => (
-                  <label key={r.id} className="flex items-center gap-3 p-3 bg-prius-subtle border border-hairline rounded-xl text-xs cursor-pointer">
+                  <label key={r.id} className="flex items-center gap-3 p-3 bg-surface border border-line rounded-inner text-xs cursor-pointer">
                     <input
                       type="checkbox"
                       checked={agruparSeleccion.has(r.id)}
                       onChange={() => handleToggleSeleccionGrupo(r.id)}
-                      className="accent-cyan-400 w-4 h-4"
+                      className="accent-gold w-4 h-4"
                     />
-                    <span className="text-prius-slate">
+                    <span className="text-ink-2">
                       {unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)} ·{' '}
                       {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
                     </span>
@@ -1340,7 +1340,7 @@ export default function Clientes() {
             type="button"
             disabled={agruparSeleccion.size < 2 || !agruparPrecioTotal || savingGrupo}
             onClick={handleCrearGrupo}
-            className="w-full py-4 bg-gold hover:bg-gold-hover anim-press disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] rounded-xl text-xs transition-all shadow-xl"
+            className="w-full py-4 bg-gold hover:bg-gold-400 anim-press disabled:opacity-50 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs transition-all"
           >
             {savingGrupo ? 'Agrupando...' : 'Agrupar y Definir Precio'}
           </button>

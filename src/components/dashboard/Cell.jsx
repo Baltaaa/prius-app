@@ -36,7 +36,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
           // Libre (bug real, oct 2026 testing): antes "white/5 border-white/10"
           // — pensado para el fondo dark glass viejo, invisible sobre el
           // card-light blanco real de hoy. Borde sutil #E5E5E5 (Quiet Luxury).
-          : "bg-white text-prius-muted border-[#E5E5E5] hover:border-black/30"
+          : "bg-white text-plano-muted border-[#E5E5E5] hover:border-black/30"
 
   const opacityClass = isDimmed ? "opacity-20" : "opacity-100"
   const highlightClass = isHighlighted

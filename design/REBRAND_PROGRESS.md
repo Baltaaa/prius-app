@@ -5,7 +5,7 @@ Fuente de verdad del diseño: design/DESIGN.md. Referencia visual: design/refere
 
 ## Estado por fase
 - [x] Fase 0 — Inventario (aprobado 2/11/2026)
-- [ ] Fase 1 — Tokens y codemod (FRENO al terminar)
+- [~] Fase 1 — Tokens y codemod: hecho, FRENO. Falta verificar plano con cuenta dedicada (snapshots y zoom mínimo)
 - [ ] Fase 2 — Primitivas y componentes brand
 - [ ] Fase 3 — Piloto Dashboard (FRENO al terminar)
 - [ ] Fase 4 — Rollout por pantalla
@@ -17,8 +17,15 @@ JS 1533,1 KB (461,1 KB gzip) · CSS 131,9 KB (25,8 KB gzip) · fuentes 284,1 KB 
 Chunk principal index 128,1 KB gzip · lint 0 errores, 23 warnings · typecheck OK
 vitest 77/78: falla format.test.ts ("Unidad carpa #74"), previo al rebranding y ajeno a estilos.
 
+## Después de Fase 1
+JS 1524,1 KB (459,1 KB gzip) · CSS 73,3 KB (16,7 KB gzip) · fuentes 70,7 KB · 88 chunks.
+Codemod: 3.595 clases en 84 archivos. lint 0 errores, typecheck OK, vitest igual que el baseline.
+Pendientes de Fase 4: text-xs y text-[8-13px], uppercase/tracking, hex en DateInput.tsx:248-252 y Dashboard.jsx:863-865.
+Cambio respecto de la tabla: text-prius-success va a text-success-ink, porque el verde sólido da 3,3:1 sobre blanco.
+
 ## Pendiente del usuario
-- Crear cuenta superadmin dedicada para Playwright y poner sus credenciales en .env.local (hoy E2E_USER_EMAIL es la cuenta personal). Sin eso no corre ningún Playwright.
+- Crear cuenta superadmin dedicada y agregar E2E_REBRAND_EMAIL / E2E_REBRAND_PASSWORD a .env.local. Sin eso no corre ningún Playwright con login. E2E_USER_EMAIL no se usa: es la cuenta personal.
+- Con la cuenta creada: npx playwright test --config playwright.rebrand.config.ts --update-snapshots, revisar el diff, y correr e2e/plano-zoom-minimo.spec.ts.
 
 ## Reglas de ejecución
 - Playwright solo con playwright.rebrand.config.ts + e2e/guard.ts (lista blanca). Nunca la config por defecto: su globalTeardown borra datos en producción.
