@@ -71,6 +71,20 @@ export default {
         swatch: '6px',
         'plano-md': '4px',
       },
+      spacing: {
+        'margin-desktop': '1.25rem',
+        'margin': '1.25rem',
+        'margin-mobile': '1rem',
+        'margin-tablet': '2rem',
+        'gutter': '1rem',
+        'gutter-sm': '0.75rem',
+        'gutter-lg': '1.5rem',
+        'space-xs': '0.25rem',
+        'space-sm': '0.5rem',
+        'space-md': '1rem',
+        'space-lg': '1.5rem',
+        'space-xl': '2.25rem',
+      },
       // Tailwind v3 no trae `dvh`: `h-screen` (100vh) en iOS Safari mide más
       // que lo visible con la barra de direcciones. Fallback en index.css.
       height: { dvh: '100dvh' },
