@@ -3,7 +3,7 @@ import { formatNombre } from '../../lib/format'
 import { Trash2, UserPlus } from 'lucide-react'
 import Modal from './Modal'
 import ConfirmarSuperadminModal from './ConfirmarSuperadminModal'
-import ClienteSelector from './ClienteSelector'
+import ClienteBuscador from './ClienteBuscador'
 import LoadingButton from '../ui/LoadingButton'
 import { useData } from '../../context/DataProvider'
 import { useDialog } from '../../context/DialogProvider'
@@ -104,7 +104,7 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
 
       <div className="space-y-2">
         <p className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Agregar cosocio</p>
-        <ClienteSelector value={nuevoId} onChange={(id) => setNuevoId(id)} />
+        <ClienteBuscador value={nuevoId} onChange={(id) => setNuevoId(id)} />
         <LoadingButton
           loading={agregando}
           loadingText="Agregando..."

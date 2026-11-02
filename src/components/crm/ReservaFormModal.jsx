@@ -12,7 +12,7 @@ import Modal from './Modal'
 import DateInput from '../inputs/DateInput'
 import BrandSelect from '../ui/BrandSelect'
 import MoneyInput from '../inputs/MoneyInput'
-import ClienteSelector from './ClienteSelector'
+import ClienteBuscador from './ClienteBuscador'
 import StatusBadge from './StatusBadge'
 import ReservaCalendar from './ReservaCalendar'
 import PagoComprobanteCampos from './PagoComprobanteCampos'
@@ -385,7 +385,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
 
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Seleccionar Cliente</label>
-            <ClienteSelector
+            <ClienteBuscador
               value={clienteId}
               onChange={(id) => setClienteId(id)}
             />

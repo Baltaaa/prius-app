@@ -4,7 +4,7 @@ import { useDialog } from '../../context/DialogProvider'
 import { usePagoComprobanteForm } from '../../hooks/usePagoComprobanteForm'
 import { useRevealOnCheck } from '../../hooks/useRevealOnCheck'
 import Modal from '../crm/Modal'
-import ClienteSelector from '../crm/ClienteSelector'
+import ClienteBuscador from '../crm/ClienteBuscador'
 import PagoComprobanteCampos from '../crm/PagoComprobanteCampos'
 import MoneyInput from '../inputs/MoneyInput'
 import LoadingButton from '../ui/LoadingButton'
@@ -117,7 +117,7 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Cliente</label>
-          <ClienteSelector value={clienteId} onChange={(id) => setClienteId(id)} autoFocus />
+          <ClienteBuscador value={clienteId} onChange={(id) => setClienteId(id)} autoFocus />
         </div>
         <div className="space-y-2">
           <label className="text-[10px] font-bold text-prius-muted uppercase tracking-widest">Temporada</label>
