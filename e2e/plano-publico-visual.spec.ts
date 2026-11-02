@@ -22,7 +22,7 @@ test.describe('Plano público (preview) — regresión visual', () => {
     await expect(page.getByText('Cargando disponibilidad…')).toHaveCount(0, { timeout: 15_000 })
     await page.waitForTimeout(400)
 
-    const mapa = page.locator('.plano-area-map, .glass-card-inner').first()
+    const mapa = page.locator('[style*="touch-action"], .glass-card-inner').first()
     await expect(mapa).toBeVisible()
     await expect(mapa).toHaveScreenshot('mapa-publico.png')
   })

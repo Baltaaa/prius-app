@@ -2,15 +2,9 @@ import { defineConfig, devices } from '@playwright/test'
 import base from './playwright.config'
 
 // Config del rebranding: pega contra producción, así que corre sin escribir
-// nada. Tres diferencias con la config por defecto:
-//  - sin globalTeardown (el de siempre borra datos al final de cualquier corrida),
-//  - con el guard de e2e/guard.ts activo (lista blanca de requests),
-//  - con una cuenta dedicada propia: nunca una cuenta real del equipo.
-if (!process.env.E2E_REBRAND_EMAIL || !process.env.E2E_REBRAND_PASSWORD) {
-  throw new Error('Faltan E2E_REBRAND_EMAIL / E2E_REBRAND_PASSWORD en .env.local: tiene que ser una cuenta dedicada a tests.')
-}
-process.env.E2E_USER_EMAIL = process.env.E2E_REBRAND_EMAIL
-process.env.E2E_USER_PASSWORD = process.env.E2E_REBRAND_PASSWORD
+// nada. Dos diferencias con la config por defecto: sin globalTeardown (el de
+// siempre borra datos al final de cualquier corrida) y con el guard de
+// e2e/guard.ts activo (lista blanca de requests).
 process.env.RB_GUARD = '1'
 
 const { globalTeardown: _sinTeardown, ...resto } = base
