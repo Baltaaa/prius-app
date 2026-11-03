@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { invocarFuncion } from '../lib/invocarFuncion'
 
 // Cache de módulo del lado del cliente (no localStorage: es solo para no
 // repetir el fetch si el usuario va y vuelve a la misma fecha dentro de la
@@ -32,15 +32,9 @@ export function useClima(fecha) {
     }
 
     setLoading(true)
-    supabase.functions
-      .invoke(`clima-playa?fecha=${fecha}`, { method: 'GET' })
-      .then(({ data, error: err }) => {
+    invocarFuncion(`clima-playa?fecha=${fecha}`, { method: 'GET' })
+      .then((data) => {
         if (!activo) return
-        if (err) {
-          setError(err)
-          setClima(null)
-          return
-        }
         cache.set(fecha, { at: Date.now(), data })
         setClima(data)
         setError(null)

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { AlertTriangle, Eye, EyeOff, X } from 'lucide-react'
 import { useOverlay, OverlayParentContext } from '../../context/OverlayProvider'
 import { useMountTransition } from '../../hooks/useMountTransition'
+import { FuncionError, MENSAJE_GENERICO } from '../../lib/invocarFuncion'
 
 // Confirmación única para TODA acción de superadmin (mini-prompt
 // 26/10/2026) — reemplaza a ConfirmDeleteModal.jsx ("escribí el nombre
@@ -22,8 +23,10 @@ import { useMountTransition } from '../../hooks/useMountTransition'
 //
 // Props:
 //   isOpen, onClose
-//   onConfirm(password) — async; si tira, el mensaje se muestra debajo del
-//     campo sin cerrar el modal (contraseña incorrecta, bloqueado, etc.)
+//   onConfirm(password) — async; si tira, el mensaje (en español, ver
+//     invocarFuncion.ts) se muestra debajo del campo sin cerrar el modal ni
+//     perder lo tipeado: contraseña incorrecta, bloqueado, sin conexión. Ante
+//     un error de conexión el botón pasa a "Reintentar".
 //   titulo: nombre de la acción, ej. "Eliminar reserva"
 //   afectaLinea: una sola línea de qué se va a afectar, ej.
 //     "Reserva de MARCELO MADOTTA · carpa #2 y sus pagos asociados"
@@ -35,12 +38,17 @@ export default function ConfirmarSuperadminModal({
   const [mostrarPassword, setMostrarPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [errorConexion, setErrorConexion] = useState(false)
+  // Guard síncrono contra doble envío (el estado `loading` recién se ve en el
+  // próximo render: un Enter + click en el mismo tick pasaba los dos).
+  const enviandoRef = useRef(false)
   const overlayId = useId()
 
   const handleClose = () => {
     if (loading) return
     setPassword('')
     setError(null)
+    setErrorConexion(false)
     setMostrarPassword(false)
     onClose?.()
   }
@@ -58,7 +66,7 @@ export default function ConfirmarSuperadminModal({
   // Limpiar el campo al abrir/cerrar — la contraseña nunca queda en el
   // estado más tiempo del necesario (y nunca se persiste ni se loguea acá).
   useEffect(() => {
-    if (isOpen) { setPassword(''); setError(null); setMostrarPassword(false) }
+    if (isOpen) { setPassword(''); setError(null); setErrorConexion(false); setMostrarPassword(false) }
   }, [isOpen])
 
   useEffect(() => {
@@ -72,15 +80,22 @@ export default function ConfirmarSuperadminModal({
   if (!shouldRender) return null
 
   const handleConfirm = async () => {
-    if (!password || loading) return
+    if (!password || loading || enviandoRef.current) return
+    enviandoRef.current = true
     setLoading(true)
     setError(null)
+    setErrorConexion(false)
     try {
       await onConfirm?.(password)
       setPassword('')
     } catch (err) {
-      setError(err.message || 'No se pudo completar la acción.')
+      // Solo se muestran mensajes ya traducidos (FuncionError); cualquier otra
+      // excepción cae al genérico en español, nunca un mensaje técnico.
+      const conocido = err instanceof FuncionError
+      setError(conocido ? err.message : MENSAJE_GENERICO)
+      setErrorConexion(conocido && err.esConexion)
     } finally {
+      enviandoRef.current = false
       setLoading(false)
     }
   }
@@ -130,11 +145,11 @@ export default function ConfirmarSuperadminModal({
             <input
               type={mostrarPassword ? 'text' : 'password'}
               value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(null) }}
+              onChange={(e) => { setPassword(e.target.value); setError(null); setErrorConexion(false) }}
               onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm() }}
               disabled={loading}
               autoFocus
-              autoComplete="current-password"
+              autoComplete="off"
               className={`w-full px-4 py-3 pr-12 bg-surface rounded-inner outline-none text-base md:text-body text-ink placeholder-ink-2 border border-transparent focus:ring-2 focus:ring-gold ${error ? 'border-danger' : 'border-line focus:border-danger/30'}`}
               placeholder="••••••••"
             />
@@ -164,7 +179,7 @@ export default function ConfirmarSuperadminModal({
             disabled={!password || loading}
             className="text-label h-11 px-2 rounded-full transition-all bg-danger hover:bg-danger text-on-ink disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-danger whitespace-nowrap overflow-hidden"
           >
-            {loading ? 'Verificando...' : confirmLabel}
+            {loading ? 'Verificando...' : errorConexion ? 'Reintentar' : confirmLabel}
           </button>
         </div>
       </div>

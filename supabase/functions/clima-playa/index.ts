@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { servirConCors } from "../_shared/cors.ts"
 
 // Mismas coordenadas que `src/config/clima.ts` (spot 3640 de Windguru,
 // "Mar del Plata - Base Naval") — duplicadas a mano porque esta función
@@ -15,16 +16,10 @@ const FORECAST_DIAS = 15
 
 const CACHE_TTL_MS = 30 * 60 * 1000
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-}
-
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(body: unknown, status = 200, cors: Record<string, string> = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+    headers: { "Content-Type": "application/json", ...cors },
   })
 }
 
@@ -61,9 +56,7 @@ async function obtenerDatosCrudos() {
 
 const FECHA_RE = /^\d{4}-\d{2}-\d{2}$/
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS })
-
+servirConCors(async (req, cors) => {
   const url = new URL(req.url)
   const fechaParam = url.searchParams.get("fecha") || ""
   const fecha = FECHA_RE.test(fechaParam) ? fechaParam : new Date().toISOString().slice(0, 10)
@@ -94,11 +87,12 @@ Deno.serve(async (req) => {
       })
     }
 
-    return jsonResponse({ fecha, disponible: horas.length > 0, horas })
+    return jsonResponse({ fecha, disponible: horas.length > 0, horas }, 200, cors)
   } catch (err) {
     return jsonResponse(
       { fecha, disponible: false, horas: [], error: String((err as Error)?.message || err) },
       502,
+      cors,
     )
   }
 })
