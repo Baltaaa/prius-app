@@ -8,7 +8,7 @@ Fuente de verdad del diseño: design/DESIGN.md. Referencia visual: design/refere
 - [x] Fase 1 — Tokens y codemod
 - [x] Fase 2 — Primitivas y componentes brand
 - [x] Fase 3 — Piloto Dashboard
-- [ ] Fase 4 — Rollout por pantalla
+- [x] Fase 4 — Rollout por pantalla
 - [ ] Fase 5 — Modales y overlays
 - [ ] Fase 6 — Auditoría final
 
@@ -36,23 +36,23 @@ Cambio respecto de la tabla: text-prius-success va a text-success-ink, porque el
 
 ## Rollout (Fase 4)
 - [x] Dashboard (piloto, Fase 3)
-- [ ] Plano (entorno)
-- [ ] Reservas
-- [ ] Recepción
-- [ ] Clientes
-- [ ] Caja Diaria
-- [ ] Reportes
-- [ ] Leads
-- [ ] Historial
-- [ ] Comprobantes
-- [ ] Mi cuenta
-- [ ] Cabinas y Lockers
-- [ ] Notificaciones
-- [ ] Ocupación
-- [ ] Login
-- [ ] CambiarContrasena
-- [ ] NotFound
-- [ ] dev/PlanoPublicoPreview
+- [x] Plano (entorno)
+- [x] Reservas
+- [x] Recepción
+- [x] Clientes
+- [x] Caja Diaria
+- [x] Reportes
+- [x] Leads
+- [x] Historial
+- [x] Comprobantes
+- [x] Mi cuenta
+- [x] Cabinas y Lockers
+- [x] Notificaciones
+- [x] Ocupación
+- [x] Login
+- [x] CambiarContrasena
+- [x] NotFound
+- [x] dev/PlanoPublicoPreview
 
 # Inventario Fase 0
 
