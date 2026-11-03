@@ -8,7 +8,7 @@ import UnidadDetalleContent from "./UnidadDetalleContent"
 // contenido/datos/handlers que el modal — ver UnidadDetalleContent.jsx.
 export default function UnidadDetallePanel({ unit, reservas, temporadaActiva, onClose, onAsignarTemporada, onMoverUnidad }) {
   return (
-    <aside className="hidden lg:flex w-96 shrink-0 card-light rounded-card p-space-lg flex-col overflow-hidden">
+    <aside className="card-surface hidden lg:flex w-96 shrink-0 p-space-lg flex-col overflow-hidden">
       {unit ? (
         <UnidadDetalleContent
           unit={unit}

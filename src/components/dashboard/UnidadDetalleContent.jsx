@@ -101,7 +101,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
             {sector && <span className="text-label text-ink-2 font-medium">{sector}</span>}
           </div>
           <span
-            className={`mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-swatch text-label uppercase font-bold tracking-wider w-fit ${
+            className={`mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-swatch text-label font-bold w-fit ${
               estado.key === "libre"
                 ? "bg-success-soft text-success-ink"
                 : estado.key === "ocupada"
@@ -118,7 +118,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
         {showCloseButton && (
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-icon bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0"
+            className="w-8 h-8 rounded-full bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0"
             title="Cerrar"
           >
             <X size={18} />
@@ -130,12 +130,12 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
         {!reserva ? (
           <div className="space-y-3">
             <div className="px-4 py-4 bg-success-soft rounded-inner text-center">
-              <p className="text-body font-bold text-success-ink uppercase tracking-widest">Unidad disponible</p>
+              <p className="text-label text-success-ink">Unidad disponible</p>
             </div>
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => onAsignarTemporada?.(unit)}
-                className="w-full h-12 bg-gold hover:bg-gold-400 text-ink rounded-inner text-body font-semibold flex items-center justify-center gap-2 transition-colors"
+                className="w-full h-12 bg-ink hover:bg-chart-2 rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-on-ink"
               >
                 Asignar cliente de temporada <ArrowRight size={14} />
               </button>
@@ -166,7 +166,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 los cosocios (avatar gris, sin badge). */}
             <div className="bg-surface rounded-inner p-space-md flex flex-col gap-space-sm">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-label text-ink-2 uppercase tracking-wider">Titular</span>
+                <span className="text-label text-ink-2">Titular</span>
                 <StatusBadge status={estadoBadgeStatus(reserva)} />
               </div>
               <button
@@ -182,7 +182,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
               </button>
               {socios.length > 0 && (
                 <div className="flex flex-col gap-1 pt-1 border-t border-line">
-                  <span className="text-label text-ink-2 uppercase tracking-wider flex items-center gap-1 pt-1">
+                  <span className="text-label text-ink-2 flex items-center gap-1 pt-1">
                     <Users size={12} /> Cosocios
                   </span>
                   {socios.map((s) => (
@@ -208,7 +208,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 </p>
                 <button
                   onClick={() => navigate(linkToRecepcion(reserva.codigo))}
-                  className="shrink-0 text-label text-ink-2 hover:text-ink-2 font-bold uppercase"
+                  className="shrink-0 text-label text-ink-2 hover:text-ink-2"
                 >
                   Ir a Recepción
                 </button>
@@ -235,7 +235,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
 
             {/* Estado financiero */}
             <div className="bg-surface rounded-inner p-space-md flex flex-col gap-space-sm">
-              <span className="text-label text-ink-2 uppercase tracking-wider">Estado financiero</span>
+              <span className="text-label text-ink-2">Estado financiero</span>
               <div className="flex items-baseline justify-between">
                 <span className="text-body text-ink-2">Costo total</span>
                 <span className="text-body text-ink font-medium">
@@ -244,7 +244,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-body text-ink-2">Saldo</span>
-                <span className={`text-body font-bold ${saldo === null ? "text-ink-2" : "text-danger"}`}>
+                <span className={`text-body font-semibold ${saldo === null ? "text-ink-2" : "text-danger"}`}>
                   {esPendienteConfirmacion ? "—" : saldo === null ? "Sin verificar" : formatPesosVisible(saldo)}
                 </span>
               </div>
@@ -256,7 +256,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 <>
                   <button
                     onClick={irAClientes}
-                    className="w-full h-12 bg-gold hover:bg-gold-400 text-ink rounded-inner text-body font-semibold flex items-center justify-center gap-2 transition-colors"
+                    className="w-full h-12 bg-ink hover:bg-chart-2 rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-on-ink"
                   >
                     {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver ficha del cliente"} <ArrowRight size={14} />
                   </button>
@@ -279,7 +279,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 <>
                   <button
                     onClick={irAReserva}
-                    className="w-full h-12 bg-gold hover:bg-gold-400 text-ink rounded-inner text-body font-semibold flex items-center justify-center gap-2 transition-colors"
+                    className="w-full h-12 bg-ink hover:bg-chart-2 rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-on-ink"
                   >
                     {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver reserva"} <ArrowRight size={14} />
                   </button>
@@ -312,10 +312,10 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
         {/* Historial */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-label text-ink-2 uppercase tracking-wider">Historial</p>
+            <p className="text-label text-ink-2">Historial</p>
             <button
               onClick={verHistorialCompleto}
-              className="text-label text-ink hover:underline font-bold uppercase"
+              className="text-label text-ink hover:underline"
             >
               Ver todas las reservas
             </button>

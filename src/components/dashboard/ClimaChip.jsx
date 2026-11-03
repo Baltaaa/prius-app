@@ -18,7 +18,7 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
           <div className="w-7 h-7 rounded-icon flex items-center justify-center border border-line bg-surface shrink-0">
             <Cloud size={14} className="text-ink-2" />
           </div>
-          <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Clima</p>
+          <p className="text-label text-ink-2">Clima</p>
         </div>
         <div className="h-6 w-16 rounded-swatch bg-surface" />
       </div>
@@ -38,9 +38,9 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
           <div className="w-7 h-7 rounded-icon flex items-center justify-center border border-line bg-surface shrink-0">
             <Cloud size={14} className="text-ink-2" />
           </div>
-          <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Clima</p>
+          <p className="text-label text-ink-2">Clima</p>
         </div>
-        <p className="text-body font-bold text-ink-2 uppercase tracking-wide">Sin pronóstico</p>
+        <p className="text-label text-ink-2">Sin pronóstico</p>
       </button>
     )
   }
@@ -71,20 +71,20 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
         }`}>
           <IconoClima size={14} className={alerta ? 'text-ink' : 'text-ink-2'} />
         </div>
-        <p className={`text-[9px] font-bold uppercase tracking-widest ${alerta ? 'text-ink' : 'text-ink-2'}`}>
+        <p className={`text-label ${alerta ? 'text-ink' : 'text-ink-2'}`}>
           {alerta ? 'Viento fuerte' : 'Clima'}
         </p>
       </div>
       <div className="flex items-end gap-3">
-        <p className="text-2xl font-bold text-ink tabular-nums leading-none">
+        <p className="text-stat text-ink tabular-nums leading-none">
           {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
         </p>
-        <div className="flex items-center gap-1 text-xs font-bold tabular-nums text-ink-2 pb-0.5">
+        <div className="flex items-center gap-1 text-label font-semibold tabular-nums text-ink-2 pb-0.5">
           <ArrowUp size={12} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
           {actual.viento != null ? Math.round(actual.viento) : '--'} km/h
         </div>
       </div>
-      <p className={`text-[10px] tabular-nums mt-1 ${alerta ? 'text-ink font-bold' : 'text-ink-2'}`}>
+      <p className={`text-label tabular-nums mt-1 ${alerta ? 'text-ink font-bold' : 'text-ink-2'}`}>
         ráfaga {Math.round(rafagaMax)} km/h{actual.olaAltura != null ? ` · ola ${Number(actual.olaAltura).toFixed(1)} m` : ''}
       </p>
     </button>

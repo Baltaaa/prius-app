@@ -35,7 +35,7 @@ export default function PlanoMobile({
       {/* Fecha + Imprimir */}
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex items-center gap-1 bg-surface p-1 rounded-inner flex-1 min-w-0">
-          <button onClick={onPrevDay} className="w-9 h-9 shrink-0 flex items-center justify-center rounded-icon bg-card text-ink-2" title="Día anterior">
+          <button onClick={onPrevDay} className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-card text-ink-2" title="Día anterior">
             <ChevronLeft size={16} />
           </button>
           <div className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-1">
@@ -44,14 +44,14 @@ export default function PlanoMobile({
                 de la tarea. */}
             <DateInput value={selectedDate} onChange={(v) => v && onDateChange(v)} calendarOnly className="w-[164px]" />
             {!esHoy && (
-              <button onClick={onHoy} className="text-label text-ink font-bold uppercase shrink-0">Hoy</button>
+              <button onClick={onHoy} className="text-label text-ink shrink-0">Hoy</button>
             )}
           </div>
-          <button onClick={onNextDay} className="w-9 h-9 shrink-0 flex items-center justify-center rounded-icon bg-card text-ink-2" title="Día siguiente">
+          <button onClick={onNextDay} className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-card text-ink-2" title="Día siguiente">
             <ChevronRight size={16} />
           </button>
         </div>
-        <button onClick={() => window.print()} className="w-11 h-11 shrink-0 flex items-center justify-center rounded-inner card-light text-ink-2" title="Imprimir A4">
+        <button onClick={() => window.print()} className="card-surface w-11 h-11 shrink-0 flex items-center justify-center rounded-full text-ink-2" title="Imprimir A4">
           <Printer size={18} />
         </button>
       </div>
@@ -65,7 +65,7 @@ export default function PlanoMobile({
               onClick={() => onToggleFiltro(k.key)}
               className={`text-left rounded-inner p-2.5 border transition-colors ${statsFiltro === k.key ? 'border-gold-300 bg-gold-100' : 'border-line bg-card'}`}
             >
-              <span className="block text-label text-ink-2 uppercase truncate">{k.label}</span>
+              <span className="block text-label text-ink-2 truncate">{k.label}</span>
               <div className="flex items-baseline gap-1">
                 <span className="text-body text-ink tabular-nums">{k.value}</span>
                 {k.sub && <span className="text-label text-ink-2 truncate">{k.sub}</span>}
@@ -92,10 +92,10 @@ export default function PlanoMobile({
       <PlanoLeyenda compact />
 
       {/* Card del plano — PlanoGrid/PlanoViewport SIN modificar */}
-      <section className="flex-1 min-h-0 card-light rounded-card card-light-inner relative overflow-hidden flex flex-col">
+      <section className="card-surface flex-1 min-h-0 relative overflow-hidden flex flex-col">
         <div className="px-3 pt-2.5 flex items-center gap-1.5 text-ink-2 shrink-0">
           <Layers size={14} />
-          <span className="text-label uppercase tracking-wider">Pasillo A · B · C</span>
+          <span className="text-label">Pasillo A · B · C</span>
         </div>
         {loading ? (
           <div className="flex-1 flex items-center justify-center text-ink-2 text-label">Cargando plano…</div>

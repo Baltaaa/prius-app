@@ -116,11 +116,11 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Cliente</label>
+          <label className="text-label text-ink-2">Cliente</label>
           <ClienteBuscador value={clienteId} onChange={(id) => setClienteId(id)} autoFocus />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Temporada</label>
+          <label className="text-label text-ink-2">Temporada</label>
           <p className="text-body text-ink">{temporadaActiva?.nombre || '—'}</p>
         </div>
         <MoneyInput
@@ -131,7 +131,7 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
           max={100_000_000}
           hint={bonificada ? 'Carpa bonificada: sin cargo, no registra pagos.' : undefined}
         />
-        <label className="flex items-center gap-2 text-xs text-ink-2 cursor-pointer">
+        <label className="flex items-center gap-2 text-label text-ink-2 cursor-pointer">
           <input type="checkbox" checked={bonificada} onChange={(e) => setBonificada(e.target.checked)} className="accent-gold w-4 h-4" />
           Unidad bonificada
         </label>
@@ -152,7 +152,7 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
                 onChange={(e) => setCargarMasTarde(e.target.checked)}
                 className="accent-gold w-4 h-4 cursor-pointer"
               />
-              <span className="text-xs font-bold text-ink uppercase tracking-widest">Cargar más tarde</span>
+              <span className="text-label text-ink">Cargar más tarde</span>
             </label>
           </div>
         )}
@@ -164,7 +164,7 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
           disabled={
             !clienteId || (requierePago && (Number(pagoForm.monto) <= 0 || pagoForm.excedeSaldo || pagoForm.comprobanteIncompleto || !!pagoForm.duplicado))
           }
-          className="w-full py-4 bg-gold hover:bg-gold-400 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs transition-all"
+          className="text-label w-full py-4 bg-ink hover:bg-chart-2 rounded-full transition-all text-on-ink"
         >
           Asignar Unidad
         </LoadingButton>

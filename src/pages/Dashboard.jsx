@@ -554,11 +554,11 @@ export default function Dashboard() {
     // botón ahora vive DENTRO de esa barra, no flotando sobre el mapa.
     const extraButtonsViewport = (
       fullscreen ? (
-        <button onClick={() => setFullscreenOpen(false)} className="w-9 h-9 rounded-icon bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Cerrar pantalla completa">
+        <button onClick={() => setFullscreenOpen(false)} className="w-9 h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Cerrar pantalla completa">
           <Shrink size={16} />
         </button>
       ) : (
-        <button onClick={() => setFullscreenOpen(true)} className="w-9 h-9 rounded-icon bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Ver en pantalla completa">
+        <button onClick={() => setFullscreenOpen(true)} className="w-9 h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Ver en pantalla completa">
           <Expand size={16} />
         </button>
       )
@@ -614,11 +614,11 @@ export default function Dashboard() {
     return (
       <div className="flex-1 min-h-0 flex flex-col gap-2.5">
         {/* Franja superior */}
-        <div className="card-light rounded-card p-2.5 md:p-3 flex flex-col gap-2 shrink-0">
+        <div className="card-surface p-2.5 md:p-3 flex flex-col gap-2 shrink-0">
           <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap">
             {/* Selector de fecha */}
             <div className="flex items-center gap-0.5 bg-surface p-0.5 rounded-inner shrink-0">
-              <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-9 h-9 flex items-center justify-center rounded-icon bg-card text-ink-2 hover:bg-line transition-colors" title="Día anterior">
+              <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-9 h-9 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día anterior">
                 <ChevronLeft size={16} />
               </button>
               <div className="flex items-center gap-1.5 px-1">
@@ -626,12 +626,12 @@ export default function Dashboard() {
                     look del mock (texto + día de semana) en vez del input
                     con borde por defecto — "el mismo selector y handler". */}
                 <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} calendarOnly className="w-[148px]" />
-                <span className="text-label text-ink-2 uppercase shrink-0">{diaSemana}</span>
+                <span className="text-label text-ink-2 shrink-0">{diaSemana}</span>
                 {!esHoy && (
-                  <button onClick={() => goToDate(todayStr())} className="text-label text-ink hover:text-ink font-bold uppercase ml-1 shrink-0">Hoy</button>
+                  <button onClick={() => goToDate(todayStr())} className="text-label text-ink hover:text-ink ml-1 shrink-0">Hoy</button>
                 )}
               </div>
-              <button onClick={() => goToDate(shiftDate(selectedDate, 1))} className="w-9 h-9 flex items-center justify-center rounded-icon bg-card text-ink-2 hover:bg-line transition-colors" title="Día siguiente">
+              <button onClick={() => goToDate(shiftDate(selectedDate, 1))} className="w-9 h-9 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día siguiente">
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -642,7 +642,7 @@ export default function Dashboard() {
                 <button onClick={() => toggleStatsFiltro('ocupacion')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'ocupacion' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
                   <span className="w-8 h-8 shrink-0 rounded-icon bg-ink text-on-ink flex items-center justify-center"><CalendarDays size={16} /></span>
                   <span className="min-w-0">
-                    <span className="block text-label text-ink-2 uppercase truncate">Ocupadas</span>
+                    <span className="block text-label text-ink-2 truncate">Ocupadas</span>
                     <span className="flex items-baseline gap-1.5">
                       <span className="text-body text-ink tabular-nums">{planoStats.ocupacion.count}</span>
                       <span className="text-label text-ink-2">{pct(planoStats.ocupacion.pct)}</span>
@@ -652,7 +652,7 @@ export default function Dashboard() {
                 <button onClick={() => toggleStatsFiltro('libres')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'libres' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
                   <span className="w-8 h-8 shrink-0 rounded-icon bg-success-soft text-success-ink flex items-center justify-center"><CheckCircle2 size={16} /></span>
                   <span className="min-w-0">
-                    <span className="block text-label text-ink-2 uppercase truncate">Libres</span>
+                    <span className="block text-label text-ink-2 truncate">Libres</span>
                     <span className="flex items-baseline gap-1.5">
                       <span className="text-body text-ink tabular-nums">{planoStats.libres.count}</span>
                       <span className="text-label text-success-ink font-semibold">{pct(planoStats.libres.count / Math.max(1, planoStats.ocupacion.total))}</span>
@@ -662,14 +662,14 @@ export default function Dashboard() {
                 <button onClick={() => toggleStatsFiltro('pendientes')} className={`flex-1 min-w-0 md:min-w-[210px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'pendientes' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
                   <span className="w-8 h-8 shrink-0 rounded-icon bg-gold text-ink flex items-center justify-center"><Clock size={16} /></span>
                   <span className="min-w-0">
-                    <span className="block text-label text-ink-2 uppercase truncate">Pendientes ({planoStats.pendientes.count})</span>
+                    <span className="block text-label text-ink-2 truncate">Pendientes ({planoStats.pendientes.count})</span>
                     <span className="block text-body text-ink tabular-nums truncate">{planoStats.pendientes.saldo > 0 ? formatPesos(planoStats.pendientes.saldo) : '—'}</span>
                   </span>
                 </button>
               </div>
             )}
 
-            <button onClick={() => window.print()} className="h-10 px-3.5 bg-surface hover:bg-line text-ink rounded-inner flex items-center gap-2 text-body shrink-0 transition-colors">
+            <button onClick={() => window.print()} className="h-10 px-3.5 bg-surface hover:bg-line text-ink rounded-full flex items-center gap-2 text-body shrink-0 transition-colors">
               <Printer size={16} /> <span className="hidden sm:inline">Imprimir A4</span>
             </button>
           </div>
@@ -695,8 +695,8 @@ export default function Dashboard() {
                 <button
                   key={key}
                   onClick={() => key === 'todas' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
-                  className={`h-7 px-3 rounded-full text-label uppercase whitespace-nowrap transition-colors ${
-                    (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-gold text-ink' : 'bg-surface text-ink hover:bg-line'
+                  className={`h-7 px-3 rounded-full text-label whitespace-nowrap transition-colors ${
+                    (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-ink text-on-ink' : 'bg-surface text-ink-2 hover:text-ink'
                   }`}
                 >
                   {label}{count != null ? ` (${count})` : ''}
@@ -704,28 +704,28 @@ export default function Dashboard() {
               ))}
             </div>
             <div className="hidden lg:block ml-auto shrink-0">
-              <PlanoLeyenda />
+              <PlanoLeyenda compact />
             </div>
           </div>
         </div>
 
         {/* Workspace: grid (sin tocar) + panel lateral fijo (desktop) */}
         <div className="flex-1 min-h-0 flex gap-3">
-          <section className="flex-1 card-light rounded-card card-light-inner relative overflow-hidden flex flex-col">
+          <section className="card-surface flex-1 relative overflow-hidden flex flex-col">
             <div className="px-3 md:px-4 pt-2 flex items-center justify-between gap-2 shrink-0">
               <span className="flex items-center gap-2 text-ink-2">
                 <Layers size={16} />
-                <span className="text-label uppercase tracking-wider">Pasillo A · Pasillo B · Pasillo C</span>
+                <span className="text-label">Pasillo A · Pasillo B · Pasillo C</span>
               </span>
               {realtimeConectado && (
                 <span className="hidden sm:inline-flex items-center gap-1.5 bg-surface px-3 py-1 rounded-full text-ink-2">
                   <span className="w-2 h-2 rounded-full bg-success" />
-                  <span className="text-label uppercase">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
+                  <span className="text-label">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
                 </span>
               )}
             </div>
             {loading ? (
-              <div className="flex-1 flex items-center justify-center text-ink-2 text-[10px] font-bold uppercase tracking-widest">
+              <div className="text-label flex-1 flex items-center justify-center text-ink-2">
                 Cargando plano…
               </div>
             ) : (
@@ -799,7 +799,7 @@ export default function Dashboard() {
           <div
             ref={bindFullscreen}
             onClick={(e) => e.stopPropagation()}
-            className="plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90vh] card-light sm:rounded-card overflow-hidden border border-line flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
+            className="card-surface plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90vh] sm:rounded-card overflow-hidden flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
           >
             {renderPlanoBody(true)}
           </div>

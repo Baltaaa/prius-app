@@ -12,10 +12,10 @@ function MiniStat({ icon: Icon, label, value, sub, alerta }) {
     <div className={`rounded-card border p-4 ${alerta ? 'border-gold-300 bg-gold-100' : 'border-line bg-surface'}`}>
       <div className="flex items-center gap-2 mb-2">
         <Icon size={14} className={alerta ? 'text-ink' : 'text-ink-2'} />
-        <p className={`text-[9px] font-bold uppercase tracking-widest ${alerta ? 'text-ink' : 'text-ink-2'}`}>{label}</p>
+        <p className={`text-label ${alerta ? 'text-ink' : 'text-ink-2'}`}>{label}</p>
       </div>
-      <p className="text-xl font-bold text-ink tabular-nums leading-none">{value}</p>
-      {sub && <p className="text-[10px] text-ink-2 tabular-nums mt-1">{sub}</p>}
+      <p className="text-card-title text-ink tabular-nums leading-none">{value}</p>
+      {sub && <p className="text-label text-ink-2 tabular-nums mt-1">{sub}</p>}
     </div>
   )
 }
@@ -72,7 +72,7 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Clima del día" maxWidthClass="sm:max-w-2xl">
-      <p className="text-xs text-ink-2 -mt-2">{formatFecha(selectedDate)} · Mar del Plata, Base Naval</p>
+      <p className="text-label text-ink-2 -mt-2">{formatFecha(selectedDate)} · Mar del Plata, Base Naval</p>
 
       {loading ? (
         <div className="space-y-4">
@@ -84,8 +84,8 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
       ) : !resumen ? (
         <div className="rounded-card border border-line bg-surface p-8 text-center">
           <Cloud size={28} className="mx-auto text-ink-2 mb-3" />
-          <p className="text-body font-bold text-ink-2 uppercase tracking-widest">Sin pronóstico para esta fecha</p>
-          <p className="text-xs text-ink-2 mt-1">Open-Meteo solo cubre hoy + 14 días.</p>
+          <p className="text-label text-ink-2">Sin pronóstico para esta fecha</p>
+          <p className="text-label text-ink-2 mt-1">Open-Meteo solo cubre hoy + 14 días.</p>
         </div>
       ) : (
         <>
@@ -95,14 +95,14 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
               <IconoHero size={30} className={alerta ? 'text-ink' : 'text-ink'} />
             </div>
             <div className="min-w-0">
-              <p className="text-4xl font-bold text-ink tabular-nums leading-none">
+              <p className="text-stat text-ink tabular-nums leading-none">
                 {resumen.actual.temperatura != null ? Math.round(resumen.actual.temperatura) : '--'}°
               </p>
-              <p className="text-xs text-ink-2 mt-1">
+              <p className="text-label text-ink-2 mt-1">
                 Sensación {resumen.actual.sensacion != null ? Math.round(resumen.actual.sensacion) : '--'}°
               </p>
               {alerta && (
-                <p className="text-[10px] font-bold uppercase tracking-widest text-ink mt-2">Viento fuerte — precaución con sombrillas/carpas</p>
+                <p className="text-label text-ink mt-2">Viento fuerte — precaución con sombrillas/carpas</p>
               )}
             </div>
           </div>
@@ -126,17 +126,17 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
 
           {/* Hora por hora */}
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Hora por hora</p>
+            <p className="text-label text-ink-2">Hora por hora</p>
             <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1">
               {horas.map((h) => (
                 <div key={h.hora} className="shrink-0 w-[72px] text-center px-2 py-3 bg-surface border border-line rounded-inner">
-                  <p className="text-[10px] font-bold text-ink-2">{h.hora}</p>
-                  <p className="text-base font-bold text-ink mt-1 tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
-                  <p className="text-[10px] text-ink-2 mt-1 tabular-nums flex items-center justify-center gap-1">
+                  <p className="text-label font-semibold text-ink-2">{h.hora}</p>
+                  <p className="text-base font-semibold text-ink mt-1 tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
+                  <p className="text-label text-ink-2 mt-1 tabular-nums flex items-center justify-center gap-1">
                     <Wind size={10} /> {h.viento != null ? Math.round(h.viento) : '--'}
                   </p>
                   {h.olaAltura != null && (
-                    <p className="text-[10px] text-ink-2 mt-0.5 tabular-nums flex items-center justify-center gap-1">
+                    <p className="text-label text-ink-2 mt-0.5 tabular-nums flex items-center justify-center gap-1">
                       <Waves size={10} /> {Number(h.olaAltura).toFixed(1)}
                     </p>
                   )}
@@ -149,10 +149,10 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
 
       {/* Windguru */}
       <div className="space-y-2">
-        <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Windguru — Mar del Plata, Base Naval</p>
+        <p className="text-label text-ink-2">Windguru — Mar del Plata, Base Naval</p>
         <div ref={widgetContainerRef} className="min-h-[140px] rounded-card overflow-hidden bg-surface border border-line" />
         {widgetEstado === 'error' && (
-          <p className="text-xs text-ink-2">No se pudo cargar el widget de Windguru — usá el link de abajo.</p>
+          <p className="text-label text-ink-2">No se pudo cargar el widget de Windguru — usá el link de abajo.</p>
         )}
       </div>
 
@@ -160,7 +160,7 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
         href={WINDGURU_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full py-3.5 rounded-inner text-xs font-bold uppercase tracking-widest bg-gold hover:bg-gold-400 text-ink transition-all flex items-center justify-center gap-2"
+        className="text-label w-full py-3.5 rounded-full bg-ink hover:bg-chart-2 transition-all flex items-center justify-center gap-2 text-on-ink"
       >
         Ver en Windguru <ExternalLink size={14} />
       </a>

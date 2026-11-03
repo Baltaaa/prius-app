@@ -37,7 +37,7 @@ export function StatCard({ icon: Icon, label, active, onClick, progress, size = 
         }`}>
           <Icon size={lg ? 18 : 14} className={active ? 'text-ink' : 'text-ink-2'} />
         </div>
-        <p className={`font-bold text-ink-2 uppercase tracking-widest truncate ${lg ? 'text-[10px]' : 'text-[9px]'}`}>{label}</p>
+        <p className={`text-label text-ink-2 truncate ${lg ? 'text-[10px]' : 'text-[9px]'}`}>{label}</p>
       </div>
       {children}
       {progress != null && (
@@ -56,7 +56,7 @@ export function OcupacionCard({ stats, filtro, onToggleFiltro, size, className =
   const lg = size === 'lg'
   return (
     <StatCard icon={Activity} label="Ocupación" active={filtro === 'ocupacion'} onClick={() => onToggleFiltro('ocupacion')} progress={stats.ocupacion.pct} size={size} className={className}>
-      <p className={`font-bold text-ink tabular-nums leading-none ${lg ? 'text-4xl' : 'text-2xl'}`}>{pct(stats.ocupacion.pct)}</p>
+      <p className={`font-semibold text-ink tabular-nums leading-none ${lg ? 'text-4xl' : 'text-2xl'}`}>{pct(stats.ocupacion.pct)}</p>
       <p className={`text-ink-2 tabular-nums mt-1 ${lg ? 'text-xs' : 'text-[10px] mt-0.5'}`}>{stats.ocupacion.count}/{stats.ocupacion.total} unidades</p>
     </StatCard>
   )
@@ -65,8 +65,8 @@ export function OcupacionCard({ stats, filtro, onToggleFiltro, size, className =
 export function CarpasCard({ stats, filtro, onToggleFiltro, className = 'w-[112px]' }) {
   return (
     <StatCard icon={Tent} label="Carpas" active={filtro === 'carpas'} onClick={() => onToggleFiltro('carpas')} progress={stats.carpas.pct} className={className}>
-      <p className="text-2xl font-bold text-ink tabular-nums leading-none">{pct(stats.carpas.pct)}</p>
-      <p className="text-[10px] text-ink-2 tabular-nums mt-0.5">{stats.carpas.count}/{stats.carpas.total}</p>
+      <p className="text-stat text-ink tabular-nums leading-none">{pct(stats.carpas.pct)}</p>
+      <p className="text-label text-ink-2 tabular-nums mt-0.5">{stats.carpas.count}/{stats.carpas.total}</p>
     </StatCard>
   )
 }
@@ -74,8 +74,8 @@ export function CarpasCard({ stats, filtro, onToggleFiltro, className = 'w-[112p
 export function SombrillasCard({ stats, filtro, onToggleFiltro, className = 'w-[112px]' }) {
   return (
     <StatCard icon={Umbrella} label="Sombrillas" active={filtro === 'sombrillas'} onClick={() => onToggleFiltro('sombrillas')} progress={stats.sombrillas.pct} className={className}>
-      <p className="text-2xl font-bold text-ink tabular-nums leading-none">{pct(stats.sombrillas.pct)}</p>
-      <p className="text-[10px] text-ink-2 tabular-nums mt-0.5">{stats.sombrillas.count}/{stats.sombrillas.total}</p>
+      <p className="text-stat text-ink tabular-nums leading-none">{pct(stats.sombrillas.pct)}</p>
+      <p className="text-label text-ink-2 tabular-nums mt-0.5">{stats.sombrillas.count}/{stats.sombrillas.total}</p>
     </StatCard>
   )
 }
@@ -83,7 +83,7 @@ export function SombrillasCard({ stats, filtro, onToggleFiltro, className = 'w-[
 export function LibresCard({ stats, filtro, onToggleFiltro, className = 'w-[100px]' }) {
   return (
     <StatCard icon={DoorOpen} label="Libres hoy" active={filtro === 'libres'} onClick={() => onToggleFiltro('libres')} className={className}>
-      <p className="text-2xl font-bold text-ink tabular-nums leading-none">{stats.libres.count}</p>
+      <p className="text-stat text-ink tabular-nums leading-none">{stats.libres.count}</p>
     </StatCard>
   )
 }
@@ -109,11 +109,11 @@ export function StatRowCard({ icon: Icon, label, value, sub, progress, active, o
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0 shrink">
           <Icon size={16} className={`shrink-0 ${active ? 'text-ink' : 'text-ink-2'}`} />
-          <span className="text-[10px] font-bold text-ink-2 uppercase tracking-widest whitespace-nowrap">{label}</span>
+          <span className="text-label text-ink-2 whitespace-nowrap">{label}</span>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-xl font-bold text-ink tabular-nums leading-none">{value}</p>
-          {sub != null && <p className="text-[10px] text-ink-2 tabular-nums mt-0.5 whitespace-nowrap">{sub}</p>}
+          <p className="text-card-title text-ink tabular-nums leading-none">{value}</p>
+          {sub != null && <p className="text-label text-ink-2 tabular-nums mt-0.5 whitespace-nowrap">{sub}</p>}
         </div>
       </div>
       {progress != null && (
@@ -149,9 +149,9 @@ export function MixCard({ stats, filtro, onToggleFiltro, className = 'w-[220px]'
             >
               <span className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLOR_TIPO_ALQUILER[key]?.swatch }} />
-                <span className="text-[11px] uppercase text-ink-2">{letra}</span>
+                <span className="text-label text-ink-2">{letra}</span>
               </span>
-              <span className={`text-xl font-bold tabular-nums leading-none ${active ? 'text-ink' : 'text-ink'}`}>{valor}</span>
+              <span className={`text-card-title tabular-nums leading-none ${active ? 'text-ink' : 'text-ink'}`}>{valor}</span>
             </button>
           )
         })}
@@ -177,11 +177,11 @@ export function MixCardCompacto({ stats, filtro, onToggleFiltro, className = '' 
             key={key}
             type="button"
             onClick={() => onToggleFiltro(key)}
-            className={`flex items-center gap-1.5 px-1.5 py-1 rounded-icon min-h-[32px] transition-colors ${active ? 'bg-gold-100' : 'hover:bg-surface'}`}
+            className={`flex items-center gap-1.5 px-1.5 py-1 rounded-full min-h-[32px] transition-colors ${active ? 'bg-gold-100' : 'hover:bg-surface'}`}
           >
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLOR_TIPO_ALQUILER[key]?.swatch }} />
-            <span className="text-[10px] uppercase text-ink-2">{letra}</span>
-            <span className={`text-body font-bold tabular-nums leading-none ${active ? 'text-ink' : 'text-ink'}`}>{valor}</span>
+            <span className="text-label text-ink-2">{letra}</span>
+            <span className={`text-body font-semibold tabular-nums leading-none ${active ? 'text-ink' : 'text-ink'}`}>{valor}</span>
           </button>
         )
       })}
@@ -192,8 +192,8 @@ export function MixCardCompacto({ stats, filtro, onToggleFiltro, className = '' 
 export function PendientesCard({ stats, filtro, onToggleFiltro, className = 'w-[152px]' }) {
   return (
     <StatCard icon={AlertCircle} label="Pendientes" active={filtro === 'pendientes'} onClick={() => onToggleFiltro('pendientes')} className={className}>
-      <p className="text-2xl font-bold text-ink tabular-nums leading-none">{stats.pendientes.count}</p>
-      <p className="text-[10px] text-danger tabular-nums font-bold mt-0.5 truncate">
+      <p className="text-stat text-ink tabular-nums leading-none">{stats.pendientes.count}</p>
+      <p className="text-label text-danger tabular-nums font-semibold mt-0.5 truncate">
         {stats.pendientes.saldo > 0 ? formatPesos(stats.pendientes.saldo) : null}
         {stats.pendientes.sinVerificar && ' + sin verificar'}
       </p>
@@ -207,7 +207,7 @@ export function IngresosCard({ stats, className = 'w-[150px]' }) {
       {stats.ingresosDelDia != null ? (
         <MontoStat value={stats.ingresosDelDia} size="md" className="text-ink leading-none" />
       ) : (
-        <p className="text-2xl font-bold text-ink tabular-nums leading-none">—</p>
+        <p className="text-stat text-ink tabular-nums leading-none">—</p>
       )}
     </StatCard>
   )
@@ -237,14 +237,14 @@ export function EstadoLegend() {
   const item = (key, swatchClass, label, children) => (
     <div key={key} className="flex items-center gap-2 min-w-0">
       <div className={`w-5 h-5 rounded-swatch border flex items-center justify-center shrink-0 relative ${swatchClass}`}>{children}</div>
-      <span className="text-[11px] text-ink-2 truncate">{label}</span>
+      <span className="text-label text-ink-2 truncate">{label}</span>
     </div>
   )
   return (
     <div className="rounded-inner border border-line bg-surface p-3">
-      <p className="text-[9px] font-bold uppercase tracking-widest text-ink-2 mb-2">Referencias</p>
+      <p className="text-label text-ink-2 mb-2">Referencias</p>
       <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
-        {item('t', `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada', <span className="text-[10px] font-bold text-ink">T</span>)}
+        {item('t', `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada', <span className="text-label font-semibold text-ink">T</span>)}
         {item('r', 'bg-card border-card', 'Sin confirmar', <Hourglass size={10} className="text-ink" />)}
         {item('libre', 'bg-surface border-line', 'Libre')}
         {item(
@@ -252,7 +252,7 @@ export function EstadoLegend() {
           `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`,
           'Saldada',
           <>
-            <span className="text-[10px] font-bold text-ink">T</span>
+            <span className="text-label font-semibold text-ink">T</span>
             <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-success" />
           </>
         )}
