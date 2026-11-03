@@ -23,6 +23,48 @@
   --radius: 24px;
 }
 
+/*
+  Formas compartidas del sistema. Viven acá (y no en cada pantalla) para que
+  botones, cards e inputs tengan un solo lugar; los componentes de
+  src/components/brand/ las usan.
+*/
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full text-body font-semibold transition-colors disabled:opacity-50;
+  }
+  .btn-primary { @apply bg-ink text-on-ink hover:bg-chart-2; }
+  .btn-gold { @apply bg-gold text-ink hover:bg-gold-400; }
+  .btn-ghost { @apply text-ink hover:bg-surface; }
+  .btn-danger { @apply bg-danger text-on-ink hover:bg-danger-ink; }
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-11 h-11 rounded-full text-ink hover:bg-surface transition-colors disabled:opacity-50;
+  }
+
+  .card-surface { @apply bg-card rounded-card; }
+  .card-pad { @apply p-5 md:p-7; }
+  .surface-pop { @apply bg-card rounded-inner border border-line; }
+
+  .field {
+    @apply block w-full min-h-12 px-4 py-2 rounded-inner bg-surface border border-transparent text-ink text-base md:text-body placeholder:text-ink-2 outline-none transition-shadow focus:ring-2 focus:ring-gold disabled:opacity-50;
+  }
+  .field-error { @apply ring-2 ring-danger/40 focus:ring-danger/60; }
+  .field-label { @apply block mb-2 text-label text-ink-2; }
+}
+
+/* Degradé de la card hero (DESIGN.md). */
+.bg-hero {
+  background: linear-gradient(135deg, theme(colors.gold.50), theme(colors.gold.200), theme(colors.gold.400));
+}
+
+/* Hover de cards clicables. */
+@media (hover: hover) {
+  .card-hover { transition: transform 200ms cubic-bezier(.22, 1, .36, 1); }
+  .card-hover:hover { transform: translateY(-2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-hover, .card-hover:hover { transition: none; transform: none; }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -229,12 +271,12 @@ body {
   eso, React desmonta el nodo antes de que `.ui-close*` llegue a correr.
 */
 @keyframes ui-open {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: scale(.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
 @keyframes ui-close {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(12px); }
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(.96); }
 }
 @keyframes ui-open-sheet {
   from { opacity: 0; transform: translateY(100%); }
@@ -260,9 +302,9 @@ body {
    instalado. Una clase CSS global sin @layer no es "utility" para el JIT:
    el prefijo de breakpoint simplemente no generaría nada. */
 @layer utilities {
-  .ui-open        { animation: ui-open 200ms ease-out both; }
+  .ui-open        { animation: ui-open 200ms cubic-bezier(.22, 1, .36, 1) both; }
   .ui-close       { animation: ui-close 150ms ease-in both; }
-  .ui-open-sheet  { animation: ui-open-sheet 200ms ease-out both; }
+  .ui-open-sheet  { animation: ui-open-sheet 240ms cubic-bezier(.22, 1, .36, 1) both; }
   .ui-close-sheet { animation: ui-close-sheet 150ms ease-in both; }
   .ui-backdrop-open  { animation: ui-backdrop-open 150ms ease-out both; }
   .ui-backdrop-close { animation: ui-backdrop-close 150ms ease-in both; }
@@ -298,6 +340,14 @@ body {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes curtain {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
 @keyframes shimmer {
   from { transform: translateX(-100%); }
   to   { transform: translateX(100%); }
@@ -305,7 +355,7 @@ body {
 
 @layer utilities {
   /* Entrada de sección (nodos internos, sin `position:fixed` adentro). */
-  .anim-fade-up { animation: fade-up 260ms cubic-bezier(.22, 1, .36, 1) both; }
+  .anim-fade-up { animation: fade-up 300ms cubic-bezier(.22, 1, .36, 1) both; }
   .anim-fade-in { animation: ui-backdrop-open 200ms ease-out both; }
 
   /*
@@ -323,13 +373,19 @@ body {
     containing block. Los portales siguen donde están — cubren además la
     ventana de 260ms en que la animación sí está corriendo.
   */
-  .anim-fade-up-page { animation: fade-up 260ms cubic-bezier(.22, 1, .36, 1) backwards; }
+  .anim-fade-up-page { animation: fade-up 300ms cubic-bezier(.22, 1, .36, 1) backwards; }
+
+  /* Barras que crecen desde 0, y el telón que descubre el trazo del gráfico:
+     dibujarlo con dasharray falla con vector-effect: non-scaling-stroke. */
+  .anim-grow { transform-origin: left; animation: grow-x 600ms cubic-bezier(.22, 1, .36, 1) backwards; }
+  .anim-curtain { transform-origin: right; animation: curtain 900ms cubic-bezier(.22, 1, .36, 1) forwards; }
+  .nav-indicador { transition: transform 300ms cubic-bezier(.22, 1, .36, 1), opacity 150ms ease-out; }
 
   /* Entrada escalonada de listas. El delay lo pone el llamador con
      `style={{ animationDelay }}` tomado de `staggerDelay()`
      (src/lib/motion.js), que corta en 12 ítems y 30ms — más que eso se
      percibe como lentitud, no como pulido. */
-  .anim-stagger { animation: fade-up 240ms cubic-bezier(.22, 1, .36, 1) both; }
+  .anim-stagger { animation: fade-up 300ms cubic-bezier(.22, 1, .36, 1) both; }
 
   /* Press de botones: 0.98 es perceptible sin que el texto se vea borroso.
      `active:` de Tailwind no alcanza acá porque también queremos la vuelta
@@ -406,7 +462,9 @@ textarea.focus-ring:focus-visible {
     animation-duration: 1ms !important;
     animation-delay: 0ms !important;
   }
-  .anim-press, .anim-colors, .hover-row { transition: none !important; }
+  .anim-grow { animation: none !important; }
+  .anim-curtain { animation-duration: 1ms !important; }
+  .anim-press, .anim-colors, .hover-row, .nav-indicador { transition: none !important; }
   .anim-press:active { transform: none !important; }
   .skeleton-shimmer::after { animation: none !important; }
   /* El pulso de opacidad de Tailwind tampoco: con la preferencia activa no

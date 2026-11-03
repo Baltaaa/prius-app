@@ -69,6 +69,7 @@ export default {
         nav: '14px',
         icon: '12px',
         swatch: '6px',
+        bar: '8px',
         'plano-md': '4px',
       },
       spacing: {

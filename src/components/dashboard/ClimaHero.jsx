@@ -1,27 +1,25 @@
-import { useState } from 'react'
-import { ArrowUp, Cloud, CloudRain, ExternalLink, Gauge, Waves, Wind } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { ArrowUp, Cloud, ExternalLink } from 'lucide-react'
 import { resumenDiaClima, gradosARumbo } from '../../lib/clima'
 import { UMBRAL_RAFAGA_ALERTA_KMH, WINDGURU_SPOT_ID } from '../../config/clima'
+import Card from '../brand/Card'
+import ChartCard from '../brand/ChartCard'
+import SegmentedControl from '../brand/SegmentedControl'
+import { Topografia } from '../brand/patterns'
 import ClimaPanel from './ClimaPanel'
 
 const WINDGURU_URL = `https://www.windguru.cz/${WINDGURU_SPOT_ID}`
 
-/**
- * Card de clima del Dashboard — rediseño oct 2026 según mock de Stitch
- * (design/stitch/01-home-*.html, bloque "Condiciones Marítimas"). Mismo
- * hook/fuente que el Plano (`useClima`, Edge Function `clima-playa`), cero
- * lógica nueva: reusa `resumenDiaClima` (lib/clima.js) y el mismo `ClimaPanel`
- * que ya usa el Plano para el detalle hora por hora + Windguru embebido — no
- * se duplica esa parte.
- *
- * El mock trae un tile "AGUA" con temperatura de mar + pleamar — ese dato NO
- * existe hoy en `useClima` (solo viento/ráfaga/ola), así que la grilla queda
- * en 3 tiles (Viento / Ráfaga / Olas) en vez de los 3 del mock (Viento/Olas/
- * Agua) — grilla ajustada a los datos reales, no se inventa un tile vacío.
- *
- * No existe hoy ningún resumen/recomendación generado con IA en el sistema
- * de clima — no se inventa acá.
- */
+// Horario de playa que grafica la card; el detalle completo sigue en ClimaPanel.
+const HORA_DESDE = '09:00'
+const HORA_HASTA = '20:00'
+
+const METRICAS = [
+  { value: 'temperatura', label: 'Temperatura', format: (v) => `${Math.round(v)} °C` },
+  { value: 'viento', label: 'Viento', format: (v) => `${Math.round(v)} km/h` },
+  { value: 'olaAltura', label: 'Olas', format: (v) => `${Number(v).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} m` },
+]
+
 // `clima`/`loading` ahora llegan por prop (B2, oct 2026): Home.jsx levantó
 // el único `useClima(fecha)` para poder esperarlo junto con el resto de sus
 // datos antes de mostrar nada (ver useInitialLoad) — dos llamadas separadas
@@ -30,145 +28,65 @@ const WINDGURU_URL = `https://www.windguru.cz/${WINDGURU_SPOT_ID}`
 // cambio en su lógica/queries — solo cambió quién lo invoca.
 export default function ClimaHero({ fecha, clima, loading }) {
   const [panelOpen, setPanelOpen] = useState(false)
+  const [metrica, setMetrica] = useState('temperatura')
   const resumen = resumenDiaClima(clima)
 
-  if (loading) {
-    return <div className="card-light rounded-card p-space-md sm:p-space-lg h-[220px] animate-pulse" />
-  }
+  const horas = useMemo(
+    () => (clima?.disponible ? clima.horas.filter((h) => h.hora >= HORA_DESDE && h.hora <= HORA_HASTA) : []),
+    [clima],
+  )
+  const opciones = METRICAS.filter((m) => horas.some((h) => h[m.value] != null))
 
-  if (!resumen) {
+  if (loading) return <div className="card-surface card-pad h-[360px] animate-pulse" />
+
+  if (!resumen || opciones.length === 0) {
     return (
-      <div className="card-light rounded-card p-space-md sm:p-space-lg flex items-center gap-space-md">
-        <Cloud size={28} className="text-ink-2" />
-        <div>
-          <p className="text-label text-ink-2 uppercase">Clima</p>
-          <p className="text-label text-ink-2 mt-1">Sin pronóstico para hoy.</p>
+      <Card title="Condiciones marítimas">
+        <div className="flex items-center gap-3 text-ink-2">
+          <Cloud size={20} strokeWidth={1.5} />
+          <p className="text-label">Sin pronóstico para hoy.</p>
         </div>
-      </div>
+      </Card>
     )
   }
 
   const { actual, rafagaMax, vientoMax } = resumen
   const alerta = Math.max(rafagaMax, vientoMax) >= UMBRAL_RAFAGA_ALERTA_KMH
-  const lluvia = Number(actual.precipitacion) > 0.2
   const rotacionFlecha = (Number(actual.direccion) || 0) + 180
-  const Icono = alerta ? Wind : lluvia ? CloudRain : Cloud
-  const horas = clima?.disponible ? clima.horas : []
-  const horaActualIdx = horas.findIndex((h) => h.hora === actual.hora)
-  const proximasHoras = horaActualIdx >= 0 ? horas.slice(horaActualIdx, horaActualIdx + 6) : horas.slice(0, 6)
+  const seleccion = opciones.find((m) => m.value === metrica) || opciones[0]
+  const serie = horas.map((h) => ({ x: h.hora, y: h[seleccion.value] }))
+  const conDato = serie.filter((d) => d.y != null)
+  const horaActual = conDato.findIndex((d) => d.x === actual.hora)
 
   return (
     <>
-      <div className="card-light rounded-card p-space-md sm:p-space-lg flex flex-col justify-between min-w-0">
-        <div>
-          {/* Encabezado: eyebrow + acciones (Windguru / Ver pronóstico) */}
-          <div className="flex items-center justify-between pb-space-md">
-            <div className="flex items-center gap-2">
-              <Wind size={16} className="text-ink-2" />
-              <span className="text-label text-ink-2 uppercase hidden sm:inline">Condiciones Marítimas · Biología Costera</span>
-              <span className="text-label text-ink-2 uppercase sm:hidden">Clima</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <a
-                href={WINDGURU_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-label text-ink hover:underline flex items-center gap-1"
-              >
-                Windguru <ExternalLink size={12} />
-              </a>
-              <span className="text-line hidden sm:inline">•</span>
-              <button
-                type="button"
-                onClick={() => setPanelOpen(true)}
-                className="text-[13px] sm:text-body font-semibold text-ink-2 hover:text-ink transition-colors hidden sm:inline"
-              >
-                Ver pronóstico
-              </button>
-            </div>
-          </div>
-
-          {/* Hero: temperatura + ubicación + alerta de viento */}
-          <div className="flex flex-wrap items-baseline justify-between gap-3 py-1">
-            <button type="button" onClick={() => setPanelOpen(true)} className="flex items-baseline gap-2 sm:hidden">
-              <span className="text-stat text-ink tracking-tighter tabular-nums">
-                {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
-              </span>
-              <span className="text-body text-ink-2 font-medium">Playa Grande</span>
+      <Card
+        className="h-full relative overflow-hidden"
+        title="Condiciones marítimas"
+        action={
+          <a href={WINDGURU_URL} target="_blank" rel="noopener noreferrer" className="btn btn-ghost h-9 px-3 shrink-0">
+            Windguru <ExternalLink size={16} strokeWidth={1.5} />
+          </a>
+        }
+      >
+        <Topografia opacity={0.03} />
+        <div className="relative">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <SegmentedControl label="Dato a graficar" options={opciones} value={seleccion.value} onChange={setMetrica} />
+            <button type="button" onClick={() => setPanelOpen(true)} className="inline-flex items-center gap-2 text-label text-ink-2 hover:text-ink anim-colors">
+              <ArrowUp size={16} strokeWidth={1.5} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
+              {alerta ? 'Viento fuerte' : 'Viento'} del {gradosARumbo(actual.direccion)} · Ver pronóstico
             </button>
-            <div className="hidden sm:flex items-baseline gap-3">
-              <span className="text-[44px] leading-none font-semibold text-ink tracking-tighter tabular-nums">
-                {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
-              </span>
-              <span className="text-body text-ink-2">Playa Grande</span>
-            </div>
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-label ${alerta ? 'bg-danger-soft text-danger' : 'bg-surface text-ink'}`}>
-              <ArrowUp size={14} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
-              {alerta ? 'Viento fuerte' : 'Viento'} del {gradosARumbo(actual.direccion)}
-            </div>
           </div>
-
-          {/* Grilla de métricas reales (sin tile de agua/pleamar: no hay dato) */}
-          <div className="grid grid-cols-3 gap-space-sm mt-space-md">
-            <div className="p-space-sm sm:p-space-md rounded-inner bg-surface flex flex-col justify-between">
-              <div className="flex items-center justify-between text-ink-2">
-                <span className="text-label uppercase">Viento</span>
-                <Wind size={16} />
-              </div>
-              <div className="mt-2">
-                <span className="text-body sm:text-card-title text-ink tabular-nums">
-                  {actual.viento != null ? Math.round(actual.viento) : '--'} <span className="text-label font-normal text-ink-2">km/h</span>
-                </span>
-              </div>
-            </div>
-            <div className="p-space-sm sm:p-space-md rounded-inner bg-surface flex flex-col justify-between">
-              <div className="flex items-center justify-between text-ink-2">
-                <span className="text-label uppercase">Ráfaga</span>
-                <Gauge size={16} />
-              </div>
-              <div className="mt-2">
-                <span className={`text-body sm:text-card-title tabular-nums ${alerta ? 'text-danger' : 'text-ink'}`}>
-                  {Math.round(rafagaMax)} <span className="text-label font-normal text-ink-2">km/h</span>
-                </span>
-              </div>
-            </div>
-            <div className="p-space-sm sm:p-space-md rounded-inner bg-surface flex flex-col justify-between">
-              <div className="flex items-center justify-between text-ink-2">
-                <span className="text-label uppercase">Olas Mar</span>
-                <Waves size={16} />
-              </div>
-              <div className="mt-2">
-                <span className="text-body sm:text-card-title text-ink tabular-nums">
-                  {actual.olaAltura != null ? Number(actual.olaAltura).toFixed(1) : '--'} <span className="text-label font-normal text-ink-2">m</span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Tira horaria */}
-          {proximasHoras.length > 0 && (
-            <div className="mt-space-md pt-space-sm border-t border-line">
-              <div className="flex items-center justify-between gap-1.5 overflow-x-auto scrollbar-none">
-                {proximasHoras.map((h) => (
-                  <div key={h.hora} className="flex-1 min-w-[48px] text-center py-1.5 px-1 rounded-icon bg-surface">
-                    <p className="text-label text-ink-2">{h.hora.slice(0, 2)}h</p>
-                    <Cloud size={16} className="text-ink-2 my-1 mx-auto" />
-                    <p className="text-body text-ink tabular-nums">{h.temperatura != null ? Math.round(h.temperatura) : '--'}°</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <ChartCard
+            key={seleccion.value}
+            data={serie}
+            formatY={seleccion.format}
+            activoInicial={horaActual >= 0 ? horaActual : Math.floor(conDato.length / 2)}
+            descripcion={`${seleccion.label} por hora, de 9 a 20`}
+          />
         </div>
-
-        <button
-          type="button"
-          onClick={() => setPanelOpen(true)}
-          className="sm:hidden mt-space-md h-9 px-4 rounded-inner bg-surface text-ink text-[13px] font-semibold hover:bg-line transition-colors"
-        >
-          Ver pronóstico
-        </button>
-      </div>
+      </Card>
 
       <ClimaPanel isOpen={panelOpen} onClose={() => setPanelOpen(false)} clima={clima} loading={loading} selectedDate={fecha} />
     </>

@@ -6,10 +6,11 @@ import { useLeads } from '../../hooks/useLeads'
 import { useHistorial } from '../../hooks/useHistorial'
 import { useData } from '../../context/DataProvider'
 import { useAuth, usePermiso } from '../../context/AuthProvider'
+import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { supabase } from '../../lib/supabase'
 import { calcularPlanoStats } from '../../lib/planoStats'
 import { buildUnitsMap } from '../../lib/planoUnits'
-import { formatPesos, formatFechaLarga, formatHora, formatMontosEnTexto, formatPorcentaje } from '../../lib/format'
+import { formatHora, formatMontosEnTexto, formatPorcentaje } from '../../lib/format'
 import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
 import { linkToReserva, linkToCliente } from '../../lib/deepLinks'
 import { isFeatureEnabled } from '../../lib/features'
@@ -17,41 +18,38 @@ import { useClima } from '../../hooks/useClima'
 import { useInitialLoad, useTimeoutFallback } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import ClimaHero from '../../components/dashboard/ClimaHero'
+import ActivityList from '../../components/brand/ActivityList'
+import { DeltaBadge } from '../../components/brand/Badge'
+import Card from '../../components/brand/Card'
+import HeroCard from '../../components/brand/HeroCard'
+import QuickActions from '../../components/brand/QuickActions'
+import SegmentedBar from '../../components/brand/SegmentedBar'
+import SegmentedControl from '../../components/brand/SegmentedControl'
+import SidebarCajaCard from '../../components/brand/SidebarCajaCard'
+import { Rayas } from '../../components/brand/patterns'
+import CountUp from '../../components/brand/motion/CountUp'
+import Reveal from '../../components/brand/motion/Reveal'
 import {
-  BookmarkPlus, CreditCard, UserCheck2, UserSearch, Lock, Unlock, ArrowRight,
-  AlertTriangle, LogIn, TimerOff, PenLine, QrCode, CircleCheck,
-  Tent, Umbrella, Wallet,
+  AlertTriangle, ArrowRight, BookmarkPlus, CreditCard, Inbox, LogIn, Map, PenLine,
+  QrCode, TimerOff, UserCheck2, UserSearch,
 } from 'lucide-react'
 
 const todayStr = () => new Date().toISOString().split('T')[0]
 
-// Fila chica de dato al pie de una card (Mix T/P/D, Sin confirmar) — label +
-// valor, sin ícono, sin acento.
-function MiniStat({ label, value }) {
-  return (
-    <div className="flex items-center justify-between text-label">
-      <span className="text-ink-2">{label}</span>
-      <span className="text-ink font-semibold tabular-nums">{value}</span>
-    </div>
-  )
-}
-
-// Barra de progreso fina dorada/negra reutilizada en las cards de capacidad.
-function Bar({ pct, tone = 'gold' }) {
-  const fill = tone === 'success' ? 'bg-success' : tone === 'black' ? 'bg-ink' : 'bg-gold'
-  return (
-    <div className="w-full h-3 rounded-full bg-surface overflow-hidden">
-      <div className={`h-full rounded-full ${fill}`} style={{ width: `${Math.min(100, Math.max(0, Math.round(pct * 100)))}%` }} />
-    </div>
-  )
-}
+const ChipDato = ({ icon: Icon, label, value, onClick }) => (
+  <button type="button" onClick={onClick} className="inline-flex items-center gap-2 h-11 px-4 rounded-full bg-card text-label text-ink-2 hover:text-ink anim-colors shrink-0">
+    <Icon size={18} strokeWidth={1.5} />
+    {label}
+    <span className="text-body text-ink tabular-nums">{value}</span>
+  </button>
+)
 
 export default function Home() {
   // Switch Pesos/Dólares (31/10/2026) — solo presentación, ver MonedaSwitch.
   const mv = useMonedaVista()
   const fmtM = mv.fmt
   const navigate = useNavigate()
-  const { perfil } = useAuth()
+  const { abrirNuevaReserva } = useNuevaReserva()
   const puedeVerReportes = usePermiso('reportes_globales')
   const recepcionOn = isFeatureEnabled('recepcion')
 
@@ -146,29 +144,18 @@ export default function Home() {
 
   if (!ready) {
     return (
-      <div className="space-y-6 lg:space-y-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
-          <Skeleton className="lg:col-span-7 h-[220px]" />
-          <div className="lg:col-span-5 flex flex-col gap-gutter-lg">
-            <Skeleton className="h-24" />
-            <div className="grid grid-cols-3 gap-space-sm">
-              <Skeleton className="h-20" />
-              <Skeleton className="h-20" />
-              <Skeleton className="h-20" />
-            </div>
-            <Skeleton className="h-20" />
-          </div>
+      <div className="flex flex-col gap-4 md:gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 md:gap-5">
+          <Skeleton className="h-[260px]" />
+          <Skeleton className="h-[260px]" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter-lg">
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 md:gap-5">
+          <Skeleton className="h-[360px]" />
+          <Skeleton className="h-[360px]" />
         </div>
       </div>
     )
   }
-
-  const nombreUsuario = perfil?.nombre || perfil?.usuario || 'Usuario'
-  const primerNombre = nombreUsuario.split(' ')[0]
 
   const iconoMovimiento = (ev) => {
     if (ev.tabla === 'auth' && ev.tipo_evento === 'login') return LogIn
@@ -176,331 +163,149 @@ export default function Home() {
     return PenLine
   }
 
-  // --- Accesos rápidos: navegación a pantallas/modales que ya existen, sin
-  // funcionalidad nueva (mock: Reservar/Cobrar/Check-in/Buscar cliente). ---
+  // Accesos a pantallas y modales que ya existen, sin funcionalidad nueva.
+  // Registrar un pago necesita una reserva, por eso Cobrar lleva a las que
+  // tienen saldo. La Caja vive en la tarjeta del sidebar.
   const accesos = [
-    { key: 'reservar', label: 'Reservar', sub: 'Nueva carpa o sombrilla', icon: BookmarkPlus, onClick: () => navigate('/app/reservas'), accent: true },
-    { key: 'cobrar', label: 'Cobrar', sub: 'Recibos y saldos pendientes', icon: CreditCard, onClick: () => navigate('/app/caja') },
-    { key: 'checkin', label: 'Check-in', sub: 'Ingreso de socios', icon: UserCheck2, onClick: () => navigate('/app/recepcion') },
-    { key: 'buscar', label: 'Buscar cliente', sub: 'Legajos e historial', icon: UserSearch, onClick: () => navigate('/app/clientes') },
+    { key: 'reservar', label: 'Reservar', icon: BookmarkPlus, onClick: () => abrirNuevaReserva() },
+    { key: 'cobrar', label: 'Cobrar', icon: CreditCard, onClick: () => navigate('/app/reservas?filtroEstado=con_saldo') },
+    { key: 'checkin', label: 'Check-in', icon: UserCheck2, onClick: () => navigate('/app/recepcion') },
+    { key: 'buscar', label: 'Buscar cliente', icon: UserSearch, onClick: () => navigate('/app/clientes') },
+    { key: 'plano', label: 'Plano', icon: Map, onClick: () => navigate('/app/plano') },
+    { key: 'leads', label: 'Leads', icon: Inbox, onClick: () => navigate('/app/leads') },
   ]
 
+  const pendientesSaldo = stats.pendientes.saldo > 0 ? stats.pendientes.saldo : 0
+  const reportesOn = isFeatureEnabled('reportes')
+  const cajaSubtitulo = cajaHoy?.abierta_at && perfilesPorId[cajaHoy.abierta_por]
+    ? `Desde ${formatHora(cajaHoy.abierta_at)} · ${perfilesPorId[cajaHoy.abierta_por]}`
+    : undefined
+
+  const movimientos = movimientosFiltrados.map((ev) => ({
+    id: ev.id,
+    icon: iconoMovimiento(ev),
+    title: formatMontosEnTexto(ev.descripcion),
+    subtitle: `${ev.actor_nombre || 'Sistema'}${ev.cliente_nombre ? ` · ${ev.cliente_nombre}` : ''}`,
+    meta: formatHora(ev.ts),
+    onClick: () => {
+      if (ev.tabla === 'reservas' && ev.registro_id) navigate(linkToReserva(ev.registro_id))
+      else if (ev.cliente_id) navigate(linkToCliente(ev.cliente_id))
+    },
+  }))
+
   return (
-    <div className="flex flex-col gap-space-lg -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0 px-4 sm:px-6 md:px-8 lg:px-0 anim-fade-up-page">
-      {/* Fila 0: saludo + estado + badges KPI (desktop) */}
-      <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
-        <div>
-          <div className="flex items-center gap-space-sm mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface text-success-ink text-label uppercase">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              Guardia Sur · Activo
-            </span>
-            <span className="hidden lg:inline text-ink-2 text-label">|</span>
-            <span className="hidden lg:inline text-ink-2 text-label">{formatFechaLarga(hoy)}</span>
-          </div>
-          <h1 className="text-page lg:text-page text-ink tracking-tight">Hola, {primerNombre}</h1>
-          <p className="lg:hidden text-label text-ink-2 mt-0.5">{formatFechaLarga(hoy)}</p>
-          <p className="hidden lg:block text-body text-ink-2 mt-1">Gestión operativa de playa, cobranzas y accesos en tiempo real.</p>
-        </div>
-
-        {/* Badges KPI — solo desktop (mobile los muestra como chips más abajo) */}
-        <div className="hidden lg:flex items-center gap-space-sm">
-          <MonedaSwitch
-            moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion}
-            fecha={mv.fecha} stale={mv.stale} compacto
-          />
-          <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-space-md py-2.5 rounded-inner card-light hover:bg-surface anim-colors transition-colors text-left">
-            <CircleCheck size={18} className="text-success-ink" />
-            <div>
-              <span className="block text-label text-ink-2 uppercase">Leads sin contactar</span>
-              <span className="text-body text-ink">{leadsLoading ? '—' : leadsSinContactar} al día</span>
-            </div>
-          </button>
-        </div>
-      </section>
-
-      {/* Fila 1 desktop: clima (7/12) + accesos rápidos y caja (5/12). Mobile: clima primero, accesos después. */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
-        <div className="lg:col-span-7 min-w-0">
-          <ClimaHero fecha={hoy} clima={clima} loading={climaLoading} />
-        </div>
-
-        <div className="lg:col-span-5 min-w-0 flex flex-col gap-space-md order-first lg:order-none">
-          {/* grid-cols-2 en mobile (pulido UX, oct 2026, item 8): antes era
-              grid-cols-4 — "Buscar cliente" (el label más largo) se salía
-              de su card en 375px. 2x2 da el doble de ancho por card; el
-              label queda centrado y puede partirse en dos líneas prolijas
-              (sin truncate: `break-words` + sin whitespace-nowrap) en vez
-              de desbordar. */}
-          <div className="grid grid-cols-2 gap-space-sm flex-1">
-            {accesos.map((a) => (
-              <button
-                key={a.key}
-                type="button"
-                onClick={a.onClick}
-                className="group flex flex-col items-center justify-center gap-1.5 p-space-sm lg:px-space-md lg:py-space-sm rounded-card card-light hover:bg-surface anim-colors active:scale-95 transition-all text-center"
-              >
-                <div className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full lg:rounded-inner flex items-center justify-center transition-colors ${a.accent ? 'bg-gold' : 'bg-surface group-hover:bg-gold-100'}`}>
-                  <a.icon size={20} className="text-ink" />
-                </div>
-                <div className="min-w-0 w-full">
-                  <span className="block text-xs md:text-label lg:text-body text-ink leading-tight break-words">{a.label}</span>
-                  <span className="hidden lg:block text-label text-ink-2 whitespace-normal">{a.sub}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Caja: estado + abrir */}
-          <div className="p-space-md rounded-card card-light flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full lg:rounded-inner bg-surface flex items-center justify-center shrink-0 text-ink-2">
-                {cajaHoy ? <Unlock size={18} /> : <Lock size={18} />}
-              </div>
-              <div className="truncate">
-                <p className="text-body text-ink truncate">{cajaHoy ? 'Caja abierta' : 'Caja sin iniciar'}</p>
-                {/* B6 (oct 2026): si falta la hora o el usuario que la abrió,
-                    se oculta la línea entera en vez de mostrar "—" — un
-                    dato a medias no aporta nada acá. */}
-                {cajaHoy && cajaHoy.abierta_at && perfilesPorId[cajaHoy.abierta_por] ? (
-                  <p className="text-label text-ink-2 truncate">
-                    Desde {formatHora(cajaHoy.abierta_at)} · {perfilesPorId[cajaHoy.abierta_por]}
-                  </p>
-                ) : !cajaHoy ? (
-                  <p className="text-label text-ink-2 truncate">Turno no registrado aún</p>
-                ) : null}
-              </div>
-            </div>
-            {!cajaHoy && (
-              <button onClick={() => navigate('/app/caja')} className="h-9 px-3 rounded-inner bg-ink text-on-ink text-label shrink-0 active:scale-95 transition-transform flex items-center gap-1">
-                Abrir <ArrowRight size={14} />
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Fila 2 mobile: chips de actividad en vivo (scroll horizontal) — en desktop ya están arriba como badges */}
-      <section className="lg:hidden -mx-4 px-4 overflow-x-auto scrollbar-none flex items-center gap-2">
-        <button onClick={() => navigate('/app/leads?estado=nuevo')} className="flex items-center gap-2 px-3 py-2 rounded-inner card-light shrink-0">
-          <span className="w-2 h-2 rounded-full bg-ink-2" />
-          <span className="text-label text-ink-2">Leads sin contactar:</span>
-          <span className="text-body text-ink">{leadsLoading ? '—' : leadsSinContactar}</span>
-        </button>
-        {recepcionOn && (
-          <button onClick={() => navigate('/app/recepcion')} className="flex items-center gap-2 px-3 py-2 rounded-inner card-light shrink-0">
-            <span className="w-2 h-2 rounded-full bg-success" />
-            <span className="text-label text-ink-2">Llegan hoy:</span>
-            <span className="text-body text-ink">{llegadasHoy.length}</span>
-          </button>
-        )}
-      </section>
-
-      {/* Fila 3: Capacidad diaria + Cobranzas temporada. `items-start` (B6,
-          oct 2026): sin esto, CSS Grid estira las dos cards a la altura de
-          la más alta por default — con `justify-between` adentro, esa
-          altura de más se convertía en un hueco vacío entre el bloque de
-          arriba y las sub-cards de abajo. Alto automático por card, sin
-          estirar. */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-gutter-lg items-start">
-        {/* Capacidad diaria (antes "Operación de hoy") */}
-        <div className="card-light rounded-card p-space-lg flex flex-col justify-between min-w-0">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-label text-ink-2 uppercase">Capacidad Diaria</span>
-              <button onClick={() => navigate('/app/plano')} className="px-2.5 py-1 rounded-full bg-surface text-success-ink text-label">
-                {stats.libres.count} disponibles para hoy
-              </button>
-            </div>
-            <button onClick={() => navigate('/app/plano')} className="w-full mt-space-md flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between text-left whitespace-normal">
-              <div className="min-w-0">
-                <span className="block text-label text-ink-2 uppercase">Ocupación General</span>
-                <span className="text-stat text-ink">{Math.round(stats.ocupacion.pct * 100)}%</span>
-              </div>
-              <div className="min-w-0 sm:text-right">
-                <span className="text-body text-ink">{stats.ocupacion.count} ocupadas</span>
-                <span className="block text-label text-ink-2">de {stats.ocupacion.total} unidades totales</span>
-              </div>
-            </button>
-            <div className="mt-3"><Bar pct={stats.ocupacion.pct} /></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-space-md mt-space-lg pt-space-md border-t border-line">
-            <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-inner bg-surface text-left">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-body text-ink"><Tent size={14} /> Carpas</span>
-                <span className="text-label text-ink font-semibold">{Math.round(stats.carpas.pct * 100)}%</span>
-              </div>
-              <div className="mt-2 flex items-baseline justify-between">
-                <span className="text-body text-ink">{stats.carpas.count} <span className="text-label font-normal text-ink-2">/ {stats.carpas.total}</span></span>
-              </div>
-              <div className="mt-2"><Bar pct={stats.carpas.pct} tone="black" /></div>
-            </button>
-            <button onClick={() => navigate('/app/plano')} className="p-space-md rounded-inner bg-surface text-left">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-body text-ink"><Umbrella size={14} /> Sombrillas</span>
-                <span className="text-label text-ink font-semibold">{Math.round(stats.sombrillas.pct * 100)}%</span>
-              </div>
-              <div className="mt-2 flex items-baseline justify-between">
-                <span className="text-body text-ink">{stats.sombrillas.count} <span className="text-label font-normal text-ink-2">/ {stats.sombrillas.total}</span></span>
-              </div>
-              <div className="mt-2"><Bar pct={stats.sombrillas.pct} /></div>
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-1.5 mt-space-md pt-space-md border-t border-line">
-            <MiniStat label="Mix Temporada / Período / Día" value={`${stats.mix.temporada}/${stats.mix.periodo}/${stats.mix.dia}`} />
-            <MiniStat label="Sin confirmar" value={stats.pendientes.sinVerificar ? `${stats.pendientes.count}+` : stats.pendientes.count} />
-          </div>
-        </div>
-
-        {/* Cobranzas temporada (antes "Caja y dinero") */}
-        <div className="card-light rounded-card p-space-lg flex flex-col justify-between min-w-0">
-          <div>
-            {puedeVerReportes && (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-label text-ink-2 uppercase">Cobranzas Temporada</span>
-                  <span className="px-2.5 py-1 rounded-full bg-surface text-success-ink text-label font-semibold">
-                    {formatPorcentaje(pctPercibido * 100, 1)} Percibido
-                  </span>
-                </div>
-                {/* Reportes oculto de momento (oct 2026, flag `reportes`
-                    en false) — esta card sigue mostrando el dato real, pero
-                    deja de ser un link a una pantalla que no está en la
-                    navegación. */}
-                <button
-                  onClick={isFeatureEnabled('reportes') ? () => navigate('/app/reportes') : undefined}
-                  className={`w-full mt-space-md flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between text-left whitespace-normal ${isFeatureEnabled('reportes') ? '' : 'cursor-default'}`}
-                >
-                  <div className="min-w-0">
-                    <span className="block text-label text-ink-2 uppercase">Total Recaudado</span>
-                    <span className="text-stat text-ink">{fmtM(totalCobrado)}</span>
-                  </div>
-                </button>
-                <div className="mt-3"><Bar pct={pctPercibido} tone="success" /></div>
-              </>
-            )}
-            {!puedeVerReportes && (
-              <div className="flex items-center justify-between">
-                <span className="text-label text-ink-2 uppercase">Caja y Cobranzas</span>
-              </div>
-            )}
-          </div>
-
-          <div className={`grid grid-cols-2 gap-space-md ${puedeVerReportes ? 'mt-space-lg pt-space-md border-t border-line' : 'mt-space-md'}`}>
-            <button onClick={() => navigate('/app/reservas')} className="p-space-md rounded-inner bg-surface text-left flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-label text-ink-2 uppercase"><AlertTriangle size={14} className="text-danger" /> Pendientes</span>
-              </div>
-              <div className="mt-2">
-                <span className="text-body text-ink">{fmtM(stats.pendientes.saldo > 0 ? stats.pendientes.saldo : 0)}</span>
-                <p className="text-label text-ink-2 mt-0.5">{stats.pendientes.count} reservas con saldo</p>
-              </div>
-            </button>
-            <button onClick={() => navigate('/app/caja')} className="p-space-md rounded-inner bg-surface text-left flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-label text-ink-2 uppercase"><Wallet size={14} className="text-success-ink" /> Caja Hoy</span>
-              </div>
-              <div className="mt-2">
-                <span className="text-body text-ink">{fmtM(stats.ingresosDelDia != null ? stats.ingresosDelDia : 0)}</span>
-                <p className="text-label text-ink-2 mt-0.5">Ingresos del día</p>
-              </div>
-            </button>
-          </div>
-
-          {/* Alerta de deuda — mobile, como en el mock */}
-          {puedeVerReportes && deudaExterna > 0 && (
-            <button onClick={() => navigate('/app/reservas')} className="lg:hidden p-2.5 rounded-inner bg-danger-soft flex items-center justify-between mt-space-sm">
-              <div className="flex items-center gap-1.5">
-                <AlertTriangle size={16} className="text-danger" />
-                <span className="text-label text-ink font-medium">{stats.pendientes.count} reservas con deuda</span>
-              </div>
-              <span className="text-body font-bold text-danger">{fmtM(deudaExterna)}</span>
-            </button>
-          )}
-        </div>
-      </section>
-
-      {/* Fila 4: llegan hoy (desktop, si está prendida la feature) */}
-      {recepcionOn && (
-        <section className="hidden lg:block">
-          <button
-            onClick={() => navigate('/app/recepcion')}
-            className="w-full card-light rounded-card p-space-md flex items-center justify-between hover:bg-surface anim-colors transition-colors"
+    <div className="flex flex-col gap-4 md:gap-5">
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 md:gap-5">
+        <Reveal index={0} className="min-w-0">
+          <HeroCard
+            className="h-full"
+            title={puedeVerReportes ? 'Cobranzas temporada' : 'Caja y cobranzas'}
+            action={<MonedaSwitch moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion} fecha={mv.fecha} stale={mv.stale} compacto />}
           >
-            <div className="flex items-center gap-2.5">
-              <QrCode size={20} className="text-ink" />
-              <span className="text-body text-ink">Llegan hoy</span>
-            </div>
-            <span className="text-body text-ink">{llegadasHoy.length}</span>
-          </button>
-        </section>
-      )}
-
-      {/* Fila 5: últimos movimientos */}
-      <section className="card-light rounded-card p-space-md lg:p-space-lg">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md">
-          <div>
-            <h2 className="text-body text-ink flex items-center gap-2">
-              Últimos movimientos
-              <span className="w-1.5 h-1.5 rounded-full bg-success" />
-            </h2>
-            <p className="hidden lg:block text-label text-ink-2">Registro auditable de accesos, modificaciones y transacciones</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden lg:flex items-center p-1 rounded-inner bg-surface">
-              {TABS_MOVIMIENTOS.map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setTabMovimientos(t.key)}
-                  className={`px-3 py-1 rounded-icon text-label transition-colors ${tabMovimientos === t.key ? 'bg-card text-ink' : 'text-ink-2 hover:text-ink'}`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            <button onClick={() => navigate('/app/historial')} className="text-label text-ink-2 hover:text-ink transition-colors flex items-center gap-1">
-              Ver todo <ArrowRight size={14} />
+            <button
+              type="button"
+              onClick={puedeVerReportes && reportesOn ? () => navigate('/app/reportes') : undefined}
+              className={`flex flex-wrap items-center gap-x-4 gap-y-2 mt-6 md:mt-8 text-left whitespace-normal ${puedeVerReportes && reportesOn ? '' : 'cursor-default'}`}
+            >
+              <span className="text-kpi"><CountUp value={puedeVerReportes ? totalCobrado : pendientesSaldo} format={fmtM} /></span>
+              {puedeVerReportes && <DeltaBadge value={formatPorcentaje(pctPercibido * 100, 1)} />}
             </button>
-          </div>
-        </div>
 
-        {historialLoading ? (
-          <p className="text-label text-ink-2 uppercase tracking-widest animate-pulse py-4 text-center">Cargando...</p>
-        ) : movimientosFiltrados.length === 0 ? (
-          <p className="text-label text-ink-2 py-4 text-center">Sin movimientos recientes.</p>
-        ) : (
-          <div className="flex flex-col divide-y divide-divider lg:divide-y-0">
-            {movimientosFiltrados.map((ev) => {
-              const Icon = iconoMovimiento(ev)
-              return (
-                <button
-                  key={ev.id}
-                  onClick={() => {
-                    if (ev.tabla === 'reservas' && ev.registro_id) navigate(linkToReserva(ev.registro_id))
-                    else if (ev.cliente_id) navigate(linkToCliente(ev.cliente_id))
-                  }}
-                  className="w-full flex items-center justify-between gap-3 py-2.5 lg:py-3.5 text-left hover:bg-surface anim-colors rounded-inner px-2 -mx-2 transition-colors lg:border-b lg:border-line lg:last:border-b-0"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-inner bg-surface flex items-center justify-center shrink-0 text-ink">
-                      <Icon size={18} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-body text-ink truncate">{formatMontosEnTexto(ev.descripcion)}</p>
-                      <p className="text-label text-ink-2 truncate">
-                        {ev.actor_nombre || 'Sistema'}{ev.cliente_nombre ? ` · ${ev.cliente_nombre}` : ''}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-label text-ink-2 tabular-nums shrink-0">{formatHora(ev.ts)}</span>
-                </button>
-              )
-            })}
-          </div>
-        )}
+            <div className="mt-auto pt-6 md:pt-8 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+              <button type="button" onClick={() => navigate('/app/reservas')} className="text-body text-left whitespace-normal">
+                {puedeVerReportes && <><span className="font-semibold tabular-nums">{fmtM(pendientesSaldo)}</span> pendientes · </>}
+                {stats.pendientes.count} reservas con saldo
+              </button>
+              <span className="text-label">Actualizado en tiempo real</span>
+            </div>
+
+            {puedeVerReportes && deudaExterna > 0 && (
+              <button type="button" onClick={() => navigate('/app/reservas')} className="lg:hidden mt-3 flex items-center gap-2 text-label text-left">
+                <AlertTriangle size={16} strokeWidth={1.5} />
+                Deuda total <span className="font-semibold tabular-nums">{fmtM(deudaExterna)}</span>
+              </button>
+            )}
+          </HeroCard>
+        </Reveal>
+
+        <Reveal index={1} className="min-w-0">
+          <Card className="h-full"><QuickActions items={accesos} /></Card>
+        </Reveal>
       </section>
+
+      {/* En desktop la caja vive en el sidebar. */}
+      <Reveal index={2} className="lg:hidden">
+        <SidebarCajaCard subtitulo={cajaSubtitulo} className="p-5" />
+      </Reveal>
+
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 md:gap-5">
+        <Reveal index={3} className="min-w-0">
+          <ClimaHero fecha={hoy} clima={clima} loading={climaLoading} />
+        </Reveal>
+
+        <Reveal index={4} className="min-w-0">
+          <Card
+            className="h-full relative overflow-hidden"
+            title="Capacidad diaria"
+            action={<button type="button" onClick={() => navigate('/app/plano')} className="btn btn-ghost h-9 px-3">Ver plano</button>}
+          >
+            <Rayas opacity={0.03} />
+            <div className="relative">
+              <p className="flex items-baseline gap-2 mb-4">
+                <span className="text-stat text-ink"><CountUp value={Math.round(stats.ocupacion.pct * 100)} format={(v) => formatPorcentaje(v)} /></span>
+                <span className="text-label text-ink-2">{stats.ocupacion.count} de {stats.ocupacion.total} ocupadas</span>
+              </p>
+              <SegmentedBar
+                label={`Ocupación del día: ${stats.carpas.count} carpas, ${stats.sombrillas.count} sombrillas y ${stats.libres.count} libres`}
+                items={[
+                  { key: 'carpas', label: 'Carpas ocupadas', value: stats.carpas.count, detail: `${stats.carpas.count} de ${stats.carpas.total}`, swatch: 'bg-gold' },
+                  { key: 'sombrillas', label: 'Sombrillas ocupadas', value: stats.sombrillas.count, detail: `${stats.sombrillas.count} de ${stats.sombrillas.total}`, swatch: 'bg-ink' },
+                  { key: 'libres', label: 'Libres', value: stats.libres.count, swatch: 'bg-line' },
+                ]}
+              />
+              <dl className="mt-4 pt-4 border-t border-divider space-y-1.5 text-label">
+                <div className="flex items-center justify-between">
+                  <dt className="text-ink-2">Mix temporada / período / día</dt>
+                  <dd className="text-ink tabular-nums">{stats.mix.temporada}/{stats.mix.periodo}/{stats.mix.dia}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-ink-2">Sin confirmar</dt>
+                  <dd className="text-ink tabular-nums">{stats.pendientes.sinVerificar ? `${stats.pendientes.count}+` : stats.pendientes.count}</dd>
+                </div>
+              </dl>
+            </div>
+          </Card>
+        </Reveal>
+      </section>
+
+      <Reveal index={5} className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+        {recepcionOn && <ChipDato icon={QrCode} label="Llegan hoy" value={llegadasHoy.length} onClick={() => navigate('/app/recepcion')} />}
+        <ChipDato icon={Inbox} label="Leads sin contactar" value={leadsLoading ? '—' : leadsSinContactar} onClick={() => navigate('/app/leads?estado=nuevo')} />
+      </Reveal>
+
+      <Reveal index={6}>
+        <Card
+          title="Últimos movimientos"
+          action={
+            <div className="flex items-center gap-2">
+              <SegmentedControl
+                className="hidden lg:inline-flex"
+                label="Filtrar movimientos"
+                options={TABS_MOVIMIENTOS.map((t) => ({ value: t.key, label: t.label }))}
+                value={tabMovimientos}
+                onChange={setTabMovimientos}
+              />
+              <button type="button" onClick={() => navigate('/app/historial')} className="btn btn-ghost h-9 px-3">
+                Ver todo <ArrowRight size={16} strokeWidth={1.5} />
+              </button>
+            </div>
+          }
+        >
+          {historialLoading
+            ? <div className="space-y-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14" />)}</div>
+            : <ActivityList items={movimientos} empty="Sin movimientos recientes." />}
+        </Card>
+      </Reveal>
     </div>
   )
 }

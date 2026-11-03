@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import TopBar from '../components/crm/TopBar'
+import Topbar from '../components/brand/Topbar'
 import AppFooter from '../components/crm/AppFooter'
-import AppShell from '../components/ui-prius/AppShell'
+import AppShell from '../components/brand/AppShell'
 import InactivityWarningModal from '../components/crm/InactivityWarningModal'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
@@ -82,10 +82,10 @@ export default function AppLayout() {
             Sidebar (≥1024px) / NavRail (768–1023px) / BottomNav (<768px). */}
         <AppShell>
           <div className="flex-1 flex flex-col h-dvh min-w-0 overflow-hidden relative">
-            <TopBar />
+            <Topbar />
 
             {/* Content View with internal vertical scroll. Padding horizontal
-                IDÉNTICO al del header (px-4 sm:px-6 md:px-8, ver TopBar.jsx)
+                IDÉNTICO al del header (px-4 sm:px-6 md:px-8, ver Topbar.jsx)
                 para que el borde de las tarjetas quede alineado con el ícono
                 del título — nunca max-w/mx-auto acá, el contenido ocupa todo
                 el ancho entre el sidebar y el borde derecho. Definido una
@@ -120,13 +120,8 @@ export default function AppLayout() {
                 los hijos sticky siguen funcionando. */}
             <main
               id="app-main-scroll"
-              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] ${esPlano ? 'py-4 md:py-3 md:pb-3' : 'py-4 md:py-8 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
+              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] ${esPlano ? 'pt-1 md:pb-3' : 'pt-1 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
             >
-              {/* h1 accesible oculto visualmente — el título visible de
-                  sección se sacó (item 4), pero un lector de pantalla sigue
-                  necesitando un h1 por página. Home tiene el suyo propio
-                  ("Hola, {nombre}"), no se duplica acá. */}
-              {!esHome && <h1 className="sr-only">{section.name}</h1>}
               <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : esPlano ? 'flex-1 min-h-0 flex flex-col' : undefined}>
                 <Outlet />
               </div>

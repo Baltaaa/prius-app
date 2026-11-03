@@ -13,7 +13,7 @@ import DateInput from '../inputs/DateInput'
 import SearchInput from '../inputs/SearchInput'
 import BrandSelect from '../ui/BrandSelect'
 import Skeleton from '../ui/Skeleton'
-import BottomSheet from '../ui-prius/BottomSheet'
+import BottomSheet from '../brand/BottomSheet'
 import HistorialDetalle from './HistorialDetalle'
 
 // Historial unificado (ítem 2, oct 2026; ampliado Tarea 4 oct 2026con

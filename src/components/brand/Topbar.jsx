@@ -2,21 +2,22 @@ import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useNotificaciones } from '../../context/NotificacionesProvider'
-import NotificacionesBandeja from './NotificacionesBandeja'
+import NotificacionesBandeja from '../crm/NotificacionesBandeja'
 import { supabase } from '../../lib/supabase'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
-import { unidadEmoji, normalizeText, formatComprobante, formatFechaLarga, formatUnidad, formatFechasReserva, formatNombre} from '../../lib/format'
+import { unidadEmoji, normalizeText, formatComprobante, formatFechaCorta, formatFechaLarga, formatUnidad, formatFechasReserva, formatNombre} from '../../lib/format'
 import { parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToPlano, linkToRecepcion } from '../../lib/deepLinks'
 import { useOverlay } from '../../context/OverlayProvider'
+import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { isFeatureEnabled } from '../../lib/features'
 import SearchInput from '../inputs/SearchInput'
 import {
-  Search, Bell, User, LogOut, ChevronDown, X,
-  QrCode, Calendar, EyeOff,
+  Search, Bell, User, LogOut, X,
+  QrCode, EyeOff, Plus,
 } from 'lucide-react'
 
 // B5 (oct 2026): modo incógnito — visible SOLO para esta cuenta puntual.
@@ -26,9 +27,11 @@ import {
 // con excepción si no coincide) — ver migración
 // 20261018082719_modo_incognito_perfiles.sql.
 const USER_ID_MODO_INCOGNITO = 'ccae0faf-3b4c-402b-902e-b0cd3c5dc1e8'
-import StatusBadge from './StatusBadge'
+import StatusBadge from '../crm/StatusBadge'
 import ScrollFade from '../ui/ScrollFade'
 import { useSection } from '../../lib/sectionTitles'
+import Button from './Button'
+import PageHeader from './PageHeader'
 
 const normalize = normalizeText
 
@@ -88,8 +91,11 @@ export default function TopBar() {
   const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
   const { clientes, reservas, unidades, pagos, realtimeConectado } = useData()
   const { perfil, rol, signOut, refetchPerfil } = useAuth()
+  const { abrirNuevaReserva } = useNuevaReserva()
+  const esHome = location.pathname.startsWith('/app/home')
 
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
+  const primerNombre = nombreMostrado.split(' ')[0]
   const hoyTopbar = useMemo(() => new Date().toISOString().split('T')[0], [])
   const rolLabel = rol === 'superadmin' ? 'Superadmin' : rol === 'admin' ? 'Admin' : ''
 
@@ -327,45 +333,28 @@ export default function TopBar() {
 
   return (
     <header
-      className="no-print relative min-h-16 md:h-20 flex items-center justify-between gap-3 px-4 md:px-gutter-lg bg-card border-b border-line sticky top-0 z-20 shrink-0"
+      className="no-print relative min-h-16 md:h-20 flex items-center justify-between gap-3 md:gap-4 px-4 sm:px-6 md:px-8 bg-canvas sticky top-0 z-20 shrink-0"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
-      {/* Izquierda: desktop/tablet (≥768px, mock 01-home-desktop) = ubicación +
-          chip Operativo + buscador inline. Mobile (<768px, mock
-          01-home-mobile) = "Prius App" + chip + nombre de la sección actual
-          chico debajo (el título grande real de cada pantalla ahora vive al
-          principio del contenido, ver AppLayout.jsx). */}
-      <div className="flex items-center gap-space-lg min-w-0 flex-1 md:flex-initial">
-        <div className="hidden md:flex items-center gap-space-sm shrink-0">
-          <span className="text-body text-ink">Playa Grande</span>
-          <span className="text-label text-ink-2">•</span>
-          <span className="text-label text-ink-2">Mar del Plata</span>
-          {realtimeConectado && (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface text-label text-success-ink">
-              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-              OPERATIVO
-            </span>
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        {!esHome && <img src="/images/prius-icon.png" alt="Prius" className="md:hidden w-7 h-7 object-contain shrink-0" />}
+        <PageHeader
+          title={esHome ? `Hola, ${primerNombre}` : section.name}
+          shortTitle={esHome ? undefined : section.shortName}
+          greeting={esHome}
+        >
+          {esHome && (
+            <p className="flex items-center gap-1.5 text-label text-ink-2 truncate">
+              {realtimeConectado && <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" title="Operativo" />}
+              {realtimeConectado && <span className="hidden sm:inline">Operativo ·</span>}
+              <span className="sm:hidden">{formatFechaCorta(hoyTopbar)}</span>
+              <span className="hidden sm:inline">{formatFechaLarga(hoyTopbar)}</span>
+            </p>
           )}
-        </div>
+        </PageHeader>
+      </div>
 
-        <div className="md:hidden min-w-0">
-          {/* Logo (B4, oct 2026): mismo /images/prius-icon.png del Sidebar
-              desktop, a 28px. "Prius App" no puede truncar (oct 2026): con
-              el ícono de QR de Recepción sumado a la derecha, el chip
-              "Operativo" con texto ya no entraba a 390px y el título se
-              cortaba a "Prius …" — achicado a solo el punto (mismo
-              significado, sin texto) en vez de arriesgar el mismo corte de
-              nuevo en una pantalla más angosta (360px incluido). */}
-          <div className="flex items-center gap-1.5 min-w-0">
-            <img src="/images/prius-icon.png" alt="Prius" className="w-7 h-7 object-contain shrink-0" />
-            <span className="text-body text-ink truncate">Prius App</span>
-            {realtimeConectado && (
-              <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" title="Operativo" />
-            )}
-          </div>
-          <p className="text-label text-ink-2 truncate">{section.shortName || section.name}</p>
-        </div>
-
+      <div className="flex items-center gap-1 md:gap-2 shrink-0">
         {/* Búsqueda global inline (desktop/tablet) — mismo handler/datos de
             siempre, solo el shell visual cambia (w-80, fondo prius-surface,
             h-9, rounded-inner del mock). En mobile pasa a un ícono que abre
@@ -375,19 +364,18 @@ export default function TopBar() {
             el espacio disponible del header y tapaba la fecha de la
             derecha (quedaba "…de 2026" cortada). Ancho fijo que crece por
             breakpoint, nunca `w-full` sin techo. */}
-        <div ref={searchOverlay.bind} className="hidden md:block relative w-48 lg:w-64 xl:w-80 min-w-0 shrink">
+        <div ref={searchOverlay.bind} className="hidden md:block relative w-52 xl:w-72 min-w-0 shrink">
         <SearchInput
           ref={searchInputRef}
           value={searchValue}
           onChange={setSearchValue}
           onKeyDown={handleSearchKeyDown}
           placeholder="Búsqueda inteligente"
-          className="rounded-inner transition-shadow duration-200"
-          inputClassName="bg-surface border-line rounded-inner h-9 min-h-0 py-0 text-label"
+          inputClassName="!bg-card !rounded-full h-11"
         />
 
         {showDropdown && (
-            <ScrollFade className="absolute left-0 right-0 mt-2 popover-light rounded-inner z-50 max-h-96 overflow-y-auto ui-open">
+            <ScrollFade className="absolute left-0 right-0 mt-2 surface-pop z-50 max-h-96 overflow-y-auto ui-open">
               {!activo ? (
                 <p className="px-4 py-6 text-center text-xs text-ink-2">Seguí escribiendo (mínimo 2 caracteres)...</p>
               ) : resultadosFlat.length === 0 ? (
@@ -471,15 +459,10 @@ export default function TopBar() {
             </ScrollFade>
         )}
         </div>
-      </div>
 
-      {/* Derecha: fecha (solo ≥1024px), campana, avatar — igual en todas
-          las pantallas, mock 01-home-desktop. */}
-      <div className="flex items-center gap-2 md:gap-space-md shrink-0">
-        <div className="hidden lg:flex items-center gap-1.5 text-label text-ink-2">
-          <Calendar size={16} />
-          {formatFechaLarga(hoyTopbar)}
-        </div>
+        <Button icon={Plus} onClick={() => abrirNuevaReserva()} aria-label="Nueva reserva" className="hidden md:inline-flex shrink-0 max-lg:px-3">
+          <span className="hidden lg:inline">Nueva reserva</span>
+        </Button>
         {/* Fase 3 (Recepción, D1): acceso directo al escáner de QR — solo
             mobile (oct 2026), mismo breakpoint que BottomNav/Sidebar. No se
             monta en desktop (no solo oculto por CSS): sin uso en escritorio
@@ -487,18 +470,19 @@ export default function TopBar() {
         {isFeatureEnabled('recepcion') && isMobile && (
           <button
             onClick={() => navigate(linkToRecepcion(null, { scan: true }))}
-            className="text-ink-2 hover:text-ink p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-icon hover:bg-surface transition-all"
+            className="btn-icon"
             title="Recepción — escanear QR"
           >
-            <QrCode size={20} />
+            <QrCode size={20} strokeWidth={1.5} />
           </button>
         )}
         {/* Búsqueda (mobile): ícono que abre pantalla completa */}
         <button
           onClick={() => setMobileSearchOpen(true)}
-          className="md:hidden text-ink-2 hover:text-ink p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-icon hover:bg-surface transition-all"
+          aria-label="Buscar"
+          className="md:hidden btn-icon"
         >
-          <Search size={20} />
+          <Search size={20} strokeWidth={1.5} />
         </button>
         {/* Notificaciones (oct 2026, modelo "bandeja de pendientes") — punto
             dorado si hay pendientes abiertas, número neutro si solo hay
@@ -523,13 +507,14 @@ export default function TopBar() {
             onClick={() => { if (!supportsHover) setShowNotifications((v) => !v) }}
             aria-haspopup="menu"
             aria-expanded={showNotifications}
-            className="relative w-9 h-9 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center rounded-inner text-ink-2 hover:text-ink md:bg-surface md:border md:border-line transition-colors"
+            aria-label="Notificaciones"
+            className="relative btn-icon"
           >
-            <Bell size={18} />
+            <Bell size={20} strokeWidth={1.5} />
             {countPendientes > 0 ? (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-gold rounded-full border-2 border-card" />
+              <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-ink rounded-full border-2 border-canvas" />
             ) : countNovedadesNoLeidas > 0 ? (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-surface text-ink text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-0.5 rounded-full bg-ink text-on-ink text-[10px] font-semibold flex items-center justify-center">
                 {countNovedadesNoLeidas > 9 ? '9+' : countNovedadesNoLeidas}
               </span>
             ) : null}
@@ -545,7 +530,7 @@ export default function TopBar() {
             // de llegar). El popover-light real queda en el div de adentro,
             // que no se mueve ni cambia de tamaño — mismo look de siempre.
             <div className="hidden md:block absolute right-0 top-full pt-3 w-[380px] max-w-[90vw] z-50">
-              <div className="max-h-[min(70vh,480px)] popover-light rounded-inner overflow-hidden ui-open flex flex-col">
+              <div className="max-h-[min(70vh,480px)] surface-pop overflow-hidden ui-open flex flex-col">
                 <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
               </div>
             </div>
@@ -589,17 +574,17 @@ export default function TopBar() {
             onClick={() => { if (!supportsHover) setShowProfileMenu((v) => !v) }}
             aria-haspopup="menu"
             aria-expanded={showProfileMenu}
-            className="flex items-center gap-1.5 p-1 min-h-[44px] hover:bg-surface rounded-full transition-colors"
+            aria-label="Menú de usuario"
+            className="flex items-center gap-1.5 p-1 min-h-[44px] rounded-full transition-colors"
           >
             {/* B5: indicador discreto mientras el modo incógnito está
                 activo — para que no quede prendido sin querer. */}
             {puedeVerModoIncognito && perfil?.modo_incognito && (
               <EyeOff size={14} className="text-ink-2 shrink-0" title="Modo incógnito activo" />
             )}
-            <div className="w-8 h-8 bg-ink text-on-ink rounded-full flex items-center justify-center font-semibold text-body shrink-0">
+            <div className="w-9 h-9 bg-ink text-on-ink rounded-full flex items-center justify-center text-body shrink-0">
               {nombreMostrado.charAt(0).toUpperCase()}
             </div>
-            <ChevronDown size={14} className="hidden md:block text-ink-2" />
           </button>
 
           {showProfileMenu && (
@@ -607,7 +592,7 @@ export default function TopBar() {
             // para que el hueco visual quede adentro del territorio
             // hovereable (ver comentario arriba).
             <div className="absolute right-0 top-full pt-3 w-56 z-50">
-              <div className="popover-light rounded-inner overflow-hidden p-1 ui-open">
+              <div className="surface-pop overflow-hidden p-1 ui-open">
                 <div className="px-4 py-3 border-b border-line">
                   <p className="text-[11px] font-bold text-ink-2 uppercase tracking-wider">{rolLabel}</p>
                   <p className="text-xs font-medium text-ink truncate">{nombreMostrado}</p>

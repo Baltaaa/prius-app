@@ -17,12 +17,12 @@ export default function BottomSheet({ isOpen, onClose, title, children, maxHeigh
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[998] flex items-end justify-center bg-overlay ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
+      className={`fixed inset-0 z-[998] flex items-end justify-center bg-overlay backdrop-blur-sm ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={() => onClose?.()}
     >
       <div
         ref={bind}
-        className={`w-full sm:max-w-md bg-card border-t border-line sm:border sm:rounded-card rounded-t-card flex flex-col overflow-hidden ${maxHeightClass} ${isOpen ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+        className={`w-full sm:max-w-md bg-card sm:rounded-card rounded-t-card flex flex-col overflow-hidden ${maxHeightClass} ${isOpen ? 'ui-open-sheet' : 'ui-close-sheet'}`}
         onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
@@ -31,10 +31,11 @@ export default function BottomSheet({ isOpen, onClose, title, children, maxHeigh
         </div>
         {title && (
           <div className="flex items-center justify-between px-5 py-3 shrink-0">
-            <h2 className="text-label uppercase text-ink">{title}</h2>
+            <h2 className="text-card-title text-ink">{title}</h2>
             <button
               onClick={() => onClose?.()}
-              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-inner text-ink-2"
+              aria-label="Cerrar"
+              className="btn-icon text-ink-2"
             >
               <X size={18} />
             </button>

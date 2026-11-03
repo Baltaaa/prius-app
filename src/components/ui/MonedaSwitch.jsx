@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTipoCambio } from '../../hooks/useTipoCambio'
 import { formatPesos, formatDolares, formatFecha } from '../../lib/format'
+import SegmentedControl from '../brand/SegmentedControl'
 
 // Switch único Pesos/Dólares para las pantallas de plata (Caja, Dashboard,
 // Reportes) — 31/10/2026.
@@ -54,29 +55,25 @@ export function useMonedaVista() {
 export default function MonedaSwitch({ moneda, onChange, cotizacion, fecha, stale, compacto = false }) {
   return (
     <div className="flex items-center gap-2 shrink-0">
-      <div className="flex items-center gap-1 bg-surface p-1 rounded-inner">
-        {['ARS', 'USD'].map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => onChange(m)}
-            className={`px-2.5 py-1 rounded-icon text-label font-bold transition-colors ${
-              moneda === m ? 'bg-card text-ink' : 'text-ink-2 hover:text-ink'
-            }`}
-          >
-            {m === 'ARS' ? '🇦🇷' : '🇺🇸'}{compacto ? '' : ` ${m === 'ARS' ? 'Pesos' : 'Dólares'}`}
-          </button>
-        ))}
-      </div>
       {moneda === 'USD' && (
         <span
-          className="text-label text-ink-2 tabular-nums whitespace-nowrap"
+          className="text-label tabular-nums whitespace-nowrap"
           title={fecha ? `Cotización del ${formatFecha(fecha)}` : undefined}
         >
           {cotizacion ? formatPesos(cotizacion) : 'sin cotización'}
-          {stale && <span className="text-ink font-semibold"> · vieja</span>}
+          {stale && <span className="font-semibold"> · vieja</span>}
         </span>
       )}
+      <SegmentedControl
+        label="Moneda"
+        className="bg-card/60"
+        value={moneda}
+        onChange={onChange}
+        options={[
+          { value: 'ARS', label: compacto ? 'ARS' : 'Pesos' },
+          { value: 'USD', label: compacto ? 'USD' : 'Dólares' },
+        ]}
+      />
     </div>
   )
 }

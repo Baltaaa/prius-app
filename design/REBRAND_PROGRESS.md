@@ -5,9 +5,9 @@ Fuente de verdad del diseño: design/DESIGN.md. Referencia visual: design/refere
 
 ## Estado por fase
 - [x] Fase 0 — Inventario (aprobado 2/11/2026)
-- [~] Fase 1 — Tokens y codemod: hecho, FRENO. Falta verificar plano con cuenta dedicada (snapshots y zoom mínimo)
-- [ ] Fase 2 — Primitivas y componentes brand
-- [ ] Fase 3 — Piloto Dashboard (FRENO al terminar)
+- [x] Fase 1 — Tokens y codemod
+- [x] Fase 2 — Primitivas y componentes brand
+- [x] Fase 3 — Piloto Dashboard
 - [ ] Fase 4 — Rollout por pantalla
 - [ ] Fase 5 — Modales y overlays
 - [ ] Fase 6 — Auditoría final
@@ -23,17 +23,19 @@ Codemod: 3.595 clases en 84 archivos. lint 0 errores, typecheck OK, vitest igual
 Pendientes de Fase 4: text-xs y text-[8-13px], uppercase/tracking, hex en DateInput.tsx:248-252 y Dashboard.jsx:863-865.
 Cambio respecto de la tabla: text-prius-success va a text-success-ink, porque el verde sólido da 3,3:1 sobre blanco.
 
-## Pendiente del usuario
-- Crear cuenta superadmin dedicada y agregar E2E_REBRAND_EMAIL / E2E_REBRAND_PASSWORD a .env.local. Sin eso no corre ningún Playwright con login. E2E_USER_EMAIL no se usa: es la cuenta personal.
-- Con la cuenta creada: npx playwright test --config playwright.rebrand.config.ts --update-snapshots, revisar el diff, y correr e2e/plano-zoom-minimo.spec.ts.
+## Decisiones de ejecución
+- Playwright corre con la cuenta de .env.local, por pedido del usuario (2/11/2026), siempre detrás del guard.
+- Sin frenos intermedios: el usuario pidió seguir de punta a punta.
+- Motion descartado por presupuesto: +30,3 KB gzip (domAnimation) y +45,4 KB (domMax), tope +25 KB.
+- Los snapshots guardados del plano son anteriores al rediseño Stitch. El mapa se comparó contra main en vivo: solo cambia la fuente.
+- Zoom mínimo en 1440 y 768: ningún número de celda se corta.
 
 ## Reglas de ejecución
-- Playwright solo con playwright.rebrand.config.ts + e2e/guard.ts (lista blanca). Nunca la config por defecto: su globalTeardown borra datos en producción.
+- Playwright solo con playwright.rebrand.config.ts + e2e/guard.ts (lista blanca): E2E_BASE_URL=http://localhost:5197 RUTAS=home npx playwright test --config playwright.rebrand.config.ts e2e/rebrand-shots.spec.ts --project=desktop-1440. Nunca la config por defecto: su globalTeardown borra datos en producción.
 - e2e/reservas.spec.ts no se corre.
-- Presupuesto Motion: +25 KB gzip como máximo.
 
 ## Rollout (Fase 4)
-- [ ] Dashboard (piloto, Fase 3)
+- [x] Dashboard (piloto, Fase 3)
 - [ ] Plano (entorno)
 - [ ] Reservas
 - [ ] Recepción

@@ -74,7 +74,9 @@ No copiar logo, ilustraciones 3D ni assets de la referencia; usar el logo real d
 
 ## Animaciones
 
-Con Motion (LazyMotion), presupuesto máximo +25 KB gzip. Entrada de cards fade + subida 8px en escalonado de 40ms, 300ms, ease [0.22,1,0.36,1]. KPIs con count-up de 800ms. Barras y segmentos que crecen desde 0. Trazo del gráfico que se dibuja. Modales scale .96→1 + fade 200ms (keyframes CSS). Indicador del item activo del nav que se desliza. Hover de cards clicables: translateY(-2px).
+Todo en CSS. Motion se midió y quedó afuera: suma 30,3 KB gzip con domAnimation y 45,4 KB con domMax, y el tope acordado era +25 KB.
+
+Entrada de cards fade + subida 8px en escalonado de 40ms, 300ms, ease [0.22,1,0.36,1]. KPIs con count-up de 800ms. Barras y segmentos que crecen desde 0. Trazo del gráfico que se dibuja. Modales scale .96→1 + fade 200ms. Indicador del item activo del nav que se desliza. Hover de cards clicables: translateY(-2px).
 
 Solo transform/opacity. Respetar prefers-reduced-motion.
 

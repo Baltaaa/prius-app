@@ -23,7 +23,7 @@ import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import ReservaDetalleContent from '../../components/crm/ReservaDetalleContent'
 import ReservaListaMobile from '../../components/crm/ReservaListaMobile'
-import BottomSheet from '../../components/ui-prius/BottomSheet'
+import BottomSheet from '../../components/brand/BottomSheet'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { Filter, Check, Globe, MonitorSmartphone, X, ChevronLeft, LayoutList } from 'lucide-react'
 
@@ -44,6 +44,7 @@ const FILTROS_ESTADO = [
   { value: 'pagado', label: 'Pagado' },
   { value: 'parcial', label: 'Parcial' },
   { value: 'pendiente', label: 'Pendiente' },
+  { value: 'con_saldo', label: 'Con saldo' },
 ]
 
 const FILTROS_TIPO = [
@@ -317,7 +318,9 @@ export default function Reservas() {
     const base = filtroUnidadId ? [...reservasOperativas, ...temporadasDeUnidadFiltrada] : reservasOperativas
     return base
       .filter((r) => {
-        const matchesEstado = filtroEstado === 'todos' || r.estado_pago === filtroEstado
+        const matchesEstado = filtroEstado === 'todos'
+          || r.estado_pago === filtroEstado
+          || (filtroEstado === 'con_saldo' && ['parcial', 'pendiente'].includes(r.estado_pago))
         const matchesTipo = filtroTipo === 'todos' || r.tipo_alquiler === filtroTipo
         const matchesUnidad = !filtroUnidadId || r.unidad_id === filtroUnidadId
         const llegada = fechaLlegada(r)

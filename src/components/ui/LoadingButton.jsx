@@ -25,7 +25,7 @@ export default function LoadingButton({
       className={`inline-flex items-center justify-center gap-2 transition-all duration-150 motion-reduce:transition-none disabled:opacity-50 ${className}`}
       {...rest}
     >
-      {loading && <Loader2 size={16} className="animate-spin motion-reduce:animate-none text-ink" />}
+      {loading && <Loader2 size={16} className="animate-spin motion-reduce:animate-none" />}
       {loading ? (loadingText ?? children) : children}
     </button>
   )

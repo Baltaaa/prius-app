@@ -5,7 +5,7 @@
 
 /** Tope de ítems animados en una lista y paso entre uno y otro. */
 export const STAGGER_MAX = 12
-export const STAGGER_STEP_MS = 30
+export const STAGGER_STEP_MS = 40
 
 /**
  * Delay de entrada para el ítem `i` de una lista.
