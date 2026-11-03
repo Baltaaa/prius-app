@@ -54,7 +54,7 @@ Card dentro de card (`card-inner`): 16px y fondo `surface`, nunca otra card blan
 
 Etiqueta de sección (`section-label`): 13px `ink-2`, 8px sobre su contenido, alineada en x con el contenido de la card; 24px (`mt-section`, `gap-section`) entre secciones.
 
-Prohibido: valores arbitrarios de espacio (`p-[13px]`, `mt-[22px]`), medios pasos fuera de escala (`p-2.5`, `gap-1.5`) y padding propio en una `card-surface`. Excepción: `max(…, env(safe-area-inset-*))`. Lo vigila `pnpm audit:design`.
+Prohibido: valores arbitrarios de espacio (`p-[13px]`, `mt-[22px]`), medios pasos fuera de escala (`p-2.5`, `gap-1.5`) y padding propio en una `card-surface`. Excepción: `max(…, env(safe-area-inset-*))`. Lo vigila `pnpm audit:design`. Excepción documentada: la franja de controles del Plano y su chrome denso (`data-card-compacta`, PlanoStatsBar, PlanoLeyenda) conservan su padding y medios pasos para no achicar el mapa, cuyo tamaño fijan los snapshots de `test:visual`.
 
 Listas y filas: 64-72px de alto, avatar 40px, nombre 15px/500 (`text-row`), divisores `divider` dentro de UNA card; la fila seleccionada va en `gold-50` con indicador dorado a la izquierda. Tablas de pagos: filas de 44px, montos a la derecha con cifras tabulares. Listas con scroll propio: `scroll-fino` (scrollbar fina con su lugar reservado) para que la barra no quede entre la lista y el panel.
 
