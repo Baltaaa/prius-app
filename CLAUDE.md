@@ -117,6 +117,7 @@ Fuente de verdad: `design/DESIGN.md` (paleta, tipografía Manrope, forma, compon
 - Pasarela de pago: Mercado Pago Checkout Pro (candidata principal) vs Payway vs Mobbex — evaluar comisiones.
 - Facturación ARCA/AFIP: requiere CUIT + certificado + integración WSFEv1 (o servicio intermediario).
 - Edge Functions para reservas públicas.
+- `enviar-qr-reserva` (email con QR vía Resend) está en el repo pero NO desplegada, y nada la invoca (ni el CRM, ni beachFlow, ni `crear-reserva-publica`, ni triggers/cron en Postgres; verificado 03/11/2026, 0 reservas web). Es parte de la feature de reserva pública (Fase 5, entrega del QR): desplegarla y cablear quién la llama junto con ese lanzamiento; `check-functions` la omite hasta entonces.
 - DNS: dominio `priusplayagrande.com.ar` en NIC.ar, delegado a Cloudflare (no transferencia, `.com.ar` no soportado como registrar en Cloudflare).
 
 ## Preferencias de trabajo
