@@ -115,11 +115,11 @@ export default function ClienteDetalleContent({
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2 w-full @[480px]:w-auto">
+            <div className="flex flex-wrap items-center gap-2 w-full @[480px]:w-auto">
               <button
                 onClick={onRegistrarPago}
                 disabled={reservasPagables.length === 0}
-                className="btn btn-secondary flex-1 @[480px]:flex-none"
+                className="btn btn-secondary flex-1 min-w-40 @[480px]:flex-none"
               >
                 <Wallet size={16} strokeWidth={1.5} /> Registrar pago
               </button>
@@ -145,7 +145,7 @@ export default function ClienteDetalleContent({
               {cliente.mail ? (
                 <div className="flex items-center gap-1 mt-1 min-w-0">
                   <p className="text-label text-ink truncate min-w-0" title={cliente.mail}>{cliente.mail.toLowerCase()}</p>
-                  <button type="button" onClick={copiarMail} className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-ink-2 hover:text-ink hover:bg-card" title="Copiar email" aria-label="Copiar email">
+                  <button type="button" onClick={copiarMail} className="shrink-0 w-11 h-11 -my-3 md:w-6 md:h-6 md:my-0 flex items-center justify-center rounded-full text-ink-2 hover:text-ink hover:bg-card" title="Copiar email" aria-label="Copiar email">
                     {mailCopiado ? <Check size={12} strokeWidth={1.5} /> : <Copy size={12} strokeWidth={1.5} />}
                   </button>
                 </div>

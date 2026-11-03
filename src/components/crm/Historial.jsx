@@ -506,7 +506,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
             <div className={`flex items-center justify-between gap-2 py-2 ${
               mostrarFiltrosGlobales ? 'sticky top-0 z-10 sticky-blur' : 'px-5'
             }`}>
-              <h3 className="text-label text-ink capitalize truncate">
+              <h3 className="text-label text-ink capitalize min-w-0">
                 {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
               </h3>
               <span className="shrink-0 text-label text-ink-2 bg-surface rounded-full px-3 py-1">

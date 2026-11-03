@@ -44,7 +44,7 @@ export default function PlanoMobile({
                 de la tarea. */}
             <DateInput value={selectedDate} onChange={(v) => v && onDateChange(v)} calendarOnly className="w-[164px]" />
             {!esHoy && (
-              <button onClick={onHoy} className="text-label text-ink shrink-0">Hoy</button>
+              <button onClick={onHoy} className="text-label text-ink shrink-0 min-h-11 px-2">Hoy</button>
             )}
           </div>
           <button onClick={onNextDay} className="w-11 h-11 md:w-9 md:h-9 shrink-0 flex items-center justify-center rounded-full bg-card text-ink-2" title="Día siguiente">

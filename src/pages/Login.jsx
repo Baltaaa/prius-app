@@ -362,7 +362,7 @@ export default function Login({ modo }) {
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
                           aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none p-1"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none"
                         >
                           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>

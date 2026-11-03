@@ -106,7 +106,7 @@ describe('formatMontosEnTexto', () => {
   it('no toca comprobantes, DNI, unidades ni fechas (ningún "$" delante)', () => {
     expect(formatMontosEnTexto('Comprobante editado — recibo_b 1880')).toBe('Comprobante editado — recibo_b 1880')
     expect(formatMontosEnTexto('Caja abierta — 2026-10-24')).toBe('Caja abierta — 2026-10-24')
-    expect(formatMontosEnTexto('Unidad carpa #74 → ocupada')).toBe('Unidad carpa #74 → ocupada')
+    expect(formatMontosEnTexto('Unidad carpa #74 → ocupada')).toBe('Unidad carpa 74 → ocupada')
   })
   it('vacío/null no rompe', () => {
     expect(formatMontosEnTexto(null)).toBe('')

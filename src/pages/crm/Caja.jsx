@@ -350,7 +350,7 @@ export default function Caja() {
               <MontoStat fmt={fmtM} value={cajaSeleccionada.total_neto} className="text-ink mb-2" />
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success-soft text-success-ink text-label font-medium max-w-full overflow-hidden mt-auto">
                 <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
-                <span className="truncate">Arqueado en tiempo real</span>
+                <span className="truncate" title="Arqueado en tiempo real">Arqueado en tiempo real</span>
               </span>
             </div>
             <div className="card-surface card-pad min-w-0 flex flex-col">
@@ -375,7 +375,7 @@ export default function Caja() {
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><Banknote size={16} /></div>
               </div>
               <MontoStat fmt={fmtM} value={totalEsperadoPreview} size="md" className="text-ink mb-2" />
-              <p className="text-label text-ink-2 mt-auto truncate">Todos los medios — ver desglose</p>
+              <p className="text-label text-ink-2 mt-auto truncate" title="Todos los medios — ver desglose">Todos los medios — ver desglose</p>
             </div>
           </div>
 

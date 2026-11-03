@@ -9,7 +9,7 @@ const inputClass =
   'w-full bg-surface rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none font-semibold border border-transparent focus:ring-2 focus:ring-gold'
 
 const chipClass = (active) =>
-  `px-3 py-3 rounded-full text-label border transition-all min-h-[44px] ${
+  `px-3 py-3 rounded-full text-label border transition-all min-h-[44px] min-w-11 ${
     active ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
   }`
 

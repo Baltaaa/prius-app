@@ -109,7 +109,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
               style={{ fontSize: 16 }}
               className="field !pl-12 !pr-12"
             />
-            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-5 top-1/2 -translate-y-1/2 text-ink-2 hover:text-ink">
+            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-1 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center text-ink-2 hover:text-ink">
               {show ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>

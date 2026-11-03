@@ -123,6 +123,12 @@ test('overlays', async ({ page }) => {
   for (const [w, h] of anchos) {
     const mobile = w < 768
     await page.setViewportSize({ width: w, height: h })
+    // El paso de inactividad deja la sesión en pie de guerra (reloj falso y
+    // última actividad vieja): cada ancho arranca con sesión y actividad frescas.
+    await page.evaluate(() => localStorage.setItem('prius_last_activity', String(Date.now()))).catch(() => {})
+    await page.goto('/app/home')
+    await page.waitForTimeout(1500)
+    if (!/\/app\//.test(page.url())) await login(page)
     for (const paso of PASOS) {
       if (paso.solo === 'desktop' && mobile) continue
       if (paso.solo === 'mobile' && !mobile) continue

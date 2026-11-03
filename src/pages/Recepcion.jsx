@@ -34,7 +34,7 @@ function EscanearQRFallback() {
 }
 
 const chipClass = (active) =>
-  `px-3 py-3 rounded-full text-label border transition-all min-h-[44px] ${
+  `px-3 py-3 rounded-full text-label border transition-all min-h-[44px] min-w-11 ${
     active ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
   }`
 

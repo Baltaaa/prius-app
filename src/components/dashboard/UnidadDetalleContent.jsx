@@ -118,7 +118,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
         {showCloseButton && (
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0"
+            className="w-11 h-11 md:w-8 md:h-8 rounded-full bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0"
             title="Cerrar"
           >
             <X size={18} />

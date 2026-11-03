@@ -116,7 +116,7 @@ export default function ConfirmarSuperadminModal({
           </div>
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-surface rounded-full text-ink-2 hover:text-ink transition-all shrink-0"
+            className="btn-icon text-ink-2 hover:text-ink shrink-0"
           >
             <X size={16} />
           </button>
