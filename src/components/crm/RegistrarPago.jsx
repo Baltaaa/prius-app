@@ -173,13 +173,13 @@ export default function RegistrarPago({
             <CheckCircle2 className="text-success-ink" size={32} />
           </div>
           <div>
-            <p className="text-lg font-bold text-ink">{formatPesos(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
+            <p className="text-card-title text-ink">{formatPesos(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
             {/* Item 11 (testing oct 2026): se sacó el aviso para el caso
                 normal (el pago SÍ afecta la caja de hoy — es lo esperable,
                 no hace falta avisarlo). Solo queda el aviso cuando NO la
                 afecta (histórico, o con fecha de otro día). */}
             {exito.noAfectaCajaHoy && (
-              <p className="text-xs text-ink-2 uppercase tracking-widest mt-1">
+              <p className="text-label text-ink-2 mt-1">
                 El cobro ya está reflejado en la reserva. No impacta en la caja de hoy — queda imputado a la fecha del pago.
               </p>
             )}
@@ -187,7 +187,7 @@ export default function RegistrarPago({
           <div className="flex gap-3 pt-2">
             <button
               onClick={onClose}
-              className="px-6 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-gold text-ink hover:bg-gold-400 transition-all"
+              className="text-label px-6 py-3 rounded-full bg-ink hover:bg-chart-2 transition-all text-on-ink"
             >
               Listo
             </button>
@@ -218,7 +218,7 @@ export default function RegistrarPago({
         monto <= 0 || excedeSaldo || comprobanteIncompleto || !!duplicado
         || (!editingPago && !reservaId && !allowSinReserva) || (!editingPago && !cliente?.id)
       }
-      className="w-full py-4 bg-gold hover:bg-gold-400 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs"
+      className="text-label w-full py-4 bg-ink hover:bg-chart-2 rounded-full text-on-ink"
     >
       {editingPago
         ? `Guardar ${monto > 0 ? formatPesos(monto) : ''}`.trim()
@@ -240,7 +240,7 @@ export default function RegistrarPago({
         {/* Reserva */}
         {reservasOptions.length > 1 || allowSinReserva ? (
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Reserva</label>
+            <label className="text-label text-ink-2">Reserva</label>
             <BrandSelect
               value={reservaId}
               onChange={setReservaId}
@@ -261,7 +261,7 @@ export default function RegistrarPago({
           </div>
         ) : reservaSeleccionada ? (
           <div className="p-4 bg-surface border border-line rounded-inner">
-            <p className="text-body font-bold text-ink uppercase">{unidadLabel}</p>
+            <p className="text-label text-ink">{unidadLabel}</p>
           </div>
         ) : null}
 
@@ -269,21 +269,21 @@ export default function RegistrarPago({
         {reservaSeleccionada && (
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
-              <p className="text-[9px] text-ink-2 uppercase tracking-widest">Total</p>
+              <p className="text-label text-ink-2">Total</p>
               <MontoStat value={total} size="xs" className="text-ink mt-1" />
             </div>
             <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
-              <p className="text-[9px] text-ink-2 uppercase tracking-widest">Pagado</p>
+              <p className="text-label text-ink-2">Pagado</p>
               {saldoDesconocido ? (
-                <p className="text-body font-bold text-ink-2 normal-case mt-1">Sin verificar</p>
+                <p className="text-body font-semibold text-ink-2 normal-case mt-1">Sin verificar</p>
               ) : (
                 <MontoStat value={pagado} size="xs" className="text-success-ink mt-1" />
               )}
             </div>
             <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
-              <p className="text-[9px] text-ink-2 uppercase tracking-widest">Saldo</p>
+              <p className="text-label text-ink-2">Saldo</p>
               {saldoDesconocido ? (
-                <p className="text-body font-bold text-ink-2 normal-case mt-1">Sin verificar</p>
+                <p className="text-body font-semibold text-ink-2 normal-case mt-1">Sin verificar</p>
               ) : (
                 <MontoStat value={saldo} size="xs" className="text-ink mt-1" />
               )}

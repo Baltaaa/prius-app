@@ -16,8 +16,8 @@ const MEDIO_ICONO = {
 }
 
 const Section = ({ title, icon: Icon, children }) => (
-  <div className="bg-card border border-line rounded-card p-6 space-y-4">
-    <h3 className="text-body font-bold text-ink flex items-center gap-2">
+  <div className="card-surface p-6 space-y-4">
+    <h3 className="text-body font-semibold text-ink flex items-center gap-2">
       {Icon && <Icon size={16} className="text-ink-2" />} {title}
     </h3>
     {children}
@@ -31,9 +31,9 @@ const Fila = ({ label, value, tone, cliente }) => (
       {/* Item 16 (testing oct 2026): nombre del cliente a cargo del
           comprobante, en chico — resumen_caja() ya lo traía, solo faltaba
           mostrarlo acá. */}
-      {cliente && <span className="block text-[10px] text-ink-2 truncate">{cliente}</span>}
+      {cliente && <span className="block text-label text-ink-2 truncate">{cliente}</span>}
     </span>
-    <span className={`text-body font-bold tabular-nums shrink-0 ${tone || 'text-ink'}`}>{value}</span>
+    <span className={`text-body font-semibold tabular-nums shrink-0 ${tone || 'text-ink'}`}>{value}</span>
   </div>
 )
 
@@ -56,16 +56,16 @@ export default function ResumenCaja({ resumen }) {
             <CheckCircle2 size={18} />
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-            <span className={`text-body font-bold ${balanceCuadrado ? 'text-success-ink' : 'text-ink'}`}>
+            <span className={`text-body font-semibold ${balanceCuadrado ? 'text-success-ink' : 'text-ink'}`}>
               {balanceCuadrado ? 'Jornada cerrada — Balance cuadrado sin diferencias' : 'Jornada cerrada con diferencia de arqueo'}
             </span>
-            <span className={`text-xs ${balanceCuadrado ? 'text-success-ink' : 'text-ink-2'}`}>
+            <span className={`text-label ${balanceCuadrado ? 'text-success-ink' : 'text-ink-2'}`}>
               Operaciones del {formatFecha(cabecera.fecha)} conciliadas y archivadas.
             </span>
           </div>
         </div>
         {balanceCuadrado && (
-          <span className="text-[10px] font-bold uppercase tracking-widest text-success-ink bg-card border border-success/30 px-3 py-1 rounded-full">
+          <span className="text-label text-success-ink bg-card border border-success/30 px-3 py-1 rounded-full">
             Balance auditado
           </span>
         )}
@@ -94,17 +94,17 @@ export default function ResumenCaja({ resumen }) {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="col-span-2 sm:col-span-1 sm:order-3 bg-surface rounded-inner p-4 text-center border border-gold-300 min-w-0">
                 <Scale className="text-ink mx-auto mb-2" size={18} />
-                <p className="text-[10px] text-ink-2 uppercase tracking-widest">Neto</p>
+                <p className="text-label text-ink-2">Neto</p>
                 <MontoStat value={totales.neto} size="sm" className="text-ink mt-1 mx-auto" />
               </div>
               <div className="sm:order-1 bg-surface rounded-inner p-4 text-center min-w-0">
                 <ArrowUpRight className="text-success-ink mx-auto mb-2" size={18} />
-                <p className="text-[10px] text-ink-2 uppercase tracking-widest">Ingresos</p>
+                <p className="text-label text-ink-2">Ingresos</p>
                 <MontoStat value={totales.ingresos} size="sm" className="text-success-ink mt-1 mx-auto" />
               </div>
               <div className="sm:order-2 bg-surface rounded-inner p-4 text-center min-w-0">
                 <ArrowDownRight className="text-danger mx-auto mb-2" size={18} />
-                <p className="text-[10px] text-ink-2 uppercase tracking-widest">Egresos</p>
+                <p className="text-label text-ink-2">Egresos</p>
                 <MontoStat value={totales.egresos} size="sm" className="text-danger mt-1 mx-auto" />
               </div>
             </div>
@@ -122,22 +122,22 @@ export default function ResumenCaja({ resumen }) {
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-body font-semibold text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
                     {!m.declarado && (
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-ink-2 bg-surface border border-line rounded-full px-2 py-0.5">
+                      <span className="text-label text-ink-2 bg-surface border border-line rounded-full px-2 py-0.5">
                         Sin declarar
                       </span>
                     )}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div className="min-w-0">
-                      <p className="text-[9px] text-ink-2 uppercase tracking-widest">Esperado</p>
+                      <p className="text-label text-ink-2">Esperado</p>
                       <MontoStat value={m.esperado} size="xs" className="text-ink" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] text-ink-2 uppercase tracking-widest">Contado</p>
+                      <p className="text-label text-ink-2">Contado</p>
                       <MontoStat value={m.contado} size="xs" className="text-ink" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] text-ink-2 uppercase tracking-widest">Diferencia</p>
+                      <p className="text-label text-ink-2">Diferencia</p>
                       <MontoStat value={m.diferencia} size="xs" className={Number(m.diferencia) === 0 ? 'text-success-ink' : 'text-ink'} />
                     </div>
                   </div>
@@ -167,7 +167,7 @@ export default function ResumenCaja({ resumen }) {
               {(Number(z.comparacion?.diferencia_total) !== 0 || Number(z.comparacion?.diferencia_cantidad) !== 0) && (
                 <div className="flex items-start gap-2 mt-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
                   <AlertTriangle className="text-ink shrink-0 mt-0.5" size={14} />
-                  <p className="text-xs text-ink-2">
+                  <p className="text-label text-ink-2">
                     Diferencia vs. lo registrado en el sistema: {formatPesos(z.comparacion.diferencia_total)} en monto,
                     {' '}{z.comparacion.diferencia_cantidad} en cantidad de comprobantes.
                   </p>
@@ -193,7 +193,7 @@ export default function ResumenCaja({ resumen }) {
 
           <Section title="Desglose por Medio de Pago" icon={CreditCard}>
             {(por_medio || []).length === 0 ? (
-              <p className="text-xs text-ink-2 uppercase tracking-widest">Sin movimientos.</p>
+              <p className="text-label text-ink-2">Sin movimientos.</p>
             ) : (
               <div className="space-y-2.5">
                 {por_medio.map((m) => {
@@ -206,13 +206,13 @@ export default function ResumenCaja({ resumen }) {
                         </div>
                         <div className="min-w-0">
                           <span className="block text-body font-semibold text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
-                          <span className="block text-[11px] text-ink-2">
+                          <span className="block text-label text-ink-2">
                             {m.cantidad} movimiento{Number(m.cantidad) === 1 ? '' : 's'}
                             {Number(m.egresos) > 0 && <> · Ingresos {formatPesos(m.ingresos)} · Gastos {formatPesos(m.egresos)}</>}
                           </span>
                         </div>
                       </div>
-                      <span className={`text-body font-bold tabular-nums shrink-0 ${Number(m.neto) < 0 ? 'text-danger' : 'text-ink'}`}>{formatPesos(m.neto)}</span>
+                      <span className={`text-body font-semibold tabular-nums shrink-0 ${Number(m.neto) < 0 ? 'text-danger' : 'text-ink'}`}>{formatPesos(m.neto)}</span>
                     </div>
                   )
                 })}
@@ -223,25 +223,25 @@ export default function ResumenCaja({ resumen }) {
           <Section title="Comprobantes de la Jornada" icon={FileCheck2}>
             <div className="space-y-4">
               <div>
-                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest mb-2">Recibos ({(recibos || []).length})</p>
+                <p className="text-label text-ink-2 mb-2">Recibos ({(recibos || []).length})</p>
                 {(recibos || []).length === 0 ? (
-                  <p className="text-xs text-ink-2 bg-surface rounded-inner p-3">Sin recibos en esta caja.</p>
+                  <p className="text-label text-ink-2 bg-surface rounded-inner p-3">Sin recibos en esta caja.</p>
                 ) : recibos.map((r) => (
                   <Fila key={r.etiqueta} label={r.etiqueta} cliente={r.cliente} value={formatPesos(r.monto_total)} tone={r.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
                 ))}
               </div>
               <div>
-                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest mb-2">Facturas ({(facturas || []).length})</p>
+                <p className="text-label text-ink-2 mb-2">Facturas ({(facturas || []).length})</p>
                 {(facturas || []).length === 0 ? (
-                  <p className="text-xs text-ink-2 bg-surface rounded-inner p-3">Sin facturas emitidas en esta jornada.</p>
+                  <p className="text-label text-ink-2 bg-surface rounded-inner p-3">Sin facturas emitidas en esta jornada.</p>
                 ) : facturas.map((f) => (
                   <Fila key={f.etiqueta} label={f.etiqueta} cliente={f.cliente} value={formatPesos(f.monto_total)} tone={f.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
                 ))}
               </div>
               <div>
-                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest mb-2">Gastos por categoría</p>
+                <p className="text-label text-ink-2 mb-2">Gastos por categoría</p>
                 {(gastos?.por_categoria || []).length === 0 ? (
-                  <p className="text-xs text-ink-2 bg-surface rounded-inner p-3">Sin gastos registrados en esta caja.</p>
+                  <p className="text-label text-ink-2 bg-surface rounded-inner p-3">Sin gastos registrados en esta caja.</p>
                 ) : gastos.por_categoria.map((g) => (
                   <Fila key={g.categoria} label={CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} value={formatPesos(g.total)} tone="text-danger" />
                 ))}
@@ -257,7 +257,7 @@ export default function ResumenCaja({ resumen }) {
                     <FileText size={14} className="text-ink-2 shrink-0" />
                     <span className="text-body text-ink-2 truncate">{p.cliente || 'S/N'} — {p.concepto}</span>
                   </div>
-                  <span className="text-body font-bold text-ink tabular-nums shrink-0">{formatPesos(p.monto)}</span>
+                  <span className="text-body font-semibold text-ink tabular-nums shrink-0">{formatPesos(p.monto)}</span>
                 </div>
               ))}
             </Section>
@@ -278,10 +278,10 @@ export default function ResumenCaja({ resumen }) {
 
       <div className="grid grid-cols-2 gap-8 pt-6">
         <div className="border-t border-line pt-3 text-center">
-          <p className="text-[10px] text-ink-2 uppercase tracking-widest">Cajero</p>
+          <p className="text-label text-ink-2">Cajero</p>
         </div>
         <div className="border-t border-line pt-3 text-center">
-          <p className="text-[10px] text-ink-2 uppercase tracking-widest">Administración</p>
+          <p className="text-label text-ink-2">Administración</p>
         </div>
       </div>
     </div>

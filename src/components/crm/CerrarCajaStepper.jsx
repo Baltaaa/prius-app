@@ -102,7 +102,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
       className="fixed inset-0 z-[999] bg-card sm:bg-overlay sm:backdrop-blur-sm sm:flex sm:items-center sm:justify-center sm:p-4"
       onClick={requestClose}
     >
-      <div ref={bind} onClick={(e) => e.stopPropagation()} className="h-full sm:h-auto sm:max-h-[90vh] w-full sm:max-w-lg card-light sm:rounded-card flex flex-col overflow-hidden">
+      <div ref={bind} onClick={(e) => e.stopPropagation()} className="card-surface h-full sm:h-auto sm:max-h-[90vh] w-full sm:max-w-lg sm:rounded-card flex flex-col overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-line bg-surface shrink-0">
           <div className="flex items-center gap-3">
             {paso > 0 && (
@@ -111,11 +111,11 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
               </button>
             )}
             <div>
-              <h2 className="text-body uppercase font-bold tracking-[0.2em] text-ink">Cerrar Caja</h2>
-              <p className="text-[10px] text-ink-2 uppercase tracking-widest mt-0.5">Paso {paso + 1} de 3 — {PASOS[paso]}</p>
+              <h2 className="text-label text-ink">Cerrar Caja</h2>
+              <p className="text-label text-ink-2 mt-0.5">Paso {paso + 1} de 3 — {PASOS[paso]}</p>
             </div>
           </div>
-          <button onClick={requestClose} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-icon text-ink-2 hover:text-ink">
+          <button onClick={requestClose} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-full text-ink-2 hover:text-ink">
             <X size={20} />
           </button>
         </div>
@@ -131,8 +131,8 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                 {diferenciaPorMedio.map((m) => (
                   <div key={m.medio} className="space-y-2 pb-4 border-b border-line last:border-0 last:pb-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-ink uppercase tracking-widest">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
-                      <span className="text-xs text-ink-2">Esperado <strong className="text-ink tabular-nums">{formatPesos(m.esperado)}</strong></span>
+                      <span className="text-label text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
+                      <span className="text-label text-ink-2">Esperado <strong className="text-ink tabular-nums">{formatPesos(m.esperado)}</strong></span>
                     </div>
                     <MoneyInput
                       label={`${MEDIO_PAGO_LABEL[m.medio] || m.medio} contado/verificado`}
@@ -140,7 +140,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                       onChange={(v) => setContadoPorMedio((prev) => ({ ...prev, [m.medio]: v }))}
                     />
                     {m.diferencia !== 0 && (
-                      <p className={`text-xs font-bold tabular-nums ${m.diferencia > 0 ? 'text-success-ink' : 'text-danger'}`}>
+                      <p className={`text-label font-semibold tabular-nums ${m.diferencia > 0 ? 'text-success-ink' : 'text-danger'}`}>
                         Diferencia: {formatPesos(m.diferencia)}
                       </p>
                     )}
@@ -150,8 +150,8 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
               <div className={`p-4 rounded-inner border text-center ${
                 diferencia === 0 ? 'bg-success-soft border-success/30' : 'bg-gold-100 border-gold-300'
               }`}>
-                <p className="text-[10px] uppercase tracking-widest text-ink-2">Diferencia total</p>
-                <p className={`text-xl font-bold tabular-nums mt-1 ${diferencia === 0 ? 'text-success-ink' : 'text-ink'}`}>
+                <p className="text-label text-ink-2">Diferencia total</p>
+                <p className={`text-card-title tabular-nums mt-1 ${diferencia === 0 ? 'text-success-ink' : 'text-ink'}`}>
                   {formatPesos(diferencia)}
                 </p>
               </div>
@@ -206,7 +206,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                     <TextInput placeholder="Primer comprobante" value={z.z_primer_comprobante} onChange={(v) => setZ({ ...z, z_primer_comprobante: v })} />
                     <TextInput placeholder="Último comprobante" value={z.z_ultimo_comprobante} onChange={(v) => setZ({ ...z, z_ultimo_comprobante: v })} />
                   </div>
-                  <p className="text-[10px] text-ink-2 uppercase tracking-widest">
+                  <p className="text-label text-ink-2">
                     La diferencia contra lo registrado en el sistema se muestra en el resumen final.
                   </p>
                 </div>
@@ -220,19 +220,19 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                 {diferenciaPorMedio.map((m) => (
                   <div key={m.medio} className="flex justify-between text-body">
                     <span className="text-ink-2">{MEDIO_PAGO_LABEL[m.medio] || m.medio} contado</span>
-                    <span className="font-bold text-ink tabular-nums">{formatPesos(m.contado)}</span>
+                    <span className="font-semibold text-ink tabular-nums">{formatPesos(m.contado)}</span>
                   </div>
                 ))}
                 <div className="flex justify-between text-body pt-2 border-t border-line">
                   <span className="text-ink-2">Diferencia total de arqueo</span>
-                  <span className={`font-bold tabular-nums ${diferencia === 0 ? 'text-success-ink' : 'text-ink'}`}>{formatPesos(diferencia)}</span>
+                  <span className={`font-semibold tabular-nums ${diferencia === 0 ? 'text-success-ink' : 'text-ink'}`}>{formatPesos(diferencia)}</span>
                 </div>
                 <div className="flex justify-between text-body">
                   <span className="text-ink-2">Cierre Z</span>
-                  <span className="font-bold text-ink">{tieneZ ? `Cargado (N.° ${z.z_numero || '—'})` : 'No cargado'}</span>
+                  <span className="font-semibold text-ink">{tieneZ ? `Cargado (N.° ${z.z_numero || '—'})` : 'No cargado'}</span>
                 </div>
               </div>
-              <p className="text-xs text-ink-2 text-center uppercase tracking-widest">
+              <p className="text-label text-ink-2 text-center">
                 Una vez cerrada, no se podrán registrar más movimientos para esta fecha.
               </p>
             </div>
@@ -245,7 +245,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
               type="button"
               disabled={paso === 0 && !puedeAvanzarPaso1}
               onClick={() => setPaso((p) => p + 1)}
-              className="w-full py-4 bg-gold hover:bg-gold-400 disabled:opacity-50 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs transition-all"
+              className="text-label w-full py-4 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all text-on-ink"
             >
               Continuar
             </button>
@@ -254,7 +254,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
               loading={saving}
               loadingText="Cerrando..."
               onClick={handleConfirmar}
-              className="w-full py-4 bg-danger hover:bg-danger-ink text-on-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs"
+              className="text-label w-full py-4 bg-danger hover:bg-danger-ink text-on-ink rounded-inner"
             >
               Cerrar Caja
             </LoadingButton>

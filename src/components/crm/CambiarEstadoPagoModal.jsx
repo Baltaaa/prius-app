@@ -73,7 +73,7 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
           type="button"
           disabled={!motivo.trim()}
           onClick={handleConfirmar}
-          className="w-full py-3 bg-gold hover:bg-gold-400 disabled:opacity-50 text-ink font-bold uppercase tracking-widest text-xs rounded-inner transition-all"
+          className="text-label w-full py-3 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all text-on-ink"
         >
           Guardar ajuste
         </button>
@@ -81,20 +81,20 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
     >
       <div className="flex items-start gap-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
         <ShieldAlert size={16} className="text-ink shrink-0 mt-0.5" />
-        <p className="text-xs text-ink-2">
+        <p className="text-label text-ink-2">
           Esto no modifica pagos ni comprobantes — solo cambia la etiqueta de estado que ve el equipo, hasta que se registre un pago nuevo o lo revierta un superadmin.
         </p>
       </div>
 
       {reserva.estado_pago_manual && (
         <div className="p-3 bg-surface border border-line rounded-inner space-y-2">
-          <p className="text-xs text-ink-2">
+          <p className="text-label text-ink-2">
             Ajustado manualmente{reserva.estado_pago_manual_motivo ? ` — ${reserva.estado_pago_manual_motivo}` : ''}.
           </p>
           <button
             type="button"
             onClick={handleVolverAutomatico}
-            className="text-[11px] font-bold uppercase tracking-widest text-ink hover:text-ink transition-colors"
+            className="text-label text-ink hover:text-ink transition-colors"
           >
             Volver al estado automático
           </button>
@@ -102,12 +102,12 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
       )}
 
       <div className="flex items-center justify-between py-2">
-        <span className="text-xs text-ink-2">Estado actual</span>
+        <span className="text-label text-ink-2">Estado actual</span>
         <StatusBadge status={reserva.estado_pago} />
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Nuevo estado</label>
+        <label className="text-label text-ink-2">Nuevo estado</label>
         <BrandSelect value={nuevoEstado} onChange={setNuevoEstado} options={OPCIONES_ESTADO} />
       </div>
 

@@ -6,11 +6,11 @@ import DateInput from '../inputs/DateInput'
 import BrandSelect from '../ui/BrandSelect'
 
 const inputClass =
-  'w-full bg-surface border border-line rounded-inner px-4 py-3 text-ink text-base md:text-body focus:border-gold-300 outline-none font-bold'
+  'w-full bg-surface rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none font-semibold border border-transparent focus:ring-2 focus:ring-gold'
 
 const chipClass = (active) =>
   `px-3 py-2.5 rounded-icon text-xs font-bold border transition-all min-h-[44px] ${
-    active ? 'bg-gold text-ink border-gold' : 'bg-surface text-ink-2 border-line hover:text-ink'
+    active ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
   }`
 
 // Campos de monto + medio de pago + comprobante (item 3/4, oct 2026) —
@@ -51,7 +51,7 @@ export default function PagoComprobanteCampos({ form }) {
               type="button"
               onClick={() => setMoneda(m)}
               className={`px-3.5 py-1.5 rounded-icon text-label font-bold transition-colors ${
-                moneda === m ? 'bg-card text-ink' : 'text-ink-2 hover:text-ink'
+                moneda === m ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
               {m === 'ARS' ? '🇦🇷 Pesos' : '🇺🇸 Dólares'}
@@ -72,7 +72,7 @@ export default function PagoComprobanteCampos({ form }) {
             />
             <div className="mt-2.5 p-3 bg-surface border border-line rounded-inner space-y-2">
               <div className="flex items-center justify-between gap-3">
-                <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest shrink-0">
+                <label className="text-label text-ink-2 shrink-0">
                   Cotización
                 </label>
                 <input
@@ -83,16 +83,16 @@ export default function PagoComprobanteCampos({ form }) {
                   value={tipoCambio ?? ''}
                   onChange={(e) => setTipoCambioManual(e.target.value === '' ? null : Number(e.target.value))}
                   placeholder="—"
-                  className="w-32 text-right bg-card border border-line rounded-icon px-2.5 py-1.5 text-base md:text-body font-bold text-ink outline-none focus:border-gold-300"
+                  className="w-32 text-right bg-surface rounded-inner px-2.5 py-1.5 text-base md:text-body font-semibold text-ink outline-none border border-transparent focus:ring-2 focus:ring-gold"
                 />
               </div>
-              <p className="text-[11px] text-ink-2">
+              <p className="text-label text-ink-2">
                 {cotizacionTipo} · {cotizacionLado}
                 {cotizacionFecha ? ` · ${formatFecha(cotizacionFecha)}` : ''}
                 {cotizacionStale && <span className="text-ink font-semibold"> · no es de hoy</span>}
               </p>
               <div className="flex items-baseline justify-between gap-2 pt-1 border-t border-line">
-                <span className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Se imputa</span>
+                <span className="text-label text-ink-2">Se imputa</span>
                 <span className="text-body text-ink tabular-nums">
                   {montoArsEquivalente ? formatPesos(montoArsEquivalente) : '—'}
                 </span>
@@ -114,7 +114,7 @@ export default function PagoComprobanteCampos({ form }) {
           />
         )}
         {!excedeSaldo && Number(monto) > 0 && (
-          <p className="text-[11px] text-ink-2 mt-1.5">
+          <p className="text-label text-ink-2 mt-1.5">
             Se registrará como: <span className="text-ink-2 font-semibold">{tipoLabel}</span>
             {!saldoDesconocido && <> — saldo restante {formatPesos(Math.max(saldo - Number(monto), 0))}</>}
             {saldoDesconocido && <span className="text-ink"> · Saldo sin verificar</span>}
@@ -124,7 +124,7 @@ export default function PagoComprobanteCampos({ form }) {
 
       {/* Medio de pago + referencia */}
       <div className="space-y-2">
-        <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Medio de pago</label>
+        <label className="text-label text-ink-2">Medio de pago</label>
         <BrandSelect
           value={medio}
           onChange={setMedio}
@@ -145,13 +145,13 @@ export default function PagoComprobanteCampos({ form }) {
 
       {/* Comprobante — obligatorio salvo "mismo comprobante que otro pago" */}
       <div className="border border-line rounded-inner overflow-hidden">
-        <div className="px-4 py-3 bg-surface text-xs font-bold uppercase tracking-widest text-ink-2">
+        <div className="text-label px-4 py-3 bg-surface text-ink-2">
           Comprobante
         </div>
         <div className="p-4 space-y-4 bg-card">
           {pagosConComprobante.length > 0 && (
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Mismo comprobante que otro pago</label>
+              <label className="text-label text-ink-2">Mismo comprobante que otro pago</label>
               <BrandSelect
                 value={mismoComprobanteDe}
                 onChange={setMismoComprobanteDe}
@@ -168,7 +168,7 @@ export default function PagoComprobanteCampos({ form }) {
           {!mismoComprobanteDe && (
             <>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Tipo</label>
+                <label className="text-label text-ink-2">Tipo</label>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(COMPROBANTE_TIPO_SIGLA).map(([value, sigla]) => (
                     <button
@@ -190,14 +190,14 @@ export default function PagoComprobanteCampos({ form }) {
                 onBlur={verificarDuplicado} min={1} max={99999999}
                 placeholder="Ej: 727" error={comprobanteIncompleto && !numero ? 'Obligatorio' : undefined}
               />
-              {verificandoDuplicado && <p className="text-[11px] text-ink-2">Verificando...</p>}
+              {verificandoDuplicado && <p className="text-label text-ink-2">Verificando...</p>}
               {duplicado && (
-                <p className="text-[11px] text-danger">
+                <p className="text-label text-danger">
                   Ese comprobante ya está cargado ({duplicado.cliente}{duplicado.fecha ? `, ${formatFecha(duplicado.fecha)}` : ''}).
                 </p>
               )}
               {anuladoPrevio && (
-                <p className="text-[11px] text-ink-2">
+                <p className="text-label text-ink-2">
                   Este número tiene un comprobante anulado previo — se puede volver a cargar.
                 </p>
               )}
@@ -210,7 +210,7 @@ export default function PagoComprobanteCampos({ form }) {
                 hint={esHistorico ? 'Pago histórico: queda en el historial del cliente, no afecta la caja' : undefined}
               />
               {comprobanteIncompleto && (
-                <p className="text-[11px] text-danger">
+                <p className="text-label text-danger">
                   El comprobante es obligatorio: completá tipo, número y fecha.
                 </p>
               )}

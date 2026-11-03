@@ -17,11 +17,11 @@ import { usePermiso } from '../../context/AuthProvider'
 import { FileText, AlertTriangle, Pencil } from 'lucide-react'
 
 const inputClass =
-  'w-full bg-surface border border-line rounded-inner px-4 py-3 text-ink text-base md:text-body focus:border-gold-300 outline-none font-bold'
+  'w-full bg-surface rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none font-semibold border border-transparent focus:ring-2 focus:ring-gold'
 
 const chipClass = (active) =>
   `px-3 py-2.5 rounded-icon text-xs font-bold border transition-all min-h-[44px] ${
-    active ? 'bg-gold text-ink border-gold' : 'bg-surface text-ink-2 border-line hover:text-ink'
+    active ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
   }`
 
 // Detalle de un pago ya registrado (Tarea 4): mismo patrón sheet/drawer que
@@ -165,7 +165,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
       <div className="space-y-6">
         {reserva && (
           <div className="p-4 bg-surface border border-line rounded-inner">
-            <p className="text-body font-bold text-ink uppercase">{unidadLabel}</p>
+            <p className="text-label text-ink">{unidadLabel}</p>
           </div>
         )}
 
@@ -176,7 +176,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
           <button
             type="button"
             onClick={() => { onClose?.(); navigate(linkToCliente(pago.cliente_id, { pagoId: pago.id })) }}
-            className="text-[10px] font-bold uppercase tracking-widest text-ink hover:underline"
+            className="text-label text-ink hover:underline"
           >
             Ver cliente →
           </button>
@@ -186,25 +186,25 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
           <div className="flex items-start gap-3 p-4 bg-danger-soft border border-danger/30 rounded-inner">
             <AlertTriangle className="text-danger shrink-0 mt-0.5" size={18} />
             <div>
-              <p className="text-body font-bold text-danger uppercase tracking-widest">Pago anulado</p>
-              <p className="text-xs text-ink-2 mt-1">{pago.anulado_motivo}</p>
-              {pago.anulado_at && <p className="text-[10px] text-ink-2 mt-1">{formatFecha(pago.anulado_at)}</p>}
+              <p className="text-label text-danger">Pago anulado</p>
+              <p className="text-label text-ink-2 mt-1">{pago.anulado_motivo}</p>
+              {pago.anulado_at && <p className="text-label text-ink-2 mt-1">{formatFecha(pago.anulado_at)}</p>}
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Monto</p>
+            <p className="text-label text-ink-2">Monto</p>
             <div className="flex items-center gap-3 mt-1">
-              <p className={`text-lg font-bold ${pago.estado === 'anulado' ? 'text-ink-2 line-through' : pagoSinVerificar(pago) ? 'text-danger' : 'text-success-ink'}`}>
+              <p className={`text-card-title ${pago.estado === 'anulado' ? 'text-ink-2 line-through' : pagoSinVerificar(pago) ? 'text-danger' : 'text-success-ink'}`}>
                 {pagoSinVerificar(pago) ? 'Monto nulo' : formatPesos(pago.monto)}
               </p>
               {pagoSinVerificar(pago) && pago.estado !== 'anulado' && puedeEditarMontoPago && (
                 <button
                   type="button"
                   onClick={() => onEditarMonto?.(pago)}
-                  className="text-[10px] font-bold uppercase tracking-widest text-ink hover:text-ink"
+                  className="text-label text-ink hover:text-ink"
                 >
                   Cargar monto
                 </button>
@@ -227,10 +227,10 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               <div className="mt-3 space-y-2 p-3 bg-surface border border-line rounded-inner">
                 <MoneyInput label="Nuevo monto" value={editMontoPago} onChange={setEditMontoPago} max={100_000_000} />
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => setEditandoMontoPago(false)} className="flex-1 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest bg-card text-ink-2 border border-line">
+                  <button type="button" onClick={() => setEditandoMontoPago(false)} className="text-label flex-1 py-2 rounded-full bg-card text-ink-2 border border-line">
                     Cancelar
                   </button>
-                  <button type="button" disabled={saving} onClick={handleGuardarMontoPago} className="flex-1 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest bg-gold text-ink disabled:opacity-50">
+                  <button type="button" disabled={saving} onClick={handleGuardarMontoPago} className="text-label flex-1 py-2 rounded-full bg-gold text-ink disabled:opacity-50">
                     Guardar
                   </button>
                 </div>
@@ -238,32 +238,32 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
             )}
           </div>
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Medio de Pago</p>
-            <p className="text-body font-bold text-ink mt-1">{formatMedioPago(pago)}</p>
+            <p className="text-label text-ink-2">Medio de Pago</p>
+            <p className="text-body font-semibold text-ink mt-1">{formatMedioPago(pago)}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Tipo</p>
+            <p className="text-label text-ink-2">Tipo</p>
             <p className="text-body text-ink mt-1">{TIPO_PAGO_LABEL[pago.tipo_pago] || '—'}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Fecha</p>
+            <p className="text-label text-ink-2">Fecha</p>
             {/* pago.fecha es la fecha real del pago (editable, la del
                 comprobante si vino con uno) — nunca fecha_hora, que es solo
                 el timestamp de carga en el sistema (auditoría). */}
             <p className="text-body text-ink mt-1">{formatFecha(pago.fecha)}</p>
             {pago.fecha_hora && (
-              <p className="text-[10px] text-ink-2 mt-0.5">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
+              <p className="text-label text-ink-2 mt-0.5">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
             )}
           </div>
           {pago.concepto && (
             <div className="col-span-2">
-              <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Concepto</p>
+              <p className="text-label text-ink-2">Concepto</p>
               <p className="text-body text-ink mt-1">{pago.concepto}</p>
             </div>
           )}
           {pago.referencia && (
             <div className="col-span-2">
-              <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Referencia</p>
+              <p className="text-label text-ink-2">Referencia</p>
               <p className="text-body text-ink mt-1">{pago.referencia}</p>
             </div>
           )}
@@ -272,7 +272,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
         {/* Comprobante: etiqueta si ya existe, o form para cargarlo/corregirlo */}
         <div className="border border-line rounded-inner overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 bg-surface">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-ink-2">
+            <div className="text-label flex items-center gap-2 text-ink-2">
               <FileText size={14} />
               {comprobantes.length === 0 && 'Sin comprobante'}
             </div>
@@ -280,7 +280,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               <button
                 type="button"
                 onClick={() => setCargandoComprobante(true)}
-                className="text-[10px] font-bold uppercase tracking-widest text-ink hover:text-ink"
+                className="text-label text-ink hover:text-ink"
               >
                 {comprobantes.length > 0 ? 'Agregar otro' : 'Cargar'}
               </button>
@@ -313,20 +313,20 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                         <DateInput label="Fecha" value={editFecha} onChange={setEditFecha} max={new Date().toISOString().split('T')[0]} calendarOnly />
                       </div>
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => setEditandoId(null)} className="flex-1 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest bg-surface text-ink-2 border border-line">
+                        <button type="button" onClick={() => setEditandoId(null)} className="text-label flex-1 py-2 rounded-full bg-surface text-ink-2 border border-line">
                           Cancelar
                         </button>
-                        <button type="button" disabled={saving} onClick={handleGuardarEdicion} className="flex-1 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest bg-gold text-ink disabled:opacity-50">
+                        <button type="button" disabled={saving} onClick={handleGuardarEdicion} className="text-label flex-1 py-2 rounded-full bg-gold text-ink disabled:opacity-50">
                           Guardar
                         </button>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <div className="text-xs">
-                        <span className="font-bold text-ink uppercase tracking-widest">{formatComprobante(c.tipo, c.numero)}</span>
+                      <div className="text-label">
+                        <span className="text-label text-ink">{formatComprobante(c.tipo, c.numero)}</span>
                         {c.fecha && <span className="text-ink-2"> · {formatFecha(c.fecha)}</span>}
-                        <span className={`ml-2 font-bold ${c.monto_total == null ? 'text-danger' : 'text-success-ink'}`}>
+                        <span className={`ml-2 font-semibold ${c.monto_total == null ? 'text-danger' : 'text-success-ink'}`}>
                           {c.monto_total == null ? 'Sin monto' : formatPesos(c.monto_total)}
                         </span>
                       </div>
@@ -346,13 +346,13 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               {sumaNoCoincide && (
                 <div className="flex items-start gap-2 px-4 py-3 bg-gold-100">
                   <AlertTriangle className="text-ink shrink-0 mt-0.5" size={14} />
-                  <p className="text-[11px] text-ink">
+                  <p className="text-label text-ink">
                     La suma de comprobantes ({formatPesos(sumaComprobantes)}) no coincide con el monto del pago ({formatPesos(pago.monto)}).
                   </p>
                 </div>
               )}
               {comprobantesPendientes > 0 && (
-                <p className="px-4 py-2 text-[10px] text-ink-2 uppercase tracking-widest">
+                <p className="text-label px-4 py-2 text-ink-2">
                   {comprobantesPendientes} comprobante{comprobantesPendientes > 1 ? 's' : ''} sin monto cargado
                 </p>
               )}
@@ -379,14 +379,14 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               </div>
               <DateInput value={fecha} onChange={setFecha} max={new Date().toISOString().split('T')[0]} />
               <div className="flex gap-3">
-                <button type="button" onClick={() => setCargandoComprobante(false)} className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-surface text-ink-2 border border-line">
+                <button type="button" onClick={() => setCargandoComprobante(false)} className="text-label flex-1 py-3 rounded-full bg-surface text-ink-2 border border-line">
                   Cancelar
                 </button>
                 <button
                   type="button"
                   disabled={saving || !comprobanteTipo || !puntoVenta || !numero}
                   onClick={handleGuardarComprobante}
-                  className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-gold text-ink disabled:opacity-50"
+                  className="text-label flex-1 py-3 rounded-full bg-gold text-ink disabled:opacity-50"
                 >
                   Guardar
                 </button>
@@ -403,13 +403,13 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               <button
                 type="button"
                 onClick={() => setAnulando(true)}
-                className="w-full py-3 rounded-inner text-xs font-bold uppercase tracking-widest text-danger border border-danger/30 hover:bg-danger-soft transition-all"
+                className="text-label w-full py-3 rounded-inner text-danger border border-danger/30 hover:bg-danger-soft transition-all"
               >
                 Anular pago
               </button>
             ) : (
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-danger uppercase tracking-widest">Motivo de la anulación (obligatorio)</label>
+                <label className="text-label text-danger">Motivo de la anulación (obligatorio)</label>
                 <textarea
                   rows={2}
                   value={motivo}
@@ -418,14 +418,14 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                   className={`${inputClass} resize-none`}
                 />
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => { setAnulando(false); setMotivo('') }} className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-surface text-ink-2 border border-line">
+                  <button type="button" onClick={() => { setAnulando(false); setMotivo('') }} className="text-label flex-1 py-3 rounded-full bg-surface text-ink-2 border border-line">
                     Volver
                   </button>
                   <button
                     type="button"
                     disabled={saving || !motivo.trim()}
                     onClick={handleAnular}
-                    className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-danger text-on-ink hover:bg-danger-ink disabled:opacity-50"
+                    className="text-label flex-1 py-3 rounded-full bg-danger text-on-ink hover:bg-danger-ink disabled:opacity-50"
                   >
                     Confirmar anulación
                   </button>
