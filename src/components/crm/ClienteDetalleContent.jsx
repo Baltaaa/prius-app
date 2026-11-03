@@ -119,21 +119,23 @@ export default function ClienteDetalleContent({
               <button
                 onClick={onRegistrarPago}
                 disabled={reservasPagables.length === 0}
-                className="btn btn-secondary flex-1 min-w-40 @[480px]:flex-none"
+                className="btn btn-secondary w-full @[480px]:w-auto"
               >
                 <Wallet size={16} strokeWidth={1.5} /> Registrar pago
               </button>
-              {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
-                <button onClick={() => abrirNuevaReserva({ clienteId: cliente.id })} className="btn-icon bg-card border border-line text-ink-2 shrink-0" title="Nueva reserva" aria-label="Nueva reserva">
-                  <CalendarPlus size={16} strokeWidth={1.5} />
+              <div className="flex items-center gap-2">
+                {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
+                  <button onClick={() => abrirNuevaReserva({ clienteId: cliente.id })} className="btn-icon bg-card border border-line text-ink-2 shrink-0" title="Nueva reserva" aria-label="Nueva reserva">
+                    <CalendarPlus size={16} strokeWidth={1.5} />
+                  </button>
+                )}
+                <button onClick={onEditar} className="btn-icon bg-card border border-line text-ink-2 shrink-0" title="Editar" aria-label="Editar">
+                  <Edit2 size={16} strokeWidth={1.5} />
                 </button>
-              )}
-              <button onClick={onEditar} className="btn-icon bg-card border border-line text-ink-2 shrink-0" title="Editar" aria-label="Editar">
-                <Edit2 size={16} strokeWidth={1.5} />
-              </button>
-              <button onClick={onEliminar} className="btn-icon bg-card border border-line text-danger-ink hover:bg-danger-soft shrink-0" title="Borrar" aria-label="Borrar">
-                <Trash2 size={16} strokeWidth={1.5} />
-              </button>
+                <button onClick={onEliminar} className="btn-icon bg-card border border-line text-danger-ink hover:bg-danger-soft shrink-0" title="Borrar" aria-label="Borrar">
+                  <Trash2 size={16} strokeWidth={1.5} />
+                </button>
+              </div>
             </div>
           </div>
 

@@ -989,7 +989,7 @@ export default function Clientes() {
             </button>
             <h1 className="text-label text-ink">Ficha de Cliente</h1>
           </div>
-          <ScrollFade className="flex-1 overflow-y-auto px-6 pt-4 pb-6 flex flex-col min-h-0">
+          <ScrollFade className="flex-1 overflow-y-auto px-page pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col min-h-0">
             {mobileDetalleCliente && (
               <ClienteDetalleContent
                 cliente={mobileDetalleCliente}

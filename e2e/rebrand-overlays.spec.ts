@@ -50,7 +50,7 @@ const PASOS: Paso[] = [
   { nombre: 'busqueda', correr: async (p, m) => {
     await ir(p, '/app/home')
     if (m) await p.getByLabel('Buscar', { exact: true }).click()
-    await p.getByPlaceholder('Búsqueda inteligente').last().fill('agu')
+    await p.getByPlaceholder(/Búsqueda inteligente|^Buscar$/).last().fill('agu')
     await p.waitForTimeout(600)
   } },
   { nombre: 'mas-sheet', solo: 'mobile', correr: async (p) => { await ir(p, '/app/home'); await p.getByRole('button', { name: 'Más', exact: true }).click(); await p.waitForTimeout(400) } },

@@ -344,38 +344,38 @@ export default function Caja() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-grid">
             <div className="card-surface card-pad min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-label text-ink-2 truncate">Neto en caja</p>
+                <p className="text-label text-ink-2">Neto en caja</p>
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><Wallet size={16} /></div>
               </div>
               <MontoStat fmt={fmtM} value={cajaSeleccionada.total_neto} className="text-ink mb-2" />
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success-soft text-success-ink text-label font-medium max-w-full overflow-hidden mt-auto">
                 <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
-                <span className="truncate" title="Arqueado en tiempo real">Arqueado en tiempo real</span>
+                <span>Arqueado en tiempo real</span>
               </span>
             </div>
             <div className="card-surface card-pad min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-label text-ink-2 truncate">Ingresos</p>
+                <p className="text-label text-ink-2">Ingresos</p>
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-success-soft flex items-center justify-center text-success-ink"><ArrowDownRight size={16} /></div>
               </div>
               <MontoStat fmt={fmtM} value={cajaSeleccionada.total_cobros} size="md" className="text-success-ink mb-2" />
-              <p className="text-label text-ink-2 mt-auto truncate">{movimientos.filter((m) => m.tipo_movimiento === 'ingreso' && m.estado !== 'anulado').length} cobro{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'} acreditado{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'}</p>
+              <p className="text-label text-ink-2 mt-auto">{movimientos.filter((m) => m.tipo_movimiento === 'ingreso' && m.estado !== 'anulado').length} cobro{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'} acreditado{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'}</p>
             </div>
             <div className="card-surface card-pad min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-label text-ink-2 truncate">Egresos</p>
+                <p className="text-label text-ink-2">Egresos</p>
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><ArrowUpRight size={16} /></div>
               </div>
               <MontoStat fmt={fmtM} value={cajaSeleccionada.total_gastos} size="md" className="text-ink mb-2" />
-              <p className="text-label text-ink-2 mt-auto truncate">{todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id && g.estado !== 'anulado').length > 0 ? `${todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length} gasto(s) cargado(s)` : 'Sin retiros cargados'}</p>
+              <p className="text-label text-ink-2 mt-auto">{todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id && g.estado !== 'anulado').length > 0 ? `${todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length} gasto(s) cargado(s)` : 'Sin retiros cargados'}</p>
             </div>
             <div className="card-surface card-pad min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-label text-ink-2 truncate">Total esperado</p>
+                <p className="text-label text-ink-2">Total esperado</p>
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><Banknote size={16} /></div>
               </div>
               <MontoStat fmt={fmtM} value={totalEsperadoPreview} size="md" className="text-ink mb-2" />
-              <p className="text-label text-ink-2 mt-auto truncate" title="Todos los medios — ver desglose">Todos los medios — ver desglose</p>
+              <p className="text-label text-ink-2 mt-auto">Todos los medios — ver desglose</p>
             </div>
           </div>
 
@@ -389,7 +389,7 @@ export default function Caja() {
                       <button
                         key={t.value}
                         onClick={() => setTab(t.value)}
-                        className={`px-4 py-2 rounded-full text-label whitespace-nowrap transition-all min-h-[40px] ${
+                        className={`px-4 py-2 rounded-full text-label whitespace-nowrap transition-all min-h-11 ${
                           tab === t.value ? 'bg-ink text-on-ink' : 'bg-surface text-ink-2 hover:bg-line'
                         }`}
                       >
@@ -476,11 +476,11 @@ export default function Caja() {
                                 <span className={`shrink-0 w-6 h-6 rounded-swatch bg-card flex items-center justify-center ${m.tipo_movimiento === 'ingreso' ? 'text-success-ink' : 'text-danger'}`}>
                                   {m.tipo_movimiento === 'ingreso' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                                 </span>
-                                <p className={`text-body font-semibold text-ink truncate min-w-0 ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.concepto}</p>
+                                <p className={`text-body font-semibold text-ink truncate min-w-0 ${m.estado === 'anulado' ? 'line-through' : ''}`} title={m.concepto}>{m.concepto}</p>
                               </div>
                               <span className={`text-body font-semibold tabular-nums whitespace-nowrap shrink-0 ${m.monto < 0 ? 'text-danger' : 'text-success-ink'}`}>{fmtM(m.monto)}</span>
                             </div>
-                            <p className="text-label text-ink-2 truncate pl-8">
+                            <p className="text-label text-ink-2 break-words pl-8">
                               {m.cliente_proveedor}{m.unidad ? ` · ${m.unidad}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
                             </p>
                             {m.comprobante && (
@@ -546,7 +546,7 @@ export default function Caja() {
                           className={`w-full flex justify-between items-center py-3 px-2 border-b border-line last:border-0 hover:bg-surface rounded-icon text-left ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
                         >
                           <div className="min-w-0">
-                            <p className={`text-body font-semibold text-ink-2 truncate ${g.estado === 'anulado' ? 'line-through' : ''}`}>{g.descripcion}</p>
+                            <p className={`text-body font-semibold text-ink-2 truncate ${g.estado === 'anulado' ? 'line-through' : ''}`} title={g.descripcion}>{g.descripcion}</p>
                             <p className="text-label text-ink-2">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
                           </div>
                           <span className="text-body font-semibold text-danger tabular-nums shrink-0 ml-3">{fmtM(g.monto)}</span>
