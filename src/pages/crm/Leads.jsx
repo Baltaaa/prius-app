@@ -77,7 +77,7 @@ export default function Leads() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-body font-semibold text-ink-2 uppercase animate-pulse">Cargando leads...</span>
+        <span className="text-label text-ink-2 animate-pulse">Cargando leads...</span>
       </div>
     )
   }
@@ -90,9 +90,9 @@ export default function Leads() {
             <button
               key={f.key}
               onClick={() => setFiltro(f.key)}
-              className={`px-4 py-2 rounded-inner text-[10px] font-bold uppercase tracking-widest border transition-all ${
+              className={`px-4 py-2 rounded-inner text-[10px] font-bold border transition-all ${
                 filtro === f.key
-                  ? 'bg-gold text-ink border-gold'
+                  ? 'bg-ink text-on-ink border-ink'
                   : 'bg-surface text-ink-2 border-line hover:text-ink'
               }`}
             >
@@ -108,7 +108,7 @@ export default function Leads() {
       </div>
 
       {visibles.length === 0 && (
-        <div className="card-light rounded-card p-12 text-center text-ink-2 uppercase text-xs tracking-widest flex flex-col items-center gap-3">
+        <div className="card-surface text-label p-12 text-center text-ink-2 flex flex-col items-center gap-3">
           <Inbox size={28} className="opacity-40" />
           Sin leads en esta vista
         </div>
@@ -138,12 +138,12 @@ export default function Leads() {
                   {estado === 'nuevo' && (
                     <span className="w-2 h-2 rounded-full bg-gold shrink-0" />
                   )}
-                  <h3 className="text-base font-bold text-ink break-words">{lead.nombre}</h3>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${meta.cls}`}>
+                  <h3 className="text-base font-semibold text-ink break-words">{lead.nombre}</h3>
+                  <span className={`text-label px-2 py-0.5 rounded-full ${meta.cls}`}>
                     {meta.label}
                   </span>
                 </div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-ink-2 mt-1">
+                <p className="text-label text-ink-2 mt-1">
                   {lead.asunto} · {fmt(lead.created_at)}
                   {lead.origen ? ` · ${lead.origen}` : ''}
                 </p>
@@ -153,11 +153,11 @@ export default function Leads() {
                 <p className="text-body text-ink-2 mt-3 whitespace-pre-wrap break-words">{lead.mensaje}</p>
               )}
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 text-xs text-ink-2">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 text-label text-ink-2">
                 <span className="inline-flex items-center gap-1.5 break-all">
                   <Phone size={12} className="text-ink-2 shrink-0" /> {telMostrado}
                   {!wa && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-gold-100 text-[9px] font-bold uppercase tracking-wider text-ink shrink-0">
+                    <span className="text-label px-1.5 py-0.5 rounded-full bg-gold-100 text-ink shrink-0">
                       A revisar
                     </span>
                   )}
@@ -172,7 +172,7 @@ export default function Leads() {
                   onClick={() => contactar(lead)}
                   disabled={!wa}
                   title={wa ? 'Contactar por WhatsApp' : 'Número a revisar'}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-inner text-xs font-bold bg-success text-on-ink hover:bg-success disabled:opacity-40 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-inner text-label font-semibold bg-success text-on-ink hover:bg-success disabled:opacity-40 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
                 >
                   <WhatsAppIcon size={14} />
                   {wa ? 'Contactar por WhatsApp' : 'Número a revisar'}
@@ -182,7 +182,7 @@ export default function Leads() {
                   {estado !== 'contactado' && (
                     <button
                       onClick={() => setEstado(lead, 'contactado')}
-                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-inner text-xs font-bold bg-surface text-ink-2 border border-line hover:text-ink transition-colors"
+                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-full text-label font-semibold bg-surface text-ink-2 border border-line hover:text-ink transition-colors"
                     >
                       <Check size={14} /> Marcar contactado
                     </button>
@@ -191,7 +191,7 @@ export default function Leads() {
                   {estado !== 'descartado' ? (
                     <button
                       onClick={() => setEstado(lead, 'descartado')}
-                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-inner text-xs font-bold bg-surface text-ink-2 border border-line hover:text-ink transition-colors"
+                      className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-full text-label font-semibold bg-surface text-ink-2 border border-line hover:text-ink transition-colors"
                     >
                       <X size={14} /> Descartar
                     </button>
@@ -199,14 +199,14 @@ export default function Leads() {
                     <>
                       <button
                         onClick={() => setEstado(lead, 'nuevo')}
-                        className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-inner text-xs font-bold bg-surface text-ink-2 border border-line hover:text-ink transition-colors"
+                        className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-full text-label font-semibold bg-surface text-ink-2 border border-line hover:text-ink transition-colors"
                       >
                         <RotateCcw size={14} /> Reabrir
                       </button>
                       {puedeEliminar && (
                         <button
                           onClick={() => setLeadAEliminar(lead)}
-                          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-inner text-xs font-bold bg-danger-soft text-danger border border-danger/30 hover:bg-danger-soft transition-colors"
+                          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-full text-label font-semibold bg-danger-soft text-danger border border-danger/30 hover:bg-danger-soft transition-colors"
                         >
                           <Trash2 size={14} /> Eliminar
                         </button>
