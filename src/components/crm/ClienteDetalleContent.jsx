@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus } from 'lucide-react'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, unidadEmoji, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
+import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus, Copy, Check } from 'lucide-react'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
 import { vistaDeGrupo, vistaDeReserva } from '../../lib/reservas'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
@@ -10,8 +11,7 @@ import StatusBadge from './StatusBadge'
 import ReservaPagosCard from './ReservaPagosCard'
 import Historial from './Historial'
 import ScrollFade from '../ui/ScrollFade'
-
-const TIPO_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
+import UnidadLabel from './UnidadLabel'
 
 // Ficha de cliente — contenido compartido entre el panel lateral fijo de
 // desktop (≥1024px, master-detalle) y la pantalla completa de mobile/tablet
@@ -23,10 +23,11 @@ export default function ClienteDetalleContent({
   cliente, derivado, reservas, pagosPorReserva, todosPagos, puedeAjustarPrecio,
   onClose, onEditar, onEliminar, onRegistrarPago, onPagoCelda, onDefinirPrecio,
   onEditarPrecio, onAgruparReservas, onLiberarUnidad, onConfirmarTemporada,
-  showCloseButton = true, wide = false,
+  showCloseButton = true,
 }) {
   const navigate = useNavigate()
   const { abrirNuevaReserva } = useNuevaReserva()
+  const [mailCopiado, setMailCopiado] = useState(false)
   if (!cliente || !derivado) return null
 
   const {
@@ -44,29 +45,40 @@ export default function ClienteDetalleContent({
     ...reservasSueltas.map((reserva) => vistaDeReserva({ reserva, pagosPorReserva, formatFecha })),
   ].sort((a, b) => Number(a.cancelada) - Number(b.cancelada))
 
+  const copiarMail = async () => {
+    try {
+      await navigator.clipboard.writeText(cliente.mail)
+      setMailCopiado(true)
+      setTimeout(() => setMailCopiado(false), 1500)
+    } catch {
+      // Sin permiso de portapapeles: el mail igual se ve completo en el title.
+    }
+  }
+
+  // El panel decide su layout por SU ancho (container query), no por el del
+  // viewport: Historial al lado solo desde 880px de panel; por debajo va
+  // debajo del detalle y todo scrollea junto.
   return (
-    <>
-      <div className="flex items-start justify-between pb-space-md shrink-0">
-        <div className="flex items-center gap-space-sm min-w-0">
-          <div className="w-11 h-11 rounded-inner bg-ink text-on-ink flex items-center justify-center text-body font-semibold shrink-0">
+    <div className="@container flex flex-col flex-1 min-h-0">
+      <div className="flex items-start justify-between gap-3 pb-4 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-12 h-12 rounded-full bg-ink text-on-ink flex items-center justify-center text-body font-semibold shrink-0">
             {cliente.nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-body text-ink truncate">{formatNombre(cliente.nombre)}</span>
+            <div className="flex items-center gap-x-2 gap-y-1 flex-wrap">
+              <span className="text-row text-ink" title={formatNombre(cliente.nombre)}>{formatNombre(cliente.nombre)}</span>
               {badgeStatus && <StatusBadge status={badgeStatus} />}
             </div>
-            <p className="text-label text-ink-2 mt-1 truncate">
-              {cliente.telefono ? formatTelefono(cliente.telefono) : <span className="text-ink-2">Sin teléfono</span>}
-              {unidadesCliente.length > 0 && (
-                <> · {unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}`).join(', ')}</>
-              )}
+            <p className="text-label text-ink-2 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span>{cliente.telefono ? formatTelefono(cliente.telefono) : 'Sin teléfono'}</span>
+              {unidadesCliente.map((u) => <UnidadLabel key={u.id ?? `${u.tipo}-${u.numero}`} tipo={u.tipo} numero={u.numero} />)}
             </p>
             {comprobanteMatch && (
               <button
                 type="button"
                 onClick={() => scrollAndHighlight(`pago-${comprobanteMatch.pago.id}`)}
-                className="text-label text-ink font-semibold mt-1 hover:underline truncate block text-left"
+                className="text-label text-ink font-semibold mt-1 hover:underline text-left"
               >
                 Comprobante {formatComprobante(comprobanteMatch.comprobante.tipo, comprobanteMatch.comprobante.numero)}
                 {formatPesosVisible(comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(comprobanteMatch.pago.monto)}` : ''}
@@ -75,150 +87,132 @@ export default function ClienteDetalleContent({
           </div>
         </div>
         {showCloseButton && (
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0" title="Cerrar">
-            <X size={18} />
+          <button onClick={onClose} className="btn-icon bg-surface text-ink-2 hover:text-ink shrink-0" title="Cerrar" aria-label="Cerrar">
+            <X size={20} strokeWidth={1.5} />
           </button>
         )}
       </div>
 
-      {/* Scroll (31/10/2026): en desktop (`wide`) la ficha NO scrollea como un
-          todo. La columna izquierda queda fija y la ÚNICA zona scrolleable es
-          la lista del Historial, a la derecha. Por debajo de `lg` sigue
-          scrolleando entera, como siempre. */}
-      <div className={`flex-1 min-h-0 ${wide ? 'lg:grid lg:grid-cols-2 lg:gap-space-md lg:items-stretch lg:overflow-hidden overflow-y-auto space-y-space-md lg:space-y-0' : 'overflow-y-auto space-y-space-md'}`}>
-      <div className="cq space-y-2.5 lg:flex lg:flex-col lg:min-h-0 lg:h-full lg:space-y-0 lg:gap-2.5">
-        {/* Saldo + acciones rápidas */}
-        <div className="bg-surface rounded-inner px-3 py-2.5 flex items-center justify-between gap-space-sm flex-wrap">
-          <div>
-            <span className="text-label text-ink-2">Saldo</span>
-            <p className={`text-body mt-0.5 ${saldoInfo.sinVerificar && !saldoHeaderSaldado ? 'text-danger' : sinPrecio ? 'text-ink-2' : 'text-ink'}`}>
-              {saldoInfo.sinVerificar
-                ? (saldoHeaderSaldado ? '' : 'Saldo sin verificar')
-                : sinPrecio
-                  ? 'Sin precio'
-                  : (formatPesosVisible(saldoInfo.total) || '')}
-            </p>
-            {comprobantesPendientesCliente > 0 && (
-              <p className="text-label text-danger mt-0.5">
-                {comprobantesPendientesCliente} comprobante{comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
+      {/* Un solo scroll mientras el panel es angosto; desde 880px cada columna
+          scrollea por su cuenta (la cadena min-h-0 llega hasta la card). */}
+      <ScrollFade className="flex-1 min-h-0 overflow-y-auto scroll-fino flex flex-col gap-section @[880px]:overflow-hidden @[880px]:grid @[880px]:grid-cols-2 @[880px]:gap-grid">
+        <div className="flex flex-col gap-4 @[880px]:min-h-0 @[880px]:overflow-y-auto @[880px]:scroll-fino">
+          {/* Saldo + acciones. Si el panel es angosto, el saldo va arriba y las
+              acciones en una segunda fila a todo el ancho. */}
+          <div className="card-inner flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-label text-ink-2">Saldo</span>
+              <p className={`text-row mt-1 ${saldoInfo.sinVerificar && !saldoHeaderSaldado ? 'text-danger-ink' : sinPrecio ? 'text-ink-2' : 'text-ink'}`}>
+                {saldoInfo.sinVerificar
+                  ? (saldoHeaderSaldado ? '' : 'Saldo sin verificar')
+                  : sinPrecio
+                    ? 'Sin precio'
+                    : (formatPesosVisible(saldoInfo.total) || '')}
               </p>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2 min-w-0">
-            <button
-              onClick={onRegistrarPago}
-              disabled={reservasPagables.length === 0}
-              className="px-4 py-2.5 min-h-[44px] bg-ink hover:bg-chart-2 disabled:opacity-30 disabled:cursor-not-allowed rounded-full flex items-center gap-2 font-semibold text-label sm:text-body transition-all text-on-ink"
-            >
-              <Wallet size={16} /> Registrar pago
-            </button>
-            {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
-              <button
-                onClick={() => abrirNuevaReserva({ clienteId: cliente.id })}
-                className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-surface rounded-full text-ink-2 transition-all"
-                title="Nueva reserva"
-              >
-                <CalendarPlus size={16} />
-              </button>
-            )}
-            <button onClick={onEditar} className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-surface rounded-full text-ink-2 transition-all" title="Editar">
-              <Edit2 size={16} />
-            </button>
-            <button onClick={onEliminar} className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-danger-soft rounded-full text-danger transition-all" title="Borrar">
-              <Trash2 size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* Datos del cliente. grid-cols-2 fijo (nunca md:grid-cols-4, oct
-            2026): este panel vive adentro de un contenedor angosto (aside
-            fijo, bottom sheet, pantalla completa) que casi nunca llega al
-            ancho real del viewport — un breakpoint de Tailwind responde al
-            viewport, no al contenedor, así que md:grid-cols-4 metía 4
-            columnas en ~365px reales (aside del breakpoint lg más angosto)
-            y el email terminaba partido letra por letra por el break-all. */}
-        {/* 31/10/2026: una fila de 4 datos en vez de grid 2x2 con padding
-            grande — la columna izquierda tiene que entrar entera en
-            1366x768 y este bloque se llevaba 172px para 4 campos cortos. */}
-        {/* 31/10/2026 bis: las 4 columnas se piden con container query (`cq-cols-4`,
-            ver index.css), no con `sm:` — a 1366x768 esta columna mide ~300px
-            reales y un breakpoint de viewport volvía a pisar los campos. */}
-        <div className="bg-surface rounded-inner px-3 py-2.5 grid grid-cols-2 cq-cols-4 gap-x-3 gap-y-2">
-          <div className="col-span-2 cq-span-1 min-w-0">
-            <p className="text-label text-ink-2 flex items-center gap-1"><Mail size={11} /> Email</p>
-            <p className="text-label text-ink mt-1 lowercase break-all">{cliente.mail || <span className="text-ink-2 normal-case whitespace-nowrap">Sin cargar</span>}</p>
-          </div>
-          <div>
-            <p className="text-label text-ink-2 flex items-center gap-1"><FileText size={11} /> CUIT</p>
-            <p className="text-label text-ink mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-ink-2 whitespace-nowrap">Sin cargar</span>}</p>
-          </div>
-          <div>
-            <p className="text-label text-ink-2 flex items-center gap-1"><FileText size={11} /> DNI</p>
-            <p className="text-label text-ink mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-ink-2 whitespace-nowrap">Sin cargar</span>}</p>
-          </div>
-          <div>
-            <p className="text-label text-ink-2">Cliente desde</p>
-            <p className="text-label text-ink mt-1">{formatFecha(cliente.created_at)}</p>
-          </div>
-          {cliente.notas && (
-            <div className="col-span-2">
-              <p className="text-label text-ink-2">Notas</p>
-              <p className="text-label text-ink-2 mt-1">{cliente.notas}</p>
+              {comprobantesPendientesCliente > 0 && (
+                <p className="text-label text-danger-ink mt-1">
+                  {comprobantesPendientesCliente} comprobante{comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
+                </p>
+              )}
             </div>
-          )}
-        </div>
-
-        {/* Reservas y pagos — UNA sola tarjeta para todo (31/10/2026):
-            grupo con precio unificado, temporada, período y día. Antes había
-            dos diseños distintos (la tarjeta rica solo para grupos, una pobre
-            para las sueltas) más la grilla ReservaPagosCard en la otra columna. */}
-        {/* La lista de reservas se queda con el alto sobrante y scrollea por
-            dentro (31/10/2026). Así la columna izquierda entra SIEMPRE en el
-            viewport, sin importar cuántas reservas tenga el cliente, y la
-            ficha nunca scrollea como un todo. */}
-        <div className="lg:flex-1 lg:min-h-0 lg:flex lg:flex-col">
-          <div className="flex items-center justify-between mb-2 shrink-0">
-            <p className="text-label text-ink-2">
-              Reservas ({vistasReservas.length})
-            </p>
-            {reservasSueltas.filter((r) => r.estado !== 'cancelada').length >= 2 && (
-              <button onClick={onAgruparReservas} className="text-label text-ink hover:text-ink transition-all">
-                Agrupar reservas
+            <div className="flex items-center gap-2 w-full @[480px]:w-auto">
+              <button
+                onClick={onRegistrarPago}
+                disabled={reservasPagables.length === 0}
+                className="btn btn-secondary flex-1 @[480px]:flex-none"
+              >
+                <Wallet size={16} strokeWidth={1.5} /> Registrar pago
               </button>
+              {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
+                <button onClick={() => abrirNuevaReserva({ clienteId: cliente.id })} className="btn-icon bg-card border border-line text-ink-2 shrink-0" title="Nueva reserva" aria-label="Nueva reserva">
+                  <CalendarPlus size={16} strokeWidth={1.5} />
+                </button>
+              )}
+              <button onClick={onEditar} className="btn-icon bg-card border border-line text-ink-2 shrink-0" title="Editar" aria-label="Editar">
+                <Edit2 size={16} strokeWidth={1.5} />
+              </button>
+              <button onClick={onEliminar} className="btn-icon bg-card border border-line text-danger-ink hover:bg-danger-soft shrink-0" title="Borrar" aria-label="Borrar">
+                <Trash2 size={16} strokeWidth={1.5} />
+              </button>
+            </div>
+          </div>
+
+          {/* Datos: la grilla se arma sola según el ancho (160px mínimo por
+              dato); el mail se recorta con title y se copia con el botón. */}
+          <div className="card-inner grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-x-4 gap-y-3">
+            <div className="min-w-0">
+              <p className="text-label text-ink-2 flex items-center gap-1"><Mail size={12} strokeWidth={1.5} /> Email</p>
+              {cliente.mail ? (
+                <div className="flex items-center gap-1 mt-1 min-w-0">
+                  <p className="text-label text-ink truncate min-w-0" title={cliente.mail}>{cliente.mail.toLowerCase()}</p>
+                  <button type="button" onClick={copiarMail} className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-ink-2 hover:text-ink hover:bg-card" title="Copiar email" aria-label="Copiar email">
+                    {mailCopiado ? <Check size={12} strokeWidth={1.5} /> : <Copy size={12} strokeWidth={1.5} />}
+                  </button>
+                </div>
+              ) : (
+                <p className="text-label text-ink-2 mt-1 whitespace-nowrap">Sin cargar</p>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-label text-ink-2 flex items-center gap-1"><FileText size={12} strokeWidth={1.5} /> CUIT</p>
+              <p className="text-label text-ink mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-ink-2 whitespace-nowrap">Sin cargar</span>}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-label text-ink-2 flex items-center gap-1"><FileText size={12} strokeWidth={1.5} /> DNI</p>
+              <p className="text-label text-ink mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-ink-2 whitespace-nowrap">Sin cargar</span>}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-label text-ink-2">Cliente desde</p>
+              <p className="text-label text-ink mt-1">{formatFecha(cliente.created_at)}</p>
+            </div>
+            {cliente.notas && (
+              <div className="col-span-full">
+                <p className="text-label text-ink-2">Notas</p>
+                <p className="text-label text-ink mt-1">{cliente.notas}</p>
+              </div>
             )}
           </div>
-          {vistasReservas.length === 0 ? (
-            <p className="text-label text-ink-2">Sin reservas.</p>
-          ) : (
-            <ScrollFade className="space-y-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
-              {vistasReservas.map((vista) => (
-                <ReservaPagosCard
-                  key={vista.key}
-                  vista={vista}
-                  cliente={cliente}
-                  onPagoCelda={onPagoCelda}
-                  onCargarMonto={onPagoCelda}
-                  onLiberarUnidad={onLiberarUnidad}
-                  onConfirmarTemporada={onConfirmarTemporada}
-                  onDefinirPrecio={onDefinirPrecio}
-                  onEditarPrecio={puedeAjustarPrecio ? onEditarPrecio : undefined}
-                  onIrAComprobante={(r) => navigate(linkToComprobante(r.id))}
-                  onCheckin={(r) => navigate(linkToRecepcion(r.codigo))}
-                />
-              ))}
-            </ScrollFade>
-          )}
-        </div>
-      </div>
 
-      {/* Columna derecha: SOLO Historial, y es lo único que scrollea. */}
-      <div className={wide ? 'lg:flex lg:flex-col lg:min-h-0 lg:h-full' : ''}>
-        <p className="text-label text-ink-2 mb-2 shrink-0">Historial</p>
-        <ScrollFade className={wide ? 'lg:flex-1 lg:min-h-0 lg:overflow-y-auto' : ''}>
+          {/* Reservas y pagos: UNA tarjeta por reserva o grupo, de todos los tipos. */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-label text-ink-2">Reservas ({vistasReservas.length})</p>
+              {reservasSueltas.filter((r) => r.estado !== 'cancelada').length >= 2 && (
+                <button onClick={onAgruparReservas} className="text-label text-ink hover:underline">
+                  Agrupar reservas
+                </button>
+              )}
+            </div>
+            {vistasReservas.length === 0 ? (
+              <p className="text-label text-ink-2">Sin reservas.</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {vistasReservas.map((vista) => (
+                  <ReservaPagosCard
+                    key={vista.key}
+                    vista={vista}
+                    cliente={cliente}
+                    onPagoCelda={onPagoCelda}
+                    onCargarMonto={onPagoCelda}
+                    onLiberarUnidad={onLiberarUnidad}
+                    onConfirmarTemporada={onConfirmarTemporada}
+                    onDefinirPrecio={onDefinirPrecio}
+                    onEditarPrecio={puedeAjustarPrecio ? onEditarPrecio : undefined}
+                    onIrAComprobante={(r) => navigate(linkToComprobante(r.id))}
+                    onCheckin={(r) => navigate(linkToRecepcion(r.codigo))}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Historial: al lado desde 880px de panel, debajo si no. */}
+        <div className="@[880px]:min-h-0 @[880px]:overflow-y-auto @[880px]:scroll-fino">
+          <p className="section-label">Historial</p>
           <Historial tipo="cliente" id={cliente.id} compact />
-        </ScrollFade>
-      </div>
-      </div>
-    </>
+        </div>
+      </ScrollFade>
+    </div>
   )
 }

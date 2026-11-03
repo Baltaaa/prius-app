@@ -277,7 +277,7 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       style={{ animationDelay: staggerDelay(indice, total) }}
-      className={`w-full flex items-start gap-3 px-3 py-3 text-left rounded-inner anim-colors anim-stagger ${
+      className={`w-full flex items-start gap-3 px-3 py-3 text-left whitespace-normal rounded-inner anim-colors anim-stagger ${
         onClick ? 'hover-row' : ''
       } ${activo ? 'bg-gold-100' : ''}`}
     >
@@ -298,16 +298,16 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
         {/* La descripción solo se agrega si dice algo distinto de la
             etiqueta del tipo: para los eventos de auth las dos son "Inicio
             de sesión" y quedaba repetido. */}
-        <p className="text-body text-ink-2 mt-0.5">
+        <p className="text-body text-ink-2 mt-1">
           <span className="text-ink">{meta.label}</span>
           {descripcionExtra(evento, meta) ? <> — {descripcionExtra(evento, meta)}</> : null}
         </p>
         {/* Solo los datos que el evento realmente tiene. max-w-full para que
             ningún chip empuje más allá del contenedor. */}
         {secundario.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+          <div className="flex flex-wrap items-center gap-2 mt-2">
             {secundario.map((s) => (
-              <span key={s} className="text-label text-ink-2 bg-surface rounded-icon px-2 py-0.5 max-w-full">{s}</span>
+              <span key={s} className="text-label text-ink-2 bg-surface rounded-icon px-2 py-1 max-w-full">{s}</span>
             ))}
           </div>
         )}
@@ -315,11 +315,11 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
             que podía exceder el ancho en mobile). Se muestran los 2
             primeros; si hay más, un chip "+N más" lleva al detalle. */}
         {cambios.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1.5">
+          <div className="flex flex-wrap gap-1 mt-2">
             {cambios.slice(0, 2).map((c) => (
               <span
                 key={c.label}
-                className="inline-flex flex-wrap items-baseline gap-x-1 text-label bg-surface rounded-icon px-2 py-0.5 max-w-full"
+                className="inline-flex flex-wrap items-baseline gap-x-1 text-label bg-surface rounded-icon px-2 py-1 max-w-full"
               >
                 <span className="text-ink-2 font-medium">{c.label}:</span>
                 <span className="text-ink-2 line-through tabular-nums">{c.antes}</span>
@@ -328,14 +328,14 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
               </span>
             ))}
             {cambios.length > 2 && (
-              <span className="text-label text-ink-2 bg-surface rounded-icon px-2 py-0.5">
+              <span className="text-label text-ink-2 bg-surface rounded-icon px-2 py-1">
                 +{cambios.length - 2} más
               </span>
             )}
           </div>
         )}
         {esHistorico && (
-          <span className="text-label inline-block text-ink-2 bg-surface border border-line rounded-full px-2 py-0.5 mt-1.5">
+          <span className="text-label inline-block text-ink-2 bg-surface border border-line rounded-full px-2 py-1 mt-2">
             Histórico
           </span>
         )}
@@ -488,7 +488,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
   const listado = (
     <div className="space-y-4">
       {grupos.length === 0 ? (
-        <div className="card-surface p-10 text-center flex flex-col items-center gap-3 anim-fade-up">
+        <div className={`${compact ? '' : 'card-surface card-pad'} py-10 text-center flex flex-col items-center gap-3 anim-fade-up`}>
           <span className="w-12 h-12 rounded-card bg-surface flex items-center justify-center">
             <History size={20} className="text-ink-2" />
           </span>
@@ -501,17 +501,19 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
         grupos.map(([fecha, items]) => (
           <div key={fecha}>
             {/* Encabezado de día sticky, con contador (mock 07). */}
+            {/* En la ficha (compact) la franja tiene el mismo inset que el texto
+                de los eventos: 8px de la card + 12px de la fila. */}
             <div className={`flex items-center justify-between gap-2 py-2 ${
-              mostrarFiltrosGlobales ? 'sticky top-0 z-10 sticky-blur' : 'bg-canvas'
+              mostrarFiltrosGlobales ? 'sticky top-0 z-10 sticky-blur' : 'px-5'
             }`}>
               <h3 className="text-label text-ink capitalize truncate">
                 {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
               </h3>
-              <span className="shrink-0 text-label text-ink-2 bg-surface rounded-full px-2.5 py-1">
+              <span className="shrink-0 text-label text-ink-2 bg-surface rounded-full px-3 py-1">
                 {items.length} {items.length === 1 ? 'evento' : 'eventos'}
               </span>
             </div>
-            <div className="card-surface p-2 space-y-1">
+            <div className={`${compact ? 'bg-surface rounded-inner' : 'card-surface'} p-2 space-y-1`}>
               {items.map((e, i) => {
                 const meta = metaDe(e)
                 const abrible = mostrarFiltrosGlobales || puedeNavegar(e)
@@ -567,8 +569,8 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
           pb-3 bajo la card de filtros. En md:static el blur no tiene
           efecto visual (nada scrollea por detrás de un elemento estático
           en flujo normal). */}
-      <div className="sticky top-0 z-20 -mx-4 px-4 md:mx-0 md:px-0 md:static pb-3 sticky-blur">
-        <div className="card-surface p-3 space-y-3">
+      <div className="sticky top-0 z-20 -mx-page px-page md:mx-0 md:px-0 md:static pb-3 sticky-blur">
+        <div className="card-surface p-card space-y-3">
           <div className="flex items-center gap-2">
             <SearchInput
               value={q}
@@ -629,7 +631,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
       {/* Lista + panel de detalle (desktop). */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-4 lg:items-start">
         <div className="min-w-0">{listado}</div>
-        <aside className="hidden lg:block sticky top-4 max-h-[calc(100dvh-8rem)] card-surface p-4">
+        <aside className="hidden lg:block sticky top-4 max-h-[calc(100dvh-8rem)] card-surface card-pad ">
           {detalle ? (
             <div key={detalle.evento.id} className="content-crossfade h-full">
               <HistorialDetalle {...detalle} onCerrar={() => setSeleccionado(null)} />
@@ -660,7 +662,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
 /** Chips de tipo de evento. En mobile van en una sola fila con scroll. */
 function ChipsTipo({ filtro, setFiltro }) {
   return (
-    <div className="flex gap-2 overflow-x-auto md:flex-wrap md:overflow-visible -mx-1 px-1 pb-0.5">
+    <div className="flex gap-2 overflow-x-auto md:flex-wrap md:overflow-visible -mx-1 px-1 pb-1">
       {FILTROS.map((f) => (
         <button
           key={f.key}

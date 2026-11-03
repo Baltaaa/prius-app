@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Receipt, Unlock, Wallet, QrCode, CalendarCheck, Users, Pencil } from 'lucide-react'
 import StatusBadge from './StatusBadge'
-import ScrollFade from '../ui/ScrollFade'
 import {
-  formatPesosVisible, formatFecha, formatComprobante, formatNombre, unidadEmoji, formatUnidad,
+  formatPesosVisible, formatFecha, formatComprobante, formatNombre, formatUnidad,
 } from '../../lib/format'
+import UnidadLabel from './UnidadLabel'
 
 // Tarjeta ÚNICA de reserva + pagos en la ficha de cliente (31/10/2026).
 //
@@ -25,6 +25,11 @@ function tituloDe(tipo, temporada, esGrupo) {
   return temporada ? `${label} · ${temporada}` : label
 }
 
+// Tabla de pagos: Fecha | Comprobante (completo, puede partirse en dos líneas)
+// | Monto a la derecha. Las columnas son las mismas en todas las filas para
+// que queden alineadas; filas de 44px.
+const COLUMNAS_PAGO = 'grid-cols-[5.5rem_minmax(0,1fr)_auto]'
+
 function FilaPago({ pago, cliente, titularId, onPagoCelda, onCargarMonto }) {
   const sinMonto = pago.monto == null || pago.monto_pendiente_verificacion
   const reservaDelPago = { ...(pago.__reserva || {}), clientes: cliente }
@@ -32,28 +37,27 @@ function FilaPago({ pago, cliente, titularId, onPagoCelda, onCargarMonto }) {
   // puede ser un cosocio, y el dueño quiere ver de quién fue la cuota.
   const pagador = pago.cliente_id && pago.cliente_id !== titularId ? pago.clientes?.nombre : null
   return (
-    <div className="w-full flex items-center gap-2 px-3 py-2 rounded-icon text-label bg-surface">
+    <div className="flex items-center gap-2 rounded-icon bg-card">
       <button
         type="button"
         onClick={() => onPagoCelda({ reserva: reservaDelPago, pago })}
-        className="flex-1 min-w-0 flex items-center justify-between gap-2 text-left hover:opacity-70 transition-opacity"
+        className={`flex-1 min-w-0 min-h-11 px-3 py-2 grid ${COLUMNAS_PAGO} items-center gap-3 text-left text-label hover:bg-row-hover rounded-icon transition-colors`}
       >
-        <span className="text-ink-2 shrink-0">{pago.fecha ? formatFecha(pago.fecha) : '—'}</span>
-        {pago.nro_cuota != null && (
-          <span className="text-ink-2 shrink-0">Cuota {pago.nro_cuota}</span>
-        )}
-        <span className="font-semibold text-ink truncate">
-          {sinMonto
-            ? <span className="text-label text-ink">Falta cargar el monto</span>
-            : formatPesosVisible(pago.monto)}
+        <span className="text-ink-2">{pago.fecha ? formatFecha(pago.fecha) : '—'}</span>
+        <span className="min-w-0 break-words text-ink">
+          {pago.comprobantes?.length > 0
+            ? pago.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
+            : <span className="text-ink-2">Sin comprobante</span>}
+          {(pago.nro_cuota != null || pagador) && (
+            <span className="block text-ink-2">
+              {pago.nro_cuota != null && `Cuota ${pago.nro_cuota}`}
+              {pago.nro_cuota != null && pagador && ' · '}
+              {pagador && formatNombre(pagador)}
+            </span>
+          )}
         </span>
-        <span className="min-w-0 text-right">
-          <span className="text-ink-2 truncate block">
-            {pago.comprobantes?.length > 0
-              ? pago.comprobantes.map((c) => formatComprobante(c.tipo, c.numero)).join(', ')
-              : 'Sin comprobante'}
-          </span>
-          {pagador && <span className="text-ink-2 text-label truncate block">{formatNombre(pagador)}</span>}
+        <span className="text-right font-semibold text-ink tabular-nums whitespace-nowrap">
+          {sinMonto ? 'Falta monto' : formatPesosVisible(pago.monto)}
         </span>
       </button>
       {/* Acceso directo a editar_monto_pago para los placeholders de la
@@ -63,9 +67,10 @@ function FilaPago({ pago, cliente, titularId, onPagoCelda, onCargarMonto }) {
           type="button"
           onClick={() => onCargarMonto({ reserva: reservaDelPago, pago })}
           title="Cargar el monto de este pago"
-          className="shrink-0 w-7 h-7 rounded-full bg-gold-100 hover:bg-gold-100 text-ink flex items-center justify-center transition-colors"
+          aria-label="Cargar el monto de este pago"
+          className="shrink-0 w-11 h-11 rounded-full bg-gold-100 text-ink flex items-center justify-center transition-colors"
         >
-          <Pencil size={12} />
+          <Pencil size={12} strokeWidth={1.5} />
         </button>
       )}
     </div>
@@ -100,7 +105,7 @@ export default function ReservaPagosCard({
     <div
       key={key}
       data-deeplink-id={`reserva-${reservaPrincipal?.id}`}
-      className={`bg-surface rounded-inner p-3 ${abierta ? 'space-y-2.5' : ''} ${
+      className={`card-inner ${abierta ? 'space-y-4' : ''} ${
         cancelada ? 'opacity-60' : ''
       }`}
     >
@@ -115,16 +120,16 @@ export default function ReservaPagosCard({
         >
           {tituloDe(tipo, temporada, esGrupo)}
         </button>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {cancelada
-            ? <span className="text-label px-2 py-0.5 rounded-full bg-surface text-danger">Cancelada</span>
+            ? <span className="text-label px-2 py-1 rounded-full bg-card text-danger-ink">Cancelada</span>
             : estadoBadge && <StatusBadge status={estadoBadge} />}
           {!cancelada && onPrecio && (
             <button
               type="button"
               onClick={() => onPrecio(reservaPrincipal)}
               title={sinPrecio ? 'Definir el precio de la reserva' : 'Editar el precio de la reserva'}
-              className="w-7 h-7 rounded-full bg-surface hover:bg-line text-ink-2 hover:text-ink flex items-center justify-center transition-colors"
+              className="w-11 h-11 -my-2 rounded-full hover:bg-card text-ink-2 hover:text-ink flex items-center justify-center transition-colors"
             >
               {sinPrecio ? <Wallet size={12} /> : <Pencil size={12} />}
             </button>
@@ -142,17 +147,17 @@ export default function ReservaPagosCard({
       <div className="cq grid grid-cols-2 cq-cols-3 gap-3 text-label">
         <div>
           <p className="text-label text-ink-2">Precio total</p>
-          <p className="text-body font-semibold text-ink mt-0.5">
+          <p className="text-body font-semibold text-ink mt-1">
             {sinPrecio ? <span className="text-ink-2">Sin precio</span> : (formatPesosVisible(precioTotal) || '—')}
           </p>
         </div>
         <div>
           <p className="text-label text-ink-2">Pagado</p>
-          <p className="text-body font-semibold text-success-ink mt-0.5">{formatPesosVisible(pagado) || '—'}</p>
+          <p className="text-body font-semibold text-success-ink mt-1">{formatPesosVisible(pagado) || '—'}</p>
         </div>
         <div>
           <p className="text-label text-ink-2">Saldo</p>
-          <p className={`text-body font-semibold mt-0.5 ${saldo == null || saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
+          <p className={`text-body font-semibold mt-1 ${saldo == null || saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
             {saldo == null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Unidad saldada'}
           </p>
         </div>
@@ -163,7 +168,7 @@ export default function ReservaPagosCard({
         <div className="space-y-1">
           {unidades.map((u) => (
             <div key={u.key} className="flex flex-wrap items-center gap-x-2 text-label text-ink-2">
-              <span>{unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}</span>
+              <span><UnidadLabel tipo={u.tipo} numero={u.numero} /></span>
               {u.fechas && <span className="text-ink-2">· {u.fechas}</span>}
               {u.cancelada && <span className="text-label text-danger">Cancelada</span>}
             </div>
@@ -180,7 +185,7 @@ export default function ReservaPagosCard({
       {/* Pagos. Los anulados no llegan hasta acá: los filtra `_pagosVigentes`
           en lib/reservas.js (siguen en la DB y en el Historial). */}
       {!cancelada && (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-label text-ink-2">Pagos</p>
             <button
@@ -194,10 +199,15 @@ export default function ReservaPagosCard({
           {pagos.length === 0 ? (
             <p className="text-label text-ink-2">Sin pagos registrados.</p>
           ) : (
-            // Con muchas cuotas la lista scrollea DENTRO de la tarjeta, para
-            // que la columna izquierda siga entrando en 1366x768 sin que la
-            // ficha entera scrollee (ver ClienteDetalleContent).
-            <ScrollFade className="space-y-1 max-h-[148px] overflow-y-auto">
+            // Con muchas cuotas la lista crece: scrollea la columna entera de
+            // la ficha (ver ClienteDetalleContent), no la tarjeta.
+            <div className="space-y-1">
+              <div className="flex gap-2 text-label text-ink-2">
+                <div className={`flex-1 min-w-0 grid ${COLUMNAS_PAGO} gap-3 px-3`}>
+                  <span>Fecha</span><span>Comprobante</span><span className="text-right">Monto</span>
+                </div>
+                {onCargarMonto && pagos.some((p) => p.monto == null || p.monto_pendiente_verificacion) && <span className="w-11 shrink-0" />}
+              </div>
               {pagos.map((p) => (
                 <FilaPago
                   key={p.id}
@@ -208,19 +218,19 @@ export default function ReservaPagosCard({
                   onCargarMonto={onCargarMonto}
                 />
               ))}
-            </ScrollFade>
+            </div>
           )}
         </div>
       )}
 
       {/* Acciones compactas */}
       {acciones.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-0.5">
+        <div className="flex flex-wrap gap-2">
           {acciones.map(({ label, icon: Icon, onClick }) => (
             <button
               key={label}
               onClick={onClick}
-              className="h-8 px-2.5 rounded-full bg-surface hover:bg-line text-ink text-label font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap"
+              className="h-11 px-4 rounded-full bg-card border border-line hover:bg-row-hover text-ink text-label font-semibold flex items-center gap-2 transition-colors whitespace-nowrap"
             >
               <Icon size={12} className="shrink-0" /> {label}
             </button>

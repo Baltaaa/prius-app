@@ -42,6 +42,7 @@ import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminMo
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import { Plus, Filter, Check, ChevronLeft, LayoutList } from 'lucide-react'
+import UnidadLabel from '../../components/crm/UnidadLabel'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
 // reserva de período/día activa hoy — temporada actual, temporadas pasadas,
@@ -709,8 +710,8 @@ export default function Clientes() {
     // Alto fijo al viewport en desktop (mini-prompt 26/10/2026), mismo
     // patrón que Reservas.jsx: `lg:h-full` hereda la altura que le da
     // AppLayout.jsx (`#app-main-scroll` dejó de scrollear en esta sección),
-    // `lg:gap-4` reemplaza a `space-y-10` solo en desktop.
-    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 anim-fade-up-page">
+    // gap-grid es el espacio entre toolbar y cajas (ver "Espaciado" en DESIGN.md).
+    <div className="flex flex-col gap-grid lg:h-full anim-fade-up-page">
       {/* Toolbar: buscador a ancho completo arriba, filtro + alta compacta
           abajo (oct 2026) — antes "Nuevo Cliente" era una barra amarilla
           gigante en mobile; ahora es un botón chico (h-10) a la derecha,
@@ -728,13 +729,13 @@ export default function Clientes() {
           placeholder="Nombre, DNI, CUIT o unidad"
           inputClassName="!bg-card"
           className={isDesktopLG ? 'w-48 lg:w-64 xl:w-80 min-w-0 shrink' : 'w-full'}
-          inputClassName={isDesktopLG ? 'h-10 min-h-0 py-0 focus:border-gold-300' : 'focus:border-gold-300 py-3'}
+          inputClassName={isDesktopLG ? "h-11 min-h-0 py-0 focus:border-gold-300" : "focus:border-gold-300 py-3"}
         />
         <div className={isDesktopLG ? 'flex items-center gap-3 flex-1 min-w-0' : 'flex items-center gap-3'}>
           <div ref={filtrosOverlay.bind} className="relative">
             <button
               onClick={() => setShowFiltros((v) => !v)}
-              className={`text-label h-10 px-4 bg-card border border-line rounded-full flex items-center gap-2 transition-all ${filtroEstado !== 'todos' ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
+              className={`text-label h-11 px-4 bg-card border border-line rounded-full flex items-center gap-2 transition-all ${filtroEstado !== 'todos' ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
             >
               <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
             </button>
@@ -756,7 +757,7 @@ export default function Clientes() {
           <div className="flex-1" />
           <button
             onClick={handleOpenCreate}
-            className="h-10 px-4 bg-ink hover:bg-chart-2 anim-press rounded-full transition-all flex items-center gap-2 font-semibold text-label shrink-0 text-on-ink"
+            className="btn btn-secondary h-11 shrink-0"
           >
             <Plus size={16} /> <span className="hidden sm:inline">Nuevo Cliente</span><span className="sm:hidden">Nuevo</span>
           </button>
@@ -773,7 +774,7 @@ export default function Clientes() {
           las dos cajas midan exactamente lo mismo — el alto real lo pone
           `lg:flex-1 lg:min-h-0` (le pasa al row el alto sobrante del
           flex-col de más arriba), no un cálculo a mano. */}
-      <div className={`${isDesktopLG ? 'flex gap-space-lg' : ''} lg:flex-1 lg:min-h-0`}>
+      <div className={`${isDesktopLG ? 'flex gap-grid' : ''} lg:flex-1 lg:min-h-0`}>
         {/* w-[480px] fijo (hasta oct 2026) dejaba casi sin aire al panel
             fijo de la derecha justo en el arranque del breakpoint lg
             (1024-1150px aprox, con Sidebar de 256px descontado): el texto
@@ -783,13 +784,21 @@ export default function Clientes() {
             lg:overflow-y-auto` (mini-prompt 26/10/2026): la lista scrollea
             adentro de su propia caja en vez de empujar la altura de la
             página. */}
-        <ScrollFade className={isDesktopLG ? 'flex-1 min-w-[280px] max-w-[480px] shrink lg:h-full lg:overflow-y-auto' : 'w-full'}>
+        {/* UNA card con divisores (estilo Recent Activity). La card no scrollea:
+            scrollea la lista de adentro, con scrollbar fina y su lugar
+            reservado, así nunca queda entre la lista y el panel. En mobile
+            va full-bleed, sin card alrededor. */}
+        <div className={isDesktopLG
+          ? '@container flex-1 min-w-[280px] max-w-[480px] shrink lg:h-full card-surface overflow-hidden flex flex-col'
+          : '@container -mx-page md:mx-0 bg-card md:card-surface overflow-hidden'}
+        >
+          <ScrollFade className={isDesktopLG ? 'flex-1 min-h-0 overflow-y-auto scroll-fino' : ''}>
           {clientesVisibles.length === 0 ? (
-            <div className="p-12 text-center text-body text-ink-2 bg-card border border-line rounded-inner">
+            <div className="px-card py-10 text-center text-body text-ink-2">
               No se encontraron clientes.
             </div>
           ) : (
-            <div className="space-y-2">
+            <ul className="divide-y divide-divider">
               {clientesVisibles.map((cliente, i) => {
                 const d = derivarCliente(cliente)
                 const isSelected = expandedId === cliente.id
@@ -805,51 +814,30 @@ export default function Clientes() {
                 return (
                   <React.Fragment key={cliente.id}>
                   {mostrarGrupo && (
-                    <p className="text-label text-ink-2 pt-2 first:pt-0">
+                    <li className="px-page md:px-card pt-4 pb-1 text-label text-ink-2 bg-card">
                       {letra} · {totalGrupo} cliente{totalGrupo > 1 ? 's' : ''}
-                    </p>
+                    </li>
                   )}
-                  <div
+                  <li
                     data-cliente-id={cliente.id}
                     data-deeplink-id={cliente.id}
                     onClick={() => setExpandedId(isSelected ? null : cliente.id)}
-                    // flex, no grid (Bloque 3, oct 2026): con grid, columnas
-                    // minmax(0,Npx) que conviven con un track 1fr crecen
-                    // hasta su tope ANTES de repartir el sobrante al 1fr
-                    // (paso "maximize non-flexible tracks" del algoritmo de
-                    // grid) — el nombre quedaba con ~80px sin importar el
-                    // ancho real de saldo/unidad. Con flex, shrink-0 +
-                    // ancho fijo en las columnas de la derecha se comporta
-                    // como se espera: el nombre (flex-1 min-w-0) se lleva
-                    // todo el sobrante real.
-                    className={`bg-card rounded-inner border px-4 py-4 min-h-[76px] flex items-center gap-x-2 cursor-pointer transition-all ${
-                      isSelected ? 'border-gold bg-surface' : 'border-line hover:bg-surface'
+                    // Fila de 64-72px. flex y no grid: el nombre (flex-1 min-w-0)
+                    // se lleva el sobrante real y la columna derecha mide lo
+                    // que mide su contenido.
+                    className={`relative min-h-16 px-page md:px-card py-2 flex items-center gap-3 cursor-pointer transition-colors active:bg-surface ${
+                      isSelected ? 'bg-gold-50' : 'hover:bg-row-hover'
                     }`}
                   >
-                    <div className="w-9 h-9 rounded-full bg-ink text-on-ink flex items-center justify-center text-label font-semibold shrink-0">
+                    {isSelected && <span aria-hidden className="absolute left-0 inset-y-3 w-1 rounded-r-full bg-gold" />}
+                    <div className="w-10 h-10 rounded-full bg-ink text-on-ink flex items-center justify-center text-label font-semibold shrink-0">
                       {cliente.nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
                     </div>
 
-                    {/* Nombre + estado (pulido UX, oct 2026, item 3): antes
-                        el teléfono ocupaba el segundo renglón y el badge de
-                        estado competía con el nombre en el primero (lo
-                        truncaba a "A.."). El teléfono ya se ve dentro de la
-                        ficha — acá va: renglón 1 nombre completo, renglón 2
-                        el badge de estado (mismo estadoBadgeStatus de
-                        siempre, sin tocar el mapeo). */}
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-ink truncate">{formatNombre(cliente.nombre)}</p>
-                      {/* 29/10/2026: el wrapper del badge solo se monta si HAY
-                          badge. Antes iba siempre con `min-h-[18px]`, así que
-                          un cliente sin estado (ej. BEATRIZ AYALA) igual
-                          ocupaba dos renglones y el `items-center` de la fila
-                          centraba el avatar contra el nombre + ese hueco
-                          vacío, dejándolo visualmente desalineado del nombre. */}
-                      {d.badgeStatus && (
-                        <div className="mt-1 min-h-[18px]">
-                          <StatusBadge status={d.badgeStatus} />
-                        </div>
-                      )}
+                    {/* Nombre + estado: el teléfono vive en la ficha. */}
+                    <div className="min-w-0 flex-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="text-row text-ink truncate max-w-full" title={formatNombre(cliente.nombre)}>{formatNombre(cliente.nombre)}</p>
+                      {d.badgeStatus && <StatusBadge status={d.badgeStatus} />}
                       {d.comprobanteMatch && (
                         <button
                           type="button"
@@ -858,7 +846,7 @@ export default function Clientes() {
                             setExpandedId(cliente.id)
                             scrollAndHighlight(`pago-${d.comprobanteMatch.pago.id}`)
                           }}
-                          className="text-label text-ink font-semibold mt-1 hover:underline truncate block max-w-full text-left"
+                          className="text-label text-ink font-semibold hover:underline truncate block max-w-full text-left"
                         >
                           Comprobante {formatComprobante(d.comprobanteMatch.comprobante.tipo, d.comprobanteMatch.comprobante.numero)}
                           {formatPesosVisible(d.comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(d.comprobanteMatch.pago.monto)}` : ''}
@@ -866,19 +854,15 @@ export default function Clientes() {
                       )}
                     </div>
 
-                    {/* Columna derecha (pulido UX, oct 2026, item 3): saldo
-                        pendiente arriba (si hay) y unidad debajo, en una
-                        sola columna alineada a la derecha — antes eran dos
-                        bloques lado a lado. Sin saldo, items-center en la
-                        fila ya centra verticalmente este bloque (más chico)
-                        contra el bloque de nombre+badge de la izquierda. */}
-                    <div className="flex flex-col items-end gap-1 shrink-0 max-w-[128px]">
+                    {/* Derecha, alineado a la derecha y con cifras tabulares:
+                        saldo pendiente (si hay) y unidad debajo. */}
+                    <div className="flex flex-col items-end gap-1 shrink-0 max-w-32 tabular-nums">
                       {d.saldoInfo.sinVerificar ? (
                         d.saldoHeaderSaldado ? null : (
                           <div className="text-right">
-                            <p className="text-label text-danger whitespace-nowrap">Saldo sin verificar</p>
+                            <p className="text-label text-danger-ink @[380px]:whitespace-nowrap">Saldo sin verificar</p>
                             {d.comprobantesPendientesCliente > 0 && (
-                              <p className="text-ink-2 font-normal normal-case tracking-normal text-label truncate">
+                              <p className="text-ink-2 text-label truncate">
                                 {d.comprobantesPendientesCliente} comprobante{d.comprobantesPendientesCliente > 1 ? 's' : ''} sin monto
                               </p>
                             )}
@@ -888,26 +872,23 @@ export default function Clientes() {
                         <span className="text-label text-ink-2 whitespace-nowrap">Sin precio</span>
                       ) : (
                         formatPesosVisible(d.saldoInfo.total) && (
-                          <MontoStat value={d.saldoInfo.total} size="xs" className="text-danger" />
+                          <MontoStat value={d.saldoInfo.total} size="xs" className="text-danger-ink" />
                         )
                       )}
 
                       <div
-                        className="flex items-baseline justify-end gap-1 tabular-nums"
-                        title={d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}`).join(', ')}
+                        className="flex items-center justify-end gap-2 text-body text-ink"
+                        title={d.unidadesCliente.map((u) => formatUnidad(u.tipo, u.numero)).join(', ')}
                       >
                         {d.unidadesCliente.length === 0 ? (
-                          <span className="text-label text-ink-2 font-semibold">Sin unidad</span>
+                          <span className="text-label text-ink-2">Sin unidad</span>
                         ) : (
                           <>
                             {d.unidadesCliente.slice(0, MAX_UNIDADES_VISIBLES).map((u, i) => (
-                              <span key={u.id ?? i} className="flex items-baseline gap-1 leading-none">
-                                <span className="text-base leading-none">{unidadEmoji(u.tipo)}</span>
-                                <span className="text-base font-semibold text-ink leading-none">{u.numero}</span>
-                              </span>
+                              <UnidadLabel key={u.id ?? i} tipo={u.tipo} numero={u.numero} soloNumero />
                             ))}
                             {d.unidadesCliente.length > MAX_UNIDADES_VISIBLES && (
-                              <span className="text-label text-ink-2 font-semibold">
+                              <span className="text-label text-ink-2">
                                 +{d.unidadesCliente.length - MAX_UNIDADES_VISIBLES}
                               </span>
                             )}
@@ -915,13 +896,14 @@ export default function Clientes() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </li>
                   </React.Fragment>
                 )
               })}
-            </div>
+            </ul>
           )}
-        </ScrollFade>
+          </ScrollFade>
+        </div>
 
         {/* Panel fijo — solo ≥1024px. Altura SIEMPRE igual a la de la lista
             (mini-prompt 26/10/2026): ya no es sticky ni calcula su propio
@@ -931,7 +913,7 @@ export default function Clientes() {
             dispara el crossfade (content-crossfade, 180ms, fade + 6px — ver
             index.css) cada vez que cambia el cliente. */}
         {isDesktopLG && (
-          <aside className="hidden lg:flex lg:h-full flex-1 min-w-[320px] card-surface p-space-lg flex-col overflow-hidden">
+          <aside className="hidden lg:flex lg:h-full flex-1 min-w-80 card-surface card-pad flex-col overflow-hidden">
             {clienteSeleccionado ? (
               <div key={clienteSeleccionado.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
                 <ClienteDetalleContent
@@ -951,7 +933,6 @@ export default function Clientes() {
                   onAgruparReservas={() => handleAbrirAgrupar(clienteSeleccionado)}
                   onLiberarUnidad={handleLiberarUnidad}
                   onConfirmarTemporada={(reserva) => { setConfirmarValorTotal(0); setConfirmarReserva({ reserva, cliente: clienteSeleccionado }) }}
-                  wide
                 />
               </div>
             ) : (
@@ -966,7 +947,7 @@ export default function Clientes() {
 
       {/* Tablet (768-1023px): mismo detalle, como bottom sheet. */}
       {!isMobile && !isDesktopLG && (
-        <BottomSheet isOpen={!!clienteSeleccionado} onClose={handleCloseDetalle} maxHeightClass="max-h-[88vh]">
+        <BottomSheet isOpen={!!clienteSeleccionado} onClose={handleCloseDetalle} maxHeightClass="max-h-[88dvh]">
           {clienteSeleccionado && (
             <ClienteDetalleContent
               cliente={clienteSeleccionado}
@@ -1008,7 +989,7 @@ export default function Clientes() {
             </button>
             <h1 className="text-label text-ink">Ficha de Cliente</h1>
           </div>
-          <ScrollFade className="flex-1 overflow-y-auto px-space-lg pt-space-md pb-space-lg flex flex-col min-h-0">
+          <ScrollFade className="flex-1 overflow-y-auto px-6 pt-4 pb-6 flex flex-col min-h-0">
             {mobileDetalleCliente && (
               <ClienteDetalleContent
                 cliente={mobileDetalleCliente}
@@ -1328,7 +1309,7 @@ export default function Clientes() {
                       className="accent-gold w-4 h-4"
                     />
                     <span className="text-ink-2">
-                      {unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)} ·{' '}
+                      <UnidadLabel tipo={r.unidades?.tipo} numero={r.unidades?.numero} /> ·{' '}
                       {r.tipo_alquiler === 'dia' ? formatFecha(r.fecha) : `${formatFecha(r.fecha_inicio)} — ${formatFecha(r.fecha_fin)}`}
                     </span>
                   </label>
