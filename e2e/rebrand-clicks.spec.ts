@@ -25,7 +25,7 @@ async function tapados(page: Page) {
       for (let n = b.parentElement; n; n = n.parentElement) {
         if (getComputedStyle(n).overflowY === 'visible') continue
         const caja = n.getBoundingClientRect()
-        if (cy < caja.top || cy > caja.bottom || cx < caja.left || cx > caja.right) recortado = true
+        if (cy <= caja.top + 1 || cy >= caja.bottom - 1 || cx <= caja.left + 1 || cx >= caja.right - 1) recortado = true
       }
       if (recortado) continue
       const e = document.elementFromPoint(cx, cy)

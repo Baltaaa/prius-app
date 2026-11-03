@@ -410,7 +410,7 @@ export default function Caja() {
                   ) : (
                     <>
                       {/* Desktop: tabla real (mock) */}
-                      <div className="hidden lg:block overflow-x-auto">
+                      <div className="hidden xl:block overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                           <thead>
                             <tr className="text-label text-ink-2 border-b border-line">
@@ -428,7 +428,7 @@ export default function Caja() {
                               <tr
                                 key={`${m.tipo_movimiento}-${m.movimiento_id}`}
                                 onClick={() => abrirDetalleMovimiento(m)}
-                                className={`hover:bg-surface cursor-pointer transition-colors ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
+                                className={`hover:bg-row-hover cursor-pointer anim-colors ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
                               >
                                 <td className="py-3 px-2 text-ink-2 font-medium whitespace-nowrap">{formatHora(m.fecha_hora)}</td>
                                 <td className="py-3 px-2 whitespace-nowrap">
@@ -437,9 +437,9 @@ export default function Caja() {
                                     {m.tipo_movimiento === 'ingreso' ? 'Ingreso' : 'Egreso'}
                                   </span>
                                 </td>
-                                <td className="py-3 px-2 whitespace-nowrap">
-                                  <span className={`font-semibold text-ink ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.cliente_proveedor || 'S/N'}</span>
-                                  {m.unidad && <span className="text-ink-2"> • {m.unidad}</span>}
+                                <td className="py-3 px-2">
+                                  <span className={`block text-ink ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.cliente_proveedor || 'S/N'}</span>
+                                  {m.unidad && <span className="block text-ink-2">{m.unidad}</span>}
                                 </td>
                                 <td className="py-3 px-2 text-ink-2">{m.concepto}</td>
                                 <td className="py-3 px-2 whitespace-nowrap">
@@ -464,7 +464,7 @@ export default function Caja() {
                           Renglón 1: concepto truncado + monto. Renglón 2 (chico,
                           truncado): cliente · unidad · medio · hora. Chip de comprobante
                           debajo, en su propia línea. */}
-                      <div className="lg:hidden space-y-2">
+                      <div className="xl:hidden space-y-2">
                         {movimientosFiltrados.map((m) => (
                           <button
                             key={`${m.tipo_movimiento}-${m.movimiento_id}`}

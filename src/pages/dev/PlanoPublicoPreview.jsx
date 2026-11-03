@@ -290,7 +290,7 @@ export default function PlanoPublicoPreview() {
           <IntegerInput label="Personas" value={personas} onChange={(n) => setPersonas(n || 1)} min={1} max={40} className="w-28" />
         </div>
 
-        <div className="card-surface flex-1 min-h-0 relative overflow-hidden flex flex-col">
+        <div className="bg-ink rounded-card flex-1 min-h-[60dvh] relative overflow-hidden flex flex-col">
           {loadingDisp && disponibilidad.length === 0 ? (
             <div className="text-label flex-1 flex items-center justify-center text-ink-2">
               Cargando disponibilidad…

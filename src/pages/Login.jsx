@@ -292,7 +292,7 @@ export default function Login({ modo }) {
                 `md:`. Ambas son solo transform+opacity y se apagan con
                 prefers-reduced-motion desde index.css. */}
             <div
-              className="w-full md:max-w-[440px] rounded-t-card md:rounded-card md:border md:border-line bg-card px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-10 ui-open-sheet md:anim-fade-up"
+              className="w-full md:max-w-[440px] rounded-t-card md:rounded-card bg-card px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-10 ui-open-sheet md:anim-fade-up"
             >
               {/* Gesto visual de bottom sheet (mobile) */}
               <div className="md:hidden flex justify-center mb-4">

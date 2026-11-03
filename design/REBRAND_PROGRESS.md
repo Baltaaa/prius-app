@@ -9,8 +9,8 @@ Fuente de verdad del diseño: design/DESIGN.md. Referencia visual: design/refere
 - [x] Fase 2 — Primitivas y componentes brand
 - [x] Fase 3 — Piloto Dashboard
 - [x] Fase 4 — Rollout por pantalla
-- [ ] Fase 5 — Modales y overlays
-- [ ] Fase 6 — Auditoría final
+- [x] Fase 5 — Modales y overlays
+- [x] Fase 6 — Auditoría final
 
 ## Baseline (antes de tocar nada)
 JS 1533,1 KB (461,1 KB gzip) · CSS 131,9 KB (25,8 KB gzip) · fuentes 284,1 KB · 88 chunks
@@ -29,6 +29,11 @@ Cambio respecto de la tabla: text-prius-success va a text-success-ink, porque el
 - Motion descartado por presupuesto: +30,3 KB gzip (domAnimation) y +45,4 KB (domMax), tope +25 KB.
 - Los snapshots guardados del plano son anteriores al rediseño Stitch. El mapa se comparó contra main en vivo: solo cambia la fuente.
 - Zoom mínimo en 1440 y 768: ningún número de celda se corta.
+
+## Final
+JS 1503,5 KB (458,2 KB gzip) · CSS 80,1 KB (17,8 KB gzip) · fuentes 70,7 KB · 84 chunks.
+audit:design 0 hallazgos, typecheck OK, lint 0 errores (23 warnings previos), build OK, vitest 77/78 (el fallo de format.test.ts es previo).
+Overlays: e2e/rebrand-overlays.spec.ts, 38 capturas, sin escrituras. Clicks: e2e/rebrand-clicks.spec.ts, 14 pantallas en 7 anchos, sin botones tapados.
 
 ## Reglas de ejecución
 - Playwright solo con playwright.rebrand.config.ts + e2e/guard.ts (lista blanca): E2E_BASE_URL=http://localhost:5197 RUTAS=home npx playwright test --config playwright.rebrand.config.ts e2e/rebrand-shots.spec.ts --project=desktop-1440. Nunca la config por defecto: su globalTeardown borra datos en producción.

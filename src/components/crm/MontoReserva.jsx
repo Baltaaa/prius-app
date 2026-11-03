@@ -29,8 +29,8 @@ export default function MontoReserva({ reserva, className = '' }) {
           <HelpCircle size={13} /> Sin verificar
         </span>
         {montoGrupoReferencia != null && (
-          <span className="text-label text-ink-2 normal-case font-normal">
-            Grupo: {formatPesos(montoGrupoReferencia)}
+          <span className="text-label text-ink-2">
+            Grupo: <span className="whitespace-nowrap">{formatPesos(montoGrupoReferencia)}</span>
           </span>
         )}
       </span>

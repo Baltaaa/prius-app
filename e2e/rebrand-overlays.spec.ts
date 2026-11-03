@@ -79,7 +79,7 @@ const PASOS: Paso[] = [
   } },
   { nombre: 'caja-cierre', correr: async (p) => {
     await ir(p, '/app/caja?fecha=2026-10-30')
-    await p.getByRole('button', { name: /Cerrar Caja/ }).first().click()
+    await p.locator('button:visible', { hasText: /Cerrar caja/i }).first().click()
     await p.waitForTimeout(600)
   } },
   { nombre: 'caja-gasto', correr: async (p) => {

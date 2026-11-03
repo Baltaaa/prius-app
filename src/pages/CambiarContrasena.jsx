@@ -70,12 +70,12 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
 
   if (linkInvalido) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-card px-6">
+      <div className="min-h-dvh flex items-center justify-center bg-canvas px-4">
         <div className="max-w-sm w-full card-surface p-8 text-center space-y-4">
           <p className="text-ink font-semibold">El enlace venció o ya se usó.</p>
           <button
             onClick={() => navigate('/recuperar')}
-            className="text-label w-full h-14 bg-ink hover:bg-chart-2 rounded-full transition-all text-on-ink"
+            className="btn btn-primary w-full"
           >
             Pedir uno nuevo
           </button>
@@ -85,7 +85,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-card px-6">
+    <div className="min-h-dvh flex items-center justify-center bg-canvas px-4">
       <div className="max-w-sm w-full card-surface p-8 space-y-6">
         <div>
           <h1 className="text-stat text-ink">
@@ -107,7 +107,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
               required
               placeholder="Nueva contraseña"
               style={{ fontSize: 16 }}
-              className="w-full h-14 pl-14 pr-14 bg-surface rounded-full outline-none text-ink border border-transparent focus:ring-2 focus:ring-gold"
+              className="field !pl-12 !pr-12"
             />
             <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-5 top-1/2 -translate-y-1/2 text-ink-2 hover:text-ink">
               {show ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -122,7 +122,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
             required
             placeholder="Repetir contraseña"
             style={{ fontSize: 16 }}
-            className="w-full h-14 px-6 bg-surface rounded-full outline-none text-ink border border-transparent focus:ring-2 focus:ring-gold"
+            className="field"
           />
 
           <div className="space-y-1.5 px-2">
@@ -141,7 +141,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
           <button
             type="submit"
             disabled={loading || !cumple || !coincide}
-            className="text-label w-full h-14 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all flex items-center justify-center gap-2 text-on-ink"
+            className="btn btn-primary w-full flex items-center justify-center gap-2 text-on-ink"
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : 'Guardar y continuar'}
           </button>
