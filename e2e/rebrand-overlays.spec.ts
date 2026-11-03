@@ -1,10 +1,15 @@
 import { test, login } from './fixtures'
 import type { Page } from '@playwright/test'
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs'
+import { auditarLayout } from './responsive-checks'
 
 // Fase 5: abre cada overlay con clicks reales y lo captura. Nunca confirma:
 // el guard corta cualquier escritura, y ConfirmarSuperadminModal no recibe
 // contraseña (5 intentos fallidos bloquean 15 minutos).
 const OUT = 'design/rebrand-shots/overlays'
+const TODOS = '360x640,390x844,430x932,768x1024,834x1194,1024x768,1180x820,1280x800,1366x768,1440x900,1920x1080'
+const ANCHOS = (process.env.ANCHOS || '390x844,1440x900').split(',').map((a) => a.split('x').map(Number))
+const LOG = process.env.LOG || `${OUT}/hallazgos.log`
 
 async function ir(page: Page, ruta: string) {
   await page.goto(ruta)
@@ -104,23 +109,32 @@ const PASOS: Paso[] = [
   } },
 ]
 
-for (const [modo, w, h] of [['desktop', 1440, 900], ['mobile', 390, 844]] as const) {
-  test(`overlays ${modo}`, async ({ page }) => {
-    test.setTimeout(560_000)
-    const solo = process.env.PASOS?.split(',')
+// `ANCHOS=todos` corre los 11 anchos del checklist. Cada overlay se captura y
+// pasa por los chequeos de layout (cero desborde dentro del modal o sheet).
+test('overlays', async ({ page }) => {
+  test.setTimeout(3_000_000)
+  mkdirSync(OUT, { recursive: true })
+  writeFileSync(LOG, '')
+  const anchos = process.env.ANCHOS === 'todos' ? TODOS.split(',').map((a) => a.split('x').map(Number)) : ANCHOS
+  const solo = process.env.PASOS?.split(',')
+  page.setDefaultTimeout(12_000)
+  await page.setViewportSize({ width: anchos[0][0], height: anchos[0][1] })
+  await login(page)
+  for (const [w, h] of anchos) {
+    const mobile = w < 768
     await page.setViewportSize({ width: w, height: h })
-    page.setDefaultTimeout(12_000)
-    await login(page)
     for (const paso of PASOS) {
-      if (paso.solo && paso.solo !== modo) continue
+      if (paso.solo === 'desktop' && mobile) continue
+      if (paso.solo === 'mobile' && !mobile) continue
       if (solo && !solo.includes(paso.nombre)) continue
       try {
-        await paso.correr(page, modo === 'mobile')
-        await page.screenshot({ path: `${OUT}/${paso.nombre}-${modo}.png` })
-        console.log('OK', modo, paso.nombre, page.url().includes('/login') ? 'SESION-CERRADA' : '')
+        await paso.correr(page, mobile)
+        await page.screenshot({ path: `${OUT}/${paso.nombre}-${w}.png` })
+        for (const x of await auditarLayout(page, { mobile, sinNav: true })) appendFileSync(LOG, `${paso.nombre} ${w}x${h} [${x.regla}] ${x.detalle}\n`)
+        console.log('OK', w, paso.nombre, page.url().includes('/login') ? 'SESION-CERRADA' : '')
       } catch (e) {
-        console.log('FALLA', modo, paso.nombre, String(e).split('\n')[0].slice(0, 120))
+        appendFileSync(LOG, `${paso.nombre} ${w}x${h} [falla-paso] ${String(e).split('\n')[0].slice(0, 140)}\n`)
       }
     }
-  })
-}
+  }
+})
