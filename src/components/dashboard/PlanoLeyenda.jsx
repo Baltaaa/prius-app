@@ -23,9 +23,9 @@ export default function PlanoLeyenda({ compact = false }) {
     // "Sin confirmar" se veía cortado ("Sin c…"). flex-wrap en dos
     // renglones prolijos, todo siempre visible, sin scroll.
     return (
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 shrink-0">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 shrink-0">
         {ITEMS.map((it, i) => (
-          <span key={i} className="flex items-center gap-2 shrink-0 text-label text-ink-2 whitespace-nowrap">
+          <span key={i} className="flex items-center gap-1.5 shrink-0 text-label text-ink-2 whitespace-nowrap">
             {it.swatch}
             {it.label}
           </span>
@@ -35,9 +35,9 @@ export default function PlanoLeyenda({ compact = false }) {
   }
 
   return (
-    <div className="flex items-center gap-4 bg-surface px-3 py-2 rounded-inner flex-wrap">
+    <div className="flex items-center gap-4 bg-surface px-3 py-1.5 rounded-inner flex-wrap">
       {ITEMS.map((it, i) => (
-        <span key={i} className="flex items-center gap-2 text-label text-ink-2 whitespace-nowrap">
+        <span key={i} className="flex items-center gap-1.5 text-label text-ink-2 whitespace-nowrap">
           {it.swatch}
           <span>{it.label} <span className="text-ink-2">· {it.hint}</span></span>
         </span>

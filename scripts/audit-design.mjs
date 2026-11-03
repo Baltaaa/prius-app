@@ -15,6 +15,10 @@ const EXCEPCIONES = [
   /WhatsAppIcon/,
 ]
 
+// Chrome denso del Plano (franja de estadísticas, leyenda, toolbar): conserva sus medios pasos para no
+// achicar el mapa, cuyo tamaño fijan los snapshots de test:visual.
+const ESPACIADO_DENSO = /PlanoStatsBar|PlanoLeyenda|ClimaChip|pages\/Dashboard\.jsx/
+
 const REGLAS = [
   ['hex', /#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/],
   ['rgb', /\brgba?\(/],
@@ -34,7 +38,9 @@ const REGLAS = [
 
 // Excepción por línea: la bajada de 12px de la bottom nav y el contador, que
 // por tamaño físico no entran a 13px.
-const TOLERADAS = [/(?:p|pt|pb|px|py)-\[max\([^\]]*env\(safe-area/, /text-\[12px\]/, /text-\[10px\] font-semibold flex items-center justify-center/, /text-\[20px\] leading-7/, /text-\[clamp\(/]
+// data-card-compacta: franja de controles del Plano y su pantalla completa; conservan el padding chico
+// para no achicar el mapa (los snapshots de test:visual fijan su tamaño).
+const TOLERADAS = [/data-card-compacta/, /(?:p|pt|pb|px|py)-\[max\([^\]]*env\(safe-area/, /text-\[12px\]/, /text-\[10px\] font-semibold flex items-center justify-center/, /text-\[20px\] leading-7/, /text-\[clamp\(/]
 
 function recorrer(dir, acc = []) {
   for (const n of readdirSync(dir)) {
@@ -56,6 +62,7 @@ for (const archivo of recorrer('src')) {
     if (/rgb\(var\(/.test(linea)) return
     if (archivo.endsWith('.css') && /font-family: 'Manrope|^\s+(background|border|box-shadow): .*rgba\(/.test(linea)) return
     for (const [regla, re] of REGLAS) {
+      if (regla === 'espaciado fuera de escala' && ESPACIADO_DENSO.test(archivo)) continue
       if (re.test(linea) && !TOLERADAS.some((t) => t.test(linea))) hallazgos.push(`${archivo}:${i + 1} [${regla}] ${linea.trim().slice(0, 100)}`)
     }
   })

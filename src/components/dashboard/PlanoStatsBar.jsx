@@ -25,13 +25,13 @@ export function StatCard({ icon: Icon, label, active, onClick, progress, size = 
     <Tag
       type={interactivo ? 'button' : undefined}
       onClick={onClick}
-      className={`group shrink-0 snap-start relative overflow-hidden rounded-card border text-left transition-all ${lg ? 'p-5' : 'p-4'} ${
+      className={`group shrink-0 snap-start relative overflow-hidden rounded-card border text-left transition-all ${lg ? 'p-5' : 'p-3.5'} ${
         active
           ? 'border-gold-300 bg-gold-100'
           : 'border-line bg-surface'
       } ${interactivo ? 'hover:border-line hover:bg-surface cursor-pointer' : ''} ${className}`}
     >
-      <div className={`flex items-center gap-2 ${lg ? 'mb-4' : 'mb-3'}`}>
+      <div className={`flex items-center gap-2 ${lg ? 'mb-3.5' : 'mb-2.5'}`}>
         <div className={`rounded-icon flex items-center justify-center border shrink-0 transition-colors ${lg ? 'w-9 h-9' : 'w-7 h-7'} ${
           active ? 'border-gold-300 bg-gold-100' : 'border-line bg-surface group-hover:border-line'
         }`}>
@@ -41,7 +41,7 @@ export function StatCard({ icon: Icon, label, active, onClick, progress, size = 
       </div>
       {children}
       {progress != null && (
-        <div className={`rounded-full bg-surface overflow-hidden ${lg ? 'mt-4 h-[5px]' : 'mt-3 h-[3px]'}`}>
+        <div className={`rounded-full bg-surface overflow-hidden ${lg ? 'mt-4 h-[5px]' : 'mt-2.5 h-[3px]'}`}>
           <div
             className="h-full rounded-full bg-gold transition-all"
             style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }}
@@ -66,7 +66,7 @@ export function CarpasCard({ stats, filtro, onToggleFiltro, className = 'w-[112p
   return (
     <StatCard icon={Tent} label="Carpas" active={filtro === 'carpas'} onClick={() => onToggleFiltro('carpas')} progress={stats.carpas.pct} className={className}>
       <p className="text-stat text-ink tabular-nums leading-none">{pct(stats.carpas.pct)}</p>
-      <p className="text-label text-ink-2 tabular-nums mt-1">{stats.carpas.count}/{stats.carpas.total}</p>
+      <p className="text-label text-ink-2 tabular-nums mt-0.5">{stats.carpas.count}/{stats.carpas.total}</p>
     </StatCard>
   )
 }
@@ -75,7 +75,7 @@ export function SombrillasCard({ stats, filtro, onToggleFiltro, className = 'w-[
   return (
     <StatCard icon={Umbrella} label="Sombrillas" active={filtro === 'sombrillas'} onClick={() => onToggleFiltro('sombrillas')} progress={stats.sombrillas.pct} className={className}>
       <p className="text-stat text-ink tabular-nums leading-none">{pct(stats.sombrillas.pct)}</p>
-      <p className="text-label text-ink-2 tabular-nums mt-1">{stats.sombrillas.count}/{stats.sombrillas.total}</p>
+      <p className="text-label text-ink-2 tabular-nums mt-0.5">{stats.sombrillas.count}/{stats.sombrillas.total}</p>
     </StatCard>
   )
 }
@@ -102,7 +102,7 @@ export function StatRowCard({ icon: Icon, label, value, sub, progress, active, o
     <Tag
       type={interactivo ? 'button' : undefined}
       onClick={onClick}
-      className={`w-full min-w-0 rounded-card border text-left transition-all px-4 py-3 ${
+      className={`w-full min-w-0 rounded-card border text-left transition-all px-3.5 py-3 ${
         active ? 'border-gold-300 bg-gold-100' : 'border-line bg-surface'
       } ${interactivo ? 'hover:border-line hover:bg-surface cursor-pointer' : ''} ${className}`}
     >
@@ -113,11 +113,11 @@ export function StatRowCard({ icon: Icon, label, value, sub, progress, active, o
         </div>
         <div className="text-right shrink-0">
           <p className="text-card-title text-ink tabular-nums leading-none">{value}</p>
-          {sub != null && <p className="text-label text-ink-2 tabular-nums mt-1 whitespace-nowrap">{sub}</p>}
+          {sub != null && <p className="text-label text-ink-2 tabular-nums mt-0.5 whitespace-nowrap">{sub}</p>}
         </div>
       </div>
       {progress != null && (
-        <div className="mt-3 h-[3px] rounded-full bg-surface overflow-hidden">
+        <div className="mt-2.5 h-[3px] rounded-full bg-surface overflow-hidden">
           <div
             className="h-full rounded-full bg-gold transition-all"
             style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }}
@@ -131,7 +131,7 @@ export function StatRowCard({ icon: Icon, label, value, sub, progress, active, o
 export function MixCard({ stats, filtro, onToggleFiltro, className = 'w-[220px]' }) {
   return (
     <StatCard icon={Layers} label="Mix de alquiler" className={className}>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
         {[
           ['temporada', 'T', stats.mix.temporada],
           ['periodo', 'P', stats.mix.periodo],
@@ -143,7 +143,7 @@ export function MixCard({ stats, filtro, onToggleFiltro, className = 'w-[220px]'
               key={key}
               type="button"
               onClick={() => onToggleFiltro(key)}
-              className={`flex flex-col items-center justify-center gap-1 min-h-[44px] rounded-icon border px-3 py-2 transition-colors ${
+              className={`flex flex-col items-center justify-center gap-1 min-h-[44px] rounded-icon border px-2.5 py-2 transition-colors ${
                 active ? 'border-gold-300 bg-gold-100' : 'border-line bg-surface hover:border-line'
               }`}
             >
@@ -177,7 +177,7 @@ export function MixCardCompacto({ stats, filtro, onToggleFiltro, className = '' 
             key={key}
             type="button"
             onClick={() => onToggleFiltro(key)}
-            className={`flex items-center gap-2 px-2 py-1 rounded-full min-h-[32px] transition-colors ${active ? 'bg-gold-100' : 'hover:bg-surface'}`}
+            className={`flex items-center gap-1.5 px-1.5 py-1 rounded-full min-h-[32px] transition-colors ${active ? 'bg-gold-100' : 'hover:bg-surface'}`}
           >
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLOR_TIPO_ALQUILER[key]?.swatch }} />
             <span className="text-label text-ink-2">{letra}</span>
@@ -193,7 +193,7 @@ export function PendientesCard({ stats, filtro, onToggleFiltro, className = 'w-[
   return (
     <StatCard icon={AlertCircle} label="Pendientes" active={filtro === 'pendientes'} onClick={() => onToggleFiltro('pendientes')} className={className}>
       <p className="text-stat text-ink tabular-nums leading-none">{stats.pendientes.count}</p>
-      <p className="text-label text-danger tabular-nums font-semibold mt-1 truncate">
+      <p className="text-label text-danger tabular-nums font-semibold mt-0.5 truncate">
         {stats.pendientes.saldo > 0 ? formatPesos(stats.pendientes.saldo) : null}
         {stats.pendientes.sinVerificar && ' + sin verificar'}
       </p>
@@ -243,7 +243,7 @@ export function EstadoLegend() {
   return (
     <div className="rounded-inner border border-line bg-surface p-3">
       <p className="text-label text-ink-2 mb-2">Referencias</p>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
         {item('t', `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.border}`, 'Alquilada', <span className="text-label font-semibold text-ink">T</span>)}
         {item('r', 'bg-card border-card', 'Sin confirmar', <Hourglass size={10} className="text-ink" />)}
         {item('libre', 'bg-surface border-line', 'Libre')}
@@ -272,14 +272,14 @@ const SkeletonCard = () => <div className="shrink-0 h-[84px] w-[132px] rounded-c
 export default function PlanoStatsBar({ stats, selectedDate, filtro, onToggleFiltro, loading }) {
   if (loading || !stats) {
     return (
-      <div className="flex gap-3 overflow-x-auto scrollbar-none">
+      <div className="flex gap-2.5 overflow-x-auto scrollbar-none">
         {Array.from({ length: 7 }).map((_, i) => <SkeletonCard key={i} />)}
       </div>
     )
   }
 
   return (
-    <div className="flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory sm:snap-none pb-1">
+    <div className="flex gap-2.5 overflow-x-auto scrollbar-none snap-x snap-mandatory sm:snap-none pb-1">
       <OcupacionCard stats={stats} filtro={filtro} onToggleFiltro={onToggleFiltro} />
       <CarpasCard stats={stats} filtro={filtro} onToggleFiltro={onToggleFiltro} />
       <SombrillasCard stats={stats} filtro={filtro} onToggleFiltro={onToggleFiltro} />
