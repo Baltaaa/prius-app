@@ -44,13 +44,13 @@ const haceMeses = (n) => {
 function Kpi({ icono: Icono, label, valor, sub, tono = 'neutro' }) {
   const color = tono === 'positivo' ? 'text-success-ink' : tono === 'negativo' ? 'text-danger' : 'text-ink'
   return (
-    <div className="card-light rounded-card p-4 flex items-start gap-3">
-      <span className="w-9 h-9 shrink-0 rounded-icon bg-surface text-ink-2 flex items-center justify-center">
+    <div className="card-surface p-4 flex items-start gap-3">
+      <span className="hidden sm:flex w-9 h-9 shrink-0 rounded-icon bg-surface text-ink-2 items-center justify-center">
         <Icono size={16} />
       </span>
       <div className="min-w-0">
-        <p className="text-label text-ink-2 uppercase tracking-wider truncate">{label}</p>
-        <p className={`text-body tabular-nums mt-0.5 ${color}`}>{valor}</p>
+        <p className="text-label text-ink-2 truncate">{label}</p>
+        <p className={`text-body lg:text-card-title tabular-nums whitespace-nowrap mt-0.5 ${color}`}>{valor}</p>
         {sub && <p className="text-label text-ink-2 mt-0.5 truncate">{sub}</p>}
       </div>
     </div>
@@ -135,7 +135,7 @@ export default function Reportes() {
   return (
     <div className="space-y-4 animate-premium-fade">
       {/* Controles */}
-      <div className="no-print card-light rounded-card p-3 flex flex-wrap items-center gap-2">
+      <div className="card-surface no-print p-3 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1 bg-surface p-1 rounded-inner shrink-0">
           {PERIODOS.map((p) => (
             <button
@@ -143,7 +143,7 @@ export default function Reportes() {
               type="button"
               onClick={() => setPeriodo(p.value)}
               className={`px-3 py-1.5 rounded-icon text-label font-bold transition-colors ${
-                periodo === p.value ? 'bg-card text-ink' : 'text-ink-2 hover:text-ink'
+                periodo === p.value ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
               {p.label}
@@ -158,7 +158,7 @@ export default function Reportes() {
               type="button"
               onClick={() => setMoneda(x)}
               className={`px-3 py-1.5 rounded-icon text-label font-bold transition-colors ${
-                moneda === x ? 'bg-card text-ink' : 'text-ink-2 hover:text-ink'
+                moneda === x ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
               {x === 'ARS' ? '🇦🇷 Pesos' : '🇺🇸 Dólares'}
@@ -172,29 +172,29 @@ export default function Reportes() {
         <div className="flex-1" />
 
         <button onClick={handleWhatsApp} disabled={!linkWa} title={linkWa ? 'Enviar a mi WhatsApp' : 'Cargá tu teléfono en Mi cuenta'}
-          className="h-10 px-3.5 rounded-inner bg-success hover:bg-success disabled:opacity-40 disabled:cursor-not-allowed text-on-ink flex items-center gap-2 text-body transition-colors">
+          className="h-10 px-3.5 rounded-full bg-success hover:bg-success disabled:opacity-40 disabled:cursor-not-allowed text-on-ink flex items-center gap-2 text-body transition-colors">
           <WhatsAppIcon size={15} /> <span className="hidden sm:inline">WhatsApp</span>
         </button>
         <button onClick={() => descargarReporteCsv(datosExport)}
-          className="h-10 px-3.5 rounded-inner bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
+          className="h-10 px-3.5 rounded-full bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
           <Download size={15} /> <span className="hidden sm:inline">CSV</span>
         </button>
         <button onClick={imprimirReporte}
-          className="h-10 px-3.5 rounded-inner bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
+          className="h-10 px-3.5 rounded-full bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
           <Printer size={15} /> <span className="hidden sm:inline">Imprimir / PDF</span>
         </button>
       </div>
 
       {faltaCotizacion && (
-        <div className="no-print p-3 bg-gold-100 border border-gold-300 rounded-inner text-xs text-ink">
+        <div className="no-print p-3 bg-gold-100 border border-gold-300 rounded-inner text-label text-ink">
           No hay cotización del dólar disponible. Los importes en USD se muestran como “—”.
         </div>
       )}
 
       {/* Encabezado (también se imprime) */}
       <div className="hidden print:block mb-4">
-        <h1 className="text-lg font-bold">Prius Playa Grande — Reporte {periodoLabel}</h1>
-        <p className="text-xs">
+        <h1 className="text-card-title">Prius Playa Grande — Reporte {periodoLabel}</h1>
+        <p className="text-label">
           {desde ? formatFecha(desde) : '—'} al {hasta ? formatFecha(hasta) : '—'} · Moneda: {moneda}
           {moneda === 'USD' && cot ? ` (cotización ${formatPesos(cot)})` : ''}
         </p>
@@ -210,10 +210,10 @@ export default function Reportes() {
 
       {/* Proyección */}
       {proyeccion && (
-        <div className="card-light rounded-card p-4 flex flex-wrap items-center gap-4">
+        <div className="card-surface p-4 flex flex-wrap items-center gap-4">
           <span className="w-9 h-9 shrink-0 rounded-icon bg-gold-100 text-ink flex items-center justify-center"><Target size={16} /></span>
           <div className="min-w-0">
-            <p className="text-label text-ink-2 uppercase tracking-wider">Proyección · {proyeccion.label}</p>
+            <p className="text-label text-ink-2">Proyección · {proyeccion.label}</p>
             <p className="text-label text-ink-2 mt-0.5">
               {formatPorcentaje(proyeccion.pctTranscurrido, 0)} transcurrido · si sigue este ritmo
             </p>
@@ -221,12 +221,12 @@ export default function Reportes() {
           <div className="flex-1" />
           <div className="flex gap-6">
             <div>
-              <p className="text-label text-ink-2 uppercase tracking-wider">Ingresos</p>
+              <p className="text-label text-ink-2">Ingresos</p>
               <p className="text-body text-ink tabular-nums">{m(proyeccion.ingresosProyectados)}</p>
               <p className="text-label text-ink-2">hoy {m(proyeccion.ingresosHastaAhora)}</p>
             </div>
             <div>
-              <p className="text-label text-ink-2 uppercase tracking-wider">Neto</p>
+              <p className="text-label text-ink-2">Neto</p>
               <p className="text-body text-ink tabular-nums">{m(proyeccion.netoProyectado)}</p>
               <p className="text-label text-ink-2">hoy {m(proyeccion.netoHastaAhora)}</p>
             </div>
@@ -236,18 +236,18 @@ export default function Reportes() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Evolución */}
-        <div className="xl:col-span-2 card-light rounded-card card-light-inner overflow-hidden flex flex-col">
+        <div className="card-surface xl:col-span-2 overflow-hidden flex flex-col">
           <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-            <p className="text-label text-ink-2 uppercase tracking-wider">Evolución · {periodoLabel}</p>
+            <p className="text-label text-ink-2">Evolución · {periodoLabel}</p>
             <span className="text-label text-ink-2">{serie.length} períodos</span>
           </div>
           {serie.length === 0 ? (
-            <p className="px-4 pb-4 text-xs text-ink-2 uppercase tracking-widest">Sin movimientos en el rango elegido.</p>
+            <p className="text-label px-4 pb-4 text-ink-2">Sin movimientos en el rango elegido.</p>
           ) : (
             <ScrollFade className="overflow-y-auto max-h-[420px] print:max-h-none print:overflow-visible">
               <table className="w-full text-body">
                 <thead className="sticky top-0 bg-card z-10">
-                  <tr className="text-left text-label text-ink-2 uppercase tracking-wider border-b border-line">
+                  <tr className="text-left text-label text-ink-2 border-b border-line">
                     <th className="px-4 py-2 font-medium">Período</th>
                     <th className="px-3 py-2 font-medium text-right">Ingresos</th>
                     <th className="px-3 py-2 font-medium text-right hidden sm:table-cell">Egresos</th>
@@ -267,7 +267,7 @@ export default function Reportes() {
                       <td className="px-3 py-2.5 text-right tabular-nums text-ink">{m(r.ingresos)}</td>
                       <td className="px-3 py-2.5 text-right tabular-nums text-ink-2 hidden sm:table-cell">{m(r.egresos)}</td>
                       <td className={`px-3 py-2.5 text-right tabular-nums font-semibold ${r.neto >= 0 ? 'text-ink' : 'text-danger'}`}>{m(r.neto)}</td>
-                      <td className="px-4 py-2.5 text-right text-xs"><Variacion pct={r.variacionIngresos} /></td>
+                      <td className="px-4 py-2.5 text-right text-label"><Variacion pct={r.variacionIngresos} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -277,10 +277,10 @@ export default function Reportes() {
         </div>
 
         {/* Medios de pago */}
-        <div className="card-light rounded-card card-light-inner overflow-hidden">
-          <p className="px-4 pt-3 pb-2 text-label text-ink-2 uppercase tracking-wider">Por medio de pago</p>
+        <div className="card-surface overflow-hidden">
+          <p className="px-4 pt-3 pb-2 text-label text-ink-2">Por medio de pago</p>
           {porMedio.length === 0 ? (
-            <p className="px-4 pb-4 text-xs text-ink-2 uppercase tracking-widest">Sin cobros en el rango.</p>
+            <p className="text-label px-4 pb-4 text-ink-2">Sin cobros en el rango.</p>
           ) : (
             <div className="px-4 pb-4 space-y-3">
               {porMedio.map((x) => (
