@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { invocarFuncion } from '../lib/invocarFuncion'
 
 // Punto 4 (30/10/2026): cotización vigente del dólar para el CRM.
 //
@@ -31,7 +32,7 @@ export function useTipoCambio() {
 
   const refrescar = useCallback(async () => {
     try {
-      await supabase.functions.invoke('tipo-cambio')
+      await invocarFuncion('tipo-cambio')
     } catch {
       // Sin ruido: si no se pudo refrescar, abajo igual se lee lo cacheado.
     }

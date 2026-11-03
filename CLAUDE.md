@@ -59,6 +59,11 @@ El dueño piensa el sistema como **cliente-céntrico y reactivo en tiempo real**
 - Códigos de reserva únicos para recepción (formato: `PRIUS-A3X9K2`).
 - **Seguridad crítica:** todos los writes públicos pasan por Supabase Edge Functions, nunca inserts directos desde el cliente. RLS en la anon key restringe a solo lectura de disponibilidad.
 
+## Edge Functions y deploy (hotfix 03/11/2026)
+- Toda Edge Function usa `supabase/functions/_shared/cors.ts` (`servirConCors`), nunca CORS inlineado ni `*`. Los orígenes permitidos viven en el código (prius-app.pages.dev, previews `*.prius-app.pages.dev`, localhost:5173, sitio público), no solo en el secret `ALLOWED_ORIGINS`.
+- Toda invocación a una Edge Function desde el front usa `invocarFuncion` (`src/lib/invocarFuncion.ts`), nunca `supabase.functions.invoke` directo: traduce los errores a español y marca `esConexion`.
+- Checklist de deploy: pnpm typecheck, pnpm lint, pnpm test, pnpm build; desplegar las Edge Functions modificadas; después del deploy `pnpm check:functions` (preflight OPTIONS con el origin de producción, sin escribir datos) debe dar todo verde.
+
 ## Diseño
 Fuente de verdad: `design/DESIGN.md` (paleta, tipografía Manrope, forma, componentes, gráficos, animaciones, layout). Referencia visual: `design/reference/`. Tokens en `src/index.css` y `tailwind.config.js`; primitivas y shell en `src/components/brand/`. `pnpm audit:design` debe dar cero hallazgos.
 - Excepciones documentadas: el mapa del plano en desktop/tablet, las vistas de impresión A4 y `lib/colors.ts`.

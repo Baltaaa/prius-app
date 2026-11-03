@@ -454,6 +454,19 @@ export function DataProvider({ children }) {
     return data
   }, [cajaHoy])
 
+  // Hotfix 03/11/2026: ante un error de conexión (`esConexion`) no se sabe si
+  // el pedido llegó y se aplicó. Antes de dejar que el modal reintente se
+  // relee el estado real: `verificar()` dice si la acción ya quedó aplicada
+  // (entonces no se repite y se da por hecha); si no, se refresca y el error
+  // sigue su camino. Con cualquier otro error no hace nada.
+  const yaAplicadaTrasErrorDeConexion = useCallback(async (err, verificar) => {
+    if (!err?.esConexion) return false
+    let aplicada = false
+    try { aplicada = !!(await verificar()) } catch { aplicada = false }
+    await Promise.all([fetchPagos(), fetchReservas(), fetchCaja()])
+    return aplicada
+  }, [fetchPagos, fetchReservas, fetchCaja])
+
   // Mini-prompt 26/10/2026: ya no es un rpc() directo — `reabrir_caja`
   // perdió el EXECUTE de `authenticated` (ver migración
   // superadmin_password_confirmacion), solo el dispatcher de la Edge
@@ -500,12 +513,21 @@ export function DataProvider({ children }) {
   }, [fetchPagos, fetchReservas, fetchCaja])
 
   const anularPago = useCallback(async (pagoId, motivo, password) => {
-    const data = await ejecutarAccionSuperadmin('anular_pago', { pago_id: pagoId, motivo }, password)
+    let data
+    try {
+      data = await ejecutarAccionSuperadmin('anular_pago', { pago_id: pagoId, motivo }, password)
+    } catch (err) {
+      const aplicada = await yaAplicadaTrasErrorDeConexion(err, async () => {
+        const { data: fila } = await supabase.from('pagos').select('estado').eq('id', pagoId).maybeSingle()
+        return fila?.estado === 'anulado'
+      })
+      if (!aplicada) throw err
+    }
     await fetchPagos()
     await fetchReservas()
     await fetchCaja()
     return data
-  }, [fetchPagos, fetchReservas, fetchCaja])
+  }, [fetchPagos, fetchReservas, fetchCaja, yaAplicadaTrasErrorDeConexion])
 
   const completarComprobante = useCallback(async (pagoId, comprobante) => {
     const { data, error } = await supabase.rpc('completar_comprobante', { p_pago_id: pagoId, p_comprobante: comprobante })
@@ -600,15 +622,24 @@ export function DataProvider({ children }) {
   // editarMontoPago (arriba de esta sección), que es para cargar el monto
   // de un recibo migrado que todavía está en null.
   const editarMontoPagoVigente = useCallback(async (pagoId, monto, password) => {
-    const data = await ejecutarAccionSuperadmin(
-      'editar_monto_pago_vigente',
-      { pago_id: pagoId, monto: Number(monto) },
-      password,
-    )
+    let data
+    try {
+      data = await ejecutarAccionSuperadmin(
+        'editar_monto_pago_vigente',
+        { pago_id: pagoId, monto: Number(monto) },
+        password,
+      )
+    } catch (err) {
+      const aplicada = await yaAplicadaTrasErrorDeConexion(err, async () => {
+        const { data: fila } = await supabase.from('pagos').select('monto').eq('id', pagoId).maybeSingle()
+        return fila && Number(fila.monto) === Number(monto)
+      })
+      if (!aplicada) throw err
+    }
     await fetchPagos()
     await fetchReservas()
     return data
-  }, [fetchPagos, fetchReservas])
+  }, [fetchPagos, fetchReservas, yaAplicadaTrasErrorDeConexion])
 
   // Update reactivo de un lead (estado: nuevo -> contactado -> descartado, o
   // notas_crm). Optimista; Realtime sobre `leads` concilia el resto.

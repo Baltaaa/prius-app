@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "jsr:@supabase/supabase-js@2"
 import { z } from "npm:zod@3"
+import { servirConCors } from "../_shared/cors.ts"
 
 // Función interna (no pública, mismo criterio que enviar-qr-reserva): la
 // invoca el CRM con el JWT del usuario logueado, verificación de JWT por
@@ -17,24 +18,9 @@ import { z } from "npm:zod@3"
 // (dispatcher Postgres, lista blanca de acciones — ver la migración
 // superadmin_password_confirmacion).
 //
-// Helpers de cors/respuesta INLINEADOS acá (no `../_shared/*.ts`) — el
-// bundler del deploy vía MCP no resuelve imports relativos fuera del
-// directorio de la función; si en algún momento se despliega con la CLI
-// de Supabase (que sí resuelve `../_shared`), se puede volver a separarlos
-// sin tocar la lógica.
-const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") || "").split(",").map((o) => o.trim()).filter(Boolean)
-function corsHeaders(origin: string | null): Record<string, string> {
-  const headers: Record<string, string> = {
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    Vary: "Origin",
-  }
-  if (origin && ALLOWED_ORIGINS.includes(origin)) headers["Access-Control-Allow-Origin"] = origin
-  return headers
-}
-function responderPreflight(req: Request): Response {
-  return new Response("ok", { headers: corsHeaders(req.headers.get("origin")) })
-}
+// CORS: helper compartido (_shared/cors.ts), igual que el resto de las
+// Edge Functions. `servirConCors` responde el preflight y agrega los headers
+// a TODA respuesta, también a cualquier excepción que escape del handler.
 function json(body: unknown, status: number, cors: Record<string, string>): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...cors } })
 }
@@ -61,6 +47,10 @@ const ACCIONES_VALIDAS = [
   "revertir_estado_pago_automatico",
   "reabrir_caja",
 ] as const
+
+// Debe coincidir con el umbral de fn_superadmin_registrar_intento (5 fallos
+// seguidos -> 15 minutos de bloqueo).
+const MAX_FALLOS = 5
 
 const Entrada = z.object({
   password: z.string().min(1),
@@ -97,10 +87,7 @@ function describirAccion(accion: string, params: Record<string, unknown>): strin
   }
 }
 
-Deno.serve(async (req) => {
-  const cors = corsHeaders(req.headers.get("origin"))
-  if (req.method === "OPTIONS") return responderPreflight(req)
-
+servirConCors(async (req, cors) => {
   const authHeader = req.headers.get("authorization") ?? ""
   const jwt = authHeader.replace(/^Bearer\s+/i, "")
   if (!jwt) return json({ ok: false, error: "no_autorizado", mensaje: "Falta la sesión." }, 401, cors)
@@ -211,7 +198,20 @@ Deno.serve(async (req) => {
           cors,
         )
       }
-      return json({ ok: false, error: "password_incorrecta", mensaje: "Contraseña incorrecta." }, 401, cors)
+      const restantes = typeof fallos === "number" ? Math.max(0, MAX_FALLOS - fallos) : null
+      return json(
+        {
+          ok: false,
+          error: "password_incorrecta",
+          mensaje:
+            restantes === null
+              ? "Contraseña incorrecta."
+              : `Contraseña incorrecta. Te ${restantes === 1 ? "queda 1 intento" : `quedan ${restantes} intentos`}.`,
+          intentos_restantes: restantes,
+        },
+        401,
+        cors,
+      )
     }
 
     // Contraseña correcta: resetea el contador de fallos y ejecuta la acción

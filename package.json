@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "audit:design": "node scripts/audit-design.mjs",
+    "check:functions": "node scripts/check-functions.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
