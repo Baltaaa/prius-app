@@ -51,10 +51,10 @@ export default function EscanearQR({ isOpen, onClose, onScan }) {
     <div className={`fixed inset-0 z-[999] bg-ink flex flex-col ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}>
       <div ref={bind} className="flex-1 flex flex-col">
         <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] shrink-0">
-          <h2 className="text-body uppercase font-bold tracking-[0.2em] text-gold">Escanear QR</h2>
+          <h2 className="text-label text-gold">Escanear QR</h2>
           <button
             onClick={() => onClose?.()}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-icon text-ink-2 hover:text-ink transition-all"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-full text-ink-2 hover:text-ink transition-all"
           >
             <X size={20} />
           </button>
