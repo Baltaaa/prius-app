@@ -20,7 +20,7 @@ import { formatHora, formatFechaLarga } from '../../lib/format'
 function Campo({ label, children }) {
   return (
     <div>
-      <p className="text-label uppercase tracking-wider text-ink-2">{label}</p>
+      <p className="text-label text-ink-2">{label}</p>
       <div className="text-body text-ink mt-1">{children}</div>
     </div>
   )
@@ -41,7 +41,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
       {/* Encabezado */}
       <div className="flex items-start justify-between gap-3 shrink-0">
         <div className="min-w-0">
-          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${meta.tile}`}>
+          <span className={`text-label inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full ${meta.tile}`}>
             <Icon size={11} /> {meta.label}
           </span>
           <h3 className="text-body text-ink mt-2 break-words">{meta.titulo}</h3>
@@ -53,7 +53,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
           <button
             onClick={onCerrar}
             aria-label="Cerrar detalle"
-            className="shrink-0 w-9 h-9 rounded-inner flex items-center justify-center text-ink-2 hover:bg-surface anim-colors"
+            className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-ink-2 hover:bg-surface anim-colors"
           >
             <X size={16} />
           </button>
@@ -63,7 +63,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain mt-4 space-y-4">
         {/* Quién lo hizo */}
         <div className="bg-surface rounded-inner p-3 flex items-center gap-3">
-          <span className="w-9 h-9 rounded-full bg-ink text-on-ink text-xs font-bold flex items-center justify-center shrink-0">
+          <span className="w-9 h-9 rounded-full bg-ink text-on-ink text-label font-semibold flex items-center justify-center shrink-0">
             {(evento.actor_nombre || 'S').slice(0, 2).toUpperCase()}
           </span>
           <div className="min-w-0">
@@ -74,7 +74,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
 
         {/* Antes vs después */}
         <div>
-          <p className="text-label uppercase tracking-wider text-ink-2 mb-2">
+          <p className="text-label text-ink-2 mb-2">
             Detalle de cambios {cambios.length > 0 && <span className="text-ink-2">· {cambios.length}</span>}
           </p>
           {cambios.length === 0 ? (
@@ -85,7 +85,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
             <div className="space-y-2">
               {cambios.map((c) => (
                 <div key={c.label} className="bg-surface rounded-inner p-3">
-                  <p className="text-label uppercase tracking-wider text-ink-2">{c.label}</p>
+                  <p className="text-label text-ink-2">{c.label}</p>
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     <span className="text-label text-ink-2 line-through break-all">{c.antes}</span>
                     <ArrowRight size={12} className="text-ink-2 shrink-0" />
@@ -102,7 +102,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
         {/* Referencias — solo las que el evento realmente trae */}
         {referencias.length > 0 && (
           <div>
-            <p className="text-label uppercase tracking-wider text-ink-2 mb-2">Referencias</p>
+            <p className="text-label text-ink-2 mb-2">Referencias</p>
             <div className="grid grid-cols-2 gap-2">
               {referencias.map((r) => (
                 <div key={r.label} className="bg-surface rounded-inner p-3 min-w-0">
@@ -115,7 +115,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
 
         {meta.descripcion && (
           <div>
-            <p className="text-label uppercase tracking-wider text-ink-2 mb-2">Descripción</p>
+            <p className="text-label text-ink-2 mb-2">Descripción</p>
             <p className="text-body text-ink break-words">{meta.descripcion}</p>
           </div>
         )}
@@ -128,7 +128,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
         <div className="shrink-0 pt-3">
           <button
             onClick={onIr}
-            className="w-full h-12 rounded-inner bg-gold hover:bg-gold-400 text-ink font-bold text-body flex items-center justify-center gap-2 anim-press anim-colors"
+            className="w-full h-12 rounded-full bg-ink hover:bg-chart-2 font-semibold text-body flex items-center justify-center gap-2 anim-press anim-colors text-on-ink"
           >
             {meta.accionLabel}
           </button>

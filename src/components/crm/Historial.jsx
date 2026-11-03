@@ -335,7 +335,7 @@ function EventoFila({ evento, meta, datos, cambios, activo, onClick, indice, tot
           </div>
         )}
         {esHistorico && (
-          <span className="inline-block text-[9px] font-bold uppercase tracking-widest text-ink-2 bg-surface border border-line rounded-full px-2 py-0.5 mt-1.5">
+          <span className="text-label inline-block text-ink-2 bg-surface border border-line rounded-full px-2 py-0.5 mt-1.5">
             Histórico
           </span>
         )}
@@ -351,7 +351,7 @@ function HistorialSkeleton() {
       {[0, 1].map((g) => (
         <div key={g} className="space-y-2">
           <Skeleton className="h-4 w-40 rounded-icon" />
-          <div className="bg-card border border-line rounded-card p-2 space-y-1">
+          <div className="card-surface p-2 space-y-1">
             {[0, 1, 2].map((i) => (
               <div key={i} className="flex items-start gap-3 px-3 py-3">
                 <Skeleton className="w-9 h-9 rounded-inner shrink-0" />
@@ -481,14 +481,14 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
   if (loading && todos.length === 0) {
     return mostrarFiltrosGlobales
       ? <HistorialSkeleton />
-      : <p className="text-xs text-ink-2 uppercase tracking-widest animate-pulse">Cargando historial...</p>
+      : <p className="text-label text-ink-2 animate-pulse">Cargando historial...</p>
   }
 
   // ───────────────────────── listado (compartido) ─────────────────────────
   const listado = (
     <div className="space-y-4">
       {grupos.length === 0 ? (
-        <div className="bg-card border border-line rounded-card p-10 text-center flex flex-col items-center gap-3 anim-fade-up">
+        <div className="card-surface p-10 text-center flex flex-col items-center gap-3 anim-fade-up">
           <span className="w-12 h-12 rounded-card bg-surface flex items-center justify-center">
             <History size={20} className="text-ink-2" />
           </span>
@@ -504,14 +504,14 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
             <div className={`flex items-center justify-between gap-2 py-2 ${
               mostrarFiltrosGlobales ? 'sticky top-0 z-10 sticky-blur' : 'bg-canvas'
             }`}>
-              <h3 className="text-label uppercase tracking-wider text-ink capitalize truncate">
+              <h3 className="text-label text-ink capitalize truncate">
                 {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
               </h3>
-              <span className="shrink-0 text-label uppercase tracking-wider text-ink-2 bg-surface rounded-full px-2.5 py-1">
+              <span className="shrink-0 text-label text-ink-2 bg-surface rounded-full px-2.5 py-1">
                 {items.length} {items.length === 1 ? 'evento' : 'eventos'}
               </span>
             </div>
-            <div className="bg-card border border-line rounded-card p-2 space-y-1">
+            <div className="card-surface p-2 space-y-1">
               {items.map((e, i) => {
                 const meta = metaDe(e)
                 const abrible = mostrarFiltrosGlobales || puedeNavegar(e)
@@ -543,7 +543,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
           type="button"
           onClick={loadMore}
           disabled={loading}
-          className="w-full h-12 rounded-inner text-label uppercase tracking-wider bg-card border border-line text-ink-2 hover:bg-surface disabled:opacity-50 anim-press anim-colors"
+          className="w-full h-12 rounded-inner text-label bg-card border border-line text-ink-2 hover:bg-surface disabled:opacity-50 anim-press anim-colors"
         >
           {loading ? 'Cargando…' : 'Cargar más'}
         </button>
@@ -568,7 +568,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
           efecto visual (nada scrollea por detrás de un elemento estático
           en flujo normal). */}
       <div className="sticky top-0 z-20 -mx-4 px-4 md:mx-0 md:px-0 md:static pb-3 sticky-blur">
-        <div className="bg-card border border-line rounded-card p-3 space-y-3">
+        <div className="card-surface p-3 space-y-3">
           <div className="flex items-center gap-2">
             <SearchInput
               value={q}
@@ -608,7 +608,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
                         return next
                       }, { replace: true })
                     }}
-                    className={`shrink-0 px-3 h-9 rounded-icon text-label uppercase tracking-wider anim-colors ${
+                    className={`shrink-0 px-3 h-9 rounded-icon text-label anim-colors ${
                       activo ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
                     }`}
                   >
@@ -629,7 +629,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
       {/* Lista + panel de detalle (desktop). */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-4 lg:items-start">
         <div className="min-w-0">{listado}</div>
-        <aside className="hidden lg:block sticky top-4 max-h-[calc(100dvh-8rem)] bg-card border border-line rounded-card p-4">
+        <aside className="hidden lg:block sticky top-4 max-h-[calc(100dvh-8rem)] card-surface p-4">
           {detalle ? (
             <div key={detalle.evento.id} className="content-crossfade h-full">
               <HistorialDetalle {...detalle} onCerrar={() => setSeleccionado(null)} />
@@ -666,10 +666,10 @@ function ChipsTipo({ filtro, setFiltro }) {
           key={f.key}
           onClick={() => setFiltro(f.key)}
           aria-pressed={filtro === f.key}
-          className={`shrink-0 px-3 h-9 rounded-inner text-label uppercase tracking-wider border anim-colors anim-press ${
+          className={`shrink-0 px-3 h-9 rounded-inner text-label border anim-colors anim-press ${
             filtro === f.key
-              ? 'bg-gold text-ink border-gold'
-              : 'bg-card text-ink-2 border-line hover:text-ink hover-accent'
+              ? 'bg-ink text-on-ink border-ink'
+              : 'bg-card text-ink-2 border-transparent hover:text-ink'
           }`}
         >
           {f.label}
