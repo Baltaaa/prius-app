@@ -161,11 +161,11 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
     return (
       <div className="flex items-center gap-3 p-3 bg-surface border border-line rounded-inner">
         <div className="w-8 h-8 rounded-full bg-ink flex items-center justify-center shrink-0 select-none">
-          <span className="text-on-ink text-xs font-bold">{initials}</span>
+          <span className="text-on-ink text-label font-semibold">{initials}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-body font-bold text-ink truncate">{clienteSeleccionado.nombre}</p>
-          {unidadLabel && <p className="text-xs text-ink-2 truncate">{unidadLabel}</p>}
+          <p className="text-body font-semibold text-ink truncate">{clienteSeleccionado.nombre}</p>
+          {unidadLabel && <p className="text-label text-ink-2 truncate">{unidadLabel}</p>}
         </div>
         <button
           type="button"
@@ -188,7 +188,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
     return (
       <div className="space-y-3 p-4 bg-surface border border-gold-300 rounded-inner">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] font-bold text-ink uppercase tracking-widest">Cliente Nuevo</p>
+          <p className="text-label text-ink">Cliente Nuevo</p>
           <button
             type="button"
             onClick={resetNuevo}
@@ -234,12 +234,12 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
           onChange={(v) => setMail(v.toLowerCase())}
           error={intentado ? errorsNuevo.mail : undefined}
         />
-        {error && <p className="text-[11px] text-danger">{error}</p>}
+        {error && <p className="text-label text-danger">{error}</p>}
         <button
           type="button"
           onClick={handleGuardar}
           disabled={saving}
-          className="w-full py-2.5 bg-gold hover:bg-gold-400 disabled:opacity-50 text-ink font-bold uppercase tracking-widest text-[10px] rounded-inner transition-all flex items-center justify-center gap-2"
+          className="text-label w-full py-2.5 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all flex items-center justify-center gap-2 text-on-ink"
         >
           <UserPlus size={14} />
           {saving ? 'Guardando...' : 'Guardar Cliente'}
@@ -274,13 +274,13 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
               if (query.length >= 2) setShowResults(true)
             }}
             onKeyDown={handleKeyDown}
-            className="w-full bg-surface border border-line rounded-inner pl-9 pr-4 py-3 text-ink text-base md:text-body focus:border-gold-300 outline-none uppercase font-bold"
+            className="w-full bg-surface rounded-inner pl-9 pr-4 py-3 text-ink text-base md:text-body outline-none font-semibold border border-transparent focus:ring-2 focus:ring-gold"
           />
         </div>
         <button
           type="button"
           onClick={() => setShowNuevo(true)}
-          className="px-3 py-3 bg-surface border border-line rounded-inner text-[10px] font-bold text-ink-2 hover:text-ink hover:border-gold-300 transition-all flex items-center gap-1.5 shrink-0 uppercase tracking-widest whitespace-nowrap"
+          className="text-label px-3 py-3 bg-surface border border-line rounded-full text-ink-2 hover:text-ink hover:border-gold-300 transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap"
         >
           <UserPlus size={14} />
           <span>+ Nuevo</span>
@@ -290,7 +290,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
       {showResults && (
         <div className="mt-1 border border-line rounded-inner overflow-hidden bg-card">
           {resultados.length === 0 ? (
-            <p className="px-4 py-3 text-xs text-ink-2 uppercase tracking-widest">Sin resultados</p>
+            <p className="text-label px-4 py-3 text-ink-2">Sin resultados</p>
           ) : (
             resultados.map((c, i) => {
               const unidadLabel = unidadPorCliente[c.id]
@@ -303,9 +303,9 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
                     i > 0 ? 'border-t border-line' : ''
                   } ${i === focusedIndex ? 'bg-surface' : 'hover:bg-surface'}`}
                 >
-                  <span className="text-body text-ink font-bold uppercase truncate">{c.nombre}</span>
+                  <span className="text-label text-ink truncate">{c.nombre}</span>
                   {unidadLabel && (
-                    <span className="text-xs text-ink-2 shrink-0">{unidadLabel}</span>
+                    <span className="text-label text-ink-2 shrink-0">{unidadLabel}</span>
                   )}
                 </button>
               )

@@ -64,23 +64,23 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Cosocios" maxWidthClass="sm:max-w-sm">
       <div className="space-y-2">
-        <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Titular</p>
+        <p className="text-label text-ink-2">Titular</p>
         {/* 30/10/2026: el titular no se puede editar desde acá, así que dejó
             de mostrarse en una caja con pinta de input (confundía: parecía
             editable). Ahora es un bloque de solo lectura con avatar de
             iniciales, mismo lenguaje visual que las cards de Clientes. */}
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-ink text-on-ink flex items-center justify-center text-xs font-bold shrink-0">
+          <div className="w-9 h-9 rounded-full bg-ink text-on-ink flex items-center justify-center text-label font-semibold shrink-0">
             {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
           </div>
-          <span className="font-bold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
+          <span className="font-semibold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
         </div>
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Cosocios ({socios.length})</p>
+        <p className="text-label text-ink-2">Cosocios ({socios.length})</p>
         {socios.length === 0 ? (
-          <p className="text-xs text-ink-2">Sin cosocios todavía.</p>
+          <p className="text-label text-ink-2">Sin cosocios todavía.</p>
         ) : (
           <div className="space-y-2">
             {socios.map((s) => (
@@ -91,7 +91,7 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
                     type="button"
                     onClick={() => handleQuitarClick(s)}
                     title={tienePagos(s.id) ? 'Tiene pagos registrados — no se puede quitar' : 'Quitar (pide contraseña de superadmin)'}
-                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-icon text-danger hover:bg-danger-soft transition-colors"
+                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-danger hover:bg-danger-soft transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -103,14 +103,14 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Agregar cosocio</p>
+        <p className="text-label text-ink-2">Agregar cosocio</p>
         <ClienteBuscador value={nuevoId} onChange={(id) => setNuevoId(id)} />
         <LoadingButton
           loading={agregando}
           loadingText="Agregando..."
           disabled={!nuevoId}
           onClick={handleAgregar}
-          className="w-full py-3 bg-gold hover:bg-gold-400 disabled:opacity-50 text-ink font-bold uppercase tracking-widest text-xs rounded-inner transition-all flex items-center justify-center gap-2"
+          className="text-label w-full py-3 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all flex items-center justify-center gap-2 text-on-ink"
         >
           <UserPlus size={14} /> Agregar
         </LoadingButton>

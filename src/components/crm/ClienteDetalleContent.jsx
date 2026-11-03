@@ -66,7 +66,7 @@ export default function ClienteDetalleContent({
               <button
                 type="button"
                 onClick={() => scrollAndHighlight(`pago-${comprobanteMatch.pago.id}`)}
-                className="text-label text-ink font-bold mt-1 hover:underline truncate block text-left"
+                className="text-label text-ink font-semibold mt-1 hover:underline truncate block text-left"
               >
                 Comprobante {formatComprobante(comprobanteMatch.comprobante.tipo, comprobanteMatch.comprobante.numero)}
                 {formatPesosVisible(comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(comprobanteMatch.pago.monto)}` : ''}
@@ -75,7 +75,7 @@ export default function ClienteDetalleContent({
           </div>
         </div>
         {showCloseButton && (
-          <button onClick={onClose} className="w-8 h-8 rounded-icon bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0" title="Cerrar">
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0" title="Cerrar">
             <X size={18} />
           </button>
         )}
@@ -90,7 +90,7 @@ export default function ClienteDetalleContent({
         {/* Saldo + acciones rápidas */}
         <div className="bg-surface rounded-inner px-3 py-2.5 flex items-center justify-between gap-space-sm flex-wrap">
           <div>
-            <span className="text-label text-ink-2 uppercase tracking-wider">Saldo</span>
+            <span className="text-label text-ink-2">Saldo</span>
             <p className={`text-body mt-0.5 ${saldoInfo.sinVerificar && !saldoHeaderSaldado ? 'text-danger' : sinPrecio ? 'text-ink-2' : 'text-ink'}`}>
               {saldoInfo.sinVerificar
                 ? (saldoHeaderSaldado ? '' : 'Saldo sin verificar')
@@ -108,23 +108,23 @@ export default function ClienteDetalleContent({
             <button
               onClick={onRegistrarPago}
               disabled={reservasPagables.length === 0}
-              className="px-4 py-2.5 min-h-[44px] bg-gold hover:bg-gold-400 disabled:opacity-30 disabled:cursor-not-allowed text-ink rounded-inner flex items-center gap-2 font-semibold text-[13px] sm:text-body transition-all"
+              className="px-4 py-2.5 min-h-[44px] bg-ink hover:bg-chart-2 disabled:opacity-30 disabled:cursor-not-allowed rounded-full flex items-center gap-2 font-semibold text-label sm:text-body transition-all text-on-ink"
             >
               <Wallet size={16} /> Registrar pago
             </button>
             {isFeatureEnabled('feat-2-acciones-rapidas-contexto') && (
               <button
                 onClick={() => abrirNuevaReserva({ clienteId: cliente.id })}
-                className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-surface rounded-inner text-ink-2 transition-all"
+                className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-surface rounded-full text-ink-2 transition-all"
                 title="Nueva reserva"
               >
                 <CalendarPlus size={16} />
               </button>
             )}
-            <button onClick={onEditar} className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-surface rounded-inner text-ink-2 transition-all" title="Editar">
+            <button onClick={onEditar} className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-surface rounded-full text-ink-2 transition-all" title="Editar">
               <Edit2 size={16} />
             </button>
-            <button onClick={onEliminar} className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-danger-soft rounded-inner text-danger transition-all" title="Borrar">
+            <button onClick={onEliminar} className="w-11 h-11 flex items-center justify-center bg-card border border-line hover:bg-danger-soft rounded-full text-danger transition-all" title="Borrar">
               <Trash2 size={16} />
             </button>
           </div>
@@ -145,24 +145,24 @@ export default function ClienteDetalleContent({
             reales y un breakpoint de viewport volvía a pisar los campos. */}
         <div className="bg-surface rounded-inner px-3 py-2.5 grid grid-cols-2 cq-cols-4 gap-x-3 gap-y-2">
           <div className="col-span-2 cq-span-1 min-w-0">
-            <p className="text-label text-ink-2 uppercase tracking-wider flex items-center gap-1"><Mail size={11} /> Email</p>
+            <p className="text-label text-ink-2 flex items-center gap-1"><Mail size={11} /> Email</p>
             <p className="text-label text-ink mt-1 lowercase break-all">{cliente.mail || <span className="text-ink-2 normal-case whitespace-nowrap">Sin cargar</span>}</p>
           </div>
           <div>
-            <p className="text-label text-ink-2 uppercase tracking-wider flex items-center gap-1"><FileText size={11} /> CUIT</p>
+            <p className="text-label text-ink-2 flex items-center gap-1"><FileText size={11} /> CUIT</p>
             <p className="text-label text-ink mt-1">{cliente.cuit ? formatCUIT(cliente.cuit) : <span className="text-ink-2 whitespace-nowrap">Sin cargar</span>}</p>
           </div>
           <div>
-            <p className="text-label text-ink-2 uppercase tracking-wider flex items-center gap-1"><FileText size={11} /> DNI</p>
+            <p className="text-label text-ink-2 flex items-center gap-1"><FileText size={11} /> DNI</p>
             <p className="text-label text-ink mt-1">{cliente.dni ? formatDNI(cliente.dni) : <span className="text-ink-2 whitespace-nowrap">Sin cargar</span>}</p>
           </div>
           <div>
-            <p className="text-label text-ink-2 uppercase tracking-wider">Cliente desde</p>
+            <p className="text-label text-ink-2">Cliente desde</p>
             <p className="text-label text-ink mt-1">{formatFecha(cliente.created_at)}</p>
           </div>
           {cliente.notas && (
             <div className="col-span-2">
-              <p className="text-label text-ink-2 uppercase tracking-wider">Notas</p>
+              <p className="text-label text-ink-2">Notas</p>
               <p className="text-label text-ink-2 mt-1">{cliente.notas}</p>
             </div>
           )}
@@ -178,17 +178,17 @@ export default function ClienteDetalleContent({
             ficha nunca scrollea como un todo. */}
         <div className="lg:flex-1 lg:min-h-0 lg:flex lg:flex-col">
           <div className="flex items-center justify-between mb-2 shrink-0">
-            <p className="text-label text-ink-2 uppercase tracking-wider">
+            <p className="text-label text-ink-2">
               Reservas ({vistasReservas.length})
             </p>
             {reservasSueltas.filter((r) => r.estado !== 'cancelada').length >= 2 && (
-              <button onClick={onAgruparReservas} className="text-label font-bold uppercase tracking-wider text-ink hover:text-ink transition-all">
+              <button onClick={onAgruparReservas} className="text-label text-ink hover:text-ink transition-all">
                 Agrupar reservas
               </button>
             )}
           </div>
           {vistasReservas.length === 0 ? (
-            <p className="text-xs text-ink-2 uppercase tracking-wider">Sin reservas.</p>
+            <p className="text-label text-ink-2">Sin reservas.</p>
           ) : (
             <ScrollFade className="space-y-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
               {vistasReservas.map((vista) => (
@@ -213,7 +213,7 @@ export default function ClienteDetalleContent({
 
       {/* Columna derecha: SOLO Historial, y es lo único que scrollea. */}
       <div className={wide ? 'lg:flex lg:flex-col lg:min-h-0 lg:h-full' : ''}>
-        <p className="text-label text-ink-2 uppercase tracking-wider mb-2 shrink-0">Historial</p>
+        <p className="text-label text-ink-2 mb-2 shrink-0">Historial</p>
         <ScrollFade className={wide ? 'lg:flex-1 lg:min-h-0 lg:overflow-y-auto' : ''}>
           <Historial tipo="cliente" id={cliente.id} compact />
         </ScrollFade>
