@@ -13,6 +13,8 @@ const ORIGENES_FIJOS = [
   "http://localhost:5173",
   "https://priusplayagrande.com.ar",
   "https://www.priusplayagrande.com.ar",
+  // Landing (beachFlow) mientras el dominio oficial no sea el único en uso.
+  "https://priusplayagrande.pages.dev",
 ]
 // Previews de Cloudflare Pages: https://<hash-o-rama>.prius-app.pages.dev
 const PREVIEW_REGEX = /^https:\/\/[a-z0-9-]+\.prius-app\.pages\.dev$/

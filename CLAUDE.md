@@ -60,7 +60,7 @@ El dueño piensa el sistema como **cliente-céntrico y reactivo en tiempo real**
 - **Seguridad crítica:** todos los writes públicos pasan por Supabase Edge Functions, nunca inserts directos desde el cliente. RLS en la anon key restringe a solo lectura de disponibilidad.
 
 ## Edge Functions y deploy (hotfix 03/11/2026)
-- Toda Edge Function usa `supabase/functions/_shared/cors.ts` (`servirConCors`), nunca CORS inlineado ni `*`. Los orígenes permitidos viven en el código (prius-app.pages.dev, previews `*.prius-app.pages.dev`, localhost:5173, sitio público), no solo en el secret `ALLOWED_ORIGINS`.
+- Toda Edge Function usa `supabase/functions/_shared/cors.ts` (`servirConCors`), nunca CORS inlineado ni `*`. Los orígenes permitidos viven en el código (prius-app.pages.dev, previews `*.prius-app.pages.dev`, localhost:5173, sitio público), no solo en el secret `ALLOWED_ORIGINS`. Incluye https://priusplayagrande.com.ar, https://www.priusplayagrande.com.ar y https://priusplayagrande.pages.dev (beachFlow). Excepción pendiente: consultar-reserva, crear-reserva-publica y lead-reserva siguen con `Deno.serve` + `corsHeaders` (ya usan el cors.ts compartido, pero sin el catch general de `servirConCors`); migrarlas cuando se puedan probar end-to-end.
 - Toda invocación a una Edge Function desde el front usa `invocarFuncion` (`src/lib/invocarFuncion.ts`), nunca `supabase.functions.invoke` directo: traduce los errores a español y marca `esConexion`.
 - Checklist de deploy: pnpm typecheck, pnpm lint, pnpm test, pnpm build; desplegar las Edge Functions modificadas; después del deploy `pnpm check:functions` (preflight OPTIONS con el origin de producción, sin escribir datos) debe dar todo verde.
 
