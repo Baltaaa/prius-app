@@ -14,9 +14,10 @@ test('capturas', async ({ page }) => {
     for (const [w, h] of ANCHOS) {
       await page.setViewportSize({ width: w, height: h })
       await page.goto(`/app/${ruta.replaceAll('~', '?')}`)
-      await page.waitForTimeout(1500)
-      await page.waitForFunction(() => !document.body.innerText.includes('Cargando') && !document.querySelector('.animate-pulse'), null, { timeout: 15_000 }).catch(() => {})
-      await page.waitForTimeout(1400)
+      await page.locator('#app-main-scroll').waitFor({ timeout: 30_000 })
+      await page.waitForTimeout(1200)
+      await page.waitForFunction(() => !document.querySelector('.animate-pulse'), null, { timeout: 20_000 }).catch(() => {})
+      await page.waitForTimeout(1300)
       const desborda = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
       const nombre = ruta.replace(/[^a-z0-9-]/gi, '_')
       await page.screenshot({ path: `design/rebrand-shots/${nombre}-${w}.png` })

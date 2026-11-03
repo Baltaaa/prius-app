@@ -47,15 +47,15 @@ export default function TextInput({
     placeholder,
     onBlur: handleBlur,
     'aria-invalid': !!error,
-    className: `w-full min-h-[44px] px-4 py-3 bg-surface border rounded-inner text-ink text-base md:text-body outline-none transition-all disabled:opacity-50 resize-none ${
-      error ? 'border-danger/30 focus:border-danger' : 'border-line focus:border-gold-300'
+    className: `field resize-none ${
+      error ? 'field-error' : ''
     }`,
   }
 
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-ink-2 uppercase tracking-widest block mb-2">
+        <label htmlFor={inputId} className="field-label">
           {label}{required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
@@ -66,11 +66,11 @@ export default function TextInput({
       )}
       <div className="flex justify-between mt-1.5">
         {error ? (
-          <p className="text-[11px] text-danger">{error}</p>
+          <p className="text-label text-danger">{error}</p>
         ) : hint ? (
-          <p className="text-[11px] text-ink-2">{hint}</p>
+          <p className="text-label text-ink-2">{hint}</p>
         ) : <span />}
-        {maxLength && <p className="text-[11px] text-ink-2 tabular-nums shrink-0">{value.length}/{maxLength}</p>}
+        {maxLength && <p className="text-label text-ink-2 tabular-nums shrink-0">{value.length}/{maxLength}</p>}
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 import { Hourglass, Clock } from "lucide-react"
+import { COLOR_ESTADO } from "../../lib/colors"
 
 // Leyenda real del Plano — ÚNICA fuente compartida entre desktop/tablet
 // (Dashboard.jsx) y mobile (PlanoMobile.jsx), oct 2026. Explica los 6
@@ -6,10 +7,10 @@ import { Hourglass, Clock } from "lucide-react"
 // arena + punto verde + reloj chico), no una versión simplificada — ver
 // comentario de "6 variantes visuales" en Cell.jsx.
 const ITEMS = [
-  { swatch: <span className="w-3.5 h-3.5 rounded-swatch bg-card border border-line shrink-0" />, label: "Libre", hint: "sin reserva vigente" },
-  { swatch: <span className="w-3.5 h-3.5 rounded-swatch bg-ink shrink-0" />, label: "Ocupada", hint: "pagada al 100%" },
-  { swatch: <span className="w-3.5 h-3.5 rounded-swatch bg-gold shrink-0" />, label: "Ocupada", hint: "con saldo pendiente" },
-  { swatch: <span className="w-3.5 h-3.5 rounded-full bg-surface border border-line flex items-center justify-center text-[9px] font-bold text-ink-2 shrink-0">T</span>, label: "T / P / D", hint: "temporada / período / día" },
+  { swatch: <span className={`w-3.5 h-3.5 rounded-swatch border shrink-0 ${COLOR_ESTADO.sinConfirmar.bg} ${COLOR_ESTADO.sinConfirmar.border}`} />, label: "Libre", hint: "sin reserva vigente" },
+  { swatch: <span className={`w-3.5 h-3.5 rounded-swatch shrink-0 ${COLOR_ESTADO.pagado.bg}`} />, label: "Ocupada", hint: "pagada al 100%" },
+  { swatch: <span className={`w-3.5 h-3.5 rounded-swatch shrink-0 ${COLOR_ESTADO.conSaldo.bg}`} />, label: "Ocupada", hint: "con saldo pendiente" },
+  { swatch: <span className="w-3.5 h-3.5 rounded-full bg-surface border border-line flex items-center justify-center text-label font-semibold text-ink-2 shrink-0">T</span>, label: "T / P / D", hint: "temporada / período / día" },
   { swatch: <Hourglass size={14} className="text-ink-2 shrink-0" />, label: "Sin confirmar", hint: "cliente de temporada pasada" },
   { swatch: <Clock size={13} className="text-ink-2 shrink-0" />, label: "Reserva web", hint: "preconfirmada, sin check-in" },
 ]

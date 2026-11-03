@@ -14,6 +14,18 @@ export const COLOR_TIPO_ALQUILER = {
 
 export const COLOR_CANCELADA = { bg: 'bg-red-500/30', border: 'border-red-500/50', text: 'text-red-100', swatch: '#ef4444' }
 
+/**
+ * Colores de estado de pago de una reserva, ÚNICA fuente: un mismo estado se
+ * ve igual en el Plano mobile, la leyenda y cualquier badge de la app. El
+ * Plano no distingue "parcial" de "sin pago": los dos son "con saldo".
+ */
+export const COLOR_ESTADO = {
+  pagado: { bg: 'bg-ink', border: 'border-ink', text: 'text-on-ink' },
+  conSaldo: { bg: 'bg-gold', border: 'border-gold', text: 'text-ink' },
+  sinConfirmar: { bg: 'bg-card', border: 'border-line', text: 'text-ink' },
+  neutro: { bg: 'bg-surface', border: 'border-surface', text: 'text-ink-2' },
+} as const
+
 export type TipoAlquiler = keyof typeof COLOR_TIPO_ALQUILER
 
 /** Clases de fondo+borde+texto para una barra/celda, según tipo_alquiler y estado. */

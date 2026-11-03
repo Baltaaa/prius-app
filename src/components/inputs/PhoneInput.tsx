@@ -48,7 +48,7 @@ export default function PhoneInput({ label, hint, error, value, onChange, onBlur
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-ink-2 uppercase tracking-widest block mb-2">
+        <label htmlFor={inputId} className="field-label">
           {label}{required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
@@ -66,11 +66,11 @@ export default function PhoneInput({ label, hint, error, value, onChange, onBlur
         onBlur={handleBlur}
         placeholder="Ej: 223 512-3456"
         aria-invalid={!!error}
-        className={`w-full min-h-[44px] px-4 py-3 bg-surface border rounded-inner text-ink text-base md:text-body font-bold outline-none transition-all disabled:opacity-50 ${
-          error ? 'border-danger/30 focus:border-danger' : 'border-line focus:border-gold-300'
+        className={`field  ${
+          error ? 'field-error' : ''
         }`}
       />
-      {error ? <p className="text-[11px] text-danger mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-ink-2 mt-1.5">{hint}</p> : null}
+      {error ? <p className="text-label text-danger mt-1.5">{error}</p> : hint ? <p className="text-label text-ink-2 mt-1.5">{hint}</p> : null}
     </div>
   )
 }

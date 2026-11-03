@@ -1,5 +1,6 @@
 import { memo } from "react"
 import { Hourglass, Clock } from "lucide-react"
+import { COLOR_ESTADO } from "../../lib/colors"
 import { STATUS } from "./constants"
 
 // Celda del Plano mobile (<768px, oct 2026) — componente NUEVO y separado de
@@ -33,10 +34,10 @@ function CellMobile({ number, unit, onClick, isHighlighted, isDimmed }) {
   const letra = isTemporada ? "T" : isPeriodo ? "P" : isDia ? "D" : null
 
   const bgClass = isPendienteConfirmacion || !isOcupada
-    ? "bg-white border border-plano-line text-black"
+    ? `${COLOR_ESTADO.sinConfirmar.bg} border ${COLOR_ESTADO.sinConfirmar.border} ${COLOR_ESTADO.sinConfirmar.text}`
     : unit?.isPaid
-      ? "bg-black border border-black text-white"
-      : "bg-[#F2CA50] border border-[#F2CA50] text-black"
+      ? `${COLOR_ESTADO.pagado.bg} border ${COLOR_ESTADO.pagado.border} ${COLOR_ESTADO.pagado.text}`
+      : `${COLOR_ESTADO.conSaldo.bg} border ${COLOR_ESTADO.conSaldo.border} ${COLOR_ESTADO.conSaldo.text}`
 
   const opacityClass = isDimmed ? "opacity-30" : "opacity-100"
   const highlightClass = isHighlighted ? "ring-2 ring-gold scale-105 z-10" : ""

@@ -76,28 +76,21 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
     >
       <div
         ref={bind}
-        className={`card-light w-full ${maxWidthClass} max-h-[92dvh] sm:max-h-[90dvh] rounded-t-card sm:rounded-card flex flex-col overflow-hidden border border-line ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
+        className={`bg-card w-full ${maxWidthClass} max-h-[92dvh] sm:max-h-[90dvh] rounded-t-card sm:rounded-card flex flex-col overflow-hidden ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
       >
         {/* Gesto de cierre (mobile) */}
         <div className="sm:hidden flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-surface" />
         </div>
 
-        {/* Header compacto en mobile (pulido mobile iPhone, oct 2026): franja
-            baja fondo blanco (antes p-6 + bg-surface era un bloque gris
-            alto) — desktop sin cambios (sm:p-6 sm:bg-prius-subtle, igual que
-            siempre). */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-line bg-card sm:bg-surface shrink-0">
-          <h2 className="text-body uppercase font-bold tracking-[0.2em] text-ink">{title}</h2>
-          <button
-            onClick={requestClose}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-icon text-ink-2 hover:text-ink transition-all"
-          >
-            <X size={20} />
+        <div className="flex items-center justify-between gap-3 px-5 sm:px-8 pt-3 sm:pt-7 pb-3 shrink-0">
+          <h2 className="text-card-title sm:text-modal-title text-ink min-w-0">{title}</h2>
+          <button onClick={requestClose} aria-label="Cerrar" className="btn-icon text-ink-2 -mr-2 shrink-0">
+            <X size={20} strokeWidth={1.5} />
           </button>
         </div>
 
-        <ScrollFade className="flex-1 overflow-y-auto overscroll-contain p-6 sm:p-8 space-y-6">
+        <ScrollFade className="flex-1 overflow-y-auto overscroll-contain px-5 sm:px-8 pt-1 pb-6 sm:pb-8 space-y-5">
           {children}
         </ScrollFade>
 
@@ -106,7 +99,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
             Safari/home indicator. */}
         {footer && (
           <div
-            className="shrink-0 border-t border-line bg-card sm:bg-surface p-4 sm:p-6"
+            className="shrink-0 border-t border-divider bg-card px-5 sm:px-8 py-4 sm:py-5"
             style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
           >
             {footer}

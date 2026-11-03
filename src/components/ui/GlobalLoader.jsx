@@ -21,7 +21,7 @@ export default function GlobalLoader({ message = 'Sincronizando...' }) {
 
         <div className="mt-8 flex flex-col items-center gap-4">
           <Loader2 className="w-6 h-6 text-gold animate-spin" />
-          <p className="text-label text-gold uppercase tracking-[0.3em] text-center">
+          <p className="text-label text-gold text-center">
             {message}
           </p>
         </div>

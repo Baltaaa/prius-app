@@ -35,7 +35,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
 
   if (!data || data.length === 0) {
     return (
-      <div className={`p-12 text-center text-body tracking-wider text-ink-2 card-light rounded-inner ${fillHeight ? 'lg:h-full' : ''}`}>
+      <div className={`p-12 text-center text-body text-ink-2 card-surface ${fillHeight ? 'lg:h-full' : ''}`}>
         {emptyMessage || 'No se encontraron registros.'}
       </div>
     )
@@ -44,7 +44,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
   if (isDesktop || !renderMobileCard) {
     return (
       <div className={`w-full ${fillHeight ? 'lg:h-full' : ''}`}>
-        <div className={`card-light rounded-inner card-light-inner ${fillHeight ? 'lg:h-full lg:flex lg:flex-col lg:overflow-hidden' : 'overflow-x-auto'}`}>
+        <div className={`card-surface ${fillHeight ? 'lg:h-full lg:flex lg:flex-col lg:overflow-hidden' : 'overflow-x-auto'}`}>
           <div className={fillHeight ? 'overflow-auto lg:flex-1 lg:min-h-0' : 'overflow-x-auto'}>
           <table className={`w-full text-left border-collapse ${columnWidths ? 'table-fixed' : ''}`}>
             {columnWidths && (
@@ -55,13 +55,13 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
               </colgroup>
             )}
             <thead className={fillHeight ? 'lg:sticky lg:top-0 lg:z-10 bg-card' : undefined}>
-              <tr className="border-b border-line text-[11px] font-bold uppercase tracking-widest text-ink-2">
+              <tr className="border-b border-divider text-label text-ink-2">
                 {headers.map((h, i) => (
-                  <th key={i} className={`font-semibold whitespace-nowrap ${columnWidths ? 'px-3 py-4' : 'px-6 py-4'}`}>{h}</th>
+                  <th key={i} className={`font-medium whitespace-nowrap h-12 ${columnWidths ? 'px-2' : 'px-6'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className={`divide-y divide-divider text-ink-2 ${columnWidths ? 'text-xs' : 'text-body'}`}>
+            <tbody className="divide-y divide-divider text-body text-ink-2 ">
               {data.map((row, i) => renderRow(row, i))}
             </tbody>
           </table>
@@ -74,7 +74,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
   return (
     <div className="w-full space-y-3">
       {data.map((row, i) => (
-        <div key={row.id ?? i} className="p-5 card-light rounded-inner flex flex-col gap-3">
+        <div key={row.id ?? i} className="p-5 card-surface flex flex-col gap-3">
           {renderMobileCard(row, i)}
         </div>
       ))}

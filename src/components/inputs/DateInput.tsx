@@ -180,7 +180,7 @@ export default function DateInput({
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-ink-2 uppercase tracking-widest block mb-2">
+        <label htmlFor={inputId} className="field-label">
           {label}{required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
@@ -201,9 +201,9 @@ export default function DateInput({
           onBlur={handleTextBlur}
           placeholder={placeholder}
           aria-invalid={!!error}
-          className={`w-full min-h-[44px] pl-4 pr-10 py-3 bg-surface border rounded-inner text-ink text-base md:text-body font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
+          className={`field pl-4 pr-10 tabular-nums  ${
             calendarOnly ? 'cursor-pointer' : ''
-          } ${error ? 'border-danger/30 focus:border-danger' : 'border-line focus:border-gold-300'}`}
+          } ${error ? 'field-error' : ''}`}
         />
         <button
           type="button"
@@ -215,17 +215,17 @@ export default function DateInput({
           <CalendarDays size={18} />
         </button>
       </div>
-      {error ? <p className="text-[11px] text-danger mt-1.5">{error}</p> : hint ? <p className="text-[11px] text-ink-2 mt-1.5">{hint}</p> : null}
+      {error ? <p className="text-label text-danger mt-1.5">{error}</p> : hint ? <p className="text-label text-ink-2 mt-1.5">{hint}</p> : null}
 
       {abierto && pos && createPortal(
         <>
           {calendarOnly && (
-            <div ref={bind} className="fixed inset-0 z-[1000] bg-overlay" onClick={() => setAbierto(false)} />
+            <div ref={bind} className="fixed inset-0 z-[1000] bg-overlay backdrop-blur-sm" onClick={() => setAbierto(false)} />
           )}
           <div
             ref={bindPopover}
             className="fixed z-[1001] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0
-                       bg-ink border border-line rounded-card p-2 dp-dark"
+                       surface-pop p-3 dp-prius ui-open"
             style={window.innerWidth >= 640 ? { top: pos.top, left: pos.left, minWidth: pos.width } : undefined}
           >
             <DayPicker
@@ -242,17 +242,6 @@ export default function DateInput({
         document.body,
       )}
 
-      {/* Recoloreado mínimo del calendario — react-day-picker trae su propio
-          style.css claro, se sobreescriben solo los colores (Quiet Luxury). */}
-      <style>{`
-        .dp-dark .rdp-root { --rdp-accent-color: #F2CA50; --rdp-accent-background-color: rgba(242,202,80,0.15); color: #fff; }
-        .dp-dark .rdp-day_button:hover { background: rgba(255,255,255,0.08); }
-        .dp-dark .rdp-selected .rdp-day_button { background: #F2CA50; color: #000; font-weight: 700; }
-        .dp-dark .rdp-disabled { opacity: 0.3; text-decoration: line-through; }
-        .dp-dark .rdp-weekday { color: rgba(255,255,255,0.4); }
-        .dp-dark .rdp-caption_label, .dp-dark .rdp-nav button { color: #fff; }
-        .dp-dark .rdp-button_previous, .dp-dark .rdp-button_next { min-width: 44px; min-height: 44px; }
-      `}</style>
     </div>
   )
 }

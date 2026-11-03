@@ -354,7 +354,7 @@ export default function TopBar() {
         </PageHeader>
       </div>
 
-      <div className="flex items-center gap-1 md:gap-2 shrink-0">
+      <div className="flex items-center md:gap-2 shrink-0">
         {/* Búsqueda global inline (desktop/tablet) — mismo handler/datos de
             siempre, solo el shell visual cambia (w-80, fondo prius-surface,
             h-9, rounded-inner del mock). En mobile pasa a un ícono que abre
@@ -384,7 +384,7 @@ export default function TopBar() {
                 <>
                   {clienteMatches.length > 0 && (
                     <div>
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2 uppercase tracking-wider">Clientes</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2">Clientes</p>
                       {clienteMatches.map((cliente) => (
                         <button
                           key={cliente.id}
@@ -393,7 +393,7 @@ export default function TopBar() {
                         >
                           <p className="text-xs font-bold text-ink truncate">{formatNombre(cliente.nombre)}</p>
                           {unidadDeCliente(cliente) && (
-                            <p className="text-[11px] text-ink-2 uppercase truncate">
+                            <p className="text-[11px] text-ink-2 truncate">
                               {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
                             </p>
                           )}
@@ -405,12 +405,12 @@ export default function TopBar() {
 
                   {unidadMatches.length > 0 && (
                     <div className="border-t border-line">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2 uppercase tracking-wider">Unidades</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2">Unidades</p>
                       {unidadMatches.map((u) => (
                         <button
                           key={u.id}
                           onClick={() => irAResultado({ tipo: 'unidad', data: u })}
-                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors uppercase text-xs font-bold text-ink"
+                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors text-xs font-bold text-ink"
                         >
                           {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
                         </button>
@@ -420,7 +420,7 @@ export default function TopBar() {
 
                   {reservaMatches.length > 0 && (
                     <div className="border-t border-line">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2 uppercase tracking-wider">Reservas</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2">Reservas</p>
                       {reservaMatches.map((reserva) => (
                         <button
                           key={reserva.id}
@@ -429,7 +429,7 @@ export default function TopBar() {
                         >
                           <span className="min-w-0">
                             <span className="block text-xs font-bold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
-                            <span className="block text-[11px] text-ink-2 uppercase truncate">
+                            <span className="block text-[11px] text-ink-2 truncate">
                               {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
                               {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
                             </span>
@@ -442,7 +442,7 @@ export default function TopBar() {
 
                   {comprobanteMatches.length > 0 && (
                     <div className="border-t border-line">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2 uppercase tracking-wider">Comprobantes</p>
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2">Comprobantes</p>
                       {comprobanteMatches.map(({ pago, comprobante }) => (
                         <button
                           key={comprobante.id}
@@ -540,7 +540,7 @@ export default function TopBar() {
         {showNotifications && createPortal(
           <div ref={notifOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-card flex flex-col ui-open">
             <div className="flex items-center justify-between px-4 h-16 border-b border-line shrink-0">
-              <h1 className="text-body font-bold uppercase tracking-widest text-ink">Notificaciones</h1>
+              <h1 className="text-body font-bold text-ink">Notificaciones</h1>
               <button
                 onClick={() => setShowNotifications(false)}
                 className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-2 hover:text-ink"
@@ -594,7 +594,7 @@ export default function TopBar() {
             <div className="absolute right-0 top-full pt-3 w-56 z-50">
               <div className="surface-pop overflow-hidden p-1 ui-open">
                 <div className="px-4 py-3 border-b border-line">
-                  <p className="text-[11px] font-bold text-ink-2 uppercase tracking-wider">{rolLabel}</p>
+                  <p className="text-[11px] font-bold text-ink-2">{rolLabel}</p>
                   <p className="text-xs font-medium text-ink truncate">{nombreMostrado}</p>
                 </div>
                 <button
@@ -654,7 +654,7 @@ export default function TopBar() {
               <>
                 {clienteMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2 uppercase tracking-wider">Clientes</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2">Clientes</p>
                     {clienteMatches.map((cliente) => (
                       <button
                         key={cliente.id}
@@ -663,7 +663,7 @@ export default function TopBar() {
                       >
                         <p className="text-body font-bold text-ink truncate">{formatNombre(cliente.nombre)}</p>
                         {unidadDeCliente(cliente) && (
-                          <p className="text-xs text-ink-2 uppercase truncate">
+                          <p className="text-xs text-ink-2 truncate">
                             {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
                           </p>
                         )}
@@ -674,12 +674,12 @@ export default function TopBar() {
                 )}
                 {unidadMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2 uppercase tracking-wider">Unidades</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2">Unidades</p>
                     {unidadMatches.map((u) => (
                       <button
                         key={u.id}
                         onClick={() => { irAResultado({ tipo: 'unidad', data: u }); setMobileSearchOpen(false) }}
-                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line uppercase text-body font-bold text-ink"
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line text-body font-bold text-ink"
                       >
                         {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
                       </button>
@@ -688,7 +688,7 @@ export default function TopBar() {
                 )}
                 {reservaMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2 uppercase tracking-wider">Reservas</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2">Reservas</p>
                     {reservaMatches.map((reserva) => (
                       <button
                         key={reserva.id}
@@ -697,7 +697,7 @@ export default function TopBar() {
                       >
                         <span className="min-w-0">
                           <span className="block text-body font-bold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
-                          <span className="block text-xs text-ink-2 uppercase truncate">
+                          <span className="block text-xs text-ink-2 truncate">
                             {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
                             {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
                           </span>
@@ -709,7 +709,7 @@ export default function TopBar() {
                 )}
                 {comprobanteMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2 uppercase tracking-wider">Comprobantes</p>
+                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2">Comprobantes</p>
                     {comprobanteMatches.map(({ pago, comprobante }) => (
                       <button
                         key={comprobante.id}

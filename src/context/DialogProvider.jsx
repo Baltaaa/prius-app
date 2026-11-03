@@ -85,24 +85,15 @@ export function DialogProvider({ children }) {
       {toasts.length > 0 && createPortal(
         <div className="fixed bottom-4 right-4 z-[1100] flex flex-col gap-2 w-[calc(100%-2rem)] max-w-sm">
           {toasts.map((t) => (
-            <div
-              key={t.id}
-              className={`card-light rounded-inner border px-4 py-3 text-body flex items-start gap-2.5 animate-premium-fade ${
-                t.tone === 'success'
-                  ? 'border-success/30 text-success-ink'
-                  : t.tone === 'error'
-                    ? 'border-danger/30 text-danger'
-                    : 'border-line text-ink-2'
-              }`}
-            >
-              {t.tone === 'success' && <CheckCircle2 size={16} className="shrink-0 mt-0.5" />}
-              {t.tone === 'error' && <AlertTriangle size={16} className="shrink-0 mt-0.5" />}
+            <div key={t.id} className="surface-pop px-4 py-3 text-body flex items-start gap-2.5 ui-open">
+              {t.tone === 'success' && <CheckCircle2 size={18} strokeWidth={1.5} className="shrink-0 mt-px text-success-ink" />}
+              {t.tone === 'error' && <AlertTriangle size={18} strokeWidth={1.5} className="shrink-0 mt-px text-danger" />}
               <span className="text-ink flex-1 min-w-0">{t.message}</span>
               {t.action && (
                 <button
                   type="button"
                   onClick={() => { t.action.onClick?.(); cerrarToast(t.id) }}
-                  className="shrink-0 self-center px-2.5 py-1 rounded-icon bg-gold hover:bg-gold-400 text-ink text-[11px] font-bold uppercase tracking-wider transition-colors"
+                  className="btn btn-primary shrink-0 self-center h-8 min-h-0 px-3 text-label"
                 >
                   {t.action.label}
                 </button>
@@ -114,35 +105,30 @@ export function DialogProvider({ children }) {
       )}
       {dialog && createPortal(
         <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-overlay backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-overlay backdrop-blur-sm ui-backdrop-open"
           onClick={() => close(dialog.mode === 'confirm' ? false : undefined)}
         >
           <div
             ref={bind}
-            className="card-light w-full max-w-sm rounded-card border border-line p-6 space-y-5"
+            className="bg-card w-full max-w-sm rounded-card p-6 sm:p-8 space-y-5 ui-open"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3">
-              <div className={`w-9 h-9 rounded-inner flex items-center justify-center shrink-0 ${isDanger ? 'bg-danger-soft text-danger' : 'bg-gold-100 text-ink'}`}>
-                {isDanger ? <AlertTriangle size={18} /> : <Info size={18} />}
+              <div className={`w-10 h-10 rounded-icon flex items-center justify-center shrink-0 ${isDanger ? 'bg-danger-soft text-danger' : 'bg-gold-100 text-ink'}`}>
+                {isDanger ? <AlertTriangle size={20} strokeWidth={1.5} /> : <Info size={20} strokeWidth={1.5} />}
               </div>
-              <div className="pt-1 min-w-0">
-                <h3 className="text-body font-bold uppercase tracking-widest text-ink">{dialog.title}</h3>
+              <div className="min-w-0">
+                <h3 className="text-card-title text-ink">{dialog.title}</h3>
                 <p className="text-body text-ink-2 mt-2 whitespace-pre-line">{dialog.message}</p>
               </div>
             </div>
-            <div className="flex gap-3 justify-end pt-2">
+            <div className="flex gap-2 justify-end">
               {dialog.mode === 'confirm' && (
-                <button
-                  onClick={() => close(false)}
-                  className="px-5 py-2.5 rounded-inner text-xs font-bold uppercase tracking-widest text-ink-2 bg-surface hover:bg-surface border border-line transition-all"
-                >
-                  Cancelar
-                </button>
+                <button onClick={() => close(false)} className="btn btn-ghost">Cancelar</button>
               )}
               <button
                 onClick={() => close(dialog.mode === 'confirm' ? true : undefined)}
-                className={`px-5 py-2.5 rounded-inner text-xs font-bold uppercase tracking-widest transition-all ${isDanger ? 'bg-danger hover:bg-danger text-on-ink' : 'bg-gold hover:bg-gold-400 text-ink'}`}
+                className={`btn ${isDanger ? 'btn-danger' : 'btn-primary'}`}
               >
                 {dialog.mode === 'confirm' ? 'Confirmar' : 'Entendido'}
               </button>

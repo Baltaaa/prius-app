@@ -17,15 +17,15 @@ import { formatPesos } from '../../lib/format'
 // partirse en dos líneas.
 const SIZE_CLASS = {
   lg: 'text-stat',
-  md: 'text-[clamp(18px,5vw,24px)] font-bold leading-tight',
+  md: 'text-[clamp(18px,5vw,24px)] font-semibold leading-tight',
   // `sm`: cards más chicas (ej. "Totales Operativos" de ResumenCaja), tope
   // en 18px = mismo tamaño que el text-lg fijo que usaban en desktop (sin
   // cambios ahí), se achica desde ~360px de ancho de card.
-  sm: 'text-[clamp(14px,4.5vw,18px)] font-bold leading-tight',
+  sm: 'text-[clamp(14px,4.5vw,18px)] font-semibold leading-tight',
   // `xs`: resúmenes de 3-4 columnas muy angostas (ej. Total/Pagado/Saldo de
   // RegistrarPago, saldo de la card de Clientes), tope en 14px = mismo
   // text-sm fijo de siempre.
-  xs: 'text-[clamp(11px,3.6vw,14px)] font-bold leading-tight',
+  xs: 'text-[clamp(11px,3.6vw,14px)] font-semibold leading-tight',
 }
 
 // `fmt` (31/10/2026): formateador opcional. Default formatPesos, así nada

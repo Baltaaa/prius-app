@@ -41,7 +41,7 @@ export default function CuitInput({ label, hint, error, value, onChange, onBlur,
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-ink-2 uppercase tracking-widest block mb-2">
+        <label htmlFor={inputId} className="field-label">
           {label}{required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
@@ -59,8 +59,8 @@ export default function CuitInput({ label, hint, error, value, onChange, onBlur,
           onBlur={() => { setTocado(true); onBlur?.() }}
           placeholder="Ej: 20-30123456-7"
           aria-invalid={!!error}
-          className={`w-full min-h-[44px] px-4 py-3 pr-9 bg-surface border rounded-inner text-ink text-base md:text-body font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
-            error ? 'border-danger/30 focus:border-danger' : 'border-line focus:border-gold-300'
+          className={`field pr-9 tabular-nums  ${
+            error ? 'field-error' : ''
           }`}
         />
         {tocado && valido && (
@@ -68,11 +68,11 @@ export default function CuitInput({ label, hint, error, value, onChange, onBlur,
         )}
       </div>
       {error ? (
-        <p className="text-[11px] text-danger mt-1.5">{error}</p>
+        <p className="text-label text-danger mt-1.5">{error}</p>
       ) : tocado && valido ? (
-        <p className="text-[11px] text-success-ink mt-1.5">CUIT válido</p>
+        <p className="text-label text-success-ink mt-1.5">CUIT válido</p>
       ) : hint ? (
-        <p className="text-[11px] text-ink-2 mt-1.5">{hint}</p>
+        <p className="text-label text-ink-2 mt-1.5">{hint}</p>
       ) : null}
     </div>
   )

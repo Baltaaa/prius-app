@@ -125,7 +125,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="text-[11px] font-bold text-ink-2 uppercase tracking-widest block mb-2">
+        <label htmlFor={inputId} className="field-label">
           {label}{required && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
@@ -149,8 +149,8 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
           placeholder={placeholder}
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
-          className={`w-full min-h-[44px] ${simbolo.length > 1 ? 'pl-12' : 'pl-8'} pr-4 py-3 bg-surface border rounded-inner text-ink text-base md:text-body font-bold tabular-nums outline-none transition-all disabled:opacity-50 ${
-            error ? 'border-danger/30 focus:border-danger' : 'border-line focus:border-gold-300'
+          className={`field ${simbolo.length > 1 ? 'pl-12' : 'pl-8'} pr-4 tabular-nums  ${
+            error ? 'field-error' : ''
           }`}
         />
       </div>
@@ -162,7 +162,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
               type="button"
               onClick={() => aplicar(c.value)}
               className={`flex-1 sm:flex-none px-3 py-2 rounded-icon text-xs font-bold border transition-all min-h-[44px] ${
-                value === c.value ? 'bg-gold text-ink border-gold' : 'bg-surface text-ink-2 border-line hover:text-ink'
+                value === c.value ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
               }`}
             >
               {c.label}
@@ -171,9 +171,9 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
         </div>
       )}
       {error ? (
-        <p id={`${inputId}-error`} className="text-[11px] text-danger mt-1.5">{error}</p>
+        <p id={`${inputId}-error`} className="text-label text-danger mt-1.5">{error}</p>
       ) : hint ? (
-        <p id={`${inputId}-hint`} className="text-[11px] text-ink-2 mt-1.5">{hint}</p>
+        <p id={`${inputId}-hint`} className="text-label text-ink-2 mt-1.5">{hint}</p>
       ) : null}
     </div>
   )

@@ -51,6 +51,19 @@
   .field-label { @apply block mb-2 text-label text-ink-2; }
 }
 
+/* Calendario de DateInput: react-day-picker trae su style.css, acá solo el
+   lenguaje de la app. */
+.dp-prius .rdp-root { --rdp-accent-color: rgb(var(--primary)); --rdp-accent-background-color: rgb(var(--secondary)); color: rgb(var(--primary)); font-size: 14px; font-weight: 500; }
+.dp-prius .rdp-day_button { border-radius: 9999px; }
+.dp-prius .rdp-day_button:hover { background: rgb(var(--secondary)); }
+.dp-prius .rdp-selected .rdp-day_button { background: rgb(var(--primary)); color: rgb(var(--primary-foreground)); border-color: transparent; font-weight: 500; }
+.dp-prius .rdp-today:not(.rdp-selected) .rdp-day_button { color: rgb(var(--primary)); box-shadow: inset 0 0 0 1px rgb(var(--accent)); }
+.dp-prius .rdp-disabled { opacity: 0.3; text-decoration: line-through; }
+.dp-prius .rdp-weekday { color: rgb(var(--muted-foreground)); font-weight: 500; font-size: 13px; }
+.dp-prius .rdp-caption_label { font-weight: 500; text-transform: capitalize; }
+.dp-prius .rdp-chevron { fill: rgb(var(--primary)); }
+.dp-prius .rdp-button_previous, .dp-prius .rdp-button_next { min-width: 44px; min-height: 44px; }
+
 /* Degradé de la card hero (DESIGN.md). */
 .bg-hero {
   background: linear-gradient(135deg, theme(colors.gold.50), theme(colors.gold.200), theme(colors.gold.400));

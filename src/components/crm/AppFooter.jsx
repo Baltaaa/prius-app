@@ -13,7 +13,7 @@ import { APP_VERSION } from '../../lib/appVersion'
 export default function AppFooter({ compacto = false }) {
   return (
     <>
-      <footer className={`hidden md:flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-line text-label text-ink-2 ${
+      <footer className={`hidden md:flex flex-col sm:flex-row items-center justify-between gap-2 text-label text-ink-2 ${
         compacto ? 'pt-2 pb-2 mt-2' : 'pt-space-sm pb-space-xl mt-space-lg'
       }`}>
         <div className="flex items-center gap-2">
@@ -25,19 +25,19 @@ export default function AppFooter({ compacto = false }) {
         <div className="flex items-center gap-2">
           <span>Mar del Plata · Buenos Aires</span>
           <span>•</span>
-          <span className="tracking-widest">{APP_VERSION}</span>
+          <span>{APP_VERSION}</span>
         </div>
       </footer>
 
       {/* Mobile (pulido iPhone, oct 2026): antes era una sola fila
           justify-between que apretaba el nombre largo contra la versión en
           375px — pasa a dos líneas centradas, sin ese apriete. */}
-      <div className="md:hidden mt-space-lg mb-6 rounded-inner p-4 bg-surface flex flex-col items-center gap-1.5 text-center">
+      <div className="md:hidden mt-space-lg mb-2 p-4 flex flex-col items-center gap-1.5 text-center">
         <div className="flex items-center gap-2 text-ink-2">
           <Umbrella size={16} className="shrink-0" />
           <span className="text-label">Prius Playa Grande · Sector Carpas y Balneario</span>
         </div>
-        <span className="text-[10px] uppercase tracking-wider text-ink-2">{APP_VERSION}</span>
+        <span className="text-label text-ink-2">{APP_VERSION}</span>
       </div>
     </>
   )
