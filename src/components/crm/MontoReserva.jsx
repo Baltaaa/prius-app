@@ -16,7 +16,7 @@ export default function MontoReserva({ reserva, className = '' }) {
   // que sí tiene un monto real sin repartir.
   if (esPendienteConfirmacion(reserva)) {
     return (
-      <span className={`inline-flex items-center gap-1.5 text-ink-2 font-bold text-xs uppercase tracking-widest ${className}`}>
+      <span className={`text-label inline-flex items-center gap-1.5 text-ink-2 ${className}`}>
         <Hourglass size={13} /> Sin confirmar
       </span>
     )
@@ -25,11 +25,11 @@ export default function MontoReserva({ reserva, className = '' }) {
   if (pendiente) {
     return (
       <span className={`inline-flex flex-col ${className}`}>
-        <span className="inline-flex items-center gap-1.5 text-ink-2 font-bold text-xs uppercase tracking-widest whitespace-nowrap">
+        <span className="text-label inline-flex items-center gap-1.5 text-ink-2 whitespace-nowrap">
           <HelpCircle size={13} /> Sin verificar
         </span>
         {montoGrupoReferencia != null && (
-          <span className="text-[10px] text-ink-2 normal-case font-normal">
+          <span className="text-label text-ink-2 normal-case font-normal">
             Grupo: {formatPesos(montoGrupoReferencia)}
           </span>
         )}
@@ -41,7 +41,7 @@ export default function MontoReserva({ reserva, className = '' }) {
     <span className={`inline-flex items-center gap-1.5 whitespace-nowrap ${className}`}>
       {formatPesosVisible(valorTotal)}
       {bonificada && (
-        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-ink-2 bg-surface border border-line px-1.5 py-0.5 rounded-swatch">
+        <span className="text-label inline-flex items-center gap-1 text-ink-2 bg-surface border border-line px-1.5 py-0.5 rounded-swatch">
           <Gift size={10} /> Bonificada
         </span>
       )}

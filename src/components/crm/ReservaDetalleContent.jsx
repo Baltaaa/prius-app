@@ -52,7 +52,7 @@ export default function ReservaDetalleContent({
         {showCloseButton && (
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-icon bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0"
+            className="w-8 h-8 rounded-full bg-surface text-ink-2 hover:text-ink flex items-center justify-center transition-colors shrink-0"
             title="Cerrar"
           >
             <X size={18} />
@@ -67,7 +67,7 @@ export default function ReservaDetalleContent({
         {reserva.estado_pago_manual && (
           <div className="flex items-start gap-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
             <ShieldAlert size={14} className="text-ink shrink-0 mt-0.5" />
-            <p className="text-xs text-ink-2">
+            <p className="text-label text-ink-2">
               Estado ajustado manualmente{reserva.estado_pago_manual_motivo ? ` — ${reserva.estado_pago_manual_motivo}` : ''}.
             </p>
           </div>
@@ -75,7 +75,7 @@ export default function ReservaDetalleContent({
 
         {/* Cliente */}
         <div className="bg-surface rounded-inner p-space-md flex flex-col gap-space-sm">
-          <span className="text-label text-ink-2 uppercase tracking-wider">Cliente</span>
+          <span className="text-label text-ink-2">Cliente</span>
           <div className="flex items-center gap-space-sm">
             <div className="w-10 h-10 rounded-inner bg-ink text-on-ink flex items-center justify-center text-body font-semibold shrink-0">
               {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
@@ -97,15 +97,15 @@ export default function ReservaDetalleContent({
         {wide ? (
           <div className="grid grid-cols-2 gap-x-space-md gap-y-3">
             <div>
-              <span className="block text-label text-ink-2 uppercase tracking-wider mb-0.5">Llegada</span>
+              <span className="block text-label text-ink-2 mb-0.5">Llegada</span>
               <span className="text-body text-ink font-medium">{formatFecha(fechaLlegada(reserva))}</span>
             </div>
             <div>
-              <span className="block text-label text-ink-2 uppercase tracking-wider mb-0.5">Fechas</span>
+              <span className="block text-label text-ink-2 mb-0.5">Fechas</span>
               <span className="text-body text-ink font-medium">{fechasLabel}</span>
             </div>
             <div>
-              <span className="block text-label text-ink-2 uppercase tracking-wider mb-0.5">Origen</span>
+              <span className="block text-label text-ink-2 mb-0.5">Origen</span>
               <span className="text-body text-ink font-medium flex items-center gap-1.5">
                 {reserva.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                 {reserva.origen === 'web' ? 'Web' : 'Manual'}
@@ -113,7 +113,7 @@ export default function ReservaDetalleContent({
             </div>
             {reserva.notas && (
               <div className="col-span-2">
-                <span className="block text-label text-ink-2 uppercase tracking-wider mb-0.5">Notas</span>
+                <span className="block text-label text-ink-2 mb-0.5">Notas</span>
                 <span className="text-body text-ink">{reserva.notas}</span>
               </div>
             )}
@@ -148,16 +148,16 @@ export default function ReservaDetalleContent({
             de un pago nuevo sigue siendo la acción "Registrar pago" de
             abajo (mismo flujo de siempre, RegistrarPago.jsx). */}
         <div className="bg-surface rounded-inner p-space-md flex flex-col gap-space-sm">
-          <span className="text-label text-ink-2 uppercase tracking-wider">Pagos</span>
+          <span className="text-label text-ink-2">Pagos</span>
           {wide ? (
             <div className="grid grid-cols-2 gap-space-md">
               <div>
-                <span className="block text-label text-ink-2 uppercase tracking-wider mb-0.5">Total</span>
+                <span className="block text-label text-ink-2 mb-0.5">Total</span>
                 <span className="text-body text-ink font-medium"><MontoReserva reserva={reserva} /></span>
               </div>
               <div>
-                <span className="block text-label text-ink-2 uppercase tracking-wider mb-0.5">Saldo</span>
-                <span className={`block text-body font-bold ${saldo === null ? 'text-ink-2' : saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
+                <span className="block text-label text-ink-2 mb-0.5">Saldo</span>
+                <span className={`block text-body font-semibold ${saldo === null ? 'text-ink-2' : saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
                   {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
                 </span>
               </div>
@@ -170,7 +170,7 @@ export default function ReservaDetalleContent({
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-body text-ink-2">Saldo</span>
-                <span className={`text-body font-bold ${saldo === null ? 'text-ink-2' : saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
+                <span className={`text-body font-semibold ${saldo === null ? 'text-ink-2' : saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
                   {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
                 </span>
               </div>
@@ -203,7 +203,7 @@ export default function ReservaDetalleContent({
                     {/* Ítem 3 (25/10/2026): quién pagó esta cuota — nombre
                         chico debajo, relevante con cosocios. */}
                     {p.clientes?.nombre && (
-                      <span className="block text-[10px] font-normal text-ink-2 truncate">{formatNombre(p.clientes.nombre)}</span>
+                      <span className="block text-label font-normal text-ink-2 truncate">{formatNombre(p.clientes.nombre)}</span>
                     )}
                   </span>
                   <span className={`shrink-0 text-label ${p.estado === 'anulado' ? 'text-ink-2 line-through' : 'text-ink-2'}`}>
@@ -232,7 +232,7 @@ export default function ReservaDetalleContent({
             <button
               onClick={() => onRegistrarPago?.(reserva)}
               disabled={Number(reserva.saldo) <= 0}
-              className="w-full h-12 bg-gold hover:bg-gold-400 disabled:opacity-40 disabled:cursor-not-allowed text-ink rounded-inner text-body font-semibold flex items-center justify-center gap-2 transition-colors"
+              className="w-full h-12 bg-ink hover:bg-chart-2 disabled:opacity-40 disabled:cursor-not-allowed rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-on-ink"
             >
               <Wallet size={16} /> Registrar pago
             </button>
@@ -268,13 +268,13 @@ export default function ReservaDetalleContent({
           <div className="flex gap-2">
             <button
               onClick={() => onCancelar?.(reserva)}
-              className="flex-1 h-11 bg-gold-100 hover:bg-gold-100 text-ink rounded-inner text-label font-medium flex items-center justify-center gap-2 transition-colors"
+              className="flex-1 h-11 bg-gold-100 hover:bg-gold-100 text-ink rounded-full text-label font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <XCircle size={14} /> Cancelar
             </button>
             <button
               onClick={() => onEliminar?.(reserva)}
-              className="flex-1 h-11 bg-danger-soft hover:bg-danger-soft text-danger rounded-inner text-label font-medium flex items-center justify-center gap-2 transition-colors"
+              className="flex-1 h-11 bg-danger-soft hover:bg-danger-soft text-danger rounded-full text-label font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <Trash2 size={14} /> Eliminar
             </button>

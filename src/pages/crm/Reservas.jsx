@@ -375,7 +375,7 @@ export default function Reservas() {
   // 1280/1366/1440. Origen baja a 56px (solo ícono + tooltip) entre 1280 y
   // 1366 — ver `origenAngosto` — y sube a 88px desde 1440.
   const origenAngosto = isDesktopXL && !isDesktop1440
-  const columnWidths = ['80px', undefined, '100px', '144px', '92px', origenAngosto ? '56px' : '88px']
+  const columnWidths = ['88px', undefined, '104px', '132px', '120px', origenAngosto ? '48px' : '84px']
 
   // Unidades con una reserva de TEMPORADA activa: quedan tomadas para toda la
   // temporada sin importar qué fecha se elija, así que ni siquiera aparecen
@@ -415,7 +415,7 @@ export default function Reservas() {
     <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 anim-fade-up-page">
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
-      <div className="flex flex-wrap gap-4 items-center lg:shrink-0">
+      <div className="flex flex-wrap gap-2 items-center lg:shrink-0 [&_.field]:bg-card">
         {/* Buscador propio sacado (testing oct 2026): el global del header ya
             busca cliente/unidad sobre todas las reservas y navega acá con
             ?id=<reserva> — un solo buscador en toda la app, ver CLAUDE.md
@@ -440,20 +440,20 @@ export default function Reservas() {
         <div ref={filtrosOverlay.bind} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
-            className={`card-light px-4 py-3 min-h-[44px] rounded-inner flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${filtrosActivos ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
+            className={`card-surface text-label px-4 py-3 min-h-[44px] rounded-full flex items-center gap-2 transition-all ${filtrosActivos ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
           >
             <Filter size={16} /> Filtros {filtrosActivos ? 'Activos' : ''}
           </button>
 
           {showFiltros && (
-              <div className="absolute right-0 mt-2 w-56 card-light rounded-inner overflow-hidden z-50 p-3 space-y-3">
+              <div className="card-surface absolute right-0 mt-2 w-56 overflow-hidden z-50 p-3 space-y-3">
                 <div>
-                  <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest mb-1 px-1">Estado de pago</p>
+                  <p className="text-label text-ink-2 mb-1 px-1">Estado de pago</p>
                   {FILTROS_ESTADO.map((f) => (
                     <button
                       key={f.value}
                       onClick={() => setFiltroEstado(f.value)}
-                      className="w-full text-left px-3 py-2 text-xs text-ink-2 hover:bg-surface anim-colors flex items-center justify-between rounded-icon"
+                      className="w-full text-left px-3 py-2 text-label text-ink-2 hover:bg-surface anim-colors flex items-center justify-between rounded-icon"
                     >
                       {f.label}
                       {filtroEstado === f.value && <Check size={14} className="text-ink" />}
@@ -461,12 +461,12 @@ export default function Reservas() {
                   ))}
                 </div>
                 <div className="border-t border-line pt-2">
-                  <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest mb-1 px-1">Tipo de alquiler</p>
+                  <p className="text-label text-ink-2 mb-1 px-1">Tipo de alquiler</p>
                   {FILTROS_TIPO.map((f) => (
                     <button
                       key={f.value}
                       onClick={() => setFiltroTipo(f.value)}
-                      className="w-full text-left px-3 py-2 text-xs text-ink-2 hover:bg-surface anim-colors flex items-center justify-between rounded-icon"
+                      className="w-full text-left px-3 py-2 text-label text-ink-2 hover:bg-surface anim-colors flex items-center justify-between rounded-icon"
                     >
                       {f.label}
                       {filtroTipo === f.value && <Check size={14} className="text-ink" />}
@@ -476,7 +476,7 @@ export default function Reservas() {
                 {filtrosActivos && (
                   <button
                     onClick={() => { limpiarFiltros(); setShowFiltros(false) }}
-                    className="w-full text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-danger hover:bg-danger-soft rounded-icon border-t border-line pt-3"
+                    className="text-label w-full text-center px-3 py-2 text-danger hover:bg-danger-soft rounded-icon border-t border-line pt-3"
                   >
                     Limpiar todos los filtros
                   </button>
@@ -496,7 +496,7 @@ export default function Reservas() {
         {unidadFiltrada && (
           <button
             onClick={() => setFiltroUnidadId(null)}
-            className="inline-flex items-center gap-2 bg-gold-100 border border-gold-300 text-ink px-4 py-2 rounded-inner text-[10px] font-bold uppercase tracking-widest hover:bg-gold-100 transition-all"
+            className="text-label inline-flex items-center gap-2 bg-gold-100 border border-gold-300 text-ink px-4 py-2 rounded-full hover:bg-gold-100 transition-all"
             title="Quitar filtro de unidad"
           >
             {unidadEmoji(unidadFiltrada.tipo)} {formatUnidad(unidadFiltrada.tipo, unidadFiltrada.numero)} <X size={12} />
@@ -505,7 +505,7 @@ export default function Reservas() {
         {(desde || hasta) && !rangoFechaInvalido && (
           <button
             onClick={() => { setDesde(''); setHasta('') }}
-            className="inline-flex items-center gap-2 bg-surface border border-line text-ink-2 px-4 py-2 rounded-inner text-[10px] font-bold uppercase tracking-widest hover:bg-surface transition-all"
+            className="text-label inline-flex items-center gap-2 bg-surface border border-line text-ink-2 px-4 py-2 rounded-full hover:bg-surface transition-all"
             title="Quitar filtro de llegada"
           >
             Llegada {desde && hasta ? formatRangoFechas(desde, hasta, true) : desde ? `desde ${formatFecha(desde)}` : `hasta ${formatFecha(hasta)}`}
@@ -515,7 +515,7 @@ export default function Reservas() {
       </div>
       )}
       {rangoFechaInvalido && (
-        <p className="text-xs font-bold text-danger uppercase tracking-widest lg:shrink-0">
+        <p className="text-label text-danger lg:shrink-0">
           "Llegada desde" no puede ser posterior a "Llegada hasta" — corregí el rango para filtrar por fecha.
         </p>
       )}
@@ -575,32 +575,32 @@ export default function Reservas() {
                 onClick={() => navigate(linkToCliente(res.cliente_id))}
                 className="hover:bg-surface anim-colors transition-all group cursor-pointer"
               >
-                <td className="px-3 py-4 align-middle text-ink-2 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-                <td className="px-3 py-4 align-middle font-bold text-ink uppercase break-words">
+                <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+                <td className="px-2 py-2 h-14 align-middle text-ink break-words">
                   {formatNombre(res.clientes?.nombre) || 'S/N'}
                   {coSocios(res).length > 0 && (
-                    <p className="text-[10px] text-ink-2 font-normal normal-case tracking-widest mt-0.5">
+                    <p className="text-label text-ink-2 font-normal normal-case mt-0.5">
                       Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                     </p>
                   )}
                 </td>
-                <td className="px-3 py-4 align-middle font-medium text-ink-2 uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
-                <td className="px-3 py-4 align-middle font-bold text-ink"><MontoReserva reserva={res} /></td>
-                <td className="px-3 py-4 align-middle text-center">
+                <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
+                <td className="px-2 py-2 h-14 align-middle text-ink"><MontoReserva reserva={res} /></td>
+                <td className="px-2 py-2 h-14 align-middle text-center">
                   <div className="flex items-center justify-center gap-2">
                     <StatusBadge status={estadoBadgeStatus(res)} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-ink-2 border border-line rounded-swatch px-1.5 py-0.5 whitespace-nowrap">
+                    <span className="text-label text-ink-2 border border-line rounded-swatch px-1.5 py-0.5 whitespace-nowrap">
                       Temporada
                     </span>
                   </div>
                 </td>
-                <td className="px-3 py-4 align-middle text-center">
+                <td className="px-2 py-2 h-14 align-middle text-center">
                   {origenAngosto ? (
                     <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-ink-2">
                       {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
                     </span>
                   ) : (
-                    <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-2 whitespace-nowrap">
+                    <span className="text-label inline-flex items-center justify-center gap-1.5 text-ink-2 whitespace-nowrap">
                       {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                       {res.origen === 'web' ? 'Web' : 'Manual'}
                     </span>
@@ -615,29 +615,29 @@ export default function Reservas() {
               onClick={() => handleOpenDetalle(res)}
               className={`hover:bg-surface anim-colors transition-all group cursor-pointer ${selectedReservaId === res.id ? 'bg-surface' : ''}`}
             >
-              <td className="px-3 py-4 align-middle text-ink-2 font-medium whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-              <td className="px-3 py-4 align-middle font-bold text-ink uppercase break-words">
+              <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+              <td className="px-2 py-2 h-14 align-middle text-ink break-words">
                 {formatNombre(res.clientes?.nombre) || 'S/N'}
                 {coSocios(res).length > 0 && (
-                  <p className="text-[10px] text-ink-2 font-normal normal-case tracking-widest mt-0.5">
+                  <p className="text-label text-ink-2 font-normal normal-case mt-0.5">
                     Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                   </p>
                 )}
               </td>
-              <td className="px-3 py-4 align-middle font-medium text-ink-2 uppercase whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
-              <td className="px-3 py-4 align-middle font-bold text-ink"><MontoReserva reserva={res} /></td>
-              <td className="px-3 py-4 align-middle text-center">
+              <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
+              <td className="px-2 py-2 h-14 align-middle text-ink"><MontoReserva reserva={res} /></td>
+              <td className="px-2 py-2 h-14 align-middle text-center">
                 <div className="flex items-center justify-center">
                   <StatusBadge status={estadoBadgeStatus(res)} />
                 </div>
               </td>
-              <td className="px-3 py-4 align-middle text-center">
+              <td className="px-2 py-2 h-14 align-middle text-center">
                 {origenAngosto ? (
                   <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-ink-2">
                     {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-2 whitespace-nowrap">
+                  <span className="text-label inline-flex items-center justify-center gap-1.5 text-ink-2 whitespace-nowrap">
                     {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                     {res.origen === 'web' ? 'Web' : 'Manual'}
                   </span>
@@ -659,7 +659,7 @@ export default function Reservas() {
               oct 2026): nunca cambia de tamaño al elegir/deseleccionar una
               reserva, y el contenido hace fade+shift de 180ms al cambiar. */}
           {isDesktopXL && (
-            <aside className="hidden xl:flex lg:h-full min-w-0 card-light rounded-card p-space-lg flex-col overflow-hidden">
+            <aside className="card-surface hidden xl:flex lg:h-full min-w-0 p-space-lg flex-col overflow-hidden">
               {selectedReserva ? (
                 <div key={selectedReserva.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
                   <ReservaDetalleContent
@@ -757,7 +757,7 @@ export default function Reservas() {
             <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-2 hover:text-ink">
               <ChevronLeft size={20} />
             </button>
-            <h1 className="text-body font-bold uppercase tracking-widest text-ink">Detalle Reserva</h1>
+            <h1 className="text-label text-ink">Detalle Reserva</h1>
           </div>
           <ScrollFade className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
             <ReservaDetalleContent

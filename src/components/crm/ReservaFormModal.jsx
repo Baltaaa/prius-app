@@ -21,7 +21,7 @@ import { Lock, Unlock, ChevronDown } from 'lucide-react'
 
 function SeccionTitulo({ children }) {
   return (
-    <p className="text-[9px] font-bold text-ink-2 uppercase tracking-[0.2em] border-b border-line pb-2">
+    <p className="text-label text-ink-2 border-b border-line pb-2">
       {children}
     </p>
   )
@@ -324,14 +324,14 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
       footer={
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Total</p>
-            <p className="text-lg font-bold text-ink">{formatPesos(bonificada ? 0 : valorTotal)}</p>
+            <p className="text-label text-ink-2">Total</p>
+            <p className="text-card-title text-ink">{formatPesos(bonificada ? 0 : valorTotal)}</p>
           </div>
           <div className="flex gap-3">
             <button
               type="button"
               onClick={() => (isMobile && mobileStep > 0 ? setMobileStep((s) => s - 1) : onClose())}
-              className="px-5 py-3 rounded-inner text-xs font-bold uppercase tracking-widest text-ink-2 bg-surface hover:bg-surface border border-line transition-all"
+              className="text-label px-5 py-3 rounded-full text-ink-2 bg-surface hover:bg-surface border border-line transition-all"
             >
               {isMobile && mobileStep > 0 ? 'Atrás' : 'Cancelar'}
             </button>
@@ -339,7 +339,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
               <button
                 type="button"
                 onClick={() => setMobileStep((s) => s + 1)}
-                className="px-6 py-3 bg-gold hover:bg-gold-400 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs transition-all"
+                className="text-label px-6 py-3 bg-ink hover:bg-chart-2 rounded-full transition-all text-on-ink"
               >
                 Siguiente
               </button>
@@ -353,7 +353,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
                   !editingReserva && !bonificada && !cargarMasTarde
                   && (Number(pagoForm.monto) <= 0 || pagoForm.excedeSaldo || pagoForm.comprobanteIncompleto || !!pagoForm.duplicado)
                 }
-                className="px-6 py-3 bg-gold hover:bg-gold-400 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs"
+                className="text-label px-6 py-3 bg-ink hover:bg-chart-2 rounded-full text-on-ink"
               >
                 {editingReserva ? 'Guardar Cambios' : 'Crear reserva'}
               </LoadingButton>
@@ -366,10 +366,10 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
         {isMobile && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-ink uppercase tracking-widest">
+              <span className="text-label text-ink">
                 Paso {mobileStep + 1} de {MOBILE_STEPS.length}
               </span>
-              <span className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">{MOBILE_STEPS[mobileStep]}</span>
+              <span className="text-label text-ink-2">{MOBILE_STEPS[mobileStep]}</span>
             </div>
             <div className="h-1 rounded-full bg-surface overflow-hidden flex gap-0.5">
               {MOBILE_STEPS.map((s, i) => (
@@ -384,7 +384,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
           <SeccionTitulo>{isMobile ? 'Cliente' : 'Cliente y unidad'}</SeccionTitulo>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Seleccionar Cliente</label>
+            <label className="text-label text-ink-2">Seleccionar Cliente</label>
             <ClienteBuscador
               value={clienteId}
               onChange={(id) => setClienteId(id)}
@@ -393,14 +393,14 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
 
           {editingReserva && (
             <div className="flex items-center justify-between p-3 bg-surface border border-line rounded-inner">
-              <div className="flex items-center gap-2 text-[10px] text-ink-2 uppercase tracking-widest font-bold">
+              <div className="text-label flex items-center gap-2 text-ink-2">
                 {bloqueada ? <Lock size={14} className="text-danger" /> : <Unlock size={14} className="text-ink-2" />}
                 {bloqueada ? 'Fecha y unidad bloqueadas' : 'Fecha y unidad editables'}
               </div>
               <button
                 type="button"
                 onClick={handleToggleBloqueada}
-                className={`px-3 py-2 rounded-icon text-[9px] font-bold uppercase tracking-widest transition-all ${
+                className={`px-3 py-2 rounded-icon text-[9px] font-bold transition-all ${
                   bloqueada ? 'bg-danger-soft text-danger hover:bg-danger-soft' : 'bg-surface text-ink-2 hover:text-ink'
                 }`}
               >
@@ -414,7 +414,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
           {isMobile && <SeccionTitulo>Unidad y fechas</SeccionTitulo>}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Unidad</label>
+              <label className="text-label text-ink-2">Unidad</label>
               <BrandSelect
                 value={unidadId}
                 onChange={setUnidadId}
@@ -425,14 +425,14 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
                 searchPlaceholder="Buscar unidad..."
               />
               {conflictoFechas && (
-                <p className="text-[10px] text-danger uppercase tracking-widest font-bold">
+                <p className="text-label text-danger">
                   Ocupada en esas fechas — elegí otra unidad o cambiá las fechas.
                 </p>
               )}
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Temporada</label>
-              <p className="w-full h-9 flex items-center bg-surface border border-line rounded-inner px-4 text-ink-2 text-body font-bold truncate">
+              <label className="text-label text-ink-2">Temporada</label>
+              <p className="w-full h-9 flex items-center bg-surface border border-line rounded-inner px-4 text-ink-2 text-body font-semibold truncate">
                 {editingReserva?.temporada || temporadaActiva?.nombre || '—'}
               </p>
             </div>
@@ -452,9 +452,9 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
                   type="button"
                   disabled={bloqueada}
                   onClick={() => setTipoAlquiler(t.key)}
-                  className={`h-9 rounded-inner text-[9px] font-bold uppercase tracking-widest border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`h-9 rounded-inner text-[9px] font-bold border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                     tipoAlquiler === t.key
-                      ? 'bg-gold text-ink border-gold'
+                      ? 'bg-ink text-on-ink border-ink'
                       : 'bg-surface text-ink-2 border-line hover:text-ink'
                   }`}
                 >
@@ -463,7 +463,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
               ))}
             </div>
             {tipoAlquiler === 'temporada' && (
-              <p className="text-[9px] text-ink-2 uppercase tracking-widest">
+              <p className="text-label text-ink-2">
                 Se asigna toda la temporada vigente ({temporadaActiva?.nombre || '—'}), sin elegir fechas.
               </p>
             )}
@@ -472,11 +472,11 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
           {tipoAlquiler === 'temporada' && (
             <div className="space-y-2">
               <div className="bg-surface border border-line rounded-inner p-4 text-center">
-                <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Temporada vigente</p>
-                <p className="text-body font-bold text-ink mt-1">{temporadaActiva?.nombre || '—'}</p>
+                <p className="text-label text-ink-2">Temporada vigente</p>
+                <p className="text-body font-semibold text-ink mt-1">{temporadaActiva?.nombre || '—'}</p>
               </div>
               {unidadId && conflictoFechas && (
-                <p className="text-[11px] text-danger">
+                <p className="text-label text-danger">
                   Esa unidad ya tiene una reserva de período o día dentro de esta temporada — no se puede asignar toda la temporada. Elegí otra unidad.
                 </p>
               )}
@@ -486,13 +486,13 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
           {tipoAlquiler === 'periodo' && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Fechas (Inicio — Fin)</label>
-                <span className="text-xs font-bold text-ink">
+                <label className="text-label text-ink-2">Fechas (Inicio — Fin)</label>
+                <span className="text-label font-semibold text-ink">
                   {fechaInicio || '—'} → {fechaFin || '—'}
                 </span>
               </div>
               {!unidadId && (
-                <p className="text-[10px] text-ink-2 uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
+                <p className="text-label text-ink-2">Elegí una unidad para ver sus días ocupados.</p>
               )}
               <div className="bg-surface border border-line rounded-inner p-3 flex justify-center">
                 <ReservaCalendar
@@ -512,11 +512,11 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
           {tipoAlquiler === 'dia' && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Fecha</label>
-                <span className="text-xs font-bold text-ink">{fecha || '—'}</span>
+                <label className="text-label text-ink-2">Fecha</label>
+                <span className="text-label font-semibold text-ink">{fecha || '—'}</span>
               </div>
               {!unidadId && (
-                <p className="text-[10px] text-ink-2 uppercase tracking-widest">Elegí una unidad para ver sus días ocupados.</p>
+                <p className="text-label text-ink-2">Elegí una unidad para ver sus días ocupados.</p>
               )}
               <div className="bg-surface border border-line rounded-inner p-3 flex justify-center">
                 <ReservaCalendar mode="single" value={fecha} onChange={setFecha} rangosOcupados={rangosOcupados} disabled={bloqueada} />
@@ -531,7 +531,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
 
           {puedeBonificar && (
             <div className="flex items-center justify-between p-3 bg-surface border border-line rounded-inner">
-              <label htmlFor="reserva-bonificada" className="text-[10px] font-bold text-ink-2 uppercase tracking-widest cursor-pointer">
+              <label htmlFor="reserva-bonificada" className="text-label text-ink-2 cursor-pointer">
                 Unidad bonificada
               </label>
               <input
@@ -557,8 +557,8 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
           {editingReserva && (
             <div className="flex items-center justify-between p-4 bg-surface border border-line rounded-inner">
               <div>
-                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Saldo Pendiente</p>
-                <p className={`text-lg font-bold ${Number(editingReserva.saldo) > 0 ? 'text-danger' : 'text-success-ink'}`}>
+                <p className="text-label text-ink-2">Saldo Pendiente</p>
+                <p className={`text-card-title ${Number(editingReserva.saldo) > 0 ? 'text-danger' : 'text-success-ink'}`}>
                   {estaSaldada(editingReserva) ? 'Unidad saldada' : formatPesos(editingReserva.saldo)}
                 </p>
               </div>
@@ -567,28 +567,28 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
           )}
 
           <div className="p-4 bg-surface border border-gold-300 rounded-inner space-y-2">
-            <p className="text-[9px] font-bold text-ink uppercase tracking-[0.2em]">Resumen</p>
-            <div className="grid grid-cols-2 gap-y-1.5 text-xs">
-              <span className="text-ink-2 uppercase tracking-widest">Unidad</span>
-              <span className="text-ink font-bold text-right truncate">
+            <p className="text-label text-ink">Resumen</p>
+            <div className="grid grid-cols-2 gap-y-1.5 text-label">
+              <span className="text-label text-ink-2">Unidad</span>
+              <span className="text-ink font-semibold text-right truncate">
                 {opcionesUnidad.find((o) => o.value === unidadId)?.label || '—'}
               </span>
-              <span className="text-ink-2 uppercase tracking-widest">Fechas</span>
-              <span className="text-ink font-bold text-right truncate">
+              <span className="text-label text-ink-2">Fechas</span>
+              <span className="text-ink font-semibold text-right truncate">
                 {tipoAlquiler === 'temporada'
                   ? temporadaActiva?.nombre || '—'
                   : tipoAlquiler === 'dia' ? (fecha ? formatFecha(fecha) : '—') : (fechaInicio && fechaFin ? formatRangoFechas(fechaInicio, fechaFin) : '—')}
               </span>
-              <span className="text-ink-2 uppercase tracking-widest">Días</span>
-              <span className="text-ink font-bold text-right">
+              <span className="text-label text-ink-2">Días</span>
+              <span className="text-ink font-semibold text-right">
                 {tipoAlquiler === 'temporada'
                   ? 'Temporada completa'
                   : tipoAlquiler === 'dia' ? (fecha ? 1 : '—') : (diasEntre(fechaInicio, fechaFin) ?? '—')}
               </span>
-              <span className="text-ink-2 uppercase tracking-widest">Total</span>
-              <span className="text-ink font-bold text-right">{formatPesos(bonificada ? 0 : valorTotal)}</span>
-              <span className="text-ink-2 uppercase tracking-widest">Saldo</span>
-              <span className={`font-bold text-right ${editingReserva && Number(editingReserva.saldo) > 0 ? 'text-danger' : 'text-success-ink'}`}>
+              <span className="text-label text-ink-2">Total</span>
+              <span className="text-ink font-semibold text-right">{formatPesos(bonificada ? 0 : valorTotal)}</span>
+              <span className="text-label text-ink-2">Saldo</span>
+              <span className={`font-semibold text-right ${editingReserva && Number(editingReserva.saldo) > 0 ? 'text-danger' : 'text-success-ink'}`}>
                 {editingReserva ? (estaSaldada(editingReserva) ? 'Saldado' : formatPesos(editingReserva.saldo)) : '—'}
               </span>
             </div>
@@ -608,7 +608,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
                   onChange={(e) => setCargarMasTarde(e.target.checked)}
                   className="accent-gold w-4 h-4 cursor-pointer"
                 />
-                <span className="text-xs font-bold text-ink uppercase tracking-widest">Cargar más tarde</span>
+                <span className="text-label text-ink">Cargar más tarde</span>
               </label>
             </div>
           )}
@@ -617,7 +617,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
             <button
               type="button"
               onClick={() => setMasOpcionesAbierto((v) => !v)}
-              className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-bold text-ink-2 uppercase tracking-widest hover:text-ink transition-all"
+              className="text-label w-full flex items-center justify-between px-4 py-3 text-ink-2 hover:text-ink transition-all"
             >
               Más opciones
               <ChevronDown size={14} className={`transition-transform ${masOpcionesAbierto ? 'rotate-180' : ''}`} />
@@ -625,17 +625,17 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
             {masOpcionesAbierto && (
               <div className="px-4 pb-4 space-y-4 border-t border-line pt-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Notas</label>
+                  <label className="text-label text-ink-2">Notas</label>
                   <textarea
                     rows={3}
                     value={notas}
                     onChange={(e) => setNotas(e.target.value)}
-                    className="w-full bg-surface border border-line rounded-inner px-4 py-3 text-ink text-body focus:border-gold-300 outline-none resize-none"
+                    className="w-full bg-surface rounded-inner px-4 py-3 text-ink text-body outline-none resize-none border border-transparent focus:ring-2 focus:ring-gold"
                   />
                 </div>
                 {editingReserva && (
                   <div>
-                    <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest mb-2">Historial</p>
+                    <p className="text-label text-ink-2 mb-2">Historial</p>
                     <Historial tipo="reserva" id={editingReserva.id} compact />
                   </div>
                 )}

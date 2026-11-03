@@ -40,15 +40,15 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
     <Modal isOpen={!!reserva} onClose={onClose} title="Detalle de Reserva">
       <div className="space-y-6">
         <div>
-          <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Titular</p>
-          <p className="text-lg font-bold text-ink uppercase mt-1">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</p>
+          <p className="text-label text-ink-2">Titular</p>
+          <p className="text-card-title text-ink mt-1">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</p>
           {(reserva.clientes?.telefono || reserva.clientes?.mail) && (
-            <p className="text-xs text-ink-2 mt-1">
+            <p className="text-label text-ink-2 mt-1">
               {reserva.clientes?.telefono} {reserva.clientes?.telefono && reserva.clientes?.mail && '·'} {reserva.clientes?.mail}
             </p>
           )}
           {socios.length > 0 && (
-            <p className="text-[11px] text-ink-2 uppercase tracking-widest mt-2">
+            <p className="text-label text-ink-2 mt-2">
               Co-socios: {socios.map((s) => formatNombre(s.nombre)).join(', ')}
             </p>
           )}
@@ -56,28 +56,28 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Unidad</p>
-            <p className="text-body text-ink mt-1 uppercase">{unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}</p>
+            <p className="text-label text-ink-2">Unidad</p>
+            <p className="text-label text-ink mt-1">{unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Tipo de alquiler</p>
+            <p className="text-label text-ink-2">Tipo de alquiler</p>
             <p className="text-body text-ink mt-1">{TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}</p>
           </div>
           {esPeriodo && (
             <>
               <div>
-                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Desde</p>
+                <p className="text-label text-ink-2">Desde</p>
                 <p className="text-body text-ink mt-1">{formatFecha(reserva.fecha_inicio)}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Hasta</p>
+                <p className="text-label text-ink-2">Hasta</p>
                 <p className="text-body text-ink mt-1">{formatFecha(reserva.fecha_fin)}</p>
               </div>
             </>
           )}
           {esDia && (
             <div>
-              <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Fecha</p>
+              <p className="text-label text-ink-2">Fecha</p>
               <p className="text-body text-ink mt-1">{formatFecha(reserva.fecha)}</p>
             </div>
           )}
@@ -85,42 +85,42 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
 
         <div className="grid grid-cols-3 gap-4 p-4 bg-surface border border-line rounded-inner">
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Monto Total</p>
-            <MontoReserva reserva={reserva} className="text-body text-ink font-bold mt-1" />
+            <p className="text-label text-ink-2">Monto Total</p>
+            <MontoReserva reserva={reserva} className="text-body text-ink font-semibold mt-1" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Saldo</p>
+            <p className="text-label text-ink-2">Saldo</p>
             <SaldoReserva reserva={reserva} pagos={pagos} className="text-body mt-1" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Estado</p>
+            <p className="text-label text-ink-2">Estado</p>
             <div className="mt-1"><StatusBadge status={estadoBadgeStatus(reserva)} /></div>
           </div>
         </div>
 
         {reserva.notas && (
           <div>
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest">Notas</p>
+            <p className="text-label text-ink-2">Notas</p>
             <p className="text-body text-ink-2 mt-1">{reserva.notas}</p>
           </div>
         )}
 
         <div>
-          <p className="text-[10px] font-bold text-ink-2 uppercase tracking-widest mb-2">Comprobantes</p>
+          <p className="text-label text-ink-2 mb-2">Comprobantes</p>
           {pagos.length === 0 ? (
-            <p className="text-xs text-ink-2 uppercase tracking-widest">Sin pagos registrados.</p>
+            <p className="text-label text-ink-2">Sin pagos registrados.</p>
           ) : (
             <div className="space-y-2">
               {pagos.map((p) => (
-                <div key={p.id} className="flex justify-between items-center text-xs px-4 py-3 bg-surface border border-line rounded-inner">
+                <div key={p.id} className="flex justify-between items-center text-label px-4 py-3 bg-surface border border-line rounded-inner">
                   <div className="text-ink-2">
-                    <span className="text-ink font-bold">{formatFecha(p.fecha)}</span>
+                    <span className="text-ink font-semibold">{formatFecha(p.fecha)}</span>
                     {' — '}{formatMedioPago(p)}
                     {p.comprobante && <span> · Comp. {p.comprobante}</span>}
                     {p.nro_cuota && <span> · Cuota {p.nro_cuota}</span>}
                   </div>
                   {pagoSinVerificar(p) ? (
-                    <strong className="inline-flex items-center gap-1.5 text-ink-2 text-[11px] uppercase tracking-widest">
+                    <strong className="text-label inline-flex items-center gap-1.5 text-ink-2">
                       <HelpCircle size={12} /> Sin verificar
                     </strong>
                   ) : (
@@ -136,14 +136,14 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
           <button
             type="button"
             onClick={() => { onClose?.(); navigate(linkToComprobante(reserva.id)) }}
-            className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-surface text-ink border border-line hover:bg-surface transition-all flex items-center justify-center gap-2"
+            className="text-label flex-1 py-3 rounded-full bg-surface text-ink border border-line hover:bg-surface transition-all flex items-center justify-center gap-2"
           >
             <Receipt size={14} /> Emitir comprobante
           </button>
           <button
             type="button"
             onClick={verCompleta}
-            className="flex-1 py-3 rounded-inner text-xs font-bold uppercase tracking-widest bg-surface text-ink border border-gold-300 hover:bg-gold-100 transition-all flex items-center justify-center gap-2"
+            className="text-label flex-1 py-3 rounded-full bg-surface text-ink border border-gold-300 hover:bg-gold-100 transition-all flex items-center justify-center gap-2"
           >
             Ver reserva completa <ArrowRight size={14} />
           </button>

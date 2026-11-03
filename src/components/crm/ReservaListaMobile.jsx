@@ -28,7 +28,7 @@ export default function ReservaListaMobile({ reservas, fechaLlegada, onOpenDetal
     <div className="space-y-5">
       {grupos.map((g) => (
         <div key={g.key} className="space-y-2">
-          <p className="text-label text-ink-2 uppercase tracking-wider px-1">
+          <p className="text-label text-ink-2 px-1">
             {g.key === 'sin-fecha' ? 'Sin fecha' : formatFecha(g.key)}
           </p>
           <div className="space-y-2">
@@ -38,7 +38,7 @@ export default function ReservaListaMobile({ reservas, fechaLlegada, onOpenDetal
                 <div
                   key={res.id}
                   onClick={() => (esTemporada ? onIrACliente(res) : onOpenDetalle(res))}
-                  className="card-light rounded-card p-space-md cursor-pointer active:opacity-80 transition-opacity"
+                  className="card-surface p-space-md cursor-pointer active:opacity-80 transition-opacity"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -55,15 +55,15 @@ export default function ReservaListaMobile({ reservas, fechaLlegada, onOpenDetal
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-line">
                     <div>
-                      <p className="text-label text-ink-2 uppercase">Saldo</p>
-                      <p className={`text-body font-bold ${Number(res.saldo) > 0 ? 'text-danger' : 'text-success-ink'}`}>
+                      <p className="text-label text-ink-2">Saldo</p>
+                      <p className={`text-body font-semibold ${Number(res.saldo) > 0 ? 'text-danger' : 'text-success-ink'}`}>
                         {Number(res.saldo) > 0 ? formatPesosVisible(res.saldo) : <MontoReserva reserva={res} />}
                       </p>
                     </div>
                     {!esTemporada && (
                       <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
                         {estadoBadgeStatus(res) === 'preconfirmada' && (
-                          <button onClick={() => onCheckIn(res)} className="w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center bg-surface text-ink-2 rounded-icon" title="Check-in">
+                          <button onClick={() => onCheckIn(res)} className="w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center bg-surface text-ink-2 rounded-full" title="Check-in">
                             <QrCode size={15} />
                           </button>
                         )}
@@ -71,13 +71,13 @@ export default function ReservaListaMobile({ reservas, fechaLlegada, onOpenDetal
                           <button
                             onClick={() => onRegistrarPago(res)}
                             disabled={Number(res.saldo) <= 0}
-                            className="w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center bg-success-soft disabled:opacity-30 text-success-ink rounded-icon"
+                            className="w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center bg-success-soft disabled:opacity-30 text-success-ink rounded-full"
                             title="Registrar pago"
                           >
                             <Wallet size={15} />
                           </button>
                         )}
-                        <button onClick={() => onComprobante(res)} className="w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center bg-surface text-ink rounded-icon" title="Comprobante">
+                        <button onClick={() => onComprobante(res)} className="w-9 h-9 min-w-[44px] min-h-[44px] flex items-center justify-center bg-surface text-ink rounded-full" title="Comprobante">
                           <Receipt size={15} />
                         </button>
                       </div>
