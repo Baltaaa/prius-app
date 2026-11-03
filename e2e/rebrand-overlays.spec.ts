@@ -35,14 +35,9 @@ const PASOS: Paso[] = [
     else await p.getByRole('button', { name: 'Nueva reserva' }).click()
     await p.waitForTimeout(500)
   } },
-  { nombre: 'date-picker-en-modal', correr: async (p, m) => {
-    await ir(p, '/app/home')
-    if (m) await p.getByRole('button', { name: 'Reserva', exact: true }).click()
-    else await p.getByRole('button', { name: 'Nueva reserva' }).click()
-    await p.waitForTimeout(400)
-    await p.getByRole('button', { name: /^(Día|Dia)$/ }).first().click().catch(() => {})
-    await p.waitForTimeout(300)
-    await p.locator('[role="dialog"] input[inputmode="numeric"], div.fixed input[readonly], div.fixed input[inputmode="numeric"]').first().click()
+  { nombre: 'date-picker', correr: async (p) => {
+    await ir(p, '/app/reservas')
+    await p.getByPlaceholder('Llegada desde').click()
     await p.waitForTimeout(400)
   } },
   { nombre: 'perfil-menu', solo: 'desktop', correr: async (p) => { await ir(p, '/app/home'); await p.getByLabel('Menú de usuario').hover(); await p.waitForTimeout(400) } },
@@ -72,24 +67,32 @@ const PASOS: Paso[] = [
     await abrirFichaCliente(p)
     await p.getByRole('button', { name: /Registrar pago/i }).first().click()
     await p.waitForTimeout(500)
-    await p.locator('button[aria-haspopup="listbox"]').first().click()
+    await p.getByRole('button', { name: /Efectivo/ }).first().click()
     await p.waitForTimeout(400)
   } },
   { nombre: 'clientes-ficha', correr: async (p) => { await abrirFichaCliente(p) } },
   { nombre: 'nuevo-cliente', correr: async (p) => { await ir(p, '/app/clientes'); await p.getByRole('button', { name: /^Nuevo/ }).click(); await p.waitForTimeout(500) } },
   { nombre: 'confirmar-superadmin', correr: async (p) => {
     await abrirFichaCliente(p)
-    await p.getByTitle(/Eliminar/).first().click()
+    await p.locator('button:has(svg.lucide-trash-2):visible').first().click()
     await p.waitForTimeout(500)
   } },
   { nombre: 'caja-cierre', correr: async (p) => {
     await ir(p, '/app/caja?fecha=2026-10-30')
-    await p.getByRole('button', { name: /Cerrar/ }).first().click()
+    await p.getByRole('button', { name: /Cerrar Caja/ }).first().click()
     await p.waitForTimeout(600)
   } },
   { nombre: 'caja-gasto', correr: async (p) => {
     await ir(p, '/app/caja?fecha=2026-10-30')
     await p.getByRole('button', { name: /Egreso|Gasto/ }).first().click()
+    await p.waitForTimeout(600)
+  } },
+  { nombre: 'toast-error', correr: async (p) => {
+    await p.route(/\/rest\/v1\/leads/, (r) => (r.request().method() === 'GET' ? r.fallback() : r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"simulado"}' })))
+    await ir(p, '/app/leads')
+    await p.getByRole('button', { name: 'Descartar' }).first().click({ force: true })
+    await p.waitForTimeout(500)
+    await p.getByRole('button', { name: /Confirmar/ }).click({ timeout: 1500 }).catch(() => {})
     await p.waitForTimeout(600)
   } },
   { nombre: 'inactividad', correr: async (p) => {
@@ -98,14 +101,6 @@ const PASOS: Paso[] = [
     await p.evaluate(() => localStorage.setItem('prius_last_activity', String(Date.now() - 14 * 60 * 1000)))
     await p.clock.fastForward(20_000)
     await p.waitForTimeout(800)
-  } },
-  { nombre: 'toast-error', correr: async (p) => {
-    await p.route(/\/rest\/v1\/leads/, (r) => (r.request().method() === 'GET' ? r.fallback() : r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"simulado"}' })))
-    await ir(p, '/app/leads')
-    await p.getByRole('button', { name: 'Descartar' }).first().click()
-    await p.waitForTimeout(500)
-    await p.getByRole('button', { name: /Confirmar/ }).click({ timeout: 1500 }).catch(() => {})
-    await p.waitForTimeout(600)
   } },
 ]
 
@@ -122,7 +117,7 @@ for (const [modo, w, h] of [['desktop', 1440, 900], ['mobile', 390, 844]] as con
       try {
         await paso.correr(page, modo === 'mobile')
         await page.screenshot({ path: `${OUT}/${paso.nombre}-${modo}.png` })
-        console.log('OK', modo, paso.nombre)
+        console.log('OK', modo, paso.nombre, page.url().includes('/login') ? 'SESION-CERRADA' : '')
       } catch (e) {
         console.log('FALLA', modo, paso.nombre, String(e).split('\n')[0].slice(0, 120))
       }

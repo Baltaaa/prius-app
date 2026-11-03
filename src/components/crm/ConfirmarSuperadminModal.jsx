@@ -155,7 +155,7 @@ export default function ConfirmarSuperadminModal({
           <button
             onClick={handleClose}
             disabled={loading}
-            className="text-label h-11 px-2 rounded-full text-ink-2 bg-surface hover:bg-surface border border-line transition-all disabled:opacity-50"
+            className="text-label h-11 px-2 rounded-full text-ink-2 hover:bg-surface transition-all disabled:opacity-50"
           >
             Cancelar
           </button>

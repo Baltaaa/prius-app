@@ -573,7 +573,7 @@ export default function Reservas() {
               <tr
                 key={res.id}
                 onClick={() => navigate(linkToCliente(res.cliente_id))}
-                className="hover:bg-surface anim-colors transition-all group cursor-pointer"
+                className="hover:bg-row-hover anim-colors group cursor-pointer"
               >
                 <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
                 <td className="px-2 py-2 h-14 align-middle text-ink break-words">
@@ -613,7 +613,7 @@ export default function Reservas() {
             <tr
               key={res.id}
               onClick={() => handleOpenDetalle(res)}
-              className={`hover:bg-surface anim-colors transition-all group cursor-pointer ${selectedReservaId === res.id ? 'bg-surface' : ''}`}
+              className={`hover:bg-row-hover anim-colors group cursor-pointer ${selectedReservaId === res.id ? 'bg-surface' : ''}`}
             >
               <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
               <td className="px-2 py-2 h-14 align-middle text-ink break-words">

@@ -384,7 +384,7 @@ export default function Caja() {
             <div className="lg:flex-1 lg:min-w-0 space-y-4">
               <div className="card-surface p-6 sm:p-7 space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
-                  <div className="flex items-center gap-1.5 overflow-x-auto">
+                  <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                     {TABS.map((t) => (
                       <button
                         key={t.value}
