@@ -350,7 +350,7 @@ export default function Caja() {
               <MontoStat fmt={fmtM} value={cajaSeleccionada.total_neto} className="text-ink mb-2" />
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success-soft text-success-ink text-label font-medium max-w-full overflow-hidden mt-auto">
                 <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
-                <span>Arqueado en tiempo real</span>
+                <span className="truncate" title="Arqueado en tiempo real">Arqueado en tiempo real</span>
               </span>
             </div>
             <div className="card-surface card-pad min-w-0 flex flex-col">
@@ -469,7 +469,7 @@ export default function Caja() {
                           <button
                             key={`${m.tipo_movimiento}-${m.movimiento_id}`}
                             onClick={() => abrirDetalleMovimiento(m)}
-                            className={`w-full flex flex-col gap-1 p-3 bg-surface rounded-inner text-left transition-all ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
+                            className={`w-full flex flex-col gap-1 p-3 bg-surface rounded-inner text-left whitespace-normal transition-all ${m.estado === 'anulado' ? 'opacity-40' : ''}`}
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-2 min-w-0">
