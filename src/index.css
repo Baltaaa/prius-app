@@ -21,6 +21,19 @@
   --input: 242 241 236;
   --ring: 242 202 80;
   --radius: 24px;
+
+  /* Espaciado (design/DESIGN.md, escala de 4px): un solo juego de valores por
+     breakpoint. Mobile <768, tablet 768-1023, desktop ≥1024. */
+  --space-page: 16px;
+  --space-grid: 12px;
+  --space-card: 16px;
+  --space-hero: 20px;
+}
+@media (min-width: 768px) {
+  :root { --space-page: 24px; --space-grid: 16px; --space-card: 20px; --space-hero: 28px; }
+}
+@media (min-width: 1024px) {
+  :root { --space-page: 32px; --space-grid: 20px; --space-card: 24px; }
 }
 
 /*
@@ -34,6 +47,8 @@
   }
   .btn-primary { @apply bg-ink text-on-ink hover:bg-chart-2; }
   .btn-gold { @apply bg-gold text-ink hover:bg-gold-400; }
+  /* Secundario: el botón primario negro ya vive en el topbar (Nueva reserva); un solo primario por vista. */
+  .btn-secondary { @apply bg-card text-ink border border-line hover:bg-surface; }
   .btn-ghost { @apply text-ink hover:bg-surface; }
   .btn-danger { @apply bg-danger text-on-ink hover:bg-danger-ink; }
   .btn-icon {
@@ -41,7 +56,15 @@
   }
 
   .card-surface { @apply bg-card rounded-card; }
-  .card-pad { @apply p-5 md:p-7; }
+  .card-pad { @apply p-card; }
+  .card-pad-hero { @apply p-hero; }
+  /* Padding lateral de página: el token, y desde 1920 el contenido queda en
+     1680px centrado (topbar y main usan la misma clase, así alinean). */
+  .px-page-max { padding-inline: max(var(--space-page), calc((100% - theme(maxWidth.page)) / 2)); }
+  /* Card dentro de card: siempre 16px y fondo surface, nunca doble padding. */
+  .card-inner { @apply bg-surface rounded-inner p-inner; }
+  /* Etiqueta de sección: 13px ink-2, 8px sobre su contenido. */
+  .section-label { @apply block mb-2 text-label text-ink-2; }
   .surface-pop { @apply bg-card rounded-inner border border-line; }
 
   .field {
@@ -105,6 +128,15 @@ button {
   white-space: nowrap;
 }
 
+/* Mobile/táctil: el feedback de toque es una escala leve, no un hover. */
+@media (hover: none) {
+  button:not(:disabled):active, a[href]:active, [role="button"]:active { scale: 0.98; }
+  button, a[href], [role="button"] { transition-property: scale, transform, color, background-color, border-color, opacity; transition-duration: 100ms; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled):active, a[href]:active, [role="button"]:active { scale: none; }
+}
+
 /* Seguimiento (oct 2026): chips/pills/badges (<span> con rounded-full, el
    patrón que usa toda la app para "47 disponibles para hoy", "Leads sin
    contactar", StatusBadge, etc.) tampoco pueden partir su texto — mismo
@@ -166,6 +198,10 @@ body {
 }
 .plano-slide-left { animation: plano-slide-in-left 200ms ease-out; }
 .plano-slide-right { animation: plano-slide-in-right 200ms ease-out; }
+
+/* Listas con scroll propio: scrollbar fina y su lugar reservado, para que no
+   se meta entre la lista y el panel de al lado ni mueva el contenido. */
+.scroll-fino { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: rgb(var(--primary) / 0.2) transparent; }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

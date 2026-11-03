@@ -2,6 +2,8 @@
 // Tokens del sistema de diseño: la especificación completa está en
 // design/DESIGN.md. Los valores viven en src/index.css como canales RGB para
 // que funcionen los modificadores de opacidad (`bg-card/90`).
+import containerQueries from '@tailwindcss/container-queries'
+
 const canal = (nombre) => `rgb(var(--${nombre}) / <alpha-value>)`
 
 export default {
@@ -60,6 +62,7 @@ export default {
         kpi: ['clamp(34px, 9vw, 60px)', { lineHeight: '1.05', letterSpacing: '-0.03em', fontWeight: '400' }],
         stat: ['clamp(22px, 6vw, 30px)', { lineHeight: '1.15', letterSpacing: '-0.02em', fontWeight: '500' }],
         'modal-title': ['24px', { lineHeight: '30px', letterSpacing: '-0.01em', fontWeight: '500' }],
+        row: ['15px', { lineHeight: '20px', fontWeight: '500' }],
         body: ['14px', { lineHeight: '20px', fontWeight: '500' }],
         label: ['13px', { lineHeight: '18px', fontWeight: '500' }],
       },
@@ -72,25 +75,24 @@ export default {
         bar: '8px',
         'plano-md': '4px',
       },
+      // Sistema de espaciado (escala de 4px, ver "Espaciado" en DESIGN.md).
+      // page/grid/card/hero cambian por breakpoint con variables de index.css;
+      // inner y section son fijos. Fuera de estos y de la escala de Tailwind
+      // no se usan valores sueltos (lo vigila scripts/audit-design.mjs).
       spacing: {
-        'margin-desktop': '1.25rem',
-        'margin': '1.25rem',
-        'margin-mobile': '1rem',
-        'margin-tablet': '2rem',
-        'gutter': '1rem',
-        'gutter-sm': '0.75rem',
-        'gutter-lg': '1.5rem',
-        'space-xs': '0.25rem',
-        'space-sm': '0.5rem',
-        'space-md': '1rem',
-        'space-lg': '1.5rem',
-        'space-xl': '2.25rem',
+        page: 'var(--space-page)',
+        grid: 'var(--space-grid)',
+        card: 'var(--space-card)',
+        hero: 'var(--space-hero)',
+        inner: '16px',
+        section: '24px',
       },
+      maxWidth: { page: '1680px' },
       // Tailwind v3 no trae `dvh`: `h-screen` (100vh) en iOS Safari mide más
       // que lo visible con la barra de direcciones. Fallback en index.css.
       height: { dvh: '100dvh' },
       minHeight: { dvh: '100dvh' },
     },
   },
-  plugins: [],
+  plugins: [containerQueries],
 }

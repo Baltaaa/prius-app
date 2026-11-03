@@ -24,12 +24,17 @@ const REGLAS = [
   ['sombra', /(?<![\w-])shadow(?:-(?:sm|md|lg|xl|2xl|inner)|-\[)/],
   ['radio', /(?<![\w-])rounded(?:-[trblse]{1,2})?-(?:sm|md|lg|xl|2xl|3xl|\[)/],
   ['tamaño', /(?<![\w-:])text-(?:xs|sm|lg|xl|2xl|3xl|4xl)\b|text-\[(?:[0-9.]+)px\]/],
+  // Espaciado (DESIGN.md, "Espaciado"): escala de 4px y tokens del sistema.
+  ['espaciado arbitrario', /(?<![\w-])-?(?:p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-\[/],
+  ['espaciado fuera de escala', /(?<![\w-])-?(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|gap-x|gap-y|space-x|space-y)-(?:0\.5|1\.5|2\.5|3\.5)(?![\w.])/],
+  ['espaciado viejo', /(?<![\w-])-?(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|gap-x|gap-y|space-x|space-y)-(?:space-(?:xs|sm|md|lg|xl)|margin(?:-desktop|-mobile|-tablet)?|gutter(?:-sm|-lg)?)\b/],
+  ['padding de card', /card-surface(?!.*(?:card-pad|rounded-full|ui-open|rounded-t-card)).*(?<![\w-])(?:(?:sm|md|lg):)?p-(?:[3-9]|1\d|20)\b/],
   ['mayúsculas', /(?<=["'`\s])uppercase(?=["'`\s])/],
 ]
 
 // Excepción por línea: la bajada de 12px de la bottom nav y el contador, que
 // por tamaño físico no entran a 13px.
-const TOLERADAS = [/text-\[12px\]/, /text-\[10px\] font-semibold flex items-center justify-center/, /text-\[20px\] leading-7/, /text-\[clamp\(/]
+const TOLERADAS = [/(?:p|pt|pb|px|py)-\[max\([^\]]*env\(safe-area/, /text-\[12px\]/, /text-\[10px\] font-semibold flex items-center justify-center/, /text-\[20px\] leading-7/, /text-\[clamp\(/]
 
 function recorrer(dir, acc = []) {
   for (const n of readdirSync(dir)) {

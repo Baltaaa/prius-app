@@ -38,11 +38,31 @@ Todas las cifras con tabular-nums. Formato es-AR de moneda.
 
 Cards radius 24px, sin borde, sin sombra (o como máximo 0 1px 2px rgba(0,0,0,.03)), separadas del fondo por contraste. Elementos internos radius 16px. Items de nav radius 14px. Botones, badges y segmented controls en pill (radius full). Íconos de lista en cuadrado radius 12px. Swatches de leyenda radius 6px.
 
-Padding de card 28-32px desktop, 20px mobile. Gap de grilla 16-20px.
+Padding de card, gap de grilla y padding de página: ver "Espaciado".
+
+## Espaciado
+
+Escala de 4px. Los valores salen de tokens (`tailwind.config.js` + variables en `src/index.css`), no de números sueltos: `p-page`, `gap-grid`, `p-card`, `p-hero`, `p-inner`, `mt-section`.
+
+Padding de página (`px-page`): 16px mobile (<768), 24px tablet (768-1023), 32px desktop (≥1024). Desde 1920px el contenido queda en `max-w-page` (1680px) centrado: topbar y main usan la clase `px-page-max`, así alinean.
+
+Gap entre cards (`gap-grid`, `space-y-grid`): 12px mobile, 16px tablet, 20px desktop.
+
+Padding de card (`card-pad`): 16px mobile, 20px tablet, 24px desktop. Hero (`card-pad-hero`): 20px mobile, 28px desde tablet. Estados vacíos suman `py-10`.
+
+Card dentro de card (`card-inner`): 16px y fondo `surface`, nunca otra card blanca ni doble padding grande. Las listas dentro de una ficha son `card-inner`; las filas dentro de un `card-inner` van en blanco.
+
+Etiqueta de sección (`section-label`): 13px `ink-2`, 8px sobre su contenido, alineada en x con el contenido de la card; 24px (`mt-section`, `gap-section`) entre secciones.
+
+Prohibido: valores arbitrarios de espacio (`p-[13px]`, `mt-[22px]`), medios pasos fuera de escala (`p-2.5`, `gap-1.5`) y padding propio en una `card-surface`. Excepción: `max(…, env(safe-area-inset-*))`. Lo vigila `pnpm audit:design`.
+
+Listas y filas: 64-72px de alto, avatar 40px, nombre 15px/500 (`text-row`), divisores `divider` dentro de UNA card; la fila seleccionada va en `gold-50` con indicador dorado a la izquierda. Tablas de pagos: filas de 44px, montos a la derecha con cifras tabulares. Listas con scroll propio: `scroll-fino` (scrollbar fina con su lugar reservado) para que la barra no quede entre la lista y el panel.
 
 ## Componentes
 
-Botón primario = pill negra h-11, texto blanco, ícono a la izquierda. Botón secundario = ghost con ícono (estilo "+ Deposit"). Botones de ícono = ghost circulares.
+Botón primario = pill negra h-11, texto blanco, ícono a la izquierda. Botón secundario (`btn-secondary`) = pill blanca con borde `line`. Botones de ícono = ghost circulares de 44px.
+
+Un solo botón primario negro visible por vista. En desktop ya lo ocupa "+ Nueva reserva" del topbar, así que toda acción de página (Nuevo Cliente, Registrar pago, Imprimir, Guardar, Abrir caja, Check-in) es secundaria. El primario solo se repite dentro de un modal o sheet, porque ese overlay es la vista (confirmar, guardar), y en pantallas sin topbar (Login, Cambiar contraseña).
 
 Segmented control = opciones en texto, la activa en pill negra con texto blanco. Badge de variación = pill negra con flecha y valor (ej: ↑ 78,5%). Badge contador = círculo negro 22px con número blanco (ej: Leads).
 
@@ -89,3 +109,20 @@ Topbar: a la izquierda el título de página (en Dashboard "Hola, Baltasar" con 
 Dashboard, fila 1: card hero "Cobranzas temporada" + card de accesos rápidos 3x2 (Reservar, Cobrar, Check-in, Buscar cliente, Plano, Leads). Fila 2: card "Condiciones marítimas" (datos de clima existentes, solo horario de playa 9 a 20 h) + card "Capacidad diaria" con barra segmentada. Debajo, "Últimos movimientos". En desktop la caja vive solo en la tarjeta del sidebar; en mobile y tablet aparece como card en el Dashboard.
 
 Mobile: el sidebar pasa a bottom nav blanco de 5 items con el activo en pill negra; topbar compacto; cards a ancho completo; accesos rápidos 3x2; sensación de app nativa. El único botón de alta es el + de la bottom nav.
+
+## Paneles y responsive
+
+Un panel de detalle (ficha de Clientes, Reservas) decide su layout por SU ancho, no por el del viewport: contenedor `@container` y variantes `@[880px]:` (plugin `@tailwindcss/container-queries`). Historial al lado del detalle solo si el panel mide 880px o más; si mide menos, va debajo y todo scrollea junto. Los breakpoints de viewport (`md:`, `lg:`) quedan para el shell y la grilla de página. Cada columna con scroll propio sale de la cadena flex/grid con `min-h-0`, nunca de alturas calculadas a mano.
+
+Mobile (<768px) como app nativa: topbar de 56px con título de 20px; bottom nav con `safe-area-inset-bottom` y contenido con padding inferior para que nunca lo tape; listas full-bleed (`-mx-page`) sin card dentro de card; tablas pasan a lista de cards; modales como bottom sheet de `max-h-[90dvh]` con scroll interno, footer sticky con safe-area y el campo enfocado siempre sobre el teclado (`useKeyboardInset`); `dvh`, nunca `vh`; touch targets de 44px o más; inputs de 16px; feedback de toque (`scale .98`), nada que dependa solo de hover.
+
+### Checklist responsive
+
+Se corre con `e2e/rebrand-responsive.spec.ts` (y `e2e/rebrand-overlays.spec.ts` para modales y sheets) en 360x640, 390x844, 430x932, 768x1024, 834x1194, 1024x768, 1180x820, 1280x800, 1366x768, 1440x900 y 1920x1080:
+
+1. `document.scrollingElement.scrollWidth <= innerWidth`: cero scroll horizontal.
+2. Ningún elemento visible desborda su card o modal.
+3. Ningún monto ni nombre truncado sin `title` (los montos nunca se cortan).
+4. La bottom nav no tapa contenido al final del scroll.
+5. Mobile: touch targets ≥ 44px e inputs ≥ 16px.
+6. Capturas en `design/rebrand-shots/` revisadas a ojo.
