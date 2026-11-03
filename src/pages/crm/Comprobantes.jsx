@@ -141,8 +141,8 @@ export default function Comprobantes() {
   }
 
   return (
-    <div className="space-y-10 animate-premium-fade">
-      <div className="card-surface p-6 space-y-2">
+    <div className="space-y-6 animate-premium-fade">
+      <div className="card-surface card-pad space-y-2">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex-1 min-w-[280px] space-y-2">
             <label className="text-label text-ink-2">Buscar reserva (cliente, DNI/CUIT, unidad)</label>
@@ -164,7 +164,7 @@ export default function Comprobantes() {
                 onClick={() => imprimir('estado_cuenta')}
                 loading={imprimiendo}
                 loadingText="Emitiendo..."
-                className="text-label bg-ink hover:bg-chart-2 px-6 py-3 rounded-full flex items-center gap-2 text-on-ink"
+                className="text-label bg-card border border-line hover:bg-surface px-6 py-3 rounded-full flex items-center gap-2 text-ink"
               >
                 <Printer size={18} /> Imprimir Comprobante
               </LoadingButton>
@@ -185,7 +185,7 @@ export default function Comprobantes() {
           </div>
 
           {pagosReserva.length > 0 && (
-            <div className="card-surface p-6 space-y-3">
+            <div className="card-surface card-pad space-y-3">
               <p className="text-label text-ink-2">Pagos Registrados — recibo individual</p>
               <div className="space-y-2">
                 {pagosReserva.map((p) => (
@@ -202,7 +202,7 @@ export default function Comprobantes() {
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       {pagoSinVerificar(p) ? (
-                        <strong className="text-label inline-flex items-center gap-1.5 text-ink-2">
+                        <strong className="text-label inline-flex items-center gap-2 text-ink-2">
                           <HelpCircle size={12} /> Sin verificar
                         </strong>
                       ) : (
@@ -210,7 +210,7 @@ export default function Comprobantes() {
                       )}
                       <button
                         onClick={() => imprimir('recibo', p.id)}
-                        className="p-2 hover:bg-surface rounded-full text-ink transition-all"
+                        className="btn-icon"
                         title="Emitir recibo de este pago"
                       >
                         <Receipt size={16} />
@@ -223,7 +223,7 @@ export default function Comprobantes() {
           )}
         </div>
       ) : (
-        <div className="card-surface p-20 text-center">
+        <div className="card-surface card-pad py-10 text-center">
           <FileText className="w-12 h-12 text-ink-2 mx-auto mb-4" />
           <p className="text-label text-ink-2">No hay reservas registradas para generar comprobantes.</p>
         </div>

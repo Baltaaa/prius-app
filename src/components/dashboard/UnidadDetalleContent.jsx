@@ -92,7 +92,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
   return (
     <>
       {/* Header */}
-      <div className="flex items-start justify-between pb-space-md shrink-0">
+      <div className="flex items-start justify-between pb-4 shrink-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-body text-ink">
@@ -101,7 +101,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
             {sector && <span className="text-label text-ink-2 font-medium">{sector}</span>}
           </div>
           <span
-            className={`mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-swatch text-label font-semibold w-fit ${
+            className={`mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-swatch text-label font-semibold w-fit ${
               estado.key === "libre"
                 ? "bg-success-soft text-success-ink"
                 : estado.key === "ocupada"
@@ -126,7 +126,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-space-md">
+      <div className="flex-1 overflow-y-auto space-y-4">
         {!reserva ? (
           <div className="space-y-3">
             <div className="px-4 py-4 bg-success-soft rounded-inner text-center">
@@ -135,7 +135,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => onAsignarTemporada?.(unit)}
-                className="w-full h-12 bg-ink hover:bg-chart-2 rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-on-ink"
+                className="w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
               >
                 Asignar cliente de temporada <ArrowRight size={14} />
               </button>
@@ -153,7 +153,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 que ReservaDetalleContent.jsx (ficha de Reservas). */}
             {reserva.estado_pago_manual && (
               <div className="flex items-start gap-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
-                <ShieldAlert size={14} className="text-ink shrink-0 mt-0.5" />
+                <ShieldAlert size={14} className="text-ink shrink-0 mt-1" />
                 <p className="text-label text-ink-2">
                   Estado ajustado manualmente{reserva.estado_pago_manual_motivo ? ` — ${reserva.estado_pago_manual_motivo}` : ""}.
                 </p>
@@ -164,14 +164,14 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 propia ficha (mismo linkToCliente de "Ver ficha del cliente");
                 el titular se distingue visualmente (avatar negro + badge) de
                 los cosocios (avatar gris, sin badge). */}
-            <div className="bg-surface rounded-inner p-space-md flex flex-col gap-space-sm">
+            <div className="bg-surface rounded-inner p-4 flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-label text-ink-2">Titular</span>
                 <StatusBadge status={estadoBadgeStatus(reserva)} />
               </div>
               <button
                 onClick={irAClientes}
-                className="flex items-center gap-space-sm text-left hover:bg-line/60 rounded-icon -m-1 p-1 transition-colors"
+                className="flex items-center gap-2 text-left hover:bg-line/60 rounded-icon -m-1 p-1 transition-colors"
               >
                 <div className="w-10 h-10 rounded-inner bg-ink text-on-ink flex items-center justify-center text-body font-semibold shrink-0">
                   {(reserva.clientes?.nombre || "S/N").trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase()}
@@ -189,7 +189,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                     <button
                       key={s.id}
                       onClick={() => navigate(linkToCliente(s.id))}
-                      className="flex items-center gap-space-sm text-left hover:bg-line/60 rounded-icon -mx-1 p-1 transition-colors"
+                      className="flex items-center gap-2 text-left hover:bg-line/60 rounded-icon -mx-1 p-1 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-icon bg-ink-2/30 text-ink-2 flex items-center justify-center text-body font-semibold shrink-0">
                         {(s.nombre || "S/N").trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase()}
@@ -217,16 +217,16 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
 
             {/* Período y datos */}
             <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between py-1.5">
+              <div className="flex items-center justify-between py-2">
                 <span className="text-label text-ink-2">Período</span>
                 <span className="text-body text-ink font-medium text-right">{fechasReserva}</span>
               </div>
-              <div className="flex items-center justify-between py-1.5">
+              <div className="flex items-center justify-between py-2">
                 <span className="text-label text-ink-2">Tipo de alquiler</span>
                 <span className="text-body text-ink font-medium">{TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}</span>
               </div>
               {reserva.notas && (
-                <div className="py-1.5">
+                <div className="py-2">
                   <span className="block text-label text-ink-2">Notas</span>
                   <span className="text-body text-ink">{reserva.notas}</span>
                 </div>
@@ -234,7 +234,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
             </div>
 
             {/* Estado financiero */}
-            <div className="bg-surface rounded-inner p-space-md flex flex-col gap-space-sm">
+            <div className="bg-surface rounded-inner p-4 flex flex-col gap-2">
               <span className="text-label text-ink-2">Estado financiero</span>
               <div className="flex items-baseline justify-between">
                 <span className="text-body text-ink-2">Costo total</span>
@@ -256,7 +256,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 <>
                   <button
                     onClick={irAClientes}
-                    className="w-full h-12 bg-ink hover:bg-chart-2 rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-on-ink"
+                    className="w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
                   >
                     {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver ficha del cliente"} <ArrowRight size={14} />
                   </button>
@@ -279,7 +279,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 <>
                   <button
                     onClick={irAReserva}
-                    className="w-full h-12 bg-ink hover:bg-chart-2 rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-on-ink"
+                    className="w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
                   >
                     {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver reserva"} <ArrowRight size={14} />
                   </button>

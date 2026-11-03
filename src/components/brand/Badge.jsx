@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react'
 export function DeltaBadge({ value, down = false, className = '' }) {
   const Flecha = down ? ArrowDown : ArrowUp
   return (
-    <span className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-ink text-on-ink text-label tabular-nums whitespace-nowrap ${className}`}>
+    <span className={`inline-flex items-center gap-1 h-7 px-3 rounded-full bg-ink text-on-ink text-label tabular-nums whitespace-nowrap ${className}`}>
       <Flecha size={14} strokeWidth={1.5} /> {value}
     </span>
   )

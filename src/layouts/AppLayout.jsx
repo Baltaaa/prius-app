@@ -85,7 +85,7 @@ export default function AppLayout() {
             <Topbar />
 
             {/* Content View with internal vertical scroll. Padding horizontal
-                IDÉNTICO al del header (px-4 sm:px-6 md:px-8, ver Topbar.jsx)
+                IDÉNTICO al del header (px-page-max, ver Topbar.jsx y "Espaciado" en DESIGN.md)
                 para que el borde de las tarjetas quede alineado con el ícono
                 del título — nunca max-w/mx-auto acá, el contenido ocupa todo
                 el ancho entre el sidebar y el borde derecho. Definido una
@@ -120,7 +120,7 @@ export default function AppLayout() {
                 los hijos sticky siguen funcionando. */}
             <main
               id="app-main-scroll"
-              className={`flex-1 flex flex-col overscroll-contain px-4 sm:px-6 md:px-8 w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] ${esPlano ? 'pt-1 md:pb-3' : 'pt-1 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
+              className={`flex-1 flex flex-col overscroll-contain px-page-max w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] ${esPlano ? 'pt-1 md:pb-3' : 'pt-1 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
             >
               <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : esPlano ? 'flex-1 min-h-0 flex flex-col' : undefined}>
                 <Outlet />

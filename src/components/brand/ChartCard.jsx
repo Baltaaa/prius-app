@@ -72,7 +72,7 @@ export default function ChartCard({ data, formatY, activoInicial = 0, etiquetaX 
         <div aria-hidden="true" className="absolute -inset-x-1 inset-y-0 bg-card pointer-events-none anim-curtain" />
         <div className="absolute inset-y-0 border-l border-dashed border-ink/40 pointer-events-none" style={{ left: `${punto.x}%` }} />
         <div
-          className="absolute w-3 h-3 -ml-1.5 -mt-1.5 rounded-full bg-ink ring-2 ring-card pointer-events-none"
+          className="absolute w-3 h-3 -ml-2 -mt-2 rounded-full bg-ink ring-2 ring-card pointer-events-none"
           style={{ left: `${punto.x}%`, top: `${punto.y}%` }}
         />
         <div

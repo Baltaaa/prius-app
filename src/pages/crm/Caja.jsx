@@ -205,7 +205,7 @@ export default function Caja() {
 
   if (!readyCaja) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-grid">
         <Skeleton className="h-12 w-64" />
         <Skeleton className="h-80" />
       </div>
@@ -213,7 +213,7 @@ export default function Caja() {
   }
 
   return (
-    <div className="space-y-8 anim-fade-up-page">
+    <div className="space-y-6 anim-fade-up-page">
       {/* Barra de navegación por fecha + historial. Pulido mobile iPhone (oct
           2026): en mobile la navegación de fecha pasa a ser su propia fila
           simétrica de ancho completo (flecha | fecha | flecha, las dos
@@ -262,7 +262,7 @@ export default function Caja() {
       {/* Estado + Historial: fila de dos columnas iguales, solo mobile (sm:
           ya los muestra arriba en la fila de siempre). */}
       {cajaSeleccionada && (
-        <div className="no-print sm:hidden grid grid-cols-2 gap-3">
+        <div className="no-print sm:hidden grid grid-cols-2 gap-grid">
           <span className={`text-label flex items-center justify-center px-4 py-3 min-h-[44px] rounded-inner border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
             {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
           </span>
@@ -276,7 +276,7 @@ export default function Caja() {
       )}
 
       {mostrarHistorial && (
-        <div className="card-surface no-print p-6 space-y-2">
+        <div className="card-surface card-pad no-print space-y-2">
           <h3 className="text-label text-ink-2 mb-3">Historial de cajas</h3>
           {historialCajas.length === 0 ? (
             <p className="text-label text-ink-2">Sin cajas registradas todavía.</p>
@@ -301,7 +301,7 @@ export default function Caja() {
       {/* Estado A: sin caja */}
       {!cajaSeleccionada && (
         esHoy ? (
-          <div className="card-surface no-print p-20 text-center space-y-6">
+          <div className="card-surface card-pad py-10 no-print text-center space-y-6">
             <div className="w-20 h-20 bg-gold-100 rounded-full flex items-center justify-center mx-auto border border-gold-300">
               <Wallet className="w-10 h-10 text-ink" />
             </div>
@@ -312,14 +312,14 @@ export default function Caja() {
                 onClick={handleAbrirCaja}
                 loading={abriendo}
                 loadingText="Abriendo..."
-                className="text-label w-full bg-ink hover:bg-chart-2 anim-press px-8 py-4 rounded-full text-on-ink"
+                className="text-label w-full bg-card border border-line hover:bg-surface anim-press px-8 py-4 rounded-full text-ink"
               >
                 Abrir Caja de Hoy
               </LoadingButton>
             </div>
           </div>
         ) : (
-          <div className="card-surface no-print p-20 text-center">
+          <div className="card-surface card-pad py-10 no-print text-center">
             <p className="text-label text-ink-2">Sin movimientos registrados este día.</p>
           </div>
         )
@@ -341,19 +341,19 @@ export default function Caja() {
               (truncate), ícono 32px arriba a la derecha igual en las
               cuatro, el pill de la primera con overflow-hidden/truncate
               para que nunca se salga de la card. */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div className="card-surface p-4 sm:p-5 min-w-0 flex flex-col">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-grid">
+            <div className="card-surface card-pad min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <p className="text-label text-ink-2 truncate">Neto en caja</p>
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><Wallet size={16} /></div>
               </div>
               <MontoStat fmt={fmtM} value={cajaSeleccionada.total_neto} className="text-ink mb-2" />
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-soft text-success-ink text-label font-medium max-w-full overflow-hidden mt-auto">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success-soft text-success-ink text-label font-medium max-w-full overflow-hidden mt-auto">
                 <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" />
                 <span className="truncate">Arqueado en tiempo real</span>
               </span>
             </div>
-            <div className="card-surface p-4 sm:p-5 min-w-0 flex flex-col">
+            <div className="card-surface card-pad min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <p className="text-label text-ink-2 truncate">Ingresos</p>
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-success-soft flex items-center justify-center text-success-ink"><ArrowDownRight size={16} /></div>
@@ -361,7 +361,7 @@ export default function Caja() {
               <MontoStat fmt={fmtM} value={cajaSeleccionada.total_cobros} size="md" className="text-success-ink mb-2" />
               <p className="text-label text-ink-2 mt-auto truncate">{movimientos.filter((m) => m.tipo_movimiento === 'ingreso' && m.estado !== 'anulado').length} cobro{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'} acreditado{movimientos.filter((m) => m.tipo_movimiento === 'ingreso').length === 1 ? '' : 's'}</p>
             </div>
-            <div className="card-surface p-4 sm:p-5 min-w-0 flex flex-col">
+            <div className="card-surface card-pad min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <p className="text-label text-ink-2 truncate">Egresos</p>
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><ArrowUpRight size={16} /></div>
@@ -369,7 +369,7 @@ export default function Caja() {
               <MontoStat fmt={fmtM} value={cajaSeleccionada.total_gastos} size="md" className="text-ink mb-2" />
               <p className="text-label text-ink-2 mt-auto truncate">{todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id && g.estado !== 'anulado').length > 0 ? `${todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length} gasto(s) cargado(s)` : 'Sin retiros cargados'}</p>
             </div>
-            <div className="card-surface p-4 sm:p-5 min-w-0 flex flex-col">
+            <div className="card-surface card-pad min-w-0 flex flex-col">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <p className="text-label text-ink-2 truncate">Total esperado</p>
                 <div className="shrink-0 w-8 h-8 rounded-inner bg-surface flex items-center justify-center text-ink-2"><Banknote size={16} /></div>
@@ -379,12 +379,12 @@ export default function Caja() {
             </div>
           </div>
 
-          <div className="lg:flex lg:gap-6 lg:items-start">
+          <div className="lg:flex lg:gap-grid lg:items-start">
             {/* Columna izquierda: tabs + movimientos */}
-            <div className="lg:flex-1 lg:min-w-0 space-y-4">
-              <div className="card-surface p-6 sm:p-7 space-y-5">
+            <div className="lg:flex-1 lg:min-w-0 space-y-grid">
+              <div className="card-surface card-pad space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
-                  <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
                     {TABS.map((t) => (
                       <button
                         key={t.value}
@@ -432,7 +432,7 @@ export default function Caja() {
                               >
                                 <td className="py-3 px-2 text-ink-2 font-medium whitespace-nowrap">{formatHora(m.fecha_hora)}</td>
                                 <td className="py-3 px-2 whitespace-nowrap">
-                                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-label font-medium ${m.tipo_movimiento === 'ingreso' ? 'bg-success-soft text-success-ink' : 'bg-danger-soft text-danger'}`}>
+                                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-label font-medium ${m.tipo_movimiento === 'ingreso' ? 'bg-success-soft text-success-ink' : 'bg-danger-soft text-danger'}`}>
                                     <span className={`w-1.5 h-1.5 rounded-full ${m.tipo_movimiento === 'ingreso' ? 'bg-success' : 'bg-danger'}`} />
                                     {m.tipo_movimiento === 'ingreso' ? 'Ingreso' : 'Egreso'}
                                   </span>
@@ -484,7 +484,7 @@ export default function Caja() {
                               {m.cliente_proveedor}{m.unidad ? ` · ${m.unidad}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
                             </p>
                             {m.comprobante && (
-                              <span className="inline-block self-start ml-8 px-2 py-0.5 rounded-swatch bg-card text-label font-semibold text-ink-2">{m.comprobante}</span>
+                              <span className="inline-block self-start ml-8 px-2 py-1 rounded-swatch bg-card text-label font-semibold text-ink-2">{m.comprobante}</span>
                             )}
                           </button>
                         ))}
@@ -558,11 +558,11 @@ export default function Caja() {
               </div>
 
               {/* Mobile/tablet: desglose por medio + alerta + acciones, abajo del todo */}
-              <div className="lg:hidden space-y-4">
+              <div className="lg:hidden space-y-grid">
                 {resumen?.por_medio?.length > 0 && (
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
                     {resumen.por_medio.map((m) => (
-                      <div key={m.medio} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-surface text-label whitespace-nowrap shrink-0">
+                      <div key={m.medio} className="flex items-center gap-2 h-8 px-3 rounded-full bg-surface text-label whitespace-nowrap shrink-0">
                         <span className="text-ink-2">{MEDIO_PAGO_LABEL[m.medio] || m.medio}:</span>
                         <span className="font-semibold text-ink tabular-nums">{fmtM(m.neto)}</span>
                       </div>
@@ -571,7 +571,7 @@ export default function Caja() {
                 )}
                 {resumen?.sin_comprobante?.length > 0 && (
                   <div className="flex items-start gap-3 p-4 bg-gold-100 border border-gold-300 rounded-inner">
-                    <AlertTriangle className="text-ink shrink-0 mt-0.5" size={16} />
+                    <AlertTriangle className="text-ink shrink-0 mt-1" size={16} />
                     <p className="text-label text-ink-2">
                       Hay {resumen.sin_comprobante.length} pago{resumen.sin_comprobante.length > 1 ? 's' : ''} sin comprobante cargado todavía.
                     </p>
@@ -581,7 +581,7 @@ export default function Caja() {
                   <button onClick={() => setMostrarGasto(true)} className="text-label flex items-center gap-2 px-6 py-3 bg-surface hover:bg-line text-ink rounded-full border border-line transition-all">
                     <Plus size={16} /> Registrar Gasto
                   </button>
-                  <button onClick={() => setMostrarCierre(true)} className="text-label flex items-center gap-2 px-6 py-3 bg-ink hover:bg-ink text-on-ink rounded-full transition-all">
+                  <button onClick={() => setMostrarCierre(true)} className="text-label flex items-center gap-2 px-6 py-3 bg-card border border-line hover:bg-surface text-ink rounded-full transition-all">
                     <Lock size={16} /> Cerrar Caja
                   </button>
                 </div>
@@ -607,7 +607,7 @@ export default function Caja() {
             {/* Columna derecha — solo >=1024px: desglose por medio con tiles + acciones (mock). */}
             <aside className="hidden lg:flex lg:w-80 lg:shrink-0 flex-col gap-4 sticky top-4 self-start">
               {resumen?.por_medio?.length > 0 && (
-                <div className="card-surface p-6 space-y-4">
+                <div className="card-surface card-pad space-y-4">
                   <h3 className="text-base font-semibold text-ink">Desglose por Medio de Pago</h3>
                   <div className="space-y-3">
                     {resumen.por_medio.map((m) => {
@@ -630,17 +630,17 @@ export default function Caja() {
 
               {resumen?.sin_comprobante?.length > 0 && (
                 <div className="flex items-start gap-3 p-4 bg-gold-100 border border-gold-300 rounded-inner">
-                  <AlertTriangle className="text-ink shrink-0 mt-0.5" size={16} />
+                  <AlertTriangle className="text-ink shrink-0 mt-1" size={16} />
                   <p className="text-label text-ink-2">
                     Hay {resumen.sin_comprobante.length} pago{resumen.sin_comprobante.length > 1 ? 's' : ''} sin comprobante cargado todavía.
                   </p>
                 </div>
               )}
 
-              <button onClick={() => setMostrarGasto(true)} className="flex items-center justify-center gap-2 px-6 py-3.5 bg-card border border-line hover:bg-surface text-ink rounded-full font-medium text-body transition-all">
+              <button onClick={() => setMostrarGasto(true)} className="flex items-center justify-center gap-2 px-6 py-4 bg-card border border-line hover:bg-surface text-ink rounded-full font-medium text-body transition-all">
                 <Plus size={18} className="text-ink-2" /> Registrar gasto
               </button>
-              <button onClick={() => setMostrarCierre(true)} className="flex items-center justify-center gap-2 px-6 py-3.5 bg-ink hover:bg-ink text-on-ink rounded-full font-medium text-body transition-all">
+              <button onClick={() => setMostrarCierre(true)} className="flex items-center justify-center gap-2 px-6 py-4 bg-card border border-line hover:bg-surface text-ink rounded-full font-medium text-body transition-all">
                 <Lock size={18} /> Cerrar caja diaria
               </button>
             </aside>
@@ -667,7 +667,7 @@ export default function Caja() {
           </div>
 
           {reabriendo && puedeReabrir && (
-            <div className="card-surface no-print p-6 space-y-4 border-gold-300">
+            <div className="card-surface card-pad no-print space-y-4 border-gold-300">
               <div className="flex items-center justify-between">
                 <h3 className="text-label text-ink">Reabrir caja</h3>
                 <button onClick={() => { setReabriendo(false); setMotivoReapertura('') }} className="text-ink-2 hover:text-ink"><X size={18} /></button>
@@ -677,7 +677,7 @@ export default function Caja() {
                 placeholder="Motivo de la reapertura (obligatorio)"
                 className="w-full bg-surface rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none resize-none border border-transparent focus:ring-2 focus:ring-gold"
               />
-              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="text-label w-full py-3 bg-ink hover:bg-chart-2 anim-press disabled:opacity-50 rounded-full transition-all text-on-ink">
+              <button onClick={handleReabrir} disabled={!motivoReapertura.trim()} className="text-label w-full py-3 bg-card border border-line hover:bg-surface anim-press disabled:opacity-50 rounded-full transition-all text-ink">
                 Confirmar reapertura
               </button>
             </div>

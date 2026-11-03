@@ -71,7 +71,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
   if (linkInvalido) {
     return (
       <div className="min-h-dvh flex items-center justify-center bg-canvas px-4">
-        <div className="max-w-sm w-full card-surface p-8 text-center space-y-4">
+        <div className="max-w-sm w-full card-surface card-pad py-10 text-center space-y-4">
           <p className="text-ink font-semibold">El enlace venció o ya se usó.</p>
           <button
             onClick={() => navigate('/recuperar')}
@@ -86,7 +86,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
 
   return (
     <div className="min-h-dvh flex items-center justify-center bg-canvas px-4">
-      <div className="max-w-sm w-full card-surface p-8 space-y-6">
+      <div className="max-w-sm w-full card-surface card-pad py-10 space-y-6">
         <div>
           <h1 className="text-stat text-ink">
             {modoRecuperacion ? 'Elegí tu nueva contraseña' : 'Cambiá tu contraseña'}
@@ -125,7 +125,7 @@ export default function CambiarContrasena({ modoRecuperacion = false }) {
             className="field"
           />
 
-          <div className="space-y-1.5 px-2">
+          <div className="space-y-2 px-2">
             {REQS.map((r) => {
               const ok = r.test(password)
               return (

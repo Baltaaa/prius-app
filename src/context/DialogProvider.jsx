@@ -85,7 +85,7 @@ export function DialogProvider({ children }) {
       {toasts.length > 0 && createPortal(
         <div className="fixed bottom-4 right-4 z-[1100] flex flex-col gap-2 w-[calc(100%-2rem)] max-w-sm">
           {toasts.map((t) => (
-            <div key={t.id} className="surface-pop px-4 py-3 text-body flex items-start gap-2.5 ui-open">
+            <div key={t.id} className="surface-pop px-4 py-3 text-body flex items-start gap-3 ui-open">
               {t.tone === 'success' && <CheckCircle2 size={18} strokeWidth={1.5} className="shrink-0 mt-px text-success-ink" />}
               {t.tone === 'error' && <AlertTriangle size={18} strokeWidth={1.5} className="shrink-0 mt-px text-danger" />}
               <span className="text-ink flex-1 min-w-0">{t.message}</span>

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatFecha, formatRangoFechas, unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
+import { formatFecha, formatRangoFechas, formatUnidad, formatNombre} from '../../lib/format'
 import DateInput from '../../components/inputs/DateInput'
 import { coSocios, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
@@ -26,6 +26,7 @@ import ReservaListaMobile from '../../components/crm/ReservaListaMobile'
 import BottomSheet from '../../components/brand/BottomSheet'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { Filter, Check, Globe, MonitorSmartphone, X, ChevronLeft, LayoutList } from 'lucide-react'
+import UnidadLabel from '../../components/crm/UnidadLabel'
 
 // Identificador legible para la línea "qué se va a afectar" del modal de
 // confirmación — reservas.codigo no existe en el schema (queda para el
@@ -375,14 +376,16 @@ export default function Reservas() {
   // 1280/1366/1440. Origen baja a 56px (solo ícono + tooltip) entre 1280 y
   // 1366 — ver `origenAngosto` — y sube a 88px desde 1440.
   const origenAngosto = isDesktopXL && !isDesktop1440
-  const columnWidths = ['88px', undefined, '104px', '132px', '120px', origenAngosto ? '48px' : '84px']
+  // Con origenAngosto la unidad también va compacta (ícono + número, el tipo
+  // queda en el title): sin eso "Cliente" quedaba en ~74px y partía los nombres.
+  const columnWidths = ['88px', undefined, origenAngosto ? '72px' : '104px', '132px', '120px', origenAngosto ? '48px' : '84px']
 
   // Unidades con una reserva de TEMPORADA activa: quedan tomadas para toda la
   // temporada sin importar qué fecha se elija, así que ni siquiera aparecen
   // como opción para una reserva nueva de período/día — evita un doble
   if (!readyReservas) {
     return (
-      <div className="space-y-6 lg:space-y-10">
+      <div className="space-y-6">
         <div className="flex flex-wrap gap-4">
           <Skeleton className="flex-1 min-w-[160px] h-12" />
           <Skeleton className="w-40 h-12" />
@@ -412,7 +415,7 @@ export default function Reservas() {
     // entre hijos se reparte solo entre los que existen (el div de chips es
     // condicional y ya no necesita el wrapper-truco de antes para no dejar
     // un hueco vacío). Por debajo de lg, layout de siempre sin cambios.
-    <div className="space-y-10 lg:space-y-0 lg:h-full lg:flex lg:flex-col lg:gap-4 anim-fade-up-page">
+    <div className="flex flex-col gap-grid lg:h-full anim-fade-up-page">
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
       <div className="flex flex-wrap gap-2 items-center lg:shrink-0 [&_.field]:bg-card">
@@ -446,7 +449,7 @@ export default function Reservas() {
           </button>
 
           {showFiltros && (
-              <div className="card-surface absolute right-0 mt-2 w-56 overflow-hidden z-50 p-3 space-y-3">
+              <div className="surface-pop absolute right-0 mt-2 w-56 overflow-hidden z-50 p-3 space-y-3">
                 <div>
                   <p className="text-label text-ink-2 mb-1 px-1">Estado de pago</p>
                   {FILTROS_ESTADO.map((f) => (
@@ -499,7 +502,7 @@ export default function Reservas() {
             className="text-label inline-flex items-center gap-2 bg-gold-100 border border-gold-300 text-ink px-4 py-2 rounded-full hover:bg-gold-100 transition-all"
             title="Quitar filtro de unidad"
           >
-            {unidadEmoji(unidadFiltrada.tipo)} {formatUnidad(unidadFiltrada.tipo, unidadFiltrada.numero)} <X size={12} />
+            <UnidadLabel tipo={unidadFiltrada.tipo} numero={unidadFiltrada.numero} /> <X size={12} />
           </button>
         )}
         {(desde || hasta) && !rangoFechaInvalido && (
@@ -555,7 +558,7 @@ export default function Reservas() {
             minmax es el mismo truco que `min-h-0` en flexbox — fuerza la
             fila a los 100% reales del grid sin importar cuánto contenido
             tengan adentro (que scrollea por su cuenta). */}
-        <div className={`${isDesktopXL ? 'grid gap-4' : ''} lg:h-full`} style={isDesktopXL ? { gridTemplateColumns: '3fr 2fr', gridTemplateRows: 'minmax(0, 1fr)' } : undefined}>
+        <div className={`${isDesktopXL ? 'grid gap-grid' : ''} lg:h-full`} style={isDesktopXL ? { gridTemplateColumns: '3fr 2fr', gridTemplateRows: 'minmax(0, 1fr)' } : undefined}>
           <div className="min-w-0 lg:h-full">
       <DataTable
         headers={headers}
@@ -579,17 +582,17 @@ export default function Reservas() {
                 <td className="px-2 py-2 h-14 align-middle text-ink break-words">
                   {formatNombre(res.clientes?.nombre) || 'S/N'}
                   {coSocios(res).length > 0 && (
-                    <p className="text-label text-ink-2 font-normal normal-case mt-0.5">
+                    <p className="text-label text-ink-2 font-normal normal-case mt-1">
                       Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                     </p>
                   )}
                 </td>
-                <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
+                <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap" title={formatUnidad(res.unidades?.tipo, res.unidades?.numero)}><UnidadLabel tipo={res.unidades?.tipo} numero={res.unidades?.numero} soloNumero={origenAngosto} /></td>
                 <td className="px-2 py-2 h-14 align-middle text-ink"><MontoReserva reserva={res} /></td>
                 <td className="px-2 py-2 h-14 align-middle text-center">
                   <div className="flex items-center justify-center gap-2">
                     <StatusBadge status={estadoBadgeStatus(res)} />
-                    <span className="text-label text-ink-2 border border-line rounded-swatch px-1.5 py-0.5 whitespace-nowrap">
+                    <span className="text-label text-ink-2 border border-line rounded-swatch px-2 py-1 whitespace-nowrap">
                       Temporada
                     </span>
                   </div>
@@ -600,7 +603,7 @@ export default function Reservas() {
                       {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
                     </span>
                   ) : (
-                    <span className="text-label inline-flex items-center justify-center gap-1.5 text-ink-2 whitespace-nowrap">
+                    <span className="text-label inline-flex items-center justify-center gap-2 text-ink-2 whitespace-nowrap">
                       {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                       {res.origen === 'web' ? 'Web' : 'Manual'}
                     </span>
@@ -619,12 +622,12 @@ export default function Reservas() {
               <td className="px-2 py-2 h-14 align-middle text-ink break-words">
                 {formatNombre(res.clientes?.nombre) || 'S/N'}
                 {coSocios(res).length > 0 && (
-                  <p className="text-label text-ink-2 font-normal normal-case mt-0.5">
+                  <p className="text-label text-ink-2 font-normal normal-case mt-1">
                     Co-socios: {coSocios(res).map((s) => s.nombre).join(', ')}
                   </p>
                 )}
               </td>
-              <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{unidadEmoji(res.unidades?.tipo)} {formatUnidad(res.unidades?.tipo, res.unidades?.numero)}</td>
+              <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap" title={formatUnidad(res.unidades?.tipo, res.unidades?.numero)}><UnidadLabel tipo={res.unidades?.tipo} numero={res.unidades?.numero} soloNumero={origenAngosto} /></td>
               <td className="px-2 py-2 h-14 align-middle text-ink"><MontoReserva reserva={res} /></td>
               <td className="px-2 py-2 h-14 align-middle text-center">
                 <div className="flex items-center justify-center">
@@ -637,7 +640,7 @@ export default function Reservas() {
                     {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
                   </span>
                 ) : (
-                  <span className="text-label inline-flex items-center justify-center gap-1.5 text-ink-2 whitespace-nowrap">
+                  <span className="text-label inline-flex items-center justify-center gap-2 text-ink-2 whitespace-nowrap">
                     {res.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                     {res.origen === 'web' ? 'Web' : 'Manual'}
                   </span>
@@ -659,7 +662,7 @@ export default function Reservas() {
               oct 2026): nunca cambia de tamaño al elegir/deseleccionar una
               reserva, y el contenido hace fade+shift de 180ms al cambiar. */}
           {isDesktopXL && (
-            <aside className="card-surface hidden xl:flex lg:h-full min-w-0 p-space-lg flex-col overflow-hidden">
+            <aside className="card-surface card-pad hidden xl:flex lg:h-full min-w-0 flex-col overflow-hidden">
               {selectedReserva ? (
                 <div key={selectedReserva.id} className="content-crossfade flex-1 min-h-0 flex flex-col">
                   <ReservaDetalleContent
@@ -699,7 +702,7 @@ export default function Reservas() {
           <div
             ref={drawerOverlay.bind}
             onClick={(e) => e.stopPropagation()}
-            className={`w-[45%] min-w-[360px] h-full bg-card border-l border-line p-space-lg flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}
+            className={`w-[45%] min-w-[360px] h-full bg-card border-l border-line p-6 flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}
           >
             {selectedReserva && (
               <ReservaDetalleContent
@@ -722,7 +725,7 @@ export default function Reservas() {
       {/* Tablet (768-1023px): mismo detalle, como bottom sheet — reusa
           BottomSheet.jsx (B1: animación de apertura/cierre real). */}
       {!isMobile && !isDesktopLG && (
-        <BottomSheet isOpen={!!selectedReserva} onClose={handleCloseDetalle} maxHeightClass="max-h-[88vh]">
+        <BottomSheet isOpen={!!selectedReserva} onClose={handleCloseDetalle} maxHeightClass="max-h-[88dvh]">
           {selectedReserva && (
             <ReservaDetalleContent
               reserva={selectedReserva}
@@ -759,7 +762,7 @@ export default function Reservas() {
             </button>
             <h1 className="text-label text-ink">Detalle Reserva</h1>
           </div>
-          <ScrollFade className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
+          <ScrollFade className="flex-1 overflow-y-auto px-6 pb-6 flex flex-col min-h-0">
             <ReservaDetalleContent
               reserva={mobileDetalleReserva}
               fechaLlegada={fechaLlegada}

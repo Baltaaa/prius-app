@@ -44,14 +44,14 @@ const haceMeses = (n) => {
 function Kpi({ icono: Icono, label, valor, sub, tono = 'neutro' }) {
   const color = tono === 'positivo' ? 'text-success-ink' : tono === 'negativo' ? 'text-danger' : 'text-ink'
   return (
-    <div className="card-surface p-4 flex items-start gap-3">
+    <div className="card-surface card-pad flex items-start gap-3">
       <span className="hidden sm:flex w-9 h-9 shrink-0 rounded-icon bg-surface text-ink-2 items-center justify-center">
         <Icono size={16} />
       </span>
       <div className="min-w-0">
-        <p className="text-label text-ink-2 truncate">{label}</p>
-        <p className={`text-body lg:text-card-title tabular-nums whitespace-nowrap mt-0.5 ${color}`}>{valor}</p>
-        {sub && <p className="text-label text-ink-2 mt-0.5 truncate">{sub}</p>}
+        <p className="text-label text-ink-2">{label}</p>
+        <p className={`text-body lg:text-card-title tabular-nums whitespace-nowrap mt-1 ${color}`}>{valor}</p>
+        {sub && <p className="text-label text-ink-2 mt-1">{sub}</p>}
       </div>
     </div>
   )
@@ -120,9 +120,9 @@ export default function Reportes() {
 
   if (!ready) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-grid">
         <Skeleton className="h-20" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-grid">
           {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}
         </div>
         <Skeleton className="h-96" />
@@ -133,16 +133,16 @@ export default function Reportes() {
   const maxIngreso = Math.max(...serie.map((r) => r.ingresos), 1)
 
   return (
-    <div className="space-y-4 animate-premium-fade">
+    <div className="space-y-grid animate-premium-fade">
       {/* Controles */}
-      <div className="card-surface no-print p-3 flex flex-wrap items-center gap-2">
+      <div className="card-surface no-print p-card flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1 bg-surface p-1 rounded-inner shrink-0">
           {PERIODOS.map((p) => (
             <button
               key={p.value}
               type="button"
               onClick={() => setPeriodo(p.value)}
-              className={`px-3 py-1.5 rounded-icon text-label font-semibold transition-colors ${
+              className={`px-3 py-2 rounded-icon text-label font-semibold transition-colors ${
                 periodo === p.value ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -157,7 +157,7 @@ export default function Reportes() {
               key={x}
               type="button"
               onClick={() => setMoneda(x)}
-              className={`px-3 py-1.5 rounded-icon text-label font-semibold transition-colors ${
+              className={`px-3 py-2 rounded-icon text-label font-semibold transition-colors ${
                 moneda === x ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -172,15 +172,15 @@ export default function Reportes() {
         <div className="flex-1" />
 
         <button onClick={handleWhatsApp} disabled={!linkWa} title={linkWa ? 'Enviar a mi WhatsApp' : 'Cargá tu teléfono en Mi cuenta'}
-          className="h-10 px-3.5 rounded-full bg-success hover:bg-success disabled:opacity-40 disabled:cursor-not-allowed text-on-ink flex items-center gap-2 text-body transition-colors">
+          className="h-10 px-4 rounded-full bg-success hover:bg-success disabled:opacity-40 disabled:cursor-not-allowed text-on-ink flex items-center gap-2 text-body transition-colors">
           <WhatsAppIcon size={15} /> <span className="hidden sm:inline">WhatsApp</span>
         </button>
         <button onClick={() => descargarReporteCsv(datosExport)}
-          className="h-10 px-3.5 rounded-full bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
+          className="h-10 px-4 rounded-full bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
           <Download size={15} /> <span className="hidden sm:inline">CSV</span>
         </button>
         <button onClick={imprimirReporte}
-          className="h-10 px-3.5 rounded-full bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
+          className="h-10 px-4 rounded-full bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
           <Printer size={15} /> <span className="hidden sm:inline">Imprimir / PDF</span>
         </button>
       </div>
@@ -201,7 +201,7 @@ export default function Reportes() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-grid">
         <Kpi icono={Wallet} label="Ingresos" valor={m(totales.ingresos)} sub={`${totales.cantidadPagos} cobros`} tono="positivo" />
         <Kpi icono={Receipt} label="Egresos" valor={m(totales.egresos)} tono="negativo" />
         <Kpi icono={TrendingUp} label="Neto" valor={m(totales.neto)} sub={`Margen ${formatPorcentaje(totales.margen, 1)}`} />
@@ -210,11 +210,11 @@ export default function Reportes() {
 
       {/* Proyección */}
       {proyeccion && (
-        <div className="card-surface p-4 flex flex-wrap items-center gap-4">
+        <div className="card-surface card-pad flex flex-wrap items-center gap-4">
           <span className="w-9 h-9 shrink-0 rounded-icon bg-gold-100 text-ink flex items-center justify-center"><Target size={16} /></span>
           <div className="min-w-0">
             <p className="text-label text-ink-2">Proyección · {proyeccion.label}</p>
-            <p className="text-label text-ink-2 mt-0.5">
+            <p className="text-label text-ink-2 mt-1">
               {formatPorcentaje(proyeccion.pctTranscurrido, 0)} transcurrido · si sigue este ritmo
             </p>
           </div>
@@ -234,7 +234,7 @@ export default function Reportes() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-grid">
         {/* Evolución */}
         <div className="card-surface xl:col-span-2 overflow-hidden flex flex-col">
           <div className="px-4 pt-3 pb-2 flex items-center justify-between">
@@ -258,16 +258,16 @@ export default function Reportes() {
                 <tbody>
                   {[...serie].reverse().map((r) => (
                     <tr key={r.clave} className="border-b border-line last:border-0">
-                      <td className="px-4 py-2.5">
+                      <td className="px-4 py-3">
                         <span className="text-ink font-medium">{r.label}</span>
                         <span className="block w-full h-1 mt-1 rounded-full bg-surface overflow-hidden">
                           <span className="block h-full bg-gold rounded-full" style={{ width: `${(r.ingresos / maxIngreso) * 100}%` }} />
                         </span>
                       </td>
-                      <td className="px-3 py-2.5 text-right tabular-nums text-ink">{m(r.ingresos)}</td>
-                      <td className="px-3 py-2.5 text-right tabular-nums text-ink-2 hidden sm:table-cell">{m(r.egresos)}</td>
-                      <td className={`px-3 py-2.5 text-right tabular-nums font-semibold ${r.neto >= 0 ? 'text-ink' : 'text-danger'}`}>{m(r.neto)}</td>
-                      <td className="px-4 py-2.5 text-right text-label"><Variacion pct={r.variacionIngresos} /></td>
+                      <td className="px-3 py-3 text-right tabular-nums text-ink">{m(r.ingresos)}</td>
+                      <td className="px-3 py-3 text-right tabular-nums text-ink-2 hidden sm:table-cell">{m(r.egresos)}</td>
+                      <td className={`px-3 py-3 text-right tabular-nums font-semibold ${r.neto >= 0 ? 'text-ink' : 'text-danger'}`}>{m(r.neto)}</td>
+                      <td className="px-4 py-3 text-right text-label"><Variacion pct={r.variacionIngresos} /></td>
                     </tr>
                   ))}
                 </tbody>

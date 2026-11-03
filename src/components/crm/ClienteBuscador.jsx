@@ -174,7 +174,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
             setQuery('')
             setTimeout(() => inputRef.current?.focus(), 50)
           }}
-          className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-ink-2 hover:text-ink transition-all"
+          className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center text-ink-2 hover:text-ink transition-all"
           aria-label="Quitar cliente"
         >
           <X size={16} />
@@ -239,7 +239,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
           type="button"
           onClick={handleGuardar}
           disabled={saving}
-          className="text-label w-full py-2.5 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all flex items-center justify-center gap-2 text-on-ink"
+          className="text-label w-full py-3 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all flex items-center justify-center gap-2 text-on-ink"
         >
           <UserPlus size={14} />
           {saving ? 'Guardando...' : 'Guardar Cliente'}
@@ -280,7 +280,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
         <button
           type="button"
           onClick={() => setShowNuevo(true)}
-          className="text-label px-3 py-3 bg-surface border border-line rounded-full text-ink-2 hover:text-ink hover:border-gold-300 transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+          className="text-label px-3 py-3 bg-surface border border-line rounded-full text-ink-2 hover:text-ink hover:border-gold-300 transition-all flex items-center gap-2 shrink-0 whitespace-nowrap"
         >
           <UserPlus size={14} />
           <span>+ Nuevo</span>
@@ -299,7 +299,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
                   key={c.id}
                   type="button"
                   onClick={() => handleSelect(c)}
-                  className={`w-full text-left px-4 py-2.5 flex items-center justify-between gap-2 transition-all ${
+                  className={`w-full text-left px-4 py-3 flex items-center justify-between gap-2 transition-all ${
                     i > 0 ? 'border-t border-line' : ''
                   } ${i === focusedIndex ? 'bg-surface' : 'hover:bg-surface'}`}
                 >

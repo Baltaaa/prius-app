@@ -126,7 +126,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
     <div className={className}>
       {label && (
         <label htmlFor={inputId} className="field-label">
-          {label}{required && <span className="text-danger ml-0.5">*</span>}
+          {label}{required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
       <div className="relative">
@@ -171,9 +171,9 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
         </div>
       )}
       {error ? (
-        <p id={`${inputId}-error`} className="text-label text-danger mt-1.5">{error}</p>
+        <p id={`${inputId}-error`} className="text-label text-danger mt-2">{error}</p>
       ) : hint ? (
-        <p id={`${inputId}-hint`} className="text-label text-ink-2 mt-1.5">{hint}</p>
+        <p id={`${inputId}-hint`} className="text-label text-ink-2 mt-2">{hint}</p>
       ) : null}
     </div>
   )

@@ -56,7 +56,7 @@ export default function TextInput({
     <div className={className}>
       {label && (
         <label htmlFor={inputId} className="field-label">
-          {label}{required && <span className="text-danger ml-0.5">*</span>}
+          {label}{required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
       {as === 'textarea' ? (
@@ -64,7 +64,7 @@ export default function TextInput({
       ) : (
         <input type={type} enterKeyHint="next" onChange={(e) => onChange(e.target.value)} {...commonProps} />
       )}
-      <div className="flex justify-between mt-1.5">
+      <div className="flex justify-between mt-2">
         {error ? (
           <p className="text-label text-danger">{error}</p>
         ) : hint ? (

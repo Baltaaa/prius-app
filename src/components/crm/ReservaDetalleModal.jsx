@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { usePagos } from '../../hooks/usePagos'
-import { formatPesos, formatFecha, unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
+import { formatPesos, formatFecha, formatUnidad, formatNombre} from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { coSocios, pagoSinVerificar, estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToComprobante } from '../../lib/deepLinks'
@@ -9,6 +9,7 @@ import Modal from './Modal'
 import MontoReserva from './MontoReserva'
 import SaldoReserva from './SaldoReserva'
 import StatusBadge from './StatusBadge'
+import UnidadLabel from './UnidadLabel'
 
 const TIPO_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 
@@ -57,7 +58,7 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-label text-ink-2">Unidad</p>
-            <p className="text-label text-ink mt-1">{unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}</p>
+            <p className="text-label text-ink mt-1"><UnidadLabel tipo={reserva.unidades?.tipo} numero={reserva.unidades?.numero} /></p>
           </div>
           <div>
             <p className="text-label text-ink-2">Tipo de alquiler</p>
@@ -120,7 +121,7 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
                     {p.nro_cuota && <span> · Cuota {p.nro_cuota}</span>}
                   </div>
                   {pagoSinVerificar(p) ? (
-                    <strong className="text-label inline-flex items-center gap-1.5 text-ink-2">
+                    <strong className="text-label inline-flex items-center gap-2 text-ink-2">
                       <HelpCircle size={12} /> Sin verificar
                     </strong>
                   ) : (

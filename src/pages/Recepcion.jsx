@@ -14,6 +14,7 @@ import { linkToComprobante } from '../lib/deepLinks'
 import StatusBadge from '../components/crm/StatusBadge'
 import MoneyInput from '../components/inputs/MoneyInput'
 import { supabase } from '../lib/supabase'
+import UnidadLabel from '../components/crm/UnidadLabel'
 
 // Lazy (Fase 1 mobile, oct 2026): EscanearQR importa `html5-qrcode`, que por
 // sí solo pesa ~105KB gzip — antes se importaba eager acá arriba, así que
@@ -33,7 +34,7 @@ function EscanearQRFallback() {
 }
 
 const chipClass = (active) =>
-  `px-3 py-2.5 rounded-full text-label border transition-all min-h-[44px] ${
+  `px-3 py-3 rounded-full text-label border transition-all min-h-[44px] ${
     active ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
   }`
 
@@ -248,17 +249,17 @@ export default function Recepcion() {
 
       <h1 className="sr-only">Recepción</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-grid">
         {/* Columna izquierda: escanear / tipear / llegan hoy */}
-        <div className="space-y-4">
+        <div className="space-y-grid">
           <button
             onClick={() => setScannerOpen(true)}
-            className="text-body font-semibold w-full h-14 bg-ink hover:bg-chart-2 rounded-full transition-all flex items-center justify-center gap-3 text-on-ink"
+            className="text-body font-semibold w-full h-14 bg-card border border-line hover:bg-surface rounded-full transition-all flex items-center justify-center gap-3 text-ink"
           >
             <QrCode size={22} /> Escanear QR
           </button>
 
-          <div className="card-surface p-4 space-y-3">
+          <div className="card-surface card-pad space-y-3">
             <label className="text-label text-ink-2">Código de reserva</label>
             <div className="flex gap-2">
               <input
@@ -279,7 +280,7 @@ export default function Recepcion() {
             {errorBusqueda && <p className="text-label text-danger">{errorBusqueda}</p>}
           </div>
 
-          <div className="card-surface p-4 space-y-3">
+          <div className="card-surface card-pad space-y-3">
             <p className="text-label text-ink-2">Llegan hoy</p>
             {lleganHoy.length === 0 ? (
               <p className="text-label text-ink-2">Nadie con reserva web pendiente de check-in hoy.</p>
@@ -308,11 +309,11 @@ export default function Recepcion() {
         {/* Columna derecha: tarjeta de la reserva cargada */}
         <div>
           {!codigoUrl ? (
-            <div className="card-surface p-8 text-center text-ink-2 text-body">
+            <div className="card-surface card-pad py-10 text-center text-ink-2 text-body">
               Escaneá un QR o cargá un código para empezar.
             </div>
           ) : exito ? (
-            <div className="card-surface p-8 text-center space-y-4">
+            <div className="card-surface card-pad py-10 text-center space-y-4">
               <CheckCircle2 className="mx-auto text-success-ink" size={40} />
               <div>
                 <p className="text-card-title text-ink">Listo — {exito.unidadesLabel}</p>
@@ -333,17 +334,17 @@ export default function Recepcion() {
               )}
               <button
                 onClick={volverAlInicio}
-                className="text-label w-full py-3.5 bg-ink hover:bg-chart-2 rounded-full transition-all text-on-ink"
+                className="text-label w-full py-4 bg-card border border-line hover:bg-surface rounded-full transition-all text-ink"
               >
                 Siguiente cliente
               </button>
             </div>
           ) : !grupo || !primera ? (
-            <div className="card-surface p-8 text-center text-ink-2 text-body">
+            <div className="card-surface card-pad py-10 text-center text-ink-2 text-body">
               No encontramos ese código de reserva.
             </div>
           ) : (
-            <div className="card-surface p-6 space-y-5">
+            <div className="card-surface card-pad space-y-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-label text-ink-2">{codigoRow.codigo}</p>
@@ -357,16 +358,16 @@ export default function Recepcion() {
 
               <div className="flex flex-wrap items-center gap-2">
                 {reservasGrupo.map((r) => (
-                  <span key={r.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface border border-line rounded-icon text-label text-ink">
-                    {unidadEmoji(r.unidades?.tipo)} {formatUnidad(r.unidades?.tipo, r.unidades?.numero)}
+                  <span key={r.id} className="inline-flex items-center gap-2 px-3 py-1 bg-surface border border-line rounded-icon text-label text-ink">
+                    <UnidadLabel tipo={r.unidades?.tipo} numero={r.unidades?.numero} />
                   </span>
                 ))}
               </div>
               {codigoRow.unidades_contiguas === false && (
-                <p className="text-label text-ink flex items-center gap-1.5"><AlertTriangle size={12} /> Las unidades no están juntas.</p>
+                <p className="text-label text-ink flex items-center gap-2"><AlertTriangle size={12} /> Las unidades no están juntas.</p>
               )}
               {coSocios(primera).length > 0 && (
-                <p className="text-label text-ink-2 flex items-center gap-1.5">
+                <p className="text-label text-ink-2 flex items-center gap-2">
                   <UsersIcon size={12} /> Co-socios: {coSocios(primera).map((s) => formatNombre(s.nombre)).join(', ')}
                 </p>
               )}
@@ -374,14 +375,14 @@ export default function Recepcion() {
               <div className="grid grid-cols-2 gap-3 text-label">
                 <div>
                   <p className="text-label text-ink-2">Fechas</p>
-                  <p className="text-ink mt-0.5">
+                  <p className="text-ink mt-1">
                     {primera.tipo_alquiler === 'dia' ? formatFecha(primera.fecha) : formatRangoFechas(primera.fecha_inicio, primera.fecha_fin)}
                     {' · '}{diasEntre(primera.fecha_inicio || primera.fecha, primera.fecha_fin || primera.fecha)} días
                   </p>
                 </div>
                 <div>
                   <p className="text-label text-ink-2">Personas</p>
-                  <p className="text-ink mt-0.5">{reservasGrupo.reduce((acc, r) => acc + (r.cantidad_personas || 0), 0)}</p>
+                  <p className="text-ink mt-1">{reservasGrupo.reduce((acc, r) => acc + (r.cantidad_personas || 0), 0)}</p>
                 </div>
               </div>
 
@@ -424,7 +425,7 @@ export default function Recepcion() {
               )}
 
               {errorCobro && (
-                <p className="text-label text-danger flex items-center gap-1.5">
+                <p className="text-label text-danger flex items-center gap-2">
                   <AlertTriangle size={12} /> {errorCobro.mensaje || MENSAJE_ERROR[errorCobro.error] || 'No se pudo completar la operación.'}
                 </p>
               )}
@@ -434,14 +435,14 @@ export default function Recepcion() {
                   <p className="text-body text-ink flex items-center gap-2"><AlertTriangle size={16} /> Reserva vencida — la unidad se liberó.</p>
                   <button
                     onClick={crearReservaNueva}
-                    className="text-label w-full py-3.5 bg-surface hover:bg-surface border border-line text-ink rounded-inner transition-all"
+                    className="text-label w-full py-4 bg-surface hover:bg-surface border border-line text-ink rounded-inner transition-all"
                   >
                     Crear reserva nueva
                   </button>
                 </div>
               ) : yaCheckin ? (
                 <div className="space-y-3">
-                  <p className="text-label text-ink-2 flex items-center gap-1.5">
+                  <p className="text-label text-ink-2 flex items-center gap-2">
                     <Clock size={13} /> Check-in hecho el {formatFechaHora(codigoRow.checkin_at)}
                     {checkinPorNombre ? ` por ${checkinPorNombre}` : ''}
                   </p>
@@ -449,7 +450,7 @@ export default function Recepcion() {
                     <button
                       disabled={saving}
                       onClick={() => ejecutarCobro({ cobrar: true, hacerCheckin: false })}
-                      className="text-label w-full py-3.5 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all text-on-ink"
+                      className="text-label w-full py-4 bg-card border border-line hover:bg-surface disabled:opacity-50 rounded-full transition-all text-ink"
                     >
                       {saving ? 'Registrando...' : `Registrar pago ${formatPesos(saldoGrupo)}`}
                     </button>
@@ -460,7 +461,7 @@ export default function Recepcion() {
                   <button
                     disabled={saving}
                     onClick={() => ejecutarCobro({ cobrar: true, hacerCheckin: todasHoy })}
-                    className="text-label w-full py-4 bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all text-on-ink"
+                    className="text-label w-full py-4 bg-card border border-line hover:bg-surface disabled:opacity-50 rounded-full transition-all text-ink"
                   >
                     {saving
                       ? 'Procesando...'
@@ -469,7 +470,7 @@ export default function Recepcion() {
                         : `Cobrar por adelantado ${formatPesos(precioAjustado && ajustarPrecio ? precioAjustado : saldoGrupo)}`}
                   </button>
                   {!todasHoy && (
-                    <p className="text-label text-ink-2 flex items-center gap-1.5">
+                    <p className="text-label text-ink-2 flex items-center gap-2">
                       <Clock size={12} /> Llega el {primera.tipo_alquiler === 'dia' ? formatFecha(primera.fecha) : formatFecha(primera.fecha_inicio)}
                     </p>
                   )}
@@ -477,7 +478,7 @@ export default function Recepcion() {
                     <button
                       disabled={saving}
                       onClick={handleCheckinSinCobrar}
-                      className="text-label w-full py-2.5 text-ink-2 hover:text-ink transition-all"
+                      className="text-label w-full py-3 text-ink-2 hover:text-ink transition-all"
                     >
                       Check-in sin cobrar
                     </button>
@@ -496,7 +497,7 @@ export default function Recepcion() {
                   <button
                     disabled={abriendoCaja}
                     onClick={() => handleAbrirCajaYReintentar({ cobrar: true, hacerCheckin: todasHoy })}
-                    className="text-label w-full py-3 min-h-[44px] bg-ink hover:bg-chart-2 disabled:opacity-50 rounded-full transition-all text-on-ink"
+                    className="text-label w-full py-3 min-h-[44px] bg-card border border-line hover:bg-surface disabled:opacity-50 rounded-full transition-all text-ink"
                   >
                     {abriendoCaja ? 'Abriendo...' : 'Abrir caja y cobrar'}
                   </button>

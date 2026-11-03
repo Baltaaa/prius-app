@@ -136,7 +136,7 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
                     <Wind size={10} /> {h.viento != null ? Math.round(h.viento) : '--'}
                   </p>
                   {h.olaAltura != null && (
-                    <p className="text-label text-ink-2 mt-0.5 tabular-nums flex items-center justify-center gap-1">
+                    <p className="text-label text-ink-2 mt-1 tabular-nums flex items-center justify-center gap-1">
                       <Waves size={10} /> {Number(h.olaAltura).toFixed(1)}
                     </p>
                   )}
@@ -160,7 +160,7 @@ export default function ClimaPanel({ isOpen, onClose, clima, loading, selectedDa
         href={WINDGURU_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-label w-full py-3.5 rounded-full bg-ink hover:bg-chart-2 transition-all flex items-center justify-center gap-2 text-on-ink"
+        className="text-label w-full py-4 rounded-full bg-ink hover:bg-chart-2 transition-all flex items-center justify-center gap-2 text-on-ink"
       >
         Ver en Windguru <ExternalLink size={14} />
       </a>

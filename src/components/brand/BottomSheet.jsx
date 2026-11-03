@@ -3,22 +3,26 @@ import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useMountTransition } from '../../hooks/useMountTransition'
+import { useKeyboardInset, centrarCampoEnfocado } from '../../hooks/useKeyboardInset'
 
 // Sheet siempre anclado abajo (a diferencia de Modal, que en desktop se
 // centra) — para pickers, menús "Más" y selectores cortos. `maxHeightClass`
 // por defecto deja margen arriba para que nunca quede pegado al borde
 // superior del viewport (date pickers largos incluidos).
-export default function BottomSheet({ isOpen, onClose, title, children, maxHeightClass = 'max-h-[85dvh]' }) {
+export default function BottomSheet({ isOpen, onClose, title, children, maxHeightClass = 'max-h-[90dvh]' }) {
   const overlayId = useId()
   const { bind } = useOverlay({ id: `prius-sheet-${overlayId}`, isOpen, onRequestClose: () => onClose?.() })
 
   const shouldRender = useMountTransition(isOpen)
+  const tecladoPx = useKeyboardInset(shouldRender)
   if (!shouldRender) return null
 
   return createPortal(
     <div
       className={`fixed inset-0 z-[998] flex items-end justify-center bg-overlay backdrop-blur-sm ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}
       onClick={() => onClose?.()}
+      onFocus={centrarCampoEnfocado}
+      style={{ paddingBottom: tecladoPx || undefined }}
     >
       <div
         ref={bind}

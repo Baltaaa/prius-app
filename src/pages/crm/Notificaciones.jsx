@@ -6,7 +6,7 @@ import NotificacionesBandeja from '../../components/crm/NotificacionesBandeja'
 // si se agrega en el futuro.
 export default function Notificaciones() {
   return (
-    <div className="card-surface overflow-hidden" style={{ height: 'calc(100dvh - 11rem)', minHeight: 420 }}>
+    <div className="card-surface overflow-hidden md:h-[calc(100dvh-11rem)] md:min-h-[420px]">
       <NotificacionesBandeja />
     </div>
   )

@@ -9,7 +9,7 @@ const inputClass =
   'w-full bg-surface rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none font-semibold border border-transparent focus:ring-2 focus:ring-gold'
 
 const chipClass = (active) =>
-  `px-3 py-2.5 rounded-full text-label border transition-all min-h-[44px] ${
+  `px-3 py-3 rounded-full text-label border transition-all min-h-[44px] ${
     active ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
   }`
 
@@ -44,13 +44,13 @@ export default function PagoComprobanteCampos({ form }) {
           se puede corregir a mano; el servidor igual recalcula y rechaza una
           que se aleje más de 30% de la del día. */}
       <div>
-        <div className="flex items-center gap-1 bg-surface p-1 rounded-inner w-fit mb-2.5">
+        <div className="flex items-center gap-1 bg-surface p-1 rounded-inner w-fit mb-3">
           {['ARS', 'USD'].map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => setMoneda(m)}
-              className={`px-3.5 py-1.5 rounded-icon text-label font-semibold transition-colors ${
+              className={`px-4 py-2 rounded-icon text-label font-semibold transition-colors ${
                 moneda === m ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -70,7 +70,7 @@ export default function PagoComprobanteCampos({ form }) {
               simbolo="US$"
               error={excedeSaldo ? `El equivalente en pesos supera el saldo pendiente (${formatPesos(saldo)})` : undefined}
             />
-            <div className="mt-2.5 p-3 bg-surface border border-line rounded-inner space-y-2">
+            <div className="mt-3 p-3 bg-surface border border-line rounded-inner space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <label className="text-label text-ink-2 shrink-0">
                   Cotización
@@ -83,7 +83,7 @@ export default function PagoComprobanteCampos({ form }) {
                   value={tipoCambio ?? ''}
                   onChange={(e) => setTipoCambioManual(e.target.value === '' ? null : Number(e.target.value))}
                   placeholder="—"
-                  className="w-32 text-right bg-surface rounded-inner px-2.5 py-1.5 text-base md:text-body font-semibold text-ink outline-none border border-transparent focus:ring-2 focus:ring-gold"
+                  className="w-32 text-right bg-surface rounded-inner px-3 py-2 text-base md:text-body font-semibold text-ink outline-none border border-transparent focus:ring-2 focus:ring-gold"
                 />
               </div>
               <p className="text-label text-ink-2">
@@ -114,7 +114,7 @@ export default function PagoComprobanteCampos({ form }) {
           />
         )}
         {!excedeSaldo && Number(monto) > 0 && (
-          <p className="text-label text-ink-2 mt-1.5">
+          <p className="text-label text-ink-2 mt-2">
             Se registrará como: <span className="text-ink-2 font-semibold">{tipoLabel}</span>
             {!saldoDesconocido && <> — saldo restante {formatPesos(Math.max(saldo - Number(monto), 0))}</>}
             {saldoDesconocido && <span className="text-ink"> · Saldo sin verificar</span>}

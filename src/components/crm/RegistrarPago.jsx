@@ -268,11 +268,11 @@ export default function RegistrarPago({
         {/* Resumen */}
         {reservaSeleccionada && (
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
+            <div className="p-3 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
               <p className="text-label text-ink-2">Total</p>
               <MontoStat value={total} size="xs" className="text-ink mt-1" />
             </div>
-            <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
+            <div className="p-3 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
               <p className="text-label text-ink-2">Pagado</p>
               {saldoDesconocido ? (
                 <p className="text-body font-semibold text-ink-2 normal-case mt-1">Sin verificar</p>
@@ -280,7 +280,7 @@ export default function RegistrarPago({
                 <MontoStat value={pagado} size="xs" className="text-success-ink mt-1" />
               )}
             </div>
-            <div className="p-2.5 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
+            <div className="p-3 sm:p-3 bg-surface border border-line rounded-inner text-center min-w-0">
               <p className="text-label text-ink-2">Saldo</p>
               {saldoDesconocido ? (
                 <p className="text-body font-semibold text-ink-2 normal-case mt-1">Sin verificar</p>

@@ -102,7 +102,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
       className="fixed inset-0 z-[999] bg-card sm:bg-overlay sm:backdrop-blur-sm sm:flex sm:items-center sm:justify-center sm:p-4"
       onClick={requestClose}
     >
-      <div ref={bind} onClick={(e) => e.stopPropagation()} className="card-surface h-full sm:h-auto sm:max-h-[90vh] w-full sm:max-w-lg sm:rounded-card flex flex-col overflow-hidden">
+      <div ref={bind} onClick={(e) => e.stopPropagation()} className="card-surface h-full sm:h-auto sm:max-h-[90dvh] w-full sm:max-w-lg sm:rounded-card flex flex-col overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-line bg-surface shrink-0">
           <div className="flex items-center gap-3">
             {paso > 0 && (
@@ -112,7 +112,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
             )}
             <div>
               <h2 className="text-label text-ink">Cerrar Caja</h2>
-              <p className="text-label text-ink-2 mt-0.5">Paso {paso + 1} de 3 — {PASOS[paso]}</p>
+              <p className="text-label text-ink-2 mt-1">Paso {paso + 1} de 3 — {PASOS[paso]}</p>
             </div>
           </div>
           <button onClick={requestClose} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-surface rounded-full text-ink-2 hover:text-ink">

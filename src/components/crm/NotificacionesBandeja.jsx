@@ -92,7 +92,7 @@ function ItemNotificacion({ item, onAccion }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-label font-semibold text-ink leading-snug whitespace-normal break-words">{item.titulo}</p>
-        {item.detalle && <p className="text-label text-ink-2 mt-0.5 truncate">{item.detalle}</p>}
+        {item.detalle && <p className="text-label text-ink-2 mt-1 truncate">{item.detalle}</p>}
         <div className="flex items-center gap-2 mt-1">
           <span className="text-label text-ink-2">{formatTiempoRelativo(item.creada_at)}</span>
           {meta.accion && (
@@ -126,7 +126,7 @@ function GrupoColapsado({ grupo, onAccion }) {
         <ChevronDown size={14} className={`text-ink-2 transition-transform ${abierto ? 'rotate-180' : ''}`} />
       </button>
       {abierto && (
-        <div className="pl-4 space-y-0.5">
+        <div className="pl-4 space-y-1">
           {grupo.items.map((item) => <ItemNotificacion key={item.id} item={item} onAccion={onAccion} />)}
         </div>
       )}
@@ -231,7 +231,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
           <button
             type="button"
             onClick={marcarTodoLeido}
-            className="text-label text-ink-2 hover:text-ink transition-all flex items-center gap-1.5"
+            className="text-label text-ink-2 hover:text-ink transition-all flex items-center gap-2"
           >
             <CheckCheck size={12} /> Marcar todo como leído
           </button>

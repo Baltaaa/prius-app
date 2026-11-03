@@ -13,7 +13,7 @@ export default function NotFound() {
       </div>
       <Link
         to="/app/home"
-        className="text-label mt-2 px-5 py-3 bg-ink hover:bg-chart-2 rounded-full transition-all text-on-ink"
+        className="text-label mt-2 px-5 py-3 bg-card border border-line hover:bg-surface rounded-full transition-all text-ink"
       >
         Volver al Home
       </Link>

@@ -28,7 +28,7 @@ export default function SidebarCajaCard({ subtitulo, className = '' }) {
         ) : (
           <div className="mt-1 flex items-center justify-between gap-2">
             <span className="text-body">Sin iniciar</span>
-            <button type="button" onClick={() => navigate('/app/caja')} className="btn btn-gold h-9 min-h-0 px-4">Abrir</button>
+            <button type="button" onClick={() => navigate('/app/caja')} className="btn btn-gold h-11 md:h-9 min-h-0 px-4">Abrir</button>
           </div>
         )}
       </div>

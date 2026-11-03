@@ -25,14 +25,14 @@ import { formatPesos, formatFecha, formatNombre } from '../../lib/format'
 /** Tarjeta blanca de sección, con su ícono y bajada. */
 function BloqueAccion({ icono: Icono, titulo, bajada, children }) {
   return (
-    <section className="card-surface p-4 md:p-5 flex flex-col gap-4 anim-fade-up">
+    <section className="card-surface card-pad flex flex-col gap-4 anim-fade-up">
       <header className="flex items-start gap-3">
         <span className="shrink-0 w-10 h-10 rounded-inner bg-surface text-ink flex items-center justify-center">
           <Icono size={18} />
         </span>
         <div className="min-w-0">
           <h2 className="text-body text-ink">{titulo}</h2>
-          <p className="text-label text-ink-2 mt-0.5">{bajada}</p>
+          <p className="text-label text-ink-2 mt-1">{bajada}</p>
         </div>
       </header>
       {children}
@@ -107,15 +107,15 @@ export default function Perfil() {
     // el botón de "Guardar cotización", que es el último de la página.
     <div className="space-y-3 anim-fade-up-page pb-bottom-nav-safe md:pb-0">
       {/* Perfil compacto */}
-      <section className="card-surface p-4 md:p-5">
+      <section className="card-surface card-pad ">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex items-center gap-3 min-w-0 md:flex-1">
             <span className="shrink-0 w-14 h-14 rounded-card bg-gold text-ink flex items-center justify-center text-stat">
               {inicial}
             </span>
             <div className="min-w-0">
-              <h1 className="text-card-title text-ink truncate">{nombreMostrado}</h1>
-              <p className="text-label text-ink-2 mt-0.5">Administración general</p>
+              <h1 className="text-card-title text-ink break-words">{nombreMostrado}</h1>
+              <p className="text-label text-ink-2 mt-1">Administración general</p>
             </div>
           </div>
 
@@ -126,12 +126,12 @@ export default function Perfil() {
             </div>
             <div className="bg-surface rounded-inner px-3 py-2 flex items-center justify-between gap-3">
               <p className="text-label text-ink-2">Seguridad</p>
-              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-icon bg-success-soft text-success-ink text-label">
+              <span className="inline-flex items-center gap-2 px-2 py-1 rounded-icon bg-success-soft text-success-ink text-label">
                 <Shield size={11} /> Protegida
               </span>
             </div>
             {perfil?.rol && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-inner bg-ink text-on-ink text-label justify-center">
+              <span className="inline-flex items-center gap-2 px-3 py-2 rounded-inner bg-ink text-on-ink text-label justify-center">
                 {perfil.rol}
               </span>
             )}
@@ -139,7 +139,7 @@ export default function Perfil() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-grid items-start">
         {/* Tarifas base */}
         <BloqueAccion
           icono={DollarSign}
@@ -147,12 +147,12 @@ export default function Perfil() {
           bajada="Valores de referencia para alquileres de temporada."
         >
           <div className="space-y-3">
-            <MoneyInput label="🏠 Precio base carpa" value={tarifaCarpa} onChange={setTarifaCarpa} max={100_000_000} />
-            <MoneyInput label="⛱️ Precio base sombrilla" value={tarifaSombrilla} onChange={setTarifaSombrilla} max={100_000_000} />
+            <MoneyInput label="Precio base carpa" value={tarifaCarpa} onChange={setTarifaCarpa} max={100_000_000} />
+            <MoneyInput label="Precio base sombrilla" value={tarifaSombrilla} onChange={setTarifaSombrilla} max={100_000_000} />
           </div>
 
           <p className="text-label text-ink-2 flex items-start gap-2">
-            <Info size={13} className="shrink-0 mt-0.5 text-ink-2" />
+            <Info size={13} className="shrink-0 mt-1 text-ink-2" />
             Las tarifas actualizadas impactan en las nuevas reservas del plano y en el cálculo de presupuestos.
           </p>
 
@@ -160,7 +160,7 @@ export default function Perfil() {
             onClick={handleGuardarTarifas}
             disabled={!tarifasSucias && !saved}
             className={`${botonPrimario} ${
-              saved ? 'bg-success-soft text-success-ink' : 'bg-ink hover:bg-chart-2 text-on-ink'
+              saved ? 'bg-success-soft text-success-ink' : 'bg-card border border-line hover:bg-surface text-ink'
             }`}
           >
             {saved ? <><Check size={16} /> Tarifas guardadas</> : <><Save size={16} /> Actualizar tarifas</>}
@@ -174,7 +174,7 @@ export default function Perfil() {
           bajada="Define qué cotización se usa para convertir a pesos los pagos en dólares. El peso sigue siendo la moneda de la caja y los reportes."
         >
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5 min-w-0">
+            <div className="space-y-2 min-w-0">
               <label className="text-label text-ink-2">Fuente</label>
               <BrandSelect
                 value={tcTipo}
@@ -183,7 +183,7 @@ export default function Perfil() {
                 options={[{ value: 'oficial', label: 'Oficial' }, { value: 'blue', label: 'Blue' }]}
               />
             </div>
-            <div className="space-y-1.5 min-w-0">
+            <div className="space-y-2 min-w-0">
               <label className="text-label text-ink-2">Valor</label>
               <BrandSelect
                 value={tcLado}
@@ -199,12 +199,12 @@ export default function Perfil() {
               <p className="text-label text-ink-2">Cotización utilizada</p>
               <span className="text-label text-ink-2">ARS / USD</span>
             </div>
-            <div className="flex items-center justify-between gap-2 flex-wrap mt-1.5">
+            <div className="flex items-center justify-between gap-2 flex-wrap mt-2">
               <p className="text-card-title text-ink tabular-nums">{tc.valor ? formatPesos(tc.valor) : '—'}</p>
               {/* Chip ámbar si la cotización no es de hoy, verde si está al día. */}
               {tc.fecha && (
                 <span
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-icon text-label ${
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-icon text-label ${
                     tc.stale ? 'bg-gold-100 text-ink' : 'bg-success-soft text-success-ink'
                   }`}
                 >
@@ -220,7 +220,7 @@ export default function Perfil() {
               loadingText="Guardando…"
               onClick={handleGuardarCotizacion}
               disabled={!cotizacionSucia}
-              className={`${botonPrimario} bg-ink hover:bg-chart-2 text-on-ink`}
+              className={`${botonPrimario} bg-card border border-line hover:bg-surface text-ink`}
             >
               <Save size={16} /> Guardar cotización
             </LoadingButton>

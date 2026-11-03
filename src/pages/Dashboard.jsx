@@ -554,11 +554,11 @@ export default function Dashboard() {
     // botón ahora vive DENTRO de esa barra, no flotando sobre el mapa.
     const extraButtonsViewport = (
       fullscreen ? (
-        <button onClick={() => setFullscreenOpen(false)} className="w-9 h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Cerrar pantalla completa">
+        <button onClick={() => setFullscreenOpen(false)} className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Cerrar pantalla completa">
           <Shrink size={16} />
         </button>
       ) : (
-        <button onClick={() => setFullscreenOpen(true)} className="w-9 h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Ver en pantalla completa">
+        <button onClick={() => setFullscreenOpen(true)} className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Ver en pantalla completa">
           <Expand size={16} />
         </button>
       )
@@ -612,16 +612,16 @@ export default function Dashboard() {
     const diaSemana = new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-AR', { weekday: 'short' }).toUpperCase().replace('.', '')
 
     return (
-      <div className="flex-1 min-h-0 flex flex-col gap-2.5">
+      <div className="flex-1 min-h-0 flex flex-col gap-3">
         {/* Franja superior */}
-        <div className="card-surface p-2.5 md:p-3 flex flex-col gap-2 shrink-0">
+        <div className="card-surface p-card flex flex-col gap-2 shrink-0">
           <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap">
             {/* Selector de fecha */}
-            <div className="flex items-center gap-0.5 bg-surface p-0.5 rounded-inner shrink-0">
-              <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-9 h-9 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día anterior">
+            <div className="flex items-center gap-1 bg-surface p-1 rounded-inner shrink-0">
+              <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-11 h-11 md:w-9 md:h-9 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día anterior">
                 <ChevronLeft size={16} />
               </button>
-              <div className="flex items-center gap-1.5 px-1">
+              <div className="flex items-center gap-2 px-1">
                 {/* calendarOnly: mismo DateInput/calendario de siempre, con el
                     look del mock (texto + día de semana) en vez del input
                     con borde por defecto — "el mismo selector y handler". */}
@@ -631,7 +631,7 @@ export default function Dashboard() {
                   <button onClick={() => goToDate(todayStr())} className="text-label text-ink hover:text-ink ml-1 shrink-0">Hoy</button>
                 )}
               </div>
-              <button onClick={() => goToDate(shiftDate(selectedDate, 1))} className="w-9 h-9 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día siguiente">
+              <button onClick={() => goToDate(shiftDate(selectedDate, 1))} className="w-11 h-11 md:w-9 md:h-9 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día siguiente">
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -643,7 +643,7 @@ export default function Dashboard() {
                   <span className="w-8 h-8 shrink-0 rounded-icon bg-ink text-on-ink flex items-center justify-center"><CalendarDays size={16} /></span>
                   <span className="min-w-0">
                     <span className="block text-label text-ink-2 truncate">Ocupadas</span>
-                    <span className="flex items-baseline gap-1.5">
+                    <span className="flex items-baseline gap-2">
                       <span className="text-body text-ink tabular-nums">{planoStats.ocupacion.count}</span>
                       <span className="text-label text-ink-2">{pct(planoStats.ocupacion.pct)}</span>
                     </span>
@@ -653,7 +653,7 @@ export default function Dashboard() {
                   <span className="w-8 h-8 shrink-0 rounded-icon bg-success-soft text-success-ink flex items-center justify-center"><CheckCircle2 size={16} /></span>
                   <span className="min-w-0">
                     <span className="block text-label text-ink-2 truncate">Libres</span>
-                    <span className="flex items-baseline gap-1.5">
+                    <span className="flex items-baseline gap-2">
                       <span className="text-body text-ink tabular-nums">{planoStats.libres.count}</span>
                       <span className="text-label text-success-ink font-semibold">{pct(planoStats.libres.count / Math.max(1, planoStats.ocupacion.total))}</span>
                     </span>
@@ -669,19 +669,19 @@ export default function Dashboard() {
               </div>
             )}
 
-            <button onClick={() => window.print()} className="h-10 px-3.5 bg-surface hover:bg-line text-ink rounded-full flex items-center gap-2 text-body shrink-0 transition-colors">
-              <Printer size={16} /> <span className="hidden sm:inline">Imprimir A4</span>
+            <button onClick={() => window.print()} title="Imprimir A4" aria-label="Imprimir A4" className="h-10 w-10 2xl:w-auto 2xl:px-4 bg-surface hover:bg-line text-ink rounded-full flex items-center justify-center gap-2 text-body shrink-0 transition-colors">
+              <Printer size={16} /> <span className="hidden 2xl:inline">Imprimir A4</span>
             </button>
           </div>
 
           {/* Filtros: tipo + estado + leyenda */}
-          <div className="flex items-center gap-2 overflow-x-auto md:flex-wrap pb-0.5 md:pb-0 scrollbar-none">
+          <div className="flex items-center gap-2 overflow-x-auto md:flex-wrap pb-1 md:pb-0 scrollbar-none">
             <div className="flex items-center bg-surface p-1 rounded-full gap-1 shrink-0">
               {[['todo', 'Todo', planoStats?.ocupacion.total], ['carpas', 'Carpas', planoStats?.carpas.total], ['sombrillas', 'Sombrillas', planoStats?.sombrillas.total]].map(([key, label, total]) => (
                 <button
                   key={key}
                   onClick={() => key === 'todo' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
-                  className={`px-3 py-0.5 rounded-full text-label whitespace-nowrap transition-colors ${
+                  className={`px-3 py-1 rounded-full text-label whitespace-nowrap transition-colors ${
                     (key === 'todo' ? !statsFiltro : statsFiltro === key) ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
                   }`}
                 >
@@ -690,7 +690,7 @@ export default function Dashboard() {
               ))}
             </div>
             <div className="w-px h-5 bg-line shrink-0 hidden sm:block" />
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {[['todas', 'Todas', null], ['libres', 'Libres', planoStats?.libres.count], ['ocupacion', 'Ocupadas', planoStats?.ocupacion.count], ['pendientes', 'Pendientes', planoStats?.pendientes.count]].map(([key, label, count]) => (
                 <button
                   key={key}
@@ -718,7 +718,7 @@ export default function Dashboard() {
                 <span className="text-label">Pasillo A · Pasillo B · Pasillo C</span>
               </span>
               {realtimeConectado && (
-                <span className="hidden sm:inline-flex items-center gap-1.5 bg-surface px-3 py-1 rounded-full text-ink-2">
+                <span className="hidden sm:inline-flex items-center gap-2 bg-surface px-3 py-1 rounded-full text-ink-2">
                   <span className="w-2 h-2 rounded-full bg-success" />
                   <span className="text-label">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
                 </span>
@@ -799,7 +799,7 @@ export default function Dashboard() {
           <div
             ref={bindFullscreen}
             onClick={(e) => e.stopPropagation()}
-            className="card-surface plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90vh] sm:rounded-card overflow-hidden flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
+            className="card-surface plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90dvh] sm:rounded-card overflow-hidden flex flex-col space-y-4 p-card animate-in zoom-in-95 duration-200"
           >
             {renderPlanoBody(true)}
           </div>

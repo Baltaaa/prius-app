@@ -23,7 +23,7 @@ const ESTADOS = {
 export default function StatusBadge({ status }) {
   const { color, label, icon: Icon } = ESTADOS[status?.toLowerCase()] || { color: COLOR_ESTADO.neutro, label: status }
   return (
-    <span className={`inline-flex items-center gap-1 h-6 px-2.5 rounded-full border text-label whitespace-nowrap ${color.bg} ${color.border} ${color.text}`}>
+    <span className={`inline-flex items-center gap-1 h-6 px-3 rounded-full border text-label whitespace-nowrap ${color.bg} ${color.border} ${color.text}`}>
       {Icon && <Icon size={12} strokeWidth={1.5} />}
       {label}
     </span>

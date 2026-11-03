@@ -3,7 +3,7 @@
 export default function PageHeader({ title, shortTitle, greeting = false, children }) {
   return (
     <div className="min-w-0">
-      <h1 className={`text-[20px] leading-7 md:text-page ${greeting ? 'xl:text-greeting' : ''} text-ink truncate`}>
+      <h1 title={title} className={`text-[20px] leading-7 md:text-page ${greeting ? 'xl:text-greeting' : ''} text-ink truncate`}>
         {shortTitle ? <><span className="xl:hidden">{shortTitle}</span><span className="hidden xl:inline">{title}</span></> : title}
       </h1>
       {children}

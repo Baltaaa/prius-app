@@ -371,7 +371,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
               </span>
               <span className="text-label text-ink-2">{MOBILE_STEPS[mobileStep]}</span>
             </div>
-            <div className="h-1 rounded-full bg-surface overflow-hidden flex gap-0.5">
+            <div className="h-1 rounded-full bg-surface overflow-hidden flex gap-1">
               {MOBILE_STEPS.map((s, i) => (
                 <div key={s} className={`flex-1 rounded-full ${i <= mobileStep ? 'bg-gold' : 'bg-line'}`} />
               ))}
@@ -568,7 +568,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
 
           <div className="p-4 bg-surface border border-gold-300 rounded-inner space-y-2">
             <p className="text-label text-ink">Resumen</p>
-            <div className="grid grid-cols-2 gap-y-1.5 text-label">
+            <div className="grid grid-cols-2 gap-y-2 text-label">
               <span className="text-label text-ink-2">Unidad</span>
               <span className="text-ink font-semibold text-right truncate">
                 {opcionesUnidad.find((o) => o.value === unidadId)?.label || '—'}

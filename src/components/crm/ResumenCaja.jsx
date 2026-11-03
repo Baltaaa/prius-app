@@ -16,7 +16,7 @@ const MEDIO_ICONO = {
 }
 
 const Section = ({ title, icon: Icon, children }) => (
-  <div className="card-surface p-6 space-y-4">
+  <div className="card-surface card-pad space-y-4">
     <h3 className="text-body font-semibold text-ink flex items-center gap-2">
       {Icon && <Icon size={16} className="text-ink-2" />} {title}
     </h3>
@@ -119,10 +119,10 @@ export default function ResumenCaja({ resumen }) {
             <div className="divide-y divide-divider">
               {(arqueo.por_medio || []).map((m) => (
                 <div key={m.medio} className="py-3 first:pt-0">
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center justify-between gap-2 mb-2">
                     <span className="text-body font-semibold text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
                     {!m.declarado && (
-                      <span className="text-label text-ink-2 bg-surface border border-line rounded-full px-2 py-0.5">
+                      <span className="text-label text-ink-2 bg-surface border border-line rounded-full px-2 py-1">
                         Sin declarar
                       </span>
                     )}
@@ -166,7 +166,7 @@ export default function ResumenCaja({ resumen }) {
               <Fila label="Primer / último comprobante" value={`${z.primer_comprobante || '—'} / ${z.ultimo_comprobante || '—'}`} />
               {(Number(z.comparacion?.diferencia_total) !== 0 || Number(z.comparacion?.diferencia_cantidad) !== 0) && (
                 <div className="flex items-start gap-2 mt-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
-                  <AlertTriangle className="text-ink shrink-0 mt-0.5" size={14} />
+                  <AlertTriangle className="text-ink shrink-0 mt-1" size={14} />
                   <p className="text-label text-ink-2">
                     Diferencia vs. lo registrado en el sistema: {formatPesos(z.comparacion.diferencia_total)} en monto,
                     {' '}{z.comparacion.diferencia_cantidad} en cantidad de comprobantes.
@@ -195,11 +195,11 @@ export default function ResumenCaja({ resumen }) {
             {(por_medio || []).length === 0 ? (
               <p className="text-label text-ink-2">Sin movimientos.</p>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {por_medio.map((m) => {
                   const Icono = MEDIO_ICONO[m.medio] || Banknote
                   return (
-                    <div key={m.medio} className="bg-surface rounded-inner p-3.5 flex items-center justify-between gap-3">
+                    <div key={m.medio} className="bg-surface rounded-inner p-4 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-icon bg-card flex items-center justify-center text-ink-2 shrink-0">
                           <Icono size={16} />

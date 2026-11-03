@@ -175,7 +175,7 @@ export default function Login({ modo }) {
   // se usan, siempre el logo/imagen reales de la app.
   const inputBase =
     "w-full h-12 px-4 rounded-inner bg-surface text-ink placeholder:text-ink-2 outline-none transition-colors motion-reduce:transition-none focus:ring-2 focus:ring-gold border border-transparent focus:ring-2 focus:ring-gold"
-  const labelBase = "block text-label font-semibold text-ink-2 mb-1.5"
+  const labelBase = "block text-label font-semibold text-ink-2 mb-2"
 
   // Aviso de inactividad/error — mismo bloque, se renderiza en DOS lugares
   // distintos según breakpoint (desktop: arriba de los campos; mobile:
@@ -184,7 +184,7 @@ export default function Login({ modo }) {
   const aviso = (
     <div aria-live="polite" className="space-y-3">
       {motivo === "inactividad" && !error && !isLocked && (
-        <div className="p-3 bg-surface border border-line rounded-swatch flex items-center gap-2.5">
+        <div className="p-3 bg-surface border border-line rounded-swatch flex items-center gap-3">
           <AlertCircle size={16} className="text-ink-2 shrink-0" />
           <span className="text-label font-medium text-ink-2">
             Cerramos tu sesión por inactividad. Volvé a ingresar para continuar.
@@ -193,7 +193,7 @@ export default function Login({ modo }) {
       )}
 
       {isLocked && (
-        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5">
+        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-3">
           <AlertCircle size={16} className="text-danger shrink-0" />
           <span className="text-label font-semibold text-danger-ink">
             Demasiados intentos. Probá de nuevo en {lockCountdown}s.
@@ -202,7 +202,7 @@ export default function Login({ modo }) {
       )}
 
       {error && !isLocked && (
-        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
+        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-3 animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
           <AlertCircle size={16} className="text-danger shrink-0" />
           <span className="text-label font-semibold text-danger-ink">{error}</span>
         </div>
@@ -254,13 +254,13 @@ export default function Login({ modo }) {
               <img src="/images/prius-icon.png" alt="" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
               <div className="leading-tight">
                 <p className="text-on-ink text-card-title md:text-card-title tracking-tight">Prius</p>
-                <p className="text-label text-on-ink/70 -mt-0.5">Playa Grande</p>
+                <p className="text-label text-on-ink/70 -mt-1">Playa Grande</p>
               </div>
             </div>
 
             {/* Bloque central — solo desktop (mock 06-login-desktop) */}
             <div className="hidden md:block max-w-md">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-on-ink/10 border border-on-ink/20 text-on-ink text-label font-semibold mb-6">
+              <span className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-on-ink/10 border border-on-ink/20 text-on-ink text-label font-semibold mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" /> Panel de Gestión y Operaciones
               </span>
               <h2 className="text-stat lg:text-greeting text-on-ink">
@@ -333,7 +333,7 @@ export default function Login({ modo }) {
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center justify-between mb-2">
                         <label htmlFor="login-password" className={labelBase + " mb-0"}>Contraseña</label>
                         <button
                           type="button"
@@ -368,7 +368,7 @@ export default function Login({ modo }) {
                         </button>
                       </div>
                       {capsLockOn && (
-                        <p className="text-label text-ink mt-1.5 flex items-center gap-1" aria-live="polite">
+                        <p className="text-label text-ink mt-2 flex items-center gap-1" aria-live="polite">
                           <AlertCircle size={12} /> Bloq Mayús activado
                         </p>
                       )}
@@ -445,7 +445,7 @@ export default function Login({ modo }) {
                       </div>
 
                       {recoverStatus === "error" && (
-                        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5" aria-live="polite">
+                        <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-3" aria-live="polite">
                           <AlertCircle size={16} className="text-danger shrink-0" />
                           <span className="text-label font-semibold text-danger-ink">No pudimos enviar el correo. Probá de nuevo.</span>
                         </div>
@@ -462,7 +462,7 @@ export default function Login({ modo }) {
                       <button
                         type="button"
                         onClick={() => setMode("login")}
-                        className="w-full text-center text-label font-semibold text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none flex items-center justify-center gap-1.5"
+                        className="w-full text-center text-label font-semibold text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none flex items-center justify-center gap-2"
                       >
                         <ArrowLeft size={14} /> Volver
                       </button>

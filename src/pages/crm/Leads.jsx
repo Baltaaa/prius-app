@@ -83,7 +83,7 @@ export default function Leads() {
   }
 
   return (
-    <div className="space-y-8 animate-premium-fade">
+    <div className="space-y-6 animate-premium-fade">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap gap-2">
           {FILTROS.map((f) => (
@@ -108,13 +108,13 @@ export default function Leads() {
       </div>
 
       {visibles.length === 0 && (
-        <div className="card-surface text-label p-12 text-center text-ink-2 flex flex-col items-center gap-3">
+        <div className="card-surface card-pad py-10 text-label text-center text-ink-2 flex flex-col items-center gap-3">
           <Inbox size={28} className="opacity-40" />
           Sin leads en esta vista
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-grid">
         {visibles.map((lead) => {
           const estado = lead.estado || 'nuevo'
           const meta = ESTADO_META[estado] || ESTADO_META.nuevo
@@ -139,7 +139,7 @@ export default function Leads() {
                     <span className="w-2 h-2 rounded-full bg-gold shrink-0" />
                   )}
                   <h3 className="text-base font-semibold text-ink break-words">{lead.nombre}</h3>
-                  <span className={`text-label px-2 py-0.5 rounded-full ${meta.cls}`}>
+                  <span className={`text-label px-2 py-1 rounded-full ${meta.cls}`}>
                     {meta.label}
                   </span>
                 </div>
@@ -153,16 +153,16 @@ export default function Leads() {
                 <p className="text-body text-ink-2 mt-3 whitespace-pre-wrap break-words">{lead.mensaje}</p>
               )}
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 text-label text-ink-2">
-                <span className="inline-flex items-center gap-1.5 break-all">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-label text-ink-2">
+                <span className="inline-flex items-center gap-2 break-all">
                   <Phone size={12} className="text-ink-2 shrink-0" /> {telMostrado}
                   {!wa && (
-                    <span className="text-label px-1.5 py-0.5 rounded-full bg-gold-100 text-ink shrink-0">
+                    <span className="text-label px-2 py-1 rounded-full bg-gold-100 text-ink shrink-0">
                       A revisar
                     </span>
                   )}
                 </span>
-                <a href={`mailto:${lead.email}`} className="inline-flex items-center gap-1.5 hover:text-ink break-all">
+                <a href={`mailto:${lead.email}`} className="inline-flex items-center gap-2 hover:text-ink break-all">
                   <Mail size={12} className="text-ink-2 shrink-0" /> {lead.email}
                 </a>
               </div>

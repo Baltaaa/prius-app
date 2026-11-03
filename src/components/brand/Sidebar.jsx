@@ -98,7 +98,7 @@ export default function Sidebar() {
     >
       <item.icon size={20} strokeWidth={1.5} className="relative shrink-0" />
       <span className="relative min-w-0 whitespace-nowrap">{item.name}</span>
-      {item.comingSoon && <span className="relative ml-auto text-label text-ink-2">Pronto</span>}
+      {item.comingSoon && <span className="relative ml-auto inline-flex items-center h-6 px-2 rounded-full bg-surface text-label text-ink-2">Pronto</span>}
       {item.badge > 0 && <CountBadge value={item.badge} className="relative ml-auto" />}
     </NavLink>
   )
@@ -117,11 +117,11 @@ export default function Sidebar() {
         <span ref={indicador} aria-hidden="true" className="absolute top-0 inset-x-3 rounded-nav bg-surface opacity-0 nav-indicador" />
         <nav aria-label="Gestión operativa">
           <h2 className="px-3 mb-1 text-label text-ink-2">Gestión operativa</h2>
-          <div className="space-y-0.5">{mainNav.map(renderItem)}</div>
+          <div className="space-y-1">{mainNav.map(renderItem)}</div>
         </nav>
         <nav aria-label="Módulos adicionales">
           <h2 className="px-3 mb-1 text-label text-ink-2">Módulos adicionales</h2>
-          <div className="space-y-0.5">{additionalNav.map(renderItem)}</div>
+          <div className="space-y-1">{additionalNav.map(renderItem)}</div>
         </nav>
       </div>
 
@@ -131,7 +131,7 @@ export default function Sidebar() {
           <button
             onClick={() => navigate('/app/perfil')}
             title={APP_VERSION}
-            className="flex-1 min-w-0 flex items-center gap-3 p-1.5 rounded-nav hover:bg-surface transition-colors text-left"
+            className="flex-1 min-w-0 flex items-center gap-3 p-2 rounded-nav hover:bg-surface transition-colors text-left"
           >
             <span className="w-9 h-9 rounded-full bg-ink text-on-ink flex items-center justify-center text-body shrink-0">
               {nombreMostrado.charAt(0).toUpperCase()}

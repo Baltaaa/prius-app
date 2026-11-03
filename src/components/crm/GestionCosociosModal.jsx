@@ -69,7 +69,7 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
             de mostrarse en una caja con pinta de input (confundía: parecía
             editable). Ahora es un bloque de solo lectura con avatar de
             iniciales, mismo lenguaje visual que las cards de Clientes. */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-ink text-on-ink flex items-center justify-center text-label font-semibold shrink-0">
             {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
           </div>
@@ -84,7 +84,7 @@ export default function GestionCosociosModal({ isOpen, onClose, reserva, pagos =
         ) : (
           <div className="space-y-2">
             {socios.map((s) => (
-              <div key={s.id} className="flex items-center justify-between gap-2 px-3 py-2.5 bg-surface border border-line rounded-inner">
+              <div key={s.id} className="flex items-center justify-between gap-2 px-3 py-3 bg-surface border border-line rounded-inner">
                 <span className="text-body font-semibold text-ink truncate">{formatNombre(s.nombre)}</span>
                 {puedeQuitarCosocio && (
                   <button

@@ -54,7 +54,7 @@ export default function CabinasLockers() {
   return (
     <div className="space-y-6 animate-premium-fade">
       {/* Aviso de sección en desarrollo */}
-      <div className="card-surface border-gold-300 bg-gold-100 p-4 sm:p-5 flex items-start gap-3">
+      <div className="card-surface card-pad border-gold-300 bg-gold-100 flex items-start gap-3">
         <div className="w-10 h-10 rounded-inner bg-gold-100 border border-gold-300 flex items-center justify-center shrink-0">
           <Construction size={18} className="text-ink" />
         </div>
@@ -64,14 +64,14 @@ export default function CabinasLockers() {
       </div>
 
       {/* Resumen */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-grid">
         {[
           { label: 'Cabinas', value: resumen.cabinas.total, icon: DoorClosed },
           { label: 'Lockers', value: resumen.lockers.total, icon: Lock },
           { label: 'Ocupados', value: resumen.cabinas.ocupadas + resumen.lockers.ocupadas, icon: Wallet },
           { label: 'Libres', value: resumen.cabinas.libres + resumen.lockers.libres, icon: UserPlus },
         ].map((kpi) => (
-          <div key={kpi.label} className="card-surface p-4 sm:p-5 min-w-0">
+          <div key={kpi.label} className="card-surface card-pad min-w-0">
             <div className="w-9 h-9 rounded-icon bg-surface border border-line flex items-center justify-center mb-3">
               <kpi.icon size={16} className="text-ink-2" />
             </div>
@@ -88,11 +88,11 @@ export default function CabinasLockers() {
       )}
 
       {/* Grilla de unidades */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-grid">
         {items.map((item) => (
-          <div key={item.id} className="card-surface p-4 space-y-3 relative">
+          <div key={item.id} className="card-surface card-pad space-y-3 relative">
             {esEjemplo && (
-              <span className="text-label absolute top-3 right-3 text-ink-2 border border-line rounded-swatch px-1.5 py-0.5">
+              <span className="text-label absolute top-3 right-3 text-ink-2 border border-line rounded-swatch px-2 py-1">
                 Ejemplo
               </span>
             )}
@@ -100,7 +100,7 @@ export default function CabinasLockers() {
               {item.tipo === 'cabina' ? <DoorClosed size={16} className="text-ink-2" /> : <Lock size={16} className="text-ink-2" />}
               <p className="text-label text-ink">{TIPO_LABEL[item.tipo]} {item.numero}</p>
             </div>
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-swatch text-label font-semibold border ${
+            <span className={`inline-flex items-center px-2 py-1 rounded-swatch text-label font-semibold border ${
               item.estado === 'libre'
                 ? 'bg-success-soft text-success-ink border-success/30'
                 : 'bg-gold-100 text-ink border-gold-300'
@@ -111,10 +111,10 @@ export default function CabinasLockers() {
               {item.titular ? <span className="text-ink-2 font-semibold">{item.titular}</span> : <span className="text-ink-2">Sin titular</span>}
             </p>
             <div className="flex gap-2 pt-1">
-              <button disabled title="Asignar — próximamente" className="text-label flex-1 py-2.5 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
+              <button disabled title="Asignar — próximamente" className="text-label flex-1 py-3 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
                 Próximamente
               </button>
-              <button disabled title="Registrar pago — próximamente" className="text-label flex-1 py-2.5 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
+              <button disabled title="Registrar pago — próximamente" className="text-label flex-1 py-3 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
                 Próximamente
               </button>
             </div>

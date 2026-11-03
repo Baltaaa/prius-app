@@ -10,7 +10,7 @@ export default function SegmentedControl({ options, value, onChange, label, clas
             type="button"
             aria-pressed={activa}
             onClick={() => onChange(o.value)}
-            className={`h-8 md:h-8 min-h-0 px-3.5 rounded-full text-label transition-colors ${activa ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'}`}
+            className={`h-11 md:h-8 min-h-0 px-4 rounded-full text-label transition-colors ${activa ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'}`}
           >
             {o.label}
           </button>

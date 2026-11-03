@@ -45,7 +45,7 @@ export default function DetalleGasto({ isOpen, onClose, gasto }) {
       <div className="space-y-6">
         {gasto.estado === 'anulado' && (
           <div className="flex items-start gap-3 p-4 bg-danger-soft border border-danger/30 rounded-inner">
-            <AlertTriangle className="text-danger shrink-0 mt-0.5" size={18} />
+            <AlertTriangle className="text-danger shrink-0 mt-1" size={18} />
             <div>
               <p className="text-label text-danger">Gasto anulado</p>
               <p className="text-label text-ink-2 mt-1">{gasto.anulado_motivo}</p>

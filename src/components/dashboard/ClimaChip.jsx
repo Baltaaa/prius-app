@@ -13,8 +13,8 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
   // durante ese rato se veía como una tarjeta vacía/rota, no "cargando".
   if (loading) {
     return (
-      <div className={`shrink-0 rounded-card border border-line bg-surface p-3.5 animate-pulse ${className}`}>
-        <div className="flex items-center gap-2 mb-2.5">
+      <div className={`shrink-0 rounded-card border border-line bg-surface p-4 animate-pulse ${className}`}>
+        <div className="flex items-center gap-2 mb-3">
           <div className="w-7 h-7 rounded-icon flex items-center justify-center border border-line bg-surface shrink-0">
             <Cloud size={14} className="text-ink-2" />
           </div>
@@ -32,9 +32,9 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
       <button
         type="button"
         onClick={onClick}
-        className={`group shrink-0 snap-start rounded-card border border-line bg-surface hover:bg-surface hover:border-line transition-all p-3.5 text-left ${className}`}
+        className={`group shrink-0 snap-start rounded-card border border-line bg-surface hover:bg-surface hover:border-line transition-all p-4 text-left ${className}`}
       >
-        <div className="flex items-center gap-2 mb-2.5">
+        <div className="flex items-center gap-2 mb-3">
           <div className="w-7 h-7 rounded-icon flex items-center justify-center border border-line bg-surface shrink-0">
             <Cloud size={14} className="text-ink-2" />
           </div>
@@ -58,14 +58,14 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
     <button
       type="button"
       onClick={onClick}
-      className={`group shrink-0 snap-start rounded-card border transition-all p-3.5 text-left ${className} ${
+      className={`group shrink-0 snap-start rounded-card border transition-all p-4 text-left ${className} ${
         alerta
           ? 'border-gold-300 bg-gold-100 hover:bg-gold-100'
           : 'border-line bg-surface hover:bg-surface hover:border-line'
       }`}
       title={alerta ? 'Viento fuerte — tocar para ver el detalle' : 'Clima — tocar para ver el detalle'}
     >
-      <div className="flex items-center gap-2 mb-2.5">
+      <div className="flex items-center gap-2 mb-3">
         <div className={`w-7 h-7 rounded-icon flex items-center justify-center border shrink-0 ${
           alerta ? 'border-gold-300 bg-gold-100' : 'border-line bg-surface'
         }`}>
@@ -79,7 +79,7 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
         <p className="text-stat text-ink tabular-nums leading-none">
           {actual.temperatura != null ? Math.round(actual.temperatura) : '--'}°
         </p>
-        <div className="flex items-center gap-1 text-label font-semibold tabular-nums text-ink-2 pb-0.5">
+        <div className="flex items-center gap-1 text-label font-semibold tabular-nums text-ink-2 pb-1">
           <ArrowUp size={12} style={{ transform: `rotate(${rotacionFlecha}deg)` }} />
           {actual.viento != null ? Math.round(actual.viento) : '--'} km/h
         </div>

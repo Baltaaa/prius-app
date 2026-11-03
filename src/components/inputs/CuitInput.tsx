@@ -42,7 +42,7 @@ export default function CuitInput({ label, hint, error, value, onChange, onBlur,
     <div className={className}>
       {label && (
         <label htmlFor={inputId} className="field-label">
-          {label}{required && <span className="text-danger ml-0.5">*</span>}
+          {label}{required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
       <div className="relative">
@@ -68,11 +68,11 @@ export default function CuitInput({ label, hint, error, value, onChange, onBlur,
         )}
       </div>
       {error ? (
-        <p className="text-label text-danger mt-1.5">{error}</p>
+        <p className="text-label text-danger mt-2">{error}</p>
       ) : tocado && valido ? (
-        <p className="text-label text-success-ink mt-1.5">CUIT válido</p>
+        <p className="text-label text-success-ink mt-2">CUIT válido</p>
       ) : hint ? (
-        <p className="text-label text-ink-2 mt-1.5">{hint}</p>
+        <p className="text-label text-ink-2 mt-2">{hint}</p>
       ) : null}
     </div>
   )

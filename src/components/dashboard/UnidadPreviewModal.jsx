@@ -59,14 +59,14 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
     >
       <div
         ref={bind}
-        className={`w-full max-h-[85vh] bg-card rounded-t-card flex flex-col overflow-hidden border-t border-line ${unit ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+        className={`w-full max-h-[85dvh] bg-card rounded-t-card flex flex-col overflow-hidden border-t border-line ${unit ? 'ui-open-sheet' : 'ui-close-sheet'}`}
         onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-line" />
         </div>
-        <div className="flex-1 overflow-y-auto px-space-lg pb-space-lg flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto px-6 pb-6 flex flex-col min-h-0">
           <UnidadDetalleContent
             unit={unitActiva}
             reservas={reservas}

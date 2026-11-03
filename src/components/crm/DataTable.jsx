@@ -35,7 +35,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
 
   if (!data || data.length === 0) {
     return (
-      <div className={`p-12 text-center text-body text-ink-2 card-surface ${fillHeight ? 'lg:h-full' : ''}`}>
+      <div className={`text-center text-body text-ink-2 card-surface card-pad py-10 ${fillHeight ? 'lg:h-full' : ''}`}>
         {emptyMessage || 'No se encontraron registros.'}
       </div>
     )
@@ -74,7 +74,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
   return (
     <div className="w-full space-y-3">
       {data.map((row, i) => (
-        <div key={row.id ?? i} className="p-5 card-surface flex flex-col gap-3">
+        <div key={row.id ?? i} className="card-surface card-pad flex flex-col gap-3">
           {renderMobileCard(row, i)}
         </div>
       ))}

@@ -80,7 +80,7 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
       }
     >
       <div className="flex items-start gap-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
-        <ShieldAlert size={16} className="text-ink shrink-0 mt-0.5" />
+        <ShieldAlert size={16} className="text-ink shrink-0 mt-1" />
         <p className="text-label text-ink-2">
           Esto no modifica pagos ni comprobantes — solo cambia la etiqueta de estado que ve el equipo, hasta que se registre un pago nuevo o lo revierta un superadmin.
         </p>
@@ -106,7 +106,7 @@ export default function CambiarEstadoPagoModal({ isOpen, onClose, reserva }) {
         <StatusBadge status={reserva.estado_pago} />
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <label className="text-label text-ink-2">Nuevo estado</label>
         <BrandSelect value={nuevoEstado} onChange={setNuevoEstado} options={OPCIONES_ESTADO} />
       </div>

@@ -19,7 +19,7 @@ export default function SegmentedBar({ items, label }) {
         {items.map((i) => (
           <li key={i.key} className="flex items-center gap-3 min-w-0">
             <span className={`w-5 h-5 rounded-swatch shrink-0 ${i.swatch}`} />
-            <span className="text-body text-ink truncate">{i.label}</span>
+            <span className="text-body text-ink min-w-0">{i.label}</span>
             <span className="ml-auto text-label text-ink-2 tabular-nums whitespace-nowrap">{i.detail ?? i.value}</span>
             <span className="w-14 text-right text-card-title text-ink tabular-nums">
               {formatPorcentaje(total ? (i.value / total) * 100 : 0, 0)}

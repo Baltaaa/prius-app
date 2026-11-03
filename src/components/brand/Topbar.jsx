@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDebounced } from '../../hooks/useDebounced'
-import { unidadEmoji, normalizeText, formatComprobante, formatFechaCorta, formatFechaLarga, formatUnidad, formatFechasReserva, formatNombre} from '../../lib/format'
+import { normalizeText, formatComprobante, formatFechaCorta, formatFechaLarga, formatUnidad, formatFechasReserva, formatNombre} from '../../lib/format'
 import { parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToPlano, linkToRecepcion } from '../../lib/deepLinks'
@@ -19,6 +19,7 @@ import {
   Search, Bell, User, LogOut, X,
   QrCode, EyeOff, Plus,
 } from 'lucide-react'
+import UnidadLabel from '../crm/UnidadLabel'
 
 // B5 (oct 2026): modo incógnito — visible SOLO para esta cuenta puntual.
 // Esto es nada más una comodidad de UI (ocultar el botón a quien no debería
@@ -32,6 +33,7 @@ import ScrollFade from '../ui/ScrollFade'
 import { useSection } from '../../lib/sectionTitles'
 import Button from './Button'
 import PageHeader from './PageHeader'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 
 const normalize = normalizeText
 
@@ -76,6 +78,7 @@ function useHoverDropdown(isOpen, setIsOpen, enabled) {
 }
 
 export default function TopBar() {
+  const buscadorAncho = useMediaQuery('(min-width: 1280px)')
   const navigate = useNavigate()
   const location = useLocation()
   const section = useSection(location.pathname)
@@ -333,22 +336,22 @@ export default function TopBar() {
 
   return (
     <header
-      className="no-print relative min-h-16 md:h-20 flex items-center justify-between gap-3 md:gap-4 px-4 sm:px-6 md:px-8 bg-canvas sticky top-0 z-20 shrink-0"
+      className="no-print relative min-h-14 md:h-20 flex items-center justify-between gap-3 md:gap-4 px-page-max bg-canvas sticky top-0 z-20 shrink-0"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
-        {!esHome && <img src="/images/prius-icon.png" alt="Prius" className="md:hidden w-7 h-7 object-contain shrink-0" />}
+        {!esHome && <img src="/images/prius-icon.png" alt="Prius" className="hidden min-[430px]:block md:hidden w-7 h-7 object-contain shrink-0" />}
         <PageHeader
           title={esHome ? `Hola, ${primerNombre}` : section.name}
           shortTitle={esHome ? undefined : section.shortName}
           greeting={esHome}
         >
           {esHome && (
-            <p className="flex items-center gap-1.5 text-label text-ink-2 truncate">
+            <p className="flex items-center gap-2 text-label text-ink-2 truncate">
               {realtimeConectado && <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" title="Operativo" />}
               {realtimeConectado && <span className="hidden sm:inline">Operativo ·</span>}
-              <span className="sm:hidden">{formatFechaCorta(hoyTopbar)}</span>
-              <span className="hidden sm:inline">{formatFechaLarga(hoyTopbar)}</span>
+              <span className="lg:hidden">{formatFechaCorta(hoyTopbar)}</span>
+              <span className="hidden lg:inline">{formatFechaLarga(hoyTopbar)}</span>
             </p>
           )}
         </PageHeader>
@@ -370,7 +373,7 @@ export default function TopBar() {
           value={searchValue}
           onChange={setSearchValue}
           onKeyDown={handleSearchKeyDown}
-          placeholder="Búsqueda inteligente"
+          placeholder={buscadorAncho ? 'Búsqueda inteligente' : 'Buscar'}
           inputClassName="!bg-card !rounded-full h-11"
         />
 
@@ -389,12 +392,12 @@ export default function TopBar() {
                         <button
                           key={cliente.id}
                           onClick={() => goToCliente(cliente)}
-                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors"
+                          className="w-full text-left px-4 py-3 hover:bg-surface transition-colors"
                         >
                           <p className="text-label text-ink truncate">{formatNombre(cliente.nombre)}</p>
                           {unidadDeCliente(cliente) && (
                             <p className="text-label text-ink-2 truncate">
-                              {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
+                              <UnidadLabel tipo={unidadDeCliente(cliente).tipo} numero={unidadDeCliente(cliente).numero} />
                             </p>
                           )}
                           {cliente.telefono && <p className="text-label text-ink-2">{cliente.telefono}</p>}
@@ -410,9 +413,9 @@ export default function TopBar() {
                         <button
                           key={u.id}
                           onClick={() => irAResultado({ tipo: 'unidad', data: u })}
-                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors text-label font-semibold text-ink"
+                          className="w-full text-left px-4 py-3 hover:bg-surface transition-colors text-label font-semibold text-ink"
                         >
-                          {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
+                          <UnidadLabel tipo={u.tipo} numero={u.numero} />
                         </button>
                       ))}
                     </div>
@@ -425,12 +428,12 @@ export default function TopBar() {
                         <button
                           key={reserva.id}
                           onClick={() => goToReserva(reserva)}
-                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors flex items-center justify-between gap-3"
+                          className="w-full text-left px-4 py-3 hover:bg-surface transition-colors flex items-center justify-between gap-3"
                         >
                           <span className="min-w-0">
                             <span className="block text-label text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
                             <span className="block text-label text-ink-2 truncate">
-                              {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
+                              <UnidadLabel tipo={reserva.unidades?.tipo} numero={reserva.unidades?.numero} />
                               {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
                             </span>
                           </span>
@@ -447,7 +450,7 @@ export default function TopBar() {
                         <button
                           key={comprobante.id}
                           onClick={() => irAResultado({ tipo: 'comprobante', data: { pago, comprobante } })}
-                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors text-label font-semibold text-ink"
+                          className="w-full text-left px-4 py-3 hover:bg-surface transition-colors text-label font-semibold text-ink"
                         >
                           {formatComprobante(comprobante.tipo, comprobante.numero)}
                         </button>
@@ -514,7 +517,7 @@ export default function TopBar() {
             {countPendientes > 0 ? (
               <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-ink rounded-full border-2 border-canvas" />
             ) : countNovedadesNoLeidas > 0 ? (
-              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-0.5 rounded-full bg-ink text-on-ink text-label font-semibold flex items-center justify-center">
+              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-1 rounded-full bg-ink text-on-ink text-label font-semibold flex items-center justify-center">
                 {countNovedadesNoLeidas > 9 ? '9+' : countNovedadesNoLeidas}
               </span>
             ) : null}
@@ -575,7 +578,7 @@ export default function TopBar() {
             aria-haspopup="menu"
             aria-expanded={showProfileMenu}
             aria-label="Menú de usuario"
-            className="flex items-center gap-1.5 p-1 min-h-[44px] rounded-full transition-colors"
+            className="flex items-center gap-2 p-1 min-h-[44px] rounded-full transition-colors"
           >
             {/* B5: indicador discreto mientras el modo incógnito está
                 activo — para que no quede prendido sin querer. */}
@@ -599,7 +602,7 @@ export default function TopBar() {
                 </div>
                 <button
                   onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
-                  className="w-full text-left px-4 py-2.5 text-label text-ink-2 hover:bg-surface flex items-center gap-2 rounded-icon"
+                  className="w-full text-left px-4 py-3 text-label text-ink-2 hover:bg-surface flex items-center gap-2 rounded-icon"
                 >
                   <User size={14} /> Mi cuenta
                 </button>
@@ -607,14 +610,14 @@ export default function TopBar() {
                   <button
                     onClick={handleToggleIncognito}
                     disabled={togglingIncognito}
-                    className={`w-full text-left px-4 py-2.5 text-label hover:bg-surface flex items-center gap-2 rounded-icon disabled:opacity-50 ${perfil?.modo_incognito ? 'text-ink font-semibold' : 'text-ink-2'}`}
+                    className={`w-full text-left px-4 py-3 text-label hover:bg-surface flex items-center gap-2 rounded-icon disabled:opacity-50 ${perfil?.modo_incognito ? 'text-ink font-semibold' : 'text-ink-2'}`}
                   >
                     <EyeOff size={14} /> Modo incógnito {perfil?.modo_incognito ? '· Activo' : ''}
                   </button>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2.5 text-label text-danger hover:bg-danger-soft flex items-center gap-2 rounded-icon"
+                  className="w-full text-left px-4 py-3 text-label text-danger hover:bg-danger-soft flex items-center gap-2 rounded-icon"
                 >
                   <LogOut size={14} /> Cerrar Sesión
                 </button>
@@ -664,7 +667,7 @@ export default function TopBar() {
                         <p className="text-body font-semibold text-ink truncate">{formatNombre(cliente.nombre)}</p>
                         {unidadDeCliente(cliente) && (
                           <p className="text-label text-ink-2 truncate">
-                            {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
+                            <UnidadLabel tipo={unidadDeCliente(cliente).tipo} numero={unidadDeCliente(cliente).numero} />
                           </p>
                         )}
                         {cliente.telefono && <p className="text-label text-ink-2">{cliente.telefono}</p>}
@@ -681,7 +684,7 @@ export default function TopBar() {
                         onClick={() => { irAResultado({ tipo: 'unidad', data: u }); setMobileSearchOpen(false) }}
                         className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line text-body font-semibold text-ink"
                       >
-                        {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
+                        <UnidadLabel tipo={u.tipo} numero={u.numero} />
                       </button>
                     ))}
                   </div>
@@ -698,7 +701,7 @@ export default function TopBar() {
                         <span className="min-w-0">
                           <span className="block text-body font-semibold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
                           <span className="block text-label text-ink-2 truncate">
-                            {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
+                            <UnidadLabel tipo={reserva.unidades?.tipo} numero={reserva.unidades?.numero} />
                             {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
                           </span>
                         </span>

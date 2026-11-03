@@ -41,7 +41,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
       {/* Encabezado */}
       <div className="flex items-start justify-between gap-3 shrink-0">
         <div className="min-w-0">
-          <span className={`text-label inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full ${meta.tile}`}>
+          <span className={`text-label inline-flex items-center gap-2 px-2 py-1 rounded-full ${meta.tile}`}>
             <Icon size={11} /> {meta.label}
           </span>
           <h3 className="text-body text-ink mt-2 break-words">{meta.titulo}</h3>
@@ -86,10 +86,10 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
               {cambios.map((c) => (
                 <div key={c.label} className="bg-surface rounded-inner p-3">
                   <p className="text-label text-ink-2">{c.label}</p>
-                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <span className="text-label text-ink-2 line-through break-all">{c.antes}</span>
                     <ArrowRight size={12} className="text-ink-2 shrink-0" />
-                    <span className="text-body font-semibold text-ink bg-gold-100 rounded-icon px-2 py-0.5 break-all">
+                    <span className="text-body font-semibold text-ink bg-gold-100 rounded-icon px-2 py-1 break-all">
                       {c.despues}
                     </span>
                   </div>
@@ -128,7 +128,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
         <div className="shrink-0 pt-3">
           <button
             onClick={onIr}
-            className="w-full h-12 rounded-full bg-ink hover:bg-chart-2 font-semibold text-body flex items-center justify-center gap-2 anim-press anim-colors text-on-ink"
+            className="w-full h-12 rounded-full bg-card border border-line hover:bg-surface font-semibold text-body flex items-center justify-center gap-2 anim-press anim-colors text-ink"
           >
             {meta.accionLabel}
           </button>

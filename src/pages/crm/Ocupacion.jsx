@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useData } from '../../context/DataProvider'
-import { unidadEmoji, formatFecha, formatRangoFechas, formatMesAnio, formatPorcentaje, formatUnidad, formatNombre} from '../../lib/format'
+import { formatFecha, formatRangoFechas, formatMesAnio, formatPorcentaje, formatUnidad, formatNombre} from '../../lib/format'
 import { COLOR_TIPO_ALQUILER, colorReserva } from '../../lib/colors'
 import { linkToPlano } from '../../lib/deepLinks'
 import ReservaDetalleModal from '../../components/crm/ReservaDetalleModal'
@@ -9,6 +9,7 @@ import DateInput from '../../components/inputs/DateInput'
 import { isFeatureEnabled } from '../../lib/features'
 import { reservaActiva } from '../../lib/reservas'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import UnidadLabel from '../../components/crm/UnidadLabel'
 
 // Vista de ocupación en un rango de fechas — distinta del Plano (que solo
 // muestra el estado de HOY/una fecha puntual). No confundir con "Historial"
@@ -244,13 +245,13 @@ export default function Ocupacion() {
               </button>
             ))}
           </div>
-          <button onClick={irAnterior} className="p-2.5 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all" title="Anterior">
+          <button onClick={irAnterior} className="p-3 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all" title="Anterior">
             <ChevronLeft size={16} />
           </button>
-          <button onClick={irSiguiente} className="p-2.5 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all" title="Siguiente">
+          <button onClick={irSiguiente} className="p-3 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all" title="Siguiente">
             <ChevronRight size={16} />
           </button>
-          <button onClick={irHoy} className="text-label px-3 py-2.5 shrink-0 bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all">
+          <button onClick={irHoy} className="text-label px-3 py-3 shrink-0 bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all">
             Hoy
           </button>
           {/* [feat-5] "Ir a fecha": salta directo al día/semana/mes elegido
@@ -266,7 +267,7 @@ export default function Ocupacion() {
             <button
               key={t}
               onClick={() => setTipoFiltro(t)}
-              className={`px-3 py-1.5 rounded-full text-label transition-all ${
+              className={`px-3 py-2 rounded-full text-label transition-all ${
                 tipoFiltro === t ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -280,29 +281,29 @@ export default function Ocupacion() {
           rayado del mismo color (no un color nuevo), bonificada con un
           punto sutil. */}
       <div className="text-label flex flex-wrap items-center gap-4 text-ink-2">
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.temporada.swatch }} /> Temporada</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.periodo.swatch }} /> Período</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.dia.swatch }} /> Día</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch border-2 border-dashed border-line" /> Sin confirmar</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch bg-surface border border-line" /> Bonificada</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch bg-danger-soft border border-danger/30" /> Cancelada</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.temporada.swatch }} /> Temporada</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.periodo.swatch }} /> Período</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.dia.swatch }} /> Día</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-swatch border-2 border-dashed border-line" /> Sin confirmar</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-swatch bg-surface border border-line" /> Bonificada</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-swatch bg-danger-soft border border-danger/30" /> Cancelada</span>
       </div>
 
       {vista === 'mes' && kpisMes && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="card-surface p-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-grid">
+          <div className="card-surface card-pad ">
             <p className="text-label text-ink-2">Ocupación promedio</p>
             <p className="text-card-title text-ink mt-1">{formatPorcentaje(kpisMes.promedio)}</p>
           </div>
-          <div className="card-surface p-4">
+          <div className="card-surface card-pad ">
             <p className="text-label text-ink-2">Día pico</p>
             <p className="text-card-title text-ink mt-1">{formatFecha(kpisMes.diaPico)} <span className="text-label text-ink-2">({formatPorcentaje(kpisMes.pctDiaPico)})</span></p>
           </div>
-          <div className="card-surface p-4">
+          <div className="card-surface card-pad ">
             <p className="text-label text-ink-2">Unidades libres hoy</p>
             <p className="text-card-title text-ink mt-1">{kpisMes.libresHoy}</p>
           </div>
-          <div className="card-surface p-4">
+          <div className="card-surface card-pad ">
             <p className="text-label text-ink-2">Hoy por tipo</p>
             <p className="text-label font-semibold text-ink mt-1 space-x-2">
               <span style={{ color: COLOR_TIPO_ALQUILER.temporada.swatch }}>T {kpisMes.porTipoHoy.temporada}</span>
@@ -323,7 +324,7 @@ export default function Ocupacion() {
                   {marcas.map((m) => (
                     <div
                       key={m.dia}
-                      className="absolute top-0 h-full border-l border-line pl-1.5 text-label text-ink-2 font-semibold flex items-center"
+                      className="absolute top-0 h-full border-l border-line pl-2 text-label text-ink-2 font-semibold flex items-center"
                       style={{ left: `${m.left}%` }}
                     >
                       {formatFecha(m.dia).slice(0, 5)}
@@ -343,7 +344,7 @@ export default function Ocupacion() {
                     const pct = Math.round((ocupadasDia / totalUnidadesFiltradas) * 100)
                     return (
                       <div key={m.dia} className="absolute top-0 h-full flex items-center text-label font-semibold text-ink-2" style={{ left: `${m.left}%` }}>
-                        <span className="pl-1.5">{pct}%</span>
+                        <span className="pl-2">{pct}%</span>
                       </div>
                     )
                   })}
@@ -355,8 +356,8 @@ export default function Ocupacion() {
                   const barras = barrasPorUnidad[u.id] || []
                   return (
                     <div key={u.id} className="flex items-stretch hover:bg-surface transition-all">
-                      <div className="text-label w-36 shrink-0 px-4 py-2.5 flex items-center gap-1.5 text-ink-2">
-                        {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
+                      <div className="text-label w-36 shrink-0 px-4 py-3 flex items-center gap-2 text-ink-2">
+                        <UnidadLabel tipo={u.tipo} numero={u.numero} />
                       </div>
                       <div className="flex-1 relative h-9 my-auto">
                         {marcas.map((m) => (
@@ -371,7 +372,7 @@ export default function Ocupacion() {
                             type="button"
                             onClick={() => setReservaDetalle(b.reserva)}
                             title={`${formatNombre(b.reserva.clientes?.nombre) || 'S/N'} — ${formatFecha(b.reserva.fecha_inicio || b.reserva.fecha)} a ${formatFecha(b.reserva.fecha_fin || b.reserva.fecha)}`}
-                            className={`absolute top-1.5 h-6 border text-label font-semibold truncate px-1.5 flex items-center gap-1 transition-all hover:brightness-110 ${b.color} ${
+                            className={`absolute top-1.5 h-6 border text-label font-semibold truncate px-2 flex items-center gap-1 transition-all hover:brightness-110 ${b.color} ${
                               b.pendienteConfirmacion ? 'border-dashed border-2' : ''
                             } ${b.recortadaIzq ? 'rounded-l-none' : 'rounded-l-swatch'} ${b.recortadaDer ? 'rounded-r-none' : 'rounded-r-swatch'}`}
                             style={{ left: `${b.left}%`, width: `${b.width}%`, minWidth: 6 }}
@@ -392,7 +393,7 @@ export default function Ocupacion() {
           </div>
         </div>
       ) : (
-        <div className="card-surface p-4">
+        <div className="card-surface card-pad ">
           <div className="grid grid-cols-7 gap-2">
             {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => (
               <div key={d} className="text-label text-center text-ink-2">{d}</div>

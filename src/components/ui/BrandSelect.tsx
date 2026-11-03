@@ -200,7 +200,7 @@ export default function BrandSelect({
                   disabled={o.disabled}
                   onMouseEnter={() => setHighlight(idx)}
                   onClick={() => selectAt(idx)}
-                  className={`w-full flex items-center justify-between gap-2 text-left px-4 py-2.5 text-body font-medium transition-all min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed text-ink ${
+                  className={`w-full flex items-center justify-between gap-2 text-left px-4 py-3 text-body font-medium transition-all min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed text-ink ${
                     isHighlighted ? 'bg-surface' : 'hover:bg-surface'
                   }`}
                 >
@@ -242,7 +242,7 @@ export default function BrandSelect({
               className={`z-[1001] surface-pop overflow-hidden ${open ? 'ui-open' : 'ui-close'}`}
             >
               {showSearch && (
-                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-divider">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-divider">
                   <Search size={14} className="text-ink-2 shrink-0" />
                   <input
                     ref={searchRef}
@@ -294,7 +294,7 @@ export default function BrandSelect({
           document.body,
         )}
 
-      {error && <p className="mt-1.5 text-label text-danger">{error}</p>}
+      {error && <p className="mt-2 text-label text-danger">{error}</p>}
     </div>
   )
 }

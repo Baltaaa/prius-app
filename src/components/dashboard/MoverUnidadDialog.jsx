@@ -4,6 +4,7 @@ import { useDialog } from '../../context/DialogProvider'
 import Modal from '../crm/Modal'
 import BrandSelect from '../ui/BrandSelect'
 import { unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
+import UnidadLabel from '../crm/UnidadLabel'
 
 // Mover un cliente de temporada de una unidad a otra, desde el Plano (ítem 5,
 // oct 2026) — exige la contraseña del superadmin logueado. La validación de
@@ -53,7 +54,7 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
       <form onSubmit={handleConfirmar} className="space-y-6">
         <div className="p-4 bg-surface border border-line rounded-inner space-y-2 text-label">
           <p><span className="text-label text-ink-2">Cliente:</span> <span className="text-ink font-semibold">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span></p>
-          <p><span className="text-label text-ink-2">Origen:</span> <span className="text-ink">{unidadEmoji(unidadOrigen.type)} {formatUnidad(unidadOrigen.type, unidadOrigen.number)}</span></p>
+          <p><span className="text-label text-ink-2">Origen:</span> <span className="text-ink"><UnidadLabel tipo={unidadOrigen.type} numero={unidadOrigen.number} /></span></p>
         </div>
 
         <div className="space-y-2">

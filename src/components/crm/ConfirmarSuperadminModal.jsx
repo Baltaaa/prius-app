@@ -116,14 +116,14 @@ export default function ConfirmarSuperadminModal({
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 hover:bg-surface rounded-full text-ink-2 hover:text-ink transition-all shrink-0"
+            className="p-2 hover:bg-surface rounded-full text-ink-2 hover:text-ink transition-all shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         <div>
-          <label className="text-label block text-ink-2 mb-1.5">
+          <label className="text-label block text-ink-2 mb-2">
             Contraseña de superadmin
           </label>
           <div className="relative">
@@ -148,7 +148,7 @@ export default function ConfirmarSuperadminModal({
               {mostrarPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          {error && <p className="text-label text-danger mt-1.5">{error}</p>}
+          {error && <p className="text-label text-danger mt-2">{error}</p>}
         </div>
 
         <div className="flex flex-col-reverse sm:grid sm:grid-cols-2 gap-3">

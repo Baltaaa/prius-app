@@ -73,7 +73,7 @@ export default function BottomNav() {
   // usa NavLink por default para Inicio/Plano/Clientes.
   const masActivo = masItems.some((item) => location.pathname.startsWith(item.path))
 
-  const claseItem = 'flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 min-h-[56px] text-[12px] leading-4 font-medium'
+  const claseItem = 'flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] text-[12px] leading-4 font-medium'
   const pill = (activo) => `flex items-center justify-center w-12 h-7 rounded-full anim-colors ${activo ? 'bg-ink text-on-ink' : 'text-ink-2'}`
 
   const renderItem = (item) => (
@@ -139,7 +139,7 @@ export default function BottomNav() {
                 <X size={20} strokeWidth={1.5} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain px-3 pb-4 space-y-0.5">
+            <div className="flex-1 overflow-y-auto overscroll-contain px-3 pb-4 space-y-1">
               {masItems.map((item) => (
                 <NavLink
                   key={item.path}
@@ -155,7 +155,7 @@ export default function BottomNav() {
                     <item.icon size={20} strokeWidth={1.5} className="shrink-0" />
                     <span className="truncate">{item.name}</span>
                   </div>
-                  {item.comingSoon && <span className="shrink-0 text-label text-ink-2">Pronto</span>}
+                  {item.comingSoon && <span className="shrink-0 inline-flex items-center h-6 px-2 rounded-full bg-surface text-label text-ink-2">Pronto</span>}
                   {!item.comingSoon && item.badge > 0 && <CountBadge value={item.badge} className="shrink-0" />}
                 </NavLink>
               ))}

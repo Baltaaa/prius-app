@@ -20,7 +20,7 @@ const inputClass =
   'w-full bg-surface rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none font-semibold border border-transparent focus:ring-2 focus:ring-gold'
 
 const chipClass = (active) =>
-  `px-3 py-2.5 rounded-full text-label border transition-all min-h-[44px] ${
+  `px-3 py-3 rounded-full text-label border transition-all min-h-[44px] ${
     active ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
   }`
 
@@ -184,7 +184,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
 
         {pago.estado === 'anulado' && (
           <div className="flex items-start gap-3 p-4 bg-danger-soft border border-danger/30 rounded-inner">
-            <AlertTriangle className="text-danger shrink-0 mt-0.5" size={18} />
+            <AlertTriangle className="text-danger shrink-0 mt-1" size={18} />
             <div>
               <p className="text-label text-danger">Pago anulado</p>
               <p className="text-label text-ink-2 mt-1">{pago.anulado_motivo}</p>
@@ -252,7 +252,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                 el timestamp de carga en el sistema (auditoría). */}
             <p className="text-body text-ink mt-1">{formatFecha(pago.fecha)}</p>
             {pago.fecha_hora && (
-              <p className="text-label text-ink-2 mt-0.5">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
+              <p className="text-label text-ink-2 mt-1">Cargado el {formatFechaHora(pago.fecha_hora)}</p>
             )}
           </div>
           {pago.concepto && (
@@ -345,7 +345,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
               ))}
               {sumaNoCoincide && (
                 <div className="flex items-start gap-2 px-4 py-3 bg-gold-100">
-                  <AlertTriangle className="text-ink shrink-0 mt-0.5" size={14} />
+                  <AlertTriangle className="text-ink shrink-0 mt-1" size={14} />
                   <p className="text-label text-ink">
                     La suma de comprobantes ({formatPesos(sumaComprobantes)}) no coincide con el monto del pago ({formatPesos(pago.monto)}).
                   </p>

@@ -29,7 +29,7 @@ export default function AvisoCajaCerrada({ onAbierta, className = '' }) {
   return (
     <div className={`p-4 bg-gold-100 border border-gold-300 rounded-inner space-y-3 ${className}`}>
       <div className="flex items-start gap-3">
-        <Wallet className="text-ink shrink-0 mt-0.5" size={18} />
+        <Wallet className="text-ink shrink-0 mt-1" size={18} />
         <p className="text-body text-ink-2">
           Todavía no hubo movimientos en la caja de hoy. Empieza en $0 con el primer cobro o gasto.
         </p>
@@ -38,7 +38,7 @@ export default function AvisoCajaCerrada({ onAbierta, className = '' }) {
         loading={saving}
         loadingText="Abriendo..."
         onClick={handleAbrir}
-        className="text-label w-full py-2.5 min-h-[44px] rounded-full bg-ink hover:bg-chart-2 text-on-ink"
+        className="text-label w-full py-3 min-h-[44px] rounded-full bg-card border border-line hover:bg-surface text-ink"
       >
         Abrir caja
       </LoadingButton>

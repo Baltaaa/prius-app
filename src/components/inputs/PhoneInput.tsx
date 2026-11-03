@@ -49,7 +49,7 @@ export default function PhoneInput({ label, hint, error, value, onChange, onBlur
     <div className={className}>
       {label && (
         <label htmlFor={inputId} className="field-label">
-          {label}{required && <span className="text-danger ml-0.5">*</span>}
+          {label}{required && <span className="text-danger ml-1">*</span>}
         </label>
       )}
       <input
@@ -70,7 +70,7 @@ export default function PhoneInput({ label, hint, error, value, onChange, onBlur
           error ? 'field-error' : ''
         }`}
       />
-      {error ? <p className="text-label text-danger mt-1.5">{error}</p> : hint ? <p className="text-label text-ink-2 mt-1.5">{hint}</p> : null}
+      {error ? <p className="text-label text-danger mt-2">{error}</p> : hint ? <p className="text-label text-ink-2 mt-2">{hint}</p> : null}
     </div>
   )
 }

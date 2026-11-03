@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { X, Wallet, Receipt, Edit2, XCircle, Trash2, QrCode, Globe, MonitorSmartphone, Users, ShieldAlert } from 'lucide-react'
 import { usePagos } from '../../hooks/usePagos'
 import { coSocios, estadoBadgeStatus, saldoNumerico, pagoSinVerificar } from '../../lib/reservas'
-import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
+import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { usePermiso } from '../../context/AuthProvider'
 import StatusBadge from './StatusBadge'
 import MontoReserva from './MontoReserva'
 import CambiarEstadoPagoModal from './CambiarEstadoPagoModal'
 import GestionCosociosModal from './GestionCosociosModal'
+import UnidadLabel from './UnidadLabel'
 
 const TIPO_LABEL = { periodo: 'Período', dia: 'Día', temporada: 'Temporada' }
 
@@ -39,14 +40,14 @@ export default function ReservaDetalleContent({
 
   return (
     <>
-      <div className="flex items-start justify-between pb-space-md shrink-0">
+      <div className="flex items-start justify-between pb-4 shrink-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-body text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
             <StatusBadge status={estadoBadgeStatus(reserva)} />
           </div>
           <p className="text-label text-ink-2 mt-1">
-            {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)} · {TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}
+            <UnidadLabel tipo={reserva.unidades?.tipo} numero={reserva.unidades?.numero} /> · {TIPO_LABEL[reserva.tipo_alquiler] || reserva.tipo_alquiler}
           </p>
         </div>
         {showCloseButton && (
@@ -60,13 +61,13 @@ export default function ReservaDetalleContent({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-space-md">
+      <div className="flex-1 overflow-y-auto space-y-4">
         {/* Ítem 2 (25/10/2026): aviso cuando el estado de pago fue ajustado
             a mano — visible para todos, no solo superadmin (transparencia
             de por qué el badge no coincide con lo que calcularía el saldo). */}
         {reserva.estado_pago_manual && (
           <div className="flex items-start gap-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
-            <ShieldAlert size={14} className="text-ink shrink-0 mt-0.5" />
+            <ShieldAlert size={14} className="text-ink shrink-0 mt-1" />
             <p className="text-label text-ink-2">
               Estado ajustado manualmente{reserva.estado_pago_manual_motivo ? ` — ${reserva.estado_pago_manual_motivo}` : ''}.
             </p>
@@ -74,9 +75,9 @@ export default function ReservaDetalleContent({
         )}
 
         {/* Cliente */}
-        <div className="bg-surface rounded-inner p-space-md flex flex-col gap-space-sm">
+        <div className="bg-surface rounded-inner p-4 flex flex-col gap-2">
           <span className="text-label text-ink-2">Cliente</span>
-          <div className="flex items-center gap-space-sm">
+          <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-inner bg-ink text-on-ink flex items-center justify-center text-body font-semibold shrink-0">
               {(reserva.clientes?.nombre || 'S/N').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase()}
             </div>
@@ -95,48 +96,48 @@ export default function ReservaDetalleContent({
             a una grilla de dos columnas en vez de lista vertical, para
             aprovechar el 40% de ancho y bajar la altura total del panel. */}
         {wide ? (
-          <div className="grid grid-cols-2 gap-x-space-md gap-y-3">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             <div>
-              <span className="block text-label text-ink-2 mb-0.5">Llegada</span>
+              <span className="block text-label text-ink-2 mb-1">Llegada</span>
               <span className="text-body text-ink font-medium">{formatFecha(fechaLlegada(reserva))}</span>
             </div>
             <div>
-              <span className="block text-label text-ink-2 mb-0.5">Fechas</span>
+              <span className="block text-label text-ink-2 mb-1">Fechas</span>
               <span className="text-body text-ink font-medium">{fechasLabel}</span>
             </div>
             <div>
-              <span className="block text-label text-ink-2 mb-0.5">Origen</span>
-              <span className="text-body text-ink font-medium flex items-center gap-1.5">
+              <span className="block text-label text-ink-2 mb-1">Origen</span>
+              <span className="text-body text-ink font-medium flex items-center gap-2">
                 {reserva.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                 {reserva.origen === 'web' ? 'Web' : 'Manual'}
               </span>
             </div>
             {reserva.notas && (
               <div className="col-span-2">
-                <span className="block text-label text-ink-2 mb-0.5">Notas</span>
+                <span className="block text-label text-ink-2 mb-1">Notas</span>
                 <span className="text-body text-ink">{reserva.notas}</span>
               </div>
             )}
           </div>
         ) : (
           <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between py-1.5">
+            <div className="flex items-center justify-between py-2">
               <span className="text-label text-ink-2">Llegada</span>
               <span className="text-body text-ink font-medium">{formatFecha(fechaLlegada(reserva))}</span>
             </div>
-            <div className="flex items-center justify-between py-1.5">
+            <div className="flex items-center justify-between py-2">
               <span className="text-label text-ink-2">Fechas</span>
               <span className="text-body text-ink font-medium text-right">{fechasLabel}</span>
             </div>
-            <div className="flex items-center justify-between py-1.5">
+            <div className="flex items-center justify-between py-2">
               <span className="text-label text-ink-2">Origen</span>
-              <span className="text-body text-ink font-medium flex items-center gap-1.5">
+              <span className="text-body text-ink font-medium flex items-center gap-2">
                 {reserva.origen === 'web' ? <Globe size={13} /> : <MonitorSmartphone size={13} />}
                 {reserva.origen === 'web' ? 'Web' : 'Manual'}
               </span>
             </div>
             {reserva.notas && (
-              <div className="py-1.5">
+              <div className="py-2">
                 <span className="block text-label text-ink-2">Notas</span>
                 <span className="text-body text-ink">{reserva.notas}</span>
               </div>
@@ -147,16 +148,16 @@ export default function ReservaDetalleContent({
         {/* Pagos: total/pagado/saldo + lista, estilo mock — lectura, el alta
             de un pago nuevo sigue siendo la acción "Registrar pago" de
             abajo (mismo flujo de siempre, RegistrarPago.jsx). */}
-        <div className="bg-surface rounded-inner p-space-md flex flex-col gap-space-sm">
+        <div className="bg-surface rounded-inner p-4 flex flex-col gap-2">
           <span className="text-label text-ink-2">Pagos</span>
           {wide ? (
-            <div className="grid grid-cols-2 gap-space-md">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="block text-label text-ink-2 mb-0.5">Total</span>
+                <span className="block text-label text-ink-2 mb-1">Total</span>
                 <span className="text-body text-ink font-medium"><MontoReserva reserva={reserva} /></span>
               </div>
               <div>
-                <span className="block text-label text-ink-2 mb-0.5">Saldo</span>
+                <span className="block text-label text-ink-2 mb-1">Saldo</span>
                 <span className={`block text-body font-semibold ${saldo === null ? 'text-ink-2' : saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
                   {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
                 </span>
@@ -177,7 +178,7 @@ export default function ReservaDetalleContent({
             </>
           )}
           {cuotas.length > 0 && (
-            <div className={wide ? 'pt-2 border-t border-line grid grid-cols-2 gap-2' : 'pt-2 border-t border-line space-y-1.5'}>
+            <div className={wide ? 'pt-2 border-t border-line grid grid-cols-2 gap-2' : 'pt-2 border-t border-line space-y-2'}>
               {cuotas.map((p) => (
                 <button
                   key={p.id}
@@ -186,8 +187,8 @@ export default function ReservaDetalleContent({
                   onClick={() => onCellClick?.(reserva, p)}
                   className={
                     wide
-                      ? 'flex flex-col items-start gap-0.5 text-left bg-card hover:bg-line/50 rounded-icon px-space-sm py-2 transition-colors min-w-0'
-                      : 'w-full flex items-center justify-between gap-2 text-left hover:bg-line/50 rounded-icon -mx-1 px-1 py-0.5 transition-colors'
+                      ? 'flex flex-col items-start gap-1 text-left bg-card hover:bg-line/50 rounded-icon px-2 py-2 transition-colors min-w-0'
+                      : 'w-full flex items-center justify-between gap-2 text-left hover:bg-line/50 rounded-icon -mx-1 px-1 py-1 transition-colors'
                   }
                 >
                   {/* Jerarquía (testing oct 2026, item 7): comprobante como
@@ -232,7 +233,7 @@ export default function ReservaDetalleContent({
             <button
               onClick={() => onRegistrarPago?.(reserva)}
               disabled={Number(reserva.saldo) <= 0}
-              className="w-full h-12 bg-ink hover:bg-chart-2 disabled:opacity-40 disabled:cursor-not-allowed rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-on-ink"
+              className="w-full h-12 bg-card border border-line hover:bg-surface disabled:opacity-40 disabled:cursor-not-allowed rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
             >
               <Wallet size={16} /> Registrar pago
             </button>

@@ -144,12 +144,12 @@ export default function Home() {
 
   if (!ready) {
     return (
-      <div className="flex flex-col gap-4 md:gap-5">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 md:gap-5">
+      <div className="flex flex-col gap-grid">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-grid">
           <Skeleton className="h-[260px]" />
           <Skeleton className="h-[260px]" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 md:gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-grid">
           <Skeleton className="h-[360px]" />
           <Skeleton className="h-[360px]" />
         </div>
@@ -194,8 +194,8 @@ export default function Home() {
   }))
 
   return (
-    <div className="flex flex-col gap-4 md:gap-5">
-      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 md:gap-5">
+    <div className="flex flex-col gap-grid">
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-grid">
         <Reveal index={0} className="min-w-0">
           <HeroCard
             className="h-full"
@@ -238,7 +238,7 @@ export default function Home() {
         <SidebarCajaCard subtitulo={cajaSubtitulo} className="p-5" />
       </Reveal>
 
-      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 md:gap-5">
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-grid">
         <Reveal index={3} className="min-w-0">
           <ClimaHero fecha={hoy} clima={clima} loading={climaLoading} />
         </Reveal>
@@ -263,7 +263,7 @@ export default function Home() {
                   { key: 'libres', label: 'Libres', value: stats.libres.count, swatch: 'bg-line' },
                 ]}
               />
-              <dl className="mt-4 pt-4 border-t border-divider space-y-1.5 text-label">
+              <dl className="mt-4 pt-4 border-t border-divider space-y-2 text-label">
                 <div className="flex items-center justify-between">
                   <dt className="text-ink-2">Mix temporada / período / día</dt>
                   <dd className="text-ink tabular-nums">{stats.mix.temporada}/{stats.mix.periodo}/{stats.mix.dia}</dd>
@@ -278,7 +278,7 @@ export default function Home() {
         </Reveal>
       </section>
 
-      <Reveal index={5} className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+      <Reveal index={5} className="flex gap-2 overflow-x-auto scrollbar-none -mx-page px-page md:mx-0 md:px-0">
         {recepcionOn && <ChipDato icon={QrCode} label="Llegan hoy" value={llegadasHoy.length} onClick={() => navigate('/app/recepcion')} />}
         <ChipDato icon={Inbox} label="Leads sin contactar" value={leadsLoading ? '—' : leadsSinContactar} onClick={() => navigate('/app/leads?estado=nuevo')} />
       </Reveal>
