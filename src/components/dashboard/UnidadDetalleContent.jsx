@@ -101,7 +101,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
             {sector && <span className="text-label text-ink-2 font-medium">{sector}</span>}
           </div>
           <span
-            className={`mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-swatch text-label font-bold w-fit ${
+            className={`mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-swatch text-label font-semibold w-fit ${
               estado.key === "libre"
                 ? "bg-success-soft text-success-ink"
                 : estado.key === "ocupada"

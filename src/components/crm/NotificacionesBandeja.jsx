@@ -91,12 +91,12 @@ function ItemNotificacion({ item, onAccion }) {
         <Icon size={16} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-ink leading-snug whitespace-normal break-words">{item.titulo}</p>
-        {item.detalle && <p className="text-[11px] text-ink-2 mt-0.5 truncate">{item.detalle}</p>}
+        <p className="text-label font-semibold text-ink leading-snug whitespace-normal break-words">{item.titulo}</p>
+        {item.detalle && <p className="text-label text-ink-2 mt-0.5 truncate">{item.detalle}</p>}
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-[10px] text-ink-2">{formatTiempoRelativo(item.creada_at)}</span>
+          <span className="text-label text-ink-2">{formatTiempoRelativo(item.creada_at)}</span>
           {meta.accion && (
-            <span className={`text-[10px] font-bold uppercase tracking-widest ${meta.color} opacity-0 group-hover:opacity-100 transition-opacity`}>
+            <span className={`text-label ${meta.color} opacity-0 group-hover:opacity-100 transition-opacity`}>
               {meta.accion}
             </span>
           )}
@@ -120,7 +120,7 @@ function GrupoColapsado({ grupo, onAccion }) {
         <div className={`w-9 h-9 rounded-full bg-surface border border-line flex items-center justify-center shrink-0 ${meta.color}`}>
           <Icon size={16} />
         </div>
-        <span className="flex-1 text-left text-xs font-bold text-ink whitespace-normal break-words">
+        <span className="flex-1 text-left text-label font-semibold text-ink whitespace-normal break-words">
           {grupo.items.length} {meta.plural}
         </span>
         <ChevronDown size={14} className={`text-ink-2 transition-transform ${abierto ? 'rotate-180' : ''}`} />
@@ -200,7 +200,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
   const gruposNovedades = useMemo(() => agruparPorDia(novedades), [novedades])
 
   if (loading) {
-    return <p className="px-4 py-10 text-center text-xs text-ink-2 uppercase tracking-widest animate-pulse">Cargando...</p>
+    return <p className="text-label px-4 py-10 text-center text-ink-2 animate-pulse">Cargando...</p>
   }
 
   return (
@@ -209,8 +209,8 @@ export default function NotificacionesBandeja({ onNavigate }) {
         <button
           type="button"
           onClick={() => setTab('pendientes')}
-          className={`flex-1 px-3 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest transition-all ${
-            tab === 'pendientes' ? 'bg-gold text-ink' : 'bg-surface text-ink-2 hover:text-ink'
+          className={`flex-1 px-3 py-2 rounded-full text-label transition-all ${
+            tab === 'pendientes' ? 'bg-ink text-on-ink' : 'bg-surface text-ink-2 hover:text-ink'
           }`}
         >
           Pendientes {countPendientes > 0 && `(${countPendientes})`}
@@ -218,8 +218,8 @@ export default function NotificacionesBandeja({ onNavigate }) {
         <button
           type="button"
           onClick={() => setTab('novedades')}
-          className={`flex-1 px-3 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest transition-all ${
-            tab === 'novedades' ? 'bg-gold text-ink' : 'bg-surface text-ink-2 hover:text-ink'
+          className={`flex-1 px-3 py-2 rounded-full text-label transition-all ${
+            tab === 'novedades' ? 'bg-ink text-on-ink' : 'bg-surface text-ink-2 hover:text-ink'
           }`}
         >
           Novedades {countNovedadesNoLeidas > 0 && `(${countNovedadesNoLeidas})`}
@@ -231,7 +231,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
           <button
             type="button"
             onClick={marcarTodoLeido}
-            className="text-[10px] font-bold uppercase tracking-widest text-ink-2 hover:text-ink transition-all flex items-center gap-1.5"
+            className="text-label text-ink-2 hover:text-ink transition-all flex items-center gap-1.5"
           >
             <CheckCheck size={12} /> Marcar todo como leído
           </button>
@@ -241,11 +241,11 @@ export default function NotificacionesBandeja({ onNavigate }) {
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 py-2 space-y-4">
         {tab === 'pendientes' ? (
           pendientes.length === 0 ? (
-            <p className="px-4 py-10 text-center text-xs text-ink-2 uppercase tracking-widest">Todo al día</p>
+            <p className="text-label px-4 py-10 text-center text-ink-2">Todo al día</p>
           ) : (
             gruposPendientes.map(({ bucket, grupos }) => (
               <div key={bucket} className="space-y-1">
-                <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-ink-2">{bucket}</p>
+                <p className="text-label px-2 text-ink-2">{bucket}</p>
                 {grupos.map((g) => g.tipo === 'grupo'
                   ? <GrupoColapsado key={g.clave} grupo={g} onAccion={handleAccion} />
                   : <ItemNotificacion key={g.item.id} item={g.item} onAccion={handleAccion} />)}
@@ -254,11 +254,11 @@ export default function NotificacionesBandeja({ onNavigate }) {
           )
         ) : (
           novedades.length === 0 ? (
-            <p className="px-4 py-10 text-center text-xs text-ink-2 uppercase tracking-widest">Sin novedades</p>
+            <p className="text-label px-4 py-10 text-center text-ink-2">Sin novedades</p>
           ) : (
             gruposNovedades.map(({ bucket, grupos }) => (
               <div key={bucket} className="space-y-1">
-                <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-ink-2">{bucket}</p>
+                <p className="text-label px-2 text-ink-2">{bucket}</p>
                 {grupos.map((g) => g.tipo === 'grupo'
                   ? <GrupoColapsado key={g.clave} grupo={g} onAccion={handleAccion} />
                   : <FilaNovedad key={g.item.id} item={g.item} onAccion={handleAccion} onArchivar={archivarNovedad} />)}

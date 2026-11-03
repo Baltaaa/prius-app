@@ -389,7 +389,7 @@ export default function Caja() {
                       <button
                         key={t.value}
                         onClick={() => setTab(t.value)}
-                        className={`px-4 py-2 rounded-inner text-xs font-bold whitespace-nowrap transition-all min-h-[40px] ${
+                        className={`px-4 py-2 rounded-full text-label whitespace-nowrap transition-all min-h-[40px] ${
                           tab === t.value ? 'bg-ink text-on-ink' : 'bg-surface text-ink-2 hover:bg-line'
                         }`}
                       >

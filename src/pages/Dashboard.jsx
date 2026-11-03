@@ -860,9 +860,9 @@ export default function Dashboard() {
           .no-print { display: none !important; }
         }
         .overflow-auto::-webkit-scrollbar { width: 8px; height: 8px; }
-        .overflow-auto::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
-        .overflow-auto::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-        .overflow-auto::-webkit-scrollbar-thumb:hover { background: #FDE047; }
+        .overflow-auto::-webkit-scrollbar-track { background: transparent; }
+        .overflow-auto::-webkit-scrollbar-thumb { background: rgb(var(--primary) / 0.15); border-radius: 4px; }
+        .overflow-auto::-webkit-scrollbar-thumb:hover { background: rgb(var(--accent)); }
       `}</style>
     </div>
   )

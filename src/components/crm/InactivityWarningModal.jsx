@@ -32,7 +32,7 @@ export default function InactivityWarningModal({ open, secondsLeft, onContinuar,
         aria-modal="true"
         aria-labelledby="inactivity-warning-title"
         aria-describedby="inactivity-warning-desc"
-        className={`card-light w-full sm:max-w-sm rounded-t-card sm:rounded-card border border-line p-6 sm:p-8 space-y-6 ${open ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
+        className={`card-surface w-full sm:max-w-sm rounded-t-card sm:rounded-card p-6 sm:p-8 space-y-6 ${open ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sm:hidden flex justify-center -mt-2 mb-1">
@@ -43,11 +43,11 @@ export default function InactivityWarningModal({ open, secondsLeft, onContinuar,
           <div className="w-11 h-11 rounded-full bg-gold-100 border border-gold-300 flex items-center justify-center shrink-0">
             <Clock size={20} className="text-ink" />
           </div>
-          <h2 id="inactivity-warning-title" className="text-lg font-bold text-ink">¿Seguís ahí?</h2>
+          <h2 id="inactivity-warning-title" className="text-card-title text-ink">¿Seguís ahí?</h2>
         </div>
 
         <p id="inactivity-warning-desc" className="text-body text-ink-2 leading-relaxed" aria-live="polite">
-          Por seguridad, tu sesión se cerrará en <span className="text-ink font-bold tabular-nums">{formatMMSS(secondsLeft)}</span>.
+          Por seguridad, tu sesión se cerrará en <span className="text-ink font-semibold tabular-nums">{formatMMSS(secondsLeft)}</span>.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -55,14 +55,14 @@ export default function InactivityWarningModal({ open, secondsLeft, onContinuar,
             type="button"
             onClick={onContinuar}
             autoFocus
-            className="order-1 sm:order-2 flex-1 h-12 min-h-[44px] bg-gold hover:bg-gold-400 active:scale-[0.98] text-ink font-bold text-body rounded-inner transition-all"
+            className="order-1 sm:order-2 flex-1 h-12 min-h-[44px] bg-ink hover:bg-chart-2 active:scale-[0.98] font-semibold text-body rounded-full transition-all text-on-ink"
           >
             Seguir conectado
           </button>
           <button
             type="button"
             onClick={onCerrarSesion}
-            className="order-2 sm:order-1 flex-1 h-12 min-h-[44px] bg-surface hover:bg-surface border border-line text-ink-2 font-bold text-body rounded-inner transition-all"
+            className="order-2 sm:order-1 flex-1 h-12 min-h-[44px] bg-surface hover:bg-surface border border-line text-ink-2 font-semibold text-body rounded-full transition-all"
           >
             Cerrar sesión
           </button>

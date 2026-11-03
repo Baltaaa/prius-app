@@ -46,7 +46,7 @@ export default function CabinasLockers() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-body font-semibold text-ink-2 animate-pulse uppercase tracking-widest">Cargando...</span>
+        <span className="text-label text-ink-2 animate-pulse">Cargando...</span>
       </div>
     )
   }
@@ -54,7 +54,7 @@ export default function CabinasLockers() {
   return (
     <div className="space-y-6 animate-premium-fade">
       {/* Aviso de sección en desarrollo */}
-      <div className="card-light border border-gold-300 bg-gold-100 rounded-card p-4 sm:p-5 flex items-start gap-3">
+      <div className="card-surface border-gold-300 bg-gold-100 p-4 sm:p-5 flex items-start gap-3">
         <div className="w-10 h-10 rounded-inner bg-gold-100 border border-gold-300 flex items-center justify-center shrink-0">
           <Construction size={18} className="text-ink" />
         </div>
@@ -71,18 +71,18 @@ export default function CabinasLockers() {
           { label: 'Ocupados', value: resumen.cabinas.ocupadas + resumen.lockers.ocupadas, icon: Wallet },
           { label: 'Libres', value: resumen.cabinas.libres + resumen.lockers.libres, icon: UserPlus },
         ].map((kpi) => (
-          <div key={kpi.label} className="card-light p-4 sm:p-5 rounded-card min-w-0">
+          <div key={kpi.label} className="card-surface p-4 sm:p-5 min-w-0">
             <div className="w-9 h-9 rounded-icon bg-surface border border-line flex items-center justify-center mb-3">
               <kpi.icon size={16} className="text-ink-2" />
             </div>
-            <p className="text-2xl font-black text-ink">{kpi.value}</p>
-            <p className="text-[10px] text-ink-2 font-bold uppercase tracking-widest mt-1 truncate">{kpi.label}</p>
+            <p className="text-stat text-ink">{kpi.value}</p>
+            <p className="text-label text-ink-2 mt-1 truncate">{kpi.label}</p>
           </div>
         ))}
       </div>
 
       {esEjemplo && (
-        <p className="text-[10px] text-ink-2 uppercase tracking-widest font-bold">
+        <p className="text-label text-ink-2">
           Todavía no hay cabinas ni lockers cargados — se muestran tarjetas de ejemplo.
         </p>
       )}
@@ -90,31 +90,31 @@ export default function CabinasLockers() {
       {/* Grilla de unidades */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {items.map((item) => (
-          <div key={item.id} className="card-light rounded-card p-4 space-y-3 relative">
+          <div key={item.id} className="card-surface p-4 space-y-3 relative">
             {esEjemplo && (
-              <span className="absolute top-3 right-3 text-[8px] font-bold uppercase tracking-widest text-ink-2 border border-line rounded-swatch px-1.5 py-0.5">
+              <span className="text-label absolute top-3 right-3 text-ink-2 border border-line rounded-swatch px-1.5 py-0.5">
                 Ejemplo
               </span>
             )}
             <div className="flex items-center gap-2">
               {item.tipo === 'cabina' ? <DoorClosed size={16} className="text-ink-2" /> : <Lock size={16} className="text-ink-2" />}
-              <p className="font-bold text-ink uppercase text-body">{TIPO_LABEL[item.tipo]} {item.numero}</p>
+              <p className="text-label text-ink">{TIPO_LABEL[item.tipo]} {item.numero}</p>
             </div>
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-swatch text-[10px] font-bold tracking-wider uppercase border ${
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-swatch text-label font-semibold border ${
               item.estado === 'libre'
                 ? 'bg-success-soft text-success-ink border-success/30'
                 : 'bg-gold-100 text-ink border-gold-300'
             }`}>
               {ESTADO_LABEL[item.estado]}
             </span>
-            <p className="text-xs text-ink-2">
-              {item.titular ? <span className="text-ink-2 font-bold uppercase">{item.titular}</span> : <span className="text-ink-2">Sin titular</span>}
+            <p className="text-label text-ink-2">
+              {item.titular ? <span className="text-ink-2 font-semibold">{item.titular}</span> : <span className="text-ink-2">Sin titular</span>}
             </p>
             <div className="flex gap-2 pt-1">
-              <button disabled title="Asignar — próximamente" className="flex-1 py-2.5 min-h-[44px] bg-surface border border-line rounded-inner text-[9px] font-bold uppercase tracking-widest text-ink-2 cursor-not-allowed">
+              <button disabled title="Asignar — próximamente" className="text-label flex-1 py-2.5 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
                 Próximamente
               </button>
-              <button disabled title="Registrar pago — próximamente" className="flex-1 py-2.5 min-h-[44px] bg-surface border border-line rounded-inner text-[9px] font-bold uppercase tracking-widest text-ink-2 cursor-not-allowed">
+              <button disabled title="Registrar pago — próximamente" className="text-label flex-1 py-2.5 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
                 Próximamente
               </button>
             </div>

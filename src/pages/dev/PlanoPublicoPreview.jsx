@@ -278,8 +278,8 @@ export default function PlanoPublicoPreview() {
     <div className="h-full flex flex-col overflow-hidden animate-premium-fade">
       <div className="flex-1 flex flex-col space-y-4 overflow-hidden pb-4">
         <div className="shrink-0">
-          <h1 className="text-lg font-bold text-ink">Vista previa — Plano público</h1>
-          <p className="text-[11px] uppercase tracking-widest text-ink-2 mt-1">
+          <h1 className="text-card-title text-ink">Vista previa — Plano público</h1>
+          <p className="text-label text-ink-2 mt-1">
             Herramienta interna (solo superadmin) — no crea ninguna reserva
           </p>
         </div>
@@ -290,9 +290,9 @@ export default function PlanoPublicoPreview() {
           <IntegerInput label="Personas" value={personas} onChange={(n) => setPersonas(n || 1)} min={1} max={40} className="w-28" />
         </div>
 
-        <div className="flex-1 min-h-0 card-light rounded-card card-light-inner relative overflow-hidden flex flex-col">
+        <div className="card-surface flex-1 min-h-0 relative overflow-hidden flex flex-col">
           {loadingDisp && disponibilidad.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-ink-2 text-[10px] font-bold uppercase tracking-widest">
+            <div className="text-label flex-1 flex items-center justify-center text-ink-2">
               Cargando disponibilidad…
             </div>
           ) : (
@@ -315,11 +315,11 @@ export default function PlanoPublicoPreview() {
         </div>
 
         {resumenSeleccion && (
-          <div className="shrink-0 card-light rounded-card px-5 py-3 flex items-center justify-between">
+          <div className="card-surface shrink-0 px-5 py-3 flex items-center justify-between">
             <span className="text-body font-semibold text-ink">{resumenSeleccion}</span>
             <button
               onClick={() => { setSelectedUnit(null); setSuggestedUnit(null) }}
-              className="text-[10px] font-bold uppercase tracking-widest text-ink-2 hover:text-ink transition-colors"
+              className="text-label text-ink-2 hover:text-ink transition-colors"
             >
               Limpiar
             </button>

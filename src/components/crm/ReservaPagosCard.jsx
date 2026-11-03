@@ -109,7 +109,7 @@ export default function ReservaPagosCard({
         <button
           type="button"
           onClick={cancelada ? () => setAbierta((v) => !v) : undefined}
-          className={`text-label font-bold text-ink text-left min-w-0 truncate ${
+          className={`text-label font-semibold text-ink text-left min-w-0 truncate ${
             cancelada ? 'hover:opacity-70 transition-opacity' : 'cursor-default'
           }`}
         >

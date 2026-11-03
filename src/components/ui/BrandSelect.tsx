@@ -180,12 +180,12 @@ export default function BrandSelect({
   const renderList = () => (
     <div ref={listRef} className="overflow-y-auto scrollbar-thin" style={{ maxHeight: isMobile ? undefined : 320 }}>
       {filtered.length === 0 ? (
-        <p className="px-4 py-3 text-xs text-ink-2">Sin resultados</p>
+        <p className="px-4 py-3 text-label text-ink-2">Sin resultados</p>
       ) : (
         groups.map(([group, opts]) => (
           <div key={group || '_'}>
             {group && (
-              <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-ink-2">{group}</p>
+              <p className="px-4 pt-3 pb-1 text-label font-semibold text-ink-2">{group}</p>
             )}
             {opts.map((o) => {
               flatIdx += 1
@@ -294,7 +294,7 @@ export default function BrandSelect({
           document.body,
         )}
 
-      {error && <p className="mt-1.5 text-[11px] text-danger">{error}</p>}
+      {error && <p className="mt-1.5 text-label text-danger">{error}</p>}
     </div>
   )
 }

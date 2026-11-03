@@ -37,7 +37,7 @@ export function StatCard({ icon: Icon, label, active, onClick, progress, size = 
         }`}>
           <Icon size={lg ? 18 : 14} className={active ? 'text-ink' : 'text-ink-2'} />
         </div>
-        <p className={`text-label text-ink-2 truncate ${lg ? 'text-[10px]' : 'text-[9px]'}`}>{label}</p>
+        <p className={`text-label text-ink-2 truncate`}>{label}</p>
       </div>
       {children}
       {progress != null && (
@@ -56,8 +56,8 @@ export function OcupacionCard({ stats, filtro, onToggleFiltro, size, className =
   const lg = size === 'lg'
   return (
     <StatCard icon={Activity} label="Ocupación" active={filtro === 'ocupacion'} onClick={() => onToggleFiltro('ocupacion')} progress={stats.ocupacion.pct} size={size} className={className}>
-      <p className={`font-semibold text-ink tabular-nums leading-none ${lg ? 'text-4xl' : 'text-2xl'}`}>{pct(stats.ocupacion.pct)}</p>
-      <p className={`text-ink-2 tabular-nums mt-1 ${lg ? 'text-xs' : 'text-[10px] mt-0.5'}`}>{stats.ocupacion.count}/{stats.ocupacion.total} unidades</p>
+      <p className={`font-semibold text-ink tabular-nums leading-none text-stat`}>{pct(stats.ocupacion.pct)}</p>
+      <p className={`text-ink-2 tabular-nums mt-1 text-label`}>{stats.ocupacion.count}/{stats.ocupacion.total} unidades</p>
     </StatCard>
   )
 }

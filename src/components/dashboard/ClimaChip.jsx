@@ -84,7 +84,7 @@ export default function ClimaChip({ clima, loading, onClick, className = 'w-[172
           {actual.viento != null ? Math.round(actual.viento) : '--'} km/h
         </div>
       </div>
-      <p className={`text-label tabular-nums mt-1 ${alerta ? 'text-ink font-bold' : 'text-ink-2'}`}>
+      <p className={`text-label tabular-nums mt-1 ${alerta ? 'text-ink font-semibold' : 'text-ink-2'}`}>
         ráfaga {Math.round(rafagaMax)} km/h{actual.olaAltura != null ? ` · ola ${Number(actual.olaAltura).toFixed(1)} m` : ''}
       </p>
     </button>

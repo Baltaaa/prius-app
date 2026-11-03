@@ -400,7 +400,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
               <button
                 type="button"
                 onClick={handleToggleBloqueada}
-                className={`px-3 py-2 rounded-icon text-[9px] font-bold transition-all ${
+                className={`px-3 py-2 rounded-full text-label transition-all ${
                   bloqueada ? 'bg-danger-soft text-danger hover:bg-danger-soft' : 'bg-surface text-ink-2 hover:text-ink'
                 }`}
               >
@@ -452,7 +452,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
                   type="button"
                   disabled={bloqueada}
                   onClick={() => setTipoAlquiler(t.key)}
-                  className={`h-9 rounded-inner text-[9px] font-bold border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`h-9 rounded-full text-label border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                     tipoAlquiler === t.key
                       ? 'bg-ink text-on-ink border-ink'
                       : 'bg-surface text-ink-2 border-line hover:text-ink'

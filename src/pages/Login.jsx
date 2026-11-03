@@ -174,8 +174,8 @@ export default function Login({ modo }) {
   // — el placeholder "P" amarillo y las fotos de relleno de esos mocks NO
   // se usan, siempre el logo/imagen reales de la app.
   const inputBase =
-    "w-full h-12 px-4 rounded-swatch border border-line bg-card text-ink placeholder:text-ink-2 outline-none transition-colors motion-reduce:transition-none focus:border-gold focus:ring-2 focus:ring-gold"
-  const labelBase = "block text-xs font-semibold text-ink-2 mb-1.5"
+    "w-full h-12 px-4 rounded-inner bg-surface text-ink placeholder:text-ink-2 outline-none transition-colors motion-reduce:transition-none focus:ring-2 focus:ring-gold border border-transparent focus:ring-2 focus:ring-gold"
+  const labelBase = "block text-label font-semibold text-ink-2 mb-1.5"
 
   // Aviso de inactividad/error — mismo bloque, se renderiza en DOS lugares
   // distintos según breakpoint (desktop: arriba de los campos; mobile:
@@ -186,7 +186,7 @@ export default function Login({ modo }) {
       {motivo === "inactividad" && !error && !isLocked && (
         <div className="p-3 bg-surface border border-line rounded-swatch flex items-center gap-2.5">
           <AlertCircle size={16} className="text-ink-2 shrink-0" />
-          <span className="text-xs font-medium text-ink-2">
+          <span className="text-label font-medium text-ink-2">
             Cerramos tu sesión por inactividad. Volvé a ingresar para continuar.
           </span>
         </div>
@@ -195,7 +195,7 @@ export default function Login({ modo }) {
       {isLocked && (
         <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5">
           <AlertCircle size={16} className="text-danger shrink-0" />
-          <span className="text-xs font-semibold text-danger-ink">
+          <span className="text-label font-semibold text-danger-ink">
             Demasiados intentos. Probá de nuevo en {lockCountdown}s.
           </span>
         </div>
@@ -204,7 +204,7 @@ export default function Login({ modo }) {
       {error && !isLocked && (
         <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
           <AlertCircle size={16} className="text-danger shrink-0" />
-          <span className="text-xs font-semibold text-danger-ink">{error}</span>
+          <span className="text-label font-semibold text-danger-ink">{error}</span>
         </div>
       )}
     </div>
@@ -239,13 +239,13 @@ export default function Login({ modo }) {
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/40 md:bg-gradient-to-br md:from-black/85 md:via-black/55 md:to-black/35" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-ink/40 md:bg-gradient-to-br md:from-ink/85 md:via-ink/55 md:to-ink/35" />
           {/* Scrim propio del wordmark (Bloque 2, nov 2026). El gradiente de
               arriba deja la franja superior en negro al 40% en mobile, y
               sobre un cielo claro el blanco del logo quedaba en ~3.8:1 — por
               debajo de AA. Esta banda sube esa zona a negro ~72% y lleva el
               texto a 10:1 largos, sin oscurecer el resto de la foto. */}
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/75 to-transparent md:hidden" />
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-ink/75 to-transparent md:hidden" />
 
           <div className="relative h-full flex flex-col justify-between p-6 md:p-12">
             {/* Wordmark — logo real de la app (/images/prius-icon.png),
@@ -253,17 +253,17 @@ export default function Login({ modo }) {
             <div className="flex items-center gap-2 md:gap-3 pt-[max(0.5rem,env(safe-area-inset-top))]">
               <img src="/images/prius-icon.png" alt="" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
               <div className="leading-tight">
-                <p className="text-on-ink font-extrabold text-lg md:text-xl tracking-tight">Prius</p>
-                <p className="text-on-ink/70 text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] -mt-0.5">Playa Grande</p>
+                <p className="text-on-ink text-card-title md:text-card-title tracking-tight">Prius</p>
+                <p className="text-label text-on-ink/70 -mt-0.5">Playa Grande</p>
               </div>
             </div>
 
             {/* Bloque central — solo desktop (mock 06-login-desktop) */}
             <div className="hidden md:block max-w-md">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-on-ink/10 border border-on-ink/20 text-on-ink text-xs font-semibold mb-6">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-on-ink/10 border border-on-ink/20 text-on-ink text-label font-semibold mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" /> Panel de Gestión y Operaciones
               </span>
-              <h2 className="text-4xl lg:text-[44px] font-extrabold text-on-ink tracking-tight leading-[1.05]">
+              <h2 className="text-stat lg:text-greeting text-on-ink">
                 Prius <span className="text-gold">Playa Grande</span>
               </h2>
               <p className="text-on-ink/70 text-base mt-4 leading-relaxed">
@@ -272,7 +272,7 @@ export default function Login({ modo }) {
             </div>
 
             {/* Pie — solo desktop */}
-            <div className="hidden md:flex items-center justify-between text-on-ink/50 text-xs border-t border-on-ink/10 pt-6">
+            <div className="hidden md:flex items-center justify-between text-on-ink/50 text-label border-t border-on-ink/10 pt-6">
               <span>Sistema CRM Interno</span>
               <span>Mar del Plata, Argentina</span>
             </div>
@@ -300,14 +300,14 @@ export default function Login({ modo }) {
               </div>
 
               {/* Pill — solo desktop (mock): "Prius App · Panel de Gestión" */}
-              <span className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface border border-line text-ink-2 text-xs font-semibold mb-6">
+              <span className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface border border-line text-ink-2 text-label font-semibold mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" /> Prius App · Panel de Gestión
               </span>
 
               {mode === "login" ? (
                 <div className="space-y-5">
                   <div>
-                    <h1 className="text-2xl md:text-xl font-extrabold text-ink tracking-tight">Iniciar sesión</h1>
+                    <h1 className="text-stat md:text-card-title text-ink tracking-tight">Iniciar sesión</h1>
                     <p className="text-ink-2 text-body mt-1">Acceso exclusivo para el equipo Prius.</p>
                   </div>
 
@@ -338,7 +338,7 @@ export default function Login({ modo }) {
                         <button
                           type="button"
                           onClick={() => setMode("recover")}
-                          className="text-xs font-semibold text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none underline underline-offset-2"
+                          className="text-label font-semibold text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none underline underline-offset-2"
                         >
                           ¿Olvidaste tu contraseña?
                         </button>
@@ -368,13 +368,13 @@ export default function Login({ modo }) {
                         </button>
                       </div>
                       {capsLockOn && (
-                        <p className="text-xs text-ink mt-1.5 flex items-center gap-1" aria-live="polite">
+                        <p className="text-label text-ink mt-1.5 flex items-center gap-1" aria-live="polite">
                           <AlertCircle size={12} /> Bloq Mayús activado
                         </p>
                       )}
                     </div>
 
-                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-ink-2 select-none">
+                    <label className="flex items-center gap-2 cursor-pointer text-label font-medium text-ink-2 select-none">
                       <input
                         type="checkbox"
                         checked={remember}
@@ -390,7 +390,7 @@ export default function Login({ modo }) {
                     <button
                       type="submit"
                       disabled={isLoading || awaitingContext || isLocked}
-                      className="w-full h-12 bg-gold hover:bg-gold-400 active:scale-[0.98] text-ink font-bold text-body rounded-swatch transition-all duration-150 motion-reduce:transition-none motion-reduce:active:scale-100 flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100"
+                      className="w-full h-12 bg-ink hover:bg-chart-2 active:scale-[0.98] font-semibold text-body rounded-full transition-all duration-150 motion-reduce:transition-none motion-reduce:active:scale-100 flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100 text-on-ink"
                     >
                       {isLoading || awaitingContext ? (
                         <>
@@ -407,7 +407,7 @@ export default function Login({ modo }) {
               ) : (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-xl font-extrabold text-ink tracking-tight">Recuperar cuenta</h2>
+                    <h2 className="text-card-title text-ink tracking-tight">Recuperar cuenta</h2>
                     <p className="text-ink-2 text-body mt-1">Te enviamos un enlace seguro a tu email.</p>
                   </div>
 
@@ -417,10 +417,10 @@ export default function Login({ modo }) {
                         <CheckCircle2 size={16} />
                         <span>Correo enviado con éxito</span>
                       </div>
-                      <p className="text-success-ink text-xs leading-relaxed">Revisá tu casilla para continuar con la restauración.</p>
+                      <p className="text-success-ink text-label leading-relaxed">Revisá tu casilla para continuar con la restauración.</p>
                       <button
                         onClick={() => setMode("login")}
-                        className="text-xs font-semibold text-ink underline underline-offset-2"
+                        className="text-label font-semibold text-ink underline underline-offset-2"
                       >
                         Volver al login
                       </button>
@@ -447,14 +447,14 @@ export default function Login({ modo }) {
                       {recoverStatus === "error" && (
                         <div className="p-3 bg-danger-soft border border-danger/30 rounded-swatch flex items-center gap-2.5" aria-live="polite">
                           <AlertCircle size={16} className="text-danger shrink-0" />
-                          <span className="text-xs font-semibold text-danger-ink">No pudimos enviar el correo. Probá de nuevo.</span>
+                          <span className="text-label font-semibold text-danger-ink">No pudimos enviar el correo. Probá de nuevo.</span>
                         </div>
                       )}
 
                       <button
                         type="submit"
                         disabled={recoverStatus === "sending"}
-                        className="w-full h-12 bg-gold hover:bg-gold-400 text-ink font-bold text-body rounded-swatch transition-all duration-150 motion-reduce:transition-none flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full h-12 bg-ink hover:bg-chart-2 font-semibold text-body rounded-full transition-all duration-150 motion-reduce:transition-none flex items-center justify-center gap-2 disabled:opacity-50 text-on-ink"
                       >
                         {recoverStatus === "sending" ? <Loader2 size={18} className="animate-spin motion-reduce:animate-none" /> : "Enviar instrucciones"}
                       </button>
@@ -462,7 +462,7 @@ export default function Login({ modo }) {
                       <button
                         type="button"
                         onClick={() => setMode("login")}
-                        className="w-full text-center text-xs font-semibold text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none flex items-center justify-center gap-1.5"
+                        className="w-full text-center text-label font-semibold text-ink-2 hover:text-ink transition-colors motion-reduce:transition-none flex items-center justify-center gap-1.5"
                       >
                         <ArrowLeft size={14} /> Volver
                       </button>
@@ -471,7 +471,7 @@ export default function Login({ modo }) {
                 </div>
               )}
 
-              <p className="text-center text-[11px] text-ink-2 font-medium mt-8">
+              <p className="text-center text-label text-ink-2 font-medium mt-8">
                 <span className="md:hidden">Prius Balneario Playa Grande · CRM v1.0</span>
                 <span className="hidden md:inline">Prius Balneario Playa Grande · CRM Interno</span>
               </p>

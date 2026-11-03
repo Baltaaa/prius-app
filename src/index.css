@@ -141,36 +141,12 @@ body {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
-.glass-popover {
-  background: rgba(23, 32, 48, 0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
-}
-
 .glass-tooltip {
   background: rgba(10, 13, 20, 0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-}
-
-/* Transición: las pantallas todavía no migradas a brand/Card (Fase 4). Se
-   borran en la auditoría final, junto con el borde. */
-.card-light {
-  background: rgb(var(--card));
-  border: 1px solid rgb(var(--border));
-}
-
-.card-light-inner {
-  background: transparent;
-}
-
-.popover-light {
-  background: rgb(var(--card));
-  border: 1px solid rgb(var(--border));
 }
 
 /*
@@ -561,7 +537,7 @@ button, a {
      para cualquiera que no lo tenga explícito. */
   /* !important a propósito: es una regla funcional (evitar el zoom
      automático de iOS al enfocar), no solo estética — tiene que ganarle a
-     cualquier text-xs/text-sm suelto que algún input todavía tenga. */
+     cualquier tamaño suelto que algún input todavía tenga. */
   input, select, textarea { font-size: 16px !important; }
 }
 
@@ -579,7 +555,7 @@ button, a {
   fondo sólido corta el contenido de golpe. Este tratamiento suaviza el
   borde con backdrop-filter + fondo semi-opaco + gradiente de fade al pie.
 
-  Unlayered a propósito: necesita ganar sobre bg-prius-background y
+  Unlayered a propósito: necesita ganar sobre bg-canvas y
   similares que están en @layer utilities.
 
   Solo se aplica en Historial (barra de filtros) — no en el Plano

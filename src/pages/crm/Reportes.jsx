@@ -142,7 +142,7 @@ export default function Reportes() {
               key={p.value}
               type="button"
               onClick={() => setPeriodo(p.value)}
-              className={`px-3 py-1.5 rounded-icon text-label font-bold transition-colors ${
+              className={`px-3 py-1.5 rounded-icon text-label font-semibold transition-colors ${
                 periodo === p.value ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -157,7 +157,7 @@ export default function Reportes() {
               key={x}
               type="button"
               onClick={() => setMoneda(x)}
-              className={`px-3 py-1.5 rounded-icon text-label font-bold transition-colors ${
+              className={`px-3 py-1.5 rounded-icon text-label font-semibold transition-colors ${
                 moneda === x ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -307,7 +307,7 @@ export default function Reportes() {
       <style>{`
         @media print {
           @page { size: A4 portrait; margin: 10mm; }
-          html, body { background: #fff !important; }
+          html, body { background: white !important; }
           .no-print { display: none !important; }
         }
       `}</style>

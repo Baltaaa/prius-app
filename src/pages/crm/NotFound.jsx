@@ -8,12 +8,12 @@ export default function NotFound() {
     <div className="h-full flex flex-col items-center justify-center gap-4 text-center animate-premium-fade">
       <Compass size={32} className="text-ink-2" />
       <div>
-        <p className="text-body font-bold text-ink uppercase tracking-widest">Página no encontrada</p>
-        <p className="text-xs text-ink-2 mt-2">La dirección a la que llegaste no existe o ya no está disponible.</p>
+        <p className="text-label text-ink">Página no encontrada</p>
+        <p className="text-label text-ink-2 mt-2">La dirección a la que llegaste no existe o ya no está disponible.</p>
       </div>
       <Link
         to="/app/home"
-        className="mt-2 px-5 py-3 bg-gold hover:bg-gold-400 text-ink font-bold uppercase tracking-[0.2em] rounded-inner text-xs transition-all"
+        className="text-label mt-2 px-5 py-3 bg-ink hover:bg-chart-2 rounded-full transition-all text-on-ink"
       >
         Volver al Home
       </Link>

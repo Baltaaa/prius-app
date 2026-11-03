@@ -175,7 +175,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
               <button
                 type="button"
                 onClick={() => setTieneZ((v) => !v)}
-                className={`w-full flex items-center justify-between px-4 py-4 rounded-inner border text-body font-bold transition-all ${
+                className={`w-full flex items-center justify-between px-4 py-4 rounded-inner border text-body font-semibold transition-all ${
                   tieneZ ? 'bg-gold-100 border-gold-300 text-ink' : 'bg-surface border-line text-ink-2'
                 }`}
               >

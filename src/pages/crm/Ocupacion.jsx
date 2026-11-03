@@ -215,7 +215,7 @@ export default function Ocupacion() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="text-body font-semibold text-ink-2 animate-pulse uppercase tracking-widest">Cargando ocupación...</span>
+        <span className="text-label text-ink-2 animate-pulse">Cargando ocupación...</span>
       </div>
     )
   }
@@ -231,26 +231,26 @@ export default function Ocupacion() {
             página entera (la fecha quedaba directamente fuera de pantalla)
             — scroll horizontal interno acá, nunca scroll de la página. */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none max-w-full">
-          <div className="card-light p-1 rounded-inner flex shrink-0">
+          <div className="card-surface p-1 flex shrink-0">
             {['semana', 'mes'].map((v) => (
               <button
                 key={v}
                 onClick={() => setVista(v)}
-                className={`px-4 py-2 rounded-icon text-[10px] font-bold uppercase tracking-widest transition-all ${
-                  vista === v ? 'bg-gold text-ink' : 'text-ink-2 hover:text-ink'
+                className={`px-4 py-2 rounded-full text-label transition-all ${
+                  vista === v ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
                 }`}
               >
                 {v === 'semana' ? 'Semana' : 'Mes'}
               </button>
             ))}
           </div>
-          <button onClick={irAnterior} className="p-2.5 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-surface hover:bg-surface border border-line rounded-inner text-ink-2 transition-all" title="Anterior">
+          <button onClick={irAnterior} className="p-2.5 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all" title="Anterior">
             <ChevronLeft size={16} />
           </button>
-          <button onClick={irSiguiente} className="p-2.5 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-surface hover:bg-surface border border-line rounded-inner text-ink-2 transition-all" title="Siguiente">
+          <button onClick={irSiguiente} className="p-2.5 min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all" title="Siguiente">
             <ChevronRight size={16} />
           </button>
-          <button onClick={irHoy} className="px-3 py-2.5 shrink-0 bg-surface hover:bg-surface border border-line rounded-inner text-[10px] font-bold uppercase tracking-widest text-ink-2 transition-all">
+          <button onClick={irHoy} className="text-label px-3 py-2.5 shrink-0 bg-surface hover:bg-surface border border-line rounded-full text-ink-2 transition-all">
             Hoy
           </button>
           {/* [feat-5] "Ir a fecha": salta directo al día/semana/mes elegido
@@ -258,16 +258,16 @@ export default function Ocupacion() {
           {isFeatureEnabled('feat-5-ir-a-fecha') && (
             <DateInput value={anchor} onChange={(v) => v && setAnchor(v)} className="w-36 shrink-0" />
           )}
-          <span className="text-body font-bold text-ink capitalize px-2 shrink-0 whitespace-nowrap">{tituloRango}</span>
+          <span className="text-body font-semibold text-ink capitalize px-2 shrink-0 whitespace-nowrap">{tituloRango}</span>
         </div>
 
-        <div className="card-light p-1 rounded-inner flex flex-wrap">
+        <div className="card-surface p-1 flex flex-wrap">
           {FILTROS_TIPO.map((t) => (
             <button
               key={t}
               onClick={() => setTipoFiltro(t)}
-              className={`px-3 py-1.5 rounded-icon text-[9px] font-bold uppercase tracking-widest transition-all ${
-                tipoFiltro === t ? 'bg-gold text-ink' : 'text-ink-2 hover:text-ink'
+              className={`px-3 py-1.5 rounded-full text-label transition-all ${
+                tipoFiltro === t ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
               {t === 'todos' ? 'Todas' : TIPO_LABEL[t]}
@@ -279,7 +279,7 @@ export default function Ocupacion() {
       {/* Leyenda fija y compacta — pendiente_confirmacion con contorno
           rayado del mismo color (no un color nuevo), bonificada con un
           punto sutil. */}
-      <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-ink-2">
+      <div className="text-label flex flex-wrap items-center gap-4 text-ink-2">
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.temporada.swatch }} /> Temporada</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.periodo.swatch }} /> Período</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-swatch" style={{ background: COLOR_TIPO_ALQUILER.dia.swatch }} /> Día</span>
@@ -290,21 +290,21 @@ export default function Ocupacion() {
 
       {vista === 'mes' && kpisMes && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="card-light rounded-card p-4">
-            <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Ocupación promedio</p>
-            <p className="text-xl font-bold text-ink mt-1">{formatPorcentaje(kpisMes.promedio)}</p>
+          <div className="card-surface p-4">
+            <p className="text-label text-ink-2">Ocupación promedio</p>
+            <p className="text-card-title text-ink mt-1">{formatPorcentaje(kpisMes.promedio)}</p>
           </div>
-          <div className="card-light rounded-card p-4">
-            <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Día pico</p>
-            <p className="text-xl font-bold text-ink mt-1">{formatFecha(kpisMes.diaPico)} <span className="text-xs text-ink-2">({formatPorcentaje(kpisMes.pctDiaPico)})</span></p>
+          <div className="card-surface p-4">
+            <p className="text-label text-ink-2">Día pico</p>
+            <p className="text-card-title text-ink mt-1">{formatFecha(kpisMes.diaPico)} <span className="text-label text-ink-2">({formatPorcentaje(kpisMes.pctDiaPico)})</span></p>
           </div>
-          <div className="card-light rounded-card p-4">
-            <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Unidades libres hoy</p>
-            <p className="text-xl font-bold text-ink mt-1">{kpisMes.libresHoy}</p>
+          <div className="card-surface p-4">
+            <p className="text-label text-ink-2">Unidades libres hoy</p>
+            <p className="text-card-title text-ink mt-1">{kpisMes.libresHoy}</p>
           </div>
-          <div className="card-light rounded-card p-4">
-            <p className="text-[9px] font-bold text-ink-2 uppercase tracking-widest">Hoy por tipo</p>
-            <p className="text-xs font-bold text-ink mt-1 space-x-2">
+          <div className="card-surface p-4">
+            <p className="text-label text-ink-2">Hoy por tipo</p>
+            <p className="text-label font-semibold text-ink mt-1 space-x-2">
               <span style={{ color: COLOR_TIPO_ALQUILER.temporada.swatch }}>T {kpisMes.porTipoHoy.temporada}</span>
               <span style={{ color: COLOR_TIPO_ALQUILER.periodo.swatch }}>P {kpisMes.porTipoHoy.periodo}</span>
               <span className="text-ink-2">D {kpisMes.porTipoHoy.dia}</span>
@@ -314,16 +314,16 @@ export default function Ocupacion() {
       )}
 
       {vista === 'semana' ? (
-        <div className="card-light rounded-card card-light-inner overflow-hidden">
+        <div className="card-surface overflow-hidden">
           <div className="overflow-x-auto">
             <div className="min-w-[900px]">
               <div className="flex border-b border-line sticky top-0 bg-card z-10">
-                <div className="w-36 shrink-0 px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-ink-2">Unidad</div>
+                <div className="text-label w-36 shrink-0 px-4 py-3 text-ink-2">Unidad</div>
                 <div className="flex-1 relative h-9">
                   {marcas.map((m) => (
                     <div
                       key={m.dia}
-                      className="absolute top-0 h-full border-l border-line pl-1.5 text-[9px] text-ink-2 font-bold flex items-center"
+                      className="absolute top-0 h-full border-l border-line pl-1.5 text-label text-ink-2 font-semibold flex items-center"
                       style={{ left: `${m.left}%` }}
                     >
                       {formatFecha(m.dia).slice(0, 5)}
@@ -334,7 +334,7 @@ export default function Ocupacion() {
 
               {/* Fila de % de ocupación por día, arriba de las filas de unidad. */}
               <div className="flex border-b border-line bg-surface">
-                <div className="w-36 shrink-0 px-4 py-2 text-[9px] font-bold uppercase tracking-widest text-ink-2">% ocupación</div>
+                <div className="text-label w-36 shrink-0 px-4 py-2 text-ink-2">% ocupación</div>
                 <div className="flex-1 relative h-6">
                   {marcas.map((m) => {
                     const ocupadasDia = unidadesFiltradas.filter((u) =>
@@ -342,7 +342,7 @@ export default function Ocupacion() {
                     ).length
                     const pct = Math.round((ocupadasDia / totalUnidadesFiltradas) * 100)
                     return (
-                      <div key={m.dia} className="absolute top-0 h-full flex items-center text-[9px] font-bold text-ink-2" style={{ left: `${m.left}%` }}>
+                      <div key={m.dia} className="absolute top-0 h-full flex items-center text-label font-semibold text-ink-2" style={{ left: `${m.left}%` }}>
                         <span className="pl-1.5">{pct}%</span>
                       </div>
                     )
@@ -355,7 +355,7 @@ export default function Ocupacion() {
                   const barras = barrasPorUnidad[u.id] || []
                   return (
                     <div key={u.id} className="flex items-stretch hover:bg-surface transition-all">
-                      <div className="w-36 shrink-0 px-4 py-2.5 flex items-center gap-1.5 text-xs font-bold text-ink-2 uppercase">
+                      <div className="text-label w-36 shrink-0 px-4 py-2.5 flex items-center gap-1.5 text-ink-2">
                         {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
                       </div>
                       <div className="flex-1 relative h-9 my-auto">
@@ -371,7 +371,7 @@ export default function Ocupacion() {
                             type="button"
                             onClick={() => setReservaDetalle(b.reserva)}
                             title={`${formatNombre(b.reserva.clientes?.nombre) || 'S/N'} — ${formatFecha(b.reserva.fecha_inicio || b.reserva.fecha)} a ${formatFecha(b.reserva.fecha_fin || b.reserva.fecha)}`}
-                            className={`absolute top-1.5 h-6 border text-[9px] font-bold uppercase truncate px-1.5 flex items-center gap-1 transition-all hover:brightness-110 ${b.color} ${
+                            className={`absolute top-1.5 h-6 border text-label font-semibold truncate px-1.5 flex items-center gap-1 transition-all hover:brightness-110 ${b.color} ${
                               b.pendienteConfirmacion ? 'border-dashed border-2' : ''
                             } ${b.recortadaIzq ? 'rounded-l-none' : 'rounded-l-swatch'} ${b.recortadaDer ? 'rounded-r-none' : 'rounded-r-swatch'}`}
                             style={{ left: `${b.left}%`, width: `${b.width}%`, minWidth: 6 }}
@@ -385,17 +385,17 @@ export default function Ocupacion() {
                   )
                 })}
                 {unidadesFiltradas.length === 0 && (
-                  <div className="px-8 py-10 text-center text-ink-2 uppercase text-xs tracking-widest">Sin unidades para este filtro.</div>
+                  <div className="text-label px-8 py-10 text-center text-ink-2">Sin unidades para este filtro.</div>
                 )}
               </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="card-light rounded-card card-light-inner p-4">
+        <div className="card-surface p-4">
           <div className="grid grid-cols-7 gap-2">
             {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => (
-              <div key={d} className="text-center text-[9px] font-bold uppercase tracking-widest text-ink-2">{d}</div>
+              <div key={d} className="text-label text-center text-ink-2">{d}</div>
             ))}
             {/* Relleno para que el día 1 caiga en su columna real de la semana (lunes=0). */}
             {Array.from({ length: (new Date(`${diasMes[0]}T12:00:00Z`).getUTCDay() + 6) % 7 }).map((_, i) => (
@@ -415,8 +415,8 @@ export default function Ocupacion() {
                   }`}
                   title={`${formatFecha(d)} — ${pct}% ocupado`}
                 >
-                  <span className={`text-xs font-bold ${esHoy ? 'text-ink' : 'text-ink-2'}`}>{Number(d.slice(-2))}</span>
-                  <span className="text-[10px] font-bold text-ink">{pct}%</span>
+                  <span className={`text-label font-semibold ${esHoy ? 'text-ink' : 'text-ink-2'}`}>{Number(d.slice(-2))}</span>
+                  <span className="text-label font-semibold text-ink">{pct}%</span>
                   <div className="flex w-full h-1.5 rounded-full overflow-hidden bg-surface">
                     {(['temporada', 'periodo', 'dia']).map((tipo) => {
                       const n = bucket.porTipo[tipo] || 0

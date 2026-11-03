@@ -90,7 +90,7 @@ export default function Leads() {
             <button
               key={f.key}
               onClick={() => setFiltro(f.key)}
-              className={`px-4 py-2 rounded-inner text-[10px] font-bold border transition-all ${
+              className={`px-4 py-2 rounded-full text-label border transition-all ${
                 filtro === f.key
                   ? 'bg-ink text-on-ink border-ink'
                   : 'bg-surface text-ink-2 border-line hover:text-ink'
@@ -129,7 +129,7 @@ export default function Leads() {
             <div
               key={lead.id}
               data-deeplink-id={lead.id}
-              className={`card-light rounded-card p-4 sm:p-5 md:p-6 ${
+              className={`card-surface card-pad ${
                 estado === 'nuevo' ? 'border-l-2 border-gold' : ''
               }`}
             >

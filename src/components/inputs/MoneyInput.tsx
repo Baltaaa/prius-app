@@ -130,7 +130,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
         </label>
       )}
       <div className="relative">
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-2 text-base md:text-body font-bold pointer-events-none select-none">{simbolo}</span>
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-2 text-base md:text-body font-semibold pointer-events-none select-none">{simbolo}</span>
         <input
           ref={setRef}
           id={inputId}
@@ -161,7 +161,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
               key={c.label}
               type="button"
               onClick={() => aplicar(c.value)}
-              className={`flex-1 sm:flex-none px-3 py-2 rounded-icon text-xs font-bold border transition-all min-h-[44px] ${
+              className={`flex-1 sm:flex-none px-3 py-2 rounded-full text-label border transition-all min-h-[44px] ${
                 value === c.value ? 'bg-ink text-on-ink border-ink' : 'bg-surface text-ink-2 border-line hover:text-ink'
               }`}
             >

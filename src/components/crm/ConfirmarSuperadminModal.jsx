@@ -103,7 +103,7 @@ export default function ConfirmarSuperadminModal({
           apilados. Desktop (sm+): dos columnas de igual ancho/alto. */}
       <div
         ref={bind}
-        className={`card-light w-full sm:max-w-md rounded-t-card sm:rounded-card border border-danger/30 p-6 space-y-5 ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
+        className={`card-surface w-full sm:max-w-md rounded-t-card sm:rounded-card border-danger/30 p-6 space-y-5 ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
         style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
       >
         <div className="flex items-start gap-3">
@@ -111,19 +111,19 @@ export default function ConfirmarSuperadminModal({
             <AlertTriangle size={18} />
           </div>
           <div className="pt-1 min-w-0 flex-1">
-            <h3 className="text-body font-bold uppercase tracking-widest text-ink">{titulo}</h3>
+            <h3 className="text-label text-ink">{titulo}</h3>
             {afectaLinea && <p className="text-body text-ink-2 mt-2 break-words">{afectaLinea}</p>}
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 hover:bg-surface rounded-icon text-ink-2 hover:text-ink transition-all shrink-0"
+            className="p-1.5 hover:bg-surface rounded-full text-ink-2 hover:text-ink transition-all shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest text-ink-2 mb-1.5">
+          <label className="text-label block text-ink-2 mb-1.5">
             Contraseña de superadmin
           </label>
           <div className="relative">
@@ -135,7 +135,7 @@ export default function ConfirmarSuperadminModal({
               disabled={loading}
               autoFocus
               autoComplete="current-password"
-              className={`w-full px-4 py-3 pr-12 bg-surface border rounded-inner outline-none text-base md:text-body text-ink placeholder-ink-2 ${error ? 'border-danger' : 'border-line focus:border-danger/30'}`}
+              className={`w-full px-4 py-3 pr-12 bg-surface rounded-inner outline-none text-base md:text-body text-ink placeholder-ink-2 border border-transparent focus:ring-2 focus:ring-gold ${error ? 'border-danger' : 'border-line focus:border-danger/30'}`}
               placeholder="••••••••"
             />
             <button
@@ -148,21 +148,21 @@ export default function ConfirmarSuperadminModal({
               {mostrarPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          {error && <p className="text-xs text-danger mt-1.5">{error}</p>}
+          {error && <p className="text-label text-danger mt-1.5">{error}</p>}
         </div>
 
         <div className="flex flex-col-reverse sm:grid sm:grid-cols-2 gap-3">
           <button
             onClick={handleClose}
             disabled={loading}
-            className="h-11 px-2 rounded-inner text-xs font-bold uppercase tracking-wide text-ink-2 bg-surface hover:bg-surface border border-line transition-all disabled:opacity-50"
+            className="text-label h-11 px-2 rounded-full text-ink-2 bg-surface hover:bg-surface border border-line transition-all disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={handleConfirm}
             disabled={!password || loading}
-            className="h-11 px-2 rounded-inner text-[11px] font-bold uppercase tracking-wide transition-all bg-danger hover:bg-danger text-on-ink disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-danger whitespace-nowrap overflow-hidden"
+            className="text-label h-11 px-2 rounded-full transition-all bg-danger hover:bg-danger text-on-ink disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-danger whitespace-nowrap overflow-hidden"
           >
             {loading ? 'Verificando...' : confirmLabel}
           </button>

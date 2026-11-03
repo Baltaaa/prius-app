@@ -9,6 +9,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "audit:design": "node scripts/audit-design.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",

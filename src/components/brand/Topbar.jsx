@@ -377,27 +377,27 @@ export default function TopBar() {
         {showDropdown && (
             <ScrollFade className="absolute left-0 right-0 mt-2 surface-pop z-50 max-h-96 overflow-y-auto ui-open">
               {!activo ? (
-                <p className="px-4 py-6 text-center text-xs text-ink-2">Seguí escribiendo (mínimo 2 caracteres)...</p>
+                <p className="px-4 py-6 text-center text-label text-ink-2">Seguí escribiendo (mínimo 2 caracteres)...</p>
               ) : resultadosFlat.length === 0 ? (
-                <p className="px-4 py-6 text-center text-xs text-ink-2">Sin resultados para "{searchValue}"</p>
+                <p className="px-4 py-6 text-center text-label text-ink-2">Sin resultados para "{searchValue}"</p>
               ) : (
                 <>
                   {clienteMatches.length > 0 && (
                     <div>
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2">Clientes</p>
+                      <p className="px-4 pt-3 pb-1 text-label font-semibold text-ink-2">Clientes</p>
                       {clienteMatches.map((cliente) => (
                         <button
                           key={cliente.id}
                           onClick={() => goToCliente(cliente)}
                           className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors"
                         >
-                          <p className="text-xs font-bold text-ink truncate">{formatNombre(cliente.nombre)}</p>
+                          <p className="text-label text-ink truncate">{formatNombre(cliente.nombre)}</p>
                           {unidadDeCliente(cliente) && (
-                            <p className="text-[11px] text-ink-2 truncate">
+                            <p className="text-label text-ink-2 truncate">
                               {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
                             </p>
                           )}
-                          {cliente.telefono && <p className="text-[11px] text-ink-2">{cliente.telefono}</p>}
+                          {cliente.telefono && <p className="text-label text-ink-2">{cliente.telefono}</p>}
                         </button>
                       ))}
                     </div>
@@ -405,12 +405,12 @@ export default function TopBar() {
 
                   {unidadMatches.length > 0 && (
                     <div className="border-t border-line">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2">Unidades</p>
+                      <p className="px-4 pt-3 pb-1 text-label font-semibold text-ink-2">Unidades</p>
                       {unidadMatches.map((u) => (
                         <button
                           key={u.id}
                           onClick={() => irAResultado({ tipo: 'unidad', data: u })}
-                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors text-xs font-bold text-ink"
+                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors text-label font-semibold text-ink"
                         >
                           {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
                         </button>
@@ -420,7 +420,7 @@ export default function TopBar() {
 
                   {reservaMatches.length > 0 && (
                     <div className="border-t border-line">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2">Reservas</p>
+                      <p className="px-4 pt-3 pb-1 text-label font-semibold text-ink-2">Reservas</p>
                       {reservaMatches.map((reserva) => (
                         <button
                           key={reserva.id}
@@ -428,8 +428,8 @@ export default function TopBar() {
                           className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors flex items-center justify-between gap-3"
                         >
                           <span className="min-w-0">
-                            <span className="block text-xs font-bold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
-                            <span className="block text-[11px] text-ink-2 truncate">
+                            <span className="block text-label text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
+                            <span className="block text-label text-ink-2 truncate">
                               {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
                               {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
                             </span>
@@ -442,12 +442,12 @@ export default function TopBar() {
 
                   {comprobanteMatches.length > 0 && (
                     <div className="border-t border-line">
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-bold text-ink-2">Comprobantes</p>
+                      <p className="px-4 pt-3 pb-1 text-label font-semibold text-ink-2">Comprobantes</p>
                       {comprobanteMatches.map(({ pago, comprobante }) => (
                         <button
                           key={comprobante.id}
                           onClick={() => irAResultado({ tipo: 'comprobante', data: { pago, comprobante } })}
-                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors text-xs font-bold text-ink"
+                          className="w-full text-left px-4 py-2.5 hover:bg-surface transition-colors text-label font-semibold text-ink"
                         >
                           {formatComprobante(comprobante.tipo, comprobante.numero)}
                         </button>
@@ -514,7 +514,7 @@ export default function TopBar() {
             {countPendientes > 0 ? (
               <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-ink rounded-full border-2 border-canvas" />
             ) : countNovedadesNoLeidas > 0 ? (
-              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-0.5 rounded-full bg-ink text-on-ink text-[10px] font-semibold flex items-center justify-center">
+              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-[16px] px-0.5 rounded-full bg-ink text-on-ink text-label font-semibold flex items-center justify-center">
                 {countNovedadesNoLeidas > 9 ? '9+' : countNovedadesNoLeidas}
               </span>
             ) : null}
@@ -540,7 +540,7 @@ export default function TopBar() {
         {showNotifications && createPortal(
           <div ref={notifOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-card flex flex-col ui-open">
             <div className="flex items-center justify-between px-4 h-16 border-b border-line shrink-0">
-              <h1 className="text-body font-bold text-ink">Notificaciones</h1>
+              <h1 className="text-body font-semibold text-ink">Notificaciones</h1>
               <button
                 onClick={() => setShowNotifications(false)}
                 className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-2 hover:text-ink"
@@ -594,12 +594,12 @@ export default function TopBar() {
             <div className="absolute right-0 top-full pt-3 w-56 z-50">
               <div className="surface-pop overflow-hidden p-1 ui-open">
                 <div className="px-4 py-3 border-b border-line">
-                  <p className="text-[11px] font-bold text-ink-2">{rolLabel}</p>
-                  <p className="text-xs font-medium text-ink truncate">{nombreMostrado}</p>
+                  <p className="text-label font-semibold text-ink-2">{rolLabel}</p>
+                  <p className="text-label font-medium text-ink truncate">{nombreMostrado}</p>
                 </div>
                 <button
                   onClick={() => { navigate('/app/perfil'); setShowProfileMenu(false); }}
-                  className="w-full text-left px-4 py-2.5 text-xs text-ink-2 hover:bg-surface flex items-center gap-2 rounded-icon"
+                  className="w-full text-left px-4 py-2.5 text-label text-ink-2 hover:bg-surface flex items-center gap-2 rounded-icon"
                 >
                   <User size={14} /> Mi cuenta
                 </button>
@@ -607,14 +607,14 @@ export default function TopBar() {
                   <button
                     onClick={handleToggleIncognito}
                     disabled={togglingIncognito}
-                    className={`w-full text-left px-4 py-2.5 text-xs hover:bg-surface flex items-center gap-2 rounded-icon disabled:opacity-50 ${perfil?.modo_incognito ? 'text-ink font-semibold' : 'text-ink-2'}`}
+                    className={`w-full text-left px-4 py-2.5 text-label hover:bg-surface flex items-center gap-2 rounded-icon disabled:opacity-50 ${perfil?.modo_incognito ? 'text-ink font-semibold' : 'text-ink-2'}`}
                   >
                     <EyeOff size={14} /> Modo incógnito {perfil?.modo_incognito ? '· Activo' : ''}
                   </button>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2.5 text-xs text-danger hover:bg-danger-soft flex items-center gap-2 rounded-icon"
+                  className="w-full text-left px-4 py-2.5 text-label text-danger hover:bg-danger-soft flex items-center gap-2 rounded-icon"
                 >
                   <LogOut size={14} /> Cerrar Sesión
                 </button>
@@ -645,41 +645,41 @@ export default function TopBar() {
           </div>
           <ScrollFade className="flex-1 overflow-y-auto">
             {!showDropdown ? (
-              <p className="px-6 py-8 text-center text-xs text-ink-2">Escribí para buscar un cliente, una reserva o una unidad (ej. "carpa 19").</p>
+              <p className="px-6 py-8 text-center text-label text-ink-2">Escribí para buscar un cliente, una reserva o una unidad (ej. "carpa 19").</p>
             ) : !activo ? (
-              <p className="px-6 py-8 text-center text-xs text-ink-2">Seguí escribiendo (mínimo 2 caracteres)...</p>
+              <p className="px-6 py-8 text-center text-label text-ink-2">Seguí escribiendo (mínimo 2 caracteres)...</p>
             ) : resultadosFlat.length === 0 ? (
-              <p className="px-6 py-8 text-center text-xs text-ink-2">Sin resultados para "{searchValue}"</p>
+              <p className="px-6 py-8 text-center text-label text-ink-2">Sin resultados para "{searchValue}"</p>
             ) : (
               <>
                 {clienteMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2">Clientes</p>
+                    <p className="px-4 pt-4 pb-1 text-label font-semibold text-ink-2">Clientes</p>
                     {clienteMatches.map((cliente) => (
                       <button
                         key={cliente.id}
                         onClick={() => { goToCliente(cliente); setMobileSearchOpen(false) }}
                         className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line"
                       >
-                        <p className="text-body font-bold text-ink truncate">{formatNombre(cliente.nombre)}</p>
+                        <p className="text-body font-semibold text-ink truncate">{formatNombre(cliente.nombre)}</p>
                         {unidadDeCliente(cliente) && (
-                          <p className="text-xs text-ink-2 truncate">
+                          <p className="text-label text-ink-2 truncate">
                             {unidadEmoji(unidadDeCliente(cliente).tipo)} {formatUnidad(unidadDeCliente(cliente).tipo, unidadDeCliente(cliente).numero)}
                           </p>
                         )}
-                        {cliente.telefono && <p className="text-xs text-ink-2">{cliente.telefono}</p>}
+                        {cliente.telefono && <p className="text-label text-ink-2">{cliente.telefono}</p>}
                       </button>
                     ))}
                   </div>
                 )}
                 {unidadMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2">Unidades</p>
+                    <p className="px-4 pt-4 pb-1 text-label font-semibold text-ink-2">Unidades</p>
                     {unidadMatches.map((u) => (
                       <button
                         key={u.id}
                         onClick={() => { irAResultado({ tipo: 'unidad', data: u }); setMobileSearchOpen(false) }}
-                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line text-body font-bold text-ink"
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line text-body font-semibold text-ink"
                       >
                         {unidadEmoji(u.tipo)} {formatUnidad(u.tipo, u.numero)}
                       </button>
@@ -688,7 +688,7 @@ export default function TopBar() {
                 )}
                 {reservaMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2">Reservas</p>
+                    <p className="px-4 pt-4 pb-1 text-label font-semibold text-ink-2">Reservas</p>
                     {reservaMatches.map((reserva) => (
                       <button
                         key={reserva.id}
@@ -696,8 +696,8 @@ export default function TopBar() {
                         className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line flex items-center justify-between gap-3"
                       >
                         <span className="min-w-0">
-                          <span className="block text-body font-bold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
-                          <span className="block text-xs text-ink-2 truncate">
+                          <span className="block text-body font-semibold text-ink truncate">{formatNombre(reserva.clientes?.nombre) || 'S/N'}</span>
+                          <span className="block text-label text-ink-2 truncate">
                             {unidadEmoji(reserva.unidades?.tipo)} {formatUnidad(reserva.unidades?.tipo, reserva.unidades?.numero)}
                             {formatFechasReserva(reserva) && ` · ${formatFechasReserva(reserva)}`}
                           </span>
@@ -709,12 +709,12 @@ export default function TopBar() {
                 )}
                 {comprobanteMatches.length > 0 && (
                   <div>
-                    <p className="px-4 pt-4 pb-1 text-[11px] font-bold text-ink-2">Comprobantes</p>
+                    <p className="px-4 pt-4 pb-1 text-label font-semibold text-ink-2">Comprobantes</p>
                     {comprobanteMatches.map(({ pago, comprobante }) => (
                       <button
                         key={comprobante.id}
                         onClick={() => { irAResultado({ tipo: 'comprobante', data: { pago, comprobante } }); setMobileSearchOpen(false) }}
-                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line text-body font-bold text-ink"
+                        className="w-full text-left px-4 py-3 min-h-[44px] hover:bg-surface transition-colors border-b border-line text-body font-semibold text-ink"
                       >
                         {formatComprobante(comprobante.tipo, comprobante.numero)}
                       </button>
