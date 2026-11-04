@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { limitesDeRango } from '../lib/historialDias'
 
 const PAGE_SIZE = 20
 
@@ -46,8 +47,11 @@ export function useHistorial(tipo, id, tiposEvento, filtrosGlobal) {
     if (f.usuario) query = query.eq('usuario', f.usuario)
     if (f.clienteId) query = query.eq('cliente_id', f.clienteId)
     if (f.tipoEvento) query = query.eq('tipo_evento', f.tipoEvento)
-    if (f.desde) query = query.gte('fecha_ref', f.desde)
-    if (f.hasta) query = query.lte('fecha_ref', f.hasta)
+    // Rango por día calendario de Buenos Aires, sobre el instante real (`ts`):
+    // `fecha_ref` se calcula en UTC y movía de día a los eventos de la noche.
+    const lim = limitesDeRango(f.desde, f.hasta)
+    if (lim.desde) query = query.gte('ts', lim.desde)
+    if (lim.hasta) query = query.lte('ts', lim.hasta)
     if (f.q) query = query.ilike('descripcion', `%${f.q}%`)
     // unidad no es columna directa de `eventos` — filtra por unidad_id
     // embebido en datos.before/after (reservas/unidades).
