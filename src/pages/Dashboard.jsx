@@ -412,8 +412,8 @@ export default function Dashboard() {
   )
 
   const planoStats = useMemo(
-    () => calcularPlanoStats({ units, pagos, cajaDelDia, selectedDate }),
-    [units, pagos, cajaDelDia, selectedDate],
+    () => calcularPlanoStats({ units, pagos, reservas, cajaDelDia, selectedDate }),
+    [units, pagos, reservas, cajaDelDia, selectedDate],
   )
 
   // Mismo hook que usa PlanoStatsBar — el cache de `useClima` es por fecha a

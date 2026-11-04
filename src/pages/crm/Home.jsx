@@ -9,6 +9,7 @@ import { useAuth, usePermiso } from '../../context/AuthProvider'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { supabase } from '../../lib/supabase'
 import { calcularPlanoStats } from '../../lib/planoStats'
+import { resumenSaldos } from '../../lib/saldos'
 import { buildUnitsMap } from '../../lib/planoUnits'
 import { formatHora, formatMontosEnTexto, formatPorcentaje } from '../../lib/format'
 import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
@@ -86,8 +87,8 @@ export default function Home() {
   // lib/planoStats.js) — nunca se reinventa el criterio de ocupación/mix.
   const units = useMemo(() => buildUnitsMap(unidades, reservas, hoy), [unidades, reservas, hoy])
   const stats = useMemo(
-    () => calcularPlanoStats({ units, pagos, cajaDelDia: cajaHoy, selectedDate: hoy }),
-    [units, pagos, cajaHoy, hoy],
+    () => calcularPlanoStats({ units, pagos, reservas, cajaDelDia: cajaHoy, selectedDate: hoy }),
+    [units, pagos, reservas, cajaHoy, hoy],
   )
 
   // Llegadas de hoy: reservas (no canceladas) cuya fecha de inicio real es
@@ -102,22 +103,14 @@ export default function Home() {
     return false
   }), [reservas, hoy, temporadasPorId])
 
-  // Facturación/deuda (mismo cálculo que Reportes.jsx, sin query nueva —
-  // reusa `reservas` ya cargadas). Dato agregado de dinero de todo el CRM:
-  // mismo gate de permiso que ya tiene Reportes — solo el bloque "Total
-  // recaudado / meta / % percibido" de la card de Cobranzas queda detrás de
-  // `puedeVerReportes`; Pendientes de cobro e Ingresos del día ya eran
-  // visibles para cualquier rol antes del rediseño, se mantiene así.
-  const { facturacionBruta, deudaExterna, totalCobrado } = useMemo(() => {
-    let facturado = 0, pendiente = 0
-    for (const r of reservas) {
-      if (r.estado === 'cancelada' || r.bonificada) continue
-      facturado += Number(r.valor_total) || 0
-      pendiente += Number(r.saldo) || 0
-    }
-    return { facturacionBruta: facturado, deudaExterna: pendiente, totalCobrado: facturado - pendiente }
-  }, [reservas])
-  const pctPercibido = facturacionBruta > 0 ? totalCobrado / facturacionBruta : 0
+  // Cobranzas y pendientes de la TEMPORADA completa: misma fuente que la ficha
+  // y que el Plano (lib/saldos.js). El Plano suma solo lo que ocupa el mapa un
+  // día; acá entran todas las reservas vigentes. Solo el bloque de total
+  // cobrado queda detrás de `puedeVerReportes`; Pendientes e Ingresos del día
+  // los ve cualquier rol.
+  const saldos = useMemo(() => resumenSaldos({ reservas, pagos }), [reservas, pagos])
+  const totalCobrado = saldos.cobrado
+  const pctPercibido = saldos.pctCobrado
 
   // Tabs de "Últimos movimientos" (desktop): filtro client-side sobre los
   // mismos `historialItems` ya cargados por useHistorial — sin query nueva.
@@ -175,7 +168,7 @@ export default function Home() {
     { key: 'leads', label: 'Leads', icon: Inbox, onClick: () => navigate('/app/leads') },
   ]
 
-  const pendientesSaldo = stats.pendientes.saldo > 0 ? stats.pendientes.saldo : 0
+  const pendientesSaldo = saldos.pendiente
   const reportesOn = isFeatureEnabled('reportes')
   const cajaSubtitulo = cajaHoy?.abierta_at && perfilesPorId[cajaHoy.abierta_por]
     ? `Desde ${formatHora(cajaHoy.abierta_at)} · ${perfilesPorId[cajaHoy.abierta_por]}`
@@ -213,16 +206,16 @@ export default function Home() {
 
             <div className="mt-auto pt-6 md:pt-8 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
               <button type="button" onClick={() => navigate('/app/reservas')} className="text-body text-left whitespace-normal">
-                {puedeVerReportes && <><span className="font-semibold tabular-nums">{fmtM(pendientesSaldo)}</span> pendientes · </>}
-                {stats.pendientes.count} reservas con saldo
+                {puedeVerReportes && <><span className="font-semibold tabular-nums">{fmtM(pendientesSaldo)}</span> pendientes de la temporada · </>}
+                {saldos.conSaldo} reservas con saldo
               </button>
               <span className="text-label">Actualizado en tiempo real</span>
             </div>
 
-            {puedeVerReportes && deudaExterna > 0 && (
-              <button type="button" onClick={() => navigate('/app/reservas')} className="lg:hidden mt-3 flex items-center gap-2 text-label text-left">
-                <AlertTriangle size={16} strokeWidth={1.5} />
-                Deuda total <span className="font-semibold tabular-nums">{fmtM(deudaExterna)}</span>
+            {saldos.sinVerificar > 0 && (
+              <button type="button" onClick={() => navigate('/app/clientes')} className="mt-3 flex items-center gap-2 text-label text-left whitespace-normal">
+                <AlertTriangle size={16} strokeWidth={1.5} className="shrink-0" />
+                {saldos.sinVerificar} {saldos.sinVerificar === 1 ? 'reserva' : 'reservas'} con saldo sin verificar, no incluidas en el pendiente
               </button>
             )}
           </HeroCard>
@@ -269,8 +262,12 @@ export default function Home() {
                   <dd className="text-ink tabular-nums">{stats.mix.temporada}/{stats.mix.periodo}/{stats.mix.dia}</dd>
                 </div>
                 <div className="flex items-center justify-between">
+                  <dt className="text-ink-2">Pendientes de pago hoy</dt>
+                  <dd className="text-ink tabular-nums">{stats.pendientes.count}</dd>
+                </div>
+                <div className="flex items-center justify-between">
                   <dt className="text-ink-2">Sin confirmar</dt>
-                  <dd className="text-ink tabular-nums">{stats.pendientes.sinVerificar ? `${stats.pendientes.count}+` : stats.pendientes.count}</dd>
+                  <dd className="text-ink tabular-nums">{stats.sinConfirmar.count}</dd>
                 </div>
               </dl>
             </div>
