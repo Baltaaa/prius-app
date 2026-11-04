@@ -15,6 +15,7 @@ import BrandSelect from '../ui/BrandSelect'
 import Skeleton from '../ui/Skeleton'
 import BottomSheet from '../brand/BottomSheet'
 import HistorialDetalle from './HistorialDetalle'
+import { unidadConEmoji } from '../../lib/unidadIcono'
 
 // Historial unificado (ítem 2, oct 2026; ampliado Tarea 4 oct 2026con
 // actor/cliente y más tablas): un solo componente para el Historial global
@@ -125,7 +126,7 @@ function datosDeEvento(evento, unidadesPorId = {}) {
   return {
     monto: monto != null ? formatPesos(monto) : null,
     cliente: evento.cliente_nombre || null,
-    unidad: unidad ? formatUnidad(unidad.tipo, unidad.numero) : null,
+    unidad: unidad ? unidadConEmoji(unidad.tipo, unidad.numero) : null,
     comprobante: val('comprobante') || null,
   }
 }
@@ -214,7 +215,7 @@ function cambiosDe(evento, unidadesPorId = {}) {
   if (!campos) return diffGenerico(before, after)
   const resolverUnidad = (id) => {
     const u = unidadesPorId[id]
-    return u ? formatUnidad(u.tipo, u.numero) : 'otra unidad'
+    return u ? unidadConEmoji(u.tipo, u.numero) : 'otra unidad'
   }
   const cambios = []
   for (const { campo, label, fmt, fmtUnidad } of campos) {

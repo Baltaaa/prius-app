@@ -8,6 +8,7 @@ import { useTipoCambio } from '../../hooks/useTipoCambio'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso, useAuth } from '../../context/AuthProvider'
 import { formatPesos, formatFecha, formatNombre } from '../../lib/format'
+import { unidadEmoji } from '../../lib/unidadIcono'
 
 // Perfil y tarifas — rebranding Stitch (nov 2026, Bloque 4).
 // Fuente: design/stitch/08_perfil_desktop.{html,png} y 08_perfil_mobile.*
@@ -147,8 +148,8 @@ export default function Perfil() {
           bajada="Valores de referencia para alquileres de temporada."
         >
           <div className="space-y-3">
-            <MoneyInput label="Precio base carpa" value={tarifaCarpa} onChange={setTarifaCarpa} max={100_000_000} />
-            <MoneyInput label="Precio base sombrilla" value={tarifaSombrilla} onChange={setTarifaSombrilla} max={100_000_000} />
+            <MoneyInput label={`${unidadEmoji('carpa')} Precio base carpa`} value={tarifaCarpa} onChange={setTarifaCarpa} max={100_000_000} />
+            <MoneyInput label={`${unidadEmoji('sombrilla')} Precio base sombrilla`} value={tarifaSombrilla} onChange={setTarifaSombrilla} max={100_000_000} />
           </div>
 
           <p className="text-label text-ink-2 flex items-start gap-2">

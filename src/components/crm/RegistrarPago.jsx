@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useData } from '../../context/DataProvider'
 import { usePagos } from '../../hooks/usePagos'
-import { formatPesos, unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
+import { formatPesos, formatNombre } from '../../lib/format'
+import { unidadConEmoji } from '../../lib/unidadIcono'
 import { comprobanteTipoDefault, ERROR_EXCEDE_SALDO } from '../../lib/pagos'
 import { usePagoComprobanteForm } from '../../hooks/usePagoComprobanteForm'
 import Modal from './Modal'
@@ -54,7 +55,7 @@ export default function RegistrarPago({
   const saldo = reservaSeleccionada && !saldoDesconocido ? Number(reservaSeleccionada.saldo || 0) : 0
   const pagado = saldoDesconocido ? null : Math.max(total - saldo, 0)
   const unidadLabel = reservaSeleccionada?.unidades
-    ? `${unidadEmoji(reservaSeleccionada.unidades.tipo)} ${formatUnidad(reservaSeleccionada.unidades.tipo, reservaSeleccionada.unidades.numero)}`
+    ? unidadConEmoji(reservaSeleccionada.unidades.tipo, reservaSeleccionada.unidades.numero)
     : ''
 
   const form = usePagoComprobanteForm({
@@ -253,8 +254,8 @@ export default function RegistrarPago({
                   // quién se está cobrando (el pago igual queda con el
                   // cliente_id de `cliente`, el cosocio que abrió el form).
                   label: r.cliente_id && cliente?.id && r.cliente_id !== cliente.id
-                    ? `${unidadEmoji(r.unidades?.tipo)} ${formatUnidad(r.unidades?.tipo, r.unidades?.numero)} (cosocio de ${formatNombre(r.clientes?.nombre) || 'otro cliente'}) — saldo ${formatPesos(r.saldo)}`
-                    : `${unidadEmoji(r.unidades?.tipo)} ${formatUnidad(r.unidades?.tipo, r.unidades?.numero)} — saldo ${formatPesos(r.saldo)}`,
+                    ? `${unidadConEmoji(r.unidades?.tipo, r.unidades?.numero)} (cosocio de ${formatNombre(r.clientes?.nombre) || 'otro cliente'}) — saldo ${formatPesos(r.saldo)}`
+                    : `${unidadConEmoji(r.unidades?.tipo, r.unidades?.numero)} — saldo ${formatPesos(r.saldo)}`,
                 })),
               ]}
             />

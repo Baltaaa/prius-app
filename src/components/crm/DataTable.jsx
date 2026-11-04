@@ -1,4 +1,5 @@
 import React, { useSyncExternalStore } from 'react'
+import ScrollFade from '../ui/ScrollFade'
 
 // Antes se renderizaban SIEMPRE la tabla desktop Y las tarjetas mobile
 // (con hidden md:block / md:hidden), ejecutando renderRow y renderMobileCard
@@ -45,7 +46,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
     return (
       <div className={`w-full ${fillHeight ? 'lg:h-full' : ''}`}>
         <div className={`card-surface ${fillHeight ? 'lg:h-full lg:flex lg:flex-col lg:overflow-hidden' : 'overflow-x-auto'}`}>
-          <div className={fillHeight ? 'overflow-auto lg:flex-1 lg:min-h-0' : 'overflow-x-auto'}>
+          <ScrollFade arriba={false} wrapperClassName={fillHeight ? 'lg:flex-1' : ''} className={fillHeight ? 'overflow-auto' : 'overflow-x-auto'}>
           <table className={`w-full text-left border-collapse ${columnWidths ? 'table-fixed' : ''}`}>
             {columnWidths && (
               <colgroup>
@@ -65,7 +66,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
               {data.map((row, i) => renderRow(row, i))}
             </tbody>
           </table>
-          </div>
+          </ScrollFade>
         </div>
       </div>
     )

@@ -1,19 +1,12 @@
 import { formatPesos, formatFecha } from '../../lib/format'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import MontoStat from '../ui/MontoStat'
+import FilaMedioPago from './FilaMedioPago'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 import {
   ArrowUpRight, ArrowDownRight, Scale, FileText, AlertTriangle, CheckCircle2,
-  CalendarDays, Wallet, Banknote, Landmark, QrCode, CreditCard, Receipt, FileCheck2,
+  CalendarDays, Wallet, Banknote, CreditCard, Receipt, FileCheck2,
 } from 'lucide-react'
-
-const MEDIO_ICONO = {
-  efectivo: Banknote,
-  transferencia: Landmark,
-  mercado_pago: QrCode,
-  tarjeta_debito: CreditCard,
-  tarjeta_credito: CreditCard,
-}
 
 const Section = ({ title, icon: Icon, children }) => (
   <div className="card-surface card-pad space-y-4">
@@ -196,26 +189,15 @@ export default function ResumenCaja({ resumen }) {
               <p className="text-label text-ink-2">Sin movimientos.</p>
             ) : (
               <div className="space-y-3">
-                {por_medio.map((m) => {
-                  const Icono = MEDIO_ICONO[m.medio] || Banknote
-                  return (
-                    <div key={m.medio} className="bg-surface rounded-inner p-4 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-icon bg-card flex items-center justify-center text-ink-2 shrink-0">
-                          <Icono size={16} />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="block text-body font-semibold text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
-                          <span className="block text-label text-ink-2">
-                            {m.cantidad} movimiento{Number(m.cantidad) === 1 ? '' : 's'}
-                            {Number(m.egresos) > 0 && <> · Ingresos {formatPesos(m.ingresos)} · Gastos {formatPesos(m.egresos)}</>}
-                          </span>
-                        </div>
-                      </div>
-                      <span className={`text-body font-semibold tabular-nums shrink-0 ${Number(m.neto) < 0 ? 'text-danger' : 'text-ink'}`}>{formatPesos(m.neto)}</span>
-                    </div>
-                  )
-                })}
+                {por_medio.map((m) => (
+                  <FilaMedioPago
+                    key={m.medio}
+                    medio={m.medio}
+                    monto={m.neto}
+                    negativo={Number(m.neto) < 0}
+                    detalle={`${m.cantidad} movimiento${Number(m.cantidad) === 1 ? '' : 's'}${Number(m.egresos) > 0 ? ` · Ingresos ${formatPesos(m.ingresos)} · Gastos ${formatPesos(m.egresos)}` : ''}`}
+                  />
+                ))}
               </div>
             )}
           </Section>

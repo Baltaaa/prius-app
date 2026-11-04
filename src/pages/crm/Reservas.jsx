@@ -27,12 +27,13 @@ import BottomSheet from '../../components/brand/BottomSheet'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import { Filter, Check, Globe, MonitorSmartphone, X, ChevronLeft, LayoutList } from 'lucide-react'
 import UnidadLabel from '../../components/crm/UnidadLabel'
+import { unidadConEmoji } from '../../lib/unidadIcono'
 
 // Identificador legible para la línea "qué se va a afectar" del modal de
 // confirmación — reservas.codigo no existe en el schema (queda para el
 // sistema de reservas públicas), así que se arma con cliente + unidad.
 const reservaIdentificador = (res) =>
-  `${formatNombre(res.clientes?.nombre) || 'S/N'} - ${res.unidades ? formatUnidad(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}`
+  `${formatNombre(res.clientes?.nombre) || 'S/N'} - ${res.unidades ? unidadConEmoji(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}`
 
 // Reservas es la COLA OPERATIVA de alquileres acotados en el tiempo (período
 // o día) — llegadas recientes, filtrable por fecha/estado. Los clientes de
@@ -162,7 +163,7 @@ export default function Reservas() {
   const handleCancelarClick = async (res) => {
     if (!(await asegurarDesbloqueada(res))) return
     const ok = await confirm(
-      `¿Cancelar la reserva de ${formatNombre(res.clientes?.nombre) || 'S/N'} — ${res.unidades ? formatUnidad(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}? La unidad y las fechas quedan libres. Los pagos y el historial no se borran.`,
+      `¿Cancelar la reserva de ${formatNombre(res.clientes?.nombre) || 'S/N'} — ${res.unidades ? unidadConEmoji(res.unidades.tipo, res.unidades.numero) : 'unidad ?'}? La unidad y las fechas quedan libres. Los pagos y el historial no se borran.`,
       { title: 'Cancelar reserva' },
     )
     if (!ok) return
@@ -762,7 +763,7 @@ export default function Reservas() {
             </button>
             <h1 className="text-label text-ink">Detalle Reserva</h1>
           </div>
-          <ScrollFade className="flex-1 overflow-y-auto px-page pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col min-h-0">
+          <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto px-page pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col">
             <ReservaDetalleContent
               reserva={mobileDetalleReserva}
               fechaLlegada={fechaLlegada}

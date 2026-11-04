@@ -4,6 +4,7 @@ import { ChevronDown, Search, Check } from 'lucide-react'
 import { normalizeText } from '../../lib/format'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useMountTransition } from '../../hooks/useMountTransition'
+import ScrollFade from './ScrollFade'
 
 export type BrandSelectOption = {
   value: string
@@ -178,7 +179,7 @@ export default function BrandSelect({
   let flatIdx = -1
 
   const renderList = () => (
-    <div ref={listRef} className="overflow-y-auto scrollbar-thin" style={{ maxHeight: isMobile ? undefined : 320 }}>
+    <ScrollFade ref={listRef} className="overflow-y-auto scrollbar-thin" wrapperClassName={isMobile ? undefined : 'max-h-80'}>
       {filtered.length === 0 ? (
         <p className="px-4 py-3 text-label text-ink-2">Sin resultados</p>
       ) : (
@@ -212,7 +213,7 @@ export default function BrandSelect({
           </div>
         ))
       )}
-    </div>
+    </ScrollFade>
   )
 
   return (

@@ -26,6 +26,8 @@ Pagado: negro con texto blanco. Pago parcial y Sin pago: dorado #F2CA50 con text
 
 Tipos de alquiler (Temporada, Período, Día): COLOR_TIPO_ALQUILER en el mismo archivo.
 
+Leyenda del Plano: los nombres salen de `COLOR_ESTADO`: negro = Pagada (ocupada, pagada al 100%), dorado = Con saldo (ocupada, saldo pendiente). Nunca dos ítems con el mismo nombre.
+
 ## Tipografía
 
 Manrope (self-hosted con @fontsource-variable/manrope), en toda la app.
@@ -33,6 +35,8 @@ Manrope (self-hosted con @fontsource-variable/manrope), en toda la app.
 Saludo del Dashboard 36-40px peso 400, tracking -0.02em. Título de página 28px peso 400, tracking -0.02em. Título de card 20-22px peso 500. KPI grande 56-64px peso 400, tracking -0.03em. Body 14-15px peso 500. Labels y metadatos 13px peso 500 en #6B6B6B.
 
 Todas las cifras con tabular-nums. Formato es-AR de moneda.
+
+Monto protagonista de una card compacta (Caja diaria del sidebar): `text-amount`, 24px peso 500. Excepción: el código de reserva se escribe y se lee carácter por carácter, así que en Recepción va en monoespaciada (`font-mono`, solo dentro de `components/recepcion/`; el audit lo permite ahí y en ningún otro lado).
 
 ## Forma
 
@@ -76,6 +80,13 @@ Modales: radius 24px, fondo blanco, padding 32px, overlay negro 30% + backdrop-b
 
 Toasts, dropdowns, popovers, date pickers y tooltips: mismo lenguaje (radius 16px, blanco, tooltip negro con texto blanco). Los flotantes blancos llevan borde #E5E5E5 para separarse de lo que tienen atrás.
 
+Emojis de unidad: carpa 🏠 y sombrilla 🏖️, una sola constante en `src/lib/unidadIcono.js`; cabina y locker no llevan. El emoji mide 1em (el tamaño del texto que lo acompaña) y va con `UnidadLabel` o `unidadConEmoji`. No se usan íconos lineales de lucide para unidades.
+
+Difuminado de scroll (`ScrollFade`, componente único): todo contenedor con scroll interno se desvanece en el borde donde queda contenido oculto (`mask-image` con gradiente de 24px) y una capa de `backdrop-blur` suave (3px) lo acompaña. Solo existe en la dirección con contenido oculto y desaparece al llegar al final. Se aplica a fichas, listas de Clientes y Reservas, Historial, sheets, modales y popovers; las tablas con encabezado sticky solo lo llevan abajo. Cada capa mide 24px y se monta solo mientras hace falta (el blur se había sacado de la app por rendimiento: no usar `backdrop-filter` en otro lado).
+
+Tiles de filtro (Plano): `bg-surface`, radius 16px, dos líneas (etiqueta 13px gris, valor 14px). Activo: `gold-50` con aro `gold` e indicador dorado de 4px a la izquierda, igual que la fila seleccionada de las listas.
+
+
 ## Gráficos
 
 Línea negra 1.75px con relleno degradé dorado 300 → transparente, tooltip en pill negra, guía vertical punteada, punto negro con anillo blanco.
@@ -103,6 +114,16 @@ Solo transform/opacity. Respetar prefers-reduced-motion.
 ## Layout
 
 Sidebar blanco: logo Prius arriba, grupos "Gestión operativa" y "Módulos adicionales" con label chico gris, items con ícono outline, el activo con fondo #F2F1EC. Badge de Leads en círculo negro. Abajo, tarjeta negra radius 24px con patrón de olas dorado al 8% que muestra el estado real de la Caja diaria (sin iniciar → botón pill dorado "Abrir"; abierta → total del día). Debajo, avatar + nombre + rol + cerrar sesión.
+
+Tarjeta de Caja diaria (sidebar y card de mobile/tablet): monto de 24px y, a su derecha, un ojito de 44px (Eye/EyeOff) que oculta el monto ("$ ••••••") como una billetera virtual; la preferencia se recuerda por usuario. Con la caja sin iniciar no hay monto ni ojito.
+
+Footer global: pegado al borde inferior del viewport salvo que el contenido lo empuje (columna `h-dvh`, contenido `flex-1`, footer `mt-auto`), en todos los anchos; en mobile queda sobre la bottom nav. Reservas y Clientes desde 1024px lo ocultan porque sus cajas llenan el viewport.
+
+Desglose por medio de pago (Caja): una fila por medio, ícono a la izquierda, etiqueta corta arriba ("Crédito", "Débito"; el nombre completo queda en `title` y en la tabla) y el monto completo abajo, sin partir el "$" del número.
+
+Plano: franja de controles en una card compacta (12px de padding, excepción documentada del chrome denso del Plano). Fila 1: navegador de fecha, segmented Todo/Carpas/Sombrillas, botón "Referencias" (popover con la leyenda) e Imprimir A4 secundario. Fila 2: cuatro tiles que son los filtros de estado (Todas, Ocupadas con %, Libres con %, Pendientes del día con monto). Debajo de 1024px: fecha a ancho completo, tiles 2x2, segmented a ancho completo y Referencias/Imprimir en el encabezado de la card del mapa. Card del mapa: inset de 12px en todos los lados; "Pasillo A · B · C" a la izquierda y la pill de unidades sincronizadas a la derecha; controles de zoom en columna debajo, alineados al mismo borde derecho que la pill, con 12px de separación. Ficha de unidad: padding de card en todos los lados, el scroll lleva `scrollbar-gutter: stable` y llega al borde inferior respetando el radio.
+
+Recepción: columna izquierda con el hero "Escanear QR" (degradé dorado de marca con el patrón de olas, segmented Cámara/Lector), la card "Código de reserva" (prefijo PRIUS- fijo, botón de búsqueda circular negro), las stats Llegan hoy / Ingresados / Pendientes con barra segmentada y "Último escaneo"; columna derecha con la reserva cargada y la lista "Llegan hoy" (filtros Todos / Pendientes / Con saldo). Mobile: la cámara es la acción principal, en una sola columna.
 
 Topbar: a la izquierda el título de página (en Dashboard "Hola, Baltasar" con la fecha chica debajo y el punto de "Operativo"). A la derecha: búsqueda en pill, pill negra "+ Nueva reserva", campana, avatar.
 

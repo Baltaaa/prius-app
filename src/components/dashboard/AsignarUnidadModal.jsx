@@ -8,7 +8,8 @@ import ClienteBuscador from '../crm/ClienteBuscador'
 import PagoComprobanteCampos from '../crm/PagoComprobanteCampos'
 import MoneyInput from '../inputs/MoneyInput'
 import LoadingButton from '../ui/LoadingButton'
-import { unidadEmoji, formatUnidad} from '../../lib/format'
+import { unidadConEmoji } from '../../lib/unidadIcono'
+
 
 // Asignar una unidad libre a un cliente de temporada, SIN salir del Plano —
 // mismo ClienteSelector (existente o nuevo) que usa Reservas.jsx (ítem 5,
@@ -39,7 +40,7 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
       saldo: bonificada ? 0 : Number(valorTotal || 0),
       saldoDesconocido: false,
       pagado: 0,
-      unidadLabel: `${unidadEmoji(unit?.type)} ${formatUnidad(unit?.type, unit?.number)}`,
+      unidadLabel: unidadConEmoji(unit?.type, unit?.number),
       temporadaOTipo: temporadaActiva?.nombre,
       sinReserva: false,
     },
@@ -112,7 +113,7 @@ export default function AsignarUnidadModal({ isOpen, onClose, unit, temporadaAct
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Asignar ${unidadEmoji(unit?.type)} ${formatUnidad(unit?.type, unit?.number)}`}
+      title={`Asignar ${unidadConEmoji(unit?.type, unit?.number)}`}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">

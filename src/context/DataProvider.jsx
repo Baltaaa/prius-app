@@ -223,7 +223,7 @@ export function DataProvider({ children }) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos' },
         () => debouncedRefetch('eventos', fetchEventos))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pagos' },
-        () => { debouncedRefetch('pagos', fetchPagos); debouncedRefetch('ingresosCaja', fetchIngresosCaja); debouncedRefetch('caja', fetchCaja) })
+        () => { debouncedRefetch('pagos', fetchPagos); debouncedRefetch('reservas', fetchReservas); debouncedRefetch('ingresosCaja', fetchIngresosCaja); debouncedRefetch('caja', fetchCaja) })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'codigos_reserva' },
         () => debouncedRefetch('codigosReserva', fetchCodigosReserva))
       .subscribe((status) => setRealtimeConectado(status === 'SUBSCRIBED'))

@@ -11,6 +11,14 @@ export const MEDIO_PAGO_LABEL = {
   tarjeta_credito: 'Tarjeta de Crédito',
 }
 
+// Etiquetas cortas para espacios angostos (desglose de Caja): el ícono ya
+// aclara el medio. Los nombres completos siguen en tablas y selects.
+export const MEDIO_PAGO_LABEL_CORTO = {
+  ...MEDIO_PAGO_LABEL,
+  tarjeta_debito: 'Débito',
+  tarjeta_credito: 'Crédito',
+}
+
 // Emoji por medio (item 4, oct 2026): el select de Registrar Pago los usa
 // para distinguir de un vistazo — débito y crédito comparten 💳, se
 // distinguen por el texto del label, como pide el diseño.

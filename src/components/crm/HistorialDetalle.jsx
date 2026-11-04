@@ -1,5 +1,6 @@
 import { X, ArrowRight } from 'lucide-react'
 import { formatHora, formatFechaLarga } from '../../lib/format'
+import ScrollFade from '../ui/ScrollFade'
 
 // Detalle de un evento del Historial (nov 2026, Bloque 3 del rebranding
 // Stitch, fuente design/stitch/07_historial_desktop.png).
@@ -60,7 +61,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
         )}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain mt-4 space-y-4">
+      <ScrollFade wrapperClassName="flex-1 mt-4" className="overflow-y-auto overscroll-contain space-y-4">
         {/* Quién lo hizo */}
         <div className="bg-surface rounded-inner p-3 flex items-center gap-3">
           <span className="w-9 h-9 rounded-full bg-ink text-on-ink text-label font-semibold flex items-center justify-center shrink-0">
@@ -119,7 +120,7 @@ export default function HistorialDetalle({ evento, meta, cambios, datos, onCerra
             <p className="text-body text-ink break-words">{meta.descripcion}</p>
           </div>
         )}
-      </div>
+      </ScrollFade>
 
       {/* Acción: es exactamente la navegación que antes hacía el click en la
           fila (handleClick de Historial.jsx) — no se agregó ni se cambió

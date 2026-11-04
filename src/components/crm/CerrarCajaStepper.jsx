@@ -10,6 +10,7 @@ import TextInput from '../inputs/TextInput'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useDialog } from '../../context/DialogProvider'
 import LoadingButton from '../ui/LoadingButton'
+import ScrollFade from '../ui/ScrollFade'
 
 const PASOS = ['Arqueo', 'Cierre Z', 'Confirmación']
 
@@ -120,7 +121,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+        <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto p-6 sm:p-8 space-y-6">
           {paso === 0 && (
             <>
               {/* Ítem 1 (25/10/2026): un bloque por medio con movimiento ese
@@ -237,7 +238,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
               </p>
             </div>
           )}
-        </div>
+        </ScrollFade>
 
         <div className="p-6 border-t border-line shrink-0">
           {paso < 2 ? (

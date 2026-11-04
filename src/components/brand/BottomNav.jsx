@@ -12,6 +12,7 @@ import {
 import { isFeatureEnabled } from '../../lib/features'
 import { useMountTransition } from '../../hooks/useMountTransition'
 import { CountBadge } from './Badge'
+import ScrollFade from '../ui/ScrollFade'
 
 // Bottom nav fijo de 5 ítems para mobile (sept 2026) — reemplaza al drawer
 // del Sidebar en pantallas chicas (el Sidebar completo queda solo para
@@ -139,7 +140,7 @@ export default function BottomNav() {
                 <X size={20} strokeWidth={1.5} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain px-3 pb-4 space-y-1">
+            <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto overscroll-contain px-3 pb-4 space-y-1">
               {masItems.map((item) => (
                 <NavLink
                   key={item.path}
@@ -166,7 +167,7 @@ export default function BottomNav() {
                 <LogOut size={20} strokeWidth={1.5} />
                 Cerrar sesión
               </button>
-            </div>
+            </ScrollFade>
           </div>
         </div>,
         document.body,

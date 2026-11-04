@@ -1,7 +1,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Search, UserPlus, X } from 'lucide-react'
 import { useData } from '../../context/DataProvider'
-import { normalizeText, formatUnidad, unidadEmoji } from '../../lib/format'
+import { normalizeText } from '../../lib/format'
+import { unidadConEmoji } from '../../lib/unidadIcono'
 import { validarClienteForm } from '../../lib/validators/cliente'
 import TextInput from '../inputs/TextInput'
 import PhoneInput from '../inputs/PhoneInput'
@@ -48,7 +49,7 @@ export default function ClienteBuscador({ value, onChange, autoFocus }) {
     for (const r of reservas) {
       if ((r.estado === 'activa' || r.estado === 'preconfirmada') && r.unidad_id && !map[r.cliente_id]) {
         const u = unidades.find((un) => un.id === r.unidad_id)
-        if (u) map[r.cliente_id] = `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}`
+        if (u) map[r.cliente_id] = unidadConEmoji(u.tipo, u.numero)
       }
     }
     return map

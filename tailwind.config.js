@@ -61,6 +61,8 @@ export default {
         // parten ni desbordan la card; la fuente baja con el viewport.
         kpi: ['clamp(34px, 9vw, 60px)', { lineHeight: '1.05', letterSpacing: '-0.03em', fontWeight: '400' }],
         stat: ['clamp(22px, 6vw, 30px)', { lineHeight: '1.15', letterSpacing: '-0.02em', fontWeight: '500' }],
+        // Monto protagonista de una card compacta (ej. Caja diaria del sidebar).
+        amount: ['clamp(22px, 5.5vw, 24px)', { lineHeight: '30px', letterSpacing: '-0.02em', fontWeight: '500' }],
         'modal-title': ['24px', { lineHeight: '30px', letterSpacing: '-0.01em', fontWeight: '500' }],
         row: ['15px', { lineHeight: '20px', fontWeight: '500' }],
         body: ['14px', { lineHeight: '20px', fontWeight: '500' }],

@@ -62,6 +62,11 @@ export function formatPesos(n: number | null | undefined): string {
 }
 
 /** Igual a formatPesos, pero null/undefined -> null (el llamador no renderiza nada). Reemplaza el viejo formatMontoVisible. */
+/** Cantidad entera con separador de miles argentino: 1.234 (conteos, unidades, personas). */
+export function formatCantidad(n: number | null | undefined): string {
+  return pesosFmt.format(Math.round(Number(n) || 0))
+}
+
 export function formatPesosVisible(n: number | null | undefined): string | null {
   return Number(n) > 0 ? formatPesos(n) : null
 }
@@ -248,15 +253,10 @@ export function formatNombre(nombre: string | null | undefined): string {
 }
 
 const UNIDAD_LABEL: Record<string, string> = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina', locker: 'Locker' }
-const UNIDAD_EMOJI: Record<string, string> = { carpa: '🏠', sombrilla: '🏖️' }
 
 /** "Carpa 19" / "Sombrilla 4" / "Cabina 2" / "Locker 12". */
 export function formatUnidad(tipo: string, numero: number | string): string {
   return `${UNIDAD_LABEL[tipo] || tipo} ${numero}`
-}
-
-export function unidadEmoji(tipo: string): string {
-  return UNIDAD_EMOJI[tipo] || ''
 }
 
 /**

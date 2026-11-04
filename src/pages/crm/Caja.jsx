@@ -4,14 +4,14 @@ import { useCaja } from '../../hooks/useCaja'
 import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
 import { useData } from '../../context/DataProvider'
 import { supabase } from '../../lib/supabase'
-import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
+import { MEDIO_PAGO_LABEL, MEDIO_PAGO_LABEL_CORTO } from '../../lib/pagos'
 import DateInput from '../../components/inputs/DateInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import LoadingButton from '../../components/ui/LoadingButton'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 import { descargarCierreCaja } from '../../lib/export/cajaCsv'
 import {
-  Plus, Wallet, ChevronLeft, ChevronRight, Banknote, Landmark, QrCode, CreditCard,
+  Plus, Wallet, ChevronLeft, ChevronRight, Banknote,
   ArrowUpRight, ArrowDownRight, Printer, Download, Lock, History, AlertTriangle, X,
 } from 'lucide-react'
 import { formatPesos, formatFecha } from '../../lib/format'
@@ -28,19 +28,13 @@ import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import MontoStat from '../../components/ui/MontoStat'
 import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
+import { emojiEnTexto } from '../../lib/unidadIcono'
+import FilaMedioPago from '../../components/crm/FilaMedioPago'
 
 const FILTROS_MEDIO = [
   { value: 'todos', label: 'Todos los medios' },
   ...Object.entries(MEDIO_PAGO_LABEL).map(([value, label]) => ({ value, label })),
 ]
-
-const MEDIO_ICONO = {
-  efectivo: Banknote,
-  transferencia: Landmark,
-  mercado_pago: QrCode,
-  tarjeta_debito: CreditCard,
-  tarjeta_credito: CreditCard,
-}
 
 const TABS = [
   { value: 'movimientos', label: 'Movimientos' },
@@ -439,7 +433,7 @@ export default function Caja() {
                                 </td>
                                 <td className="py-3 px-2">
                                   <span className={`block text-ink ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.cliente_proveedor || 'S/N'}</span>
-                                  {m.unidad && <span className="block text-ink-2">{m.unidad}</span>}
+                                  {m.unidad && <span className="block text-ink-2">{emojiEnTexto(m.unidad)}</span>}
                                 </td>
                                 <td className="py-3 px-2 text-ink-2">{m.concepto}</td>
                                 <td className="py-3 px-2 whitespace-nowrap">
@@ -481,7 +475,7 @@ export default function Caja() {
                               <span className={`text-body font-semibold tabular-nums whitespace-nowrap shrink-0 ${m.monto < 0 ? 'text-danger' : 'text-success-ink'}`}>{fmtM(m.monto)}</span>
                             </div>
                             <p className="text-label text-ink-2 break-words pl-8">
-                              {m.cliente_proveedor}{m.unidad ? ` · ${m.unidad}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
+                              {m.cliente_proveedor}{m.unidad ? ` · ${emojiEnTexto(m.unidad)}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
                             </p>
                             {m.comprobante && (
                               <span className="inline-block self-start ml-8 px-2 py-1 rounded-swatch bg-card text-label font-semibold text-ink-2">{m.comprobante}</span>
@@ -563,7 +557,7 @@ export default function Caja() {
                   <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
                     {resumen.por_medio.map((m) => (
                       <div key={m.medio} className="flex items-center gap-2 h-8 px-3 rounded-full bg-surface text-label whitespace-nowrap shrink-0">
-                        <span className="text-ink-2">{MEDIO_PAGO_LABEL[m.medio] || m.medio}:</span>
+                        <span className="text-ink-2">{MEDIO_PAGO_LABEL_CORTO[m.medio] || m.medio}:</span>
                         <span className="font-semibold text-ink tabular-nums">{fmtM(m.neto)}</span>
                       </div>
                     ))}
@@ -610,20 +604,9 @@ export default function Caja() {
                 <div className="card-surface card-pad space-y-4">
                   <h3 className="text-base font-semibold text-ink">Desglose por Medio de Pago</h3>
                   <div className="space-y-3">
-                    {resumen.por_medio.map((m) => {
-                      const IconoMedio = MEDIO_ICONO[m.medio] || Banknote
-                      return (
-                        <div key={m.medio} className="bg-surface rounded-inner p-4 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-icon bg-card flex items-center justify-center text-ink-2">
-                              <IconoMedio size={18} />
-                            </div>
-                            <span className="text-body font-semibold text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
-                          </div>
-                          <span className="text-body font-semibold text-ink tabular-nums">{fmtM(m.neto)}</span>
-                        </div>
-                      )
-                    })}
+                    {resumen.por_medio.map((m) => (
+                      <FilaMedioPago key={m.medio} medio={m.medio} monto={m.neto} fmt={fmtM} negativo={Number(m.neto) < 0} />
+                    ))}
                   </div>
                 </div>
               )}

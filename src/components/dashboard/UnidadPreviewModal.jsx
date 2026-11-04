@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import { useOverlay } from "../../context/OverlayProvider"
 import { useMountTransition } from "../../hooks/useMountTransition"
 import UnidadDetalleContent from "./UnidadDetalleContent"
+import ScrollFade from '../ui/ScrollFade'
 
 // Hoja inferior de detalle de unidad — tablet y mobile (<1024px). Desktop
 // usa el panel lateral fijo en cambio (UnidadDetallePanel.jsx, mismo
@@ -66,7 +67,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
         <div className="flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-line" />
         </div>
-        <div className="flex-1 overflow-y-auto px-6 pb-6 flex flex-col min-h-0">
+        <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto px-6 pb-6 flex flex-col">
           <UnidadDetalleContent
             unit={unitActiva}
             reservas={reservas}
@@ -75,7 +76,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
             onAsignarTemporada={onAsignarTemporada}
             onMoverUnidad={onMoverUnidad}
           />
-        </div>
+        </ScrollFade>
       </div>
     </div>,
     document.body,

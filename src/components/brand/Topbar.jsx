@@ -378,7 +378,7 @@ export default function TopBar() {
         />
 
         {showDropdown && (
-            <ScrollFade className="absolute left-0 right-0 mt-2 surface-pop z-50 max-h-96 overflow-y-auto ui-open">
+            <ScrollFade wrapperClassName="absolute left-0 right-0 mt-2 surface-pop z-50 max-h-96 ui-open" className="overflow-y-auto">
               {!activo ? (
                 <p className="px-4 py-6 text-center text-label text-ink-2">Seguí escribiendo (mínimo 2 caracteres)...</p>
               ) : resultadosFlat.length === 0 ? (
@@ -646,7 +646,7 @@ export default function TopBar() {
               <X size={20} />
             </button>
           </div>
-          <ScrollFade className="flex-1 overflow-y-auto">
+          <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto">
             {!showDropdown ? (
               <p className="px-6 py-8 text-center text-label text-ink-2">Escribí para buscar un cliente, una reserva o una unidad (ej. "carpa 19").</p>
             ) : !activo ? (

@@ -11,6 +11,8 @@ const { globalTeardown: _sinTeardown, ...resto } = base
 
 export default defineConfig({
   ...resto,
+  // Sin trazas ni videos: una corrida larga con fallas llegó a ocupar 160 MB y llenar el disco.
+  use: { ...resto.use, trace: 'off', video: 'off' },
   // Crea datos reales y auditoría mobile no se usa en el rebranding.
   testIgnore: [/reservas\.spec\.ts/, /auditoria-mobile\.spec\.ts/],
   projects: [

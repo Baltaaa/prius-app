@@ -11,6 +11,7 @@ import MontoReserva from './MontoReserva'
 import CambiarEstadoPagoModal from './CambiarEstadoPagoModal'
 import GestionCosociosModal from './GestionCosociosModal'
 import UnidadLabel from './UnidadLabel'
+import ScrollFade from '../ui/ScrollFade'
 
 const TIPO_LABEL = { periodo: 'Período', dia: 'Día', temporada: 'Temporada' }
 
@@ -61,7 +62,7 @@ export default function ReservaDetalleContent({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4">
+      <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto space-y-4">
         {/* Ítem 2 (25/10/2026): aviso cuando el estado de pago fue ajustado
             a mano — visible para todos, no solo superadmin (transparencia
             de por qué el badge no coincide con lo que calcularía el saldo). */}
@@ -233,7 +234,7 @@ export default function ReservaDetalleContent({
             <button
               onClick={() => onRegistrarPago?.(reserva)}
               disabled={Number(reserva.saldo) <= 0}
-              className="w-full h-12 bg-card border border-line hover:bg-surface disabled:opacity-40 disabled:cursor-not-allowed rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
+              className="px-4 w-full h-12 bg-card border border-line hover:bg-surface disabled:opacity-40 disabled:cursor-not-allowed rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
             >
               <Wallet size={16} /> Registrar pago
             </button>
@@ -269,19 +270,19 @@ export default function ReservaDetalleContent({
           <div className="flex gap-2">
             <button
               onClick={() => onCancelar?.(reserva)}
-              className="flex-1 h-11 bg-gold-100 hover:bg-gold-100 text-ink rounded-full text-label font-medium flex items-center justify-center gap-2 transition-colors"
+              className="px-4 flex-1 h-11 bg-gold-100 hover:bg-gold-100 text-ink rounded-full text-label font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <XCircle size={14} /> Cancelar
             </button>
             <button
               onClick={() => onEliminar?.(reserva)}
-              className="flex-1 h-11 bg-danger-soft hover:bg-danger-soft text-danger rounded-full text-label font-medium flex items-center justify-center gap-2 transition-colors"
+              className="px-4 flex-1 h-11 bg-danger-soft hover:bg-danger-soft text-danger rounded-full text-label font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <Trash2 size={14} /> Eliminar
             </button>
           </div>
         </div>
-      </div>
+      </ScrollFade>
 
       {puedeAjustarEstadoPago && (
         <CambiarEstadoPagoModal isOpen={mostrarCambiarEstado} onClose={() => setMostrarCambiarEstado(false)} reserva={reserva} />

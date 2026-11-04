@@ -135,7 +135,8 @@ test('overlays', async ({ page }) => {
       if (solo && !solo.includes(paso.nombre)) continue
       try {
         await paso.correr(page, mobile)
-        await page.screenshot({ path: `${OUT}/${paso.nombre}-${w}.png` })
+        await page.waitForTimeout(450) // la animación de apertura (scale .96→1, 200ms) tiene que terminar antes de medir
+        if (!process.env.SIN_CAPTURAS) await page.screenshot({ path: `${OUT}/${paso.nombre}-${w}.png` })
         for (const x of await auditarLayout(page, { mobile, sinNav: true })) appendFileSync(LOG, `${paso.nombre} ${w}x${h} [${x.regla}] ${x.detalle}\n`)
         console.log('OK', w, paso.nombre, page.url().includes('/login') ? 'SESION-CERRADA' : '')
       } catch (e) {
