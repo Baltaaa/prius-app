@@ -158,9 +158,10 @@ for (const tipo of ['estado_cuenta', 'recibo']) {
       return { opacity: s.opacity, filter: s.filter, z: s.zIndex, ancho: w.getBoundingClientRect().width / root.width, adjust: s.getPropertyValue('print-color-adjust') || s.getPropertyValue('-webkit-print-color-adjust') }
     })
     if (TAG !== 'old') {
-      expect(Number(css!.opacity)).toBeGreaterThanOrEqual(0.05)
-      expect(Number(css!.opacity)).toBeLessThanOrEqual(0.06)
+      expect(Number(css!.opacity)).toBeGreaterThanOrEqual(0.09)
+      expect(Number(css!.opacity)).toBeLessThanOrEqual(0.09)
       expect(css!.filter).toContain('grayscale')
+      expect(css!.filter).toContain('brightness(0.6)')
       expect(css!.ancho).toBeGreaterThan(0.55)
       expect(css!.ancho).toBeLessThan(0.6)
       expect(css!.z).toBe('-1')
