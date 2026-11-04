@@ -7,8 +7,9 @@ import PlanoViewport from "../../components/plano/PlanoViewport"
 import CeldaPublica from "../../components/plano/CeldaPublica"
 import DateInput from "../../components/inputs/DateInput"
 import IntegerInput from "../../components/inputs/IntegerInput"
+import { hoyAR } from "../../lib/fechas"
 
-const todayStr = () => new Date().toISOString().split("T")[0]
+const todayStr = hoyAR
 const TIPO_LABEL = { carpa: "Carpa", sombrilla: "Sombrilla" }
 const PLANO_PAD = 24
 

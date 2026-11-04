@@ -1,3 +1,4 @@
+import { hoyAR, sumarMeses } from '../../lib/fechas'
 import { useMemo, useState } from 'react'
 import {
   TrendingUp, TrendingDown, Wallet, Receipt, Target, Percent,
@@ -33,12 +34,8 @@ import {
 // switch a USD es de presentación: divide por la cotización vigente, y por
 // eso el encabezado siempre aclara con cuál se convirtió.
 
-const hoyIso = () => new Date().toISOString().split('T')[0]
-const haceMeses = (n) => {
-  const d = new Date()
-  d.setMonth(d.getMonth() - n)
-  return d.toISOString().split('T')[0]
-}
+const hoyIso = hoyAR
+const haceMeses = (n) => sumarMeses(hoyAR(), -n)
 
 // Tile de KPI (mismo lenguaje que los tiles del Plano): etiqueta arriba, valor
 // grande y una línea de apoyo. Hasta xl el monto va en formato compacto

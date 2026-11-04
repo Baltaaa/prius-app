@@ -1,6 +1,6 @@
 import { reservaActiva } from './reservas'
 import { resumenSaldos } from './saldos'
-import { fechaAR } from './fecha'
+import { fechaAR } from './fechas'
 
 // Lógica pura de la pantalla de Recepción: qué reservas web llegan hoy, cuáles
 // ya ingresaron y cuál fue el último check-in. Todo sale de datos que el

@@ -34,6 +34,7 @@ import { useSection } from '../../lib/sectionTitles'
 import Button from './Button'
 import PageHeader from './PageHeader'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { useHoyAR } from '../../hooks/useHoyAR'
 
 const normalize = normalizeText
 
@@ -122,7 +123,7 @@ export default function TopBar() {
 
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
   const primerNombre = nombreMostrado.split(' ')[0]
-  const hoyTopbar = useMemo(() => new Date().toISOString().split('T')[0], [])
+  const hoyTopbar = useHoyAR()
   const rolLabel = rol === 'superadmin' ? 'Superadmin' : rol === 'admin' ? 'Admin' : ''
 
   // Hover solo en dispositivos con mouse real — en touch (incluso tablets

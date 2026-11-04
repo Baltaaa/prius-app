@@ -1,4 +1,4 @@
-import { fechaAR, hoyAR } from './fecha'
+import { fechaAR, hoyAR, sumarDias } from './fechas'
 import { formatFechaLarga } from './format'
 
 // Día calendario de un evento del Historial, SIEMPRE en America/Argentina/
@@ -34,13 +34,7 @@ export function limitesDeRango(desde, hasta) {
   }
 }
 
-// Suma días a una fecha "YYYY-MM-DD" (aritmética de calendario, sin zonas).
-export function sumarDias(fecha, n) {
-  const [y, m, d] = fecha.split('-').map(Number)
-  const dt = new Date(Date.UTC(y, m - 1, d))
-  dt.setUTCDate(dt.getUTCDate() + n)
-  return dt.toISOString().split('T')[0]
-}
+export { sumarDias }
 
 export function etiquetaDia(dia, hoy = hoyAR()) {
   if (dia === 'sin-fecha') return 'Sin fecha'

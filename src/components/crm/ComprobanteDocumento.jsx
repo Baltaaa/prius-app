@@ -17,12 +17,12 @@ const CSS = `
     font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; color: #000;
     position: relative; isolation: isolate; }
   /* Marca de agua obligatoria en todo comprobante emitido: el logo real de
-     Prius centrado, ~58% del ancho de la hoja, en grises al 5,5% de opacidad,
+     Prius centrado, ~58% del ancho de la hoja, en grises (brightness .6) al 9% de opacidad,
      detrás de todo el contenido (z-index negativo dentro del stacking context
      del documento). Una sola por copia, nunca en mosaico. Sale al imprimir:
      print-color-adjust exact. */
   .cd-watermark { position: absolute; left: 50%; top: 50%; width: 58%; height: auto; aspect-ratio: 1;
-    transform: translate(-50%, -50%); opacity: 0.055; filter: grayscale(1); z-index: -1;
+    transform: translate(-50%, -50%); opacity: 0.09; filter: grayscale(1) brightness(0.6); z-index: -1;
     pointer-events: none; user-select: none; object-fit: contain;
     print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .cd-root * { box-sizing: border-box; print-color-adjust: exact; -webkit-print-color-adjust: exact; }

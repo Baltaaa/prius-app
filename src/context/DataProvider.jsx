@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { ejecutarAccionSuperadmin } from '../lib/superadminAction'
+import { useHoyAR } from '../hooks/useHoyAR'
 
 /*
   Fuente única de datos del CRM.
@@ -52,7 +53,7 @@ export function DataProvider({ children }) {
   // efectivamente SUBSCRIBED, no un flag siempre-true.
   const [realtimeConectado, setRealtimeConectado] = useState(false)
 
-  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], [])
+  const todayStr = useHoyAR()
 
   // ---- Fetchers acotados (para realtime y refetch selectivo) ----
 

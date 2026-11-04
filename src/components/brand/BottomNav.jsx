@@ -1,3 +1,4 @@
+import { APP_VERSION } from '../../lib/appVersion'
 import { useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
@@ -167,6 +168,11 @@ export default function BottomNav() {
                 <LogOut size={20} strokeWidth={1.5} />
                 Cerrar sesión
               </button>
+              {/* Footer global en mobile: al final de "Más", no en cada pantalla. */}
+              <div className="pt-4 pb-1 flex flex-col items-center gap-1 text-center text-label text-ink-2">
+                <span className="inline-flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-gold" /><span className="text-ink">Prius Playa Grande</span> · Sector Carpas y Balneario</span>
+                <span>Mar del Plata · Buenos Aires · {APP_VERSION}</span>
+              </div>
             </ScrollFade>
           </div>
         </div>,

@@ -25,20 +25,17 @@ import { useOverlay } from "../context/OverlayProvider"
 import { useClima } from "../hooks/useClima"
 import { useInitialLoad } from "../hooks/useInitialLoad"
 import Skeleton from "../components/ui/Skeleton"
+import { hoyAR, sumarDias } from "../lib/fechas"
 
 // El plano de playa solo dibuja carpas y sombrillas. Cabinas y lockers están
 // dentro del complejo y se manejan en su propia sección del CRM.
 const PREFIJO = { carpa: "C", sombrilla: "S" }
 
-const todayStr = () => new Date().toISOString().split("T")[0]
+const todayStr = hoyAR
 
 // Mismo helper que Caja.jsx: suma/resta un día a una fecha yyyy-mm-dd sin
 // líos de timezone.
-const shiftDate = (fecha, delta) => {
-  const d = new Date(fecha + "T00:00:00")
-  d.setDate(d.getDate() + delta)
-  return d.toISOString().split("T")[0]
-}
+const shiftDate = sumarDias
 
 export default function Dashboard() {
   const { unidades, reservas, loading, temporadaActiva, cajaHoy, historialCajas, pagos, realtimeConectado } = useData()

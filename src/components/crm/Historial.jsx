@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
 import { formatFecha, formatHora, formatPesos, formatMontosEnTexto } from '../../lib/format'
-import { hoyAR } from '../../lib/fecha'
+import { hoyAR } from '../../lib/fechas'
 import { agruparPorDia, etiquetaDia, sumarDias } from '../../lib/historialDias'
 import { useData } from '../../context/DataProvider'
 import { linkToCliente, linkToReserva } from '../../lib/deepLinks'

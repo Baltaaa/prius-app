@@ -11,6 +11,7 @@ import { useOverlay } from '../../context/OverlayProvider'
 import { useDialog } from '../../context/DialogProvider'
 import LoadingButton from '../ui/LoadingButton'
 import ScrollFade from '../ui/ScrollFade'
+import { hoyAR } from '../../lib/fechas'
 
 const PASOS = ['Arqueo', 'Cierre Z', 'Confirmación']
 
@@ -30,7 +31,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
   const [observaciones, setObservaciones] = useState('')
   const [tieneZ, setTieneZ] = useState(false)
   const [z, setZ] = useState({
-    z_numero: null, z_fecha: new Date().toISOString().split('T')[0], z_total: 0,
+    z_numero: null, z_fecha: hoyAR(), z_total: 0,
     z_neto_gravado: 0, z_iva: 0, z_cantidad_comprobantes: null, z_primer_comprobante: '', z_ultimo_comprobante: '',
   })
   const [saving, setSaving] = useState(false)
@@ -190,7 +191,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <IntegerInput placeholder="N.° de Z" value={z.z_numero} onChange={(v) => setZ({ ...z, z_numero: v })} min={1} />
-                    <DateInput value={z.z_fecha} onChange={(v) => setZ({ ...z, z_fecha: v })} max={new Date().toISOString().split('T')[0]} />
+                    <DateInput value={z.z_fecha} onChange={(v) => setZ({ ...z, z_fecha: v })} max={hoyAR()} />
                   </div>
                   <MoneyInput label="Total Z" value={z.z_total} onChange={(v) => setZ({ ...z, z_total: v })} />
                   <div className="grid grid-cols-2 gap-4">

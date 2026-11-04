@@ -1,3 +1,4 @@
+import { hoyAR } from '../../lib/fechas'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
@@ -35,7 +36,7 @@ import {
   QrCode, TimerOff, UserCheck2, UserSearch,
 } from 'lucide-react'
 
-const todayStr = () => new Date().toISOString().split('T')[0]
+const todayStr = hoyAR
 
 const ChipDato = ({ icon: Icon, label, value, onClick }) => (
   <button type="button" onClick={onClick} className="inline-flex items-center gap-2 h-11 px-4 rounded-full bg-card text-label text-ink-2 hover:text-ink anim-colors shrink-0">
