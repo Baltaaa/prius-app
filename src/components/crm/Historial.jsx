@@ -4,16 +4,22 @@ import {
   CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff, SlidersHorizontal,
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
-import { formatFecha, formatFechaLarga, formatHora, formatPesos, formatMontosEnTexto, formatUnidad } from '../../lib/format'
+import { formatFecha, formatHora, formatPesos, formatMontosEnTexto } from '../../lib/format'
+import { hoyAR } from '../../lib/fecha'
+import { agruparPorDia, etiquetaDia, sumarDias } from '../../lib/historialDias'
 import { useData } from '../../context/DataProvider'
 import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
 import { staggerDelay } from '../../lib/motion'
 import { useEsDesktop } from '../../hooks/useMediaQuery'
-import DateInput from '../inputs/DateInput'
-import SearchInput from '../inputs/SearchInput'
 import BrandSelect from '../ui/BrandSelect'
 import Skeleton from '../ui/Skeleton'
 import BottomSheet from '../brand/BottomSheet'
+import ToolbarSticky from '../brand/ToolbarSticky'
+import SegmentedControl from '../brand/SegmentedControl'
+import SegmentedScroll from '../brand/SegmentedScroll'
+import RangoFechasChip from '../brand/RangoFechasChip'
+import BuscadorColapsable from '../brand/BuscadorColapsable'
+import ScrollFade from '../ui/ScrollFade'
 import HistorialDetalle from './HistorialDetalle'
 import { unidadConEmoji } from '../../lib/unidadIcono'
 
@@ -87,24 +93,15 @@ const FILTROS = [
   { key: 'notas', label: 'Notas' },
 ]
 
-const todayStr = () => new Date().toISOString().split('T')[0]
-const addDays = (s, n) => {
-  const [y, m, d] = s.split('-').map(Number)
-  const dt = new Date(Date.UTC(y, m - 1, d))
-  dt.setUTCDate(dt.getUTCDate() + n)
-  return dt.toISOString().split('T')[0]
-}
+// Día calendario SIEMPRE en America/Argentina/Buenos_Aires (lib/fecha.js y
+// lib/historialDias.js): nunca toISOString(), que es UTC.
+const todayStr = hoyAR
+const addDays = sumarDias
 
 // (nov 2026) TIPOS_MODIFICACION / TIPOS_CANCELACION se borraron junto con la
 // barra de estadísticas: solo servían para contar "Modificaciones" y
 // "Cancelaciones" en esos KPIs. No había queries propias que sacar — los
 // cinco números se calculaban en memoria sobre los eventos ya paginados.
-
-function etiquetaFecha(fecha) {
-  if (fecha === todayStr()) return 'Hoy'
-  if (fecha === addDays(todayStr(), -1)) return 'Ayer'
-  return formatFechaLarga(fecha)
-}
 
 function metaDe(evento) {
   return TIPO_EVENTO_META[evento.tipo_evento] || { icon: Activity, label: formatMontosEnTexto(evento.descripcion), tono: 'info', filtro: 'otros' }
@@ -422,18 +419,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
     [todos, filtro],
   )
 
-  const grupos = useMemo(() => {
-    const map = new Map()
-    for (const e of filtrados) {
-      const key = e.fecha_ref || 'sin-fecha'
-      if (!map.has(key)) map.set(key, [])
-      map.get(key).push(e)
-    }
-    const entries = [...map.entries()]
-    const conFecha = entries.filter(([k]) => k !== 'sin-fecha').sort((a, b) => (a[0] < b[0] ? 1 : -1))
-    const sinFecha = entries.filter(([k]) => k === 'sin-fecha')
-    return [...conFecha, ...sinFecha]
-  }, [filtrados])
+  const grupos = useMemo(() => agruparPorDia(filtrados), [filtrados])
 
   // Navegación del evento. Sin cambios respecto de la versión anterior: en
   // el listado global ahora se dispara desde el botón del detalle en vez
@@ -487,7 +473,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
 
   // ───────────────────────── listado (compartido) ─────────────────────────
   const listado = (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {grupos.length === 0 ? (
         <div className={`${compact ? '' : 'card-surface card-pad'} py-10 text-center flex flex-col items-center gap-3 anim-fade-up`}>
           <span className="w-12 h-12 rounded-card bg-surface flex items-center justify-center">
@@ -501,17 +487,14 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
       ) : (
         grupos.map(([fecha, items]) => (
           <div key={fecha}>
-            {/* Encabezado de día sticky, con contador (mock 07). */}
-            {/* En la ficha (compact) la franja tiene el mismo inset que el texto
-                de los eventos: 8px de la card + 12px de la fila. */}
-            <div className={`flex items-center justify-between gap-2 py-2 ${
-              mostrarFiltrosGlobales ? 'sticky top-0 z-10 sticky-blur' : 'px-5'
-            }`}>
-              <h3 className="text-label text-ink capitalize min-w-0">
-                {fecha === 'sin-fecha' ? 'Sin fecha' : etiquetaFecha(fecha)}
-              </h3>
-              <span className="shrink-0 text-label text-ink-2 bg-surface rounded-full px-3 py-1">
-                {items.length} {items.length === 1 ? 'evento' : 'eventos'}
+            {/* Encabezado de día: estático, en el flujo normal, arriba de su grupo
+                ("Hoy · 13 eventos"). Nunca sticky: pegado se superponía con los
+                demás y rompía el scroll. En la ficha (compact) lleva el mismo
+                inset que el texto de los eventos: 8px de la card + 12px de la fila. */}
+            <div className={`flex items-baseline gap-2 pb-2 ${compact ? 'px-5' : 'px-1'}`}>
+              <h3 className="text-label text-ink font-semibold capitalize min-w-0">{etiquetaDia(fecha)}</h3>
+              <span className="shrink-0 text-label text-ink-2 tabular-nums">
+                · {items.length} {items.length === 1 ? 'evento' : 'eventos'}
               </span>
             </div>
             <div className={`${compact ? 'bg-surface rounded-inner' : 'card-surface'} p-2 space-y-1`}>
@@ -560,24 +543,33 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
   }
 
   // ─────────────────────────── Historial global ───────────────────────────
+  const atajo = atajoActivo(desde, hasta)
+  const elegirAtajo = (a) => {
+    if (a.dias == null) { setFiltrosAbiertos(true); return }
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      const d = addDays(todayStr(), -a.dias)
+      d === addDays(todayStr(), -7) ? next.delete('hDesde') : next.set('hDesde', d)
+      next.delete('hHasta')
+      return next
+    }, { replace: true })
+  }
   return (
     <div className="anim-fade-up-page">
-      {/* Barra de filtros. En mobile queda fija arriba y los controles finos
-          se despliegan; en desktop está todo a la vista. */}
-      {/* sticky-blur: fondo semi-opaco + backdrop-filter para que el
-          contenido que scrollea por detrás se difumine en vez de cortar
-          en seco. El ::after (solo mobile) extiende el fade al área de
-          pb-3 bajo la card de filtros. En md:static el blur no tiene
-          efecto visual (nada scrollea por detrás de un elemento estático
-          en flujo normal). */}
-      <div className="sticky top-0 z-20 -mx-page px-page md:mx-0 md:px-0 md:static pb-3 sticky-blur">
-        <div className="card-surface p-card space-y-3">
-          <div className="flex items-center gap-2">
-            <SearchInput
+      {/* Toolbar en la zona sticky superior (ToolbarSticky), junto a la topbar:
+          una sola pieza flotante con blur progresivo. Dos filas como máximo y
+          controles de 40px en desktop:
+          fila 1: buscador · Hoy/7 días/Mes/Personalizado · UN chip de rango ·
+          usuario; fila 2: tabs de tipo en una sola línea (scroll con fade).
+          En mobile los filtros finos se despliegan con el botón de ajustes. */}
+      <ToolbarSticky>
+        <div className="toolbar-40 flex flex-col gap-2 md:gap-3">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
+            <BuscadorColapsable
               value={q}
               onChange={(v) => setRango('hq', v, '')}
               placeholder="Buscar por usuario, cliente o comprobante"
-              className="flex-1 min-w-0"
+              className="flex-1 min-w-0 md:max-w-[360px]"
             />
             <button
               type="button"
@@ -590,55 +582,59 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
             >
               <SlidersHorizontal size={16} />
             </button>
-          </div>
-
-          {/* Rango + usuario: siempre visible en desktop, desplegable en mobile. */}
-          <div className={`${filtrosAbiertos ? 'grid' : 'hidden'} md:grid gap-2 grid-cols-2 md:flex md:flex-wrap md:items-center`}>
-            <div className="col-span-2 flex items-center gap-1 bg-surface rounded-inner p-1 overflow-x-auto md:col-auto">
-              {ATAJOS.map((a) => {
-                const activo = atajoActivo(desde, hasta) === a.key
-                return (
-                  <button
-                    key={a.key}
-                    type="button"
-                    onClick={() => {
-                      if (a.dias == null) return setFiltrosAbiertos(true)
-                      setSearchParams((prev) => {
-                        const next = new URLSearchParams(prev)
-                        const d = addDays(todayStr(), -a.dias)
-                        d === addDays(todayStr(), -7) ? next.delete('hDesde') : next.set('hDesde', d)
-                        next.delete('hHasta')
-                        return next
-                      }, { replace: true })
-                    }}
-                    className={`shrink-0 px-3 h-9 rounded-icon text-label anim-colors ${
-                      activo ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
-                    }`}
-                  >
-                    {a.label}
-                  </button>
-                )
-              })}
+            {/* Rango + usuario: siempre en la fila 1 en desktop, desplegable en mobile. */}
+            <div className={`${filtrosAbiertos ? 'flex' : 'hidden'} md:contents basis-full flex-col gap-2`}>
+              <SegmentedControl
+                label="Rango"
+                options={ATAJOS.map((a) => ({ value: a.key, label: a.label }))}
+                value={atajo}
+                onChange={(k) => elegirAtajo(ATAJOS.find((a) => a.key === k))}
+                fullWidth="hasta-md"
+                compact
+              />
+              <RangoFechasChip
+                desde={desde}
+                hasta={hasta}
+                setDesde={(v) => setRango('hDesde', v || addDays(todayStr(), -7), addDays(todayStr(), -7))}
+                setHasta={(v) => setRango('hHasta', v || todayStr(), todayStr())}
+                className="md:w-40 shrink-0"
+              />
+              <div className="md:w-36 xl:w-44 shrink-0 [&_.field]:!bg-card">
+                <BrandSelect value={usuarioFiltro} onChange={(v) => setRango('hUsuario', v, '')} options={opcionesUsuario} className="w-full" />
+              </div>
             </div>
-            <DateInput value={desde} onChange={(v) => setRango('hDesde', v || addDays(todayStr(), -7), addDays(todayStr(), -7))} className="w-full md:w-36" />
-            <DateInput value={hasta} onChange={(v) => setRango('hHasta', v || todayStr(), todayStr())} min={desde} className="w-full md:w-36" />
-            <BrandSelect value={usuarioFiltro} onChange={(v) => setRango('hUsuario', v, '')} options={opcionesUsuario} className="col-span-2 w-full md:w-48" />
           </div>
-
-          <ChipsTipo filtro={filtro} setFiltro={setFiltro} />
+          <SegmentedScroll
+            label="Tipo de movimiento"
+            options={FILTROS.map((f) => ({ value: f.key, label: f.label }))}
+            value={filtro}
+            onChange={setFiltro}
+            className="self-start"
+          />
         </div>
-      </div>
+      </ToolbarSticky>
 
-      {/* Lista + panel de detalle (desktop). */}
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-4 lg:items-start">
+      {/* Lista + panel de detalle (desktop). `lg:pt-3` deja el tope de la lista
+          a zona + 16px, el mismo `top` del panel sticky: quedan alineados. */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-4 lg:items-start lg:pt-3">
         <div className="min-w-0">{listado}</div>
-        <aside className="hidden lg:block sticky top-4 max-h-[calc(100dvh-8rem)] card-surface card-pad ">
+        {/* Panel de detalle: sticky arriba a la derecha (zona + 16px), alto máximo
+            = viewport menos la zona y el mismo margen abajo, con scroll interno
+            difuminado. `top-3` (12px) porque el sticky de Chrome se mide desde
+            el padding de #app-main-scroll, que ya es zona + 4px: queda a zona + 16px. Sin selección ocupa ese alto y el vacío va centrado. */}
+        <aside
+          className={`hidden lg:flex flex-col sticky top-3 card-surface overflow-hidden ${
+            detalle ? 'max-h-[calc(100dvh-var(--zona-h)-32px)]' : 'h-[calc(100dvh-var(--zona-h)-32px)]'
+          }`}
+        >
           {detalle ? (
-            <div key={detalle.evento.id} className="content-crossfade h-full">
-              <HistorialDetalle {...detalle} onCerrar={() => setSeleccionado(null)} />
-            </div>
+            <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto card-pad">
+              <div key={detalle.evento.id} className="content-crossfade">
+                <HistorialDetalle {...detalle} onCerrar={() => setSeleccionado(null)} />
+              </div>
+            </ScrollFade>
           ) : (
-            <div className="flex flex-col items-center justify-center text-center gap-3 py-16 text-ink-2">
+            <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 card-pad text-ink-2">
               <History size={22} />
               <p className="text-label max-w-[200px]">Elegí un movimiento para ver el detalle.</p>
             </div>

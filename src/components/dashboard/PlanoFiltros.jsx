@@ -4,7 +4,7 @@ import DateInput from '../inputs/DateInput'
 import SegmentedControl from '../brand/SegmentedControl'
 import PlanoLeyenda from './PlanoLeyenda'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesos, formatPesosCompacto, formatFecha } from '../../lib/format'
+import { formatPesos, formatPesosCompacto, formatFecha, formatDiaCorto } from '../../lib/format'
 import { unidadEmoji } from '../../lib/unidadIcono'
 
 export const pct = (n) => `${Math.round((n || 0) * 100)}%`
@@ -28,13 +28,13 @@ export function PlanoStatTiles({ stats, valor, onChange, fecha, compacto = false
     { key: 'libres', label: 'Libres', texto: `${stats.libres.count} · ${pct(stats.libres.count / Math.max(1, total))}` },
     {
       key: 'pendientes',
-      label: 'Pendientes del día',
+      label: compacto ? 'Pendientes' : 'Pendientes del día',
       texto: `${stats.pendientes.count}${saldo}`,
       ayuda: `Unidades ocupadas el ${formatFecha(fecha)} con saldo por cobrar. No incluye reservas fuera de esa fecha: el Dashboard suma toda la temporada.`,
     },
   ]
   return (
-    <div role="radiogroup" aria-label="Filtrar el plano por estado" className={`grid grid-cols-2 lg:grid-cols-4 gap-2 ${className}`}>
+    <div role="radiogroup" aria-label="Filtrar el plano por estado" className={`${compacto ? 'flex gap-1' : 'grid grid-cols-2 lg:grid-cols-4 gap-2'} ${className}`}>
       {tiles.map((t) => {
         const activo = (valor ?? null) === t.key
         return (
@@ -43,15 +43,15 @@ export function PlanoStatTiles({ stats, valor, onChange, fecha, compacto = false
             type="button"
             role="radio"
             aria-checked={activo}
-            title={t.ayuda}
+            title={t.ayuda ? `${t.label}: ${t.texto}. ${t.ayuda}` : `${t.label}: ${t.texto}`}
             onClick={() => onChange(t.key)}
-            className={`relative min-h-12 min-w-0 px-3 py-1 flex flex-col justify-center rounded-inner text-left transition-colors ${
+            className={`relative min-h-12 min-w-0 ${compacto ? 'flex-auto px-2' : 'px-3'} py-1 flex flex-col justify-center rounded-inner text-left transition-colors ${
               activo ? 'bg-gold-50 ring-1 ring-gold' : 'bg-surface hover:bg-line/50'
             }`}
           >
             {activo && <span aria-hidden className="absolute left-0 inset-y-2 w-1 rounded-full bg-gold" />}
             <span className="block text-label text-ink-2 truncate">{t.label}</span>
-            <span className="block text-body text-ink tabular-nums whitespace-nowrap truncate">{t.texto}</span>
+            <span className={`block ${compacto ? 'text-label font-semibold' : 'text-body'} text-ink tabular-nums whitespace-nowrap truncate`}>{t.texto}</span>
           </button>
         )
       })}
@@ -141,8 +141,19 @@ export function PlanoControles({
           <ChevronLeft size={16} />
         </button>
         <div className="flex-1 min-w-0 flex items-center justify-center gap-2 px-1">
-          <DateInput value={selectedDate} onChange={(v) => v && onDateChange(v)} calendarOnly className={anchoFecha} />
+          {/* Mobile (compacto): fecha corta que siempre entra ("Jue 06/11"),
+              con un chip "Hoy" cuando corresponde. Nunca truncada. */}
+          <DateInput
+            value={selectedDate}
+            onChange={(v) => v && onDateChange(v)}
+            calendarOnly
+            className={compacto ? 'flex-1 min-w-0' : anchoFecha}
+            formatoVisible={compacto ? formatDiaCorto : undefined}
+          />
           {diaSemana && <span className="hidden md:inline lg:hidden xl:inline text-label text-ink-2 shrink-0">{diaSemana}</span>}
+          {compacto && esHoy && (
+            <span className="shrink-0 inline-flex items-center h-7 px-3 rounded-full bg-gold-100 text-label text-ink">Hoy</span>
+          )}
           {!esHoy && (
             <button onClick={onHoy} className="text-label text-ink shrink-0 min-h-11 md:min-h-0 min-w-11 md:min-w-0 px-2">Hoy</button>
           )}

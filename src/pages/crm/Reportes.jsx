@@ -1,18 +1,17 @@
 import { useMemo, useState } from 'react'
 import {
-  TrendingUp, TrendingDown, Download, Printer, Wallet, Receipt, Target, Percent,
+  TrendingUp, TrendingDown, Wallet, Receipt, Target, Percent,
 } from 'lucide-react'
 import { useData } from '../../context/DataProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useDialog } from '../../context/DialogProvider'
 import { useTipoCambio } from '../../hooks/useTipoCambio'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
-import DateInput from '../../components/inputs/DateInput'
-import BrandSelect from '../../components/ui/BrandSelect'
+import ToolbarSticky from '../../components/brand/ToolbarSticky'
+import ReportesControles from '../../components/reportes/ReportesControles'
 import ScrollFade from '../../components/ui/ScrollFade'
 import Skeleton from '../../components/ui/Skeleton'
-import WhatsAppIcon from '../../components/ui/WhatsAppIcon'
-import { formatPesos, formatPorcentaje, formatFecha } from '../../lib/format'
+import { formatPesos, formatPesosCompacto, formatPorcentaje, formatFecha } from '../../lib/format'
 import { MEDIO_PAGO_LABEL, MEDIO_PAGO_EMOJI } from '../../lib/pagos'
 import {
   PERIODOS, construirSerie, totalesDe, proyectarPeriodoEnCurso, desglosePorMedio,
@@ -41,21 +40,29 @@ const haceMeses = (n) => {
   return d.toISOString().split('T')[0]
 }
 
-function Kpi({ icono: Icono, label, valor, sub, tono = 'neutro' }) {
+// Tile de KPI (mismo lenguaje que los tiles del Plano): etiqueta arriba, valor
+// grande y una línea de apoyo. Hasta xl el monto va en formato compacto
+// ($142,4M) para que los cuatro entren sin truncar; desde xl, completo. El
+// `title` siempre trae el monto completo.
+function Kpi({ icono: Icono, label, valor, valorCompacto, sub, tono = 'neutro' }) {
   const color = tono === 'positivo' ? 'text-success-ink' : tono === 'negativo' ? 'text-danger' : 'text-ink'
   return (
-    <div className="card-surface card-pad flex items-start gap-3">
-      <span className="hidden sm:flex w-9 h-9 shrink-0 rounded-icon bg-surface text-ink-2 items-center justify-center">
-        <Icono size={16} />
-      </span>
-      <div className="min-w-0">
-        <p className="text-label text-ink-2">{label}</p>
-        <p className={`text-body lg:text-card-title tabular-nums whitespace-nowrap mt-1 ${color}`}>{valor}</p>
-        {sub && <p className="text-label text-ink-2 mt-1">{sub}</p>}
-      </div>
+    <div data-card-compacta title={valor} className="card-surface p-3 xl:p-4 min-w-0 flex flex-col justify-center">
+      <p className="flex items-center gap-2 text-label text-ink-2">
+        <Icono size={14} className="shrink-0" />
+        <span className="truncate">{label}</span>
+      </p>
+      <p className={`text-card-title tabular-nums whitespace-nowrap mt-1 ${color}`}>
+        <span className="xl:hidden">{valorCompacto ?? valor}</span>
+        <span className="hidden xl:inline">{valor}</span>
+      </p>
+      {sub && <p className="text-label text-ink-2 mt-1">{sub}</p>}
     </div>
   )
 }
+
+// "Promedio mensual", no "Promedio por mensual".
+const PROMEDIO_LABEL = { dia: 'Promedio diario', semana: 'Promedio semanal', mes: 'Promedio mensual', anio: 'Promedio anual' }
 
 // Partir de casi cero infla la variación a números sin sentido (un mes de
 // $30 contra uno de $142M daba "+473.849.900%"). Por encima de +999% se
@@ -104,6 +111,8 @@ export default function Reportes() {
   const periodoLabel = PERIODOS.find((p) => p.value === periodo)?.label || periodo
   const cot = tc.valor
   const m = (v) => montoEnMoneda(v, moneda, cot)
+  // En pesos, formato compacto para los tiles chicos; en dólares el monto ya es corto.
+  const mc = (v) => (moneda === 'USD' ? m(v) : formatPesosCompacto(v))
   const faltaCotizacion = moneda === 'USD' && !cot
 
   const datosExport = { serie, totales, proyeccion, moneda, cotizacion: cot, periodoLabel, desde, hasta, porMedio }
@@ -134,55 +143,30 @@ export default function Reportes() {
 
   return (
     <div className="space-y-grid animate-premium-fade">
-      {/* Controles */}
-      <div className="card-surface no-print p-card flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1 bg-surface p-1 rounded-inner shrink-0">
-          {PERIODOS.map((p) => (
-            <button
-              key={p.value}
-              type="button"
-              onClick={() => setPeriodo(p.value)}
-              className={`px-3 py-2 rounded-icon text-label font-semibold transition-colors ${
-                periodo === p.value ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+      {/* Controles: viven en la zona sticky superior, junto a la topbar. */}
+      <ToolbarSticky>
+        <ReportesControles
+          periodo={periodo}
+          setPeriodo={setPeriodo}
+          moneda={moneda}
+          setMoneda={setMoneda}
+          desde={desde}
+          hasta={hasta}
+          setDesde={setDesde}
+          setHasta={setHasta}
+          onWhatsApp={handleWhatsApp}
+          linkWa={linkWa}
+          onCsv={() => descargarReporteCsv(datosExport)}
+          onImprimir={imprimirReporte}
+        />
+      </ToolbarSticky>
 
-        <div className="flex items-center gap-1 bg-surface p-1 rounded-inner shrink-0">
-          {['ARS', 'USD'].map((x) => (
-            <button
-              key={x}
-              type="button"
-              onClick={() => setMoneda(x)}
-              className={`px-3 py-2 rounded-icon text-label font-semibold transition-colors ${
-                moneda === x ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
-              }`}
-            >
-              {x === 'ARS' ? '🇦🇷 Pesos' : '🇺🇸 Dólares'}
-            </button>
-          ))}
-        </div>
-
-        <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Desde" className="w-40" />
-        <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Hasta" min={desde || undefined} className="w-40" />
-
-        <div className="flex-1" />
-
-        <button onClick={handleWhatsApp} disabled={!linkWa} title={linkWa ? 'Enviar a mi WhatsApp' : 'Cargá tu teléfono en Mi cuenta'}
-          className="h-10 px-4 rounded-full bg-success hover:bg-success disabled:opacity-40 disabled:cursor-not-allowed text-on-ink flex items-center gap-2 text-body transition-colors">
-          <WhatsAppIcon size={15} /> <span className="hidden sm:inline">WhatsApp</span>
-        </button>
-        <button onClick={() => descargarReporteCsv(datosExport)}
-          className="h-10 px-4 rounded-full bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
-          <Download size={15} /> <span className="hidden sm:inline">CSV</span>
-        </button>
-        <button onClick={imprimirReporte}
-          className="h-10 px-4 rounded-full bg-surface hover:bg-line text-ink flex items-center gap-2 text-body transition-colors">
-          <Printer size={15} /> <span className="hidden sm:inline">Imprimir / PDF</span>
-        </button>
+      {/* KPIs: lo primero que se ve. 2x2 en mobile, una fila de 4 desde md. */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-grid">
+        <Kpi icono={Wallet} label="Ingresos" valor={m(totales.ingresos)} valorCompacto={mc(totales.ingresos)} sub={`${totales.cantidadPagos} cobros`} tono="positivo" />
+        <Kpi icono={Receipt} label="Egresos" valor={m(totales.egresos)} valorCompacto={mc(totales.egresos)} tono="negativo" />
+        <Kpi icono={TrendingUp} label="Neto" valor={m(totales.neto)} valorCompacto={mc(totales.neto)} sub={`Margen ${formatPorcentaje(totales.margen, 1)}`} />
+        <Kpi icono={Percent} label="Ticket promedio" valor={m(totales.ticketPromedio)} valorCompacto={mc(totales.ticketPromedio)} sub={`${PROMEDIO_LABEL[periodo] || 'Promedio'}: ${mc(totales.promedioPorPeriodo)}`} />
       </div>
 
       {faltaCotizacion && (
@@ -198,14 +182,6 @@ export default function Reportes() {
           {desde ? formatFecha(desde) : '—'} al {hasta ? formatFecha(hasta) : '—'} · Moneda: {moneda}
           {moneda === 'USD' && cot ? ` (cotización ${formatPesos(cot)})` : ''}
         </p>
-      </div>
-
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-grid">
-        <Kpi icono={Wallet} label="Ingresos" valor={m(totales.ingresos)} sub={`${totales.cantidadPagos} cobros`} tono="positivo" />
-        <Kpi icono={Receipt} label="Egresos" valor={m(totales.egresos)} tono="negativo" />
-        <Kpi icono={TrendingUp} label="Neto" valor={m(totales.neto)} sub={`Margen ${formatPorcentaje(totales.margen, 1)}`} />
-        <Kpi icono={Percent} label="Ticket promedio" valor={m(totales.ticketPromedio)} sub={`Promedio por ${periodoLabel.toLowerCase()}: ${m(totales.promedioPorPeriodo)}`} />
       </div>
 
       {/* Proyección */}
@@ -264,10 +240,12 @@ export default function Reportes() {
                           <span className="block h-full bg-gold rounded-full" style={{ width: `${(r.ingresos / maxIngreso) * 100}%` }} />
                         </span>
                       </td>
-                      <td className="px-3 py-3 text-right tabular-nums text-ink">{m(r.ingresos)}</td>
-                      <td className="px-3 py-3 text-right tabular-nums text-ink-2 hidden sm:table-cell">{m(r.egresos)}</td>
-                      <td className={`px-3 py-3 text-right tabular-nums font-semibold ${r.neto >= 0 ? 'text-ink' : 'text-danger'}`}>{m(r.neto)}</td>
-                      <td className="px-4 py-3 text-right text-label"><Variacion pct={r.variacionIngresos} /></td>
+                      {/* En mobile los montos van compactos ($48,8M) para que la tabla entre sin
+                          partir el "$" ni cortar la columna Var.; desde sm, completos. */}
+                      <td title={m(r.ingresos)} className="px-3 py-3 text-right tabular-nums whitespace-nowrap text-ink"><span className="sm:hidden">{mc(r.ingresos)}</span><span className="hidden sm:inline">{m(r.ingresos)}</span></td>
+                      <td className="px-3 py-3 text-right tabular-nums whitespace-nowrap text-ink-2 hidden sm:table-cell">{m(r.egresos)}</td>
+                      <td title={m(r.neto)} className={`px-3 py-3 text-right tabular-nums whitespace-nowrap font-semibold ${r.neto >= 0 ? 'text-ink' : 'text-danger'}`}><span className="sm:hidden">{mc(r.neto)}</span><span className="hidden sm:inline">{m(r.neto)}</span></td>
+                      <td className="px-4 py-3 text-right text-label whitespace-nowrap"><Variacion pct={r.variacionIngresos} /></td>
                     </tr>
                   ))}
                 </tbody>

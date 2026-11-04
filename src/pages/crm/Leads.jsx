@@ -1,3 +1,4 @@
+import ToolbarSticky from '../../components/brand/ToolbarSticky'
 import { useMemo, useState } from 'react'
 import WhatsAppIcon from '../../components/ui/WhatsAppIcon'
 import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
@@ -84,13 +85,14 @@ export default function Leads() {
 
   return (
     <div className="space-y-6 animate-premium-fade">
-      <div className="flex flex-wrap items-center gap-3">
+      <ToolbarSticky>
+      <div className="toolbar-40 flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap gap-2">
           {FILTROS.map((f) => (
             <button
               key={f.key}
               onClick={() => setFiltro(f.key)}
-              className={`px-4 py-2 rounded-full text-label border transition-all ${
+              className={`px-4 py-2 md:py-0 md:h-10 rounded-full text-label border transition-all ${
                 filtro === f.key
                   ? 'bg-ink text-on-ink border-ink'
                   : 'bg-surface text-ink-2 border-line hover:text-ink'
@@ -106,6 +108,7 @@ export default function Leads() {
           </p>
         )}
       </div>
+      </ToolbarSticky>
 
       {visibles.length === 0 && (
         <div className="card-surface card-pad py-10 text-label text-center text-ink-2 flex flex-col items-center gap-3">

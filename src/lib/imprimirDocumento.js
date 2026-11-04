@@ -64,10 +64,18 @@ export function imprimirDocumento(elemento, { titulo } = {}) {
     // ninguna fuente externa, a propósito — ver nota arriba), pero se espera
     // igual por si alguna vez se agrega una @font-face acá. Un frame extra
     // de render evita imprimir en blanco en navegadores lentos para montar.
+    // Las imágenes (logo y marca de agua del comprobante) también se esperan,
+    // con un tope de 2s: sin eso podían faltar en la hoja si no estaban en caché.
+    const esperarImagenes = () => Promise.race([
+      Promise.all([...idoc.images].map((img) => (img.complete ? null : new Promise((r) => { img.onload = r; img.onerror = r })))),
+      new Promise((r) => setTimeout(r, 2000)),
+    ])
     Promise.resolve(idoc.fonts?.ready).then(() => {
       requestAnimationFrame(() => {
-        iframe.contentWindow.focus()
-        iframe.contentWindow.print()
+        esperarImagenes().then(() => {
+          iframe.contentWindow.focus()
+          iframe.contentWindow.print()
+        })
       })
     })
   })

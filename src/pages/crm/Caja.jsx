@@ -1,3 +1,4 @@
+import ToolbarSticky from '../../components/brand/ToolbarSticky'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useCaja } from '../../hooks/useCaja'
@@ -216,9 +217,10 @@ export default function Caja() {
           wrappeaban de forma impredecible. Debajo, estado + Historial en una
           fila de dos columnas iguales. Desktop (sm+) sigue siendo la fila
           única de siempre. */}
-      <div className="no-print space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+      <ToolbarSticky>
+      <div className="toolbar-40 no-print space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <div className="flex items-center gap-3 sm:contents">
-          <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
+          <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 md:p-0 md:w-10 md:h-10 md:min-h-0 md:min-w-0 flex items-center justify-center bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
             <ChevronLeft size={16} />
           </button>
           {/* w-36 (144px) no entraba la fecha completa en mobile (texto 16px ahí
@@ -226,12 +228,12 @@ export default function Caja() {
               del Plano, oct 2026. flex-1 en mobile para que la fecha ocupe el
               centro de la fila simétrica; ancho fijo en desktop (sin cambios). */}
           <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="[&_.field]:bg-card flex-1 min-w-0 sm:flex-none sm:w-[164px]" />
-          <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 bg-surface hover:bg-surface anim-colors disabled:opacity-30 disabled:cursor-not-allowed border border-line rounded-full text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
+          <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 md:p-0 md:w-10 md:h-10 md:min-h-0 md:min-w-0 flex items-center justify-center bg-surface hover:bg-surface anim-colors disabled:opacity-30 disabled:cursor-not-allowed border border-line rounded-full text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
             <ChevronRight size={16} />
           </button>
         </div>
         {!esHoy && (
-          <button onClick={() => setSelectedDate(todayStr())} className="text-label w-full sm:w-auto px-4 py-3 bg-gold-100 hover:bg-gold-100 border border-gold-300 rounded-inner text-ink transition-all">
+          <button onClick={() => setSelectedDate(todayStr())} className="text-label w-full sm:w-auto px-4 py-3 md:py-0 md:h-10 bg-gold-100 hover:bg-gold-100 border border-gold-300 rounded-inner text-ink transition-all">
             Volver a Hoy
           </button>
         )}
@@ -240,18 +242,19 @@ export default function Caja() {
           fecha={mv.fecha} stale={mv.stale} compacto
         />
         {cajaSeleccionada && (
-          <span className={`text-label hidden sm:inline-block px-4 py-2 rounded-inner border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
+          <span className={`text-label hidden sm:inline-flex items-center px-4 py-2 md:py-0 md:h-10 rounded-inner border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
             {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
           </span>
         )}
         <div className="hidden sm:block sm:flex-1" />
         <button
           onClick={() => setMostrarHistorial((v) => !v)}
-          className="text-label hidden sm:flex items-center gap-2 px-4 py-3 bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all min-h-[44px]"
+          className="text-label hidden sm:flex items-center gap-2 px-4 py-3 md:py-0 md:h-10 md:min-h-0 bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all min-h-[44px]"
         >
           <History size={14} /> Historial
         </button>
       </div>
+      </ToolbarSticky>
 
       {/* Estado + Historial: fila de dos columnas iguales, solo mobile (sm:
           ya los muestra arriba en la fila de siempre). */}
@@ -599,7 +602,7 @@ export default function Caja() {
             </div>
 
             {/* Columna derecha — solo >=1024px: desglose por medio con tiles + acciones (mock). */}
-            <aside className="hidden lg:flex lg:w-80 lg:shrink-0 flex-col gap-4 sticky top-4 self-start">
+            <aside className="hidden lg:flex lg:w-80 lg:shrink-0 flex-col gap-4 sticky top-3 self-start">
               {resumen?.por_medio?.length > 0 && (
                 <div className="card-surface card-pad space-y-4">
                   <h3 className="text-base font-semibold text-ink">Desglose por Medio de Pago</h3>

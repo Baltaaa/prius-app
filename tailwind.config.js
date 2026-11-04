@@ -55,6 +55,8 @@ export default {
       // `font-*` explícito igual le gana, Tailwind lo emite después.
       fontSize: {
         greeting: ['38px', { lineHeight: '44px', letterSpacing: '-0.02em', fontWeight: '400' }],
+        // Título de página del topbar en desktop (64px de alto).
+        topbar: ['24px', { lineHeight: '32px', letterSpacing: '-0.02em', fontWeight: '400' }],
         page: ['28px', { lineHeight: '34px', letterSpacing: '-0.02em', fontWeight: '400' }],
         'card-title': ['21px', { lineHeight: '28px', letterSpacing: '-0.01em', fontWeight: '500' }],
         // clamp: los montos reales son largos ("$ 270.058.530") y nunca se
