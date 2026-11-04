@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Topbar from '../components/brand/Topbar'
+import ProgressiveBlurHeader from '../components/brand/ProgressiveBlurHeader'
+import { ToolbarSlotContext } from '../components/brand/toolbarSlot'
 import AppFooter from '../components/crm/AppFooter'
 import AppShell from '../components/brand/AppShell'
 import InactivityWarningModal from '../components/crm/InactivityWarningModal'
@@ -51,6 +53,11 @@ export default function AppLayout() {
   // Clientes, acá el footer NO se oculta (se quiere visible siempre, pegado
   // abajo) y el fix aplica en todos los anchos, no solo desde `lg`.
   const esPlano = location.pathname.startsWith('/app/plano')
+  // Comprobantes (nov 2026): la página nunca scrollea, ni vertical ni
+  // horizontal. Alto = 100dvh menos la zona sticky, el footer (desktop) y la
+  // bottom nav (mobile); la preview se escala para entrar y la lista de pagos
+  // scrollea por dentro.
+  const esComprobantes = location.pathname.startsWith('/app/comprobantes')
 
   // Pulido UX (oct 2026, item 4): se sacó el bloque visible de título de
   // sección (H1 + subtítulo) de todas las pantallas — ocupaba espacio y era
@@ -60,6 +67,26 @@ export default function AppLayout() {
   useEffect(() => {
     document.title = esHome ? 'Prius App' : `${section.name} · Prius App`
   }, [esHome, section.name])
+
+  // Zona sticky superior (nov 2026): Topbar + toolbar de la sección flotan
+  // sobre el contenido (ProgressiveBlurHeader). Su alto real se mide acá y se
+  // publica como `--zona-h`: #app-main-scroll lo usa de padding superior
+  // (clase `pt-zona`), así la página arranca justo debajo y lo demás pasa por
+  // detrás. `slot` es el nodo donde las páginas montan su toolbar
+  // (<ToolbarSticky>, un portal).
+  const layoutRef = useRef(null)
+  const zonaRef = useRef(null)
+  const [slot, setSlot] = useState(null)
+  useLayoutEffect(() => {
+    const zona = zonaRef.current
+    const layout = layoutRef.current
+    if (!zona || !layout) return undefined
+    const medir = () => layout.style.setProperty('--zona-h', `${zona.offsetHeight}px`)
+    medir()
+    const ro = new ResizeObserver(medir)
+    ro.observe(zona)
+    return () => ro.disconnect()
+  }, [])
 
   return (
     <OverlayProvider>
@@ -80,9 +107,14 @@ export default function AppLayout() {
             el BottomNav fijo y el contenido final de cada pantalla quedan
             dentro del área visible desde el primer render. AppShell decide
             Sidebar (≥1024px) / NavRail (768–1023px) / BottomNav (<768px). */}
+        <ToolbarSlotContext.Provider value={slot}>
         <AppShell>
-          <div className="flex-1 flex flex-col h-dvh min-w-0 overflow-hidden relative">
-            <Topbar />
+          <div ref={layoutRef} className="layout-zona flex-1 flex flex-col h-dvh min-w-0 overflow-hidden relative">
+            <ProgressiveBlurHeader ref={zonaRef} className="absolute top-0 inset-x-0 z-20">
+              <Topbar />
+              {/* Slot de la toolbar de la sección (ver ToolbarSticky.jsx). */}
+              <div ref={setSlot} className="px-page-max pb-3 md:pb-4 empty:p-0" />
+            </ProgressiveBlurHeader>
 
             {/* Content View with internal vertical scroll. Padding horizontal
                 IDÉNTICO al del header (px-page-max, ver Topbar.jsx y "Espaciado" en DESIGN.md)
@@ -120,9 +152,9 @@ export default function AppLayout() {
                 los hijos sticky siguen funcionando. */}
             <main
               id="app-main-scroll"
-              className={`flex-1 flex flex-col overscroll-contain px-page-max w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] ${esPlano ? 'pt-1 md:pb-3' : esSeccionAlturaFija ? 'pt-1 md:pb-12' : 'pt-1 md:pb-0'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
+              className={`flex-1 flex flex-col overscroll-contain px-page-max w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] pt-zona ${esPlano ? 'md:pb-3' : esSeccionAlturaFija ? 'md:pb-12' : 'md:pb-0'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : esPlano ? 'max-md:overflow-hidden overflow-y-auto' : esComprobantes ? 'overflow-hidden' : 'overflow-y-auto'}`}
             >
-              <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : esPlano ? 'flex-1 min-h-0 flex flex-col' : undefined}>
+              <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : esPlano || esComprobantes ? 'flex-1 min-h-0 flex flex-col' : undefined}>
                 <Outlet />
               </div>
               {/* El footer global empujaría las cajas más allá del viewport
@@ -132,12 +164,15 @@ export default function AppLayout() {
               {/* mt-auto: el main es una columna que llena el viewport (h-dvh), así
                   que en páginas cortas el footer queda pegado al borde inferior y
                   solo lo empuja hacia abajo el contenido cuando es más largo. */}
-              <div className={`no-print mt-auto ${esSeccionAlturaFija ? 'lg:hidden' : ''}`}>
+              {/* Plano en mobile: la pantalla no scrollea (el mapa llena el alto
+                  disponible), así que el footer no entra. */}
+              <div className={`no-print mt-auto ${esSeccionAlturaFija ? 'lg:hidden' : ''} ${esPlano || esComprobantes ? 'max-md:hidden' : ''}`}>
                 <AppFooter compacto={esPlano} />
               </div>
             </main>
           </div>
         </AppShell>
+        </ToolbarSlotContext.Provider>
         </NuevaReservaProvider>
         </NotificacionesProvider>
       </DataProvider>

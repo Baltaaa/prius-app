@@ -96,6 +96,29 @@ export default function TopBar() {
   const { perfil, rol, signOut, refetchPerfil } = useAuth()
   const { abrirNuevaReserva } = useNuevaReserva()
   const esHome = location.pathname.startsWith('/app/home')
+  // Home: el saludo grande se compacta al scrollear (histéresis 32/8px para
+  // que no parpadee en el umbral). Solo re-renderiza al cruzar el umbral.
+  const [compacto, setCompacto] = useState(false)
+  useEffect(() => {
+    setCompacto(false)
+    if (!esHome) return undefined
+    const el = document.getElementById('app-main-scroll')
+    if (!el) return undefined
+    let raf = 0
+    const onScroll = () => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        const y = el.scrollTop
+        setCompacto((prev) => (prev ? y > 8 : y > 32))
+      })
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [esHome])
 
   const nombreMostrado = perfil?.nombre || perfil?.usuario || 'Usuario'
   const primerNombre = nombreMostrado.split(' ')[0]
@@ -335,9 +358,12 @@ export default function TopBar() {
   }
 
   return (
+    // Vive dentro de la zona sticky flotante (ProgressiveBlurHeader, montada en
+    // AppLayout): sin fondo propio, el degradé + blur lo pone la zona.
+    // Mobile: 56px (+ safe area) = 8 de aire arriba, 44 de área táctil, 4 abajo.
+    // Desktop: 64px, título de 24px.
     <header
-      className="no-print relative min-h-14 md:h-20 flex items-center justify-between gap-3 md:gap-4 px-page-max bg-canvas sticky top-0 z-20 shrink-0"
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      className="no-print relative flex items-center justify-between gap-3 md:gap-4 px-page-max pt-topbar pb-1 md:pb-0 md:h-16"
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {!esHome && <img src="/images/prius-icon.png" alt="Prius" className="hidden min-[430px]:block md:hidden w-7 h-7 object-contain shrink-0" />}
@@ -345,6 +371,7 @@ export default function TopBar() {
           title={esHome ? `Hola, ${primerNombre}` : section.name}
           shortTitle={esHome ? undefined : section.shortName}
           greeting={esHome}
+          compacto={compacto}
         >
           {esHome && (
             <p className="flex items-center gap-2 text-label text-ink-2 truncate">
@@ -476,7 +503,7 @@ export default function TopBar() {
             className="btn-icon"
             title="Recepción — escanear QR"
           >
-            <QrCode size={20} strokeWidth={1.5} />
+            <QrCode size={22} strokeWidth={1.5} />
           </button>
         )}
         {/* Búsqueda (mobile): ícono que abre pantalla completa */}
@@ -485,7 +512,7 @@ export default function TopBar() {
           aria-label="Buscar"
           className="md:hidden btn-icon"
         >
-          <Search size={20} strokeWidth={1.5} />
+          <Search size={22} strokeWidth={1.5} />
         </button>
         {/* Notificaciones (oct 2026, modelo "bandeja de pendientes") — punto
             dorado si hay pendientes abiertas, número neutro si solo hay
@@ -513,7 +540,7 @@ export default function TopBar() {
             aria-label="Notificaciones"
             className="relative btn-icon"
           >
-            <Bell size={20} strokeWidth={1.5} />
+            <Bell size={22} strokeWidth={1.5} />
             {countPendientes > 0 ? (
               <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-ink rounded-full border-2 border-canvas" />
             ) : countNovedadesNoLeidas > 0 ? (

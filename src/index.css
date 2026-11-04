@@ -634,3 +634,136 @@ button, a {
 @supports not (backdrop-filter: blur(1px)) {
   .sticky-blur { background-color: rgb(var(--background)); }
 }
+
+/*
+  Zona sticky superior flotante (nov 2026) — ProgressiveBlurHeader.jsx.
+
+  Topbar + toolbar de la sección forman UNA pieza que flota sobre el
+  contenido (que scrollea por debajo). Fondo: degradé canvas 80% → transparente
+  y blur progresivo, fuerte arriba y cero en el borde inferior, con capas de
+  backdrop-filter de intensidad creciente y máscaras en degradé. El fondo se
+  extiende 20px por debajo de la zona: ahí el blur termina de apagarse sin
+  borde visible. Sin backdrop-filter queda solo el degradé.
+
+  `--zona-h` (alto real de la zona) lo mide AppLayout con un ResizeObserver y
+  lo usa el padding superior de #app-main-scroll: la página arranca justo
+  debajo de la zona y todo lo demás pasa por detrás.
+*/
+.layout-zona { --zona-h: calc(56px + env(safe-area-inset-top)); }
+@media (min-width: 768px) { .layout-zona { --zona-h: 64px; } }
+
+.pt-zona { padding-top: calc(var(--zona-h) + 4px); }
+/* Topbar: 8px de aire arriba más la safe area en mobile; en desktop la altura fija la centra. */
+.pt-topbar { padding-top: calc(env(safe-area-inset-top) + 8px); }
+@media (min-width: 768px) { .pt-topbar { padding-top: 0; } }
+#app-main-scroll { scroll-padding-top: var(--zona-h); }
+
+.pbh-fondo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: -20px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--background) / 0.8) 0%,
+    rgb(var(--background) / 0.8) 30%,
+    rgb(var(--background) / 0) 100%
+  );
+}
+.pbh-capa {
+  position: absolute;
+  inset: 0;
+  -webkit-backdrop-filter: blur(var(--pbh-blur));
+  backdrop-filter: blur(var(--pbh-blur));
+}
+.pbh-capa-1 {
+  --pbh-blur: 1.5px;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
+}
+.pbh-capa-2 {
+  --pbh-blur: 3px;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 75%);
+  mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 75%);
+}
+.pbh-capa-3 {
+  --pbh-blur: 6px;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 15%, transparent 55%);
+  mask-image: linear-gradient(to bottom, black 0%, black 15%, transparent 55%);
+}
+.pbh-capa-4 {
+  --pbh-blur: 12px;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 5%, transparent 35%);
+  mask-image: linear-gradient(to bottom, black 0%, black 5%, transparent 35%);
+}
+/* Celulares de gama media: una capa menos (3 en lugar de 4). */
+@media (max-width: 767px) {
+  .pbh-capa-1 { display: none; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pbh-capa { display: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .pbh-capa { display: none; }
+}
+@media print {
+  .pbh { display: none !important; }
+  .pt-zona { padding-top: 0 !important; }
+}
+
+/*
+  Saludo del Dashboard (Home): arranca grande y, al scrollear, se compacta al
+  título chico de las demás secciones (20px). Solo transform/opacity — el alto
+  de la topbar no cambia, así el contenido nunca salta. `--g-s` es el cociente
+  entre 20px y el tamaño del saludo en cada breakpoint.
+*/
+.greeting-wrap { --g-s: 0.8333; --g-y: 10px; }
+@media (min-width: 768px) { .greeting-wrap { --g-s: 0.8333; --g-y: 8px; } }
+@media (min-width: 1280px) { .greeting-wrap { --g-s: 0.7143; --g-y: 6px; } }
+.greeting-h1 {
+  transform-origin: left center;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.greeting-sub { transition: opacity 0.2s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+.greeting-wrap[data-compacto='true'] .greeting-h1 { transform: translateY(var(--g-y)) scale(var(--g-s)); }
+.greeting-wrap[data-compacto='true'] .greeting-sub { opacity: 0; transform: translateY(-4px); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .greeting-h1, .greeting-sub { transition: none; }
+}
+
+/*
+  Plano en mobile apaisado (celular de costado, <768px de ancho y poco alto):
+  la pantalla no scrollea y apilar controles + mapa dejaba el mapa sin alto.
+  Acá los controles pasan a una columna a la izquierda y el mapa ocupa todo
+  el alto a la derecha.
+*/
+@media (max-width: 767px) and (orientation: landscape) and (max-height: 520px) {
+  .plano-mobile-root { flex-direction: row; }
+  .plano-mobile-controles { width: 264px; flex-shrink: 0; overflow-y: auto; }
+  .plano-mobile-controles [role='radiogroup'] { display: grid; grid-template-columns: 1fr 1fr; }
+}
+
+/*
+  Toolbars sticky de desktop (nov 2026): controles de 40px de alto, mismo gap,
+  una o dos filas como máximo. En mobile siguen los 44px de siempre.
+*/
+@media (min-width: 768px) {
+  .toolbar-40 .field { min-height: 40px; height: 40px; padding-top: 0; padding-bottom: 0; }
+  .toolbar-40 .btn { height: 40px; }
+}
+
+/* Hoja del comprobante en pantalla: papel blanco con radio chico y sombra mínima. */
+.hoja-comprobante {
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 0 0 1px rgb(var(--border));
+  overflow: hidden;
+}
+
+/* Scroll horizontal de una sola línea (tabs de tipo): sin barra, con snap. */
+.scroll-x-snap { overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none; }
+.scroll-x-snap::-webkit-scrollbar { display: none; }
+.scroll-x-snap > * { scroll-snap-align: start; }
