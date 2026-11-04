@@ -29,6 +29,13 @@ export default [
       // imports de componentes que sí se usan. Se apaga hasta que se agregue
       // ese plugin (o el equivalente de typescript-eslint).
       'no-unused-vars': 'off',
+      // "El día" siempre en hora argentina: `toISOString().split('T')[0]` (y
+      // slice/substring) es UTC y pasadas las 21:00 ART ya es "mañana". Usar
+      // hoyAR() / fechaAR() / sumarDias() de src/lib/fechas.js.
+      'no-restricted-syntax': ['error', {
+        selector: "CallExpression[callee.property.name=/^(split|slice|substring)$/][callee.object.callee.property.name='toISOString']",
+        message: 'No uses toISOString().split/slice/substring para fechas (es UTC). Usá hoyAR()/fechaAR()/sumarDias() de src/lib/fechas.js.',
+      }],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],

@@ -1,3 +1,4 @@
+import { hoyAR } from '../lib/fechas'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useTipoCambio, usdAPesos } from './useTipoCambio'
@@ -41,7 +42,7 @@ export function usePagoComprobanteForm({ resetKey, cliente, reservaInfo, pagosCo
   const [comprobanteTipo, setComprobanteTipo] = useState('factura_b')
   const [puntoVenta] = useState(1) // siempre 1, automático — no se edita (item 4, oct 2026)
   const [numero, setNumero] = useState('')
-  const [fechaComprobante, setFechaComprobante] = useState(() => new Date().toISOString().split('T')[0])
+  const [fechaComprobante, setFechaComprobante] = useState(() => hoyAR())
   const [mismoComprobanteDe, setMismoComprobanteDe] = useState('')
   const [duplicado, setDuplicado] = useState(null) // { cliente, fecha } | null
   const [anuladoPrevio, setAnuladoPrevio] = useState(false)
@@ -56,7 +57,7 @@ export function usePagoComprobanteForm({ resetKey, cliente, reservaInfo, pagosCo
     setReferencia('')
     setComprobanteTipo(comprobanteTipoDefault(cliente?.condicion_iva))
     setNumero('')
-    setFechaComprobante(new Date().toISOString().split('T')[0])
+    setFechaComprobante(hoyAR())
     setMismoComprobanteDe('')
     setDuplicado(null)
     setAnuladoPrevio(false)

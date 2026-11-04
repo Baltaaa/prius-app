@@ -13,6 +13,7 @@ import { useDialog } from '../../context/DialogProvider'
 import LoadingButton from '../ui/LoadingButton'
 import MontoStat from '../ui/MontoStat'
 import { CheckCircle2 } from 'lucide-react'
+import { hoyAR } from '../../lib/fechas'
 
 // Componente compartido de cobro (Tarea 4): Clientes, Reservas y el modal de
 // unidad del Plano abren este mismo bottom sheet/drawer para registrar un
@@ -94,7 +95,7 @@ export default function RegistrarPago({
       // timestamp de carga), nunca la fecha de hoy.
       setFechaComprobante(
         comprobanteExistente?.fecha || editingPago.fecha
-          || (editingPago.fecha_hora ? editingPago.fecha_hora.slice(0, 10) : new Date().toISOString().split('T')[0])
+          || (editingPago.fecha_hora ? editingPago.fecha_hora.slice(0, 10) : hoyAR())
       )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,7 +105,7 @@ export default function RegistrarPago({
   // histórico (pre-corte) como si tiene una fecha de otro día post-corte —
   // en los dos casos impacta la caja de esa fecha, no la de hoy.
   const fechaPago = fechaComprobante || null
-  const noAfectaCajaHoy = esHistorico || (fechaPago && fechaPago !== new Date().toISOString().split('T')[0])
+  const noAfectaCajaHoy = esHistorico || (fechaPago && fechaPago !== hoyAR())
 
   const submit = async (permitirExcedente = false) => {
     if (monto <= 0) return

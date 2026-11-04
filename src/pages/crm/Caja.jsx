@@ -31,6 +31,7 @@ import MontoStat from '../../components/ui/MontoStat'
 import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
 import { emojiEnTexto } from '../../lib/unidadIcono'
 import FilaMedioPago from '../../components/crm/FilaMedioPago'
+import { hoyAR, sumarDias } from '../../lib/fechas'
 
 const FILTROS_MEDIO = [
   { value: 'todos', label: 'Todos los medios' },
@@ -45,13 +46,9 @@ const TABS = [
   { value: 'gastos', label: 'Gastos' },
 ]
 
-const todayStr = () => new Date().toISOString().split('T')[0]
+const todayStr = hoyAR
 
-const shiftDate = (fecha, delta) => {
-  const d = new Date(fecha + 'T00:00:00')
-  d.setDate(d.getDate() + delta)
-  return d.toISOString().split('T')[0]
-}
+const shiftDate = sumarDias
 
 export default function Caja() {
   const { cajaHoy, historialCajas, todosGastos, loading, iniciarCaja, cerrarCaja, reabrirCaja } = useCaja()

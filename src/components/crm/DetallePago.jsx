@@ -16,6 +16,7 @@ import MoneyInput from '../inputs/MoneyInput'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso } from '../../context/AuthProvider'
 import { FileText, AlertTriangle, Pencil } from 'lucide-react'
+import { hoyAR } from '../../lib/fechas'
 
 const inputClass =
   'w-full bg-surface rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none font-semibold border border-transparent focus:ring-2 focus:ring-gold'
@@ -46,7 +47,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
   const [comprobanteTipo, setComprobanteTipo] = useState('factura_b')
   const [puntoVenta, setPuntoVenta] = useState(null)
   const [numero, setNumero] = useState(null)
-  const [fecha, setFecha] = useState(() => new Date().toISOString().split('T')[0])
+  const [fecha, setFecha] = useState(() => hoyAR())
   const [saving, setSaving] = useState(false)
 
   const [editandoId, setEditandoId] = useState(null)
@@ -87,7 +88,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
     setMotivo('')
     setPuntoVenta(null)
     setNumero(null)
-    setFecha(new Date().toISOString().split('T')[0])
+    setFecha(hoyAR())
     setEditandoId(null)
     setEditandoMontoPago(false)
     setEditMontoPago(null)
@@ -117,7 +118,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
   const abrirEdicion = (comprobante) => {
     setEditandoId(comprobante.id)
     setEditMonto(comprobante.monto_total ?? null)
-    setEditFecha(comprobante.fecha || new Date().toISOString().split('T')[0])
+    setEditFecha(comprobante.fecha || hoyAR())
     setEditTipo(comprobante.tipo || null)
   }
 
@@ -311,7 +312,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <MoneyInput label="Monto" value={editMonto} onChange={setEditMonto} max={100_000_000} />
-                        <DateInput label="Fecha" value={editFecha} onChange={setEditFecha} max={new Date().toISOString().split('T')[0]} calendarOnly />
+                        <DateInput label="Fecha" value={editFecha} onChange={setEditFecha} max={hoyAR()} calendarOnly />
                       </div>
                       <div className="flex gap-2">
                         <button type="button" onClick={() => setEditandoId(null)} className="text-label flex-1 py-2 rounded-full bg-surface text-ink-2 border border-line">
@@ -378,7 +379,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                 <IntegerInput value={puntoVenta} onChange={setPuntoVenta} min={1} max={99999} placeholder="Punto de venta" />
                 <IntegerInput value={numero} onChange={setNumero} min={1} max={99999999} placeholder="Número" />
               </div>
-              <DateInput value={fecha} onChange={setFecha} max={new Date().toISOString().split('T')[0]} />
+              <DateInput value={fecha} onChange={setFecha} max={hoyAR()} />
               <div className="flex gap-3">
                 <button type="button" onClick={() => setCargandoComprobante(false)} className="text-label flex-1 py-3 rounded-full bg-surface text-ink-2 border border-line">
                   Cancelar

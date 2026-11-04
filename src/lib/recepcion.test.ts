@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { llegadasDelDia, filtrarLlegadas, enRangoHoy } from './recepcion'
-import { hoyAR, fechaAR } from './fecha'
+import { hoyAR, fechaAR } from './fechas'
 
 const HOY = '2026-11-03'
 const web = (codigo: string, extra: Record<string, unknown> = {}) => ({

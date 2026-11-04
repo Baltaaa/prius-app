@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { invocarFuncion } from '../lib/invocarFuncion'
+import { hoyAR } from '../lib/fechas'
 
 // Punto 4 (30/10/2026): cotización vigente del dólar para el CRM.
 //
@@ -47,7 +48,7 @@ export function useTipoCambio() {
 
   const fila = cotizaciones[config.tipo] || null
   const valor = fila ? Number(fila[config.lado] ?? fila.venta) : null
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = hoyAR()
 
   return {
     loading,

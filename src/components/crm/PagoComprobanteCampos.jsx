@@ -4,6 +4,7 @@ import MoneyInput from '../inputs/MoneyInput'
 import IntegerInput from '../inputs/IntegerInput'
 import DateInput from '../inputs/DateInput'
 import BrandSelect from '../ui/BrandSelect'
+import { hoyAR } from '../../lib/fechas'
 
 const inputClass =
   'w-full bg-surface rounded-inner px-4 py-3 text-ink text-base md:text-body outline-none font-semibold border border-transparent focus:ring-2 focus:ring-gold'
@@ -205,7 +206,7 @@ export default function PagoComprobanteCampos({ form }) {
                 label="Fecha"
                 value={fechaComprobante}
                 onChange={setFechaComprobante}
-                max={new Date().toISOString().split('T')[0]}
+                max={hoyAR()}
                 calendarOnly
                 hint={esHistorico ? 'Pago histórico: queda en el historial del cliente, no afecta la caja' : undefined}
               />

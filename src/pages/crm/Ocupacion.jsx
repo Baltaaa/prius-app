@@ -10,6 +10,7 @@ import { isFeatureEnabled } from '../../lib/features'
 import { reservaActiva } from '../../lib/reservas'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import UnidadLabel from '../../components/crm/UnidadLabel'
+import { hoyAR, sumarDias, sumarMeses } from '../../lib/fechas'
 
 // Vista de ocupación en un rango de fechas — distinta del Plano (que solo
 // muestra el estado de HOY/una fecha puntual). No confundir con "Historial"
@@ -28,19 +29,9 @@ const toUTC = (s) => {
   return Date.UTC(y, m - 1, d)
 }
 const diffDays = (a, b) => Math.round((toUTC(b) - toUTC(a)) / 86400000)
-const addDays = (s, n) => {
-  const [y, m, d] = s.split('-').map(Number)
-  const dt = new Date(Date.UTC(y, m - 1, d))
-  dt.setUTCDate(dt.getUTCDate() + n)
-  return dt.toISOString().split('T')[0]
-}
-const addMonths = (s, n) => {
-  const [y, m, d] = s.split('-').map(Number)
-  const dt = new Date(Date.UTC(y, m - 1, d))
-  dt.setUTCMonth(dt.getUTCMonth() + n)
-  return dt.toISOString().split('T')[0]
-}
-const todayStr = () => new Date().toISOString().split('T')[0]
+const addDays = sumarDias
+const addMonths = sumarMeses
+const todayStr = hoyAR
 const diasDelMes = (anchorIso) => {
   const [y, m] = anchorIso.split('-').map(Number)
   const ultimo = new Date(Date.UTC(y, m, 0)).getUTCDate()
