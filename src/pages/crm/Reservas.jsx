@@ -1,11 +1,12 @@
+import ToolbarSticky from '../../components/brand/ToolbarSticky'
+import RangoFechasChip from '../../components/brand/RangoFechasChip'
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import ScrollFade from '../../components/ui/ScrollFade'
 import { createPortal } from 'react-dom'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatFecha, formatRangoFechas, formatUnidad, formatNombre} from '../../lib/format'
-import DateInput from '../../components/inputs/DateInput'
+import { formatFecha, formatUnidad, formatNombre} from '../../lib/format'
 import { coSocios, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
@@ -419,32 +420,26 @@ export default function Reservas() {
     <div className="flex flex-col gap-grid lg:h-full anim-fade-up-page">
       {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
           pegado al navbar, con el alta en la misma fila. */}
-      <div className="flex flex-wrap gap-2 items-center lg:shrink-0 [&_.field]:bg-card">
+      <ToolbarSticky>
+      <div className="toolbar-40 flex flex-wrap gap-2 md:gap-3 items-center lg:shrink-0 [&_.field]:bg-card">
         {/* Buscador propio sacado (testing oct 2026): el global del header ya
             busca cliente/unidad sobre todas las reservas y navega acá con
             ?id=<reserva> — un solo buscador en toda la app, ver CLAUDE.md
-            "Navegación y deep-linking". El espacio libre lo usan los
-            filtros de fecha, que ahora pueden crecer un poco más. */}
-        <div className="flex items-center gap-1">
-          <DateInput value={desde || null} onChange={(v) => setDesde(v || '')} placeholder="Llegada desde" className="w-44" />
-          {desde && (
-            <button type="button" onClick={() => setDesde('')} aria-label="Limpiar 'Llegada desde'" className="shrink-0 w-11 h-11 flex items-center justify-center text-ink-2 hover:text-ink transition-all" title="Limpiar 'Llegada desde'">
-              <X size={14} />
-            </button>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          <DateInput value={hasta || null} onChange={(v) => setHasta(v || '')} placeholder="Llegada hasta" min={desde || undefined} className="w-44" />
-          {hasta && (
-            <button type="button" onClick={() => setHasta('')} aria-label="Limpiar 'Llegada hasta'" className="shrink-0 w-11 h-11 flex items-center justify-center text-ink-2 hover:text-ink transition-all" title="Limpiar 'Llegada hasta'">
-              <X size={14} />
-            </button>
-          )}
-        </div>
+            "Navegación y deep-linking". Rango de llegada: UN chip con popover. */}
+        <RangoFechasChip
+          desde={desde}
+          hasta={hasta}
+          setDesde={setDesde}
+          setHasta={setHasta}
+          onLimpiar={() => { setDesde(''); setHasta('') }}
+          vacio="Llegada: todas"
+          etiqueta="Rango de llegada"
+          className="w-52 shrink-0"
+        />
         <div ref={filtrosOverlay.bind} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
-            className={`card-surface text-label px-4 py-3 min-h-[44px] rounded-full flex items-center gap-2 transition-all ${filtrosActivos ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
+            className={`card-surface text-label px-4 h-11 md:h-10 rounded-full flex items-center gap-2 transition-all ${filtrosActivos ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
           >
             <Filter size={16} /> Filtros {filtrosActivos ? 'Activos' : ''}
           </button>
@@ -489,13 +484,14 @@ export default function Reservas() {
           )}
         </div>
       </div>
+      </ToolbarSticky>
 
       {/* Envoltorio condicional (ítem 7, oct 2026): sin chips activos este
           div no debe existir, porque el `space-y-10` del contenedor padre
           le metía el mismo gap de 40px que a cualquier hermano con
           contenido real — quedaba un salto vacío entre los filtros y la
           tabla aunque no hubiera ningún chip para mostrar. */}
-      {(unidadFiltrada || ((desde || hasta) && !rangoFechaInvalido)) && (
+      {unidadFiltrada && (
       <div className="flex flex-wrap gap-2 lg:shrink-0">
         {unidadFiltrada && (
           <button
@@ -504,16 +500,6 @@ export default function Reservas() {
             title="Quitar filtro de unidad"
           >
             <UnidadLabel tipo={unidadFiltrada.tipo} numero={unidadFiltrada.numero} /> <X size={12} />
-          </button>
-        )}
-        {(desde || hasta) && !rangoFechaInvalido && (
-          <button
-            onClick={() => { setDesde(''); setHasta('') }}
-            className="text-label inline-flex items-center gap-2 bg-surface border border-line text-ink-2 px-4 py-2 rounded-full hover:bg-surface transition-all"
-            title="Quitar filtro de llegada"
-          >
-            Llegada {desde && hasta ? formatRangoFechas(desde, hasta, true) : desde ? `desde ${formatFecha(desde)}` : `hasta ${formatFecha(hasta)}`}
-            <X size={12} />
           </button>
         )}
       </div>

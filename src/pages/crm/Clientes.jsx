@@ -1,3 +1,4 @@
+import ToolbarSticky from '../../components/brand/ToolbarSticky'
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import ScrollFade from '../../components/ui/ScrollFade'
 import { createPortal } from 'react-dom'
@@ -723,20 +724,21 @@ export default function Clientes() {
           Cliente alineado a la derecha — los tres con la misma altura
           (h-10). En mobile/tablet se mantiene el buscador a ancho completo
           arriba y el filtro+alta abajo (mejor para touch). */}
-      <div className={`${isDesktopLG ? 'flex items-center gap-3' : 'space-y-3'} lg:shrink-0`}>
+      <ToolbarSticky>
+      <div className={`toolbar-40 ${isDesktopLG ? 'flex items-center gap-3' : 'space-y-3'} lg:shrink-0`}>
         <SearchInput
           value={searchTerm}
           onChange={setSearchTerm}
           placeholder="Nombre, DNI, CUIT o unidad"
           inputClassName="!bg-card"
           className={isDesktopLG ? 'w-48 lg:w-64 xl:w-80 min-w-0 shrink' : 'w-full'}
-          inputClassName={isDesktopLG ? "h-11 min-h-0 py-0 focus:border-gold-300" : "focus:border-gold-300 py-3"}
+          inputClassName={isDesktopLG ? "h-10 min-h-0 py-0 focus:border-gold-300" : "focus:border-gold-300 py-3"}
         />
         <div className={isDesktopLG ? 'flex items-center gap-3 flex-1 min-w-0' : 'flex items-center gap-3'}>
           <div ref={filtrosOverlay.bind} className="relative">
             <button
               onClick={() => setShowFiltros((v) => !v)}
-              className={`text-label h-11 px-4 bg-card border border-line rounded-full flex items-center gap-2 transition-all ${filtroEstado !== 'todos' ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
+              className={`text-label h-11 md:h-10 px-4 bg-card border border-line rounded-full flex items-center gap-2 transition-all ${filtroEstado !== 'todos' ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
             >
               <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
             </button>
@@ -758,12 +760,13 @@ export default function Clientes() {
           <div className="flex-1" />
           <button
             onClick={handleOpenCreate}
-            className="btn btn-secondary h-11 shrink-0"
+            className="btn btn-secondary h-11 md:h-10 shrink-0"
           >
             <Plus size={16} /> <span className="hidden sm:inline">Nuevo Cliente</span><span className="sm:hidden">Nuevo</span>
           </button>
         </div>
       </div>
+      </ToolbarSticky>
 
       {/* Directorio maestro-detalle (oct 2026, mock 04-clientes): lista
           compacta a la izquierda (ancho fijo ≥1024px, columna completa

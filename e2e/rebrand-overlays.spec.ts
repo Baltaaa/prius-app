@@ -42,7 +42,10 @@ const PASOS: Paso[] = [
   } },
   { nombre: 'date-picker', correr: async (p) => {
     await ir(p, '/app/reservas')
-    await p.getByPlaceholder('Llegada desde').click()
+    // el rango de llegada es un chip: abre el popover/sheet y ahí el selector de fecha
+    await p.getByRole('button', { name: /^Rango de llegada/ }).click()
+    await p.waitForTimeout(300)
+    await p.getByLabel('Desde').click()
     await p.waitForTimeout(400)
   } },
   { nombre: 'perfil-menu', solo: 'desktop', correr: async (p) => { await ir(p, '/app/home'); await p.getByLabel('Menú de usuario').hover(); await p.waitForTimeout(400) } },
