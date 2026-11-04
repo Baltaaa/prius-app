@@ -18,7 +18,7 @@ const RPC_LECTURA = new Set([
 
 // Escrituras que la app dispara sola al navegar. Se cortan con una respuesta
 // falsa exitosa: si fallaran, ensuciarían la UI con errores que no son reales.
-const RPC_SILENCIOSA = new Set(['fn_recalcular_estados_unidades', 'fn_registrar_evento_auth'])
+const RPC_SILENCIOSA = new Set(['fn_recalcular_estados_unidades', 'fn_registrar_evento_auth', 'fn_cierre_automatico_caja'])
 const TABLA_SILENCIOSA = new Set(['vistas_recientes', 'preferencias_usuario'])
 const FUNCION_SILENCIOSA = new Set(['tipo-cambio'])
 
