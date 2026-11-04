@@ -1,4 +1,3 @@
-import { Umbrella } from 'lucide-react'
 import { APP_VERSION } from '../../lib/appVersion'
 
 // Footer del shell (mock 01-home-desktop/mobile) — al final del contenido de
@@ -13,6 +12,7 @@ import { APP_VERSION } from '../../lib/appVersion'
 export default function AppFooter({ compacto = false }) {
   return (
     <>
+      {/* Mobile: el footer no se muestra en pantalla; vive al final del sheet "Más" (BottomNav). */}
       <footer className={`hidden md:flex flex-col sm:flex-row items-center justify-between gap-2 text-label text-ink-2 ${
         compacto ? 'pt-2 pb-2 mt-2' : 'pt-2 pb-4 mt-6'
       }`}>
@@ -29,16 +29,6 @@ export default function AppFooter({ compacto = false }) {
         </div>
       </footer>
 
-      {/* Mobile (pulido iPhone, oct 2026): antes era una sola fila
-          justify-between que apretaba el nombre largo contra la versión en
-          375px — pasa a dos líneas centradas, sin ese apriete. */}
-      <div className="md:hidden mt-6 mb-2 p-4 flex flex-col items-center gap-2 text-center">
-        <div className="flex items-center gap-2 text-ink-2">
-          <Umbrella size={16} className="shrink-0" />
-          <span className="text-label">Prius Playa Grande · Sector Carpas y Balneario</span>
-        </div>
-        <span className="text-label text-ink-2">{APP_VERSION}</span>
-      </div>
     </>
   )
 }

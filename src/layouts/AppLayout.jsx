@@ -166,7 +166,7 @@ export default function AppLayout() {
                   solo lo empuja hacia abajo el contenido cuando es más largo. */}
               {/* Plano en mobile: la pantalla no scrollea (el mapa llena el alto
                   disponible), así que el footer no entra. */}
-              <div className={`no-print mt-auto ${esSeccionAlturaFija ? 'lg:hidden' : ''} ${esPlano || esComprobantes ? 'max-md:hidden' : ''}`}>
+              <div className={`no-print mt-auto max-md:hidden ${esSeccionAlturaFija ? 'lg:hidden' : ''}`}>
                 <AppFooter compacto={esPlano} />
               </div>
             </main>
