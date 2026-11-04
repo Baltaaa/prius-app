@@ -113,7 +113,7 @@ export default function AppLayout() {
             <ProgressiveBlurHeader ref={zonaRef} className="absolute top-0 inset-x-0 z-20">
               <Topbar />
               {/* Slot de la toolbar de la sección (ver ToolbarSticky.jsx). */}
-              <div ref={setSlot} className="px-page-max pb-3 md:pb-4 empty:p-0" />
+              <div ref={setSlot} className="px-page-max pt-4 pb-3 md:pb-4 empty:p-0" />
             </ProgressiveBlurHeader>
 
             {/* Content View with internal vertical scroll. Padding horizontal

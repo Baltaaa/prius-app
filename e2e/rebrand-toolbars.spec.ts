@@ -1,7 +1,7 @@
 import { test, expect, login } from './fixtures'
 import { esperarCarga } from './responsive-checks'
 
-// Toolbars sticky de desktop: 2 filas como máximo, alto <= 112px, controles de
+// Toolbars sticky de desktop: 2 filas como máximo, alto <= 128px (112 + 16 de pt-4), controles de
 // 40px, cero filas extra por wrap y topbar de 64px con título de 24px. Solo lectura.
 const TODOS = '1024x768,1280x800,1366x768,1440x900,1920x1080'
 const ANCHOS = (process.env.ANCHOS || TODOS).split(',').map((a) => a.split('x').map(Number) as [number, number])
@@ -41,7 +41,7 @@ test('toolbars desktop: alto, filas y controles de 40px', async ({ page }) => {
       const donde = `${ruta} ${w}x${h}`
       expect(info.topbarH, `${donde} alto de la topbar`).toBe(64)
       if (ruta !== 'home') expect(info.titulo, `${donde} título`).toBe('24px')
-      expect(info.toolbarH, `${donde} alto de la toolbar ${JSON.stringify(info)}`).toBeLessThanOrEqual(112)
+      expect(info.toolbarH, `${donde} alto de la toolbar ${JSON.stringify(info)}`).toBeLessThanOrEqual(128)
       expect(info.filas, `${donde} filas`).toBeLessThanOrEqual(2)
       for (const a of info.altos) expect(a, `${donde} alto de control ${JSON.stringify(info.altos)}`).toBeLessThanOrEqual(44)
       expect(info.hscroll, `${donde} scroll horizontal`).toBe(false)
