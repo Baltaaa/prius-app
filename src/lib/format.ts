@@ -192,6 +192,14 @@ export function formatFechaCorta(val: string | null | undefined, withYear = fals
   return withYear ? `${d}/${m}/${y.slice(2)}` : `${d}/${m}`
 }
 
+/** "Jue 06/11" — día de la semana + fecha corta, para controles angostos (mobile). */
+export function formatDiaCorto(val: string | null | undefined): string {
+  if (!val || !FECHA_SOLO_RE.test(val)) return ''
+  const [y, m, d] = val.split('-').map(Number)
+  const dia = new Date(y, m - 1, d).toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', '')
+  return `${dia.charAt(0).toUpperCase()}${dia.slice(1)} ${formatFechaCorta(val)}`
+}
+
 /** Normaliza para comparar sin importar mayúsculas/acentos (ej: "Perez" matchea "Pérez") — usado por el buscador, no es un formatter de visualización. */
 export function normalizeText(s: string | null | undefined): string {
   return String(s ?? '')

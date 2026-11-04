@@ -585,26 +585,12 @@ export default function Dashboard() {
           tipoFiltro={tipoFiltro}
           onTipo={setTipoFiltro}
           onImprimir={() => window.print()}
-          transform={transform}
-          ready={ready}
-          isDragging={isDragging}
-          canPan={canPanAhora}
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onEncuadrar={handleEncuadrar}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMapMouseDown={handleMapMouseDown}
-          onMapWheel={handleMapWheel}
-          onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
-          viewportRef={setMapViewportRef}
-          contentRef={contentRef}
           fullscreen={fullscreen}
           onToggleFullscreen={() => setFullscreenOpen(!fullscreen)}
+          slideRef={mapSlideRef}
+          onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
           unidades={unidades}
           renderCelda={renderCeldaMobile}
-          extraButtonsViewport={extraButtonsViewport}
         />
       )
     }

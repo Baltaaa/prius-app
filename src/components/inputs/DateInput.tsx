@@ -47,6 +47,8 @@ export interface DateInputProps {
   className?: string
   id?: string
   calendarOnly?: boolean
+  /** Cómo se muestra la fecha en el campo (solo visual; value/onChange siguen en yyyy-mm-dd). Ej: "Jue 06/11" en controles angostos. */
+  formatoVisible?: (iso: string) => string
 }
 
 function isoToDate(iso: string | null | undefined): Date | undefined {
@@ -75,9 +77,10 @@ export default function DateInput({
   // usos existentes sin tocar cada call site). El modo tipeable queda
   // disponible solo si algún caller futuro pide `calendarOnly={false}` a
   // propósito.
-  placeholder = 'dd/mm/aaaa', className = '', id, calendarOnly = true,
+  placeholder = 'dd/mm/aaaa', className = '', id, calendarOnly = true, formatoVisible,
 }: DateInputProps) {
-  const [texto, setTexto] = useState(value ? formatFecha(value) : '')
+  const verFecha = (iso: string) => (formatoVisible ? formatoVisible(iso) : formatFecha(iso))
+  const [texto, setTexto] = useState(value ? verFecha(value) : '')
   const [abierto, setAbierto] = useState(false)
   const [pos, setPos] = useState<Pos | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
@@ -86,7 +89,8 @@ export default function DateInput({
   const inputId = id || autoId
   const overlayId = useId()
 
-  useEffect(() => setTexto(value ? formatFecha(value) : ''), [value])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setTexto(value ? verFecha(value) : ''), [value])
 
   const medirPosicion = useCallback(() => {
     const rect = wrapRef.current?.getBoundingClientRect()
@@ -167,7 +171,7 @@ export default function DateInput({
   const handleSelect = (d: Date | undefined) => {
     const iso = dateToIso(d)
     onChange(iso)
-    setTexto(iso ? formatFecha(iso) : '')
+    setTexto(iso ? verFecha(iso) : '')
     setAbierto(false)
   }
 
