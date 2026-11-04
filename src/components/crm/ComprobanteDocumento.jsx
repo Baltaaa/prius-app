@@ -1,8 +1,10 @@
-import { Tent, Umbrella, Warehouse, Lock as LockIcon } from 'lucide-react'
+import { Warehouse, Lock as LockIcon } from 'lucide-react'
 import { formatFecha, formatFechaHora, formatPesos, formatNombre} from '../../lib/format'
+import { unidadEmoji } from '../../lib/unidadIcono'
 
 const TIPO_ALQUILER_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
-const UNIDAD_ICON = { carpa: Tent, sombrilla: Umbrella, cabina: Warehouse, locker: LockIcon }
+// Carpa y sombrilla llevan su emoji (lib/unidadIcono.js); cabina y locker, ícono lineal.
+const UNIDAD_ICON = { cabina: Warehouse, locker: LockIcon }
 const UNIDAD_LABEL = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina', locker: 'Locker' }
 
 // Hoja CSS propia del documento — nunca Tailwind (ese no existe en el
@@ -12,7 +14,17 @@ const UNIDAD_LABEL = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina',
 // pueden divergir (criterio "la vista previa coincide con el papel").
 const CSS = `
   .cd-root { width: 210mm; min-height: 148mm; background: #fff; padding: 14mm; box-sizing: border-box;
-    font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; color: #000; }
+    font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; color: #000;
+    position: relative; isolation: isolate; }
+  /* Marca de agua obligatoria en todo comprobante emitido: el logo real de
+     Prius centrado, ~58% del ancho de la hoja, en grises al 5,5% de opacidad,
+     detrás de todo el contenido (z-index negativo dentro del stacking context
+     del documento). Una sola por copia, nunca en mosaico. Sale al imprimir:
+     print-color-adjust exact. */
+  .cd-watermark { position: absolute; left: 50%; top: 50%; width: 58%; height: auto; aspect-ratio: 1;
+    transform: translate(-50%, -50%); opacity: 0.055; filter: grayscale(1); z-index: -1;
+    pointer-events: none; user-select: none; object-fit: contain;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .cd-root * { box-sizing: border-box; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .cd-root, .cd-root * { break-inside: avoid; }
 
@@ -31,6 +43,9 @@ const CSS = `
   .cd-value { font-size: 11pt; font-weight: 700; text-transform: uppercase; margin: 0; }
   .cd-detail { font-size: 8pt; color: #333; margin: 1.5mm 0 0; line-height: 1.5; }
   .cd-unidad-icon { display: inline-flex; vertical-align: -2px; margin-right: 1.5mm; }
+  /* Mismo recuadro (13px) y alineación que el ícono lineal que reemplaza: el emoji no
+     debe agrandar la línea ni correr el resto del documento. */
+  .cd-unidad-emoji { display: inline-block; width: 13px; height: 13px; line-height: 13px; font-size: 12px; text-align: center; vertical-align: baseline; margin-right: 1.5mm; filter: grayscale(1); }
 
   .cd-linea { display: flex; justify-content: space-between; align-items: baseline; padding: 2.5mm 0; border-bottom: 0.2mm solid #E5E5E5; }
   .cd-linea-label { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #555; }
@@ -67,7 +82,8 @@ const CSS = `
 export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', copia = null }) {
   if (!datos) return null
 
-  const UnidadIcon = UNIDAD_ICON[datos.unidad.tipo] || null
+  const emoji = unidadEmoji(datos.unidad.tipo)
+  const UnidadIcon = emoji ? null : UNIDAD_ICON[datos.unidad.tipo] || null
   const unidadLabel = UNIDAD_LABEL[datos.unidad.tipo] || datos.unidad.tipo || 'Unidad'
   // Oct 2026: `datos.saldo === null` (pagos sin verificar) nunca es lo mismo
   // que "saldada" — `Number(null) > 0` da `false`, así que antes esto
@@ -80,6 +96,7 @@ export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', co
   return (
     <div className="cd-root">
       <style>{CSS}</style>
+      <img src="/images/prius-icon.png" alt="" className="cd-watermark" aria-hidden="true" />
 
       <div className="cd-header">
         <div className="cd-brand">
@@ -110,6 +127,7 @@ export default function ComprobanteDocumento({ datos, tipo = 'estado_cuenta', co
         <div>
           <p className="cd-label">Detalle del Alquiler</p>
           <p className="cd-value">
+            {emoji && <span className="cd-unidad-emoji">{emoji}</span>}
             {UnidadIcon && <UnidadIcon size={13} className="cd-unidad-icon" />}
             {unidadLabel} {datos.unidad.numero}
           </p>
