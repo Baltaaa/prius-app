@@ -46,11 +46,11 @@ function LeadFila({ lead, activo, onClick, expandible, children }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 min-w-0">
             {estado === 'nuevo' && <span className="w-2 h-2 rounded-full bg-gold shrink-0" />}
-            <h3 className="text-body font-semibold text-ink truncate">{lead.nombre}</h3>
+            <h3 className="text-body font-semibold text-ink truncate" title={lead.nombre}>{lead.nombre}</h3>
             <span className={`shrink-0 text-label px-2 rounded-full ${meta.cls}`}>{meta.label}</span>
           </div>
-          <p className="text-label text-ink-2 truncate">{lead.asunto} · {fechaRelativa(lead.created_at)}</p>
-          <p className="text-label text-ink-2 truncate">{primeraLinea}</p>
+          <p className="text-label text-ink-2 truncate" title={`${lead.asunto} · ${fechaRelativa(lead.created_at)}`}>{lead.asunto} · {fechaRelativa(lead.created_at)}</p>
+          <p className="text-label text-ink-2 truncate" title={primeraLinea}>{primeraLinea}</p>
         </div>
         {expandible && <ChevronDown size={18} className={`shrink-0 text-ink-2 transition-transform duration-[250ms] ${activo ? 'rotate-180' : ''}`} />}
       </button>
@@ -58,7 +58,7 @@ function LeadFila({ lead, activo, onClick, expandible, children }) {
         // Expansión de 250ms: la fila anima su alto de 0 a su contenido.
         <div className="grid" style={{ gridTemplateRows: activo ? '1fr' : '0fr', transition: 'grid-template-rows 250ms cubic-bezier(0.22, 1, 0.36, 1)' }}>
           <div className="overflow-hidden min-h-0">
-            <div className="px-3 pb-4 pt-1">{activo ? children : null}</div>
+            {activo && <div className="px-3 pb-4 pt-1">{children}</div>}
           </div>
         </div>
       )}
