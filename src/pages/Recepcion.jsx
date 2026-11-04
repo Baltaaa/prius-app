@@ -8,7 +8,8 @@ import { useDialog } from '../context/DialogProvider'
 import { usePermiso } from '../context/AuthProvider'
 import { reservaActiva, estadoBadgeStatus, coSocios } from '../lib/reservas'
 import { normalizarCodigoReserva, codigoReservaValido } from '../lib/parse'
-import { formatPesos, formatPesosVisible, formatFecha, formatFechaHora, formatRangoFechas, formatTelefono, unidadEmoji, formatUnidad, formatNombre} from '../lib/format'
+import { formatPesos, formatPesosVisible, formatFecha, formatFechaHora, formatRangoFechas, formatTelefono, formatNombre } from '../lib/format'
+import { unidadConEmoji, unidadEmoji } from '../lib/unidadIcono'
 import { MEDIO_PAGO_LABEL, ERROR_CAJA_CERRADA } from '../lib/pagos'
 import { linkToComprobante } from '../lib/deepLinks'
 import StatusBadge from '../components/crm/StatusBadge'
@@ -192,7 +193,7 @@ export default function Recepcion() {
       })
       if (!data.ok) { setErrorCobro(data); return }
       setExito({
-        unidadesLabel: reservasGrupo.map((r) => `${unidadEmoji(r.unidades?.tipo)} ${formatUnidad(r.unidades?.tipo, r.unidades?.numero)}`).join(' + '),
+        unidadesLabel: reservasGrupo.map((r) => unidadConEmoji(r.unidades?.tipo, r.unidades?.numero)).join(' + '),
         total: data.total_cobrado,
         pagos: data.pagos,
       })

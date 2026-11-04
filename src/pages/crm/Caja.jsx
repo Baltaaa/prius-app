@@ -28,6 +28,7 @@ import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
 import MontoStat from '../../components/ui/MontoStat'
 import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
+import { emojiEnTexto } from '../../lib/unidadIcono'
 
 const FILTROS_MEDIO = [
   { value: 'todos', label: 'Todos los medios' },
@@ -439,7 +440,7 @@ export default function Caja() {
                                 </td>
                                 <td className="py-3 px-2">
                                   <span className={`block text-ink ${m.estado === 'anulado' ? 'line-through' : ''}`}>{m.cliente_proveedor || 'S/N'}</span>
-                                  {m.unidad && <span className="block text-ink-2">{m.unidad}</span>}
+                                  {m.unidad && <span className="block text-ink-2">{emojiEnTexto(m.unidad)}</span>}
                                 </td>
                                 <td className="py-3 px-2 text-ink-2">{m.concepto}</td>
                                 <td className="py-3 px-2 whitespace-nowrap">
@@ -481,7 +482,7 @@ export default function Caja() {
                               <span className={`text-body font-semibold tabular-nums whitespace-nowrap shrink-0 ${m.monto < 0 ? 'text-danger' : 'text-success-ink'}`}>{fmtM(m.monto)}</span>
                             </div>
                             <p className="text-label text-ink-2 break-words pl-8">
-                              {m.cliente_proveedor}{m.unidad ? ` · ${m.unidad}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
+                              {m.cliente_proveedor}{m.unidad ? ` · ${emojiEnTexto(m.unidad)}` : ''} · {MEDIO_PAGO_LABEL[m.medio_pago] || m.medio_pago} · {formatHora(m.fecha_hora)}
                             </p>
                             {m.comprobante && (
                               <span className="inline-block self-start ml-8 px-2 py-1 rounded-swatch bg-card text-label font-semibold text-ink-2">{m.comprobante}</span>

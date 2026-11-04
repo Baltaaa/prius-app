@@ -6,6 +6,7 @@ import {
   Bell, Inbox, FileText, AlertCircle, Wallet, Clock, CalendarPlus,
   CalendarClock, Ban, CheckCircle2, CheckCheck, ChevronDown,
 } from 'lucide-react'
+import { emojiEnTexto } from '../../lib/unidadIcono'
 
 // Catálogo único de tipo -> ícono/color/acción/plural (colapso). Si aparece
 // un tipo sin entrada acá, cae a un ícono genérico — nunca se inventa un
@@ -91,8 +92,8 @@ function ItemNotificacion({ item, onAccion }) {
         <Icon size={16} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-label font-semibold text-ink leading-snug whitespace-normal break-words">{item.titulo}</p>
-        {item.detalle && <p className="text-label text-ink-2 mt-1 truncate">{item.detalle}</p>}
+        <p className="text-label font-semibold text-ink leading-snug whitespace-normal break-words">{emojiEnTexto(item.titulo)}</p>
+        {item.detalle && <p className="text-label text-ink-2 mt-1 truncate">{emojiEnTexto(item.detalle)}</p>}
         <div className="flex items-center gap-2 mt-1">
           <span className="text-label text-ink-2">{formatTiempoRelativo(item.creada_at)}</span>
           {meta.accion && (

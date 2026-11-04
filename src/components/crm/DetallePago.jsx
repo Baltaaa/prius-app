@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useData } from '../../context/DataProvider'
 import { linkToCliente } from '../../lib/deepLinks'
-import { formatPesos, formatFecha, formatFechaHora, unidadEmoji, formatComprobante, formatUnidad} from '../../lib/format'
+import { formatPesos, formatFecha, formatFechaHora, formatComprobante } from '../../lib/format'
+import { unidadConEmoji } from '../../lib/unidadIcono'
 import {
   formatMedioPago, TIPO_PAGO_LABEL, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL,
 } from '../../lib/pagos'
@@ -98,7 +99,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
 
   if (!pago) return null
 
-  const unidadLabel = reserva?.unidades ? `${unidadEmoji(reserva.unidades.tipo)} ${formatUnidad(reserva.unidades.tipo, reserva.unidades.numero)}` : ''
+  const unidadLabel = reserva?.unidades ? unidadConEmoji(reserva.unidades.tipo, reserva.unidades.numero) : ''
 
   const handleGuardarComprobante = async () => {
     if (!comprobanteTipo || !puntoVenta || !numero) return

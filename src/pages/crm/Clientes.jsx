@@ -9,7 +9,8 @@ import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, unidadEmoji, formatComprobante, formatUnidad, formatNombre, normalizeText} from '../../lib/format'
+import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatComprobante, formatUnidad, formatNombre, normalizeText } from '../../lib/format'
+import { unidadConEmoji } from '../../lib/unidadIcono'
 import MontoStat from '../../components/ui/MontoStat'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
@@ -136,7 +137,7 @@ export default function Clientes() {
     () =>
       [...unidades]
         .sort((a, b) => (GRUPO_UNIDAD_CLIENTES[a.tipo] || a.tipo).localeCompare(GRUPO_UNIDAD_CLIENTES[b.tipo] || b.tipo) || a.numero - b.numero)
-        .map((u) => ({ value: u.id, group: GRUPO_UNIDAD_CLIENTES[u.tipo] || u.tipo, label: `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}` })),
+        .map((u) => ({ value: u.id, group: GRUPO_UNIDAD_CLIENTES[u.tipo] || u.tipo, label: unidadConEmoji(u.tipo, u.numero) })),
     [unidades],
   )
   const puedeBonificar = usePermiso('bonificar')
@@ -337,7 +338,7 @@ export default function Clientes() {
         return
       }
     }
-    const unidadLabel = r.unidades ? formatUnidad(r.unidades.tipo, r.unidades.numero) : 'la unidad'
+    const unidadLabel = r.unidades ? unidadConEmoji(r.unidades.tipo, r.unidades.numero) : 'la unidad'
     const ok = await confirm(
       `Se va a liberar ${unidadLabel} y desvincular a este cliente de la reserva. La reserva pasa a "cancelada" (no se borra, queda en el historial) y la unidad queda disponible para asignar a otro cliente. ¿Confirmar?`,
       { title: 'Liberar unidad' },
@@ -878,7 +879,7 @@ export default function Clientes() {
 
                       <div
                         className="flex items-center justify-end gap-2 text-body text-ink"
-                        title={d.unidadesCliente.map((u) => formatUnidad(u.tipo, u.numero)).join(', ')}
+                        title={d.unidadesCliente.map((u) => unidadConEmoji(u.tipo, u.numero)).join(', ')}
                       >
                         {d.unidadesCliente.length === 0 ? (
                           <span className="text-label text-ink-2">Sin unidad</span>

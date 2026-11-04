@@ -248,15 +248,10 @@ export function formatNombre(nombre: string | null | undefined): string {
 }
 
 const UNIDAD_LABEL: Record<string, string> = { carpa: 'Carpa', sombrilla: 'Sombrilla', cabina: 'Cabina', locker: 'Locker' }
-const UNIDAD_EMOJI: Record<string, string> = { carpa: '🏠', sombrilla: '🏖️' }
 
 /** "Carpa 19" / "Sombrilla 4" / "Cabina 2" / "Locker 12". */
 export function formatUnidad(tipo: string, numero: number | string): string {
   return `${UNIDAD_LABEL[tipo] || tipo} ${numero}`
-}
-
-export function unidadEmoji(tipo: string): string {
-  return UNIDAD_EMOJI[tipo] || ''
 }
 
 /**

@@ -3,7 +3,8 @@ import { supabase } from '../../lib/supabase'
 import { useDialog } from '../../context/DialogProvider'
 import Modal from '../crm/Modal'
 import BrandSelect from '../ui/BrandSelect'
-import { unidadEmoji, formatUnidad, formatNombre} from '../../lib/format'
+import { formatNombre } from '../../lib/format'
+import { unidadConEmoji } from '../../lib/unidadIcono'
 import UnidadLabel from '../crm/UnidadLabel'
 
 // Mover un cliente de temporada de una unidad a otra, desde el Plano (ítem 5,
@@ -21,7 +22,7 @@ export default function MoverUnidadDialog({ isOpen, onClose, reserva, unidadOrig
 
   const opciones = useMemo(() => (unidadesLibres || []).filter((u) => u.tipo === unidadOrigen?.type), [unidadesLibres, unidadOrigen])
   const opcionesCombo = useMemo(
-    () => [...opciones].sort((a, b) => a.numero - b.numero).map((u) => ({ value: u.id, label: `${unidadEmoji(u.tipo)} ${formatUnidad(u.tipo, u.numero)}` })),
+    () => [...opciones].sort((a, b) => a.numero - b.numero).map((u) => ({ value: u.id, label: unidadConEmoji(u.tipo, u.numero) })),
     [opciones],
   )
 

@@ -6,7 +6,8 @@ import { useReservas } from "../../hooks/useReservas"
 import { useDialog } from "../../context/DialogProvider"
 import { usePermiso } from "../../context/AuthProvider"
 import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib/reservas"
-import { formatPesos, formatPesosVisible, formatFecha, unidadEmoji, formatUnidad, formatNombre} from "../../lib/format"
+import { formatPesos, formatPesosVisible, formatFecha, formatNombre } from '../../lib/format'
+import { unidadConEmoji } from '../../lib/unidadIcono'
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
 import Historial from "../crm/Historial"
@@ -77,7 +78,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
       }
     }
     const ok = await confirm(
-      `Se va a liberar ${unidadEmoji(unit.type)} ${formatUnidad(unit.type, unit.number)} y desvincular a este cliente de la reserva. La reserva pasa a "cancelada" (no se borra, queda en el historial) y la unidad queda disponible para asignar a otro cliente. ¿Confirmar?`,
+      `Se va a liberar ${unidadConEmoji(unit.type, unit.number)} y desvincular a este cliente de la reserva. La reserva pasa a "cancelada" (no se borra, queda en el historial) y la unidad queda disponible para asignar a otro cliente. ¿Confirmar?`,
       { title: 'Liberar unidad' },
     )
     if (!ok) return
@@ -96,7 +97,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-body text-ink">
-              {unidadEmoji(unit.type)} {unit.type === "sombrilla" ? "Sombrilla" : "Carpa"} {unit.number}
+              {unidadConEmoji(unit.type, unit.number)}
             </span>
             {sector && <span className="text-label text-ink-2 font-medium">{sector}</span>}
           </div>
