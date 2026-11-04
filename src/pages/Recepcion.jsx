@@ -264,7 +264,7 @@ export default function Recepcion() {
 
       <h1 className="sr-only">Recepción</h1>
 
-      <div className="flex flex-col gap-grid lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
+      <div className="flex flex-col gap-grid lg:grid lg:grid-cols-2 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
         <div className="contents lg:flex lg:flex-col lg:gap-grid lg:min-w-0">
           <div className="order-1">
             <RecepcionHero

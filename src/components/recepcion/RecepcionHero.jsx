@@ -31,9 +31,9 @@ export default function RecepcionHero({ modo, onModo, onAbrirCamara, onCodigoLei
     <section className="relative overflow-hidden rounded-card bg-hero card-pad-hero text-ink">
       <Olas opacity={0.05} />
       <div className="relative flex flex-col gap-4 md:gap-6">
-        <header className="flex items-center justify-between gap-3">
+        <header className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-card-title">Escanear QR</h2>
-          <SegmentedControl className="hidden md:inline-flex" label="Modo de lectura" options={MODOS} value={modo} onChange={onModo} />
+          <SegmentedControl className="hidden md:inline-flex shrink-0" label="Modo de lectura" options={MODOS} value={modo} onChange={onModo} />
         </header>
 
         {modo === 'camara' ? (
