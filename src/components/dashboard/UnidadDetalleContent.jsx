@@ -15,6 +15,7 @@ import CambiarEstadoPagoModal from "../crm/CambiarEstadoPagoModal"
 import GestionCosociosModal from "../crm/GestionCosociosModal"
 import { useNuevaReserva } from "../../context/NuevaReservaProvider"
 import { linkToCliente, linkToReserva, linkToRecepcion } from "../../lib/deepLinks"
+import ScrollFade from '../ui/ScrollFade'
 
 const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
 
@@ -29,7 +30,7 @@ const TIPO_LABEL = { temporada: "Temporada", periodo: "Período", dia: "Día" }
 // guardia" y campos DNI/Cta/ocupantes/cochera — ninguno existe hoy en esta
 // pantalla (el cobro+check-in real vive en Recepción), así que no se
 // inventan: se listan como pendiente en el reporte de la tarea.
-export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, onClose, onAsignarTemporada, onMoverUnidad, showCloseButton = true }) {
+export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, onClose, onAsignarTemporada, onMoverUnidad, showCloseButton = true, headerClassName = "", bodyClassName = "" }) {
   const navigate = useNavigate()
   const reserva = unit?.reserva || null
   const { pagos } = usePagos(reserva?.id)
@@ -93,7 +94,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
   return (
     <>
       {/* Header */}
-      <div className="flex items-start justify-between pb-4 shrink-0">
+      <div className={`flex items-start justify-between pb-4 shrink-0 ${headerClassName}`}>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-body text-ink">
@@ -127,7 +128,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4">
+      <ScrollFade wrapperClassName="flex-1" className={`overflow-y-auto space-y-4 ${bodyClassName}`}>
         {!reserva ? (
           <div className="space-y-3">
             <div className="px-4 py-4 bg-success-soft rounded-inner text-center">
@@ -136,7 +137,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => onAsignarTemporada?.(unit)}
-                className="w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
+                className="px-4 w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
               >
                 Asignar cliente de temporada <ArrowRight size={14} />
               </button>
@@ -257,7 +258,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 <>
                   <button
                     onClick={irAClientes}
-                    className="w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
+                    className="px-4 w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
                   >
                     {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver ficha del cliente"} <ArrowRight size={14} />
                   </button>
@@ -280,7 +281,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
                 <>
                   <button
                     onClick={irAReserva}
-                    className="w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
+                    className="px-4 w-full h-12 bg-card border border-line hover:bg-surface rounded-full text-body font-semibold flex items-center justify-center gap-2 transition-colors text-ink"
                   >
                     {reserva.estado_pago === "pendiente" ? "Registrar pago" : "Ver reserva"} <ArrowRight size={14} />
                   </button>
@@ -323,7 +324,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
           </div>
           <Historial tipo="unidad" id={unit.dbId} compact />
         </div>
-      </div>
+      </ScrollFade>
 
       {puedeAjustarEstadoPago && reserva && (
         <CambiarEstadoPagoModal isOpen={mostrarCambiarEstado} onClose={() => setMostrarCambiarEstado(false)} reserva={reserva} />

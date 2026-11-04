@@ -22,6 +22,7 @@ import { isFeatureEnabled } from '../../lib/features'
 import { APP_VERSION } from '../../lib/appVersion'
 import { CountBadge } from './Badge'
 import SidebarCajaCard from './SidebarCajaCard'
+import ScrollFade from '../ui/ScrollFade'
 
 // Fondo del ítem activo: un solo nodo que se desliza con transform hasta el
 // link activo. El alto cambia con la altura de pantalla, por eso se mide.
@@ -113,7 +114,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div ref={contenedor} className="relative flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-4">
+      <ScrollFade ref={contenedor} wrapperClassName="flex-1" className="relative overflow-y-auto px-3 pb-3 space-y-4">
         <span ref={indicador} aria-hidden="true" className="absolute top-0 inset-x-3 rounded-nav bg-surface opacity-0 nav-indicador" />
         <nav aria-label="Gestión operativa">
           <h2 className="px-3 mb-1 text-label text-ink-2">Gestión operativa</h2>
@@ -123,7 +124,7 @@ export default function Sidebar() {
           <h2 className="px-3 mb-1 text-label text-ink-2">Módulos adicionales</h2>
           <div className="space-y-1">{additionalNav.map(renderItem)}</div>
         </nav>
-      </div>
+      </ScrollFade>
 
       <div className="p-3 pt-1 shrink-0 space-y-2">
         <SidebarCajaCard />

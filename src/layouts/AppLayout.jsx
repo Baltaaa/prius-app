@@ -120,7 +120,7 @@ export default function AppLayout() {
                 los hijos sticky siguen funcionando. */}
             <main
               id="app-main-scroll"
-              className={`flex-1 flex flex-col overscroll-contain px-page-max w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] ${esPlano ? 'pt-1 md:pb-3' : 'pt-1 md:pb-12'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
+              className={`flex-1 flex flex-col overscroll-contain px-page-max w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] ${esPlano ? 'pt-1 md:pb-3' : esSeccionAlturaFija ? 'pt-1 md:pb-12' : 'pt-1 md:pb-0'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : 'overflow-y-auto'}`}
             >
               <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : esPlano ? 'flex-1 min-h-0 flex flex-col' : undefined}>
                 <Outlet />
@@ -129,7 +129,10 @@ export default function AppLayout() {
                   en Reservas/Clientes desktop — acá se oculta desde `lg`
                   (abajo de eso, mobile y tablet lo siguen viendo igual que
                   siempre). En el resto de las secciones no se toca. */}
-              <div className={`no-print ${esSeccionAlturaFija ? 'lg:hidden' : ''}`}>
+              {/* mt-auto: el main es una columna que llena el viewport (h-dvh), así
+                  que en páginas cortas el footer queda pegado al borde inferior y
+                  solo lo empuja hacia abajo el contenido cuando es más largo. */}
+              <div className={`no-print mt-auto ${esSeccionAlturaFija ? 'lg:hidden' : ''}`}>
                 <AppFooter compacto={esPlano} />
               </div>
             </main>

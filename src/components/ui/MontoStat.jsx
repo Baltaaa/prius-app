@@ -34,7 +34,7 @@ const SIZE_CLASS = {
 export default function MontoStat({ value, size = 'lg', className = '', as: Tag = 'p', fmt = formatPesos }) {
   return (
     <Tag className={`${SIZE_CLASS[size] || SIZE_CLASS.lg} tabular-nums whitespace-nowrap ${className}`}>
-      {fmt(value)}
+      {String(fmt(value)).replace(/ /g, '\u00a0')}
     </Tag>
   )
 }

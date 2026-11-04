@@ -94,7 +94,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
           </button>
         </div>
 
-        <ScrollFade className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-8 pt-1 pb-6 sm:pb-8 space-y-5">
+        <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto overscroll-contain px-4 sm:px-8 pt-1 pb-6 sm:pb-8 space-y-5">
           {children}
         </ScrollFade>
 

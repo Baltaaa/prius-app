@@ -793,7 +793,7 @@ export default function Clientes() {
           ? '@container flex-1 min-w-[280px] max-w-[480px] shrink lg:h-full card-surface overflow-hidden flex flex-col'
           : '@container -mx-page md:mx-0 bg-card md:card-surface overflow-hidden'}
         >
-          <ScrollFade className={isDesktopLG ? 'flex-1 min-h-0 overflow-y-auto scroll-fino' : ''}>
+          <ScrollFade wrapperClassName={isDesktopLG ? 'flex-1' : ''} className={isDesktopLG ? 'overflow-y-auto scroll-fino' : ''}>
           {clientesVisibles.length === 0 ? (
             <div className="px-card py-10 text-center text-body text-ink-2">
               No se encontraron clientes.
@@ -990,7 +990,7 @@ export default function Clientes() {
             </button>
             <h1 className="text-label text-ink">Ficha de Cliente</h1>
           </div>
-          <ScrollFade className="flex-1 overflow-y-auto px-page pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col min-h-0">
+          <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto px-page pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col">
             {mobileDetalleCliente && (
               <ClienteDetalleContent
                 cliente={mobileDetalleCliente}

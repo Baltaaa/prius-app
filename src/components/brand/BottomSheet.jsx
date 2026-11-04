@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useMountTransition } from '../../hooks/useMountTransition'
 import { useKeyboardInset, centrarCampoEnfocado } from '../../hooks/useKeyboardInset'
+import ScrollFade from '../ui/ScrollFade'
 
 // Sheet siempre anclado abajo (a diferencia de Modal, que en desktop se
 // centra) — para pickers, menús "Más" y selectores cortos. `maxHeightClass`
@@ -45,9 +46,9 @@ export default function BottomSheet({ isOpen, onClose, title, children, maxHeigh
             </button>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4">
+        <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto overscroll-contain px-4 pb-4">
           {children}
-        </div>
+        </ScrollFade>
       </div>
     </div>,
     document.body,

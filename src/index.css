@@ -203,6 +203,19 @@ body {
    se meta entre la lista y el panel de al lado ni mueva el contenido. */
 .scroll-fino { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: rgb(var(--primary) / 0.2) transparent; }
 
+/* Capas de blur de ScrollFade (components/ui/ScrollFade.jsx): 24px sobre el
+   borde donde queda contenido oculto, con el blur más fuerte en el borde y
+   nulo hacia adentro. Se montan solo mientras hay contenido oculto. */
+.scroll-blur {
+  position: absolute; left: 0; right: 0; height: 24px; z-index: 1; pointer-events: none;
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  animation: scroll-blur-in 150ms ease-out both;
+}
+.scroll-blur-arriba { top: 0; -webkit-mask-image: linear-gradient(to bottom, black, transparent); mask-image: linear-gradient(to bottom, black, transparent); }
+.scroll-blur-abajo { bottom: 0; -webkit-mask-image: linear-gradient(to top, black, transparent); mask-image: linear-gradient(to top, black, transparent); }
+@keyframes scroll-blur-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .scroll-blur { animation: none; } }
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

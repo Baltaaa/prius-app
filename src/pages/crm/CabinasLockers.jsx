@@ -111,10 +111,10 @@ export default function CabinasLockers() {
               {item.titular ? <span className="text-ink-2 font-semibold">{item.titular}</span> : <span className="text-ink-2">Sin titular</span>}
             </p>
             <div className="flex gap-2 pt-1">
-              <button disabled title="Asignar — próximamente" className="text-label flex-1 py-3 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
+              <button disabled title="Asignar — próximamente" className="text-label flex-1 px-4 py-3 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
                 Próximamente
               </button>
-              <button disabled title="Registrar pago — próximamente" className="text-label flex-1 py-3 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
+              <button disabled title="Registrar pago — próximamente" className="text-label flex-1 px-4 py-3 min-h-[44px] bg-surface border border-line rounded-full text-ink-2 cursor-not-allowed">
                 Próximamente
               </button>
             </div>

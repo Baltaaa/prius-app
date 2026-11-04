@@ -1,24 +1,34 @@
 import { useCallback, useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react'
 
-// Indicador de profundidad para cualquier contenedor con scroll vertical
-// (30/10/2026). Difumina el contenido contra el fondo arriba cuando ya se
-// scrolleó y abajo cuando queda más para ver; al llegar al final el de abajo
-// desaparece. Así se nota de un vistazo que una lista/modal sigue.
+// Difuminado de scroll: componente único para TODO contenedor con scroll
+// interno (fichas, listas, Historial, sheets, modales). Cuando queda contenido
+// oculto arriba o abajo, ese borde se desvanece a transparente (mask-image) y
+// una capa con blur suave (backdrop-filter) lo acompaña, así nunca hay un
+// corte seco. Solo aparece en la dirección donde hay contenido oculto y se va
+// al llegar al final. El fade va a transparente, no a un color: funciona
+// sobre cualquier fondo. Es la única excepción a "sin gradientes": funcional,
+// no decorativo.
 //
-// Se resuelve con `mask-image` sobre el propio contenedor que scrollea, no
-// con overlays absolutos: no agrega nodos, no tapa clicks y funciona sobre
-// cualquier fondo (el fade va a transparente, no a un color hardcodeado).
-// Es la única excepción a "sin gradientes" de CLAUDE.md — es funcional, no
-// decorativo.
+// Estructura: <wrapper relative> <scroller> + capas de blur absolutas </wrapper>.
+// Las capas son hermanas del scroller (no hijas) para no alterar su layout
+// (flex, grid, gap, space-y) ni scrollear con el contenido.
 //
-// Uso: reemplazar el div que scrollea.
-//   <ScrollFade className="overflow-y-auto max-h-64"> ... </ScrollFade>
-// `as` permite usar otra etiqueta (ul, section, etc.). El ref expone el nodo
-// real por si el caller necesita medir o scrollear.
-const FADE = 24 // px de difuminado — sutil, acorde a "Quiet Luxury"
+// Uso: el div que antes scrolleaba pasa a ser <ScrollFade>.
+//   - `className`: clases del SCROLLER (overflow, padding, gap, display...).
+//   - `wrapperClassName`: clases de LAYOUT de la caja (flex-1, max-h-*, h-full,
+//     absolute, w-*, surface-pop...). El wrapper es una columna flex con
+//     min-h-0 y overflow-hidden; el scroller es flex-1 min-h-0.
+//   - `arriba={false}`: sin difuminado arriba (tablas con encabezado sticky).
+// `as` permite otra etiqueta para el scroller. El ref expone el scroller.
+//
+// Costo: el backdrop-filter se había sacado del proyecto por rendimiento (ver
+// CLAUDE.md). Acá cada capa mide 24px, se monta solo mientras hay contenido
+// oculto en esa dirección y nunca hay más de dos por contenedor.
+const FADE = 24 // px de difuminado — sutil
 
+/** @type {import('react').ForwardRefExoticComponent<Record<string, any> & import('react').RefAttributes<any>>} */
 const ScrollFade = forwardRef(function ScrollFade(
-  { as: Tag = 'div', className = '', style, children, ...rest },
+  { as: Tag = 'div', className = '', wrapperClassName = '', style, arriba: conArriba = true, children, ...rest },
   ref,
 ) {
   const innerRef = useRef(null)
@@ -32,10 +42,9 @@ const ScrollFade = forwardRef(function ScrollFade(
     // 1px de tolerancia: scrollHeight/scrollTop son fraccionarios con zoom
     // del browser o alturas en rem, y sin esto el fade de abajo nunca
     // terminaba de apagarse al llegar al final.
-    setSombras({
-      arriba: scrollTop > 1,
-      abajo: scrollTop + clientHeight < scrollHeight - 1,
-    })
+    const siguiente = { arriba: scrollTop > 1, abajo: scrollTop + clientHeight < scrollHeight - 1 }
+    // Mismo valor: no re-renderiza en cada evento de scroll.
+    setSombras((prev) => (prev.arriba === siguiente.arriba && prev.abajo === siguiente.abajo ? prev : siguiente))
   }, [])
 
   useEffect(() => {
@@ -54,19 +63,24 @@ const ScrollFade = forwardRef(function ScrollFade(
     }
   }, [recalcular])
 
-  const desde = arriba ? `transparent 0, black ${FADE}px` : 'black 0'
+  const verArriba = conArriba && arriba
+  const desde = verArriba ? `transparent 0, black ${FADE}px` : 'black 0'
   const hasta = abajo ? `black calc(100% - ${FADE}px), transparent 100%` : 'black 100%'
-  const mask = arriba || abajo ? `linear-gradient(to bottom, ${desde}, ${hasta})` : undefined
+  const mask = verArriba || abajo ? `linear-gradient(to bottom, ${desde}, ${hasta})` : undefined
 
   return (
-    <Tag
-      ref={innerRef}
-      className={className}
-      style={{ ...style, maskImage: mask, WebkitMaskImage: mask }}
-      {...rest}
-    >
-      {children}
-    </Tag>
+    <div className={`relative flex flex-col min-h-0 overflow-hidden ${wrapperClassName}`}>
+      <Tag
+        ref={innerRef}
+        className={`flex-1 min-h-0 ${className}`}
+        style={{ ...style, maskImage: mask, WebkitMaskImage: mask }}
+        {...rest}
+      >
+        {children}
+      </Tag>
+      {verArriba && <span aria-hidden className="scroll-blur scroll-blur-arriba" />}
+      {abajo && <span aria-hidden className="scroll-blur scroll-blur-abajo" />}
+    </div>
   )
 })
 

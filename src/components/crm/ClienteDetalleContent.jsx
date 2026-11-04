@@ -95,8 +95,8 @@ export default function ClienteDetalleContent({
 
       {/* Un solo scroll mientras el panel es angosto; desde 880px cada columna
           scrollea por su cuenta (la cadena min-h-0 llega hasta la card). */}
-      <ScrollFade className="flex-1 min-h-0 overflow-y-auto scroll-fino flex flex-col gap-section @[880px]:overflow-hidden @[880px]:grid @[880px]:grid-cols-2 @[880px]:gap-grid">
-        <div className="flex flex-col gap-4 @[880px]:min-h-0 @[880px]:overflow-y-auto @[880px]:scroll-fino">
+      <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto scroll-fino flex flex-col gap-section @[880px]:overflow-hidden @[880px]:grid @[880px]:grid-cols-2 @[880px]:gap-grid">
+        <ScrollFade wrapperClassName="shrink-0 @[880px]:shrink" className="flex flex-col gap-4 @[880px]:overflow-y-auto @[880px]:scroll-fino">
           {/* Saldo + acciones. Si el panel es angosto, el saldo va arriba y las
               acciones en una segunda fila a todo el ancho. */}
           <div className="card-inner flex flex-wrap items-center justify-between gap-3">
@@ -207,13 +207,13 @@ export default function ClienteDetalleContent({
               </div>
             )}
           </div>
-        </div>
+        </ScrollFade>
 
         {/* Historial: al lado desde 880px de panel, debajo si no. */}
-        <div className="@[880px]:min-h-0 @[880px]:overflow-y-auto @[880px]:scroll-fino">
+        <ScrollFade wrapperClassName="shrink-0 @[880px]:shrink" className="@[880px]:overflow-y-auto @[880px]:scroll-fino">
           <p className="section-label">Historial</p>
           <Historial tipo="cliente" id={cliente.id} compact />
-        </div>
+        </ScrollFade>
       </ScrollFade>
     </div>
   )

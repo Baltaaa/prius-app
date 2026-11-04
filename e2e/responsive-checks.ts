@@ -118,3 +118,85 @@ export async function esperarCarga(page: Page) {
   ).catch(() => {})
   await page.waitForTimeout(700)
 }
+
+// Bloque 5 (revisión de padding): contenido pegado al borde de su card o pill,
+// pills sin aire a los costados y controles hermanos que se tocan. Heurística
+// para encontrar candidatos; cada hallazgo se mira a mano antes de corregir.
+export async function auditarPadding(page: Page): Promise<Hallazgo[]> {
+  return page.evaluate(() => {
+    const out: { regla: string; detalle: string }[] = []
+    const vistos = new Set<string>()
+    const etiqueta = (e: Element) => `${e.tagName.toLowerCase()}${typeof e.className === 'string' && e.className ? '.' + e.className.trim().split(/\s+/).slice(0, 3).join('.') : ''} "${(e.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 24)}"`
+    const visible = (e: Element) => {
+      const r = e.getBoundingClientRect()
+      if (r.width < 1 || r.height < 1) return false
+      const s = getComputedStyle(e)
+      return s.visibility !== 'hidden' && s.display !== 'none' && Number(s.opacity) > 0.05
+    }
+    const excluido = (e: Element) => !!e.closest('[style*="touch-action"], .plano-print, #print-root, .sr-only, [aria-hidden="true"]')
+    const agregar = (regla: string, clave: string, detalle: string) => { if (!vistos.has(regla + clave)) { vistos.add(regla + clave); out.push({ regla, detalle }) } }
+    const raices: Element[] = [document.querySelector('#app-main-scroll') ?? document.body]
+    document.querySelectorAll('.fixed.inset-0, [role="dialog"]').forEach((o) => raices.push(o))
+
+    const esContenedor = (e: Element) => {
+      const c = typeof e.className === 'string' ? e.className : ''
+      return /(^|\s)(card-surface|card-inner|surface-pop)(\s|$)/.test(c) || e.getAttribute('role') === 'dialog'
+    }
+    const tieneTexto = (e: Element) => [...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent || '').trim().length > 0)
+
+    for (const raiz of raices) {
+      raiz.querySelectorAll('*').forEach((el) => {
+        if (excluido(el) || !visible(el)) return
+        const r = el.getBoundingClientRect()
+        const s = getComputedStyle(el)
+
+        // A. Contenido (texto, ícono, control) a menos de 8px del borde de su card.
+        const hoja = tieneTexto(el) || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || (el.tagName === 'svg' && !el.closest('button, a')) || (el.tagName === 'BUTTON' && !tieneTexto(el) && el.children.length > 0 && el.getBoundingClientRect().width < 60)
+        if (hoja) {
+          let cont: Element | null = el.parentElement
+          while (cont && !esContenedor(cont)) cont = cont.parentElement
+          if (cont && cont !== el) {
+            const c = cont.getBoundingClientRect()
+            const radio = parseFloat(getComputedStyle(cont).borderTopLeftRadius) || 0
+            const izq = r.left - c.left, der = c.right - r.right, arr = r.top - c.top, aba = c.bottom - r.bottom
+            const minimo = Math.min(izq, der)
+            // Filas que ocupan todo el ancho de la card (listas, tablas con divisores) no cuentan.
+            const ancho = r.width >= c.width - 2
+            if (!ancho && radio >= 12 && (minimo < 8 || arr < 6 || aba < 6) && !(el.closest('[class*="overflow-y-auto"], table'))) {
+              agregar('pegado-al-borde', etiqueta(el) + '|' + etiqueta(cont), `${etiqueta(el)} a ${Math.round(izq)}/${Math.round(der)}/${Math.round(arr)}/${Math.round(aba)}px (izq/der/arr/aba) de ${etiqueta(cont)}`)
+            }
+          }
+        }
+
+        // B. Pill con texto y fondo/borde, pero sin aire a los costados.
+        const radioPill = parseFloat(s.borderTopLeftRadius) || 0
+        if (tieneTexto(el) && radioPill >= r.height / 2 - 1 && r.width > r.height + 4) {
+          const conFondo = s.backgroundColor !== 'rgba(0, 0, 0, 0)' || parseFloat(s.borderTopWidth) > 0
+          const pl = parseFloat(s.paddingLeft), pr = parseFloat(s.paddingRight)
+          if (conFondo && (pl < 8 || pr < 8) && s.display !== 'contents') agregar('pill-sin-aire', etiqueta(el), `${etiqueta(el)} padding ${pl}/${pr}px`)
+        }
+
+        // D. Scroll interno con barra visible y sin lugar reservado: la barra se
+        // come el padding del contenido (y el layout salta al aparecer).
+        if (/(auto|scroll)/.test(s.overflowY) && el.scrollHeight > el.clientHeight + 1) {
+          const barra = (el as HTMLElement).offsetWidth - el.clientWidth - parseFloat(s.borderLeftWidth) - parseFloat(s.borderRightWidth)
+          if (barra >= 6 && s.scrollbarGutter !== 'stable' && el.closest('.card-surface, .surface-pop, [role="dialog"]')) agregar('scroll-sin-gutter', etiqueta(el), `${etiqueta(el)} barra ${Math.round(barra)}px sin scrollbar-gutter: stable`)
+        }
+
+        // C. Hermanos interactivos que se tocan o se pisan.
+        if (['BUTTON', 'A'].includes(el.tagName) || (radioPill >= r.height / 2 - 1 && s.backgroundColor !== 'rgba(0, 0, 0, 0)')) {
+          const sig = el.nextElementSibling
+          if (sig && visible(sig) && !excluido(sig)) {
+            const sr = sig.getBoundingClientRect()
+            const mismaFila = Math.abs((r.top + r.height / 2) - (sr.top + sr.height / 2)) < Math.min(r.height, sr.height) / 2
+            const ss = getComputedStyle(sig)
+            const interactivo = ['BUTTON', 'A'].includes(sig.tagName) || (parseFloat(ss.borderTopLeftRadius) >= sr.height / 2 - 1 && ss.backgroundColor !== 'rgba(0, 0, 0, 0)')
+            const sep = sr.left - r.right
+            if (mismaFila && interactivo && sep < 3 && sep > -r.width) agregar('controles-pegados', etiqueta(el) + '|' + etiqueta(sig), `${etiqueta(el)} y ${etiqueta(sig)} a ${Math.round(sep)}px`)
+          }
+        }
+      })
+    }
+    return out
+  })
+}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { supabase } from "../lib/supabase"
-import { Printer, Expand, Shrink, ChevronLeft, ChevronRight, CalendarDays, CheckCircle2, Clock, Layers } from "lucide-react"
+import { Expand, Shrink, Layers } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
@@ -12,15 +12,13 @@ import MoverUnidadDialog from "../components/dashboard/MoverUnidadDialog"
 import Cell from "../components/dashboard/Cell"
 import CellMobile from "../components/dashboard/CellMobile"
 import PlanoZoomBar from "../components/dashboard/PlanoZoomBar"
-import PlanoLeyenda from "../components/dashboard/PlanoLeyenda"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import PlanoGrid from "../components/plano/PlanoGrid"
 import PlanoViewport from "../components/plano/PlanoViewport"
-import { pct } from "../components/dashboard/PlanoStatsBar"
+import { PlanoControles, PlanoAcciones } from "../components/dashboard/PlanoFiltros"
 import { useData } from "../context/DataProvider"
 import { calcularPlanoStats } from "../lib/planoStats"
 import { buildUnitsMap } from "../lib/planoUnits"
-import { formatPesos } from "../lib/format"
 import DateInput from "../components/inputs/DateInput"
 import { useDeepLinkTarget } from "../hooks/useDeepLinkTarget"
 import { useOverlay } from "../context/OverlayProvider"
@@ -421,27 +419,32 @@ export default function Dashboard() {
   // un fetch extra salvo que todavía no se haya pedido esa fecha.
   const { clima: climaDelDia } = useClima(selectedDate)
 
-  // Filtro visual de PlanoStatsBar: qué chip está "activo" ahora, y el set de
-  // unidades que corresponde resaltar. Puramente de presentación — no toca
-  // ningún dato, solo decide `isHighlighted`/`isDimmed` en cada <Cell>.
-  const [statsFiltro, setStatsFiltro] = useState(null)
-  const toggleStatsFiltro = useCallback((key) => {
-    setStatsFiltro((prev) => (prev === key ? null : key))
+  // Filtros visuales del Plano: las stats son el filtro de ESTADO (Todas /
+  // Ocupadas / Libres / Pendientes) y un segmented es el de TIPO (Todo /
+  // Carpas / Sombrillas). Se combinan: se resaltan las unidades que cumplen
+  // los dos. Puramente de presentación — no toca ningún dato, solo decide
+  // `isHighlighted`/`isDimmed` en cada <Cell>.
+  const [estadoFiltro, setEstadoFiltro] = useState(null)
+  const [tipoFiltro, setTipoFiltro] = useState(null)
+  const toggleEstadoFiltro = useCallback((key) => {
+    setEstadoFiltro((prev) => (prev === key ? null : key))
   }, [])
   const highlightedUnitIds = useMemo(() => {
-    if (!statsFiltro) return null
-    const porFiltro = {
+    if (!estadoFiltro && !tipoFiltro) return null
+    const porEstado = {
       ocupacion: planoStats.ocupacion.unitIds,
-      carpas: planoStats.carpas.unitIds,
-      sombrillas: planoStats.sombrillas.unitIds,
-      temporada: planoStats.mixUnitIds.temporada,
-      periodo: planoStats.mixUnitIds.periodo,
-      dia: planoStats.mixUnitIds.dia,
-      pendientes: planoStats.pendientes.unitIds,
       libres: planoStats.libres.unitIds,
+      pendientes: planoStats.pendientes.unitIds,
     }
-    return new Set(porFiltro[statsFiltro] || [])
-  }, [statsFiltro, planoStats])
+    const todas = Object.values(units)
+    const porTipo = {
+      carpas: todas.filter((u) => u.type === 'carpa').map((u) => u.dbId),
+      sombrillas: todas.filter((u) => u.type === 'sombrilla').map((u) => u.dbId),
+    }
+    const conjuntos = [estadoFiltro && porEstado[estadoFiltro], tipoFiltro && porTipo[tipoFiltro]].filter(Boolean)
+    const [primero, ...resto] = conjuntos
+    return new Set(primero.filter((id) => resto.every((c) => c.includes(id))))
+  }, [estadoFiltro, tipoFiltro, planoStats, units])
   const cellHighlight = useCallback((unit) => {
     if (!highlightedUnitIds || !unit) return {}
     return highlightedUnitIds.has(unit.dbId) ? { isHighlighted: true } : { isDimmed: true }
@@ -577,8 +580,11 @@ export default function Dashboard() {
           onDateChange={goToDate}
           planoStats={planoStats}
           loading={loading}
-          statsFiltro={statsFiltro}
-          onToggleFiltro={toggleStatsFiltro}
+          estadoFiltro={estadoFiltro}
+          onEstado={toggleEstadoFiltro}
+          tipoFiltro={tipoFiltro}
+          onTipo={setTipoFiltro}
+          onImprimir={() => window.print()}
           transform={transform}
           ready={ready}
           isDragging={isDragging}
@@ -613,123 +619,51 @@ export default function Dashboard() {
 
     return (
       <div className="flex-1 min-h-0 flex flex-col gap-2.5">
-        {/* Franja superior */}
-        <div data-card-compacta className="card-surface p-3 flex flex-col gap-2 shrink-0">
-          <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap">
-            {/* Selector de fecha */}
-            <div className="flex items-center gap-0.5 bg-surface p-0.5 rounded-inner shrink-0">
-              <button onClick={() => goToDate(shiftDate(selectedDate, -1))} className="w-11 h-11 md:w-9 md:h-9 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día anterior">
-                <ChevronLeft size={16} />
-              </button>
-              <div className="flex items-center gap-1.5 px-1">
-                {/* calendarOnly: mismo DateInput/calendario de siempre, con el
-                    look del mock (texto + día de semana) en vez del input
-                    con borde por defecto — "el mismo selector y handler". */}
-                <DateInput value={selectedDate} onChange={(v) => v && goToDate(v)} calendarOnly className="w-[148px]" />
-                <span className="text-label text-ink-2 shrink-0">{diaSemana}</span>
-                {!esHoy && (
-                  <button onClick={() => goToDate(todayStr())} className="text-label text-ink hover:text-ink ml-1 shrink-0">Hoy</button>
-                )}
-              </div>
-              <button onClick={() => goToDate(shiftDate(selectedDate, 1))} className="w-11 h-11 md:w-9 md:h-9 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día siguiente">
-                <ChevronRight size={16} />
-              </button>
-            </div>
-
-            {/* 3 KPIs reales: Ocupadas / Libres / Pendientes */}
-            {planoStats && (
-              <div className="grid grid-cols-3 md:flex gap-2 flex-1 md:max-w-2xl">
-                <button onClick={() => toggleStatsFiltro('ocupacion')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'ocupacion' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
-                  <span className="w-8 h-8 shrink-0 rounded-icon bg-ink text-on-ink flex items-center justify-center"><CalendarDays size={16} /></span>
-                  <span className="min-w-0">
-                    <span className="block text-label text-ink-2 truncate">Ocupadas</span>
-                    <span className="flex items-baseline gap-1.5">
-                      <span className="text-body text-ink tabular-nums">{planoStats.ocupacion.count}</span>
-                      <span className="text-label text-ink-2">{pct(planoStats.ocupacion.pct)}</span>
-                    </span>
-                  </span>
-                </button>
-                <button onClick={() => toggleStatsFiltro('libres')} className={`flex-1 min-w-0 md:min-w-[170px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'libres' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
-                  <span className="w-8 h-8 shrink-0 rounded-icon bg-success-soft text-success-ink flex items-center justify-center"><CheckCircle2 size={16} /></span>
-                  <span className="min-w-0">
-                    <span className="block text-label text-ink-2 truncate">Libres</span>
-                    <span className="flex items-baseline gap-1.5">
-                      <span className="text-body text-ink tabular-nums">{planoStats.libres.count}</span>
-                      <span className="text-label text-success-ink font-semibold">{pct(planoStats.libres.count / Math.max(1, planoStats.ocupacion.total))}</span>
-                    </span>
-                  </span>
-                </button>
-                <button onClick={() => toggleStatsFiltro('pendientes')} className={`flex-1 min-w-0 md:min-w-[210px] p-2 rounded-inner flex items-center gap-2 text-left transition-colors ${statsFiltro === 'pendientes' ? 'bg-gold-100 ring-1 ring-gold' : 'bg-surface'}`}>
-                  <span className="w-8 h-8 shrink-0 rounded-icon bg-gold text-ink flex items-center justify-center"><Clock size={16} /></span>
-                  <span className="min-w-0">
-                    <span className="block text-label text-ink-2 truncate">Pendientes ({planoStats.pendientes.count})</span>
-                    <span className="block text-body text-ink tabular-nums truncate">{planoStats.pendientes.saldo > 0 ? formatPesos(planoStats.pendientes.saldo) : '—'}</span>
-                  </span>
-                </button>
-              </div>
-            )}
-
-            <button onClick={() => window.print()} title="Imprimir A4" aria-label="Imprimir A4" className="h-10 w-10 2xl:w-auto 2xl:px-4 bg-surface hover:bg-line text-ink rounded-full flex items-center justify-center gap-2 text-body shrink-0 transition-colors">
-              <Printer size={16} /> <span className="hidden 2xl:inline">Imprimir A4</span>
-            </button>
-          </div>
-
-          {/* Filtros: tipo + estado + leyenda */}
-          <div className="flex items-center gap-2 overflow-x-auto md:flex-wrap pb-0.5 md:pb-0 scrollbar-none">
-            <div className="flex items-center bg-surface p-1 rounded-full gap-1 shrink-0">
-              {[['todo', 'Todo', planoStats?.ocupacion.total], ['carpas', 'Carpas', planoStats?.carpas.total], ['sombrillas', 'Sombrillas', planoStats?.sombrillas.total]].map(([key, label, total]) => (
-                <button
-                  key={key}
-                  onClick={() => key === 'todo' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
-                  className={`px-3 py-0.5 rounded-full text-label whitespace-nowrap transition-colors ${
-                    (key === 'todo' ? !statsFiltro : statsFiltro === key) ? 'bg-ink text-on-ink' : 'text-ink-2 hover:text-ink'
-                  }`}
-                >
-                  {label}{total != null ? ` (${total})` : ''}
-                </button>
-              ))}
-            </div>
-            <div className="w-px h-5 bg-line shrink-0 hidden sm:block" />
-            <div className="flex items-center gap-1.5 shrink-0">
-              {[['todas', 'Todas', null], ['libres', 'Libres', planoStats?.libres.count], ['ocupacion', 'Ocupadas', planoStats?.ocupacion.count], ['pendientes', 'Pendientes', planoStats?.pendientes.count]].map(([key, label, count]) => (
-                <button
-                  key={key}
-                  onClick={() => key === 'todas' ? setStatsFiltro(null) : toggleStatsFiltro(key)}
-                  className={`h-7 px-3 rounded-full text-label whitespace-nowrap transition-colors ${
-                    (key === 'todas' ? !statsFiltro : statsFiltro === key) ? 'bg-ink text-on-ink' : 'bg-surface text-ink-2 hover:text-ink'
-                  }`}
-                >
-                  {label}{count != null ? ` (${count})` : ''}
-                </button>
-              ))}
-            </div>
-            <div className="hidden lg:block ml-auto shrink-0">
-              <PlanoLeyenda compact />
-            </div>
-          </div>
+        {/* Franja superior: controles compartidos con el Plano mobile (ver
+            PlanoFiltros.jsx). Las stats son los filtros; no hay fila de chips. */}
+        <div data-card-compacta className="card-surface p-3 shrink-0">
+          <PlanoControles
+            selectedDate={selectedDate}
+            esHoy={esHoy}
+            diaSemana={diaSemana}
+            onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
+            onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
+            onHoy={() => goToDate(todayStr())}
+            onDateChange={goToDate}
+            planoStats={planoStats}
+            estadoFiltro={estadoFiltro}
+            onEstado={toggleEstadoFiltro}
+            tipoFiltro={tipoFiltro}
+            onTipo={setTipoFiltro}
+            onImprimir={() => window.print()}
+            anchoFecha="w-[148px]"
+          />
         </div>
 
         {/* Workspace: grid (sin tocar) + panel lateral fijo (desktop) */}
         <div className="flex-1 min-h-0 flex gap-3">
-          <section className="card-surface flex-1 relative overflow-hidden flex flex-col">
-            <div className="px-3 md:px-4 pt-2 flex items-center justify-between gap-2 shrink-0">
-              <span className="flex items-center gap-2 text-ink-2">
-                <Layers size={16} />
-                <span className="text-label">Pasillo A · Pasillo B · Pasillo C</span>
+          <section data-card-compacta className="card-surface flex-1 relative overflow-hidden flex flex-col p-3 gap-3">
+            <div className="flex items-center justify-between gap-3 shrink-0">
+              <span className="flex items-center gap-2 text-ink-2 min-w-0">
+                <Layers size={16} className="shrink-0" />
+                <span className="text-label truncate">Pasillo A · B · C</span>
               </span>
-              {realtimeConectado && (
-                <span className="hidden sm:inline-flex items-center gap-1.5 bg-surface px-3 py-1 rounded-full text-ink-2">
-                  <span className="w-2 h-2 rounded-full bg-success" />
-                  <span className="text-label">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
-                </span>
-              )}
+              <div className="flex items-center gap-3 shrink-0">
+                {realtimeConectado && (
+                  <span className="hidden md:inline-flex lg:hidden xl:inline-flex items-center gap-2 bg-surface px-3 h-7 rounded-full text-ink-2">
+                    <span className="w-2 h-2 rounded-full bg-success" />
+                    <span className="text-label">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
+                  </span>
+                )}
+                <PlanoAcciones onImprimir={() => window.print()} className="lg:hidden" />
+              </div>
             </div>
             {loading ? (
               <div className="text-label flex-1 flex items-center justify-center text-ink-2">
                 Cargando plano…
               </div>
             ) : (
-              <div className="flex-1 min-h-0 flex gap-2 px-2 pb-2">
+              <div className="flex-1 min-h-0 flex gap-3">
                 {/* `[&>div:first-child]:hidden` oculta la barra de zoom propia
                     de PlanoViewport.jsx (congelado, vive adentro con
                     position:absolute encima del mapa) sin tocar ese archivo —

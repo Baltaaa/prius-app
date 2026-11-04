@@ -14,7 +14,7 @@ export default function AppFooter({ compacto = false }) {
   return (
     <>
       <footer className={`hidden md:flex flex-col sm:flex-row items-center justify-between gap-2 text-label text-ink-2 ${
-        compacto ? 'pt-2 pb-2 mt-2' : 'pt-2 pb-9 mt-6'
+        compacto ? 'pt-2 pb-2 mt-2' : 'pt-2 pb-4 mt-6'
       }`}>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-gold" />

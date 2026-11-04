@@ -244,7 +244,7 @@ export default function Reportes() {
           {serie.length === 0 ? (
             <p className="text-label px-4 pb-4 text-ink-2">Sin movimientos en el rango elegido.</p>
           ) : (
-            <ScrollFade className="overflow-y-auto max-h-[420px] print:max-h-none print:overflow-visible">
+            <ScrollFade wrapperClassName="max-h-[420px] print:max-h-none print:overflow-visible" className="overflow-y-auto print:max-h-none print:overflow-visible">
               <table className="w-full text-body">
                 <thead className="sticky top-0 bg-card z-10">
                   <tr className="text-left text-label text-ink-2 border-b border-line">

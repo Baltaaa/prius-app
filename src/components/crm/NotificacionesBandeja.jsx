@@ -7,6 +7,7 @@ import {
   CalendarClock, Ban, CheckCircle2, CheckCheck, ChevronDown,
 } from 'lucide-react'
 import { emojiEnTexto } from '../../lib/unidadIcono'
+import ScrollFade from '../ui/ScrollFade'
 
 // Catálogo único de tipo -> ícono/color/acción/plural (colapso). Si aparece
 // un tipo sin entrada acá, cae a un ícono genérico — nunca se inventa un
@@ -239,7 +240,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
         </div>
       )}
 
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 py-2 space-y-4">
+      <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto overscroll-contain px-2 py-2 space-y-4">
         {tab === 'pendientes' ? (
           pendientes.length === 0 ? (
             <p className="text-label px-4 py-10 text-center text-ink-2">Todo al día</p>
@@ -267,7 +268,7 @@ export default function NotificacionesBandeja({ onNavigate }) {
             ))
           )
         )}
-      </div>
+      </ScrollFade>
     </div>
   )
 }

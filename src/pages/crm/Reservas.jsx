@@ -763,7 +763,7 @@ export default function Reservas() {
             </button>
             <h1 className="text-label text-ink">Detalle Reserva</h1>
           </div>
-          <ScrollFade className="flex-1 overflow-y-auto px-page pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col min-h-0">
+          <ScrollFade wrapperClassName="flex-1" className="overflow-y-auto px-page pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col">
             <ReservaDetalleContent
               reserva={mobileDetalleReserva}
               fechaLlegada={fechaLlegada}
