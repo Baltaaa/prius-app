@@ -23,7 +23,7 @@ test('responsive: rutas × anchos', async ({ page }) => {
       await esperarCarga(page)
       const nombre = `${ruta.replace(/[^a-z0-9-]/gi, '_')}-${w}`
       const hallazgos = await auditarLayout(page, { mobile: w < 768 })
-      await page.screenshot({ path: `${OUT}/${nombre}.png` })
+      if (!process.env.SIN_CAPTURAS) await page.screenshot({ path: `${OUT}/${nombre}.png` })
       for (const x of hallazgos) appendFileSync(LOG, `${ruta} ${w}x${h} [${x.regla}] ${x.detalle}\n`)
     }
   }
