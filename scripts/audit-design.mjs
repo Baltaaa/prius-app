@@ -17,7 +17,11 @@ const EXCEPCIONES = [
 
 // Chrome denso del Plano (franja de estadísticas, leyenda, toolbar): conserva sus medios pasos para no
 // achicar el mapa, cuyo tamaño fijan los snapshots de test:visual.
-const ESPACIADO_DENSO = /PlanoStatsBar|PlanoLeyenda|ClimaChip|pages\/Dashboard\.jsx/
+const ESPACIADO_DENSO = /PlanoFiltros|PlanoMobile|PlanoLeyenda|pages\/Dashboard\.jsx/
+
+// Código de reserva: se lee carácter por carácter, así que va en monoespaciada (excepción pedida
+// para Recepción, documentada en DESIGN.md). Solo vale dentro de components/recepcion/.
+const FUENTE_MONO_OK = /components\/recepcion\//
 
 const REGLAS = [
   ['hex', /#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/],
@@ -63,6 +67,7 @@ for (const archivo of recorrer('src')) {
     if (archivo.endsWith('.css') && /font-family: 'Manrope|^\s+(background|border|box-shadow): .*rgba\(/.test(linea)) return
     for (const [regla, re] of REGLAS) {
       if (regla === 'espaciado fuera de escala' && ESPACIADO_DENSO.test(archivo)) continue
+      if (regla === 'fuente' && FUENTE_MONO_OK.test(archivo) && /font-mono\b/.test(linea)) continue
       if (re.test(linea) && !TOLERADAS.some((t) => t.test(linea))) hallazgos.push(`${archivo}:${i + 1} [${regla}] ${linea.trim().slice(0, 100)}`)
     }
   })

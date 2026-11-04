@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthProvider'
 import { useDialog } from '../context/DialogProvider'
 import { linkToRecepcion } from '../lib/deepLinks'
+import { esValido, normalizar } from '../lib/codigoReserva'
 
 // Punto 8 (30/10/2026): el administrador tiene la misma cuenta abierta en la
 // compu y en el celular. Escanea un QR con el celular y la compu reacciona en
@@ -52,7 +53,9 @@ export function useRecepcionRemota() {
           if (ultimoRef.current === ev.id) return
           ultimoRef.current = ev.id
 
-          const codigo = ev.codigo || null
+          // Mismo formato que cualquier otro código (lib/codigoReserva.js): un
+          // evento con un valor que no es un código no abre nada.
+          const codigo = esValido(ev.codigo) ? normalizar(ev.codigo) : null
           const destino = linkToRecepcion(codigo)
           const yaEnRecepcion = locationRef.current.pathname.startsWith('/app/recepcion')
 

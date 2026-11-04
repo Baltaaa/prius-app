@@ -62,6 +62,11 @@ export function formatPesos(n: number | null | undefined): string {
 }
 
 /** Igual a formatPesos, pero null/undefined -> null (el llamador no renderiza nada). Reemplaza el viejo formatMontoVisible. */
+/** Cantidad entera con separador de miles argentino: 1.234 (conteos, unidades, personas). */
+export function formatCantidad(n: number | null | undefined): string {
+  return pesosFmt.format(Math.round(Number(n) || 0))
+}
+
 export function formatPesosVisible(n: number | null | undefined): string | null {
   return Number(n) > 0 ? formatPesos(n) : null
 }

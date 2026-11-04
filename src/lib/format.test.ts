@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  formatPesos, formatPesosVisible, formatPesosCSV, formatFecha, formatFechaHora,
+  formatCantidad, formatPesos, formatPesosVisible, formatPesosCSV, formatFecha, formatFechaHora,
   formatRangoFechas, formatDNI, formatCUIT, formatComprobante, formatUnidad,
   formatMontosEnTexto, formatPorcentaje, formatPesosCompacto, formatDolares,
 } from './format'
@@ -138,5 +138,13 @@ describe('formatPesosCompacto', () => {
 describe('formatDolares', () => {
   it('con prefijo US$ y separadores de miles', () => {
     expect(formatDolares(1200)).toBe('US$ 1.200')
+  })
+})
+
+describe('formatCantidad', () => {
+  it('separa miles y redondea', () => {
+    expect(formatCantidad(1234)).toBe('1.234')
+    expect(formatCantidad(7)).toBe('7')
+    expect(formatCantidad(null)).toBe('0')
   })
 })
