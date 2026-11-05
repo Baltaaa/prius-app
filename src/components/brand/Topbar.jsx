@@ -333,6 +333,14 @@ export default function TopBar() {
   // Pantalla completa, sin "afuera" — se registra solo para Escape y para
   // que abrirla cierre cualquier otro overlay que hubiera quedado abierto.
   const mobileSearchOverlay = useOverlay({ id: 'topbar-mobile-search', isOpen: mobileSearchOpen, onRequestClose: closeMobileSearch })
+  // Los anclas de los popovers son refs de objeto (estables): el territorio de
+  // cada overlay (trigger + panel en portal) se registra una sola vez acá.
+  useEffect(() => {
+    searchOverlay.bind(searchAnchorRef.current)
+    notifOverlay.bind(notifAnchorRef.current)
+    profileOverlay.bind(profileAnchorRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // [feat-1] Ctrl/Cmd+K enfoca el buscador desde cualquier pantalla —
   // desktop enfoca el input inline, mobile abre la búsqueda a pantalla
@@ -398,7 +406,7 @@ export default function TopBar() {
             el espacio disponible del header y tapaba la fecha de la
             derecha (quedaba "…de 2026" cortada). Ancho fijo que crece por
             breakpoint, nunca `w-full` sin techo. */}
-        <div ref={(el) => { searchAnchorRef.current = el; searchOverlay.bind(el) }} className="hidden md:block relative w-52 xl:w-72 min-w-0 shrink">
+        <div ref={searchAnchorRef} className="hidden md:block relative w-52 xl:w-72 min-w-0 shrink">
         <SearchInput
           ref={searchInputRef}
           value={searchValue}
@@ -524,7 +532,7 @@ export default function TopBar() {
             popover anclado acá mismo. Mobile: hoja a pantalla completa
             (mismo patrón que la búsqueda mobile, más abajo). */}
         <div
-          ref={(el) => { notifAnchorRef.current = el; notifOverlay.bind(el) }}
+          ref={notifAnchorRef}
           className="relative"
           onPointerEnter={notifHover.onPointerEnter}
           onPointerLeave={notifHover.onPointerLeave}
@@ -594,7 +602,7 @@ export default function TopBar() {
 
         {/* Profile */}
         <div
-          ref={(el) => { profileAnchorRef.current = el; profileOverlay.bind(el) }}
+          ref={profileAnchorRef}
           className="relative"
           onPointerEnter={profileHover.onPointerEnter}
           onPointerLeave={profileHover.onPointerLeave}

@@ -29,9 +29,12 @@ const PopoverAnclado = forwardRef(function PopoverAnclado(
   const [pos, setPos] = useState(null)
 
   useLayoutEffect(() => {
+    let raf = 0
     const calcular = () => {
       const rect = anchorRef.current?.getBoundingClientRect()
-      if (!rect) return
+      // El ref del ancla puede adjuntarse después del layout effect de este
+      // hijo (React atrapa hijos primero): reintenta en el próximo frame.
+      if (!rect) { raf = requestAnimationFrame(calcular); return }
       const vw = document.documentElement.clientWidth
       const ancho = Math.min(matchWidth ? Math.max(rect.width, minWidth) : width, vw - MARGEN * 2)
       const izq = align === 'right' ? rect.right - ancho : rect.left
@@ -43,6 +46,7 @@ const PopoverAnclado = forwardRef(function PopoverAnclado(
     window.addEventListener('resize', calcular)
     window.addEventListener('scroll', calcular, true)
     return () => {
+      cancelAnimationFrame(raf)
       window.removeEventListener('resize', calcular)
       window.removeEventListener('scroll', calcular, true)
     }
