@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Download, Printer, Share2 } from 'lucide-react'
 import SegmentedControl from '../brand/SegmentedControl'
 import RangoFechasChip from '../brand/RangoFechasChip'
 import WhatsAppIcon from '../ui/WhatsAppIcon'
+import PopoverAnclado from '../ui/PopoverAnclado'
 import { useOverlay } from '../../context/OverlayProvider'
 import { PERIODOS } from '../../lib/reportes'
 
@@ -23,9 +24,10 @@ const MONEDAS = [
 function Compartir({ onWhatsApp, linkWa, onCsv, onImprimir }) {
   const [abierto, setAbierto] = useState(false)
   const { bind } = useOverlay({ id: 'reportes-compartir', isOpen: abierto, onRequestClose: () => setAbierto(false) })
+  const anclaRef = useRef(null)
   const item = 'w-full text-left px-4 min-h-11 text-label text-ink hover:bg-surface flex items-center gap-3 rounded-icon disabled:opacity-40 disabled:cursor-not-allowed'
   return (
-    <div className="relative shrink-0">
+    <div ref={anclaRef} className="relative shrink-0">
       <button
         ref={bind}
         type="button"
@@ -40,7 +42,7 @@ function Compartir({ onWhatsApp, linkWa, onCsv, onImprimir }) {
         <span className="hidden md:inline">Compartir</span>
       </button>
       {abierto && (
-        <div ref={bind} role="menu" className="absolute right-0 top-full mt-2 z-50 w-60 surface-pop ui-open p-1">
+        <PopoverAnclado ref={bind} anchorRef={anclaRef} align="right" width={240} role="menu" className="p-1">
           <button role="menuitem" type="button" disabled={!linkWa} title={linkWa ? 'Enviar a mi WhatsApp' : 'Cargá tu teléfono en Mi cuenta'}
             onClick={() => { setAbierto(false); onWhatsApp() }} className={item}>
             <WhatsAppIcon size={16} /> WhatsApp
@@ -51,7 +53,7 @@ function Compartir({ onWhatsApp, linkWa, onCsv, onImprimir }) {
           <button role="menuitem" type="button" onClick={() => { setAbierto(false); onImprimir() }} className={item}>
             <Printer size={16} /> Imprimir / PDF
           </button>
-        </div>
+        </PopoverAnclado>
       )}
     </div>
   )

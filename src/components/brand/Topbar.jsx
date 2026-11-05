@@ -29,7 +29,7 @@ import UnidadLabel from '../crm/UnidadLabel'
 // 20261018082719_modo_incognito_perfiles.sql.
 const USER_ID_MODO_INCOGNITO = 'ccae0faf-3b4c-402b-902e-b0cd3c5dc1e8'
 import StatusBadge from '../crm/StatusBadge'
-import ScrollFade from '../ui/ScrollFade'
+import PopoverAnclado from '../ui/PopoverAnclado'
 import { useSection } from '../../lib/sectionTitles'
 import Button from './Button'
 import PageHeader from './PageHeader'
@@ -91,6 +91,9 @@ export default function TopBar() {
   // título/avatar en 360px.
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const searchInputRef = useRef(null)
+  const searchAnchorRef = useRef(null)
+  const notifAnchorRef = useRef(null)
+  const profileAnchorRef = useRef(null)
   const searchFeatureOn = isFeatureEnabled('feat-1-search-global-mejorado')
   const { countPendientes, countNovedadesNoLeidas } = useNotificaciones()
   const { clientes, reservas, unidades, pagos, realtimeConectado } = useData()
@@ -395,7 +398,7 @@ export default function TopBar() {
             el espacio disponible del header y tapaba la fecha de la
             derecha (quedaba "…de 2026" cortada). Ancho fijo que crece por
             breakpoint, nunca `w-full` sin techo. */}
-        <div ref={searchOverlay.bind} className="hidden md:block relative w-52 xl:w-72 min-w-0 shrink">
+        <div ref={(el) => { searchAnchorRef.current = el; searchOverlay.bind(el) }} className="hidden md:block relative w-52 xl:w-72 min-w-0 shrink">
         <SearchInput
           ref={searchInputRef}
           value={searchValue}
@@ -406,7 +409,7 @@ export default function TopBar() {
         />
 
         {showDropdown && (
-            <ScrollFade wrapperClassName="absolute left-0 right-0 mt-2 surface-pop z-50 max-h-96 ui-open" className="overflow-y-auto">
+            <PopoverAnclado ref={searchOverlay.bind} anchorRef={searchAnchorRef} matchWidth minWidth={360} role="listbox">
               {!activo ? (
                 <p className="px-4 py-6 text-center text-label text-ink-2">Seguí escribiendo (mínimo 2 caracteres)...</p>
               ) : resultadosFlat.length === 0 ? (
@@ -487,7 +490,7 @@ export default function TopBar() {
                   )}
                 </>
               )}
-            </ScrollFade>
+            </PopoverAnclado>
         )}
         </div>
 
@@ -521,12 +524,12 @@ export default function TopBar() {
             popover anclado acá mismo. Mobile: hoja a pantalla completa
             (mismo patrón que la búsqueda mobile, más abajo). */}
         <div
-          ref={notifOverlay.bind}
+          ref={(el) => { notifAnchorRef.current = el; notifOverlay.bind(el) }}
           className="relative"
           onPointerEnter={notifHover.onPointerEnter}
           onPointerLeave={notifHover.onPointerLeave}
           onFocus={() => setShowNotifications(true)}
-          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setShowNotifications(false) }}
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget) && !e.relatedTarget?.closest?.('[data-popover-anclado]')) setShowNotifications(false) }}
           onKeyDown={(e) => {
             if (e.key !== 'Escape') return
             setShowNotifications(false)
@@ -551,20 +554,23 @@ export default function TopBar() {
             ) : null}
           </button>
 
-          {showNotifications && (
-            // `top-full pt-3` en vez de `mt-3` en el panel (oct 2026): el
-            // padding queda DENTRO del contenedor con los handlers de hover,
-            // así el hueco visual entre el ícono y el panel sigue siendo
-            // parte del "territorio" hovereable (sin esto, mover el mouse en
-            // línea recta del ícono al panel pasaba por una franja que no
-            // era descendiente de este contenedor y cerraba el panel antes
-            // de llegar). El popover-light real queda en el div de adentro,
-            // que no se mueve ni cambia de tamaño — mismo look de siempre.
-            <div className="hidden md:block absolute right-0 top-full pt-3 w-[380px] max-w-[90vw] z-50">
-              <div className="max-h-[min(70vh,480px)] surface-pop overflow-hidden ui-open flex flex-col">
-                <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
-              </div>
-            </div>
+          {showNotifications && !isMobile && (
+            // Portal anclado (zona sticky): el panel vive en document.body, así
+            // que lleva los mismos handlers de hover que el contenedor para no
+            // cerrarse al cruzar el hueco entre el ícono y el panel.
+            <PopoverAnclado
+              ref={notifOverlay.bind}
+              anchorRef={notifAnchorRef}
+              align="right"
+              width={380}
+              offset={12}
+              scroll={false}
+              className="max-h-[min(70vh,480px)]"
+              onPointerEnter={notifHover.onPointerEnter}
+              onPointerLeave={notifHover.onPointerLeave}
+            >
+              <NotificacionesBandeja onNavigate={() => setShowNotifications(false)} />
+            </PopoverAnclado>
           )}
         </div>
 
@@ -588,12 +594,12 @@ export default function TopBar() {
 
         {/* Profile */}
         <div
-          ref={profileOverlay.bind}
+          ref={(el) => { profileAnchorRef.current = el; profileOverlay.bind(el) }}
           className="relative"
           onPointerEnter={profileHover.onPointerEnter}
           onPointerLeave={profileHover.onPointerLeave}
           onFocus={() => setShowProfileMenu(true)}
-          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setShowProfileMenu(false) }}
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget) && !e.relatedTarget?.closest?.('[data-popover-anclado]')) setShowProfileMenu(false) }}
           onKeyDown={(e) => {
             if (e.key !== 'Escape') return
             setShowProfileMenu(false)
@@ -619,11 +625,17 @@ export default function TopBar() {
           </button>
 
           {showProfileMenu && (
-            // Mismo patrón que Notificaciones: padding-top en vez de margin,
-            // para que el hueco visual quede adentro del territorio
-            // hovereable (ver comentario arriba).
-            <div className="absolute right-0 top-full pt-3 w-56 z-50">
-              <div className="surface-pop overflow-hidden p-1 ui-open">
+            <PopoverAnclado
+              ref={profileOverlay.bind}
+              anchorRef={profileAnchorRef}
+              align="right"
+              width={224}
+              offset={12}
+              className="p-1"
+              onPointerEnter={profileHover.onPointerEnter}
+              onPointerLeave={profileHover.onPointerLeave}
+            >
+              <div>
                 <div className="px-4 py-3 border-b border-line">
                   <p className="text-label font-semibold text-ink-2">{rolLabel}</p>
                   <p className="text-label font-medium text-ink truncate">{nombreMostrado}</p>
@@ -650,7 +662,7 @@ export default function TopBar() {
                   <LogOut size={14} /> Cerrar Sesión
                 </button>
               </div>
-            </div>
+            </PopoverAnclado>
           )}
         </div>
       </div>

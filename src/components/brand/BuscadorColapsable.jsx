@@ -14,13 +14,14 @@ export default function BuscadorColapsable({ value, onChange, placeholder, class
   const [abierto, setAbierto] = useState(false)
   const id = useId()
   const inputRef = useRef(null)
+  const anclaRef = useRef(null)
   const { bind } = useOverlay({ id: `buscador-${id}`, isOpen: abierto, onRequestClose: () => setAbierto(false) })
 
   if (ancho || mobile) {
     return <SearchInput value={value} onChange={onChange} placeholder={placeholder} className={className} />
   }
   return (
-    <div ref={bind} className="relative shrink-0">
+    <div ref={(el) => { anclaRef.current = el; bind(el) }} className="relative shrink-0">
       <button
         type="button"
         onClick={() => { setAbierto(true); setTimeout(() => inputRef.current?.focus(), 0) }}

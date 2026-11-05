@@ -1,6 +1,7 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { CalendarDays } from 'lucide-react'
 import BottomSheet from './BottomSheet'
+import PopoverAnclado from '../ui/PopoverAnclado'
 import DateInput from '../inputs/DateInput'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
@@ -19,6 +20,7 @@ export default function RangoFechasChip({
   const [abierto, setAbierto] = useState(false)
   const esMobile = !useMediaQuery('(min-width: 768px)')
   const id = useId()
+  const anclaRef = useRef(null)
   const { bind } = useOverlay({ id: `rango-${id}`, isOpen: abierto && !esMobile, onRequestClose: () => setAbierto(false) })
   const hay = !!(desde || hasta)
   const texto = hay
@@ -34,7 +36,7 @@ export default function RangoFechasChip({
     </div>
   )
   return (
-    <div className={`relative min-w-0 ${className}`}>
+    <div ref={anclaRef} className={`relative min-w-0 ${className}`}>
       <button
         ref={esMobile ? undefined : bind}
         type="button"
@@ -56,9 +58,9 @@ export default function RangoFechasChip({
         </BottomSheet>
       ) : (
         abierto && (
-          <div ref={bind} role="dialog" aria-label={etiqueta} className="absolute left-0 top-full mt-2 z-50 w-72 surface-pop ui-open p-4">
+          <PopoverAnclado ref={bind} anchorRef={anclaRef} width={288} role="dialog" aria-label={etiqueta} className="p-4" scroll={false}>
             {selectores}
-          </div>
+          </PopoverAnclado>
         )
       )}
     </div>

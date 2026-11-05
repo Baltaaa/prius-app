@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Info, Printer } from 'lucide-react'
 import DateInput from '../inputs/DateInput'
 import SegmentedControl from '../brand/SegmentedControl'
 import PlanoLeyenda from './PlanoLeyenda'
+import PopoverAnclado from '../ui/PopoverAnclado'
 import { useOverlay } from '../../context/OverlayProvider'
 import { formatPesos, formatPesosCompacto, formatFecha, formatDiaCorto } from '../../lib/format'
 import { unidadEmoji } from '../../lib/unidadIcono'
@@ -83,9 +84,10 @@ export function PlanoTipoSegmented({ valor, onChange, fullWidth = false, classNa
 // (y con Escape) por el mismo gestor de overlays que el resto de la app.
 export function PlanoReferencias({ soloIcono = false, className = '' }) {
   const [abierto, setAbierto] = useState(false)
+  const anclaRef = useRef(null)
   const { bind } = useOverlay({ id: 'plano-referencias', isOpen: abierto, onRequestClose: () => setAbierto(false) })
   return (
-    <div className={`relative ${className}`}>
+    <div ref={anclaRef} className={`relative ${className}`}>
       <button
         ref={bind}
         type="button"
@@ -100,10 +102,10 @@ export function PlanoReferencias({ soloIcono = false, className = '' }) {
         {soloIcono && <span className="sr-only">Referencias</span>}
       </button>
       {abierto && (
-        <div ref={bind} role="dialog" aria-label="Referencias del plano" className="absolute right-0 top-full mt-2 z-50 w-80 max-w-[calc(100vw-2rem)] surface-pop ui-open p-4">
+        <PopoverAnclado ref={bind} anchorRef={anclaRef} align="right" width={320} role="dialog" aria-label="Referencias del plano" className="p-4">
           <p className="section-label !mt-0">Referencias</p>
           <PlanoLeyenda />
-        </div>
+        </PopoverAnclado>
       )}
     </div>
   )
