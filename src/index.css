@@ -86,6 +86,10 @@
 .dp-prius .rdp-caption_label { font-weight: 500; text-transform: capitalize; }
 .dp-prius .rdp-chevron { fill: rgb(var(--primary)); }
 .dp-prius .rdp-button_previous, .dp-prius .rdp-button_next { min-width: 44px; min-height: 44px; }
+/* Calendario inline a ancho completo (bottom sheet de rangos): 7 columnas que reparten el ancho
+   de la pantalla menos el gutter de 16px de cada lado. */
+.dp-full .rdp-root { --rdp-day-width: min(60px, calc((100dvw - 32px) / 7)); --rdp-day-height: 44px; --rdp-months-gap: 0px; width: 100%; }
+.dp-full .rdp-months, .dp-full .rdp-month, .dp-full .rdp-month_grid { width: 100%; max-width: none; }
 
 /* Degradé de la card hero (DESIGN.md). */
 .bg-hero {

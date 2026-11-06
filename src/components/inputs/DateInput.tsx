@@ -226,21 +226,27 @@ export default function DateInput({
           {calendarOnly && (
             <div ref={bind} className="fixed inset-0 z-[1000] bg-overlay backdrop-blur-sm" onClick={() => setAbierto(false)} />
           )}
-          <div
-            ref={bindPopover}
-            className="fixed z-[1001] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0
-                       surface-pop p-3 dp-prius ui-open"
-            style={window.innerWidth >= 640 ? { top: pos.top, left: pos.left, minWidth: pos.width } : undefined}
-          >
-            <DayPicker
-              mode="single"
-              locale={es}
-              weekStartsOn={1}
-              selected={isoToDate(value)}
-              defaultMonth={isoToDate(value) || new Date()}
-              disabled={disabledMatcher}
-              onSelect={handleSelect}
-            />
+          {/* Mobile (<640px): un contenedor fixed que centra con flex. Antes el
+              popover se centraba con translate(-50%), pero la animación
+              `ui-open` (transform: scale) lo pisaba y el calendario quedaba
+              corrido hacia abajo y a la derecha. Desde 640px el popover va
+              fixed junto al campo, como siempre. */}
+          <div className="fixed inset-0 z-[1001] flex items-center justify-center pointer-events-none sm:block sm:inset-auto">
+            <div
+              ref={bindPopover}
+              className="pointer-events-auto max-w-[calc(100dvw-32px)] sm:fixed surface-pop p-3 dp-prius ui-open"
+              style={window.innerWidth >= 640 ? { top: pos.top, left: pos.left, minWidth: pos.width } : undefined}
+            >
+              <DayPicker
+                mode="single"
+                locale={es}
+                weekStartsOn={1}
+                selected={isoToDate(value)}
+                defaultMonth={isoToDate(value) || new Date()}
+                disabled={disabledMatcher}
+                onSelect={handleSelect}
+              />
+            </div>
           </div>
         </>,
         document.body,
