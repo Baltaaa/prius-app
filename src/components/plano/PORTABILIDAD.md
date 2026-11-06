@@ -29,7 +29,9 @@ Una sola clase, usada por el cluster de botones de zoom de
 blur en tiempo real fuerza al compositor a re-rasterizar en cada
 hover/scroll, ver el comentario original ahí.)
 
-`PlanoGrid.jsx` y `CeldaPublica.jsx` no usan ninguna clase custom — solo
+`PlanoGrid.jsx` lleva la clase `plano-contra` en sus rótulos (Recreación, Acceso, Pileta, Sector Sombrillas, Océano Atlántico): en el CRM sirve para que no queden cabeza abajo cuando el plano se rota 180° (`.plano-contra` en `src/index.css`). En beachFlow, sin esa regla CSS, la clase no hace nada.
+
+`CeldaPublica.jsx` no usa ninguna clase custom — solo
 utilidades de Tailwind (incluidos valores arbitrarios como `bg-[#FDE047]`).
 
 ### tailwind.config.js
