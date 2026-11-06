@@ -22,15 +22,20 @@ export function PlanoStatTiles({ stats, valor, onChange, fecha, compacto = false
   if (!stats) return null
   const total = stats.ocupacion.total
   const fmt = compacto ? formatMontoCompacto : formatMonto
-  const saldo = stats.pendientes.saldo > 0 ? ` · ${fmt(stats.pendientes.saldo)}` : ''
+  const saldo = stats.pendientes.saldo > 0 ? fmt(stats.pendientes.saldo) : null
+  // `texto` es el resumen accesible; `principal` el número grande y `pill` el valor secundario
+  // (porcentaje o monto), en una etiqueta negra como el "↑ 79,5%" del Dashboard.
+  const pctLibres = pct(stats.libres.count / Math.max(1, total))
   const tiles = [
-    { key: null, label: 'Todas', texto: String(total) },
-    { key: 'ocupacion', label: 'Ocupadas', texto: `${stats.ocupacion.count} · ${pct(stats.ocupacion.pct)}` },
-    { key: 'libres', label: 'Libres', texto: `${stats.libres.count} · ${pct(stats.libres.count / Math.max(1, total))}` },
+    { key: null, label: 'Todas', principal: String(total), texto: String(total) },
+    { key: 'ocupacion', label: 'Ocupadas', principal: String(stats.ocupacion.count), pill: pct(stats.ocupacion.pct), texto: `${stats.ocupacion.count} · ${pct(stats.ocupacion.pct)}` },
+    { key: 'libres', label: 'Libres', principal: String(stats.libres.count), pill: pctLibres, texto: `${stats.libres.count} · ${pctLibres}` },
     {
       key: 'pendientes',
       label: compacto ? 'Pendientes' : 'Pendientes del día',
-      texto: `${stats.pendientes.count}${saldo}`,
+      principal: String(stats.pendientes.count),
+      pill: saldo,
+      texto: `${stats.pendientes.count}${saldo ? ` · ${saldo}` : ''}`,
       ayuda: `Unidades ocupadas el ${formatFecha(fecha)} con saldo por cobrar. No incluye reservas fuera de esa fecha: el Dashboard suma toda la temporada.`,
     },
   ]
@@ -52,7 +57,10 @@ export function PlanoStatTiles({ stats, valor, onChange, fecha, compacto = false
           >
             {activo && <span aria-hidden className="absolute left-0 inset-y-2 w-1 rounded-full bg-gold" />}
             <span className="block text-label text-ink-2 truncate">{t.label}</span>
-            <span className={`block ${compacto ? 'text-label font-semibold' : 'text-body'} text-ink tabular-nums whitespace-nowrap truncate`}>{t.texto}</span>
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0">
+              <span className={`${compacto ? 'text-label font-semibold' : 'text-body'} text-ink tabular-nums whitespace-nowrap`}>{t.principal}</span>
+              {t.pill && <span data-tile-pill className="inline-flex items-center rounded-full bg-ink text-on-ink text-label tabular-nums whitespace-nowrap px-2 py-0.5">{t.pill}</span>}
+            </span>
           </button>
         )
       })}
@@ -138,8 +146,10 @@ export function PlanoControles({
   planoStats, estadoFiltro, onEstado, tipoFiltro, onTipo, onImprimir, compacto = false, anchoFecha, modoCliente = false,
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="order-1 flex items-center gap-1 bg-surface p-1 rounded-inner flex-1 min-w-0 lg:flex-none">
+    <div className={`flex flex-wrap items-center ${modoCliente && !compacto ? 'gap-2 lg:gap-4' : 'gap-2'}`}>
+      {/* En pantalla completa de escritorio el navegador de fecha es una pill, igual que el
+          contenedor del segmented de su derecha. */}
+      <div className={`order-1 flex items-center gap-1 bg-surface p-1 flex-1 min-w-0 lg:flex-none ${modoCliente && !compacto ? 'rounded-inner lg:rounded-full' : 'rounded-inner'}`}>
         <button onClick={onPrevDay} className="w-11 h-11 md:w-9 md:h-9 shrink-0 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día anterior">
           <ChevronLeft size={16} />
         </button>

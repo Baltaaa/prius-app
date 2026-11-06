@@ -21,29 +21,71 @@ function celdaDe(index, tipo, numero, fila, numberSide) {
   return { ...(u || { tipo, numero, fila }), numberSide }
 }
 
+// Ola: franja con borde superior ondulado (período `p`, amplitud `a`, nivel `y`) que llena hasta
+// el pie del viewBox. Más ancha que el viewBox en un período, así el translateX de `.plano-ola`
+// (exactamente un período) cierra el ciclo sin saltos.
+const MAR_W = 700
+const MAR_H = 128
+function ola(y, p, a) {
+  const tramos = Math.ceil((MAR_W + p) / (p / 2))
+  return `M0 ${y}q${p / 4} ${-a} ${p / 2} 0${`t${p / 2} 0`.repeat(tramos - 1)}V${MAR_H}H0Z`
+}
+const OLA_CLARA = ola(30, 140, 6)
+const OLA_MEDIA = ola(52, 175, 7)
+const OLA_HONDA = ola(76, 100, 5)
+
+// Mar del modo cliente (pantalla completa): SVG inline propio, 5 paths, sin imágenes. Arena en
+// dorado 50 (fondo) y 100 (franja húmeda), 3 capas de azul en tonos de la pileta y una línea de
+// espuma. Vive dentro de PlanoGrid, o sea dentro de la capa que gira, y su rótulo contra-gira.
+// Las olas se mueven solo con transform (index.css, `.plano-ola`), apagadas con reduced-motion.
+function MarCliente() {
+  return (
+    <div className="mt-16 w-full relative overflow-hidden rounded-2xl border border-[#F7DF96] bg-[#FEFBF3]" data-plano-mar>
+      <svg viewBox={`0 0 ${MAR_W} ${MAR_H}`} preserveAspectRatio="none" aria-hidden="true" className="block w-full h-[128px]">
+        <path d="M0 14q87 8 175 0t175 0 175 0 175 0V50H0Z" fill="#FDF5E0" />
+        <path className="plano-ola" style={{ '--ola-p': '100px', animationDuration: '16s' }} d={OLA_HONDA} fill="#8CC8E8" />
+        <path className="plano-ola" style={{ '--ola-p': '175px', animationDuration: '22s', animationDirection: 'reverse' }} d={OLA_MEDIA} fill="#B4DCF0" />
+        <path className="plano-ola" style={{ '--ola-p': '140px', animationDuration: '18s' }} d={OLA_CLARA} fill="#D6ECF8" />
+        <path className="plano-ola" style={{ '--ola-p': '140px', animationDuration: '18s' }} d={`M0 30q35 -6 70 0${'t70 0'.repeat(11)}`} fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+      </svg>
+      <div className="absolute inset-x-0 bottom-4 flex justify-center">
+        <span className="plano-contra text-[11px] font-black uppercase tracking-[1em] text-sky-900" style={{ paddingLeft: "1em" }}>Océano Atlántico</span>
+      </div>
+    </div>
+  )
+}
+
 // Dibuja el plano completo (carpas + sombrillas + rótulos fijos) según
 // planoLayout.js. `unidades`: lista con al menos { id, numero, tipo, fila,
 // orden } — el resto de los campos que tenga cada objeto los decide quien
 // la pase (acá no se leen). `renderCelda(unidad)` decide qué pintar en cada
 // posición (CRM: <Cell/> con estado de reserva; landing: <CeldaPublica/>
 // con libre/bloqueada/seleccionada/sugerida).
-export default function PlanoGrid({ unidades, renderCelda }) {
+export default function PlanoGrid({ unidades, renderCelda, mar = false }) {
   const index = indexar(unidades)
 
   return (
     <>
-      {/* Row Superior Unificada: Recreación + Acceso + Pileta */}
+      {/* Row superior: Recreación + Acceso + Pileta. Tres recuadros del mismo tratamiento (radio,
+          borde de 1px, 122px de alto) y el mismo ancho total de siempre: cada uno va en un
+          contenedor de ancho fijo con 2px de aire a cada lado, así no se mueve ninguna celda. */}
       <div className="flex justify-center gap-0 items-start mb-6">
-        <div style={{ width: PLANO_SECTOR_WIDTH }} className="h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-          <span className="plano-contra">Recreación</span>
+        <div style={{ width: PLANO_SECTOR_WIDTH }} className="px-0.5">
+          <div className="h-[122px] flex items-center justify-center bg-[#FEFBF3] border border-[#F7DF96] rounded-lg">
+            <span className="plano-contra text-[10px] font-black uppercase tracking-[0.6em] text-gray-500">Recreación</span>
+          </div>
         </div>
-        <div style={{ width: PLANO_PASILLO_CENTRAL }} className="h-[50px] flex items-center justify-center border-y border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-          <span className="plano-contra">Acceso</span>
+        <div style={{ width: PLANO_PASILLO_CENTRAL }} className="px-0.5">
+          <div className="h-[122px] flex items-center justify-center bg-[#FEFBF3] border border-[#F7DF96] rounded-lg">
+            <span className="plano-contra text-[10px] font-black uppercase tracking-[0.6em] text-gray-500">Acceso</span>
+          </div>
         </div>
-        <div style={{ width: PLANO_SECTOR_WIDTH }} className="h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
-          <div className="absolute inset-0 bg-sky-400/5" />
-          <span className="plano-contra relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
-          <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
+        <div style={{ width: PLANO_SECTOR_WIDTH }} className="px-0.5">
+          <div className="h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-lg flex flex-col items-center justify-center relative group overflow-hidden">
+            <div className="absolute inset-0 bg-sky-400/5" />
+            <span className="plano-contra relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
+            <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
+          </div>
         </div>
       </div>
 
@@ -98,9 +140,13 @@ export default function PlanoGrid({ unidades, renderCelda }) {
         </div>
       </div>
 
-      <div className="mt-16 w-full bg-white/5 border border-white/5 py-5 text-center text-gray-600 font-black text-[11px] tracking-[1em] uppercase rounded-2xl">
-        <span className="plano-contra">Océano Atlántico</span>
-      </div>
+      {mar ? (
+        <MarCliente />
+      ) : (
+        <div className="mt-16 w-full bg-white/5 border border-white/5 py-5 text-center text-gray-600 font-black text-[11px] tracking-[1em] uppercase rounded-2xl">
+          <span className="plano-contra">Océano Atlántico</span>
+        </div>
+      )}
     </>
   )
 }

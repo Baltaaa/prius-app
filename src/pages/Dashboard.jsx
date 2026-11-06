@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { supabase } from "../lib/supabase"
-import { Expand, Shrink, Layers } from "lucide-react"
+import { Expand, Layers, X } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
@@ -568,11 +568,7 @@ export default function Dashboard() {
     // Mismo estilo claro que PlanoZoomBar (ya no glass-card oscuro): este
     // botón ahora vive DENTRO de esa barra, no flotando sobre el mapa.
     const extraButtonsViewport = (
-      fullscreen ? (
-        <button onClick={() => setFullscreenOpen(false)} className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Cerrar pantalla completa">
-          <Shrink size={16} />
-        </button>
-      ) : (
+      fullscreen ? null : (
         <button onClick={() => setFullscreenOpen(true)} className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Ver en pantalla completa">
           <Expand size={16} />
         </button>
@@ -622,6 +618,10 @@ export default function Dashboard() {
         {/* Franja superior: controles compartidos con el Plano mobile (ver
             PlanoFiltros.jsx). Las stats son los filtros; no hay fila de chips. */}
         <div data-card-compacta className="card-surface p-3 shrink-0">
+          {/* Modo cliente: logo dorado a la izquierda (centrado con los controles), controles a su
+              derecha con 16px, y la X de 44px a la derecha. Esc también cierra (useOverlay). */}
+          <div className={fullscreen ? 'flex items-center gap-4' : ''}>
+          {fullscreen && <img src="/images/prius-icon.png" alt="Prius" className="w-11 h-11 object-contain shrink-0" />}
           <PlanoControles
             selectedDate={selectedDate}
             esHoy={esHoy}
@@ -639,6 +639,18 @@ export default function Dashboard() {
             anchoFecha="w-[148px]"
             modoCliente={fullscreen}
           />
+          {fullscreen && (
+            <button
+              type="button"
+              onClick={() => setFullscreenOpen(false)}
+              title="Cerrar pantalla completa"
+              aria-label="Cerrar pantalla completa"
+              className="ml-auto w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-ink hover:bg-surface transition-colors"
+            >
+              <X size={20} strokeWidth={1.5} />
+            </button>
+          )}
+          </div>
         </div>
 
         {/* Workspace: grid (sin tocar) + panel lateral fijo (desktop) */}
@@ -689,7 +701,7 @@ export default function Dashboard() {
                     contentRef={contentRef}
                   >
                     <PlanoRotable rotado={rotado}>
-                      <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+                      <PlanoGrid unidades={unidades} renderCelda={renderCelda} mar={fullscreen} />
                     </PlanoRotable>
                   </PlanoViewport>
                 </div>
@@ -738,7 +750,7 @@ export default function Dashboard() {
           <div
             ref={bindFullscreen}
             onClick={(e) => e.stopPropagation()}
-            data-card-compacta className="card-surface plano-fullscreen-sheet w-full h-full sm:w-[90vw] sm:h-[90dvh] sm:rounded-card overflow-hidden flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
+            data-card-compacta className="card-surface plano-fullscreen-sheet w-full h-dvh rounded-none md:w-[90vw] md:h-[90dvh] md:rounded-card overflow-hidden flex flex-col space-y-4 p-4 sm:p-6 animate-in zoom-in-95 duration-200"
           >
             {renderPlanoBody(true)}
           </div>
@@ -778,13 +790,13 @@ export default function Dashboard() {
     {!loading && <PlanoImpresion units={units} selectedDate={selectedDate} stats={planoStats} />}
 
       <style>{`
-        /* Pantalla completa del plano en mobile (<640px, donde el modal ya
-           es w-full h-full, borde a borde): reserva las safe areas del
+        /* Pantalla completa del plano en mobile (<768px, donde el modal es
+           inset-0 y 100dvh, sin radio ni margen): reserva las safe areas del
            dispositivo (notch arriba, home indicator abajo) sumadas al
            padding de siempre (p-4), para que los botones de zoom y el de
-           salir nunca queden debajo de ellas. Desktop (sm:, >=640px) no se
+           salir nunca queden debajo de ellas. Desktop (md:, >=768px) no se
            toca — ahí el modal ya no llega a los bordes reales de pantalla. */
-        @media (max-width: 639.98px) {
+        @media (max-width: 767.98px) {
           .plano-fullscreen-sheet {
             padding-top: calc(1rem + env(safe-area-inset-top));
             padding-right: calc(1rem + env(safe-area-inset-right));

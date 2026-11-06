@@ -31,6 +31,8 @@ hover/scroll, ver el comentario original ahí.)
 
 `PlanoGrid.jsx` lleva la clase `plano-contra` en sus rótulos (Recreación, Acceso, Pileta, Sector Sombrillas, Océano Atlántico): en el CRM sirve para que no queden cabeza abajo cuando el plano se rota 180° (`.plano-contra` en `src/index.css`). En beachFlow, sin esa regla CSS, la clase no hace nada.
 
+Dos agregados nuevos de `PlanoGrid.jsx` (ajustes del plano, 06/11/2026): los recuadros Recreación/Acceso (dorado 50 `#FEFBF3`, borde dorado 300 `#F7DF96`, 122px, mismo tratamiento que la Pileta; valores arbitrarios de Tailwind, nada que extender) y la prop `mar` (SVG inline `MarCliente`, solo CRM en pantalla completa; beachFlow no la pasa). Las olas usan `.plano-ola` + `@keyframes plano-ola` de `src/index.css`; sin esa regla el mar se ve estático.
+
 `CeldaPublica.jsx` no usa ninguna clase custom — solo
 utilidades de Tailwind (incluidos valores arbitrarios como `bg-[#FDE047]`).
 
