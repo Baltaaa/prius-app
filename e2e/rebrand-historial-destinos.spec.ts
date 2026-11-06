@@ -16,29 +16,31 @@ for (const [nombre, w, h] of [['desktop', 1440, 900], ['mobile', 390, 844]] as [
 
     for (const q of BUSQUEDAS) {
       for (const idx of [0, 1]) {
-        await page.goto(`/app/historial?hDesde=2026-08-01&hq=${encodeURIComponent(q)}`)
-        await esperarCarga(page)
-        const filas = page.locator('#app-main-scroll button.hover-row')
-        if ((await filas.count()) <= idx) continue
-        const fila = filas.nth(idx)
-        const etiqueta = ((await fila.innerText()) || '').split('\n').filter(Boolean).slice(0, 3).join(' | ')
-        await fila.click()
-
-        const ir = page.getByRole('button', { name: /^(Ver ficha de|Abrir registro)/ }).first()
-        if (!(await ir.isVisible().catch(() => false))) {
-          visitados.push(`${q}#${idx} sin destino: ${etiqueta}`)
-          continue
-        }
-        await ir.click()
-        // Si los datos del CRM aún cargan, la app avisa y no navega: se reintenta.
-        for (let i = 0; i < 6; i++) {
-          await page.waitForTimeout(1200)
+        // Hasta 3 intentos: si el clic llega mientras los datos del CRM aún cargan, la app avisa
+        // y no navega (y la lista puede re-renderizarse), así que se vuelve a abrir la fila.
+        let etiqueta = ''
+        let sinDestino = false
+        for (let intento = 0; intento < 3; intento++) {
+          await page.goto(`/app/historial?hDesde=2026-08-01&hq=${encodeURIComponent(q)}`)
+          await esperarCarga(page)
+          await page.waitForTimeout(1500 * intento)
+          const filas = page.locator('#app-main-scroll button.hover-row')
+          if ((await filas.count()) <= idx) { sinDestino = true; break }
+          const fila = filas.nth(idx)
+          etiqueta = ((await fila.innerText()) || '').split('\n').filter(Boolean).slice(0, 3).join(' | ')
+          await fila.click()
+          const ir = page.getByRole('button', { name: /^(Ver ficha de|Abrir registro)/ }).first()
+          if (!(await ir.isVisible().catch(() => false))) {
+            visitados.push(`${q}#${idx} sin destino: ${etiqueta}`)
+            sinDestino = true
+            break
+          }
+          await ir.click()
+          await page.waitForTimeout(1500)
           if (new URL(page.url()).pathname !== '/app/historial') break
           if (await page.getByText('Este registro ya no existe').isVisible().catch(() => false)) break
-          const avisos = await page.evaluate(() => (document.body.innerText.match(/Cargando datos[^\n]*|No se encontr[^\n]*|ya no existe/g) || []).join(' / '))
-          if (avisos) console.log(`${q}#${idx} iter ${i}: aviso "${avisos}" url=${page.url()}`)
-          if (await ir.isVisible().catch(() => false)) await ir.click()
         }
+        if (sinDestino) continue
 
         const url = new URL(page.url())
         if (url.pathname === '/app/historial') {
