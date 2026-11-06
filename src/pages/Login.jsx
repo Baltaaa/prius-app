@@ -7,11 +7,42 @@ import { LOGIN_MAX_ATTEMPTS, LOGIN_LOCKOUT_MS } from "../config/session"
 import { Eye, EyeOff, Loader2, AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react"
 import GlobalLoader from "../components/ui/GlobalLoader"
 
+// Mobile: el alto del login es el del viewport VISUAL (el que queda sobre el teclado), no el
+// layout viewport — iOS no achica el layout viewport al abrir el teclado y empuja la página.
+// Con la raíz fija a ese alto/offset la página nunca salta y el formulario queda entero a la vista.
+function useViewportVisual() {
+  const [vv, setVv] = useState({ alto: null, top: 0, teclado: false })
+  useEffect(() => {
+    const v = window.visualViewport
+    if (!v) return undefined
+    const medir = () => {
+      const teclado = window.innerHeight - v.height > 120
+      setVv({ alto: Math.round(v.height), top: Math.round(v.offsetTop), teclado })
+      if (window.scrollX || window.scrollY) window.scrollTo(0, 0)
+    }
+    medir()
+    v.addEventListener("resize", medir)
+    v.addEventListener("scroll", medir)
+    return () => { v.removeEventListener("resize", medir); v.removeEventListener("scroll", medir) }
+  }, [])
+  return vv
+}
+
 export default function Login({ modo }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const { session, perfil, loading: authLoading, logLoginEvent } = useAuth()
+
+  const vv = useViewportVisual()
+  // Sin scroll de página ni rebote mientras el login está montado.
+  useEffect(() => {
+    const html = document.documentElement
+    const previo = { o: html.style.overscrollBehavior, b: document.body.style.overflow }
+    html.style.overscrollBehavior = "none"
+    document.body.style.overflow = "hidden"
+    return () => { html.style.overscrollBehavior = previo.o; document.body.style.overflow = previo.b }
+  }, [])
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -181,8 +212,8 @@ export default function Login({ modo }) {
   // distintos según breakpoint (desktop: arriba de los campos; mobile:
   // arriba del botón, ver mocks), nunca los dos juntos — por eso vive acá
   // como variable en vez de JSX inline repetido.
-  const aviso = (
-    <div aria-live="polite" className="space-y-3">
+  const aviso = (visibilidad) => (
+    <div aria-live="polite" className={`space-y-3 empty:hidden ${visibilidad}`}>
       {motivo === "inactividad" && !error && !isLocked && (
         <div className="p-3 bg-surface border border-line rounded-swatch flex items-center gap-3">
           <AlertCircle size={16} className="text-ink-2 shrink-0" />
@@ -211,7 +242,10 @@ export default function Login({ modo }) {
   )
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-ink selection:bg-gold selection:text-ink">
+    <div
+      className="max-md:fixed max-md:inset-x-0 max-md:top-[var(--vv-top,0px)] max-md:h-[var(--vv-h,100dvh)] md:relative md:h-[100dvh] w-full overflow-hidden overscroll-none bg-ink selection:bg-gold selection:text-ink"
+      style={{ "--vv-h": vv.alto ? `${vv.alto}px` : undefined, "--vv-top": `${vv.top}px` }}
+    >
       {isSuccess && <GlobalLoader message="Iniciando sesión segura" />}
 
       {/* Shell: columna en mobile (imagen arriba, sheet abajo) / fila en
@@ -222,7 +256,9 @@ export default function Login({ modo }) {
             sin animación — ver nota de rendimiento original más abajo).
             Mobile: franja superior fija. Desktop: mitad izquierda, full
             height. */}
-        <div className="relative shrink-0 h-[34dvh] md:h-full md:w-1/2 overflow-hidden">
+        {/* Mobile: la franja de marca se queda con TODO el alto que el formulario no usa (flex-1) —
+            ni scroll ni espacio en blanco en ningún celular. Con el teclado abierto se oculta. */}
+        <div className={`relative flex-1 min-h-[88px] md:flex-none md:min-h-0 md:h-full md:w-1/2 overflow-hidden ${vv.teclado ? "max-md:hidden" : ""}`}>
           {/*
             Fondo estático (sin cambios respecto al diseño anterior). Antes:
             JPEG de 5405×3601 (~3.5 MB, ~78 MP = ~300 MB de bitmap en RAM)
@@ -284,18 +320,21 @@ export default function Login({ modo }) {
             achica el dvh disponible por debajo de lo que mide el
             formulario, el sheet scrollea internamente en vez de empujar el
             botón "Ingresar" fuera de la pantalla. */}
-        <main className="flex-1 min-h-0 flex flex-col md:items-center md:justify-center bg-card md:bg-canvas overflow-hidden">
-          <div className="flex-1 min-h-0 w-full overflow-y-auto overscroll-contain md:flex md:items-center md:justify-center md:py-10">
+        <main
+          onFocusCapture={(e) => { const el = e.target; setTimeout(() => el.scrollIntoView?.({ block: "center" }), 250) }}
+          className="max-md:shrink max-md:min-h-0 md:flex-1 flex flex-col md:items-center md:justify-center bg-card md:bg-canvas overflow-hidden"
+        >
+          <div className="min-h-0 w-full overflow-y-auto overscroll-contain md:flex-1 md:flex md:items-center md:justify-center md:py-10">
             {/* Entrada (Bloque 1/2, nov 2026): el sheet sube desde abajo en
                 mobile y el formulario entra con fade-up en desktop — dos
                 animaciones distintas sobre el mismo nodo vía la variante
                 `md:`. Ambas son solo transform+opacity y se apagan con
                 prefers-reduced-motion desde index.css. */}
             <div
-              className="w-full md:max-w-[440px] rounded-t-card md:rounded-card bg-card px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-10 ui-open-sheet md:anim-fade-up"
+              className="w-full md:max-w-[440px] rounded-t-card md:rounded-card bg-card px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-10 ui-open-sheet md:anim-fade-up"
             >
               {/* Gesto visual de bottom sheet (mobile) */}
-              <div className="md:hidden flex justify-center mb-4">
+              <div className="md:hidden flex justify-center mb-3">
                 <div className="w-10 h-1 rounded-full bg-line" />
               </div>
 
@@ -305,16 +344,16 @@ export default function Login({ modo }) {
               </span>
 
               {mode === "login" ? (
-                <div className="space-y-5">
+                <div className="space-y-4 md:space-y-5">
                   <div>
                     <h1 className="text-stat md:text-card-title text-ink tracking-tight">Iniciar sesión</h1>
                     <p className="text-ink-2 text-body mt-1">Acceso exclusivo para el equipo Prius.</p>
                   </div>
 
                   {/* Aviso — desktop, arriba de los campos (mock desktop) */}
-                  <div className="hidden md:block">{aviso}</div>
+                  {aviso("hidden md:block")}
 
-                  <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                  <form onSubmit={handleSubmit} noValidate className="space-y-3 md:space-y-4">
                     <div>
                       <label htmlFor="login-email" className={labelBase}>Email</label>
                       <input
@@ -385,7 +424,7 @@ export default function Login({ modo }) {
                     </label>
 
                     {/* Aviso — mobile, arriba del botón (mock mobile) */}
-                    <div className="md:hidden">{aviso}</div>
+                    {aviso("md:hidden")}
 
                     <button
                       type="submit"
@@ -471,7 +510,7 @@ export default function Login({ modo }) {
                 </div>
               )}
 
-              <p className="text-center text-label text-ink-2 font-medium mt-8">
+              <p className="text-center text-label text-ink-2 font-medium mt-4 md:mt-8">
                 <span className="md:hidden">Prius Balneario Playa Grande · CRM v1.0</span>
                 <span className="hidden md:inline">Prius Balneario Playa Grande · CRM Interno</span>
               </p>
