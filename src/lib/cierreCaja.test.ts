@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cajasConArqueoPendiente, ddmm, minutosParaMedianoche, nivelAvisoCierre } from './cierreCaja'
+import { cajasConArqueoPendiente, ddmm, minutosParaMedianoche, nivelAvisoCierre, notificacionArqueoPendiente } from './cierreCaja'
 
 // ART = UTC-3: 23:30 ART = 02:30Z (+1), 23:55 = 02:55Z, 00:00 ART = 03:00Z.
 describe('aviso de cierre de caja', () => {
@@ -30,4 +30,24 @@ describe('arqueo pendiente', () => {
     expect(l.map((c: { fecha: string }) => c.fecha)).toEqual(['2026-11-01', '2026-11-03'])
   })
   it('ddmm', () => { expect(ddmm('2026-11-04')).toBe('04/11') })
+})
+
+describe('notificación de arqueo pendiente', () => {
+  const caja = (fecha: string, extra = {}) => ({ fecha, cierre_automatico: true, arqueo_pendiente: true, ...extra })
+  it('sin cajas pendientes no hay notificación (desaparece sola al completar el arqueo)', () => {
+    expect(notificacionArqueoPendiente([])).toBeNull()
+    expect(notificacionArqueoPendiente([caja('2026-11-04', { arqueo_pendiente: false })])).toBeNull()
+  })
+  it('una caja: texto exacto y abre Caja en esa fecha con el arqueo listo', () => {
+    const n = notificacionArqueoPendiente([caja('2026-11-04')])!
+    expect(n.titulo).toBe('La caja del 04/11 se cerró automáticamente a las 00:00. Falta hacer el arqueo y la Z.')
+    expect(n.ruta_destino).toBe('/app/caja?fecha=2026-11-04&cerrar=1')
+    expect(n.alerta).toBe(true)
+  })
+  it('varias: UNA sola agrupada con la lista de fechas y Caja en la más vieja', () => {
+    const n = notificacionArqueoPendiente([caja('2026-11-04'), caja('2026-10-30'), caja('2026-11-01', { arqueo_pendiente: false })])!
+    expect(n.titulo).toBe('2 cajas cerradas automáticamente: falta arqueo y Z')
+    expect(n.detalle).toBe('30/10, 04/11')
+    expect(n.ruta_destino).toBe('/app/caja?fecha=2026-10-30')
+  })
 })

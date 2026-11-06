@@ -4,7 +4,7 @@ import { useNotificaciones } from '../../context/NotificacionesProvider'
 import { formatTiempoRelativo } from '../../lib/format'
 import {
   Bell, Inbox, FileText, AlertCircle, Wallet, Clock, CalendarPlus,
-  CalendarClock, Ban, CheckCircle2, CheckCheck, ChevronDown,
+  CalendarClock, Ban, CheckCircle2, CheckCheck, ChevronDown, AlertTriangle,
 } from 'lucide-react'
 import { emojiEnTexto } from '../../lib/unidadIcono'
 import ScrollFade from '../ui/ScrollFade'
@@ -23,6 +23,7 @@ const TIPO_META = {
   reserva_modificada: { icon: CalendarClock, color: 'text-ink', accion: 'Ver reserva', plural: 'reservas modificadas' },
   reserva_cancelada: { icon: Ban, color: 'text-danger', accion: 'Ver reserva', plural: 'reservas canceladas' },
   pago_registrado: { icon: CheckCircle2, color: 'text-success-ink', accion: 'Ver pago', plural: 'pagos registrados' },
+  arqueo_pendiente: { icon: AlertTriangle, color: 'text-danger-ink', accion: 'Hacer arqueo y Z', plural: 'cajas con arqueo pendiente', alerta: true },
   caja_cerrada: { icon: Wallet, color: 'text-success-ink', accion: 'Ver caja', plural: 'cajas cerradas' },
 }
 
@@ -87,18 +88,19 @@ function ItemNotificacion({ item, onAccion }) {
     <button
       type="button"
       onClick={() => onAccion(item)}
-      className="w-full text-left flex items-start gap-3 p-3 rounded-inner hover:bg-surface transition-all group"
+      className={`w-full text-left flex items-start gap-3 p-3 rounded-inner transition-all group ${meta.alerta ? 'bg-danger-soft hover:bg-danger-soft/70' : 'hover:bg-surface'}`}
+      data-notif-tipo={item.tipo}
     >
-      <div className={`w-9 h-9 rounded-full bg-surface border border-line flex items-center justify-center shrink-0 ${meta.color}`}>
+      <div className={`w-9 h-9 rounded-full ${meta.alerta ? 'bg-card border-danger/30' : 'bg-surface border-line'} border flex items-center justify-center shrink-0 ${meta.color}`}>
         <Icon size={16} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-label font-semibold text-ink leading-snug whitespace-normal break-words">{emojiEnTexto(item.titulo)}</p>
-        {item.detalle && <p className="text-label text-ink-2 mt-1 truncate">{emojiEnTexto(item.detalle)}</p>}
+        {item.detalle && <p className={`text-label text-ink-2 mt-1 ${meta.alerta ? 'whitespace-normal break-words' : 'truncate'}`}>{emojiEnTexto(item.detalle)}</p>}
         <div className="flex items-center gap-2 mt-1">
           <span className="text-label text-ink-2">{formatTiempoRelativo(item.creada_at)}</span>
           {meta.accion && (
-            <span className={`text-label ${meta.color} opacity-0 group-hover:opacity-100 transition-opacity`}>
+            <span className={`text-label ${meta.color} ${meta.alerta ? '' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
               {meta.accion}
             </span>
           )}

@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './AuthProvider'
+import { useData } from './DataProvider'
+import { notificacionArqueoPendiente } from '../lib/cierreCaja'
 
 const Ctx = createContext(null)
 
@@ -21,7 +23,8 @@ export function NotificacionesProvider({ children }) {
   const { session } = useAuth()
   const usuarioId = session?.user?.id || null
 
-  const [pendientes, setPendientes] = useState([])
+  const { historialCajas } = useData()
+  const [pendientesDB, setPendientes] = useState([])
   const [novedades, setNovedades] = useState([]) // { ...notificacion, leida_at, archivada_at }
   const [loading, setLoading] = useState(true)
 
@@ -56,6 +59,14 @@ export function NotificacionesProvider({ children }) {
       .sort((a, b) => new Date(b.creada_at) - new Date(a.creada_at))
     setNovedades(vivas)
   }, [usuarioId])
+
+  // Alerta derivada (sin tabla): las cajas cerradas automáticamente a las 00:00 ART que todavía
+  // tienen arqueo_pendiente. Desaparece sola cuando se hace el arqueo y la Z. Una sola
+  // notificación, agrupada si hay más de una caja.
+  const pendientes = useMemo(() => {
+    const alerta = notificacionArqueoPendiente(historialCajas)
+    return alerta ? [alerta, ...pendientesDB] : pendientesDB
+  }, [historialCajas, pendientesDB])
 
   const refetch = useCallback(async () => {
     await Promise.all([fetchPendientes(), fetchNovedades()])

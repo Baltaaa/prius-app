@@ -30,7 +30,7 @@ export function AvisoCierreInminente() {
 }
 
 // Arqueo pendiente: la caja de un día anterior se cerró automáticamente y falta el arqueo y la Z.
-export function AvisoArqueoPendiente({ compacto = false, className = '' }) {
+export function AvisoArqueoPendiente({ className = '' }) {
   const { historialCajas } = useCaja()
   const navigate = useNavigate()
   const pendientes = cajasConArqueoPendiente(historialCajas)
@@ -38,13 +38,6 @@ export function AvisoArqueoPendiente({ compacto = false, className = '' }) {
   const c = pendientes[0]
   const ir = () => navigate(`/app/caja?fecha=${c.fecha}&cerrar=1`)
   const texto = `La caja del ${ddmm(c.fecha)} se cerró automáticamente: falta el arqueo`
-  if (compacto) {
-    return (
-      <button type="button" onClick={ir} className={`mt-3 w-full text-left rounded-inner bg-gold text-ink px-3 py-2 text-label ${className}`}>
-        {texto}{pendientes.length > 1 ? ` (+${pendientes.length - 1} más)` : ''} · Hacer arqueo
-      </button>
-    )
-  }
   return (
     <div role="alert" className={`no-print p-card rounded-card flex flex-wrap items-center gap-3 bg-gold-100 border border-gold-300 text-ink ${className}`}>
       <AlertTriangle size={18} className="shrink-0" />

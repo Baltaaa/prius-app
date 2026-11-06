@@ -68,7 +68,7 @@ export default function PlanoMobile({
               onAnimationEnd={onAnimationEnd}
             >
               <PlanoRotable rotado={rotado}>
-                <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+                <PlanoGrid unidades={unidades} renderCelda={renderCelda} mar={fullscreen} />
               </PlanoRotable>
             </ZoomPanPinch>
             <PlanoZoomPill

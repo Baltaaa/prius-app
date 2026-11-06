@@ -247,22 +247,20 @@ function descripcionExtra(evento, meta) {
   return texto
 }
 
-// Atajos de rango del mock (07): Hoy / 7 días / Mes / Personalizado.
-// "Personalizado" no fija fechas: solo revela los dos date pickers.
+// Atajos de rango: Hoy / 7 días / Mes. Las fechas a mano se eligen con el chip de rango; si el
+// rango no coincide con ningún atajo, ninguno queda activo.
 const ATAJOS = [
   { key: 'hoy', label: 'Hoy', dias: 0 },
   { key: '7d', label: '7 días', dias: 7 },
   { key: 'mes', label: 'Mes', dias: 30 },
-  { key: 'custom', label: 'Personalizado' },
 ]
 
 function atajoActivo(desde, hasta) {
-  if (hasta !== todayStr()) return 'custom'
+  if (hasta !== todayStr()) return null
   for (const a of ATAJOS) {
-    if (a.dias == null) continue
     if (desde === addDays(todayStr(), -a.dias)) return a.key
   }
-  return 'custom'
+  return null
 }
 
 /** Fila de evento. Misma pieza para el listado global y para las fichas. */
@@ -538,7 +536,6 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
   // ─────────────────────────── Historial global ───────────────────────────
   const atajo = atajoActivo(desde, hasta)
   const elegirAtajo = (a) => {
-    if (a.dias == null) { setFiltrosAbiertos(true); return }
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       const d = addDays(todayStr(), -a.dias)
@@ -552,7 +549,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
       {/* Toolbar en la zona sticky superior (ToolbarSticky), junto a la topbar:
           una sola pieza flotante con blur progresivo. Dos filas como máximo y
           controles de 40px en desktop:
-          fila 1: buscador · Hoy/7 días/Mes/Personalizado · UN chip de rango ·
+          fila 1: buscador · Hoy/7 días/Mes · UN chip de rango ·
           usuario; fila 2: tabs de tipo en una sola línea (scroll con fade).
           En mobile los filtros finos se despliegan con el botón de ajustes. */}
       <ToolbarSticky>
@@ -592,7 +589,9 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
                 setHasta={(v) => setRango('hHasta', v || todayStr(), todayStr())}
                 className="md:w-40 shrink-0"
               />
-              <div className="md:w-36 xl:w-44 shrink-0 [&_.field]:!bg-card">
+              {/* "Todos los usuarios" siempre completo: el select toma el ancho de su contenido (w-max) y
+                  no se achica nunca; si la fila no alcanza, se achica el buscador. */}
+              <div className="md:w-max md:min-w-fit shrink-0 [&_.field]:!bg-card">
                 <BrandSelect value={usuarioFiltro} onChange={(v) => setRango('hUsuario', v, '')} options={opcionesUsuario} className="w-full" />
               </div>
             </div>

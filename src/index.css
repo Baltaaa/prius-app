@@ -206,6 +206,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .plano-rotable, .plano-contra { transition-duration: 1ms; }
 }
+/* Olas del mar del modo cliente (PlanoGrid, MarCliente): solo transform, un período por vuelta. */
+@keyframes plano-ola { to { transform: translateX(calc(var(--ola-p) * -1)); } }
+.plano-ola { animation: plano-ola 18s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .plano-ola { animation: none; } }
 .plano-slide-left { animation: plano-slide-in-left 200ms ease-out; }
 .plano-slide-right { animation: plano-slide-in-right 200ms ease-out; }
 
