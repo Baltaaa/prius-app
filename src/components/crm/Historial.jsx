@@ -4,11 +4,12 @@ import {
   CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff, SlidersHorizontal,
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
-import { formatFecha, formatHora, formatPesos, formatMontosEnTexto } from '../../lib/format'
+import { formatFecha, formatHora, formatMonto, formatMontosEnTexto } from '../../lib/format'
 import { hoyAR } from '../../lib/fechas'
 import { agruparPorDia, etiquetaDia, sumarDias } from '../../lib/historialDias'
 import { useData } from '../../context/DataProvider'
-import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
+import { useDialog } from '../../context/DialogProvider'
+import { resolverDestinoEvento, MENSAJE_REGISTRO_INEXISTENTE } from '../../lib/destinoEvento'
 import { staggerDelay } from '../../lib/motion'
 import { useEsDesktop } from '../../hooks/useMediaQuery'
 import BrandSelect from '../ui/BrandSelect'
@@ -121,7 +122,7 @@ function datosDeEvento(evento, unidadesPorId = {}) {
   const unidad = unidadId ? unidadesPorId[unidadId] : null
   const monto = val('monto')
   return {
-    monto: monto != null ? formatPesos(monto) : null,
+    monto: monto != null ? formatMonto(monto) : null,
     cliente: evento.cliente_nombre || null,
     unidad: unidad ? unidadConEmoji(unidad.tipo, unidad.numero) : null,
     comprobante: val('comprobante') || null,
@@ -135,13 +136,13 @@ const CAMPOS_DIFF = {
     { campo: 'fecha_inicio', label: 'Fecha inicio', fmt: formatFecha },
     { campo: 'fecha_fin', label: 'Fecha fin', fmt: formatFecha },
     { campo: 'fecha', label: 'Fecha', fmt: formatFecha },
-    { campo: 'valor_total', label: 'Monto', fmt: formatPesos },
+    { campo: 'valor_total', label: 'Monto', fmt: formatMonto },
     // `fmtUnidad` (no `fmt`): necesita el mapa de unidades, que solo existe
     // en runtime. Sin esto el Historial mostraba el UUID crudo
     // ("Unidad: 249cb18c-… → 524e8f62-…") — 31/10/2026.
     { campo: 'unidad_id', label: 'Unidad', fmtUnidad: true },
   ],
-  pagos: [{ campo: 'monto', label: 'Monto', fmt: formatPesos }, { campo: 'medio', label: 'Medio' }],
+  pagos: [{ campo: 'monto', label: 'Monto', fmt: formatMonto }, { campo: 'medio', label: 'Medio' }],
 }
 
 // Ruido que nunca se muestra en el diff genérico: claves técnicas, sellos
@@ -167,7 +168,7 @@ const comoTexto = (v, campo = '') => {
   if (v === null || v === undefined || v === '') return '—'
   if (typeof v === 'boolean') return v ? 'Sí' : 'No'
   if (typeof v === 'object') return JSON.stringify(v).slice(0, 60)
-  if (ES_PLATA.test(campo) && !Number.isNaN(Number(v))) return formatPesos(Number(v))
+  if (ES_PLATA.test(campo) && !Number.isNaN(Number(v))) return formatMonto(Number(v))
   if (ES_FECHA.test(campo)) return formatFecha(String(v).slice(0, 10))
   return String(v)
 }
@@ -372,7 +373,8 @@ function HistorialSkeleton() {
 export default function Historial({ tipo = 'global', id, onEventoClick, compact = false }) {
   // Mapa id -> unidad, para que el diff muestre "Carpa 12 → Carpa 58" en vez
   // del UUID crudo (31/10/2026). Las unidades ya están en memoria.
-  const { unidades } = useData()
+  const { unidades, reservas, clientes, pagos, leads, loading: cargandoDatos } = useData()
+  const { toast } = useDialog()
   const unidadesPorId = useMemo(() => {
     const map = {}
     for (const u of unidades || []) map[u.id] = u
@@ -421,29 +423,20 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
 
   const grupos = useMemo(() => agruparPorDia(filtrados), [filtrados])
 
-  // Navegación del evento. Sin cambios respecto de la versión anterior: en
-  // el listado global ahora se dispara desde el botón del detalle en vez
-  // del click directo en la fila, pero la lógica es la misma.
+  // Navegación del evento: el destino sale de `lib/destinoEvento` (único
+  // resolver). Registro borrado -> aviso, sin navegar a una pantalla vacía.
+  const destinoDe = (evento) => resolverDestinoEvento(evento, { reservas, clientes, pagos, leads, unidades })
   const handleClick = (evento) => {
     if (onEventoClick) return onEventoClick(evento)
-    const after = evento.datos?.after || {}
-    const before = evento.datos?.before || {}
-    const clienteId = evento.cliente_id || after.cliente_id || before.cliente_id
-    if (evento.tabla === 'reservas') return navigate(linkToReserva(evento.registro_id))
-    if (evento.tabla === 'clientes') return navigate(linkToCliente(evento.registro_id))
-    if (evento.tabla === 'pagos' && clienteId) {
-      return navigate(linkToCliente(clienteId, { pagoId: evento.registro_id }))
-    }
-    if (evento.tabla === 'comprobantes' && clienteId) {
-      return navigate(linkToCliente(clienteId))
-    }
-    if (clienteId) return navigate(linkToCliente(clienteId))
+    // Con los datos del CRM todavía cargando, "no existe" sería un falso negativo.
+    if (cargandoDatos) return toast('Cargando datos, probá de nuevo en un instante.')
+    const destino = destinoDe(evento)
+    if (!destino) return
+    if (destino.inexistente) return toast(MENSAJE_REGISTRO_INEXISTENTE)
+    navigate(destino.ruta)
   }
 
-  const puedeNavegar = (e) => {
-    const clienteId = e.cliente_id || e.datos?.after?.cliente_id || e.datos?.before?.cliente_id
-    return !!onEventoClick || e.tabla === 'reservas' || e.tabla === 'clientes' || !!clienteId
-  }
+  const puedeNavegar = (e) => !!onEventoClick || destinoDe(e) !== null
 
   /** Props del detalle para el evento abierto. */
   const detalle = useMemo(() => {
@@ -463,7 +456,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
       datos,
       onIr: puedeNavegar(seleccionado) ? () => handleClick(seleccionado) : null,
     }
-  }, [seleccionado, unidadesPorId])
+  }, [seleccionado, unidadesPorId, reservas, clientes, pagos, leads, unidades])
 
   if (loading && todos.length === 0) {
     return mostrarFiltrosGlobales

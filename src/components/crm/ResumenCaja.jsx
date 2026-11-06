@@ -1,4 +1,4 @@
-import { formatPesos, formatFecha } from '../../lib/format'
+import { formatMonto, formatFecha } from '../../lib/format'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import MontoStat from '../ui/MontoStat'
 import FilaMedioPago from './FilaMedioPago'
@@ -139,12 +139,12 @@ export default function ResumenCaja({ resumen }) {
             </div>
             <Fila
               label="Total"
-              value={formatPesos(arqueo.total?.contado)}
+              value={formatMonto(arqueo.total?.contado)}
               tone={diferenciaArqueo === 0 ? 'text-success-ink' : 'text-ink'}
             />
             <Fila
               label="Diferencia total"
-              value={formatPesos(arqueo.total?.diferencia)}
+              value={formatMonto(arqueo.total?.diferencia)}
               tone={diferenciaArqueo === 0 ? 'text-success-ink' : 'text-ink'}
             />
           </Section>
@@ -152,16 +152,16 @@ export default function ResumenCaja({ resumen }) {
           {z?.numero && (
             <Section title="Controlador Fiscal — Cierre Z" icon={Receipt}>
               <Fila label="Número Z" value={z.numero} />
-              <Fila label="Total Z" value={formatPesos(z.total)} />
-              <Fila label="Neto gravado" value={formatPesos(z.neto_gravado)} />
-              <Fila label="IVA" value={formatPesos(z.iva)} />
+              <Fila label="Total Z" value={formatMonto(z.total)} />
+              <Fila label="Neto gravado" value={formatMonto(z.neto_gravado)} />
+              <Fila label="IVA" value={formatMonto(z.iva)} />
               <Fila label="Cantidad de comprobantes" value={z.cantidad_comprobantes ?? '—'} />
               <Fila label="Primer / último comprobante" value={`${z.primer_comprobante || '—'} / ${z.ultimo_comprobante || '—'}`} />
               {(Number(z.comparacion?.diferencia_total) !== 0 || Number(z.comparacion?.diferencia_cantidad) !== 0) && (
                 <div className="flex items-start gap-2 mt-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
                   <AlertTriangle className="text-ink shrink-0 mt-1" size={14} />
                   <p className="text-label text-ink-2">
-                    Diferencia vs. lo registrado en el sistema: {formatPesos(z.comparacion.diferencia_total)} en monto,
+                    Diferencia vs. lo registrado en el sistema: {formatMonto(z.comparacion.diferencia_total)} en monto,
                     {' '}{z.comparacion.diferencia_cantidad} en cantidad de comprobantes.
                   </p>
                 </div>
@@ -179,9 +179,9 @@ export default function ResumenCaja({ resumen }) {
               transferencia o un swipe de tarjeta). */}
           <Section title="Total General — Todos los Medios" icon={Scale}>
             <Fila label="Movimientos" value={totales.cantidad ?? '—'} />
-            <Fila label="Ingresos" value={formatPesos(totales.ingresos)} tone="text-success-ink" />
-            <Fila label="Gastos" value={formatPesos(totales.egresos)} tone="text-danger" />
-            <Fila label="Neto" value={formatPesos(totales.neto)} tone="text-ink" />
+            <Fila label="Ingresos" value={formatMonto(totales.ingresos)} tone="text-success-ink" />
+            <Fila label="Gastos" value={formatMonto(totales.egresos)} tone="text-danger" />
+            <Fila label="Neto" value={formatMonto(totales.neto)} tone="text-ink" />
           </Section>
 
           <Section title="Desglose por Medio de Pago" icon={CreditCard}>
@@ -195,7 +195,7 @@ export default function ResumenCaja({ resumen }) {
                     medio={m.medio}
                     monto={m.neto}
                     negativo={Number(m.neto) < 0}
-                    detalle={`${m.cantidad} movimiento${Number(m.cantidad) === 1 ? '' : 's'}${Number(m.egresos) > 0 ? ` · Ingresos ${formatPesos(m.ingresos)} · Gastos ${formatPesos(m.egresos)}` : ''}`}
+                    detalle={`${m.cantidad} movimiento${Number(m.cantidad) === 1 ? '' : 's'}${Number(m.egresos) > 0 ? ` · Ingresos ${formatMonto(m.ingresos)} · Gastos ${formatMonto(m.egresos)}` : ''}`}
                   />
                 ))}
               </div>
@@ -209,7 +209,7 @@ export default function ResumenCaja({ resumen }) {
                 {(recibos || []).length === 0 ? (
                   <p className="text-label text-ink-2 bg-surface rounded-inner p-3">Sin recibos en esta caja.</p>
                 ) : recibos.map((r) => (
-                  <Fila key={r.etiqueta} label={r.etiqueta} cliente={r.cliente} value={formatPesos(r.monto_total)} tone={r.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
+                  <Fila key={r.etiqueta} label={r.etiqueta} cliente={r.cliente} value={formatMonto(r.monto_total)} tone={r.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
                 ))}
               </div>
               <div>
@@ -217,7 +217,7 @@ export default function ResumenCaja({ resumen }) {
                 {(facturas || []).length === 0 ? (
                   <p className="text-label text-ink-2 bg-surface rounded-inner p-3">Sin facturas emitidas en esta jornada.</p>
                 ) : facturas.map((f) => (
-                  <Fila key={f.etiqueta} label={f.etiqueta} cliente={f.cliente} value={formatPesos(f.monto_total)} tone={f.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
+                  <Fila key={f.etiqueta} label={f.etiqueta} cliente={f.cliente} value={formatMonto(f.monto_total)} tone={f.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
                 ))}
               </div>
               <div>
@@ -225,7 +225,7 @@ export default function ResumenCaja({ resumen }) {
                 {(gastos?.por_categoria || []).length === 0 ? (
                   <p className="text-label text-ink-2 bg-surface rounded-inner p-3">Sin gastos registrados en esta caja.</p>
                 ) : gastos.por_categoria.map((g) => (
-                  <Fila key={g.categoria} label={CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} value={formatPesos(g.total)} tone="text-danger" />
+                  <Fila key={g.categoria} label={CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} value={formatMonto(g.total)} tone="text-danger" />
                 ))}
               </div>
             </div>
@@ -239,7 +239,7 @@ export default function ResumenCaja({ resumen }) {
                     <FileText size={14} className="text-ink-2 shrink-0" />
                     <span className="text-body text-ink-2 truncate">{p.cliente || 'S/N'} — {p.concepto}</span>
                   </div>
-                  <span className="text-body font-semibold text-ink tabular-nums shrink-0">{formatPesos(p.monto)}</span>
+                  <span className="text-body font-semibold text-ink tabular-nums shrink-0">{formatMonto(p.monto)}</span>
                 </div>
               ))}
             </Section>
@@ -248,10 +248,10 @@ export default function ResumenCaja({ resumen }) {
           {((anulados?.pagos || []).length > 0 || (anulados?.gastos || []).length > 0) && (
             <Section title="Anulados">
               {(anulados.pagos || []).map((p) => (
-                <Fila key={`p-${p.pago_id}`} label={`Pago — ${p.motivo}`} value={formatPesos(p.monto)} tone="text-ink-2 line-through" />
+                <Fila key={`p-${p.pago_id}`} label={`Pago — ${p.motivo}`} value={formatMonto(p.monto)} tone="text-ink-2 line-through" />
               ))}
               {(anulados.gastos || []).map((g) => (
-                <Fila key={`g-${g.gasto_id}`} label={`Gasto — ${g.motivo}`} value={formatPesos(g.monto)} tone="text-ink-2 line-through" />
+                <Fila key={`g-${g.gasto_id}`} label={`Gasto — ${g.motivo}`} value={formatMonto(g.monto)} tone="text-ink-2 line-through" />
               ))}
             </Section>
           )}

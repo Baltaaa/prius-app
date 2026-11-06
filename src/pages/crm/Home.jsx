@@ -28,6 +28,7 @@ import QuickActions from '../../components/brand/QuickActions'
 import SegmentedBar from '../../components/brand/SegmentedBar'
 import SegmentedControl from '../../components/brand/SegmentedControl'
 import SidebarCajaCard from '../../components/brand/SidebarCajaCard'
+import OjitoMontos from '../../components/brand/OjitoMontos'
 import { Rayas } from '../../components/brand/patterns'
 import CountUp from '../../components/brand/motion/CountUp'
 import Reveal from '../../components/brand/motion/Reveal'
@@ -196,14 +197,18 @@ export default function Home() {
             title={puedeVerReportes ? 'Cobranzas temporada' : 'Caja y cobranzas'}
             action={<MonedaSwitch moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion} fecha={mv.fecha} stale={mv.stale} compacto />}
           >
-            <button
-              type="button"
-              onClick={puedeVerReportes && reportesOn ? () => navigate('/app/reportes') : undefined}
-              className={`flex flex-wrap items-center gap-x-4 gap-y-2 mt-6 md:mt-8 text-left whitespace-normal ${puedeVerReportes && reportesOn ? '' : 'cursor-default'}`}
-            >
-              <span className="text-kpi"><CountUp value={puedeVerReportes ? totalCobrado : pendientesSaldo} format={fmtM} /></span>
-              {puedeVerReportes && <DeltaBadge value={formatPorcentaje(pctPercibido * 100, 1)} />}
-            </button>
+            {/* KPI + ojito del modo privacidad global (el mismo estado que el de la card de Caja). */}
+            <div className="mt-6 md:mt-8 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={puedeVerReportes && reportesOn ? () => navigate('/app/reportes') : undefined}
+                className={`min-w-0 flex flex-wrap items-center gap-x-4 gap-y-2 text-left whitespace-normal ${puedeVerReportes && reportesOn ? '' : 'cursor-default'}`}
+              >
+                <span className="text-kpi"><CountUp value={puedeVerReportes ? totalCobrado : pendientesSaldo} format={fmtM} /></span>
+                {puedeVerReportes && <DeltaBadge value={formatPorcentaje(pctPercibido * 100, 1)} />}
+              </button>
+              <OjitoMontos sobre="claro" className="-mr-2" />
+            </div>
 
             <div className="mt-auto pt-6 md:pt-8 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
               <button type="button" onClick={() => navigate('/app/reservas')} className="text-body text-left whitespace-normal">

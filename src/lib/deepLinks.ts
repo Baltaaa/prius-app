@@ -80,6 +80,11 @@ export function linkToLead(leadId: string): string {
   return `/app/leads?id=${leadId}`
 }
 
+// Caja de un día puntual (Caja.jsx lee `?fecha=`); sin fecha, la de hoy.
+export function linkToCaja(fecha?: string | null): string {
+  return fecha ? `/app/caja?fecha=${fecha}` : '/app/caja'
+}
+
 export function linkToHistorial(filtros?: Record<string, string | undefined>): string {
   const params = new URLSearchParams()
   for (const [k, v] of Object.entries(filtros || {})) {

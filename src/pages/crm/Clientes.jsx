@@ -10,7 +10,7 @@ import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatComprobante, formatUnidad, formatNombre, normalizeText } from '../../lib/format'
+import { formatMontoVisible, formatFecha, formatCUIT, formatDNI, formatComprobante, formatUnidad, formatNombre, normalizeText } from '../../lib/format'
 import { unidadConEmoji } from '../../lib/unidadIcono'
 import MontoStat from '../../components/ui/MontoStat'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
@@ -853,7 +853,7 @@ export default function Clientes() {
                           className="text-label text-ink font-semibold hover:underline truncate block max-w-full text-left"
                         >
                           Comprobante {formatComprobante(d.comprobanteMatch.comprobante.tipo, d.comprobanteMatch.comprobante.numero)}
-                          {formatPesosVisible(d.comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(d.comprobanteMatch.pago.monto)}` : ''}
+                          {formatMontoVisible(d.comprobanteMatch.pago.monto) ? ` · ${formatMontoVisible(d.comprobanteMatch.pago.monto)}` : ''}
                         </button>
                       )}
                     </div>
@@ -875,7 +875,7 @@ export default function Clientes() {
                       ) : d.sinPrecio ? (
                         <span className="text-label text-ink-2 whitespace-nowrap">Sin precio</span>
                       ) : (
-                        formatPesosVisible(d.saldoInfo.total) && (
+                        formatMontoVisible(d.saldoInfo.total) && (
                           <MontoStat value={d.saldoInfo.total} size="xs" className="text-danger-ink" />
                         )
                       )}

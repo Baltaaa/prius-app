@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Topbar from '../components/brand/Topbar'
+import { AvisoCierreInminente } from '../components/crm/AvisosCaja'
 import ProgressiveBlurHeader from '../components/brand/ProgressiveBlurHeader'
 import { ToolbarSlotContext } from '../components/brand/toolbarSlot'
 import AppFooter from '../components/crm/AppFooter'
@@ -155,6 +156,7 @@ export default function AppLayout() {
               className={`flex-1 flex flex-col overscroll-contain px-page-max w-full pb-bottom-nav-safe bg-canvas [overflow-x:clip] pt-zona ${esPlano ? 'md:pb-3' : esSeccionAlturaFija ? 'md:pb-12' : 'md:pb-0'} ${esSeccionAlturaFija ? 'overflow-y-auto lg:overflow-hidden' : esPlano ? 'max-md:overflow-hidden overflow-y-auto' : esComprobantes ? 'overflow-hidden' : 'overflow-y-auto'}`}
             >
               <div className={esSeccionAlturaFija ? 'lg:flex-1 lg:min-h-0 lg:flex lg:flex-col' : esPlano || esComprobantes ? 'flex-1 min-h-0 flex flex-col' : undefined}>
+                <AvisoCierreInminente />
                 <Outlet />
               </div>
               {/* El footer global empujaría las cajas más allá del viewport

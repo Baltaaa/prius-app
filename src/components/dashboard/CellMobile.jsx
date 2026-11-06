@@ -24,7 +24,8 @@ import { STATUS } from "./constants"
 // "pagada") — se omite a propósito, no es un descarte accidental.
 // El reloj chico (preconfirmada web) se mantiene como marca independiente,
 // se puede combinar con cualquiera de los 3 fondos.
-function CellMobile({ number, unit, onClick, isHighlighted, isDimmed }) {
+// `modoCliente` (pantalla completa): toda ocupada del mismo color, sin letra ni marcas (ver Cell.jsx).
+function CellMobile({ number, unit, onClick, isHighlighted, isDimmed, modoCliente = false }) {
   const status = unit?.status || STATUS.LIBRE
   const isPendienteConfirmacion = status === STATUS.PENDIENTE_CONFIRMACION
   const isTemporada = status === STATUS.TEMPORADA
@@ -33,7 +34,12 @@ function CellMobile({ number, unit, onClick, isHighlighted, isDimmed }) {
   const isOcupada = isTemporada || isPeriodo || isDia
   const letra = isTemporada ? "T" : isPeriodo ? "P" : isDia ? "D" : null
 
-  const bgClass = isPendienteConfirmacion || !isOcupada
+  // En modo cliente una pendiente de confirmación sigue siendo una unidad tomada: se ve ocupada.
+  const bgClass = modoCliente
+    ? (isOcupada || isPendienteConfirmacion
+      ? `${COLOR_ESTADO.ocupada.bg} border ${COLOR_ESTADO.ocupada.border} ${COLOR_ESTADO.ocupada.text}`
+      : `${COLOR_ESTADO.sinConfirmar.bg} border ${COLOR_ESTADO.sinConfirmar.border} ${COLOR_ESTADO.sinConfirmar.text}`)
+    : isPendienteConfirmacion || !isOcupada
     ? `${COLOR_ESTADO.sinConfirmar.bg} border ${COLOR_ESTADO.sinConfirmar.border} ${COLOR_ESTADO.sinConfirmar.text}`
     : unit?.isPaid
       ? `${COLOR_ESTADO.pagado.bg} border ${COLOR_ESTADO.pagado.border} ${COLOR_ESTADO.pagado.text}`
@@ -48,15 +54,15 @@ function CellMobile({ number, unit, onClick, isHighlighted, isDimmed }) {
       onClick={() => onClick(unit)}
       className={`relative w-11 h-9 min-w-[44px] min-h-[36px] shrink-0 rounded-plano-md flex items-center justify-center font-semibold text-[13px] tabular-nums transition-colors ${bgClass} ${opacityClass} ${highlightClass}`}
     >
-      {number}
+      <span className="plano-contra">{number}</span>
 
-      {isPendienteConfirmacion && (
+      {!modoCliente && isPendienteConfirmacion && (
         <Hourglass size={12} className="absolute top-0.5 right-0.5 text-plano-slate" />
       )}
-      {letra && !isPendienteConfirmacion && (
-        <span className="absolute top-0 right-0.5 text-[10px] font-bold leading-none">{letra}</span>
+      {!modoCliente && letra && !isPendienteConfirmacion && (
+        <span className="plano-contra absolute top-0 right-0.5 text-[10px] font-bold leading-none">{letra}</span>
       )}
-      {unit?.esPreconfirmadaWeb && (
+      {!modoCliente && unit?.esPreconfirmadaWeb && (
         <Clock size={10} className="absolute -bottom-0.5 -right-0.5 text-current opacity-90" />
       )}
     </button>

@@ -6,7 +6,7 @@ import { useReservas } from "../../hooks/useReservas"
 import { useDialog } from "../../context/DialogProvider"
 import { usePermiso } from "../../context/AuthProvider"
 import { coSocios, saldoNumerico, montoInfo, estadoBadgeStatus } from "../../lib/reservas"
-import { formatPesos, formatPesosVisible, formatFecha, formatNombre } from '../../lib/format'
+import { formatMonto, formatMontoVisible, formatFecha, formatNombre } from '../../lib/format'
 import { unidadConEmoji } from '../../lib/unidadIcono'
 import { sectorDeUnidad, estadoUnidadInfo } from "../../lib/plano"
 import StatusBadge from "../crm/StatusBadge"
@@ -241,13 +241,13 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
               <div className="flex items-baseline justify-between">
                 <span className="text-body text-ink-2">Costo total</span>
                 <span className="text-body text-ink font-medium">
-                  {esPendienteConfirmacion ? "Sin confirmar" : bonificada ? "Sin cargo" : precioSinVerificar ? "Sin verificar" : Number(valorTotal) > 0 ? formatPesos(valorTotal) : "Sin precio"}
+                  {esPendienteConfirmacion ? "Sin confirmar" : bonificada ? "Sin cargo" : precioSinVerificar ? "Sin verificar" : Number(valorTotal) > 0 ? formatMonto(valorTotal) : "Sin precio"}
                 </span>
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-body text-ink-2">Saldo</span>
                 <span className={`text-body font-semibold ${saldo === null ? "text-ink-2" : "text-danger"}`}>
-                  {esPendienteConfirmacion ? "—" : saldo === null ? "Sin verificar" : formatPesosVisible(saldo)}
+                  {esPendienteConfirmacion ? "—" : saldo === null ? "Sin verificar" : formatMontoVisible(saldo)}
                 </span>
               </div>
             </div>

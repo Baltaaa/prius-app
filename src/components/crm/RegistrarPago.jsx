@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useData } from '../../context/DataProvider'
 import { usePagos } from '../../hooks/usePagos'
-import { formatPesos, formatNombre } from '../../lib/format'
+import { formatMonto, formatNombre } from '../../lib/format'
 import { unidadConEmoji } from '../../lib/unidadIcono'
 import { comprobanteTipoDefault, ERROR_EXCEDE_SALDO } from '../../lib/pagos'
 import { usePagoComprobanteForm } from '../../hooks/usePagoComprobanteForm'
@@ -150,7 +150,7 @@ export default function RegistrarPago({
     } catch (err) {
       if (err.code === ERROR_EXCEDE_SALDO) {
         const ok = await confirm(
-          `El monto supera el saldo pendiente de la reserva (${formatPesos(saldo)}). ¿Registrar igual el excedente?`,
+          `El monto supera el saldo pendiente de la reserva (${formatMonto(saldo)}). ¿Registrar igual el excedente?`,
           { title: 'Monto mayor al saldo', tone: 'error' },
         )
         if (ok) return submit(true)
@@ -175,7 +175,7 @@ export default function RegistrarPago({
             <CheckCircle2 className="text-success-ink" size={32} />
           </div>
           <div>
-            <p className="text-card-title text-ink">{formatPesos(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
+            <p className="text-card-title text-ink">{formatMonto(exito.monto)} {exito.editado ? 'guardado' : 'registrado'}</p>
             {/* Item 11 (testing oct 2026): se sacó el aviso para el caso
                 normal (el pago SÍ afecta la caja de hoy — es lo esperable,
                 no hace falta avisarlo). Solo queda el aviso cuando NO la
@@ -223,10 +223,10 @@ export default function RegistrarPago({
       className="text-label w-full py-4 bg-ink hover:bg-chart-2 rounded-full text-on-ink"
     >
       {editingPago
-        ? `Guardar ${monto > 0 ? formatPesos(monto) : ''}`.trim()
+        ? `Guardar ${monto > 0 ? formatMonto(monto) : ''}`.trim()
         : esHistorico
-          ? `Confirmar pago histórico ${monto > 0 ? formatPesos(monto) : ''}`.trim()
-          : `Confirmar ${monto > 0 ? formatPesos(monto) : 'Pago'}`}
+          ? `Confirmar pago histórico ${monto > 0 ? formatMonto(monto) : ''}`.trim()
+          : `Confirmar ${monto > 0 ? formatMonto(monto) : 'Pago'}`}
     </LoadingButton>
   )
 
@@ -255,8 +255,8 @@ export default function RegistrarPago({
                   // quién se está cobrando (el pago igual queda con el
                   // cliente_id de `cliente`, el cosocio que abrió el form).
                   label: r.cliente_id && cliente?.id && r.cliente_id !== cliente.id
-                    ? `${unidadConEmoji(r.unidades?.tipo, r.unidades?.numero)} (cosocio de ${formatNombre(r.clientes?.nombre) || 'otro cliente'}) — saldo ${formatPesos(r.saldo)}`
-                    : `${unidadConEmoji(r.unidades?.tipo, r.unidades?.numero)} — saldo ${formatPesos(r.saldo)}`,
+                    ? `${unidadConEmoji(r.unidades?.tipo, r.unidades?.numero)} (cosocio de ${formatNombre(r.clientes?.nombre) || 'otro cliente'}) — saldo ${formatMonto(r.saldo)}`
+                    : `${unidadConEmoji(r.unidades?.tipo, r.unidades?.numero)} — saldo ${formatMonto(r.saldo)}`,
                 })),
               ]}
             />

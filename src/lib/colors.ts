@@ -21,6 +21,8 @@ export const COLOR_CANCELADA = { bg: 'bg-red-500/30', border: 'border-red-500/50
  */
 export const COLOR_ESTADO = {
   pagado: { bg: 'bg-ink', border: 'border-ink', text: 'text-on-ink' },
+  // Ocupada SIN distinguir saldo: la única que ve el cliente en el Plano en pantalla completa (modo cliente).
+  ocupada: { bg: 'bg-ink', border: 'border-ink', text: 'text-on-ink' },
   conSaldo: { bg: 'bg-gold', border: 'border-gold', text: 'text-ink' },
   sinConfirmar: { bg: 'bg-card', border: 'border-line', text: 'text-ink' },
   neutro: { bg: 'bg-surface', border: 'border-surface', text: 'text-ink-2' },

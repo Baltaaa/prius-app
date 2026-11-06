@@ -5,7 +5,7 @@ import SegmentedControl from '../brand/SegmentedControl'
 import PlanoLeyenda from './PlanoLeyenda'
 import PopoverAnclado from '../ui/PopoverAnclado'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesos, formatPesosCompacto, formatFecha, formatDiaCorto } from '../../lib/format'
+import { formatMonto, formatMontoCompacto, formatFecha, formatDiaCorto } from '../../lib/format'
 import { unidadEmoji } from '../../lib/unidadIcono'
 
 export const pct = (n) => `${Math.round((n || 0) * 100)}%`
@@ -21,7 +21,7 @@ export const pct = (n) => `${Math.round((n || 0) * 100)}%`
 export function PlanoStatTiles({ stats, valor, onChange, fecha, compacto = false, className = '' }) {
   if (!stats) return null
   const total = stats.ocupacion.total
-  const fmt = compacto ? formatPesosCompacto : formatPesos
+  const fmt = compacto ? formatMontoCompacto : formatMonto
   const saldo = stats.pendientes.saldo > 0 ? ` · ${fmt(stats.pendientes.saldo)}` : ''
   const tiles = [
     { key: null, label: 'Todas', texto: String(total) },
@@ -127,6 +127,7 @@ export function PlanoAcciones({ onImprimir, className = '' }) {
   )
 }
 
+// `modoCliente`: la versión mínima de pantalla completa (ver más abajo).
 // Controles completos del Plano (desktop, tablet y mobile comparten este
 // bloque): navegador de fecha, tiles-filtro de estado, segmented de tipo,
 // Referencias e Imprimir A4. Desde lg (1024px) todo va en dos filas (fecha ·
@@ -134,7 +135,7 @@ export function PlanoAcciones({ onImprimir, className = '' }) {
 // tiles 2x2 y segmented a ancho completo, con targets de 44px.
 export function PlanoControles({
   selectedDate, esHoy, diaSemana, onPrevDay, onNextDay, onHoy, onDateChange,
-  planoStats, estadoFiltro, onEstado, tipoFiltro, onTipo, onImprimir, compacto = false, anchoFecha,
+  planoStats, estadoFiltro, onEstado, tipoFiltro, onTipo, onImprimir, compacto = false, anchoFecha, modoCliente = false,
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -165,16 +166,20 @@ export function PlanoControles({
         </button>
       </div>
 
-      <PlanoAcciones onImprimir={onImprimir} className="hidden lg:flex order-3 ml-auto" />
+      {/* Modo cliente (pantalla completa): solo fecha y Todo/Carpas/Sombrillas. Sin tiles de
+          stats (con montos de pendientes), sin Referencias ni Imprimir A4. */}
+      {!modoCliente && <PlanoAcciones onImprimir={onImprimir} className="hidden lg:flex order-3 ml-auto" />}
 
-      <PlanoStatTiles
-        className="order-3 lg:order-4 basis-full"
-        stats={planoStats}
-        valor={estadoFiltro}
-        onChange={onEstado}
-        fecha={selectedDate}
-        compacto={compacto}
-      />
+      {!modoCliente && (
+        <PlanoStatTiles
+          className="order-3 lg:order-4 basis-full"
+          stats={planoStats}
+          valor={estadoFiltro}
+          onChange={onEstado}
+          fecha={selectedDate}
+          compacto={compacto}
+        />
+      )}
 
       <PlanoTipoSegmented
         className="order-4 basis-full lg:order-2 lg:basis-auto"

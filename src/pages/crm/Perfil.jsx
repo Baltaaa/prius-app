@@ -7,7 +7,7 @@ import LoadingButton from '../../components/ui/LoadingButton'
 import { useTipoCambio } from '../../hooks/useTipoCambio'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso, useAuth } from '../../context/AuthProvider'
-import { formatPesos, formatFecha, formatNombre } from '../../lib/format'
+import { formatMonto, formatFecha, formatNombre } from '../../lib/format'
 import { unidadEmoji } from '../../lib/unidadIcono'
 
 // Perfil y tarifas — rebranding Stitch (nov 2026, Bloque 4).
@@ -201,7 +201,7 @@ export default function Perfil() {
               <span className="text-label text-ink-2">ARS / USD</span>
             </div>
             <div className="flex items-center justify-between gap-2 flex-wrap mt-2">
-              <p className="text-card-title text-ink tabular-nums">{tc.valor ? formatPesos(tc.valor) : '—'}</p>
+              <p className="text-card-title text-ink tabular-nums">{tc.valor ? formatMonto(tc.valor) : '—'}</p>
               {/* Chip ámbar si la cotización no es de hoy, verde si está al día. */}
               {tc.fecha && (
                 <span

@@ -111,7 +111,7 @@ export function validarComprobante(datos, tipo = 'estado_cuenta') {
   if (!datos.unidad.tipo || datos.unidad.numero == null) return 'La reserva no tiene unidad asignada.'
   if (datos.pendienteConfirmacion) return 'La reserva todavía no confirmó precio para esta temporada.'
   if (datos.montoTotalSinVerificar) return 'El monto total de esta reserva no está verificado todavía.'
-  if (!datos.bonificada && Number(datos.montoTotal) <= 0) return 'El monto total de la reserva es $0.'
+  if (!datos.bonificada && Number(datos.montoTotal) <= 0) return 'El monto total de la reserva es cero.'
   if (datos.montoAbonado === null) return 'Hay pagos sin verificar: completá el monto antes de emitir.'
   if (datos.saldo === null) return 'El saldo de esta reserva no se puede calcular todavía.'
   if (datos.saldo < 0) return 'El saldo calculado es negativo — revisá los pagos de esta reserva.'

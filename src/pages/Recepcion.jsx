@@ -11,7 +11,7 @@ import { normalizar as normalizarCodigo, esValido as codigoValido, cuerpo as cue
 import { resumenSaldos } from '../lib/saldos'
 import { hoyAR } from '../lib/fechas'
 import { enRangoHoy, llegadasDelDia } from '../lib/recepcion'
-import { formatPesos, formatPesosVisible, formatFecha, formatFechaHora, formatRangoFechas, formatTelefono, formatNombre } from '../lib/format'
+import { formatMonto, formatMontoVisible, formatFecha, formatFechaHora, formatRangoFechas, formatTelefono, formatNombre } from '../lib/format'
 import { unidadConEmoji } from '../lib/unidadIcono'
 import { MEDIO_PAGO_LABEL, ERROR_CAJA_CERRADA } from '../lib/pagos'
 import { linkToComprobante, linkToPlano } from '../lib/deepLinks'
@@ -226,7 +226,7 @@ export default function Recepcion() {
 
   const handleCheckinSinCobrar = async () => {
     const ok = await confirm(
-      `Queda un saldo de ${formatPesos(saldoGrupo)} sin cobrar. ¿Hacer el check-in igual?`,
+      `Queda un saldo de ${formatMonto(saldoGrupo)} sin cobrar. ¿Hacer el check-in igual?`,
       { title: 'Check-in sin cobrar', tone: 'error' },
     )
     if (ok) ejecutarCobro({ cobrar: false, hacerCheckin: true })
@@ -298,7 +298,7 @@ export default function Recepcion() {
                 <CheckCircle2 className="mx-auto text-success-ink" size={40} />
                 <div>
                   <p className="text-card-title text-ink">Listo — {exito.unidadesLabel}</p>
-                  {exito.total > 0 && <p className="text-body text-ink-2 mt-1">Cobrado: {formatPesos(exito.total)}</p>}
+                  {exito.total > 0 && <p className="text-body text-ink-2 mt-1">Cobrado: {formatMonto(exito.total)}</p>}
                 </div>
                 {exito.pagos.length > 0 && (
                   <div className="space-y-1">
@@ -366,15 +366,15 @@ export default function Recepcion() {
                 <div className="grid grid-cols-3 gap-3">
                   <div className="p-3 bg-surface border border-line rounded-inner text-center">
                     <p className="text-label text-ink-2">Total</p>
-                    <p className="text-body font-semibold text-ink mt-1">{formatPesosVisible(totalGrupo)}</p>
+                    <p className="text-body font-semibold text-ink mt-1">{formatMontoVisible(totalGrupo)}</p>
                   </div>
                   <div className="p-3 bg-surface border border-line rounded-inner text-center">
                     <p className="text-label text-ink-2">Pagado</p>
-                    <p className="text-body font-semibold text-success-ink mt-1">{formatPesosVisible(pagadoGrupo)}</p>
+                    <p className="text-body font-semibold text-success-ink mt-1">{formatMontoVisible(pagadoGrupo)}</p>
                   </div>
                   <div className="p-3 bg-surface border border-line rounded-inner text-center">
                     <p className="text-label text-ink-2">Saldo</p>
-                    <p className="text-body font-semibold text-ink mt-1">{formatPesosVisible(saldoGrupo)}</p>
+                    <p className="text-body font-semibold text-ink mt-1">{formatMontoVisible(saldoGrupo)}</p>
                   </div>
                 </div>
 
@@ -389,8 +389,8 @@ export default function Recepcion() {
                     {medio !== codigoRow.metodo_pago_previsto && (
                       <div className="p-3 bg-gold-100 border border-gold-300 rounded-inner space-y-2">
                         <p className="text-label text-ink-2">
-                          Reservó con {MEDIO_PAGO_LABEL[codigoRow.metodo_pago_previsto]}: {formatPesos(totalGrupo)}
-                          {' · '}En {MEDIO_PAGO_LABEL[medio]}: {precioAjustado != null ? formatPesos(precioAjustado) : '—'}
+                          Reservó con {MEDIO_PAGO_LABEL[codigoRow.metodo_pago_previsto]}: {formatMonto(totalGrupo)}
+                          {' · '}En {MEDIO_PAGO_LABEL[medio]}: {precioAjustado != null ? formatMonto(precioAjustado) : '—'}
                         </p>
                         <label className="flex items-center gap-2 text-label text-ink-2 cursor-pointer">
                           <input type="checkbox" checked={ajustarPrecio} onChange={(e) => setAjustarPrecio(e.target.checked)} className="accent-gold" />
@@ -429,7 +429,7 @@ export default function Recepcion() {
                         onClick={() => ejecutarCobro({ cobrar: true, hacerCheckin: false })}
                         className="text-label w-full py-4 bg-card border border-line hover:bg-surface disabled:opacity-50 rounded-full transition-all text-ink"
                       >
-                        {saving ? 'Registrando...' : `Registrar pago ${formatPesos(saldoGrupo)}`}
+                        {saving ? 'Registrando...' : `Registrar pago ${formatMonto(saldoGrupo)}`}
                       </button>
                     )}
                   </div>
@@ -443,8 +443,8 @@ export default function Recepcion() {
                       {saving
                         ? 'Procesando...'
                         : todasHoy
-                          ? (saldoGrupo > 0 ? `Cobrar ${formatPesos(precioAjustado && ajustarPrecio ? precioAjustado : saldoGrupo)} y hacer check-in` : 'Hacer check-in')
-                          : `Cobrar por adelantado ${formatPesos(precioAjustado && ajustarPrecio ? precioAjustado : saldoGrupo)}`}
+                          ? (saldoGrupo > 0 ? `Cobrar ${formatMonto(precioAjustado && ajustarPrecio ? precioAjustado : saldoGrupo)} y hacer check-in` : 'Hacer check-in')
+                          : `Cobrar por adelantado ${formatMonto(precioAjustado && ajustarPrecio ? precioAjustado : saldoGrupo)}`}
                     </button>
                     {!todasHoy && (
                       <p className="text-label text-ink-2 flex items-center gap-2">

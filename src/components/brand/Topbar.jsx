@@ -35,6 +35,7 @@ import Button from './Button'
 import PageHeader from './PageHeader'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useHoyAR } from '../../hooks/useHoyAR'
+import { usePrivacidad } from '../../context/PrivacidadProvider'
 
 const normalize = normalizeText
 
@@ -99,6 +100,7 @@ export default function TopBar() {
   const { clientes, reservas, unidades, pagos, realtimeConectado } = useData()
   const { perfil, rol, signOut, refetchPerfil } = useAuth()
   const { abrirNuevaReserva } = useNuevaReserva()
+  const { oculto: montosOcultos, mostrar: mostrarMontos } = usePrivacidad()
   const esHome = location.pathname.startsWith('/app/home')
   // Home: el saludo grande se compacta al scrollear (histéresis 32/8px para
   // que no parpadee en el umbral). Solo re-renderiza al cruzar el umbral.
@@ -502,6 +504,23 @@ export default function TopBar() {
         )}
         </div>
 
+        {/* Modo privacidad activo: pill chica que, al tocarla, vuelve a mostrar los montos.
+            Debajo de 430px queda solo el ícono (el título y los íconos de la derecha necesitan el
+            ancho); el área tocable es de 44px en todos los casos. */}
+        {montosOcultos && (
+          <button
+            type="button"
+            onClick={mostrarMontos}
+            aria-label="Montos ocultos: tocá para mostrarlos"
+            title="Montos ocultos: tocá para mostrarlos"
+            className="shrink-0 min-h-11 min-w-11 inline-flex items-center justify-center"
+          >
+            <span className="inline-flex items-center gap-1 h-8 px-2 min-[430px]:px-3 rounded-full bg-gold-50 border border-gold text-ink text-label font-semibold whitespace-nowrap">
+              <EyeOff size={14} strokeWidth={1.5} />
+              <span className="hidden min-[430px]:inline">Montos ocultos</span>
+            </span>
+          </button>
+        )}
         <Button icon={Plus} onClick={() => abrirNuevaReserva()} aria-label="Nueva reserva" className="hidden md:inline-flex shrink-0 max-lg:px-3">
           <span className="hidden lg:inline">Nueva reserva</span>
         </Button>

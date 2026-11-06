@@ -28,8 +28,8 @@ test('reportes mobile 390x844: KPIs visibles, chip de rango y menú Compartir', 
   // el chip abre un bottom sheet con los dos selectores; "Listo" lo cierra
   await chip.click()
   await expect(page.getByRole('heading', { name: 'Rango de fechas' })).toBeVisible()
-  await expect(page.getByLabel('Desde')).toBeVisible()
-  await expect(page.getByLabel('Hasta')).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Desde/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Hasta/ })).toBeVisible()
   await page.getByRole('button', { name: 'Listo' }).click()
   await expect(page.getByRole('heading', { name: 'Rango de fechas' })).toHaveCount(0)
 

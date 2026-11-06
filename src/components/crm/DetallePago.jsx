@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useData } from '../../context/DataProvider'
 import { linkToCliente } from '../../lib/deepLinks'
-import { formatPesos, formatFecha, formatFechaHora, formatComprobante } from '../../lib/format'
+import { formatMonto, formatFecha, formatFechaHora, formatComprobante } from '../../lib/format'
 import { unidadConEmoji } from '../../lib/unidadIcono'
 import {
   formatMedioPago, TIPO_PAGO_LABEL, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL,
@@ -200,7 +200,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
             <p className="text-label text-ink-2">Monto</p>
             <div className="flex items-center gap-3 mt-1">
               <p className={`text-card-title ${pago.estado === 'anulado' ? 'text-ink-2 line-through' : pagoSinVerificar(pago) ? 'text-danger' : 'text-success-ink'}`}>
-                {pagoSinVerificar(pago) ? 'Monto nulo' : formatPesos(pago.monto)}
+                {pagoSinVerificar(pago) ? 'Monto nulo' : formatMonto(pago.monto)}
               </p>
               {pagoSinVerificar(pago) && pago.estado !== 'anulado' && puedeEditarMontoPago && (
                 <button
@@ -329,7 +329,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                         <span className="text-label text-ink">{formatComprobante(c.tipo, c.numero)}</span>
                         {c.fecha && <span className="text-ink-2"> · {formatFecha(c.fecha)}</span>}
                         <span className={`ml-2 font-semibold ${c.monto_total == null ? 'text-danger' : 'text-success-ink'}`}>
-                          {c.monto_total == null ? 'Sin monto' : formatPesos(c.monto_total)}
+                          {c.monto_total == null ? 'Sin monto' : formatMonto(c.monto_total)}
                         </span>
                       </div>
                       {puedeEditarComprobante && (
@@ -349,7 +349,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                 <div className="flex items-start gap-2 px-4 py-3 bg-gold-100">
                   <AlertTriangle className="text-ink shrink-0 mt-1" size={14} />
                   <p className="text-label text-ink">
-                    La suma de comprobantes ({formatPesos(sumaComprobantes)}) no coincide con el monto del pago ({formatPesos(pago.monto)}).
+                    La suma de comprobantes ({formatMonto(sumaComprobantes)}) no coincide con el monto del pago ({formatMonto(pago.monto)}).
                   </p>
                 </div>
               )}
@@ -443,7 +443,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
         onClose={() => setConfirmarAnular(false)}
         onConfirm={handleConfirmAnular}
         titulo="Anular pago"
-        afectaLinea={`${formatPesos(pago.monto)} · ${motivo.trim()}`}
+        afectaLinea={`${formatMonto(pago.monto)} · ${motivo.trim()}`}
         confirmLabel="Anular"
       />
       <ConfirmarSuperadminModal
@@ -459,7 +459,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
         onClose={() => setConfirmarEditarMonto(false)}
         onConfirm={handleConfirmEditarMonto}
         titulo="Editar monto del pago"
-        afectaLinea={`Nuevo monto: ${formatPesos(editMontoPago)}`}
+        afectaLinea={`Nuevo monto: ${formatMonto(editMontoPago)}`}
         confirmLabel="Guardar"
       />
     </Modal>

@@ -1,5 +1,5 @@
 import { HelpCircle, Gift, Hourglass } from 'lucide-react'
-import { formatPesos, formatPesosVisible } from '../../lib/format'
+import { formatMonto, formatMontoVisible } from '../../lib/format'
 import { montoInfo, esPendienteConfirmacion } from '../../lib/reservas'
 
 // Un "$0" en pantalla es ambiguo: puede ser un monto real (bonificado) o un
@@ -30,7 +30,7 @@ export default function MontoReserva({ reserva, className = '' }) {
         </span>
         {montoGrupoReferencia != null && (
           <span className="text-label text-ink-2">
-            Grupo: <span className="whitespace-nowrap">{formatPesos(montoGrupoReferencia)}</span>
+            Grupo: <span className="whitespace-nowrap">{formatMonto(montoGrupoReferencia)}</span>
           </span>
         )}
       </span>
@@ -39,7 +39,7 @@ export default function MontoReserva({ reserva, className = '' }) {
 
   return (
     <span className={`inline-flex items-center gap-2 whitespace-nowrap ${className}`}>
-      {formatPesosVisible(valorTotal)}
+      {formatMontoVisible(valorTotal)}
       {bonificada && (
         <span className="text-label inline-flex items-center gap-1 text-ink-2 bg-surface border border-line px-2 py-1 rounded-swatch">
           <Gift size={10} /> Bonificada

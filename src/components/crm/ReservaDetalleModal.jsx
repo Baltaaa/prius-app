@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { usePagos } from '../../hooks/usePagos'
-import { formatPesos, formatFecha, formatUnidad, formatNombre} from '../../lib/format'
+import { formatMonto, formatFecha, formatUnidad, formatNombre} from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { coSocios, pagoSinVerificar, estadoBadgeStatus } from '../../lib/reservas'
 import { linkToCliente, linkToReserva, linkToComprobante } from '../../lib/deepLinks'
@@ -125,7 +125,7 @@ export default function ReservaDetalleModal({ reserva, onClose }) {
                       <HelpCircle size={12} /> Sin verificar
                     </strong>
                   ) : (
-                    <strong className="text-success-ink">{formatPesos(p.monto)}</strong>
+                    <strong className="text-success-ink">{formatMonto(p.monto)}</strong>
                   )}
                 </div>
               ))}

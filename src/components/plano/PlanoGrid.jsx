@@ -35,14 +35,14 @@ export default function PlanoGrid({ unidades, renderCelda }) {
       {/* Row Superior Unificada: Recreación + Acceso + Pileta */}
       <div className="flex justify-center gap-0 items-start mb-6">
         <div style={{ width: PLANO_SECTOR_WIDTH }} className="h-[50px] flex items-center justify-center border border-white/10 rounded-l-lg bg-white/5 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-          Recreación
+          <span className="plano-contra">Recreación</span>
         </div>
         <div style={{ width: PLANO_PASILLO_CENTRAL }} className="h-[50px] flex items-center justify-center border-y border-white/10 bg-white/10 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-          Acceso
+          <span className="plano-contra">Acceso</span>
         </div>
         <div style={{ width: PLANO_SECTOR_WIDTH }} className="h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-r-lg flex flex-col items-center justify-center relative group overflow-hidden">
           <div className="absolute inset-0 bg-sky-400/5" />
-          <span className="relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
+          <span className="plano-contra relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
           <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
         </div>
       </div>
@@ -80,7 +80,7 @@ export default function PlanoGrid({ unidades, renderCelda }) {
       <div className="mt-16 flex flex-col items-center">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-[1px] w-12 bg-white/10" />
-          <span className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-500">⛱️ Sector Sombrillas</span>
+          <span className="plano-contra text-[11px] font-black uppercase tracking-[0.5em] text-gray-500">⛱️ Sector Sombrillas</span>
           <div className="h-[1px] w-12 bg-white/10" />
         </div>
         <div className="grid grid-cols-2 gap-20">
@@ -99,7 +99,7 @@ export default function PlanoGrid({ unidades, renderCelda }) {
       </div>
 
       <div className="mt-16 w-full bg-white/5 border border-white/5 py-5 text-center text-gray-600 font-black text-[11px] tracking-[1em] uppercase rounded-2xl">
-        Océano Atlántico
+        <span className="plano-contra">Océano Atlántico</span>
       </div>
     </>
   )

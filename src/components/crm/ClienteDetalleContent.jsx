@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Mail, FileText, Edit2, Trash2, Wallet, CalendarPlus, Copy, Check } from 'lucide-react'
-import { formatPesosVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
+import { formatMontoVisible, formatFecha, formatCUIT, formatDNI, formatTelefono, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
 import { vistaDeGrupo, vistaDeReserva } from '../../lib/reservas'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
@@ -81,7 +81,7 @@ export default function ClienteDetalleContent({
                 className="text-label text-ink font-semibold mt-1 hover:underline text-left"
               >
                 Comprobante {formatComprobante(comprobanteMatch.comprobante.tipo, comprobanteMatch.comprobante.numero)}
-                {formatPesosVisible(comprobanteMatch.pago.monto) ? ` · ${formatPesosVisible(comprobanteMatch.pago.monto)}` : ''}
+                {formatMontoVisible(comprobanteMatch.pago.monto) ? ` · ${formatMontoVisible(comprobanteMatch.pago.monto)}` : ''}
               </button>
             )}
           </div>
@@ -107,7 +107,7 @@ export default function ClienteDetalleContent({
                   ? (saldoHeaderSaldado ? '' : 'Saldo sin verificar')
                   : sinPrecio
                     ? 'Sin precio'
-                    : (formatPesosVisible(saldoInfo.total) || '')}
+                    : (formatMontoVisible(saldoInfo.total) || '')}
               </p>
               {comprobantesPendientesCliente > 0 && (
                 <p className="text-label text-danger-ink mt-1">

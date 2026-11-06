@@ -86,6 +86,10 @@
 .dp-prius .rdp-caption_label { font-weight: 500; text-transform: capitalize; }
 .dp-prius .rdp-chevron { fill: rgb(var(--primary)); }
 .dp-prius .rdp-button_previous, .dp-prius .rdp-button_next { min-width: 44px; min-height: 44px; }
+/* Calendario inline a ancho completo (bottom sheet de rangos): 7 columnas que reparten el ancho
+   de la pantalla menos el gutter de 16px de cada lado. */
+.dp-full .rdp-root { --rdp-day-width: min(60px, calc((100dvw - 32px) / 7)); --rdp-day-height: 44px; --rdp-months-gap: 0px; width: 100%; }
+.dp-full .rdp-months, .dp-full .rdp-month, .dp-full .rdp-month_grid { width: 100%; max-width: none; }
 
 /* Degradé de la card hero (DESIGN.md). */
 .bg-hero {
@@ -195,6 +199,12 @@ body {
 @keyframes plano-slide-in-right {
   from { transform: translateX(-24px); opacity: 0.4; }
   to { transform: translateX(0); opacity: 1; }
+}
+/* Rotar el plano 180° (PlanoRotable): la capa gira y los rótulos contra-giran con la misma curva. */
+.plano-rotable { transform: rotate(var(--plano-giro, 0deg)); transform-origin: 50% 50%; transition: transform 600ms cubic-bezier(.4, 0, .2, 1); }
+.plano-contra { display: inline-block; transform: rotate(var(--plano-contra, 0deg)); transition: transform 600ms cubic-bezier(.4, 0, .2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .plano-rotable, .plano-contra { transition-duration: 1ms; }
 }
 .plano-slide-left { animation: plano-slide-in-left 200ms ease-out; }
 .plano-slide-right { animation: plano-slide-in-right 200ms ease-out; }

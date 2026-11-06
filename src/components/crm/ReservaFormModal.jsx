@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useReservas } from '../../hooks/useReservas'
 import { useClientes } from '../../hooks/useClientes'
-import { formatPesos, formatRangoFechas, formatFecha } from '../../lib/format'
+import { formatMonto, formatRangoFechas, formatFecha } from '../../lib/format'
 import { unidadConEmoji } from '../../lib/unidadIcono'
 import { estaSaldada, rangosOcupadosPorUnidad, estadoBadgeStatus } from '../../lib/reservas'
 import { useDialog } from '../../context/DialogProvider'
@@ -274,7 +274,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
         return
       }
       if (pagoForm.excedeSaldo) {
-        await alert(`El monto supera el total de la reserva (${formatPesos(valorTotal)}).`)
+        await alert(`El monto supera el total de la reserva (${formatMonto(valorTotal)}).`)
         return
       }
       if (pagoForm.comprobanteIncompleto) {
@@ -326,7 +326,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-label text-ink-2">Total</p>
-            <p className="text-card-title text-ink">{formatPesos(bonificada ? 0 : valorTotal)}</p>
+            <p className="text-card-title text-ink">{formatMonto(bonificada ? 0 : valorTotal)}</p>
           </div>
           <div className="flex gap-3">
             <button
@@ -560,7 +560,7 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
               <div>
                 <p className="text-label text-ink-2">Saldo Pendiente</p>
                 <p className={`text-card-title ${Number(editingReserva.saldo) > 0 ? 'text-danger' : 'text-success-ink'}`}>
-                  {estaSaldada(editingReserva) ? 'Unidad saldada' : formatPesos(editingReserva.saldo)}
+                  {estaSaldada(editingReserva) ? 'Unidad saldada' : formatMonto(editingReserva.saldo)}
                 </p>
               </div>
               <StatusBadge status={estadoBadgeStatus(editingReserva)} />
@@ -587,10 +587,10 @@ export default function ReservaFormModal({ isOpen, onClose, editingReserva, pref
                   : tipoAlquiler === 'dia' ? (fecha ? 1 : '—') : (diasEntre(fechaInicio, fechaFin) ?? '—')}
               </span>
               <span className="text-label text-ink-2">Total</span>
-              <span className="text-ink font-semibold text-right">{formatPesos(bonificada ? 0 : valorTotal)}</span>
+              <span className="text-ink font-semibold text-right">{formatMonto(bonificada ? 0 : valorTotal)}</span>
               <span className="text-label text-ink-2">Saldo</span>
               <span className={`font-semibold text-right ${editingReserva && Number(editingReserva.saldo) > 0 ? 'text-danger' : 'text-success-ink'}`}>
-                {editingReserva ? (estaSaldada(editingReserva) ? 'Saldado' : formatPesos(editingReserva.saldo)) : '—'}
+                {editingReserva ? (estaSaldada(editingReserva) ? 'Saldado' : formatMonto(editingReserva.saldo)) : '—'}
               </span>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { CheckCircle2, MapPin } from 'lucide-react'
 import UnidadLabel from '../crm/UnidadLabel'
-import { formatFecha, formatHora, formatNombre, formatPesos, formatRangoFechas, formatCantidad } from '../../lib/format'
+import { formatFecha, formatHora, formatNombre, formatMonto, formatRangoFechas, formatCantidad } from '../../lib/format'
 
 // Último check-in de hoy, leído de la base (codigos_reserva.checkin_at): al
 // recargar la pantalla sigue ahí. La hora es la real del check-in.
@@ -51,7 +51,7 @@ export default function UltimoEscaneo({ grupo, onVerEnPlano }) {
               {grupo.sinVerificar
                 ? <span className="text-ink-2">Sin verificar</span>
                 : grupo.saldo > 0
-                  ? <span className="text-danger-ink font-semibold tabular-nums whitespace-nowrap">{formatPesos(grupo.saldo).replace(/ /g, ' ')}</span>
+                  ? <span className="text-danger-ink font-semibold tabular-nums whitespace-nowrap">{formatMonto(grupo.saldo).replace(/ /g, ' ')}</span>
                   : <span className="text-success-ink font-semibold">Saldado</span>}
             </Dato>
           </div>

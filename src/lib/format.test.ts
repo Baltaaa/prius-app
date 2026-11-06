@@ -1,39 +1,39 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import {
-  formatCantidad, formatPesos, formatPesosVisible, formatPesosCSV, formatFecha, formatFechaHora,
+  formatCantidad, formatMonto, formatMontoVisible, formatMontoReal, formatMontoUSDReal, setMontosOcultos, MONTO_OCULTO, formatPesosCSV, formatFecha, formatFechaHora,
   formatRangoFechas, formatDNI, formatCUIT, formatComprobante, formatUnidad,
-  formatMontosEnTexto, formatPorcentaje, formatPesosCompacto, formatDolares,
+  formatMontosEnTexto, formatPorcentaje, formatMontoCompacto, formatMontoUSD,
 } from './format'
 
-describe('formatPesos', () => {
+describe('formatMonto', () => {
   it('formatea miles con punto y sin centavos', () => {
-    expect(formatPesos(1089000)).toBe('$ 1.089.000')
+    expect(formatMonto(1089000)).toBe('$ 1.089.000')
   })
   it('cero se muestra como "$ 0"', () => {
-    expect(formatPesos(0)).toBe('$ 0')
-    expect(formatPesos(null)).toBe('$ 0')
-    expect(formatPesos(undefined)).toBe('$ 0')
+    expect(formatMonto(0)).toBe('$ 0')
+    expect(formatMonto(null)).toBe('$ 0')
+    expect(formatMonto(undefined)).toBe('$ 0')
   })
   it('negativos con signo menos real (U+2212) antes del $', () => {
-    expect(formatPesos(-15000)).toBe('−$ 15.000')
-    expect(formatPesos(-15000)[0]).toBe('−')
+    expect(formatMonto(-15000)).toBe('−$ 15.000')
+    expect(formatMonto(-15000)[0]).toBe('−')
   })
   it('redondea decimales', () => {
-    expect(formatPesos(1000.6)).toBe('$ 1.001')
+    expect(formatMonto(1000.6)).toBe('$ 1.001')
   })
   it('números grandes, sin abreviar', () => {
-    expect(formatPesos(99999999999)).toBe('$ 99.999.999.999')
+    expect(formatMonto(99999999999)).toBe('$ 99.999.999.999')
   })
 })
 
-describe('formatPesosVisible', () => {
+describe('formatMontoVisible', () => {
   it('null si no es mayor a 0 (nunca "$ 0")', () => {
-    expect(formatPesosVisible(0)).toBeNull()
-    expect(formatPesosVisible(null)).toBeNull()
-    expect(formatPesosVisible(-100)).toBeNull()
+    expect(formatMontoVisible(0)).toBeNull()
+    expect(formatMontoVisible(null)).toBeNull()
+    expect(formatMontoVisible(-100)).toBeNull()
   })
   it('formatea si es mayor a 0', () => {
-    expect(formatPesosVisible(500)).toBe('$ 500')
+    expect(formatMontoVisible(500)).toBe('$ 500')
   })
 })
 
@@ -123,21 +123,21 @@ describe('formatPorcentaje', () => {
   })
 })
 
-describe('formatPesosCompacto', () => {
+describe('formatMontoCompacto', () => {
   it('abrevia millones', () => {
-    expect(formatPesosCompacto(1_500_000)).toBe('$1.5M')
+    expect(formatMontoCompacto(1_500_000)).toBe('$1.5M')
   })
   it('abrevia miles', () => {
-    expect(formatPesosCompacto(850_000)).toBe('$850K')
+    expect(formatMontoCompacto(850_000)).toBe('$850K')
   })
   it('por debajo de mil, monto entero sin abreviar', () => {
-    expect(formatPesosCompacto(500)).toBe('$ 500')
+    expect(formatMontoCompacto(500)).toBe('$ 500')
   })
 })
 
-describe('formatDolares', () => {
+describe('formatMontoUSD', () => {
   it('con prefijo US$ y separadores de miles', () => {
-    expect(formatDolares(1200)).toBe('US$ 1.200')
+    expect(formatMontoUSD(1200)).toBe('US$ 1.200')
   })
 })
 
@@ -146,5 +146,41 @@ describe('formatCantidad', () => {
     expect(formatCantidad(1234)).toBe('1.234')
     expect(formatCantidad(7)).toBe('7')
     expect(formatCantidad(null)).toBe('0')
+  })
+})
+
+describe('modo privacidad', () => {
+  afterEach(() => setMontosOcultos(false))
+
+  it('activo: todo monto sale "$ ••••••" (pesos, compacto, dólares, visible)', () => {
+    setMontosOcultos(true)
+    expect(formatMonto(1089000)).toBe(MONTO_OCULTO)
+    expect(formatMonto(-15000)).toBe(MONTO_OCULTO)
+    expect(formatMonto(0)).toBe(MONTO_OCULTO)
+    expect(formatMontoCompacto(1200000)).toBe(MONTO_OCULTO)
+    expect(formatMontoUSD(1200)).toBe(MONTO_OCULTO)
+    expect(formatMontoVisible(500)).toBe(MONTO_OCULTO)
+    expect(formatMontoVisible(0)).toBeNull()
+    expect(MONTO_OCULTO.replace(/\s/g, ' ')).toBe('$ ••••••')
+  })
+
+  it('activo: impresiones y exportaciones siguen con el monto real', () => {
+    setMontosOcultos(true)
+    expect(formatMontoReal(1089000)).toBe('$ 1.089.000')
+    expect(formatMontoReal(-15000)).toBe('−$ 15.000')
+    expect(formatMontoUSDReal(1200)).toBe('US$ 1.200')
+  })
+
+  it('activo: los montos dentro de texto guardado también se tapan', () => {
+    setMontosOcultos(true)
+    expect(formatMontosEnTexto('Pago registrado — $ 1.150.000 tarjeta')).toBe(`Pago registrado — ${MONTO_OCULTO} tarjeta`)
+    expect(formatMontosEnTexto('Pago editado — $1200000')).toBe(`Pago editado — ${MONTO_OCULTO}`)
+    expect(formatMontosEnTexto('Total −US$ 50 y $1,2M')).toBe(`Total ${MONTO_OCULTO} y ${MONTO_OCULTO}`)
+    expect(formatMontosEnTexto('Carpa 12 → Carpa 58, comprobante RB-3661')).toBe('Carpa 12 → Carpa 58, comprobante RB-3661')
+  })
+
+  it('inactivo: formato de siempre', () => {
+    expect(formatMonto(1089000)).toBe('$ 1.089.000')
+    expect(formatMontosEnTexto('Pago editado — $1200000')).toBe('Pago editado — $ 1.200.000')
   })
 })

@@ -1,6 +1,6 @@
 import { Wallet, Receipt, Edit2, XCircle, Trash2, QrCode } from 'lucide-react'
 import { coSocios, estadoBadgeStatus } from '../../lib/reservas'
-import { formatFecha, formatPesosVisible, formatUnidad, formatNombre} from '../../lib/format'
+import { formatFecha, formatMontoVisible, formatUnidad, formatNombre} from '../../lib/format'
 import StatusBadge from './StatusBadge'
 import MontoReserva from './MontoReserva'
 import UnidadLabel from './UnidadLabel'
@@ -59,7 +59,7 @@ export default function ReservaListaMobile({ reservas, fechaLlegada, onOpenDetal
                     <div>
                       <p className="text-label text-ink-2">Saldo</p>
                       <p className={`text-body font-semibold ${Number(res.saldo) > 0 ? 'text-danger-ink' : 'text-success-ink'}`}>
-                        {Number(res.saldo) > 0 ? formatPesosVisible(res.saldo) : <MontoReserva reserva={res} />}
+                        {Number(res.saldo) > 0 ? formatMontoVisible(res.saldo) : <MontoReserva reserva={res} />}
                       </p>
                     </div>
                     {!esTemporada && (
