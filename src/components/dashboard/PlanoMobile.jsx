@@ -1,6 +1,7 @@
 import { useRef } from "react"
 import { Layers } from "lucide-react"
 import PlanoGrid from "../plano/PlanoGrid"
+import PlanoRotable from "./PlanoRotable"
 import ZoomPanPinch from "../ui/ZoomPanPinch"
 import PlanoZoomPill from "./PlanoZoomPill"
 import { PlanoControles, PlanoAcciones } from "./PlanoFiltros"
@@ -19,7 +20,7 @@ import { PlanoControles, PlanoAcciones } from "./PlanoFiltros"
 export default function PlanoMobile({
   selectedDate, esHoy, onPrevDay, onNextDay, onHoy, onDateChange,
   planoStats, loading, estadoFiltro, onEstado, tipoFiltro, onTipo, onImprimir,
-  fullscreen, onToggleFullscreen, slideRef, onAnimationEnd,
+  rotado, onRotar, fullscreen, onToggleFullscreen, slideRef, onAnimationEnd,
   unidades, renderCelda,
 }) {
   const mapa = useRef(null)
@@ -43,6 +44,7 @@ export default function PlanoMobile({
           onTipo={onTipo}
           onImprimir={onImprimir}
           compacto
+          modoCliente={fullscreen}
         />
       </div>
 
@@ -53,7 +55,7 @@ export default function PlanoMobile({
             <Layers size={14} className="shrink-0" />
             <span className="text-label truncate">Pasillo A · B · C</span>
           </span>
-          <PlanoAcciones onImprimir={onImprimir} />
+          {!fullscreen && <PlanoAcciones onImprimir={onImprimir} />}
         </div>
         {loading ? (
           <div className="flex-1 flex items-center justify-center text-ink-2 text-label">Cargando plano…</div>
@@ -65,13 +67,17 @@ export default function PlanoMobile({
               slideRef={slideRef}
               onAnimationEnd={onAnimationEnd}
             >
-              <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+              <PlanoRotable rotado={rotado}>
+                <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+              </PlanoRotable>
             </ZoomPanPinch>
             <PlanoZoomPill
               className="absolute top-0 right-0 z-10"
               onZoomIn={() => mapa.current?.acercar()}
               onZoomOut={() => mapa.current?.alejar()}
               onEncuadrar={() => mapa.current?.encuadrar()}
+              onRotar={onRotar}
+              rotado={rotado}
               fullscreen={fullscreen}
               onToggleFullscreen={onToggleFullscreen}
             />

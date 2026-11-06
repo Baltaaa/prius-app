@@ -200,6 +200,12 @@ body {
   from { transform: translateX(-24px); opacity: 0.4; }
   to { transform: translateX(0); opacity: 1; }
 }
+/* Rotar el plano 180° (PlanoRotable): la capa gira y los rótulos contra-giran con la misma curva. */
+.plano-rotable { transform: rotate(var(--plano-giro, 0deg)); transform-origin: 50% 50%; transition: transform 600ms cubic-bezier(.4, 0, .2, 1); }
+.plano-contra { display: inline-block; transform: rotate(var(--plano-contra, 0deg)); transition: transform 600ms cubic-bezier(.4, 0, .2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .plano-rotable, .plano-contra { transition-duration: 1ms; }
+}
 .plano-slide-left { animation: plano-slide-in-left 200ms ease-out; }
 .plano-slide-right { animation: plano-slide-in-right 200ms ease-out; }
 

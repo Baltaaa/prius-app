@@ -14,6 +14,7 @@ import CellMobile from "../components/dashboard/CellMobile"
 import PlanoZoomBar from "../components/dashboard/PlanoZoomBar"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import PlanoGrid from "../components/plano/PlanoGrid"
+import PlanoRotable from "../components/dashboard/PlanoRotable"
 import PlanoViewport from "../components/plano/PlanoViewport"
 import { PlanoControles, PlanoAcciones } from "../components/dashboard/PlanoFiltros"
 import { useData } from "../context/DataProvider"
@@ -59,11 +60,20 @@ export default function Dashboard() {
   // montado a la vez (nunca los dos juntos) para no duplicar el ref de
   // `mapSlideRef` ni el trabajo de render.
   const [fullscreenOpen, setFullscreenOpen] = useState(false)
+  // Pantalla completa = MODO CLIENTE (se le muestra el plano al cliente): sin stats, sin
+  // referencias, sin imprimir y sin ficha de unidad; todas las ocupadas del mismo color.
+  // Rotar: gira el plano 180° (ver PlanoRotable); el estado vive acá para que sea el mismo
+  // en la vista normal y en pantalla completa.
+  const [rotado, setRotado] = useState(false)
+  const alternarRotar = () => setRotado((v) => !v)
   const { bind: bindFullscreen } = useOverlay({
     id: "plano-fullscreen",
     isOpen: fullscreenOpen,
     onRequestClose: () => setFullscreenOpen(false),
   })
+  useEffect(() => {
+    if (fullscreenOpen) setSelectedUnitId(null) // al entrar al modo cliente no queda ninguna ficha abierta
+  }, [fullscreenOpen])
   useEffect(() => {
     if (!fullscreenOpen) return
     const prev = document.body.style.overflow
@@ -426,8 +436,10 @@ export default function Dashboard() {
   const toggleEstadoFiltro = useCallback((key) => {
     setEstadoFiltro((prev) => (prev === key ? null : key))
   }, [])
+  // En modo cliente el filtro de estado (que dejaría "pendientes" a la vista) no se aplica.
+  const estadoEfectivo = fullscreenOpen ? null : estadoFiltro
   const highlightedUnitIds = useMemo(() => {
-    if (!estadoFiltro && !tipoFiltro) return null
+    if (!estadoEfectivo && !tipoFiltro) return null
     const porEstado = {
       ocupacion: planoStats.ocupacion.unitIds,
       libres: planoStats.libres.unitIds,
@@ -438,10 +450,10 @@ export default function Dashboard() {
       carpas: todas.filter((u) => u.type === 'carpa').map((u) => u.dbId),
       sombrillas: todas.filter((u) => u.type === 'sombrilla').map((u) => u.dbId),
     }
-    const conjuntos = [estadoFiltro && porEstado[estadoFiltro], tipoFiltro && porTipo[tipoFiltro]].filter(Boolean)
+    const conjuntos = [estadoEfectivo && porEstado[estadoEfectivo], tipoFiltro && porTipo[tipoFiltro]].filter(Boolean)
     const [primero, ...resto] = conjuntos
     return new Set(primero.filter((id) => resto.every((c) => c.includes(id))))
-  }, [estadoFiltro, tipoFiltro, planoStats, units])
+  }, [estadoEfectivo, tipoFiltro, planoStats, units])
   const cellHighlight = useCallback((unit) => {
     if (!highlightedUnitIds || !unit) return {}
     return highlightedUnitIds.has(unit.dbId) ? { isHighlighted: true } : { isDimmed: true }
@@ -482,9 +494,10 @@ export default function Dashboard() {
   )
 
   // useCallback: referencia estable para no romper el React.memo de las 184 Cell
+  // En modo cliente (pantalla completa) tocar una unidad no abre nada: ni titular ni saldo.
   const handleUnitClick = useCallback((unit) => {
-    if (unit) setSelectedUnitId(unit.id)
-  }, [])
+    if (unit && !fullscreenOpen) setSelectedUnitId(unit.id)
+  }, [fullscreenOpen])
 
   // Pasos de 0.2, techo 3, piso = fitScale*0.5 (se puede alejar por debajo
   // del encuadre), zoom relativo al centro del contenedor (el punto central
@@ -513,10 +526,11 @@ export default function Dashboard() {
         unit={unit}
         onClick={handleUnitClick}
         numberSide={slot.numberSide}
+        modoCliente={fullscreenOpen}
         {...cellHighlight(unit)}
       />
     )
-  }, [units, handleUnitClick, cellHighlight])
+  }, [units, handleUnitClick, cellHighlight, fullscreenOpen])
 
   // Misma unidad/handlers que renderCelda, pero con CellMobile (celda nueva
   // y separada, ver ese archivo) — nunca Cell.jsx escalado. Mismo puente,
@@ -530,10 +544,11 @@ export default function Dashboard() {
         number={slot.numero}
         unit={unit}
         onClick={handleUnitClick}
+        modoCliente={fullscreenOpen}
         {...cellHighlight(unit)}
       />
     )
-  }, [units, handleUnitClick, cellHighlight])
+  }, [units, handleUnitClick, cellHighlight, fullscreenOpen])
 
   // Un solo nodo cumple el doble rol de "ref de la animación de slide al
   // cambiar de fecha" y "ref del viewport para medir fitScale" — nunca dos
@@ -582,6 +597,8 @@ export default function Dashboard() {
           tipoFiltro={tipoFiltro}
           onTipo={setTipoFiltro}
           onImprimir={() => window.print()}
+          rotado={rotado}
+          onRotar={alternarRotar}
           fullscreen={fullscreen}
           onToggleFullscreen={() => setFullscreenOpen(!fullscreen)}
           slideRef={mapSlideRef}
@@ -620,6 +637,7 @@ export default function Dashboard() {
             onTipo={setTipoFiltro}
             onImprimir={() => window.print()}
             anchoFecha="w-[148px]"
+            modoCliente={fullscreen}
           />
         </div>
 
@@ -632,13 +650,13 @@ export default function Dashboard() {
                 <span className="text-label truncate">Pasillo A · B · C</span>
               </span>
               <div className="flex items-center gap-3 shrink-0">
-                {realtimeConectado && (
+                {realtimeConectado && !fullscreen && (
                   <span className="hidden md:inline-flex lg:hidden xl:inline-flex items-center gap-2 bg-surface px-3 h-7 rounded-full text-ink-2">
                     <span className="w-2 h-2 rounded-full bg-success" />
                     <span className="text-label">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
                   </span>
                 )}
-                <PlanoAcciones onImprimir={() => window.print()} className="lg:hidden" />
+                {!fullscreen && <PlanoAcciones onImprimir={() => window.print()} className="lg:hidden" />}
               </div>
             </div>
             {loading ? (
@@ -670,22 +688,26 @@ export default function Dashboard() {
                     viewportRef={setMapViewportRef}
                     contentRef={contentRef}
                   >
-                    <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+                    <PlanoRotable rotado={rotado}>
+                      <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
+                    </PlanoRotable>
                   </PlanoViewport>
                 </div>
-                <PlanoZoomBar onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onEncuadrar={handleEncuadrar} extraButtons={extraButtonsViewport} />
+                <PlanoZoomBar onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onEncuadrar={handleEncuadrar} onRotar={alternarRotar} rotado={rotado} extraButtons={extraButtonsViewport} />
               </div>
             )}
           </section>
 
-          <UnidadDetallePanel
-            unit={selectedUnit}
-            reservas={reservas}
-            temporadaActiva={temporadaActiva}
-            onClose={handleCerrarDetalle}
-            onAsignarTemporada={handleAsignarTemporada}
-            onMoverUnidad={handleMoverUnidadClick}
-          />
+          {!fullscreen && (
+            <UnidadDetallePanel
+              unit={selectedUnit}
+              reservas={reservas}
+              temporadaActiva={temporadaActiva}
+              onClose={handleCerrarDetalle}
+              onAsignarTemporada={handleAsignarTemporada}
+              onMoverUnidad={handleMoverUnidadClick}
+            />
+          )}
         </div>
       </div>
     )
@@ -724,7 +746,7 @@ export default function Dashboard() {
         document.body,
       )}
 
-      {selectedUnit && (
+      {selectedUnit && !fullscreenOpen && (
         <UnidadPreviewModal
           unit={selectedUnit}
           reservas={reservas}

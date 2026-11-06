@@ -1,7 +1,7 @@
 import { memo, useState } from "react"
 import { Hourglass, Clock } from "lucide-react"
 import { STATUS } from "./constants"
-import { COLOR_TIPO_ALQUILER } from "../../lib/colors"
+import { COLOR_TIPO_ALQUILER, COLOR_ESTADO } from "../../lib/colors"
 
 // 184 celdas montadas a la vez en el Plano. React.memo evita re-renderizarlas
 // todas cuando cambia el zoom o se abre un modal, y `transition-colors` en vez
@@ -16,7 +16,12 @@ import { COLOR_TIPO_ALQUILER } from "../../lib/colors"
 //   celda vacía                → libre
 //   P fondo oscuro             → período
 //   D fondo gris claro         → día
-function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "left" }) {
+//
+// `modoCliente` (pantalla completa, para mostrarle el plano al cliente): toda unidad ocupada
+// (incluida la pendiente de confirmación) se ve del MISMO color de "ocupada", sin letra T/P/D,
+// sin punto de pagada, sin reloj ni borde punteado y sin tooltip con el titular: nada que
+// distinga saldo, tipo de alquiler ni persona.
+function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "left", modoCliente = false }) {
   const status = unit?.status || STATUS.LIBRE
   const isPendienteConfirmacion = status === STATUS.PENDIENTE_CONFIRMACION
   const isTemporada = status === STATUS.TEMPORADA
@@ -25,7 +30,9 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
   const isOcupada = isTemporada || isPeriodo || isDia || isPendienteConfirmacion
   const [showTooltip, setShowTooltip] = useState(false)
 
-  const styles = isPendienteConfirmacion
+  const styles = modoCliente && isOcupada
+    ? `${COLOR_ESTADO.ocupada.bg} ${COLOR_ESTADO.ocupada.text} ${COLOR_ESTADO.ocupada.border}`
+    : isPendienteConfirmacion
     ? "bg-white text-black border-[#E5E5E5]"
     : isTemporada
       ? `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.text} ${COLOR_TIPO_ALQUILER.temporada.border}`
@@ -45,7 +52,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
 
   const numberLabel = (
     <span
-      className={`w-7 md:w-8 text-xs md:text-sm font-bold tabular-nums text-black ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
+      className={`plano-contra w-7 md:w-8 text-xs md:text-sm font-bold tabular-nums text-black ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
     >
       {number}
     </span>
@@ -55,34 +62,34 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
     <div
       className="flex items-center relative cursor-pointer select-none"
       onClick={() => onClick(unit)}
-      onMouseEnter={() => unit?.clientName && setShowTooltip(true)}
+      onMouseEnter={() => !modoCliente && unit?.clientName && setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
       {numberSide === "left" && numberLabel}
       <button
         data-deeplink-id={unit?.dbId}
         tabIndex={-1}
-        className={`w-6 h-[18px] md:w-7 md:h-5 text-[10px] md:text-[11px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative pointer-events-none ${styles} ${opacityClass} ${highlightClass} ${unit?.esPreconfirmadaWeb ? "border-dashed" : ""}`}
+        className={`w-6 h-[18px] md:w-7 md:h-5 text-[10px] md:text-[11px] font-bold flex flex-col items-center justify-center border rounded-sm cursor-pointer transition-colors relative pointer-events-none ${styles} ${opacityClass} ${highlightClass} ${!modoCliente && unit?.esPreconfirmadaWeb ? "border-dashed" : ""}`}
       >
-        <span className="leading-none">
-          {isPendienteConfirmacion && <Hourglass size={11} />}
-          {isTemporada && "T"}
-          {isPeriodo && "P"}
-          {isDia && "D"}
+        <span className="plano-contra leading-none">
+          {!modoCliente && isPendienteConfirmacion && <Hourglass size={11} />}
+          {!modoCliente && isTemporada && "T"}
+          {!modoCliente && isPeriodo && "P"}
+          {!modoCliente && isDia && "D"}
         </span>
-        {unit?.isPaid && isOcupada && (
+        {!modoCliente && unit?.isPaid && isOcupada && (
           <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]" />
         )}
         {/* D5 (Fase 3 Recepción): reserva web preconfirmada vigente — mismo
             borde punteado de arriba + reloj, nunca color nuevo. */}
-        {unit?.esPreconfirmadaWeb && (
+        {!modoCliente && unit?.esPreconfirmadaWeb && (
           <Clock size={7} className="absolute -bottom-0.5 -right-0.5 text-current opacity-80" />
         )}
       </button>
       {numberSide === "right" && numberLabel}
 
       {/* Tooltip */}
-      {showTooltip && unit?.clientName && (
+      {!modoCliente && showTooltip && unit?.clientName && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-52 glass-tooltip text-white text-[11px] p-4 rounded-xl shadow-2xl z-50 pointer-events-none border border-white/20">
           <p className="font-bold uppercase tracking-wider text-[#FDE047] mb-2">{unit.clientName}</p>
           <div className="space-y-1 opacity-80 font-medium">
