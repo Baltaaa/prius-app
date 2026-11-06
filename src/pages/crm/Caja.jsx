@@ -24,6 +24,7 @@ import DetallePago from '../../components/crm/DetallePago'
 import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
 import ResumenCaja from '../../components/crm/ResumenCaja'
 import CajaImpresion from '../../components/crm/CajaImpresion'
+import { AvisoArqueoPendiente } from '../../components/crm/AvisosCaja'
 import CerrarCajaStepper from '../../components/crm/CerrarCajaStepper'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
@@ -58,7 +59,7 @@ export default function Caja() {
   // llegan de la base ya están en pesos; `fmtM` los convierte para mostrar.
   const mv = useMonedaVista()
   const fmtM = mv.fmt
-  const { pagos } = useData()
+  const { pagos, refetchAll } = useData()
   const { alert, toast } = useDialog()
 
   // Fecha y tab en la URL (Tarea 9, oct 2026) — antes recargar la página a
@@ -87,6 +88,12 @@ export default function Caja() {
   const [mostrarHistorial, setMostrarHistorial] = useState(false)
   const [mostrarGasto, setMostrarGasto] = useState(false)
   const [mostrarCierre, setMostrarCierre] = useState(false)
+  // Respaldo del cierre automático de las 00:00 ART: al abrir Caja se vuelve a correr (idempotente).
+  // Si todavía no está la función en la base, el error se ignora.
+  useEffect(() => {
+    supabase.rpc('fn_cierre_automatico_caja').then(({ data }) => { if (data > 0) refetchAll?.() }, () => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [gastoSeleccionado, setGastoSeleccionado] = useState(null)
   const [pagoSeleccionado, setPagoSeleccionado] = useState(null)
   const [reabriendo, setReabriendo] = useState(false)
@@ -105,6 +112,13 @@ export default function Caja() {
 
   const esHoy = selectedDate === todayStr()
   const cajaSeleccionada = cajaPorFecha[selectedDate] || null
+  // ?cerrar=1 (desde los avisos de cierre): abre el cierre/arqueo de la caja elegida si corresponde.
+  useEffect(() => {
+    if (searchParams.get('cerrar') !== '1' || !cajaSeleccionada) return
+    if (cajaSeleccionada.estado === 'abierta' || cajaSeleccionada.arqueo_pendiente) setMostrarCierre(true)
+    setSearchParams((prev) => { const n = new URLSearchParams(prev); n.delete('cerrar'); return n }, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cajaSeleccionada?.id])
 
   // Fuente única de verdad: pantalla, impresión y CSV parten siempre del
   // mismo resumen_caja(caja_id) — si la caja está cerrada se usa el
@@ -240,7 +254,7 @@ export default function Caja() {
         />
         {cajaSeleccionada && (
           <span className={`text-label hidden sm:inline-flex items-center px-4 py-2 md:py-0 md:h-10 rounded-inner border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
-            {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
+            {cajaSeleccionada.arqueo_pendiente ? 'Cerrada automáticamente · falta el arqueo' : cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
           </span>
         )}
         <div className="hidden sm:block sm:flex-1" />
@@ -258,7 +272,7 @@ export default function Caja() {
       {cajaSeleccionada && (
         <div className="no-print sm:hidden grid grid-cols-2 gap-grid">
           <span className={`text-label flex items-center justify-center px-4 py-3 min-h-[44px] rounded-inner border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
-            {cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
+            {cajaSeleccionada.arqueo_pendiente ? 'Cerrada automáticamente · falta el arqueo' : cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
           </span>
           <button
             onClick={() => setMostrarHistorial((v) => !v)}
@@ -268,6 +282,8 @@ export default function Caja() {
           </button>
         </div>
       )}
+
+      <AvisoArqueoPendiente className="mb-grid" />
 
       {mostrarHistorial && (
         <div className="card-surface card-pad no-print space-y-2">
@@ -642,6 +658,11 @@ export default function Caja() {
               <Download size={14} /> Exportar CSV
             </button>
             <div className="flex-1" />
+            {cajaSeleccionada.arqueo_pendiente && (
+              <button onClick={() => setMostrarCierre(true)} className="text-label flex items-center gap-2 px-5 py-3 bg-gold-100 border border-gold-300 rounded-full text-ink transition-all">
+                Hacer arqueo y Z
+              </button>
+            )}
             {!reabriendo && puedeReabrir ? (
               <button onClick={() => setReabriendo(true)} className="text-label flex items-center gap-2 px-5 py-3 bg-gold-100 hover:bg-gold-100 border border-gold-300 rounded-full text-ink transition-all">
                 Reabrir Caja

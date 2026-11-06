@@ -1,3 +1,4 @@
+import { AvisoArqueoPendiente } from '../crm/AvisosCaja'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Wallet } from 'lucide-react'
 import { useCaja } from '../../hooks/useCaja'
@@ -49,6 +50,7 @@ export default function SidebarCajaCard({ subtitulo, className = '' }) {
             <button type="button" onClick={() => navigate('/app/caja')} className="btn btn-gold h-11 md:h-9 min-h-0 px-4">Abrir</button>
           </div>
         )}
+        <AvisoArqueoPendiente compacto />
       </div>
     </section>
   )
