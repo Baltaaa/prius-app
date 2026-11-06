@@ -8,7 +8,8 @@ import { formatFecha, formatHora, formatPesos, formatMontosEnTexto } from '../..
 import { hoyAR } from '../../lib/fechas'
 import { agruparPorDia, etiquetaDia, sumarDias } from '../../lib/historialDias'
 import { useData } from '../../context/DataProvider'
-import { linkToCliente, linkToReserva } from '../../lib/deepLinks'
+import { useDialog } from '../../context/DialogProvider'
+import { resolverDestinoEvento, MENSAJE_REGISTRO_INEXISTENTE } from '../../lib/destinoEvento'
 import { staggerDelay } from '../../lib/motion'
 import { useEsDesktop } from '../../hooks/useMediaQuery'
 import BrandSelect from '../ui/BrandSelect'
@@ -372,7 +373,8 @@ function HistorialSkeleton() {
 export default function Historial({ tipo = 'global', id, onEventoClick, compact = false }) {
   // Mapa id -> unidad, para que el diff muestre "Carpa 12 → Carpa 58" en vez
   // del UUID crudo (31/10/2026). Las unidades ya están en memoria.
-  const { unidades } = useData()
+  const { unidades, reservas, clientes, pagos, leads, loading: cargandoDatos } = useData()
+  const { toast } = useDialog()
   const unidadesPorId = useMemo(() => {
     const map = {}
     for (const u of unidades || []) map[u.id] = u
@@ -421,29 +423,20 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
 
   const grupos = useMemo(() => agruparPorDia(filtrados), [filtrados])
 
-  // Navegación del evento. Sin cambios respecto de la versión anterior: en
-  // el listado global ahora se dispara desde el botón del detalle en vez
-  // del click directo en la fila, pero la lógica es la misma.
+  // Navegación del evento: el destino sale de `lib/destinoEvento` (único
+  // resolver). Registro borrado -> aviso, sin navegar a una pantalla vacía.
+  const destinoDe = (evento) => resolverDestinoEvento(evento, { reservas, clientes, pagos, leads, unidades })
   const handleClick = (evento) => {
     if (onEventoClick) return onEventoClick(evento)
-    const after = evento.datos?.after || {}
-    const before = evento.datos?.before || {}
-    const clienteId = evento.cliente_id || after.cliente_id || before.cliente_id
-    if (evento.tabla === 'reservas') return navigate(linkToReserva(evento.registro_id))
-    if (evento.tabla === 'clientes') return navigate(linkToCliente(evento.registro_id))
-    if (evento.tabla === 'pagos' && clienteId) {
-      return navigate(linkToCliente(clienteId, { pagoId: evento.registro_id }))
-    }
-    if (evento.tabla === 'comprobantes' && clienteId) {
-      return navigate(linkToCliente(clienteId))
-    }
-    if (clienteId) return navigate(linkToCliente(clienteId))
+    // Con los datos del CRM todavía cargando, "no existe" sería un falso negativo.
+    if (cargandoDatos) return toast('Cargando datos, probá de nuevo en un instante.')
+    const destino = destinoDe(evento)
+    if (!destino) return
+    if (destino.inexistente) return toast(MENSAJE_REGISTRO_INEXISTENTE)
+    navigate(destino.ruta)
   }
 
-  const puedeNavegar = (e) => {
-    const clienteId = e.cliente_id || e.datos?.after?.cliente_id || e.datos?.before?.cliente_id
-    return !!onEventoClick || e.tabla === 'reservas' || e.tabla === 'clientes' || !!clienteId
-  }
+  const puedeNavegar = (e) => !!onEventoClick || destinoDe(e) !== null
 
   /** Props del detalle para el evento abierto. */
   const detalle = useMemo(() => {
@@ -463,7 +456,7 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
       datos,
       onIr: puedeNavegar(seleccionado) ? () => handleClick(seleccionado) : null,
     }
-  }, [seleccionado, unidadesPorId])
+  }, [seleccionado, unidadesPorId, reservas, clientes, pagos, leads, unidades])
 
   if (loading && todos.length === 0) {
     return mostrarFiltrosGlobales

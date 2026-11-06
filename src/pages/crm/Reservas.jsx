@@ -206,7 +206,10 @@ export default function Reservas() {
         return true
       }
       registrarVisto('reserva', res.id) // [feat-4]
-      abrirEdicionReserva(res)
+      // Abre la FICHA (panel, drawer o sheet según el ancho), no el modal de
+      // edición: antes el deep-link de Historial/búsqueda dejaba "Elegí una
+      // reserva" a la vista en desktop. Editar sigue a un click desde la ficha.
+      setSelectedReservaId(res.id)
       return true
     },
   })
