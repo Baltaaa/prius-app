@@ -15,7 +15,7 @@ import {
   Plus, Wallet, ChevronLeft, ChevronRight, Banknote,
   ArrowUpRight, ArrowDownRight, Printer, Download, Lock, History, AlertTriangle, X,
 } from 'lucide-react'
-import { formatPesos, formatFecha } from '../../lib/format'
+import { formatMonto, formatFecha } from '../../lib/format'
 import { useDialog } from '../../context/DialogProvider'
 import { usePermiso, useAuth } from '../../context/AuthProvider'
 import RegistrarGasto from '../../components/crm/RegistrarGasto'
@@ -316,7 +316,7 @@ export default function Caja() {
               <Wallet className="w-10 h-10 text-ink" />
             </div>
             <h2 className="text-label text-card-title text-ink">Caja no iniciada</h2>
-            <p className="text-ink-2 text-body max-w-md mx-auto">Abrí la caja del día para empezar a registrar cobros y gastos. Siempre arranca en $0.</p>
+            <p className="text-ink-2 text-body max-w-md mx-auto">Abrí la caja del día para empezar a registrar cobros y gastos. Siempre arranca en cero.</p>
             <div className="max-w-xs mx-auto">
               <LoadingButton
                 onClick={handleAbrirCaja}

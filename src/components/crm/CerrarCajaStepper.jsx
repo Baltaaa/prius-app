@@ -1,7 +1,7 @@
 import { useState, useEffect, useId, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ChevronLeft, Check } from 'lucide-react'
-import { formatPesos } from '../../lib/format'
+import { formatMonto } from '../../lib/format'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import MoneyInput from '../inputs/MoneyInput'
 import IntegerInput from '../inputs/IntegerInput'
@@ -134,7 +134,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                   <div key={m.medio} className="space-y-2 pb-4 border-b border-line last:border-0 last:pb-0">
                     <div className="flex items-center justify-between">
                       <span className="text-label text-ink">{MEDIO_PAGO_LABEL[m.medio] || m.medio}</span>
-                      <span className="text-label text-ink-2">Esperado <strong className="text-ink tabular-nums">{formatPesos(m.esperado)}</strong></span>
+                      <span className="text-label text-ink-2">Esperado <strong className="text-ink tabular-nums">{formatMonto(m.esperado)}</strong></span>
                     </div>
                     <MoneyInput
                       label={`${MEDIO_PAGO_LABEL[m.medio] || m.medio} contado/verificado`}
@@ -143,7 +143,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                     />
                     {m.diferencia !== 0 && (
                       <p className={`text-label font-semibold tabular-nums ${m.diferencia > 0 ? 'text-success-ink' : 'text-danger'}`}>
-                        Diferencia: {formatPesos(m.diferencia)}
+                        Diferencia: {formatMonto(m.diferencia)}
                       </p>
                     )}
                   </div>
@@ -154,7 +154,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
               }`}>
                 <p className="text-label text-ink-2">Diferencia total</p>
                 <p className={`text-card-title tabular-nums mt-1 ${diferencia === 0 ? 'text-success-ink' : 'text-ink'}`}>
-                  {formatPesos(diferencia)}
+                  {formatMonto(diferencia)}
                 </p>
               </div>
               {necesitaObservacion && (
@@ -222,12 +222,12 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                 {diferenciaPorMedio.map((m) => (
                   <div key={m.medio} className="flex justify-between text-body">
                     <span className="text-ink-2">{MEDIO_PAGO_LABEL[m.medio] || m.medio} contado</span>
-                    <span className="font-semibold text-ink tabular-nums">{formatPesos(m.contado)}</span>
+                    <span className="font-semibold text-ink tabular-nums">{formatMonto(m.contado)}</span>
                   </div>
                 ))}
                 <div className="flex justify-between text-body pt-2 border-t border-line">
                   <span className="text-ink-2">Diferencia total de arqueo</span>
-                  <span className={`font-semibold tabular-nums ${diferencia === 0 ? 'text-success-ink' : 'text-ink'}`}>{formatPesos(diferencia)}</span>
+                  <span className={`font-semibold tabular-nums ${diferencia === 0 ? 'text-success-ink' : 'text-ink'}`}>{formatMonto(diferencia)}</span>
                 </div>
                 <div className="flex justify-between text-body">
                   <span className="text-ink-2">Cierre Z</span>

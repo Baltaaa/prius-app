@@ -18,10 +18,10 @@ export default function ComprobanteImpresionDoble({ datos, tipo }) {
   return (
     <div style={{ width: '210mm', height: '297mm', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
       <div style={{ height: '148.5mm', overflow: 'hidden', boxSizing: 'border-box' }}>
-        <ComprobanteDocumento datos={datos} tipo={tipo} copia="original" />
+        <ComprobanteDocumento datos={datos} tipo={tipo} copia="original" montosReales />
       </div>
       <div style={{ height: '148.5mm', overflow: 'hidden', borderTop: '0.3mm dashed #999', boxSizing: 'border-box' }}>
-        <ComprobanteDocumento datos={datos} tipo={tipo} copia="duplicado" />
+        <ComprobanteDocumento datos={datos} tipo={tipo} copia="duplicado" montosReales />
       </div>
     </div>
   )

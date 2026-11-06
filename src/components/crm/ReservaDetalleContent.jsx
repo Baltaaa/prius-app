@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Wallet, Receipt, Edit2, XCircle, Trash2, QrCode, Globe, MonitorSmartphone, Users, ShieldAlert } from 'lucide-react'
 import { usePagos } from '../../hooks/usePagos'
 import { coSocios, estadoBadgeStatus, saldoNumerico, pagoSinVerificar } from '../../lib/reservas'
-import { formatFecha, formatRangoFechas, formatPesosVisible, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
+import { formatFecha, formatRangoFechas, formatMontoVisible, formatComprobante, formatUnidad, formatNombre} from '../../lib/format'
 import { linkToComprobante, linkToRecepcion } from '../../lib/deepLinks'
 import { usePermiso } from '../../context/AuthProvider'
 import StatusBadge from './StatusBadge'
@@ -160,7 +160,7 @@ export default function ReservaDetalleContent({
               <div>
                 <span className="block text-label text-ink-2 mb-1">Saldo</span>
                 <span className={`block text-body font-semibold ${saldo === null ? 'text-ink-2' : saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
-                  {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
+                  {saldo === null ? 'Sin verificar' : saldo > 0 ? formatMontoVisible(saldo) : 'Saldado'}
                 </span>
               </div>
             </div>
@@ -173,7 +173,7 @@ export default function ReservaDetalleContent({
               <div className="flex items-baseline justify-between">
                 <span className="text-body text-ink-2">Saldo</span>
                 <span className={`text-body font-semibold ${saldo === null ? 'text-ink-2' : saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
-                  {saldo === null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Saldado'}
+                  {saldo === null ? 'Sin verificar' : saldo > 0 ? formatMontoVisible(saldo) : 'Saldado'}
                 </span>
               </div>
             </>
@@ -209,7 +209,7 @@ export default function ReservaDetalleContent({
                     )}
                   </span>
                   <span className={`shrink-0 text-label ${p.estado === 'anulado' ? 'text-ink-2 line-through' : 'text-ink-2'}`}>
-                    {pagoSinVerificar(p) ? 'Sin verificar' : formatPesosVisible(p.monto)}
+                    {pagoSinVerificar(p) ? 'Sin verificar' : formatMontoVisible(p.monto)}
                   </span>
                 </button>
               ))}

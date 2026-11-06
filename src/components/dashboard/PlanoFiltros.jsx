@@ -5,7 +5,7 @@ import SegmentedControl from '../brand/SegmentedControl'
 import PlanoLeyenda from './PlanoLeyenda'
 import PopoverAnclado from '../ui/PopoverAnclado'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatPesos, formatPesosCompacto, formatFecha, formatDiaCorto } from '../../lib/format'
+import { formatMonto, formatMontoCompacto, formatFecha, formatDiaCorto } from '../../lib/format'
 import { unidadEmoji } from '../../lib/unidadIcono'
 
 export const pct = (n) => `${Math.round((n || 0) * 100)}%`
@@ -21,7 +21,7 @@ export const pct = (n) => `${Math.round((n || 0) * 100)}%`
 export function PlanoStatTiles({ stats, valor, onChange, fecha, compacto = false, className = '' }) {
   if (!stats) return null
   const total = stats.ocupacion.total
-  const fmt = compacto ? formatPesosCompacto : formatPesos
+  const fmt = compacto ? formatMontoCompacto : formatMonto
   const saldo = stats.pendientes.saldo > 0 ? ` · ${fmt(stats.pendientes.saldo)}` : ''
   const tiles = [
     { key: null, label: 'Todas', texto: String(total) },

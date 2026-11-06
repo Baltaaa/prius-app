@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Receipt, Unlock, Wallet, QrCode, CalendarCheck, Users, Pencil } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 import {
-  formatPesosVisible, formatFecha, formatComprobante, formatNombre, formatUnidad,
+  formatMontoVisible, formatFecha, formatComprobante, formatNombre, formatUnidad,
 } from '../../lib/format'
 import UnidadLabel from './UnidadLabel'
 
@@ -57,7 +57,7 @@ function FilaPago({ pago, cliente, titularId, onPagoCelda, onCargarMonto }) {
           )}
         </span>
         <span className="text-right font-semibold text-ink tabular-nums whitespace-nowrap">
-          {sinMonto ? 'Falta monto' : formatPesosVisible(pago.monto)}
+          {sinMonto ? 'Falta monto' : formatMontoVisible(pago.monto)}
         </span>
       </button>
       {/* Acceso directo a editar_monto_pago para los placeholders de la
@@ -148,17 +148,17 @@ export default function ReservaPagosCard({
         <div>
           <p className="text-label text-ink-2">Precio total</p>
           <p className="text-body font-semibold text-ink mt-1">
-            {sinPrecio ? <span className="text-ink-2">Sin precio</span> : (formatPesosVisible(precioTotal) || '—')}
+            {sinPrecio ? <span className="text-ink-2">Sin precio</span> : (formatMontoVisible(precioTotal) || '—')}
           </p>
         </div>
         <div>
           <p className="text-label text-ink-2">Pagado</p>
-          <p className="text-body font-semibold text-success-ink mt-1">{formatPesosVisible(pagado) || '—'}</p>
+          <p className="text-body font-semibold text-success-ink mt-1">{formatMontoVisible(pagado) || '—'}</p>
         </div>
         <div>
           <p className="text-label text-ink-2">Saldo</p>
           <p className={`text-body font-semibold mt-1 ${saldo == null || saldo > 0 ? 'text-danger' : 'text-success-ink'}`}>
-            {saldo == null ? 'Sin verificar' : saldo > 0 ? formatPesosVisible(saldo) : 'Unidad saldada'}
+            {saldo == null ? 'Sin verificar' : saldo > 0 ? formatMontoVisible(saldo) : 'Unidad saldada'}
           </p>
         </div>
       </div>

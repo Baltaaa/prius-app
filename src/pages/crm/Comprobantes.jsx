@@ -8,7 +8,7 @@ import { useDialog } from '../../context/DialogProvider'
 import { useData } from '../../context/DataProvider'
 import { usePreferenciaUsuario } from '../../hooks/usePreferenciaUsuario'
 import { isFeatureEnabled } from '../../lib/features'
-import { formatFecha, formatPesos, formatComprobante, formatNombre} from '../../lib/format'
+import { formatFecha, formatMonto, formatComprobante, formatNombre} from '../../lib/format'
 import { formatMedioPago } from '../../lib/pagos'
 import { pagoSinVerificar, tieneAlgunPagoReal } from '../../lib/reservas'
 import { numeroComprobante, armarDatosComprobante, validarComprobante } from '../../lib/comprobante'
@@ -59,7 +59,7 @@ function ListaPagos({ pagos, onRecibo }) {
                 <HelpCircle size={12} /> Sin verificar
               </strong>
             ) : (
-              <strong className="text-success-ink">{formatPesos(p.monto)}</strong>
+              <strong className="text-success-ink">{formatMonto(p.monto)}</strong>
             )}
             <button onClick={() => onRecibo(p.id)} className="btn-icon" title="Emitir recibo de este pago" aria-label="Emitir recibo de este pago">
               <Receipt size={16} />

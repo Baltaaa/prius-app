@@ -1,6 +1,7 @@
 import { crearDocumentoCsv } from './csvBuilder'
 import { descargarCsv, nombreArchivoCsv } from './descargarCsv'
-import { formatPesos, formatDolares, formatPorcentaje } from '../format'
+// Exportaciones: siempre con los montos reales, aunque el modo privacidad esté activo.
+import { formatMonto, formatMontoUSD, formatMontoReal, formatMontoUSDReal, formatPorcentaje } from '../format'
 import { MEDIO_PAGO_LABEL } from '../pagos'
 
 // Exportación de Reportes (31/10/2026): CSV, texto para WhatsApp e impresión
@@ -11,13 +12,22 @@ import { MEDIO_PAGO_LABEL } from '../pagos'
 // diálogo), igual que la hoja A4 de Caja y del Plano — sin sumar una
 // dependencia de PDF al bundle.
 
-/** Formatea un importe en la moneda elegida para mostrar. */
+/** Para MOSTRAR en pantalla: respeta el modo privacidad ("$ ••••••"). */
+export function montoEnMonedaVista(pesos, moneda, cotizacion) {
+  if (moneda === 'USD') {
+    if (!cotizacion || cotizacion <= 0) return '—'
+    return formatMontoUSD(pesos / cotizacion)
+  }
+  return formatMonto(pesos)
+}
+
+/** Para exportar e imprimir (CSV, WhatsApp, A4): siempre el monto real. */
 export function montoEnMoneda(pesos, moneda, cotizacion) {
   if (moneda === 'USD') {
     if (!cotizacion || cotizacion <= 0) return '—'
-    return formatDolares(pesos / cotizacion)
+    return formatMontoUSDReal(pesos / cotizacion)
   }
-  return formatPesos(pesos)
+  return formatMontoReal(pesos)
 }
 
 export function descargarReporteCsv({ serie, totales, proyeccion, moneda, cotizacion, periodoLabel, desde, hasta, porMedio = [] }) {
@@ -28,7 +38,7 @@ export function descargarReporteCsv({ serie, totales, proyeccion, moneda, cotiza
     ['Hasta', hasta || '—'],
     ['Moneda', moneda],
   ]
-  if (moneda === 'USD') metadatos.push(['Cotización usada', cotizacion ? formatPesos(cotizacion) : '—'])
+  if (moneda === 'USD') metadatos.push(['Cotización usada', cotizacion ? formatMontoReal(cotizacion) : '—'])
 
   const secciones = [
     {
@@ -76,7 +86,7 @@ export function textoReporteWhatsApp({ serie, totales, proyeccion, moneda, cotiz
   const lineas = []
   lineas.push(`*Prius Playa Grande — Reporte ${periodoLabel}*`)
   if (desde || hasta) lineas.push(`${desde || '…'} a ${hasta || '…'}`)
-  lineas.push(`Moneda: ${moneda}${moneda === 'USD' && cotizacion ? ` (cotización ${formatPesos(cotizacion)})` : ''}`)
+  lineas.push(`Moneda: ${moneda}${moneda === 'USD' && cotizacion ? ` (cotización ${formatMontoReal(cotizacion)})` : ''}`)
   lineas.push('')
   lineas.push(`*Ingresos:* ${m(totales.ingresos)}`)
   lineas.push(`*Egresos:* ${m(totales.egresos)}`)

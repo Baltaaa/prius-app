@@ -4,7 +4,7 @@ import {
   CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff, SlidersHorizontal,
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
-import { formatFecha, formatHora, formatPesos, formatMontosEnTexto } from '../../lib/format'
+import { formatFecha, formatHora, formatMonto, formatMontosEnTexto } from '../../lib/format'
 import { hoyAR } from '../../lib/fechas'
 import { agruparPorDia, etiquetaDia, sumarDias } from '../../lib/historialDias'
 import { useData } from '../../context/DataProvider'
@@ -122,7 +122,7 @@ function datosDeEvento(evento, unidadesPorId = {}) {
   const unidad = unidadId ? unidadesPorId[unidadId] : null
   const monto = val('monto')
   return {
-    monto: monto != null ? formatPesos(monto) : null,
+    monto: monto != null ? formatMonto(monto) : null,
     cliente: evento.cliente_nombre || null,
     unidad: unidad ? unidadConEmoji(unidad.tipo, unidad.numero) : null,
     comprobante: val('comprobante') || null,
@@ -136,13 +136,13 @@ const CAMPOS_DIFF = {
     { campo: 'fecha_inicio', label: 'Fecha inicio', fmt: formatFecha },
     { campo: 'fecha_fin', label: 'Fecha fin', fmt: formatFecha },
     { campo: 'fecha', label: 'Fecha', fmt: formatFecha },
-    { campo: 'valor_total', label: 'Monto', fmt: formatPesos },
+    { campo: 'valor_total', label: 'Monto', fmt: formatMonto },
     // `fmtUnidad` (no `fmt`): necesita el mapa de unidades, que solo existe
     // en runtime. Sin esto el Historial mostraba el UUID crudo
     // ("Unidad: 249cb18c-… → 524e8f62-…") — 31/10/2026.
     { campo: 'unidad_id', label: 'Unidad', fmtUnidad: true },
   ],
-  pagos: [{ campo: 'monto', label: 'Monto', fmt: formatPesos }, { campo: 'medio', label: 'Medio' }],
+  pagos: [{ campo: 'monto', label: 'Monto', fmt: formatMonto }, { campo: 'medio', label: 'Medio' }],
 }
 
 // Ruido que nunca se muestra en el diff genérico: claves técnicas, sellos
@@ -168,7 +168,7 @@ const comoTexto = (v, campo = '') => {
   if (v === null || v === undefined || v === '') return '—'
   if (typeof v === 'boolean') return v ? 'Sí' : 'No'
   if (typeof v === 'object') return JSON.stringify(v).slice(0, 60)
-  if (ES_PLATA.test(campo) && !Number.isNaN(Number(v))) return formatPesos(Number(v))
+  if (ES_PLATA.test(campo) && !Number.isNaN(Number(v))) return formatMonto(Number(v))
   if (ES_FECHA.test(campo)) return formatFecha(String(v).slice(0, 10))
   return String(v)
 }

@@ -6,7 +6,7 @@
 // navegador (un cajero en otro huso horario no puede correr la fecha de un
 // movimiento de caja).
 //
-// Ejemplo: formatPesos(1089000) -> "$ 1.089.000"; formatPesos(-15000) -> "−$ 15.000".
+// Ejemplo: formatMonto(1089000) -> "$ 1.089.000"; formatMonto(-15000) -> "−$ 15.000".
 
 import { parsePhoneNumberFromString } from 'libphonenumber-js/min'
 
@@ -54,39 +54,75 @@ function aFechaSegura(val: string | Date | null | undefined): Date | null {
   return Number.isNaN(d.getTime()) ? null : d
 }
 
-/** "$ 1.089.000" / "−$ 15.000" / "$ 0". Entero, sin centavos — decisión única de la app. */
-export function formatPesos(n: number | null | undefined): string {
+// ── Montos y modo privacidad ───────────────────────────────────────────────
+// TODO monto en pantalla pasa por formatMonto (y sus variantes Compacto / USD).
+// Con el modo privacidad activo (el "ojito" global, ver context/PrivacidadProvider)
+// devuelven "$ ••••••" en lugar del número. Las impresiones y exportaciones usan
+// las variantes *Real, que nunca se ocultan; los inputs de carga no formatean con
+// estas (MoneyInput tiene su propio formato) así que tampoco se ocultan.
+// Espacio no separable: el "$" nunca queda en un renglón y los puntos en otro.
+export const MONTO_OCULTO = '$\u00a0••••••'
+
+let montosOcultos = false
+/** Lo llama el PrivacidadProvider en cada render con el estado vigente. */
+export function setMontosOcultos(valor: boolean): void {
+  montosOcultos = !!valor
+}
+export function montosEstanOcultos(): boolean {
+  return montosOcultos
+}
+
+function pesosReal(n: number | null | undefined): string {
   const num = Number(n) || 0
   const abs = Math.round(Math.abs(num))
   return num < 0 ? `${MINUS}$ ${pesosFmt.format(abs)}` : `$ ${pesosFmt.format(abs)}`
 }
 
-/** Igual a formatPesos, pero null/undefined -> null (el llamador no renderiza nada). Reemplaza el viejo formatMontoVisible. */
-/** Cantidad entera con separador de miles argentino: 1.234 (conteos, unidades, personas). */
-export function formatCantidad(n: number | null | undefined): string {
-  return pesosFmt.format(Math.round(Number(n) || 0))
-}
-
-export function formatPesosVisible(n: number | null | undefined): string | null {
-  return Number(n) > 0 ? formatPesos(n) : null
-}
-
-/** "$1,2M" / "$850K" / "$ 500" — versión abreviada para espacios chicos (stats compactas del Plano mobile). Por debajo de 1000 cae a formatPesos entero. */
-export function formatPesosCompacto(n: number | null | undefined): string {
+function pesosCompactoReal(n: number | null | undefined): string {
   const num = Number(n) || 0
   const abs = Math.abs(num)
   const signo = num < 0 ? MINUS : ''
   if (abs >= 1_000_000) return `${signo}$${(abs / 1_000_000).toFixed(1).replace('.0', '')}M`
   if (abs >= 1_000) return `${signo}$${Math.round(abs / 1_000)}K`
-  return formatPesos(num)
+  return pesosReal(num)
 }
 
-/** "US$ 1.200" / "−US$ 50" — mismos separadores de miles que formatPesos, sin centavos. */
-export function formatDolares(n: number | null | undefined): string {
+function dolaresReal(n: number | null | undefined): string {
   const num = Number(n) || 0
   const abs = Math.round(Math.abs(num))
   return num < 0 ? `${MINUS}US$ ${pesosFmt.format(abs)}` : `US$ ${pesosFmt.format(abs)}`
 }
+
+/** "$ 1.089.000" / "−$ 15.000" / "$ 0"; oculto: "$ ••••••". Entero, sin centavos — decisión única de la app. */
+export function formatMonto(n: number | null | undefined): string {
+  return montosOcultos ? MONTO_OCULTO : pesosReal(n)
+}
+
+/** Cantidad entera con separador de miles argentino: 1.234 (conteos, unidades, personas). No es un monto: nunca se oculta. */
+export function formatCantidad(n: number | null | undefined): string {
+  return pesosFmt.format(Math.round(Number(n) || 0))
+}
+
+/** Igual a formatMonto, pero un monto <= 0 o vacío -> null (el llamador no renderiza nada). */
+export function formatMontoVisible(n: number | null | undefined): string | null {
+  return Number(n) > 0 ? formatMonto(n) : null
+}
+
+/** "$1,2M" / "$850K" / "$ 500" — versión abreviada para espacios chicos (stats compactas del Plano mobile). Por debajo de 1000 cae a formatMonto entero. */
+export function formatMontoCompacto(n: number | null | undefined): string {
+  return montosOcultos ? MONTO_OCULTO : pesosCompactoReal(n)
+}
+
+/** "US$ 1.200" / "−US$ 50" — mismos separadores de miles que formatMonto, sin centavos. */
+export function formatMontoUSD(n: number | null | undefined): string {
+  return montosOcultos ? MONTO_OCULTO : dolaresReal(n)
+}
+
+// Variantes que IGNORAN el modo privacidad: solo para impresiones (A4, comprobantes) y
+// exportaciones (CSV/PDF/XLSX), que siempre salen con los montos reales.
+export const formatMontoReal = pesosReal
+export const formatMontoCompactoReal = pesosCompactoReal
+export const formatMontoUSDReal = dolaresReal
 
 /** "87%" / "12,5%" — recibe el valor ya en escala 0-100 (no la fracción 0-1). */
 export function formatPorcentaje(n: number | null | undefined, decimales = 0): string {
@@ -320,13 +356,17 @@ export function formatCodigoReserva(codigo: string | null | undefined): string {
 // comprobante ("RB-3661"), un DNI, un número de unidad ("#74") o una fecha
 // ("2026-10-24"), ninguno de los cuales lleva "$" delante.
 const MONTO_CRUDO_RE = /\$(\d+)/g
+// Montos ya formateados dentro de texto guardado ("Total $ 4.516.000", "−US$ 50", "$1,2M"):
+// con el modo privacidad activo también se tapan.
+const MONTO_EN_TEXTO_RE = /[−-]?(?:US)?\$\s?\d[\d.,]*(?:[KM])?/g
 
-/** Formatea montos crudos ("$1200000" -> "$ 1.200.000") embebidos en texto libre de Historial, sin tocar el dato guardado. Ya formateados ("$ 1.200.000") quedan igual — no vuelve a matchear. */
+/** Formatea montos crudos ("$1200000" -> "$ 1.200.000") embebidos en texto libre de Historial, sin tocar el dato guardado. Ya formateados ("$ 1.200.000") quedan igual — no vuelve a matchear. Con el modo privacidad activo, todos los montos del texto se tapan. */
 export function formatMontosEnTexto(texto: string | null | undefined): string {
   if (!texto) return ''
-  return limpiarNumeralUnidad(
-    texto.replace(MONTO_CRUDO_RE, (_match, digitos: string) => formatPesos(Number(digitos))),
+  const conFormato = limpiarNumeralUnidad(
+    texto.replace(MONTO_CRUDO_RE, (_match, digitos: string) => pesosReal(Number(digitos))),
   )
+  return montosOcultos ? conFormato.replace(MONTO_EN_TEXTO_RE, MONTO_OCULTO) : conFormato
 }
 
 /**

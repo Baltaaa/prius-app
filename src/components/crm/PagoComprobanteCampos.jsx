@@ -1,4 +1,4 @@
-import { formatPesos, formatFecha } from '../../lib/format'
+import { formatMonto, formatFecha } from '../../lib/format'
 import { MEDIO_PAGO_LABEL, MEDIO_PAGO_EMOJI, COMPROBANTE_TIPO_SIGLA, COMPROBANTE_TIPO_LABEL } from '../../lib/pagos'
 import MoneyInput from '../inputs/MoneyInput'
 import IntegerInput from '../inputs/IntegerInput'
@@ -69,7 +69,7 @@ export default function PagoComprobanteCampos({ form }) {
               required
               max={1_000_000}
               simbolo="US$"
-              error={excedeSaldo ? `El equivalente en pesos supera el saldo pendiente (${formatPesos(saldo)})` : undefined}
+              error={excedeSaldo ? `El equivalente en pesos supera el saldo pendiente (${formatMonto(saldo)})` : undefined}
             />
             <div className="mt-3 p-3 bg-surface border border-line rounded-inner space-y-2">
               <div className="flex items-center justify-between gap-3">
@@ -95,7 +95,7 @@ export default function PagoComprobanteCampos({ form }) {
               <div className="flex items-baseline justify-between gap-2 pt-1 border-t border-line">
                 <span className="text-label text-ink-2">Se imputa</span>
                 <span className="text-body text-ink tabular-nums">
-                  {montoArsEquivalente ? formatPesos(montoArsEquivalente) : '—'}
+                  {montoArsEquivalente ? formatMonto(montoArsEquivalente) : '—'}
                 </span>
               </div>
             </div>
@@ -107,7 +107,7 @@ export default function PagoComprobanteCampos({ form }) {
             onChange={setMonto}
             required
             max={100_000_000}
-            error={excedeSaldo ? `El monto supera el saldo pendiente (${formatPesos(saldo)})` : undefined}
+            error={excedeSaldo ? `El monto supera el saldo pendiente (${formatMonto(saldo)})` : undefined}
             chips={!saldoDesconocido && saldo > 0 ? [
               { label: 'Saldo total', value: saldo },
               { label: '50%', value: Math.round(saldo / 2) },
@@ -117,7 +117,7 @@ export default function PagoComprobanteCampos({ form }) {
         {!excedeSaldo && Number(monto) > 0 && (
           <p className="text-label text-ink-2 mt-2">
             Se registrará como: <span className="text-ink-2 font-semibold">{tipoLabel}</span>
-            {!saldoDesconocido && <> — saldo restante {formatPesos(Math.max(saldo - Number(monto), 0))}</>}
+            {!saldoDesconocido && <> — saldo restante {formatMonto(Math.max(saldo - Number(monto), 0))}</>}
             {saldoDesconocido && <span className="text-ink"> · Saldo sin verificar</span>}
           </p>
         )}
@@ -160,7 +160,7 @@ export default function PagoComprobanteCampos({ form }) {
                   { value: '', label: 'No — es un comprobante nuevo' },
                   ...pagosConComprobante.map((p) => ({
                     value: p.comprobante_id,
-                    label: `Cuota ${p.nro_cuota} — ${formatPesos(p.monto)}`,
+                    label: `Cuota ${p.nro_cuota} — ${formatMonto(p.monto)}`,
                   })),
                 ]}
               />

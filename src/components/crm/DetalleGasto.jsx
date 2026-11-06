@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useData } from '../../context/DataProvider'
 import { useDialog } from '../../context/DialogProvider'
-import { formatPesos, formatFecha } from '../../lib/format'
+import { formatMonto, formatFecha } from '../../lib/format'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import { CATEGORIA_GASTO_LABEL } from '../../lib/caja'
 import Modal from './Modal'
@@ -61,7 +61,7 @@ export default function DetalleGasto({ isOpen, onClose, gasto }) {
           <div>
             <p className="text-label text-ink-2">Monto</p>
             <p className={`text-card-title mt-1 ${gasto.estado === 'anulado' ? 'text-ink-2 line-through' : 'text-danger'}`}>
-              {formatPesos(gasto.monto)}
+              {formatMonto(gasto.monto)}
             </p>
           </div>
           <div>

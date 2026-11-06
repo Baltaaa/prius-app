@@ -1,4 +1,5 @@
-import { formatPesos, formatFecha, formatFechaHora } from '../../lib/format'
+// Impresión: siempre con los montos reales, aunque el modo privacidad esté activo.
+import { formatMontoReal, formatFecha, formatFechaHora } from '../../lib/format'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 
@@ -45,9 +46,9 @@ export default function CajaImpresion({ resumen }) {
 
       <div className="ci-totales">
         <div><div className="label">Movimientos</div><div className="valor">{totales.cantidad ?? '—'}</div></div>
-        <div><div className="label">Ingresos</div><div className="valor">{formatPesos(totales.ingresos)}</div></div>
-        <div><div className="label">Egresos</div><div className="valor">{formatPesos(totales.egresos)}</div></div>
-        <div><div className="label ci-accent">Neto</div><div className="valor ci-accent">{formatPesos(totales.neto)}</div></div>
+        <div><div className="label">Ingresos</div><div className="valor">{formatMontoReal(totales.ingresos)}</div></div>
+        <div><div className="label">Egresos</div><div className="valor">{formatMontoReal(totales.egresos)}</div></div>
+        <div><div className="label ci-accent">Neto</div><div className="valor ci-accent">{formatMontoReal(totales.neto)}</div></div>
       </div>
 
       {/* Item 2 (fix urgente oct 2026): columna Cantidad — total general de
@@ -61,9 +62,9 @@ export default function CajaImpresion({ resumen }) {
               <tr key={m.medio}>
                 <td>{MEDIO_PAGO_LABEL[m.medio] || m.medio}</td>
                 <td className="num">{m.cantidad}</td>
-                <td className="num">{formatPesos(m.ingresos)}</td>
-                <td className="num">{formatPesos(m.egresos)}</td>
-                <td className="num">{formatPesos(m.neto)}</td>
+                <td className="num">{formatMontoReal(m.ingresos)}</td>
+                <td className="num">{formatMontoReal(m.egresos)}</td>
+                <td className="num">{formatMontoReal(m.neto)}</td>
               </tr>
             ))}
           </tbody>
@@ -78,16 +79,16 @@ export default function CajaImpresion({ resumen }) {
             {(arqueo.por_medio || []).map((m) => (
               <tr key={m.medio}>
                 <td>{MEDIO_PAGO_LABEL[m.medio] || m.medio}{!m.declarado ? ' (sin declarar)' : ''}</td>
-                <td className="num">{formatPesos(m.esperado)}</td>
-                <td className="num">{formatPesos(m.contado)}</td>
-                <td className="num">{formatPesos(m.diferencia)}</td>
+                <td className="num">{formatMontoReal(m.esperado)}</td>
+                <td className="num">{formatMontoReal(m.contado)}</td>
+                <td className="num">{formatMontoReal(m.diferencia)}</td>
               </tr>
             ))}
             <tr>
               <td><strong>Total</strong></td>
-              <td className="num"><strong>{formatPesos(arqueo.total?.esperado)}</strong></td>
-              <td className="num"><strong>{formatPesos(arqueo.total?.contado)}</strong></td>
-              <td className="num"><strong>{formatPesos(arqueo.total?.diferencia)}</strong></td>
+              <td className="num"><strong>{formatMontoReal(arqueo.total?.esperado)}</strong></td>
+              <td className="num"><strong>{formatMontoReal(arqueo.total?.contado)}</strong></td>
+              <td className="num"><strong>{formatMontoReal(arqueo.total?.diferencia)}</strong></td>
             </tr>
           </tbody>
         </table>
@@ -99,11 +100,11 @@ export default function CajaImpresion({ resumen }) {
           <table className="ci-table">
             <tbody>
               <tr><td>Número</td><td className="num">{z.numero}</td></tr>
-              <tr><td>Total Z</td><td className="num">{formatPesos(z.total)}</td></tr>
-              <tr><td>Neto gravado</td><td className="num">{formatPesos(z.neto_gravado)}</td></tr>
-              <tr><td>IVA</td><td className="num">{formatPesos(z.iva)}</td></tr>
+              <tr><td>Total Z</td><td className="num">{formatMontoReal(z.total)}</td></tr>
+              <tr><td>Neto gravado</td><td className="num">{formatMontoReal(z.neto_gravado)}</td></tr>
+              <tr><td>IVA</td><td className="num">{formatMontoReal(z.iva)}</td></tr>
               <tr><td>Cantidad de comprobantes</td><td className="num">{z.cantidad_comprobantes ?? '—'}</td></tr>
-              <tr><td>Diferencia vs. registrado</td><td className="num">{formatPesos(z.comparacion?.diferencia_total)}</td></tr>
+              <tr><td>Diferencia vs. registrado</td><td className="num">{formatMontoReal(z.comparacion?.diferencia_total)}</td></tr>
             </tbody>
           </table>
         </div>
@@ -120,7 +121,7 @@ export default function CajaImpresion({ resumen }) {
               {[...(facturas || []), ...(recibos || [])].map((c) => (
                 <tr key={c.etiqueta}>
                   <td>{c.etiqueta}</td><td>{c.cliente || '—'}</td><td>{formatFecha(c.fecha)}</td>
-                  <td className="num">{formatPesos(c.monto_total)}</td><td>{c.estado}</td>
+                  <td className="num">{formatMontoReal(c.monto_total)}</td><td>{c.estado}</td>
                 </tr>
               ))}
             </tbody>
@@ -137,7 +138,7 @@ export default function CajaImpresion({ resumen }) {
               {sin_comprobante.map((p) => (
                 <tr key={p.pago_id}>
                   <td>{formatHora(p.fecha_hora)}</td><td>{p.cliente || 'S/N'}</td><td>{p.concepto}</td>
-                  <td className="num">{formatPesos(p.monto)}</td>
+                  <td className="num">{formatMontoReal(p.monto)}</td>
                 </tr>
               ))}
             </tbody>
@@ -154,7 +155,7 @@ export default function CajaImpresion({ resumen }) {
               <tr key={g.gasto_id}>
                 <td>{formatHora(g.fecha_hora)}</td><td>{g.concepto}</td>
                 <td>{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria}</td><td>{g.proveedor || '—'}</td>
-                <td className="num">{formatPesos(g.monto)}</td>
+                <td className="num">{formatMontoReal(g.monto)}</td>
               </tr>
             ))}
           </tbody>
@@ -168,10 +169,10 @@ export default function CajaImpresion({ resumen }) {
             <thead><tr><th>Tipo</th><th>Motivo</th><th className="num">Monto</th></tr></thead>
             <tbody>
               {(anulados.pagos || []).map((p) => (
-                <tr key={`p-${p.pago_id}`}><td>Pago</td><td>{p.motivo}</td><td className="num">{formatPesos(p.monto)}</td></tr>
+                <tr key={`p-${p.pago_id}`}><td>Pago</td><td>{p.motivo}</td><td className="num">{formatMontoReal(p.monto)}</td></tr>
               ))}
               {(anulados.gastos || []).map((g) => (
-                <tr key={`g-${g.gasto_id}`}><td>Gasto</td><td>{g.motivo}</td><td className="num">{formatPesos(g.monto)}</td></tr>
+                <tr key={`g-${g.gasto_id}`}><td>Gasto</td><td>{g.motivo}</td><td className="num">{formatMontoReal(g.monto)}</td></tr>
               ))}
             </tbody>
           </table>

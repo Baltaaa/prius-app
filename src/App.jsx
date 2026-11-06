@@ -6,6 +6,7 @@ import PrivateRoute from './components/PrivateRoute'
 import GlobalLoader from './components/ui/GlobalLoader'
 import ScrollToTop from './components/ScrollToTop'
 import { AuthProvider } from './context/AuthProvider'
+import { PrivacidadProvider, usePrivacidad } from './context/PrivacidadProvider'
 
 // El login es la primera pantalla: solo él se carga en el bundle inicial.
 // Todo el CRM va lazy -> se descarga recién al autenticarse, en chunks por página.
@@ -31,6 +32,20 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <PrivacidadProvider>
+          <Contenido />
+        </PrivacidadProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  )
+}
+
+// Se suscribe al modo privacidad: al alternar el ojito vuelve a renderizar todo el árbol de
+// rutas, así cada formatMonto() se recalcula con el estado nuevo sin recargar ni remontar nada.
+function Contenido() {
+  usePrivacidad()
+  return (
+    <>
         <ScrollToTop />
         <Suspense fallback={<GlobalLoader message="Cargando módulo" />}>
           <Routes>
@@ -109,7 +124,6 @@ export default function App() {
             <Route path="*" element={<Navigate to="/app/home" replace />} />
           </Routes>
         </Suspense>
-      </AuthProvider>
-    </BrowserRouter>
+    </>
   )
 }

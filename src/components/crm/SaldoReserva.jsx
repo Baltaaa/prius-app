@@ -1,5 +1,5 @@
 import { HelpCircle } from 'lucide-react'
-import { formatPesos } from '../../lib/format'
+import { formatMonto } from '../../lib/format'
 import { esPendienteConfirmacion, saldoNumerico } from '../../lib/reservas'
 
 // Saldo de una reserva — homólogo de MontoReserva.jsx pero para el lado del
@@ -23,7 +23,7 @@ export default function SaldoReserva({ reserva, pagos = [], className = '' }) {
 
   return (
     <span className={`font-semibold ${saldo > 0 ? 'text-danger' : 'text-success-ink'} ${className}`}>
-      {saldo > 0 ? formatPesos(saldo) : 'Unidad saldada'}
+      {saldo > 0 ? formatMonto(saldo) : 'Unidad saldada'}
     </span>
   )
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTipoCambio } from '../../hooks/useTipoCambio'
-import { formatPesos, formatDolares, formatFecha } from '../../lib/format'
+import { formatMonto, formatMontoUSD, formatFecha } from '../../lib/format'
 import SegmentedControl from '../brand/SegmentedControl'
 
 // Switch único Pesos/Dólares para las pantallas de plata (Caja, Dashboard,
@@ -44,9 +44,9 @@ export function useMonedaVista() {
   const fmt = useCallback((pesos) => {
     if (moneda === 'USD') {
       if (!cotizacion || cotizacion <= 0) return '—'
-      return formatDolares((Number(pesos) || 0) / cotizacion)
+      return formatMontoUSD((Number(pesos) || 0) / cotizacion)
     }
-    return formatPesos(pesos)
+    return formatMonto(pesos)
   }, [moneda, cotizacion])
 
   return { moneda, setMoneda, fmt, cotizacion, stale: tc.stale, fecha: tc.fecha, tipo: tc.tipo, lado: tc.lado }
@@ -60,7 +60,7 @@ export default function MonedaSwitch({ moneda, onChange, cotizacion, fecha, stal
           className="text-label tabular-nums whitespace-nowrap"
           title={fecha ? `Cotización del ${formatFecha(fecha)}` : undefined}
         >
-          {cotizacion ? formatPesos(cotizacion) : 'sin cotización'}
+          {cotizacion ? formatMonto(cotizacion) : 'sin cotización'}
           {stale && <span className="font-semibold"> · vieja</span>}
         </span>
       )}

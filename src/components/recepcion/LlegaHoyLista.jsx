@@ -2,7 +2,7 @@ import { useState } from 'react'
 import SegmentedControl from '../brand/SegmentedControl'
 import UnidadLabel, { UnidadIcono } from '../crm/UnidadLabel'
 import { filtrarLlegadas, FILTROS_LLEGADAS } from '../../lib/recepcion'
-import { formatHora, formatNombre, formatPesos } from '../../lib/format'
+import { formatHora, formatNombre, formatMonto } from '../../lib/format'
 
 // "Llegan hoy": una fila por reserva web (código) con el emoji de la unidad, el
 // nombre, el código en mono, la unidad y el saldo. Pendiente → botón Check-in
@@ -44,7 +44,7 @@ export default function LlegaHoyLista({ items, onCheckin }) {
                 {g.sinVerificar ? (
                   <span className="text-label text-ink-2 whitespace-nowrap">Saldo sin verificar</span>
                 ) : g.saldo > 0 ? (
-                  <span className="text-label font-semibold text-danger-ink tabular-nums whitespace-nowrap">{formatPesos(g.saldo).replace(/ /g, ' ')}</span>
+                  <span className="text-label font-semibold text-danger-ink tabular-nums whitespace-nowrap">{formatMonto(g.saldo).replace(/ /g, ' ')}</span>
                 ) : null}
                 {g.ingresoAt ? (
                   <span className="inline-flex flex-col items-end">

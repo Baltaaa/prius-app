@@ -32,6 +32,11 @@ export function clienteIdDeEvento(evento) {
   return evento?.cliente_id || val(evento, 'cliente_id') || null
 }
 
+/**
+ * @param {any} evento
+ * @param {{ reservas?: any[], clientes?: any[], pagos?: any[], leads?: any[], unidades?: any[] }} [datos]
+ * @returns {{ ruta: string } | { inexistente: true } | null}
+ */
 export function resolverDestinoEvento(evento, { reservas = [], clientes = [], pagos = [], leads = [], unidades = [] } = {}) {
   if (!evento) return null
   const existeCliente = (id) => !!id && clientes.some((c) => c.id === id)

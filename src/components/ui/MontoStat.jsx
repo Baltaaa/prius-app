@@ -1,4 +1,4 @@
-import { formatPesos } from '../../lib/format'
+import { formatMonto } from '../../lib/format'
 
 // Componente único de monto para cards/resúmenes de stats (pulido mobile
 // iPhone, oct 2026) — el "$" nunca se separa del número (whitespace-nowrap)
@@ -28,10 +28,10 @@ const SIZE_CLASS = {
   xs: 'text-[clamp(11px,3.6vw,14px)] font-semibold leading-tight',
 }
 
-// `fmt` (31/10/2026): formateador opcional. Default formatPesos, así nada
+// `fmt` (31/10/2026): formateador opcional. Default formatMonto, así nada
 // cambia donde ya se usaba; las pantallas con switch Pesos/Dólares le pasan
 // el `fmt` de useMonedaVista() para mostrar el mismo monto convertido.
-export default function MontoStat({ value, size = 'lg', className = '', as: Tag = 'p', fmt = formatPesos }) {
+export default function MontoStat({ value, size = 'lg', className = '', as: Tag = 'p', fmt = formatMonto }) {
   return (
     <Tag className={`${SIZE_CLASS[size] || SIZE_CLASS.lg} tabular-nums whitespace-nowrap ${className}`}>
       {String(fmt(value)).replace(/ /g, '\u00a0')}

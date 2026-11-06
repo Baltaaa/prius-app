@@ -12,13 +12,13 @@ import ToolbarSticky from '../../components/brand/ToolbarSticky'
 import ReportesControles from '../../components/reportes/ReportesControles'
 import ScrollFade from '../../components/ui/ScrollFade'
 import Skeleton from '../../components/ui/Skeleton'
-import { formatPesos, formatPesosCompacto, formatPorcentaje, formatFecha } from '../../lib/format'
+import { formatMonto, formatMontoCompacto, formatPorcentaje, formatFecha } from '../../lib/format'
 import { MEDIO_PAGO_LABEL, MEDIO_PAGO_EMOJI } from '../../lib/pagos'
 import {
   PERIODOS, construirSerie, totalesDe, proyectarPeriodoEnCurso, desglosePorMedio,
 } from '../../lib/reportes'
 import {
-  montoEnMoneda, descargarReporteCsv, textoReporteWhatsApp, linkWhatsAppReporte, imprimirReporte,
+  montoEnMonedaVista, descargarReporteCsv, textoReporteWhatsApp, linkWhatsAppReporte, imprimirReporte,
 } from '../../lib/export/reportesExport'
 
 // Reportes (31/10/2026, rediseño): lo que el dueño quiere ver de un vistazo —
@@ -107,9 +107,9 @@ export default function Reportes() {
 
   const periodoLabel = PERIODOS.find((p) => p.value === periodo)?.label || periodo
   const cot = tc.valor
-  const m = (v) => montoEnMoneda(v, moneda, cot)
+  const m = (v) => montoEnMonedaVista(v, moneda, cot)
   // En pesos, formato compacto para los tiles chicos; en dólares el monto ya es corto.
-  const mc = (v) => (moneda === 'USD' ? m(v) : formatPesosCompacto(v))
+  const mc = (v) => (moneda === 'USD' ? m(v) : formatMontoCompacto(v))
   const faltaCotizacion = moneda === 'USD' && !cot
 
   const datosExport = { serie, totales, proyeccion, moneda, cotizacion: cot, periodoLabel, desde, hasta, porMedio }
@@ -177,7 +177,7 @@ export default function Reportes() {
         <h1 className="text-card-title">Prius Playa Grande — Reporte {periodoLabel}</h1>
         <p className="text-label">
           {desde ? formatFecha(desde) : '—'} al {hasta ? formatFecha(hasta) : '—'} · Moneda: {moneda}
-          {moneda === 'USD' && cot ? ` (cotización ${formatPesos(cot)})` : ''}
+          {moneda === 'USD' && cot ? ` (cotización ${formatMonto(cot)})` : ''}
         </p>
       </div>
 
