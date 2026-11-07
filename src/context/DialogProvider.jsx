@@ -110,7 +110,7 @@ export function DialogProvider({ children }) {
         >
           <div
             ref={bind}
-            className="bg-card w-full max-w-sm rounded-card p-6 sm:p-8 space-y-5 ui-open"
+            className="capa-elevada bg-card w-full max-w-sm rounded-card p-6 sm:p-8 space-y-5 ui-open"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3">

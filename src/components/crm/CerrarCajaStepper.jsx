@@ -101,7 +101,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[999] bg-card sm:bg-overlay sm:backdrop-blur-sm sm:flex sm:items-center sm:justify-center sm:p-4"
+      className="fixed inset-0 z-[999] capa-elevada bg-card sm:bg-overlay sm:backdrop-blur-sm sm:flex sm:items-center sm:justify-center sm:p-4"
       onClick={requestClose}
     >
       <div ref={bind} onClick={(e) => e.stopPropagation()} className="card-surface h-full sm:h-auto sm:max-h-[90dvh] w-full sm:max-w-lg sm:rounded-card flex flex-col overflow-hidden">

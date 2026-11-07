@@ -60,7 +60,7 @@ export default function UnidadPreviewModal({ unit, reservas, temporadaActiva, on
     >
       <div
         ref={bind}
-        className={`w-full max-h-[85dvh] bg-card rounded-t-card flex flex-col overflow-hidden border-t border-line ${unit ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+        className={`w-full max-h-[85dvh] capa-elevada bg-card rounded-t-card flex flex-col overflow-hidden border-t border-line ${unit ? 'ui-open-sheet' : 'ui-close-sheet'}`}
         onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >

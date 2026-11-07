@@ -232,7 +232,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                   <button type="button" onClick={() => setEditandoMontoPago(false)} className="text-label flex-1 py-2 rounded-full bg-card text-ink-2 border border-line">
                     Cancelar
                   </button>
-                  <button type="button" disabled={saving} onClick={handleGuardarMontoPago} className="text-label flex-1 py-2 rounded-full bg-gold text-ink disabled:opacity-50">
+                  <button type="button" disabled={saving} onClick={handleGuardarMontoPago} className="text-label flex-1 py-2 rounded-full bg-gold text-on-gold disabled:opacity-50">
                     Guardar
                   </button>
                 </div>
@@ -318,7 +318,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                         <button type="button" onClick={() => setEditandoId(null)} className="text-label flex-1 py-2 rounded-full bg-surface text-ink-2 border border-line">
                           Cancelar
                         </button>
-                        <button type="button" disabled={saving} onClick={handleGuardarEdicion} className="text-label flex-1 py-2 rounded-full bg-gold text-ink disabled:opacity-50">
+                        <button type="button" disabled={saving} onClick={handleGuardarEdicion} className="text-label flex-1 py-2 rounded-full bg-gold text-on-gold disabled:opacity-50">
                           Guardar
                         </button>
                       </div>
@@ -388,7 +388,7 @@ export default function DetallePago({ isOpen, onClose, pago, reserva, autoAbrirM
                   type="button"
                   disabled={saving || !comprobanteTipo || !puntoVenta || !numero}
                   onClick={handleGuardarComprobante}
-                  className="text-label flex-1 py-3 rounded-full bg-gold text-ink disabled:opacity-50"
+                  className="text-label flex-1 py-3 rounded-full bg-gold text-on-gold disabled:opacity-50"
                 >
                   Guardar
                 </button>

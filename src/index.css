@@ -5,21 +5,135 @@
 /*
   Tokens del sistema de diseño (design/DESIGN.md). Se guardan como canales RGB
   para que tailwind.config.js pueda aplicarles opacidad (`bg-card/90`). Mismos
-  nombres que usa shadcn por convención.
+  nombres que usa shadcn por convención. Los que en oscuro llevan alfa propio
+  (bordes, tintes dorados, fondos suaves) tienen su `-a`: tailwind.config.js lo
+  multiplica por la opacidad de la clase.
+
+  Modo oscuro (DESIGN.md, "Modo oscuro"): la MISMA lista de tokens redefinida
+  bajo `:root[data-theme="dark"]`, nunca clases `dark:` sueltas. Un subárbol con
+  `data-theme="light"` vuelve a la paleta clara (mapa del plano, preview de
+  comprobantes). Lo oscuro vive dentro de `@media screen`: al imprimir siempre
+  sale claro.
 */
+
+/* Marca (preparación SaaS): un solo color, --brand, y toda la escala dorada sale
+   de él. Una marca por cliente solo pisaría estos tres canales. Fijos: no
+   cambian con el tema (fotos, cámara, grafito). */
 :root {
+  --brand-r: 242;
+  --brand-g: 202;
+  --brand-b: 80;
+  --brand: var(--brand-r) var(--brand-g) var(--brand-b);
+  --on-brand: 0 0 0;
+  --scrim: 0 0 0;
+  --on-scrim: 255 255 255;
+}
+
+:root, [data-theme="light"] {
+  color-scheme: light;
   --background: 248 247 242;
   --card: 255 255 255;
+  /* Modales, popovers, sheets: en claro, igual que una card. */
+  --elevated: 255 255 255;
   --primary: 0 0 0;
   --primary-foreground: 255 255 255;
   --secondary: 242 241 236;
   --muted: 242 241 236;
   --muted-foreground: 107 107 107;
-  --accent: 242 202 80;
-  --accent-foreground: 0 0 0;
+  --accent: var(--brand);
+  --accent-foreground: var(--on-brand);
   --border: 229 229 229;
+  --border-a: 1;
+  --divider: 240 239 234;
+  --divider-a: 1;
+  --row-hover: 250 249 245;
+  --row-hover-a: 1;
+  --overlay: 0 0 0;
+  --overlay-a: .3;
   --input: 242 241 236;
-  --ring: 242 202 80;
+  --ring: var(--brand);
+  --autofill: 255 255 255;
+  /* Escala dorada = --brand mezclado con blanco (6,8 / 18 / 38 / 60 / 80%): con el
+     dorado de Prius da exactamente la escala de DESIGN.md (50 a 400). */
+  --gold-50: calc(255 - (255 - var(--brand-r)) * .068) calc(255 - (255 - var(--brand-g)) * .068) calc(255 - (255 - var(--brand-b)) * .068);
+  --gold-100: calc(255 - (255 - var(--brand-r)) * .1795) calc(255 - (255 - var(--brand-g)) * .1795) calc(255 - (255 - var(--brand-b)) * .1795);
+  --gold-200: calc(255 - (255 - var(--brand-r)) * .383) calc(255 - (255 - var(--brand-g)) * .383) calc(255 - (255 - var(--brand-b)) * .383);
+  --gold-300: calc(255 - (255 - var(--brand-r)) * .6) calc(255 - (255 - var(--brand-g)) * .6) calc(255 - (255 - var(--brand-b)) * .6);
+  --gold-400: calc(255 - (255 - var(--brand-r)) * .8) calc(255 - (255 - var(--brand-g)) * .8) calc(255 - (255 - var(--brand-b)) * .8);
+  --gold-50-a: 1;
+  --gold-100-a: 1;
+  --gold-200-a: 1;
+  --gold-300-a: 1;
+  --gold-400-a: 1;
+  --chart-2: 61 61 61;
+  --chart-3: 138 138 138;
+  --success: 22 163 74;
+  --success-soft: 231 246 236;
+  --success-soft-a: 1;
+  --success-ink: 22 101 52;
+  --danger: 220 38 38;
+  --danger-soft: 253 236 236;
+  --danger-soft-a: 1;
+  --danger-ink: 185 28 28;
+  --grafito: linear-gradient(135deg, #2A2A28 0%, #3A3936 55%, #55524C 100%);
+  --grafito-sombra: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 24px -12px rgba(0,0,0,.35);
+  --hero: linear-gradient(135deg, rgb(var(--gold-50)), rgb(var(--gold-200)), rgb(var(--gold-400)));
+  /* Multiplicador de opacidad de los patrones SVG de marca (patterns.jsx). */
+  --patron-escala: 1;
+}
+/* Un subárbol claro dentro del oscuro también recupera el color de texto. */
+[data-theme="light"] { color: rgb(var(--primary)); }
+
+@media screen {
+  /* También un subárbol: la cámara de Recepción es oscura en los dos temas. */
+  :root[data-theme="dark"], [data-theme="dark"] {
+    color-scheme: dark;
+    --background: 14 14 13;
+    --card: 22 22 21;
+    --elevated: 29 29 27;
+    --primary: 245 244 239;
+    --primary-foreground: 14 14 13;
+    --secondary: 36 36 34;
+    --muted: 36 36 34;
+    --muted-foreground: 163 162 156;
+    --border: 255 255 255;
+    --border-a: .08;
+    --divider: 255 255 255;
+    --divider-a: .06;
+    --row-hover: 255 255 255;
+    --row-hover-a: .03;
+    --overlay: 0 0 0;
+    --overlay-a: .6;
+    --input: 36 36 34;
+    --autofill: 36 36 34;
+    /* Tintes dorados = --brand con alfa sobre la superficie que tengan atrás. */
+    --gold-50: var(--brand);
+    --gold-100: var(--brand);
+    --gold-200: var(--brand);
+    --gold-300: var(--brand);
+    --gold-50-a: .08;
+    --gold-100-a: .12;
+    --gold-200-a: .18;
+    --gold-300-a: .35;
+    --chart-2: 214 212 205;
+    --chart-3: 120 119 114;
+    --success: 74 222 128;
+    --success-soft: 74 222 128;
+    --success-soft-a: .12;
+    --success-ink: 74 222 128;
+    --danger: 248 113 113;
+    --danger-soft: 248 113 113;
+    --danger-soft-a: .12;
+    --danger-ink: 252 165 165;
+    --grafito: linear-gradient(135deg, #1F1E1C 0%, #2C2A26 100%);
+    --grafito-sombra: inset 0 1px 0 rgb(var(--brand) / .25);
+    --hero: radial-gradient(120% 140% at 100% 0%, rgb(var(--brand) / .18) 0%, rgb(var(--brand) / 0) 65%), rgb(var(--card));
+    --patron-escala: 1.2;
+  }
+  [data-theme="dark"] { color: rgb(var(--primary)); }
+}
+
+:root {
   --radius: 24px;
 
   /* Espaciado (design/DESIGN.md, escala de 4px): un solo juego de valores por
@@ -46,7 +160,15 @@
     @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full text-body font-semibold transition-colors disabled:opacity-50;
   }
   .btn-primary { @apply bg-ink text-on-ink hover:bg-chart-2; }
-  .btn-gold { @apply bg-gold text-ink hover:bg-gold-400; }
+  .btn-gold { @apply bg-gold text-on-gold hover:bg-gold-400; }
+  /* Superficie grafito (DESIGN.md): degradé + highlight + sombra. El hover aclara 6% con una capa
+     blanca entre el fondo y el contenido (un degradé no se anima); active: scale .98. Es oscura en
+     los dos temas, así que su texto es el blanco fijo (`on-scrim`), no `on-ink`. */
+  .superficie-grafito { @apply relative isolate bg-grafito shadow-grafito text-on-scrim transition-transform duration-200 active:scale-[.98]; }
+  .superficie-grafito::before { content: ''; border-radius: inherit; @apply absolute inset-0 -z-10 bg-on-scrim/[.06] opacity-0 transition-opacity duration-200 pointer-events-none; }
+  .superficie-grafito:hover::before { @apply opacity-100; }
+  @media (prefers-reduced-motion: reduce) { .superficie-grafito, .superficie-grafito::before { transition: none; } }
+  .btn-grafito { @apply superficie-grafito; }
   /* Secundario: el botón primario negro ya vive en el topbar (Nueva reserva); un solo primario por vista. */
   .btn-secondary { @apply bg-card text-ink border border-line hover:bg-surface; }
   .btn-ghost { @apply text-ink hover:bg-surface; }
@@ -65,7 +187,10 @@
   .card-inner { @apply bg-surface rounded-inner p-inner; }
   /* Etiqueta de sección: 13px ink-2, 8px sobre su contenido. */
   .section-label { @apply block mb-2 text-label text-ink-2; }
-  .surface-pop { @apply bg-card rounded-inner border border-line; }
+  /* Capa elevada (modales, popovers, sheets, dropdowns, toasts): en oscuro la elevación es más
+     luz, no sombra. Redefine --card para todo lo que cuelga adentro; en claro no cambia nada. */
+  .capa-elevada { --card: var(--elevated); }
+  .surface-pop { @apply capa-elevada bg-card rounded-inner border border-line; }
 
   .field {
     @apply block w-full min-h-12 px-4 py-2 rounded-inner bg-surface border border-transparent text-ink text-base md:text-body placeholder:text-ink-2 outline-none transition-shadow focus:ring-2 focus:ring-gold disabled:opacity-50;
@@ -91,9 +216,9 @@
 .dp-full .rdp-root { --rdp-day-width: min(60px, calc((100dvw - 32px) / 7)); --rdp-day-height: 44px; --rdp-months-gap: 0px; width: 100%; }
 .dp-full .rdp-months, .dp-full .rdp-month, .dp-full .rdp-month_grid { width: 100%; max-width: none; }
 
-/* Degradé de la card hero (DESIGN.md). */
+/* Degradé de la card hero (DESIGN.md); en oscuro, glow radial de --brand sobre la card. */
 .bg-hero {
-  background: linear-gradient(135deg, theme(colors.gold.50), theme(colors.gold.200), theme(colors.gold.400));
+  background: var(--hero);
 }
 
 /* Hover de cards clicables. */
@@ -477,8 +602,8 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px rgb(var(--card)) inset !important;
-  box-shadow: 0 0 0 1000px rgb(var(--card)) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px rgb(var(--autofill)) inset !important;
+  box-shadow: 0 0 0 1000px rgb(var(--autofill)) inset !important;
   -webkit-text-fill-color: rgb(var(--primary)) !important;
   caret-color: rgb(var(--primary));
   transition: background-color 9999s ease-in-out 0s;
@@ -487,8 +612,8 @@ input:-webkit-autofill:active {
 /* Hover solo donde el puntero realmente puede hacer hover. */
 @media (hover: hover) {
   .hover-row { transition: background-color 180ms ease-out; }
-  .hover-row:hover { background-color: theme(colors.row-hover); }
-  .hover-accent:hover { background-color: theme(colors.gold.100); }
+  .hover-row:hover { background-color: rgb(var(--row-hover) / var(--row-hover-a)); }
+  .hover-accent:hover { background-color: rgb(var(--gold-100) / var(--gold-100-a)); }
 }
 
 /*
@@ -775,6 +900,23 @@ button, a {
   border-radius: 6px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 0 0 1px rgb(var(--border));
   overflow: hidden;
+}
+
+/*
+  Modo oscuro: detalles de plataforma y transición (DESIGN.md, "Modo oscuro").
+  - Selección de texto en dorado de marca, legible en los dos temas.
+  - Cambio de tema: lib/tema.js hace un reveal circular con View Transitions;
+    mientras cambia, `.tema-cambiando` apaga las transiciones de color para que
+    nada parpadee entre la paleta vieja y la nueva.
+  - Mapa del plano: `.plano-hoja` es la hoja clara (con `data-theme="light"`)
+    donde vive el mapa; en oscuro se despega del entorno con un borde sutil.
+*/
+::selection { background-color: rgb(var(--brand) / .35); color: rgb(var(--primary)); }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+.tema-cambiando, .tema-cambiando *, .tema-cambiando *::before, .tema-cambiando *::after { transition: none !important; }
+.plano-hoja { background-color: rgb(var(--card)); }
+@media screen {
+  :root[data-theme="dark"] .plano-hoja { border-radius: 16px; box-shadow: 0 0 0 1px rgb(var(--on-scrim) / .08); }
 }
 
 /* Scroll horizontal de una sola línea (tabs de tipo): sin barra, con snap. */

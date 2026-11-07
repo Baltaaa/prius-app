@@ -5,7 +5,7 @@ import { normalizarTelefonoAR, waLink } from '../../lib/telefono'
 import { formatFechaHora } from '../../lib/format'
 
 export const ESTADO_META = {
-  nuevo: { label: 'Nuevo', cls: 'bg-gold text-ink' },
+  nuevo: { label: 'Nuevo', cls: 'bg-gold text-on-gold' },
   contactado: { label: 'Contactado', cls: 'bg-success-soft text-success-ink border border-success/30' },
   descartado: { label: 'Descartado', cls: 'bg-surface text-ink-2 border border-line' },
 }

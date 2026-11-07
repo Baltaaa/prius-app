@@ -7,6 +7,7 @@ import GlobalLoader from './components/ui/GlobalLoader'
 import ScrollToTop from './components/ScrollToTop'
 import { AuthProvider } from './context/AuthProvider'
 import { PrivacidadProvider, usePrivacidad } from './context/PrivacidadProvider'
+import { TemaProvider } from './context/TemaProvider'
 
 // El login es la primera pantalla: solo él se carga en el bundle inicial.
 // Todo el CRM va lazy -> se descarga recién al autenticarse, en chunks por página.
@@ -32,9 +33,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <PrivacidadProvider>
-          <Contenido />
-        </PrivacidadProvider>
+        <TemaProvider>
+          <PrivacidadProvider>
+            <Contenido />
+          </PrivacidadProvider>
+        </TemaProvider>
       </AuthProvider>
     </BrowserRouter>
   )

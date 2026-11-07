@@ -4,11 +4,11 @@ import { usePrivacidad } from '../../context/PrivacidadProvider'
 // Ojito del modo privacidad global (como una billetera virtual): oculta o muestra TODOS los
 // montos de la app. Hay dos en pantalla — el KPI de cobranzas del Dashboard y la card de la Caja
 // diaria — y los dos controlan el mismo estado. Target de 44px.
-// `sobre`: 'oscuro' (fondo ink, p. ej. la card de la Caja) o 'claro' (el hero dorado).
+// `sobre`: 'oscuro' (superficie grafito de la card de la Caja, oscura en los dos temas) o 'claro' (el hero dorado).
 export default function OjitoMontos({ sobre = 'claro', className = '' }) {
   const { oculto, alternar } = usePrivacidad()
   const tono = sobre === 'oscuro'
-    ? 'text-on-ink/70 hover:text-on-ink hover:bg-on-ink/10'
+    ? 'text-on-scrim/70 hover:text-on-scrim hover:bg-on-scrim/10'
     : 'text-ink/70 hover:text-ink hover:bg-ink/10'
   return (
     <button

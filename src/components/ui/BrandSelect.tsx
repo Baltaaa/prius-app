@@ -271,7 +271,7 @@ export default function BrandSelect({
             <div
               onClick={(e) => e.stopPropagation()}
               onKeyDown={handleKeyDown}
-              className={`w-full max-h-[80vh] bg-card rounded-t-card flex flex-col overflow-hidden ${open ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+              className={`w-full max-h-[80vh] capa-elevada bg-card rounded-t-card flex flex-col overflow-hidden ${open ? 'ui-open-sheet' : 'ui-close-sheet'}`}
             >
               <div className="flex justify-center pt-3 pb-1 shrink-0">
                 <div className="w-10 h-1 rounded-full bg-line" />

@@ -118,7 +118,7 @@ export default function ConfirmarSuperadminModal({
           apilados. Desktop (sm+): dos columnas de igual ancho/alto. */}
       <div
         ref={bind}
-        className={`card-surface w-full sm:max-w-md rounded-t-card sm:rounded-card border-danger/30 p-6 space-y-5 ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
+        className={`capa-elevada card-surface w-full sm:max-w-md rounded-t-card sm:rounded-card border-danger/30 p-6 space-y-5 ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
         style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
       >
         <div className="flex items-start gap-3">

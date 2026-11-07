@@ -682,7 +682,9 @@ export default function Dashboard() {
                     position:absolute encima del mapa) sin tocar ese archivo —
                     PlanoZoomBar.jsx la reemplaza acá al lado, fuera del mapa,
                     llamando a las mismas funciones. */}
-                <div className="flex-1 min-h-0 flex flex-col relative [&>div:first-child]:hidden">
+                {/* Hoja clara del mapa (data-theme="light"): el plano y sus colores de estado
+                    son idénticos en los dos temas; en oscuro solo el entorno cambia. */}
+                <div data-theme="light" className="plano-hoja flex-1 min-h-0 flex flex-col relative [&>div:first-child]:hidden">
                   <PlanoViewport
                     transform={transform}
                     ready={ready}

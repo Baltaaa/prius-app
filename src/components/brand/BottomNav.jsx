@@ -14,6 +14,7 @@ import { isFeatureEnabled } from '../../lib/features'
 import { useMountTransition } from '../../hooks/useMountTransition'
 import { CountBadge } from './Badge'
 import ScrollFade from '../ui/ScrollFade'
+import SelectorTema from './SelectorTema'
 
 // Bottom nav fijo de 5 ítems para mobile (sept 2026) — reemplaza al drawer
 // del Sidebar en pantallas chicas (el Sidebar completo queda solo para
@@ -107,7 +108,7 @@ export default function BottomNav() {
             en la misma línea que el resto. */}
         <button type="button" onClick={() => abrirNuevaReserva()} className={`relative ${claseItem} text-ink-2`}>
           <span className="w-12 h-7" aria-hidden="true" />
-          <span className="absolute -top-4 w-12 h-12 rounded-full bg-gold text-ink flex items-center justify-center active:scale-95 transition-transform">
+          <span className="absolute -top-4 w-12 h-12 rounded-full bg-gold text-on-gold flex items-center justify-center active:scale-95 transition-transform">
             <Plus size={24} strokeWidth={1.5} />
           </span>
           Reserva
@@ -128,7 +129,7 @@ export default function BottomNav() {
         >
           <div
             ref={bindMore}
-            className={`w-full max-h-[85dvh] bg-card rounded-t-card flex flex-col overflow-hidden ${showMore ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+            className={`w-full max-h-[85dvh] capa-elevada bg-card rounded-t-card flex flex-col overflow-hidden ${showMore ? 'ui-open-sheet' : 'ui-close-sheet'}`}
             onClick={(e) => e.stopPropagation()}
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
@@ -161,6 +162,10 @@ export default function BottomNav() {
                   {!item.comingSoon && item.badge > 0 && <CountBadge value={item.badge} className="shrink-0" />}
                 </NavLink>
               ))}
+              <div className="px-3 pt-2 pb-3">
+                <p className="section-label">Tema</p>
+                <SelectorTema />
+              </div>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-3 min-h-[48px] rounded-nav text-body text-danger hover:bg-danger-soft anim-colors"

@@ -30,6 +30,7 @@ import UnidadLabel from '../crm/UnidadLabel'
 const USER_ID_MODO_INCOGNITO = 'ccae0faf-3b4c-402b-902e-b0cd3c5dc1e8'
 import StatusBadge from '../crm/StatusBadge'
 import PopoverAnclado from '../ui/PopoverAnclado'
+import { ToggleTema } from './SelectorTema'
 import { useSection } from '../../lib/sectionTitles'
 import Button from './Button'
 import PageHeader from './PageHeader'
@@ -521,7 +522,7 @@ export default function TopBar() {
             </span>
           </button>
         )}
-        <Button icon={Plus} onClick={() => abrirNuevaReserva()} aria-label="Nueva reserva" className="hidden md:inline-flex shrink-0 max-lg:px-3">
+        <Button variant="grafito" icon={Plus} onClick={() => abrirNuevaReserva()} aria-label="Nueva reserva" className="hidden md:inline-flex shrink-0 max-lg:px-3">
           <span className="hidden lg:inline">Nueva reserva</span>
         </Button>
         {/* Fase 3 (Recepción, D1): acceso directo al escáner de QR — solo
@@ -602,7 +603,7 @@ export default function TopBar() {
         </div>
 
         {showNotifications && createPortal(
-          <div ref={notifOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-card flex flex-col ui-open">
+          <div ref={notifOverlay.bind} className="md:hidden fixed inset-0 z-[997] capa-elevada bg-card flex flex-col ui-open">
             <div className="flex items-center justify-between px-4 h-16 border-b border-line shrink-0">
               <h1 className="text-body font-semibold text-ink">Notificaciones</h1>
               <button
@@ -673,6 +674,7 @@ export default function TopBar() {
                 >
                   <User size={14} /> Mi cuenta
                 </button>
+                <ToggleTema />
                 {puedeVerModoIncognito && (
                   <button
                     onClick={handleToggleIncognito}
@@ -697,7 +699,7 @@ export default function TopBar() {
       {/* Búsqueda mobile a pantalla completa (Tarea 4.2) — mismos resultados
           que el buscador de desktop, reutiliza clienteMatches/reservaMatches. */}
       {mobileSearchOpen && createPortal(
-        <div ref={mobileSearchOverlay.bind} className="md:hidden fixed inset-0 z-[997] bg-card flex flex-col ui-open">
+        <div ref={mobileSearchOverlay.bind} className="md:hidden fixed inset-0 z-[997] capa-elevada bg-card flex flex-col ui-open">
           <div className="flex items-center gap-3 px-4 h-16 border-b border-line shrink-0">
             <SearchInput
               value={searchValue}

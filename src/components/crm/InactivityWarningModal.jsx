@@ -32,7 +32,7 @@ export default function InactivityWarningModal({ open, secondsLeft, onContinuar,
         aria-modal="true"
         aria-labelledby="inactivity-warning-title"
         aria-describedby="inactivity-warning-desc"
-        className={`card-surface w-full sm:max-w-sm rounded-t-card sm:rounded-card p-6 sm:p-8 space-y-6 ${open ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
+        className={`capa-elevada card-surface w-full sm:max-w-sm rounded-t-card sm:rounded-card p-6 sm:p-8 space-y-6 ${open ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sm:hidden flex justify-center -mt-2 mb-1">

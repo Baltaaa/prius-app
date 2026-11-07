@@ -80,7 +80,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidthClass 
     >
       <div
         ref={bind}
-        className={`bg-card w-full ${maxWidthClass} max-h-[90dvh] rounded-t-card sm:rounded-card flex flex-col overflow-hidden ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
+        className={`capa-elevada bg-card w-full ${maxWidthClass} max-h-[90dvh] rounded-t-card sm:rounded-card flex flex-col overflow-hidden ${isOpen ? 'ui-open-sheet sm:ui-open' : 'ui-close-sheet sm:ui-close'}`}
       >
         {/* Gesto de cierre (mobile) */}
         <div className="sm:hidden flex justify-center pt-3 pb-1 shrink-0">

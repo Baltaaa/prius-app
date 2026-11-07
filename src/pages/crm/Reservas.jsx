@@ -692,7 +692,7 @@ export default function Reservas() {
           <div
             ref={drawerOverlay.bind}
             onClick={(e) => e.stopPropagation()}
-            className={`w-[45%] min-w-[360px] h-full bg-card border-l border-line p-6 flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}
+            className={`w-[45%] min-w-[360px] h-full capa-elevada bg-card border-l border-line p-6 flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}
           >
             {selectedReserva && (
               <ReservaDetalleContent
@@ -745,7 +745,7 @@ export default function Reservas() {
           la página en vez de cubrir el viewport real, dejando el BottomNav
           visible encima del detalle. */}
       {isMobile && mobileDetalleShouldRender && createPortal(
-        <div className={`fixed inset-0 z-[995] bg-card flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}>
+        <div className={`fixed inset-0 z-[995] capa-elevada bg-card flex flex-col ${selectedReserva ? 'ui-open' : 'ui-close'}`}>
           <div className="flex items-center gap-2 px-2 h-16 border-b border-line shrink-0">
             <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-2 hover:text-ink">
               <ChevronLeft size={20} />
