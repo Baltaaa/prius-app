@@ -87,6 +87,14 @@ Difuminado de scroll (`ScrollFade`, componente único): todo contenedor con scro
 Tiles de filtro (Plano): `bg-surface`, radius 16px, dos líneas (etiqueta 13px gris, valor 14px). Activo: `gold-50` con aro `gold` e indicador dorado de 4px a la izquierda, igual que la fila seleccionada de las listas.
 
 
+## Superficie grafito
+
+Una sola superficie de énfasis, solo para el botón "+ Nueva reserva" del topbar y la card de Caja diaria (sidebar en desktop, card del Dashboard en mobile y tablet), espejadas con el mismo estilo. Token en `tailwind.config.js` (`bg-grafito`, `shadow-grafito`) y clase `.superficie-grafito` / `.btn-grafito` en `index.css`; no se usa en ningún otro lado. El resto de los primarios sigue en negro plano y el "+" dorado de la bottom nav no cambia.
+
+Fondo `linear-gradient(135deg, #2A2A28 0%, #3A3936 55%, #55524C 100%)`; highlight interior de 1px arriba `rgba(255,255,255,.08)`; sombra `0 10px 24px -12px rgba(0,0,0,.35)`. Texto blanco, secundarios en `on-ink/60` (el peor punto, el borde claro del degradé, da 4,8:1; AA). Hover: una capa blanca al 6% se funde en 200ms (un degradé no se anima); active: `scale(.98)`; sin transiciones con `prefers-reduced-motion`.
+
+Botón: pill del alto de siempre (h-11), ícono + y texto blancos. Card: radio 24px, sin patrón de olas, monto blanco del tamaño actual, "Abierta · total del día" en secundario, ojito y "Abrir" dorado como estaban. El modo privacidad sigue mandando: el monto sale `$ ••••••` sobre el grafito.
+
 ## Gráficos
 
 Línea negra 1.75px con relleno degradé dorado 300 → transparente, tooltip en pill negra, guía vertical punteada, punto negro con anillo blanco.

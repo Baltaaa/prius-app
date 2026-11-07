@@ -47,6 +47,13 @@
   }
   .btn-primary { @apply bg-ink text-on-ink hover:bg-chart-2; }
   .btn-gold { @apply bg-gold text-ink hover:bg-gold-400; }
+  /* Superficie grafito (DESIGN.md): degradé + highlight + sombra. El hover aclara 6% con una capa
+     blanca entre el fondo y el contenido (un degradé no se anima); active: scale .98. */
+  .superficie-grafito { @apply relative isolate bg-grafito shadow-grafito text-on-ink transition-transform duration-200 active:scale-[.98]; }
+  .superficie-grafito::before { content: ''; border-radius: inherit; @apply absolute inset-0 -z-10 bg-on-ink/[.06] opacity-0 transition-opacity duration-200 pointer-events-none; }
+  .superficie-grafito:hover::before { @apply opacity-100; }
+  @media (prefers-reduced-motion: reduce) { .superficie-grafito, .superficie-grafito::before { transition: none; } }
+  .btn-grafito { @apply superficie-grafito; }
   /* Secundario: el botón primario negro ya vive en el topbar (Nueva reserva); un solo primario por vista. */
   .btn-secondary { @apply bg-card text-ink border border-line hover:bg-surface; }
   .btn-ghost { @apply text-ink hover:bg-surface; }

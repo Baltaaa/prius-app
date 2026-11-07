@@ -521,7 +521,7 @@ export default function TopBar() {
             </span>
           </button>
         )}
-        <Button icon={Plus} onClick={() => abrirNuevaReserva()} aria-label="Nueva reserva" className="hidden md:inline-flex shrink-0 max-lg:px-3">
+        <Button variant="grafito" icon={Plus} onClick={() => abrirNuevaReserva()} aria-label="Nueva reserva" className="hidden md:inline-flex shrink-0 max-lg:px-3">
           <span className="hidden lg:inline">Nueva reserva</span>
         </Button>
         {/* Fase 3 (Recepción, D1): acceso directo al escáner de QR — solo

@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react'
 const VARIANTES = {
   primary: 'btn-primary',
   gold: 'btn-gold',
+  grafito: 'btn-grafito',
   ghost: 'btn-ghost',
   danger: 'btn-danger',
 }

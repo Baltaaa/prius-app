@@ -91,6 +91,14 @@ export default {
         inner: '16px',
         section: '24px',
       },
+      // Superficie grafito (DESIGN.md, "Superficie grafito"): solo el botón "Nueva reserva" del
+      // topbar y la card de Caja diaria. Degradé de 135° con un highlight interior de 1px arriba.
+      backgroundImage: {
+        grafito: 'linear-gradient(135deg, #2A2A28 0%, #3A3936 55%, #55524C 100%)',
+      },
+      boxShadow: {
+        grafito: 'inset 0 1px 0 rgba(255,255,255,.08), 0 10px 24px -12px rgba(0,0,0,.35)',
+      },
       maxWidth: { page: '1680px' },
       // Tailwind v3 no trae `dvh`: `h-screen` (100vh) en iOS Safari mide más
       // que lo visible con la barra de direcciones. Fallback en index.css.
