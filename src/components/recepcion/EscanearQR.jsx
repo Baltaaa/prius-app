@@ -48,7 +48,7 @@ export default function EscanearQR({ isOpen, onClose, onScan }) {
   if (!shouldRender) return null
 
   return createPortal(
-    <div className={`fixed inset-0 z-[999] bg-ink flex flex-col ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}>
+    <div data-theme="dark" className={`fixed inset-0 z-[999] bg-canvas flex flex-col ${isOpen ? 'ui-backdrop-open' : 'ui-backdrop-close'}`}>
       <div ref={bind} className="flex-1 flex flex-col">
         <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] shrink-0">
           <h2 className="text-label text-gold">Escanear QR</h2>

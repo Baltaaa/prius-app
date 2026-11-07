@@ -27,7 +27,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, maxHeigh
     >
       <div
         ref={bind}
-        className={`w-full sm:max-w-md bg-card sm:rounded-card rounded-t-card flex flex-col overflow-hidden ${maxHeightClass} ${isOpen ? 'ui-open-sheet' : 'ui-close-sheet'}`}
+        className={`w-full sm:max-w-md capa-elevada bg-card sm:rounded-card rounded-t-card flex flex-col overflow-hidden ${maxHeightClass} ${isOpen ? 'ui-open-sheet' : 'ui-close-sheet'}`}
         onClick={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >

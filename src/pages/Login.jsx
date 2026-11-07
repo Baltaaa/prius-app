@@ -243,7 +243,7 @@ export default function Login({ modo }) {
 
   return (
     <div
-      className="max-md:fixed max-md:inset-x-0 max-md:top-[var(--vv-top,0px)] max-md:h-[var(--vv-h,100dvh)] md:relative md:h-[100dvh] w-full overflow-hidden overscroll-none bg-ink selection:bg-gold selection:text-ink"
+      className="max-md:fixed max-md:inset-x-0 max-md:top-[var(--vv-top,0px)] max-md:h-[var(--vv-h,100dvh)] md:relative md:h-[100dvh] w-full overflow-hidden overscroll-none bg-scrim selection:bg-gold selection:text-on-gold"
       style={{ "--vv-h": vv.alto ? `${vv.alto}px` : undefined, "--vv-top": `${vv.top}px` }}
     >
       {isSuccess && <GlobalLoader message="Iniciando sesión segura" />}
@@ -275,13 +275,13 @@ export default function Login({ modo }) {
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-ink/40 md:bg-gradient-to-br md:from-ink/85 md:via-ink/55 md:to-ink/35" />
+          <div className="absolute inset-0 bg-gradient-to-t from-scrim/70 via-scrim/20 to-scrim/40 md:bg-gradient-to-br md:from-scrim/85 md:via-scrim/55 md:to-scrim/35" />
           {/* Scrim propio del wordmark (Bloque 2, nov 2026). El gradiente de
               arriba deja la franja superior en negro al 40% en mobile, y
               sobre un cielo claro el blanco del logo quedaba en ~3.8:1 — por
               debajo de AA. Esta banda sube esa zona a negro ~72% y lleva el
               texto a 10:1 largos, sin oscurecer el resto de la foto. */}
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-ink/75 to-transparent md:hidden" />
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-scrim/75 to-transparent md:hidden" />
 
           <div className="relative h-full flex flex-col justify-between p-6 md:p-12">
             {/* Wordmark — logo real de la app (/images/prius-icon.png),
@@ -289,26 +289,26 @@ export default function Login({ modo }) {
             <div className="flex items-center gap-2 md:gap-3 pt-[max(0.5rem,env(safe-area-inset-top))]">
               <img src="/images/prius-icon.png" alt="" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
               <div className="leading-tight">
-                <p className="text-on-ink text-card-title md:text-card-title tracking-tight">Prius</p>
-                <p className="text-label text-on-ink/70 -mt-1">Playa Grande</p>
+                <p className="text-on-scrim text-card-title md:text-card-title tracking-tight">Prius</p>
+                <p className="text-label text-on-scrim/70 -mt-1">Playa Grande</p>
               </div>
             </div>
 
             {/* Bloque central — solo desktop (mock 06-login-desktop) */}
             <div className="hidden md:block max-w-md">
-              <span className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-on-ink/10 border border-on-ink/20 text-on-ink text-label font-semibold mb-6">
+              <span className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-on-scrim/10 border border-on-scrim/20 text-on-scrim text-label font-semibold mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" /> Panel de Gestión y Operaciones
               </span>
-              <h2 className="text-stat lg:text-greeting text-on-ink">
+              <h2 className="text-stat lg:text-greeting text-on-scrim">
                 Prius <span className="text-gold">Playa Grande</span>
               </h2>
-              <p className="text-on-ink/70 text-base mt-4 leading-relaxed">
+              <p className="text-on-scrim/70 text-base mt-4 leading-relaxed">
                 Gestión operativa inteligente para carpas, sombrillas y servicios de balneario.
               </p>
             </div>
 
             {/* Pie — solo desktop */}
-            <div className="hidden md:flex items-center justify-between text-on-ink/50 text-label border-t border-on-ink/10 pt-6">
+            <div className="hidden md:flex items-center justify-between text-on-scrim/50 text-label border-t border-on-scrim/10 pt-6">
               <span>Sistema CRM Interno</span>
               <span>Mar del Plata, Argentina</span>
             </div>

@@ -107,7 +107,7 @@ export default function UnidadDetalleContent({ unit, reservas, temporadaActiva, 
               estado.key === "libre"
                 ? "bg-success-soft text-success-ink"
                 : estado.key === "ocupada"
-                  ? "bg-gold text-ink"
+                  ? "bg-gold text-on-gold"
                   : estado.key === "sin_confirmar"
                     ? "bg-surface text-ink-2"
                     : "bg-danger-soft text-danger"

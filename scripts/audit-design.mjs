@@ -13,6 +13,8 @@ const EXCEPCIONES = [
   /database\.types\.ts|\.test\.ts/,
   // Colores de marca de terceros.
   /WhatsAppIcon/,
+  // Color de la barra del navegador por tema: espejo del canvas de cada tema (meta theme-color).
+  /lib\/tema\.js/,
 ]
 
 // Chrome denso del Plano (franja de estadísticas, leyenda, toolbar): conserva sus medios pasos para no
@@ -65,6 +67,8 @@ for (const archivo of recorrer('src')) {
     // sección de plano congelado guarda valores propios a propósito.
     if (/rgb\(var\(/.test(linea)) return
     if (archivo.endsWith('.css') && /font-family: 'Manrope|^\s+(background|border|box-shadow): .*rgba\(/.test(linea)) return
+    // Definición de un token (`--x: valor`, claro u oscuro): es el único lugar donde viven los colores.
+    if (archivo.endsWith('.css') && /^\s+--[\w-]+:/.test(linea)) return
     for (const [regla, re] of REGLAS) {
       if (regla === 'espaciado fuera de escala' && ESPACIADO_DENSO.test(archivo)) continue
       if (regla === 'fuente' && FUENTE_MONO_OK.test(archivo) && /font-mono\b/.test(linea)) continue

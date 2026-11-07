@@ -5,8 +5,13 @@
 import containerQueries from '@tailwindcss/container-queries'
 
 const canal = (nombre) => `rgb(var(--${nombre}) / <alpha-value>)`
+// Token con alfa propio por tema (`--x-a`): en oscuro bordes y tintes son
+// blanco/dorado con alfa; la opacidad de la clase se multiplica encima.
+const canalA = (nombre) => `rgb(var(--${nombre}) / calc(var(--${nombre}-a) * <alpha-value>))`
 
 export default {
+  // Modo oscuro por tokens (index.css). `dark:` solo para excepciones puntuales.
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -16,27 +21,35 @@ export default {
       colors: {
         canvas: canal('background'),
         card: canal('card'),
+        elevated: canal('elevated'),
         surface: canal('secondary'),
         ink: { DEFAULT: canal('primary'), 2: canal('muted-foreground') },
         'on-ink': canal('primary-foreground'),
-        line: canal('border'),
-        divider: '#F0EFEA',
-        'row-hover': '#FAF9F5',
-        overlay: 'rgb(0 0 0 / 0.3)',
+        line: canalA('border'),
+        divider: canalA('divider'),
+        'row-hover': canalA('row-hover'),
+        overlay: canalA('overlay'),
+        // Escala dorada derivada de --brand (index.css); en oscuro 50-300 son --brand con alfa.
+        brand: canal('brand'),
         gold: {
           DEFAULT: canal('accent'),
-          50: '#FEFBF3',
-          100: '#FDF5E0',
-          200: '#FAEBBC',
-          300: '#F7DF96',
-          400: '#F5D573',
+          50: canalA('gold-50'),
+          100: canalA('gold-100'),
+          200: canalA('gold-200'),
+          300: canalA('gold-300'),
+          400: canalA('gold-400'),
           500: canal('accent'),
         },
-        chart: { 2: '#3D3D3D', 3: '#8A8A8A' },
-        // Pares soft/ink verificados a contraste AA ≥ 4.5:1. Sobre fondo
-        // claro el texto usa `ink`: el verde sólido da 3,3:1 sobre blanco.
-        success: { DEFAULT: '#16A34A', soft: '#E7F6EC', ink: '#166534' },
-        danger: { DEFAULT: '#DC2626', soft: '#FDECEC', ink: '#B91C1C' },
+        // Texto sobre dorado sólido: negro en los dos temas.
+        'on-gold': canal('on-brand'),
+        // Fijos, iguales en los dos temas: velos sobre fotos, cámara, grafito.
+        scrim: canal('scrim'),
+        'on-scrim': canal('on-scrim'),
+        chart: { 2: canal('chart-2'), 3: canal('chart-3') },
+        // Pares soft/ink verificados a contraste AA ≥ 4.5:1 en los dos temas.
+        // Sobre fondo claro el texto usa `ink`: el verde sólido da 3,3:1 sobre blanco.
+        success: { DEFAULT: canal('success'), soft: canalA('success-soft'), ink: canal('success-ink') },
+        danger: { DEFAULT: canal('danger'), soft: canalA('danger-soft'), ink: canal('danger-ink') },
         // Plano congelado (ver "Plano congelado" en index.css): valores del
         // sistema anterior, solo para Cell, CellMobile y compañía.
         plano: {
@@ -93,11 +106,12 @@ export default {
       },
       // Superficie grafito (DESIGN.md, "Superficie grafito"): solo el botón "Nueva reserva" del
       // topbar y la card de Caja diaria. Degradé de 135° con un highlight interior de 1px arriba.
+      // Valores por tema en index.css (--grafito, --grafito-sombra).
       backgroundImage: {
-        grafito: 'linear-gradient(135deg, #2A2A28 0%, #3A3936 55%, #55524C 100%)',
+        grafito: 'var(--grafito)',
       },
       boxShadow: {
-        grafito: 'inset 0 1px 0 rgba(255,255,255,.08), 0 10px 24px -12px rgba(0,0,0,.35)',
+        grafito: 'var(--grafito-sombra)',
       },
       maxWidth: { page: '1680px' },
       // Tailwind v3 no trae `dvh`: `h-screen` (100vh) en iOS Safari mide más

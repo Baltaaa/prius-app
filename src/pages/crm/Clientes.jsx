@@ -743,7 +743,7 @@ export default function Clientes() {
               <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
             </button>
             {showFiltros && (
-                <div className="absolute left-0 mt-2 w-48 bg-card border border-line rounded-inner overflow-hidden z-50 p-3">
+                <div className="absolute left-0 mt-2 w-48 capa-elevada bg-card border border-line rounded-inner overflow-hidden z-50 p-3">
                   {FILTROS_ESTADO_CLIENTE.map((f) => (
                     <button
                       key={f.value}
@@ -986,7 +986,7 @@ export default function Clientes() {
           sin portal este overlay quedaba recortado a la altura del
           contenido scrolleable en vez de cubrir el viewport real. */}
       {isMobile && mobileDetalleShouldRender && createPortal(
-        <div className={`fixed inset-0 z-[995] bg-card flex flex-col ${clienteSeleccionado ? 'ui-open' : 'ui-close'}`}>
+        <div className={`fixed inset-0 z-[995] capa-elevada bg-card flex flex-col ${clienteSeleccionado ? 'ui-open' : 'ui-close'}`}>
           <div className="flex items-center gap-2 px-2 h-16 border-b border-line shrink-0">
             <button onClick={handleCloseDetalle} className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-ink-2 hover:text-ink">
               <ChevronLeft size={20} />

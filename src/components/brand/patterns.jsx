@@ -1,5 +1,6 @@
 // Identidad Prius: patrones SVG de líneas finas, siempre decorativos
-// (aria-hidden, sin eventos). La opacidad va de 3 a 8% según DESIGN.md.
+// (aria-hidden, sin eventos). La opacidad va de 3 a 8% según DESIGN.md; en
+// oscuro la multiplica --patron-escala (index.css).
 function Patron({ children, viewBox, opacity, className }) {
   return (
     <svg
@@ -9,7 +10,7 @@ function Patron({ children, viewBox, opacity, className }) {
       fill="none"
       stroke="currentColor"
       strokeWidth="1"
-      style={{ opacity }}
+      style={{ opacity: `calc(${opacity} * var(--patron-escala, 1))` }}
       className={`pointer-events-none absolute ${className}`}
     >
       {children}

@@ -36,7 +36,7 @@ const EscanearQR = lazy(() => import('../components/recepcion/EscanearQR'))
 
 function EscanearQRFallback() {
   return (
-    <div className="fixed inset-0 z-[999] bg-ink flex flex-col items-center justify-center gap-3">
+    <div data-theme="dark" className="fixed inset-0 z-[999] bg-canvas flex flex-col items-center justify-center gap-3">
       <div className="w-8 h-8 border-2 border-line border-t-gold rounded-full animate-spin" />
       <p className="text-body text-ink-2">Abriendo cámara…</p>
     </div>

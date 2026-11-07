@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Shield, DollarSign, Save, Check, Info, Clock, RefreshCw } from 'lucide-react'
+import { Shield, DollarSign, Save, Check, Info, Clock, RefreshCw, SunMoon } from 'lucide-react'
 import MoneyInput from '../../components/inputs/MoneyInput'
+import SelectorTema from '../../components/brand/SelectorTema'
 import BrandSelect from '../../components/ui/BrandSelect'
 import LoadingButton from '../../components/ui/LoadingButton'
 import { useTipoCambio } from '../../hooks/useTipoCambio'
@@ -111,7 +112,7 @@ export default function Perfil() {
       <section className="card-surface card-pad ">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex items-center gap-3 min-w-0 md:flex-1">
-            <span className="shrink-0 w-14 h-14 rounded-card bg-gold text-ink flex items-center justify-center text-stat">
+            <span className="shrink-0 w-14 h-14 rounded-card bg-gold text-on-gold flex items-center justify-center text-stat">
               {inicial}
             </span>
             <div className="min-w-0">
@@ -141,6 +142,14 @@ export default function Perfil() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-grid items-start">
+        <BloqueAccion
+          icono={SunMoon}
+          titulo="Apariencia"
+          bajada="Claro, oscuro o el mismo tema que tu dispositivo. Se guarda para tu usuario."
+        >
+          <SelectorTema />
+        </BloqueAccion>
+
         {/* Tarifas base */}
         <BloqueAccion
           icono={DollarSign}
