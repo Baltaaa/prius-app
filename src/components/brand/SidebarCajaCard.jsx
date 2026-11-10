@@ -3,10 +3,12 @@ import { Wallet } from 'lucide-react'
 import { useCaja } from '../../hooks/useCaja'
 import OjitoMontos from './OjitoMontos'
 import { formatMonto } from '../../lib/format'
+import { totalDiaCaja } from '../../lib/totalDiaCaja'
 
 // Estado real de la Caja diaria. En desktop vive al pie del sidebar; en mobile
 // y tablet, donde no hay sidebar, el Dashboard la muestra como card. El total
-// es la misma columna que lee "ingresos del día" en lib/planoStats.js.
+// es la misma columna que lee "ingresos del día" en lib/planoStats.js, más el
+// Cierre Z si la caja se cerró con Z cargada (lib/totalDiaCaja.js).
 // Ojito: modo privacidad GLOBAL (context/PrivacidadProvider): oculta todos los montos de la app,
 // no solo este. Sin caja iniciada no hay monto, ni ojito.
 
@@ -14,7 +16,7 @@ export default function SidebarCajaCard({ subtitulo, className = '' }) {
   const navigate = useNavigate()
   const { cajaHoy } = useCaja()
   const cerrada = cajaHoy?.estado === 'cerrada'
-  const monto = formatMonto(Number(cajaHoy?.total_cobros || 0)).replace(/ /g, ' ')
+  const monto = formatMonto(totalDiaCaja(cajaHoy, 'total_cobros')).replace(/ /g, ' ')
 
   return (
     <section className={`rounded-card superficie-grafito p-4 ${className}`}>

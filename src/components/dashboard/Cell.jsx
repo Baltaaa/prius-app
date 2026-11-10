@@ -1,7 +1,8 @@
-import { memo, useState } from "react"
+import { memo, useRef, useState } from "react"
 import { Hourglass, Clock } from "lucide-react"
 import { STATUS } from "./constants"
 import { COLOR_TIPO_ALQUILER, COLOR_ESTADO } from "../../lib/colors"
+import CellTooltip from "./CellTooltip"
 
 // 184 celdas montadas a la vez en el Plano. React.memo evita re-renderizarlas
 // todas cuando cambia el zoom o se abre un modal, y `transition-colors` en vez
@@ -29,11 +30,14 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
   const isDia = status === STATUS.DIA
   const isOcupada = isTemporada || isPeriodo || isDia || isPendienteConfirmacion
   const [showTooltip, setShowTooltip] = useState(false)
+  // Ancla del tooltip: el cartel vive en un portal fuera del plano (ver
+  // CellTooltip.jsx) y se posiciona midiendo esta celda.
+  const anclaRef = useRef(null)
 
   const styles = modoCliente && isOcupada
     ? `${COLOR_ESTADO.ocupada.bg} ${COLOR_ESTADO.ocupada.text} ${COLOR_ESTADO.ocupada.border}`
     : isPendienteConfirmacion
-    ? "bg-white text-black border-[#E5E5E5]"
+    ? "bg-white text-black border-[#E5E5E5] dark:bg-surface dark:text-ink dark:border-line"
     : isTemporada
       ? `${COLOR_TIPO_ALQUILER.temporada.bg} ${COLOR_TIPO_ALQUILER.temporada.text} ${COLOR_TIPO_ALQUILER.temporada.border}`
       : isPeriodo
@@ -43,7 +47,10 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
           // Libre (bug real, oct 2026 testing): antes "white/5 border-white/10"
           // — pensado para el fondo dark glass viejo, invisible sobre el
           // card-light blanco real de hoy. Borde sutil #E5E5E5 (Quiet Luxury).
-          : "bg-white text-plano-muted border-[#E5E5E5] hover:border-black/30"
+          // Modo oscuro (nov 2026): la casilla libre pasa a la superficie
+          // oscura de la app con borde gris oscuro sutil — 184 casillas
+          // blancas sobre el lienzo oscuro encandilaban. Solo color.
+          : "bg-white text-plano-muted border-[#E5E5E5] hover:border-black/30 dark:bg-surface dark:text-ink-2 dark:border-line dark:hover:border-white/30"
 
   const opacityClass = isDimmed ? "opacity-20" : "opacity-100"
   const highlightClass = isHighlighted
@@ -52,7 +59,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
 
   const numberLabel = (
     <span
-      className={`plano-contra w-7 md:w-8 text-xs md:text-sm font-bold tabular-nums text-black ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
+      className={`plano-contra w-7 md:w-8 text-xs md:text-sm font-bold tabular-nums text-black dark:text-ink ${numberSide === "right" ? "text-left pl-1" : "text-right pr-1"}`}
     >
       {number}
     </span>
@@ -60,6 +67,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
 
   return (
     <div
+      ref={anclaRef}
       className="flex items-center relative cursor-pointer select-none"
       onClick={() => onClick(unit)}
       onMouseEnter={() => !modoCliente && unit?.clientName && setShowTooltip(true)}
@@ -88,9 +96,11 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
       </button>
       {numberSide === "right" && numberLabel}
 
-      {/* Tooltip */}
+      {/* Tooltip — en un portal a document.body: con zoom, dentro del
+          contenedor del plano quedaba cortado (overflow + transform). */}
       {!modoCliente && showTooltip && unit?.clientName && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-52 glass-tooltip text-white text-[11px] p-4 rounded-xl shadow-2xl z-50 pointer-events-none border border-white/20">
+        <CellTooltip anchorRef={anclaRef}>
+        <div className="w-52 glass-tooltip text-white text-[11px] p-4 rounded-xl shadow-2xl pointer-events-none border border-white/20">
           <p className="font-bold uppercase tracking-wider text-[#FDE047] mb-2">{unit.clientName}</p>
           <div className="space-y-1 opacity-80 font-medium">
             {isPendienteConfirmacion ? (
@@ -116,6 +126,7 @@ function Cell({ number, unit, onClick, isHighlighted, isDimmed, numberSide = "le
             )}
           </div>
         </div>
+        </CellTooltip>
       )}
     </div>
   )

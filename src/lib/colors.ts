@@ -6,9 +6,14 @@
  * — mismo esquema en las dos pantallas para que un usuario que ya conoce
  * el Plano reconozca los mismos colores en Ocupación.
  */
+// Modo oscuro del Plano (nov 2026): en oscuro la temporada pasa al amarillo de
+// marca #F2CA50 (`brand`) con la T en negro, y período/día suben un escalón de
+// luminosidad para despegarse del lienzo oscuro. En claro NADA cambia: las
+// clases `dark:` solo se activan con `[data-theme="dark"]` en la raíz
+// (tailwind.config.js), y al imprimir la hoja siempre sale clara.
 export const COLOR_TIPO_ALQUILER = {
-  temporada: { bg: 'bg-[#FDE047]', border: 'border-[#FDE047]', text: 'text-black', swatch: '#FDE047' },
-  periodo: { bg: 'bg-slate-600', border: 'border-slate-500', text: 'text-white', swatch: '#475569' },
+  temporada: { bg: 'bg-[#FDE047] dark:bg-brand', border: 'border-[#FDE047] dark:border-brand', text: 'text-black', swatch: '#FDE047' },
+  periodo: { bg: 'bg-slate-600 dark:bg-slate-400', border: 'border-slate-500 dark:border-slate-400', text: 'text-white dark:text-black', swatch: '#475569' },
   dia: { bg: 'bg-gray-300', border: 'border-gray-300', text: 'text-black', swatch: '#d1d5db' },
 } as const
 

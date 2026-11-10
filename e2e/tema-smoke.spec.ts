@@ -2,9 +2,11 @@ import { test, expect, login } from './fixtures'
 import { esperarCarga } from './responsive-checks'
 
 // Smoke del modo oscuro (solo lectura): los dos temas en las pantallas principales, sin flash al
-// recargar, mapa del plano en hoja clara e impresión siempre clara. Corre con
-// playwright.rebrand.config.ts (guard de requests, sin teardown).
+// recargar, mapa del plano siguiendo el tema activo (nov 2026: antes la hoja se forzaba clara) e
+// impresión siempre clara. Corre con playwright.rebrand.config.ts (guard de requests, sin teardown).
 const CANVAS = { claro: 'rgb(248, 247, 242)', oscuro: 'rgb(14, 14, 13)' }
+// `.plano-hoja` = rgb(var(--card)) del tema activo.
+const HOJA_PLANO = { claro: 'rgb(255, 255, 255)', oscuro: 'rgb(22, 22, 21)' }
 const RUTAS = ['/app/home', '/app/plano', '/app/caja', '/app/reservas', '/app/clientes', '/app/perfil']
 
 for (const tema of ['claro', 'oscuro'] as const) {
@@ -25,11 +27,11 @@ for (const tema of ['claro', 'oscuro'] as const) {
       expect(estado.fondo, ruta).toBe(CANVAS[tema])
     }
 
-    // Mapa del plano: hoja clara en los dos temas.
+    // Mapa del plano: la hoja sigue el tema activo (nov 2026).
     await page.goto('/app/plano')
     await esperarCarga(page)
     const hoja = await page.locator('.plano-hoja').first().evaluate((e) => getComputedStyle(e).backgroundColor)
-    expect(hoja).toBe('rgb(255, 255, 255)')
+    expect(hoja).toBe(HOJA_PLANO[tema])
 
     // Sin flash: el tema ya está puesto antes de que monte React.
     await page.reload({ waitUntil: 'commit' })

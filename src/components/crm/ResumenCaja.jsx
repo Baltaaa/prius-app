@@ -3,8 +3,9 @@ import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import MontoStat from '../ui/MontoStat'
 import FilaMedioPago from './FilaMedioPago'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
+import { totalDiaResumen } from '../../lib/totalDiaCaja'
 import {
-  ArrowUpRight, ArrowDownRight, Scale, FileText, AlertTriangle, CheckCircle2,
+  ArrowUpRight, ArrowDownRight, Scale, FileText, CheckCircle2,
   CalendarDays, Wallet, Banknote, CreditCard, Receipt, FileCheck2,
 } from 'lucide-react'
 
@@ -39,6 +40,10 @@ export default function ResumenCaja({ resumen }) {
   const { cabecera, totales, por_medio, arqueo, z, facturas, recibos, sin_comprobante, gastos, anulados } = resumen
   const diferenciaArqueo = Number(arqueo.total?.diferencia || 0)
   const balanceCuadrado = diferenciaArqueo === 0
+  // Total del día = facturas y recibos + Cierre Z (lib/totalDiaCaja.js). Los
+  // tiles de Ingresos y Neto ya lo incluyen; "Movimientos" sigue contando solo
+  // los movimientos del CRM.
+  const dia = totalDiaResumen(resumen)
 
   return (
     <div className="space-y-6">
@@ -88,12 +93,12 @@ export default function ResumenCaja({ resumen }) {
               <div className="col-span-2 sm:col-span-1 sm:order-3 bg-surface rounded-inner p-4 text-center border border-gold-300 min-w-0">
                 <Scale className="text-ink mx-auto mb-2" size={18} />
                 <p className="text-label text-ink-2">Neto</p>
-                <MontoStat value={totales.neto} size="sm" className="text-ink mt-1 mx-auto" />
+                <MontoStat value={dia.neto} size="sm" className="text-ink mt-1 mx-auto" />
               </div>
               <div className="sm:order-1 bg-surface rounded-inner p-4 text-center min-w-0">
                 <ArrowUpRight className="text-success-ink mx-auto mb-2" size={18} />
                 <p className="text-label text-ink-2">Ingresos</p>
-                <MontoStat value={totales.ingresos} size="sm" className="text-success-ink mt-1 mx-auto" />
+                <MontoStat value={dia.ingresos} size="sm" className="text-success-ink mt-1 mx-auto" />
               </div>
               <div className="sm:order-2 bg-surface rounded-inner p-4 text-center min-w-0">
                 <ArrowDownRight className="text-danger mx-auto mb-2" size={18} />
@@ -151,21 +156,14 @@ export default function ResumenCaja({ resumen }) {
 
           {z?.numero && (
             <Section title="Controlador Fiscal — Cierre Z" icon={Receipt}>
+              {/* Nov 2026: sin Neto gravado ni IVA (los calcula la contadora) y
+                  sin "diferencia vs. registrado" — la Z suma al total del día,
+                  no se compara contra lo registrado. */}
               <Fila label="Número Z" value={z.numero} />
+              <Fila label="Fecha de la Z" value={z.fecha ? formatFecha(z.fecha) : '—'} />
               <Fila label="Total Z" value={formatMonto(z.total)} />
-              <Fila label="Neto gravado" value={formatMonto(z.neto_gravado)} />
-              <Fila label="IVA" value={formatMonto(z.iva)} />
               <Fila label="Cantidad de comprobantes" value={z.cantidad_comprobantes ?? '—'} />
               <Fila label="Primer / último comprobante" value={`${z.primer_comprobante || '—'} / ${z.ultimo_comprobante || '—'}`} />
-              {(Number(z.comparacion?.diferencia_total) !== 0 || Number(z.comparacion?.diferencia_cantidad) !== 0) && (
-                <div className="flex items-start gap-2 mt-2 p-3 bg-gold-100 border border-gold-300 rounded-inner">
-                  <AlertTriangle className="text-ink shrink-0 mt-1" size={14} />
-                  <p className="text-label text-ink-2">
-                    Diferencia vs. lo registrado en el sistema: {formatMonto(z.comparacion.diferencia_total)} en monto,
-                    {' '}{z.comparacion.diferencia_cantidad} en cantidad de comprobantes.
-                  </p>
-                </div>
-              )}
             </Section>
           )}
         </div>
@@ -179,9 +177,11 @@ export default function ResumenCaja({ resumen }) {
               transferencia o un swipe de tarjeta). */}
           <Section title="Total General — Todos los Medios" icon={Scale}>
             <Fila label="Movimientos" value={totales.cantidad ?? '—'} />
-            <Fila label="Ingresos" value={formatMonto(totales.ingresos)} tone="text-success-ink" />
-            <Fila label="Gastos" value={formatMonto(totales.egresos)} tone="text-danger" />
-            <Fila label="Neto" value={formatMonto(totales.neto)} tone="text-ink" />
+            <Fila label="Facturas y recibos" value={formatMonto(dia.facturasYRecibos)} tone="text-success-ink" />
+            {dia.conZ && <Fila label="Cierre Z — controlador fiscal" value={formatMonto(dia.z)} tone="text-success-ink" />}
+            <Fila label="Ingresos" value={formatMonto(dia.ingresos)} tone="text-success-ink" />
+            <Fila label="Gastos" value={formatMonto(dia.egresos)} tone="text-danger" />
+            <Fila label="Neto" value={formatMonto(dia.neto)} tone="text-ink" />
           </Section>
 
           <Section title="Desglose por Medio de Pago" icon={CreditCard}>

@@ -156,3 +156,13 @@ Fuente de verdad: `design/DESIGN.md` (paleta, tipografía Manrope, forma, compon
 - Es mejor dar el código fuente real en el prompt que descripciones abstractas o listas de archivos.
 - Preferir "borrar y reemplazar" explícito en vez de "mejorar" cuando se pide refactor.
 - Un fix declarado "resuelto" sin verificación de interacción no cuenta: siempre reproducir el bug y probar el arreglo en navegador.
+
+## Cierre Z (Caja diaria) — nov 2026
+- La Z es el Informe Diario de Cierre del controlador fiscal PosNet. El administrador la carga a mano en el paso 2 del cierre: N° de Z, fecha, total, cantidad de comprobantes, primer y último comprobante.
+- No se cargan Neto gravado ni IVA: los calcula la contadora.
+- La Z se SUMA al total del día (facturas y recibos + Z). No existe cálculo de diferencia vs registrado. La Z no cambia el arqueo por medio de pago.
+- En la impresión A4 y el CSV, la Z va como sección propia debajo de Facturas y recibos, con el renglón Facturas y recibos + Cierre Z = Total del día.
+
+## Plano — nov 2026
+- El tooltip de unidad se renderiza en un portal fuera del contenedor del plano: position fixed, z-index máximo y siempre dentro del viewport, con cualquier zoom.
+- El plano sigue el tema oscuro de la app, con el amarillo #F2CA50 como color principal. Solo cambian los colores; la geometría y el funcionamiento no se tocan. La impresión A4 del plano sigue en blanco.

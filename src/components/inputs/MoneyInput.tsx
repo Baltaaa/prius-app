@@ -3,6 +3,36 @@ import { parsePesos } from '../../lib/parse'
 
 const thousands = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 })
 
+// Modo `decimales` (nov 2026, Total Z del controlador fiscal): el único monto
+// de la app que llega con centavos ("340000.00"). Todo lo demás sigue siendo
+// entero, igual que siempre — el modo es opt-in y no cambia nada sin la prop.
+const MAX_DEC = 2
+
+/** Texto tipeado -> { display, valor } en modo decimales. */
+function parseConDecimales(raw: string, permitirNegativo: boolean): { display: string; valor: number | null } {
+  const limpio = raw.replace(permitirNegativo ? /[^\d,.-]/g : /[^\d,.]/g, '').replace(/\./g, ',')
+  const negativo = permitirNegativo && limpio.trimStart().startsWith('-')
+  const sinSigno = limpio.replace(/-/g, '')
+  const coma = sinSigno.indexOf(',')
+  const enteroRaw = (coma === -1 ? sinSigno : sinSigno.slice(0, coma)).replace(/,/g, '')
+  const decRaw = coma === -1 ? null : sinSigno.slice(coma + 1).replace(/,/g, '').slice(0, MAX_DEC)
+  const entero = enteroRaw.replace(/^0+(?=\d)/, '')
+  if (!entero && decRaw === null) return { display: negativo ? '-' : '', valor: null }
+  const signo = negativo ? '-' : ''
+  const display = signo + thousands.format(Number(entero || 0)) + (decRaw === null ? '' : `,${decRaw}`)
+  const valor = Number(`${signo}${entero || 0}.${(decRaw || '0').padEnd(MAX_DEC, '0')}`)
+  return { display, valor }
+}
+
+/** Número -> texto con miles y, si tiene centavos, exactamente dos decimales. */
+function formatDecimales(n: number): string {
+  const redondeado = Math.round(n * 100) / 100
+  const entero = Math.trunc(Math.abs(redondeado))
+  const centavos = Math.round((Math.abs(redondeado) - entero) * 100)
+  const signo = redondeado < 0 ? '-' : ''
+  return signo + thousands.format(entero) + (centavos ? `,${String(centavos).padStart(2, '0')}` : '')
+}
+
 /**
  * Único input permitido para montos en toda la app (Tarea 2, guía
  * "Inputs, validación y formateo unificado"). Nunca un `<input type="number">`
@@ -35,6 +65,8 @@ export interface MoneyInputProps {
   chips?: { label: string; value: number }[]
   /** Símbolo a la izquierda. Default "$" — "US$" para montos en dólares (31/10/2026). */
   simbolo?: string
+  /** Acepta centavos (dos decimales). Solo el Total Z de la caja lo usa. */
+  decimales?: boolean
   className?: string
   id?: string
 }
@@ -43,16 +75,24 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
   {
     label, hint, error, value, onChange, onBlur, min, max, permitirNegativo = false, permitirCero = true,
     placeholder = '0', disabled, loading, required, chips, className = '', id, simbolo = '$',
+    decimales = false,
   },
   forwardedRef,
 ) {
   const innerRef = useRef<HTMLInputElement | null>(null)
-  const [display, setDisplay] = useState(value != null ? thousands.format(value) : '')
+  const formatear = (n: number) => (decimales ? formatDecimales(n) : thousands.format(n))
+  const [display, setDisplay] = useState(value != null ? formatear(value) : '')
   const autoId = useRef(`money-${Math.random().toString(36).slice(2, 9)}`).current
   const inputId = id || autoId
 
   useEffect(() => {
-    setDisplay(value != null ? thousands.format(value) : '')
+    // No se repinta si el display actual ya representa ese mismo valor: en modo
+    // decimales "340.000," vale 340000 y reformatear le borraria la coma recien
+    // tipeada al usuario.
+    const actual = decimales ? parseConDecimales(display, permitirNegativo).valor : null
+    if (decimales && actual === value) return
+    setDisplay(value != null ? formatear(value) : '')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
   const setRef = (el: HTMLInputElement | null) => {
@@ -75,6 +115,19 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
     const input = e.target
     const raw = input.value
     const cursorDesde = raw.length - input.selectionStart!
+
+    if (decimales) {
+      const { display: formateado, valor } = parseConDecimales(raw, permitirNegativo)
+      setDisplay(formateado)
+      aplicar(valor)
+      requestAnimationFrame(() => {
+        const el = innerRef.current
+        if (!el) return
+        const pos = Math.max(0, formateado.length - cursorDesde)
+        el.setSelectionRange(pos, pos)
+      })
+      return
+    }
 
     // Solo dígitos (y un "-" adelante si se permite negativo) — bloquea letras.
     const permitido = permitirNegativo ? /[^\d-]/g : /[^\d]/g
@@ -107,6 +160,13 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault()
     const texto = e.clipboardData.getData('text')
+    if (decimales) {
+      // parsePesos tira con centavos reales, que acá son validos: se pega tal cual.
+      const { display: formateado, valor } = parseConDecimales(texto, permitirNegativo)
+      setDisplay(formateado)
+      aplicar(valor)
+      return
+    }
     try {
       const n = parsePesos(texto)
       aplicar(n)
@@ -135,7 +195,7 @@ const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyI
           ref={setRef}
           id={inputId}
           type="text"
-          inputMode="numeric"
+          inputMode={decimales ? 'decimal' : 'numeric'}
           enterKeyHint="done"
           autoComplete="off"
           disabled={disabled || loading}

@@ -44,6 +44,14 @@ de Tailwind (`bg-[#FDE047]`) o clases de la paleta default — no dependen de
 ningún token agregado en `extend`. Cualquier proyecto con Tailwind v3 + JIT
 los resuelve sin tocar su config.
 
+**Una sola salvedad (modo oscuro del plano, nov 2026):** `PlanoGrid.jsx` ahora
+lleva variantes `dark:` en los rótulos fijos y en los recuadros Recreación /
+Acceso / Pileta / Océano Atlántico (valores arbitrarios, nada de tokens de la
+app). En el CRM se activan con `darkMode: ['class', '[data-theme="dark"]']`.
+beachFlow no tiene modo oscuro: para que NUNCA se activen por el tema del
+sistema operativo del visitante, su `tailwind.config.js` tiene que declarar el
+mismo `darkMode` basado en clase/atributo en vez del default `media`.
+
 ### Fuente
 
 Ninguna clase de esta carpeta fija `font-family` — hereda la que use el

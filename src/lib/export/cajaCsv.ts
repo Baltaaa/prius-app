@@ -6,6 +6,7 @@
 import { crearDocumentoCsv, type Seccion } from './csvBuilder'
 import { descargarCsv, nombreArchivoCsv } from './descargarCsv'
 import { formatFechaCsv, formatHoraCsv, formatMontoCsv, etiqueta, etiquetaComprobante, unidadNotacionCsv } from './formatos'
+import { totalDiaResumen } from '../totalDiaCaja'
 
 interface MetaExport {
   exportadoPorNombre: string
@@ -24,6 +25,8 @@ function validarResumen(resumen: any): void {
   if (netoEsperado !== Number(totales.neto)) {
     console.warn('[export caja] Neto no coincide con Ingresos − Egresos', { netoEsperado, neto: totales.neto })
   }
+  // La suma por medio se compara contra los ingresos DEL CRM (sin la Z: la Z no
+  // tiene medio de pago, no se mezcla con el desglose).
   const sumaPorMedio = (por_medio || []).reduce((acc: number, m: any) => acc + Number(m.ingresos || 0), 0)
   if (sumaPorMedio !== Number(totales.ingresos)) {
     console.warn('[export caja] La suma por medio de pago no coincide con Ingresos', { sumaPorMedio, ingresos: totales.ingresos })
@@ -36,15 +39,40 @@ function validarResumen(resumen: any): void {
   }
 }
 
+// Nov 2026 ("Cierre Z"): Ingresos y Neto incluyen el Cierre Z — la Z suma al
+// total del día, no se compara contra lo registrado (lib/totalDiaCaja.js).
 function seccionResumen(resumen: any): Seccion {
-  const { totales } = resumen
+  const dia = totalDiaResumen(resumen)
+  const filas: Seccion['filas'] = [['Facturas y recibos', formatMontoCsv(dia.facturasYRecibos)]]
+  if (dia.conZ) filas.push(['Cierre Z — controlador fiscal', formatMontoCsv(dia.z)])
+  filas.push(
+    ['Ingresos', formatMontoCsv(dia.ingresos)],
+    ['Egresos', formatMontoCsv(dia.egresos)],
+    ['Neto', formatMontoCsv(dia.neto)],
+  )
+  return { titulo: 'Resumen', columnas: ['Concepto', 'Monto'], filas }
+}
+
+// Sección propia debajo de "Comprobantes del día" (las facturas y recibos),
+// con el renglón Facturas y recibos + Cierre Z = Total del día. Sin Z cargada
+// no se exporta.
+function seccionCierreZ(resumen: any): Seccion {
+  const dia = totalDiaResumen(resumen)
+  const z = resumen.z || {}
   return {
-    titulo: 'Resumen',
-    columnas: ['Concepto', 'Monto'],
-    filas: [
-      ['Ingresos', formatMontoCsv(totales.ingresos)],
-      ['Egresos', formatMontoCsv(totales.egresos)],
-      ['Neto', formatMontoCsv(totales.neto)],
+    titulo: 'Cierre Z (controlador fiscal)',
+    columnas: ['N.° de Z', 'Fecha', 'Comprobantes', 'Primero – Último', 'Total'],
+    filas: [[
+      z.numero || '',
+      formatFechaCsv(z.fecha),
+      z.cantidad_comprobantes ?? '',
+      `${z.primer_comprobante || '—'} – ${z.ultimo_comprobante || '—'}`,
+      formatMontoCsv(z.total),
+    ]],
+    filaTotal: [
+      `Facturas y recibos ${formatMontoCsv(dia.facturasYRecibos)} + Cierre Z ${formatMontoCsv(dia.z)} = Total del día`,
+      '', '', '',
+      formatMontoCsv(dia.total),
     ],
   }
 }
@@ -179,6 +207,7 @@ export function construirCierreCajaCsv(resumen: any, meta: MetaExport): string {
       seccionArqueo(resumen),
       seccionMov,
       seccionComprobantes(resumen),
+      ...(totalDiaResumen(resumen).conZ ? [seccionCierreZ(resumen)] : []),
       seccionAnulaciones(resumen),
     ],
   })

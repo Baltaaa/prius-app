@@ -33,6 +33,7 @@ import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
 import { emojiEnTexto } from '../../lib/unidadIcono'
 import FilaMedioPago from '../../components/crm/FilaMedioPago'
 import { hoyAR, sumarDias } from '../../lib/fechas'
+import { totalDiaCaja } from '../../lib/totalDiaCaja'
 
 const FILTROS_MEDIO = [
   { value: 'todos', label: 'Todos los medios' },
@@ -298,7 +299,7 @@ export default function Caja() {
             >
               <span className="text-body text-ink-2">{formatFecha(c.fecha)}</span>
               <span className="flex items-center gap-4 text-label">
-                <span className="font-semibold text-ink tabular-nums">{fmtM(c.total_neto)}</span>
+                <span className="font-semibold text-ink tabular-nums">{fmtM(totalDiaCaja(c, 'total_neto'))}</span>
                 {c.diferencia != null && Number(c.diferencia) !== 0 && (
                   <span className="text-ink tabular-nums">dif. {fmtM(c.diferencia)}</span>
                 )}
@@ -721,6 +722,7 @@ export default function Caja() {
         isOpen={mostrarCierre}
         onClose={() => setMostrarCierre(false)}
         porMedio={resumen?.por_medio || []}
+        ingresosDia={resumen?.totales?.ingresos || 0}
         onConfirm={handleCerrarCaja}
       />
 

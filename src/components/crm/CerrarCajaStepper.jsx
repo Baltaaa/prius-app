@@ -12,6 +12,7 @@ import { useDialog } from '../../context/DialogProvider'
 import LoadingButton from '../ui/LoadingButton'
 import ScrollFade from '../ui/ScrollFade'
 import { hoyAR } from '../../lib/fechas'
+import { componerTotalDia } from '../../lib/totalDiaCaja'
 
 const PASOS = ['Arqueo', 'Cierre Z', 'Confirmación']
 
@@ -25,14 +26,18 @@ const PASOS = ['Arqueo', 'Cierre Z', 'Confirmación']
 // (viene de resumen.por_medio, ya precalculado — no se recalcula acá).
 // Precarga cada campo con su esperado (el cajero solo lo toca si hay
 // diferencia real), excepto efectivo que arranca igual que siempre.
-export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onConfirm }) {
+//
+// `ingresosDia`: total de facturas y recibos del día (resumen.totales.ingresos).
+// El paso 3 lo suma con el Total Z — misma regla y misma función que la
+// pantalla, la impresión y el CSV (lib/totalDiaCaja.js).
+export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], ingresosDia = 0, onConfirm }) {
   const [paso, setPaso] = useState(0)
   const [contadoPorMedio, setContadoPorMedio] = useState({})
   const [observaciones, setObservaciones] = useState('')
   const [tieneZ, setTieneZ] = useState(false)
   const [z, setZ] = useState({
-    z_numero: null, z_fecha: hoyAR(), z_total: 0,
-    z_neto_gravado: 0, z_iva: 0, z_cantidad_comprobantes: null, z_primer_comprobante: '', z_ultimo_comprobante: '',
+    z_numero: '', z_fecha: hoyAR(), z_total: 0,
+    z_cantidad_comprobantes: null, z_primer_comprobante: '', z_ultimo_comprobante: '',
   })
   const [saving, setSaving] = useState(false)
 
@@ -83,6 +88,8 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
   const necesitaObservacion = diferencia !== 0
 
   const puedeAvanzarPaso1 = !necesitaObservacion || observaciones.trim().length > 0
+
+  const totalDia = componerTotalDia(ingresosDia, tieneZ ? z.z_total : 0)
 
   const handleConfirmar = async () => {
     setSaving(true)
@@ -190,14 +197,14 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
               {tieneZ && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <IntegerInput placeholder="N.° de Z" value={z.z_numero} onChange={(v) => setZ({ ...z, z_numero: v })} min={1} />
+                    {/* N.° de Z, primer y último comprobante van como TEXTO: la Z
+                        los trae con ceros a la izquierda ("00000238", "00001208") y
+                        hay que conservarlos tal cual salen del controlador. */}
+                    <TextInput placeholder="N.° de Z" value={z.z_numero} onChange={(v) => setZ({ ...z, z_numero: v })} />
                     <DateInput value={z.z_fecha} onChange={(v) => setZ({ ...z, z_fecha: v })} max={hoyAR()} />
                   </div>
-                  <MoneyInput label="Total Z" value={z.z_total} onChange={(v) => setZ({ ...z, z_total: v })} />
-                  <div className="grid grid-cols-2 gap-4">
-                    <MoneyInput label="Neto gravado" value={z.z_neto_gravado} onChange={(v) => setZ({ ...z, z_neto_gravado: v })} />
-                    <MoneyInput label="IVA" value={z.z_iva} onChange={(v) => setZ({ ...z, z_iva: v })} />
-                  </div>
+                  {/* Total Z con decimales: la Z trae centavos (340000.00). */}
+                  <MoneyInput label="Total Z" decimales value={z.z_total} onChange={(v) => setZ({ ...z, z_total: v })} />
                   <IntegerInput
                     placeholder="Cantidad de comprobantes"
                     value={z.z_cantidad_comprobantes}
@@ -209,7 +216,7 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                     <TextInput placeholder="Último comprobante" value={z.z_ultimo_comprobante} onChange={(v) => setZ({ ...z, z_ultimo_comprobante: v })} />
                   </div>
                   <p className="text-label text-ink-2">
-                    La diferencia contra lo registrado en el sistema se muestra en el resumen final.
+                    El total de la Z se suma al total del día.
                   </p>
                 </div>
               )}
@@ -232,6 +239,26 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], onCo
                 <div className="flex justify-between text-body">
                   <span className="text-ink-2">Cierre Z</span>
                   <span className="font-semibold text-ink">{tieneZ ? `Cargado (N.° ${z.z_numero || '—'})` : 'No cargado'}</span>
+                </div>
+              </div>
+
+              {/* Total del día: facturas y recibos + Cierre Z (nov 2026). La Z
+                  suma, no se compara — ver lib/totalDiaCaja.js. Sin Z cargada
+                  el total es solo facturas y recibos. */}
+              <div className="p-5 bg-surface border border-line rounded-inner space-y-3">
+                <div className="flex justify-between text-body">
+                  <span className="text-ink-2">Facturas y recibos</span>
+                  <span className="font-semibold text-ink tabular-nums">{formatMonto(totalDia.facturasYRecibos)}</span>
+                </div>
+                {tieneZ && (
+                  <div className="flex justify-between text-body">
+                    <span className="text-ink-2">Cierre Z — controlador fiscal</span>
+                    <span className="font-semibold text-ink tabular-nums">{formatMonto(totalDia.z)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-body pt-2 border-t border-line">
+                  <span className="text-ink-2">Total del día</span>
+                  <span className="font-semibold text-ink tabular-nums">{formatMonto(totalDia.total)}</span>
                 </div>
               </div>
               <p className="text-label text-ink-2 text-center">

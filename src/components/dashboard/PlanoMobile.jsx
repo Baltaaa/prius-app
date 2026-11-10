@@ -61,8 +61,8 @@ export default function PlanoMobile({
           <div className="flex-1 flex items-center justify-center text-ink-2 text-label">Cargando plano…</div>
         ) : (
           <div className="flex-1 min-h-0 relative flex flex-col">
-            {/* Hoja clara del mapa: idéntica en los dos temas (ver Dashboard.jsx). */}
-            <div data-theme="light" className="plano-hoja flex-1 min-h-0 flex flex-col">
+            {/* Hoja del mapa: sigue el tema activo (ver Dashboard.jsx). */}
+            <div className="plano-hoja flex-1 min-h-0 flex flex-col">
             <ZoomPanPinch
               ref={mapa}
               resetKey={`${estadoFiltro ?? ""}|${tipoFiltro ?? ""}`}

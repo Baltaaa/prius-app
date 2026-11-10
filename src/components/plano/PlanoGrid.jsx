@@ -40,21 +40,26 @@ const OLA_HONDA = ola(76, 100, 5)
 // Las olas se mueven solo con transform (index.css, `.plano-ola`), apagadas con reduced-motion.
 function MarCliente() {
   return (
-    <div className="mt-16 w-full relative overflow-hidden rounded-2xl border border-[#F7DF96] bg-[#FEFBF3]" data-plano-mar>
+    <div className="mt-16 w-full relative overflow-hidden rounded-2xl border border-[#F7DF96] bg-[#FEFBF3] dark:border-white/10 dark:bg-[#1F1E1C]" data-plano-mar>
       <svg viewBox={`0 0 ${MAR_W} ${MAR_H}`} preserveAspectRatio="none" aria-hidden="true" className="block w-full h-[128px]">
-        <path d="M0 14q87 8 175 0t175 0 175 0 175 0V50H0Z" fill="#FDF5E0" />
+        <path className="dark:fill-[#2A2A28]" d="M0 14q87 8 175 0t175 0 175 0 175 0V50H0Z" fill="#FDF5E0" />
         <path className="plano-ola" style={{ '--ola-p': '100px', animationDuration: '16s' }} d={OLA_HONDA} fill="#8CC8E8" />
         <path className="plano-ola" style={{ '--ola-p': '175px', animationDuration: '22s', animationDirection: 'reverse' }} d={OLA_MEDIA} fill="#B4DCF0" />
         <path className="plano-ola" style={{ '--ola-p': '140px', animationDuration: '18s' }} d={OLA_CLARA} fill="#D6ECF8" />
         <path className="plano-ola" style={{ '--ola-p': '140px', animationDuration: '18s' }} d={`M0 30q35 -6 70 0${'t70 0'.repeat(11)}`} fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
       </svg>
       <div className="absolute inset-x-0 bottom-4 flex justify-center">
-        <span className="plano-contra text-[11px] font-black uppercase tracking-[1em] text-sky-900" style={{ paddingLeft: "1em" }}>Océano Atlántico</span>
+        <span className="plano-contra text-[11px] font-black uppercase tracking-[1em] text-sky-900 dark:text-sky-100" style={{ paddingLeft: "1em" }}>Océano Atlántico</span>
       </div>
     </div>
   )
 }
 
+// Modo oscuro (nov 2026): los rótulos fijos y los recuadros llevan variantes
+// `dark:` con valores arbitrarios (ver PORTABILIDAD.md). Solo cambian colores:
+// geometría, tamaños, numeración y zoom quedan intactos, y en claro se ve
+// exactamente igual que siempre.
+//
 // Dibuja el plano completo (carpas + sombrillas + rótulos fijos) según
 // planoLayout.js. `unidades`: lista con al menos { id, numero, tipo, fila,
 // orden } — el resto de los campos que tenga cada objeto los decide quien
@@ -71,19 +76,19 @@ export default function PlanoGrid({ unidades, renderCelda, mar = false }) {
           contenedor de ancho fijo con 2px de aire a cada lado, así no se mueve ninguna celda. */}
       <div className="flex justify-center gap-0 items-start mb-6">
         <div style={{ width: PLANO_SECTOR_WIDTH }} className="px-0.5">
-          <div className="h-[122px] flex items-center justify-center bg-[#FEFBF3] border border-[#F7DF96] rounded-lg">
-            <span className="plano-contra text-[10px] font-black uppercase tracking-[0.6em] text-gray-500">Recreación</span>
+          <div className="h-[122px] flex items-center justify-center bg-[#FEFBF3] border border-[#F7DF96] rounded-lg dark:bg-[#F2CA50]/[0.08] dark:border-[#F2CA50]/30">
+            <span className="plano-contra text-[10px] font-black uppercase tracking-[0.6em] text-gray-500 dark:text-gray-300">Recreación</span>
           </div>
         </div>
         <div style={{ width: PLANO_PASILLO_CENTRAL }} className="px-0.5">
-          <div className="h-[122px] flex items-center justify-center bg-[#FEFBF3] border border-[#F7DF96] rounded-lg">
-            <span className="plano-contra text-[10px] font-black uppercase tracking-[0.6em] text-gray-500">Acceso</span>
+          <div className="h-[122px] flex items-center justify-center bg-[#FEFBF3] border border-[#F7DF96] rounded-lg dark:bg-[#F2CA50]/[0.08] dark:border-[#F2CA50]/30">
+            <span className="plano-contra text-[10px] font-black uppercase tracking-[0.6em] text-gray-500 dark:text-gray-300">Acceso</span>
           </div>
         </div>
         <div style={{ width: PLANO_SECTOR_WIDTH }} className="px-0.5">
-          <div className="h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-lg flex flex-col items-center justify-center relative group overflow-hidden">
+          <div className="h-[122px] bg-sky-500/10 border border-sky-500/30 rounded-lg flex flex-col items-center justify-center relative group overflow-hidden dark:bg-sky-400/[0.07] dark:border-sky-400/25">
             <div className="absolute inset-0 bg-sky-400/5" />
-            <span className="plano-contra relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em]">Pileta</span>
+            <span className="plano-contra relative z-10 text-[10px] font-black text-sky-400 uppercase tracking-[0.6em] dark:text-sky-300">Pileta</span>
             <div className="w-12 h-1 bg-sky-400/20 rounded-full mt-2" />
           </div>
         </div>
@@ -122,7 +127,7 @@ export default function PlanoGrid({ unidades, renderCelda, mar = false }) {
       <div className="mt-16 flex flex-col items-center">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-[1px] w-12 bg-white/10" />
-          <span className="plano-contra text-[11px] font-black uppercase tracking-[0.5em] text-gray-500">⛱️ Sector Sombrillas</span>
+          <span className="plano-contra text-[11px] font-black uppercase tracking-[0.5em] text-gray-500 dark:text-gray-300">⛱️ Sector Sombrillas</span>
           <div className="h-[1px] w-12 bg-white/10" />
         </div>
         <div className="grid grid-cols-2 gap-20">
@@ -143,7 +148,7 @@ export default function PlanoGrid({ unidades, renderCelda, mar = false }) {
       {mar ? (
         <MarCliente />
       ) : (
-        <div className="mt-16 w-full bg-white/5 border border-white/5 py-5 text-center text-gray-600 font-black text-[11px] tracking-[1em] uppercase rounded-2xl">
+        <div className="mt-16 w-full bg-white/5 border border-white/5 py-5 text-center text-gray-600 font-black text-[11px] tracking-[1em] uppercase rounded-2xl dark:bg-white/[0.04] dark:border-white/10 dark:text-gray-300">
           <span className="plano-contra">Océano Atlántico</span>
         </div>
       )}

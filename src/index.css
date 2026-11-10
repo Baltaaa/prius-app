@@ -11,9 +11,8 @@
 
   Modo oscuro (DESIGN.md, "Modo oscuro"): la MISMA lista de tokens redefinida
   bajo `:root[data-theme="dark"]`, nunca clases `dark:` sueltas. Un subárbol con
-  `data-theme="light"` vuelve a la paleta clara (mapa del plano, preview de
-  comprobantes). Lo oscuro vive dentro de `@media screen`: al imprimir siempre
-  sale claro.
+  `data-theme="light"` vuelve a la paleta clara (preview de comprobantes). Lo
+  oscuro vive dentro de `@media screen`: al imprimir siempre sale claro.
 */
 
 /* Marca (preparación SaaS): un solo color, --brand, y toda la escala dorada sale
@@ -908,8 +907,12 @@ button, a {
   - Cambio de tema: lib/tema.js hace un reveal circular con View Transitions;
     mientras cambia, `.tema-cambiando` apaga las transiciones de color para que
     nada parpadee entre la paleta vieja y la nueva.
-  - Mapa del plano: `.plano-hoja` es la hoja clara (con `data-theme="light"`)
-    donde vive el mapa; en oscuro se despega del entorno con un borde sutil.
+  - Mapa del plano: `.plano-hoja` es la hoja donde vive el mapa y SIGUE EL TEMA
+    activo (nov 2026; antes se forzaba clara con `data-theme="light"`). En
+    oscuro es la superficie oscura, despegada del entorno con un borde sutil;
+    las casillas, los números y los rótulos ponen su propia variante `dark:`
+    (Cell.jsx, PlanoGrid.jsx, lib/colors.ts). La impresión A4 del plano no
+    cambia: la hace PlanoImpresion.jsx, aparte y siempre en blanco.
 */
 ::selection { background-color: rgb(var(--brand) / .35); color: rgb(var(--primary)); }
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }

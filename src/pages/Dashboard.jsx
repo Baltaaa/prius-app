@@ -682,9 +682,12 @@ export default function Dashboard() {
                     position:absolute encima del mapa) sin tocar ese archivo —
                     PlanoZoomBar.jsx la reemplaza acá al lado, fuera del mapa,
                     llamando a las mismas funciones. */}
-                {/* Hoja clara del mapa (data-theme="light"): el plano y sus colores de estado
-                    son idénticos en los dos temas; en oscuro solo el entorno cambia. */}
-                <div data-theme="light" className="plano-hoja flex-1 min-h-0 flex flex-col relative [&>div:first-child]:hidden">
+                {/* Hoja del mapa: sigue el tema activo de la app (nov 2026). En
+                    oscuro el lienzo es la superficie oscura y las casillas, los
+                    números y los rótulos tienen su variante `dark:`; en claro
+                    queda exactamente como siempre. La impresión A4 del plano no
+                    cambia: la hace PlanoImpresion.jsx, aparte y en blanco. */}
+                <div className="plano-hoja flex-1 min-h-0 flex flex-col relative [&>div:first-child]:hidden">
                   <PlanoViewport
                     transform={transform}
                     ready={ready}

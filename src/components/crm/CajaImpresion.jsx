@@ -2,6 +2,7 @@
 import { formatMontoReal, formatFecha, formatFechaHora } from '../../lib/format'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
+import { totalDiaResumen } from '../../lib/totalDiaCaja'
 
 // Hoja A4 del resumen de caja (Tarea 5) — mismo patrón que PlanoImpresion.jsx:
 // oculta en pantalla, única cosa visible al imprimir (Caja.jsx la envuelve
@@ -10,6 +11,9 @@ import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 export default function CajaImpresion({ resumen }) {
   if (!resumen) return null
   const { cabecera, totales, por_medio, arqueo, z, facturas, recibos, sin_comprobante, gastos, anulados } = resumen
+  // Ingresos y Neto de los recuadros de arriba incluyen el Cierre Z
+  // (lib/totalDiaCaja.js); Movimientos sigue contando solo los del CRM.
+  const dia = totalDiaResumen(resumen)
 
   return (
     <div className="caja-impresion">
@@ -33,6 +37,7 @@ export default function CajaImpresion({ resumen }) {
           .ci-totales .label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.08em; }
           .ci-totales .valor { font-size: 11pt; font-weight: 700; }
           .ci-accent { color: #b8860b !important; }
+          .ci-total-dia { margin-top: 1.2mm; padding: 1mm 1.5mm; border-top: 0.3mm solid #000; font-size: 8pt; text-align: right; font-variant-numeric: tabular-nums; }
           .ci-firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 10mm; page-break-inside: avoid; }
           .ci-firmas div { border-top: 0.3mm solid #000; padding-top: 1.5mm; text-align: center; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.1em; }
           .ci-footer { margin-top: 6mm; font-size: 6.5pt; color: #555 !important; text-align: right; }
@@ -46,9 +51,9 @@ export default function CajaImpresion({ resumen }) {
 
       <div className="ci-totales">
         <div><div className="label">Movimientos</div><div className="valor">{totales.cantidad ?? '—'}</div></div>
-        <div><div className="label">Ingresos</div><div className="valor">{formatMontoReal(totales.ingresos)}</div></div>
-        <div><div className="label">Egresos</div><div className="valor">{formatMontoReal(totales.egresos)}</div></div>
-        <div><div className="label ci-accent">Neto</div><div className="valor ci-accent">{formatMontoReal(totales.neto)}</div></div>
+        <div><div className="label">Ingresos</div><div className="valor">{formatMontoReal(dia.ingresos)}</div></div>
+        <div><div className="label">Egresos</div><div className="valor">{formatMontoReal(dia.egresos)}</div></div>
+        <div><div className="label ci-accent">Neto</div><div className="valor ci-accent">{formatMontoReal(dia.neto)}</div></div>
       </div>
 
       {/* Item 2 (fix urgente oct 2026): columna Cantidad — total general de
@@ -94,22 +99,6 @@ export default function CajaImpresion({ resumen }) {
         </table>
       </div>
 
-      {z?.numero && (
-        <div className="ci-section">
-          <h2>Cierre Z</h2>
-          <table className="ci-table">
-            <tbody>
-              <tr><td>Número</td><td className="num">{z.numero}</td></tr>
-              <tr><td>Total Z</td><td className="num">{formatMontoReal(z.total)}</td></tr>
-              <tr><td>Neto gravado</td><td className="num">{formatMontoReal(z.neto_gravado)}</td></tr>
-              <tr><td>IVA</td><td className="num">{formatMontoReal(z.iva)}</td></tr>
-              <tr><td>Cantidad de comprobantes</td><td className="num">{z.cantidad_comprobantes ?? '—'}</td></tr>
-              <tr><td>Diferencia vs. registrado</td><td className="num">{formatMontoReal(z.comparacion?.diferencia_total)}</td></tr>
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {(facturas?.length > 0 || recibos?.length > 0) && (
         <div className="ci-section">
           <h2>Facturas y recibos</h2>
@@ -126,6 +115,32 @@ export default function CajaImpresion({ resumen }) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Cierre Z (nov 2026): sección propia debajo de Facturas y recibos y
+          antes de Gastos, con el renglón Facturas y recibos + Cierre Z =
+          Total del día. Sin Z cargada no se imprime. */}
+      {dia.conZ && (
+        <div className="ci-section">
+          <h2>Cierre Z (Controlador Fiscal)</h2>
+          <table className="ci-table">
+            <thead><tr><th>N.° de Z</th><th>Fecha</th><th className="num">Comprobantes</th><th>Primero – Último</th><th className="num">Total</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>{z.numero}</td>
+                <td>{z.fecha ? formatFecha(z.fecha) : '—'}</td>
+                <td className="num">{z.cantidad_comprobantes ?? '—'}</td>
+                <td>{z.primer_comprobante || '—'} – {z.ultimo_comprobante || '—'}</td>
+                <td className="num">{formatMontoReal(z.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="ci-total-dia">
+            Facturas y recibos <strong>{formatMontoReal(dia.facturasYRecibos)}</strong>
+            {' + '}Cierre Z <strong>{formatMontoReal(dia.z)}</strong>
+            {' = '}Total del día <strong>{formatMontoReal(dia.total)}</strong>
+          </div>
         </div>
       )}
 
