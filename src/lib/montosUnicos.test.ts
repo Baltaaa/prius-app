@@ -42,7 +42,8 @@ describe('montos: un solo formateador', () => {
   it('las variantes *Real (que ignoran la privacidad) solo se usan en impresión y exportación', () => {
     const ok = new Set([
       'lib/format.ts', 'lib/format.test.ts',
-      'components/crm/CajaImpresion.jsx', 'components/crm/ComprobanteDocumento.jsx', 'lib/export/reportesExport.js',
+      'components/crm/CajaImpresion.jsx', 'components/crm/ClientesImpresion.jsx',
+      'components/crm/ComprobanteDocumento.jsx', 'lib/export/reportesExport.js',
     ])
     const usos = fuentes.filter((f) => /\bformatMonto(Compacto|USD)?Real\b/.test(f.txt)).map((f) => f.rel).filter((r) => !ok.has(r))
     expect(usos).toEqual([])

@@ -10,8 +10,8 @@ import { usePagos } from '../../hooks/usePagos'
 import { useDebounced } from '../../hooks/useDebounced'
 import { useDeepLinkTarget } from '../../hooks/useDeepLinkTarget'
 import { useOverlay } from '../../context/OverlayProvider'
-import { formatMontoVisible, formatFecha, formatCUIT, formatDNI, formatComprobante, formatUnidad, formatNombre, normalizeText } from '../../lib/format'
-import { unidadConEmoji } from '../../lib/unidadIcono'
+import { formatMontoVisible, formatTelefono, formatFecha, formatCUIT, formatDNI, formatComprobante, formatUnidad, formatNombre, normalizeText } from '../../lib/format'
+import { unidadConEmoji, unidadEmoji } from '../../lib/unidadIcono'
 import MontoStat from '../../components/ui/MontoStat'
 import { cuitValido, parseDNI, parseUnidadQuery, normalizarNumeroComprobante } from '../../lib/parse'
 import { scrollAndHighlight } from '../../lib/highlight'
@@ -39,11 +39,12 @@ import DniInput from '../../components/inputs/DniInput'
 import CuitInput from '../../components/inputs/CuitInput'
 import SearchInput from '../../components/inputs/SearchInput'
 import BrandSelect from '../../components/ui/BrandSelect'
-import StatusBadge from '../../components/crm/StatusBadge'
+import StatusBadge, { estadoLabel } from '../../components/crm/StatusBadge'
+import ClientesImpresion from '../../components/crm/ClientesImpresion'
 import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
-import { Plus, Filter, Check, ChevronLeft, LayoutList } from 'lucide-react'
+import { Plus, Filter, Check, ChevronLeft, LayoutList, Printer } from 'lucide-react'
 import UnidadLabel from '../../components/crm/UnidadLabel'
 
 // Directorio MAESTRO: todo cliente histórico del balneario, tenga o no una
@@ -89,6 +90,8 @@ const unidadesDeReservas = (reservasCliente) => {
 }
 
 const MAX_UNIDADES_VISIBLES = 3
+
+const TIPO_ALQUILER_LABEL = { temporada: 'Temporada', periodo: 'Período', dia: 'Día' }
 
 const FILTROS_ESTADO_CLIENTE = [
   { value: 'todos', label: 'Todos' },
@@ -685,6 +688,58 @@ export default function Clientes() {
     }
   }
 
+  // Impresión A4 del listado (nov 2026): imprime EXACTAMENTE `clientesVisibles`
+  // — el filtro de Estado y la búsqueda activos, el conjunto completo (la
+  // lista no pagina ni virtualiza) y en el mismo orden alfabético de pantalla.
+  // Las filas se arman recién al apretar Imprimir (derivarCliente por cliente
+  // no es gratis) y se tiran al terminar. Los saldos viajan como NÚMERO: el
+  // formateo lo hace ClientesImpresion con la variante de impresión, para que
+  // una impresión nunca salga con el modo privacidad aplicado — y para que el
+  // uso quede dentro de un archivo de impresión (ver montosUnicos.test.ts).
+  const [filasImpresion, setFilasImpresion] = useState(null)
+
+  const armarFilasImpresion = () => clientesVisibles.map((cliente, i) => {
+    const d = derivarCliente(cliente)
+    const tipo = d.reservaBadge?.tipo_alquiler
+    const saldoNota = d.saldoInfo.sinVerificar ? 'Sin verificar' : d.sinPrecio ? 'Sin precio' : ''
+    return {
+      id: cliente.id,
+      n: i + 1,
+      cliente: [cliente.apellido, cliente.nombre].filter(Boolean).map(formatNombre).join(', ') || formatNombre(cliente.nombre),
+      documento: cliente.cuit ? formatCUIT(cliente.cuit) : cliente.dni ? formatDNI(cliente.dni) : '',
+      telefono: cliente.telefono ? formatTelefono(cliente.telefono) : '',
+      unidades: d.unidadesCliente.length === 0
+        ? 'Sin unidad'
+        : d.unidadesCliente.map((u) => `${unidadEmoji(u.tipo)}${unidadEmoji(u.tipo) ? ' ' : ''}${u.numero}`).join('  '),
+      tipo: tipo ? TIPO_ALQUILER_LABEL[tipo] || tipo : '',
+      estado: d.badgeStatus ? estadoLabel(d.badgeStatus) : '',
+      saldoNota,
+      saldo: saldoNota ? null : Number(d.saldoInfo.total) || 0,
+    }
+  })
+
+  const totalSaldoImpresion = useMemo(() => {
+    if (!filasImpresion) return 0
+    return clientesVisibles.reduce((acc, c) => {
+      const info = saldoPorCliente[c.id]
+      return acc + (info && !info.sinVerificar ? Number(info.total) || 0 : 0)
+    }, 0)
+  }, [filasImpresion, clientesVisibles, saldoPorCliente])
+
+  const handleImprimirListado = () => setFilasImpresion(armarFilasImpresion())
+
+  // Imprime recién cuando las filas ya están en el DOM, y las suelta al volver.
+  useEffect(() => {
+    if (!filasImpresion) return undefined
+    const limpiar = () => setFilasImpresion(null)
+    window.addEventListener('afterprint', limpiar, { once: true })
+    const id = requestAnimationFrame(() => window.print())
+    return () => {
+      cancelAnimationFrame(id)
+      window.removeEventListener('afterprint', limpiar)
+    }
+  }, [filasImpresion])
+
   const clienteSeleccionado = expandedId ? clientes.find((c) => c.id === expandedId) : null
   const derivadoSeleccionado = clienteSeleccionado ? derivarCliente(clienteSeleccionado) : null
   const handleCloseDetalle = () => setExpandedId(null)
@@ -757,6 +812,18 @@ export default function Clientes() {
                 </div>
             )}
           </div>
+          {/* Imprime el listado que coincide con el filtro de Estado y la
+              búsqueda activos (ClientesImpresion). Mismo ícono que el
+              "Imprimir A4" del Plano; en mobile queda solo el ícono. */}
+          <button
+            type="button"
+            onClick={handleImprimirListado}
+            aria-label="Imprimir listado"
+            title="Imprimir listado"
+            className="text-label h-11 md:h-10 px-4 bg-card border border-line rounded-full flex items-center gap-2 text-ink-2 hover:text-ink transition-all shrink-0"
+          >
+            <Printer size={16} /> <span className="hidden sm:inline">Imprimir</span>
+          </button>
           <div className="flex-1" />
           <button
             onClick={handleOpenCreate}
@@ -1343,6 +1410,17 @@ export default function Clientes() {
       />
 
       <ScrollToTopButton />
+
+      {filasImpresion && (
+        <ClientesImpresion
+          filas={filasImpresion}
+          filtroTexto={filtroEstado === 'todos'
+            ? 'Todos los clientes'
+            : `Estado: ${FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label || filtroEstado}`}
+          busqueda={debouncedSearch.trim().length >= 2 ? debouncedSearch.trim() : ''}
+          totalSaldo={totalSaldoImpresion}
+        />
+      )}
     </div>
   )
 }

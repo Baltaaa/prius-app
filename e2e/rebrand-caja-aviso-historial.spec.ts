@@ -59,7 +59,11 @@ for (const [nombre, w, h] of ANCHOS) {
     const url = new URL(page.url())
     expect(url.pathname).toBe('/app/caja')
     expect(url.searchParams.get('fecha')).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-    await expect(page.getByText('Cerrada automáticamente · falta el arqueo').locator('visible=true').first()).toBeVisible()
+    // Nov 2026: el chip de la barra dice "Falta el arqueo" (antes la frase larga
+    // "Cerrada automáticamente · falta el arqueo", que en una sola fila no entraba).
+    await expect(page.getByText('Falta el arqueo').locator('visible=true').first()).toBeVisible()
+    // Y el botón del flujo, que reemplazó al banner amarillo.
+    await expect(page.getByRole('button', { name: 'Hacer arqueo y Z' })).toBeVisible()
   })
 }
 

@@ -166,3 +166,12 @@ Fuente de verdad: `design/DESIGN.md` (paleta, tipografía Manrope, forma, compon
 ## Plano — nov 2026
 - El tooltip de unidad se renderiza en un portal fuera del contenedor del plano: position fixed, z-index máximo y siempre dentro del viewport, con cualquier zoom.
 - El plano sigue el tema oscuro de la app, con el amarillo #F2CA50 como color principal. Solo cambian los colores; la geometría y el funcionamiento no se tocan. La impresión A4 del plano sigue en blanco.
+
+## Clientes — impresión de listado (nov 2026)
+- En Directorio de Clientes, el botón "Imprimir" (al lado de "Estado") imprime en A4 los clientes que coinciden con el filtro de Estado y la búsqueda activos; sin filtro imprime todos los registrados.
+- Imprime el conjunto completo, no solo lo visible en pantalla, en el mismo orden que la lista.
+- Formato compacto para gastar pocas hojas: tabla de una fila por cliente (N°, Cliente, DNI/CUIT, Teléfono, Unidades con 🏠/⛱️, Tipo de alquiler, Estado, Saldo pendiente), títulos repetidos en cada hoja, totales al final, blanco y negro.
+
+## Caja Diaria — barra superior (nov 2026)
+- No hay banner amarillo de "caja cerrada automáticamente". Si la caja que se está viendo se cerró sola y le falta el arqueo, aparece en la barra el botón neutro "Hacer arqueo y Z".
+- Una sola barra: fecha, ARS/USD y chip de estado a la izquierda; Imprimir A4, Exportar CSV, Reabrir/Cerrar Caja e Historial a la derecha. Botones en neutro, el color solo en el chip de estado.

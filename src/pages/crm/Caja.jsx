@@ -1,5 +1,5 @@
 import ToolbarSticky from '../../components/brand/ToolbarSticky'
-import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useCaja } from '../../hooks/useCaja'
 import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
@@ -24,7 +24,6 @@ import DetallePago from '../../components/crm/DetallePago'
 import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
 import ResumenCaja from '../../components/crm/ResumenCaja'
 import CajaImpresion from '../../components/crm/CajaImpresion'
-import { AvisoArqueoPendiente } from '../../components/crm/AvisosCaja'
 import CerrarCajaStepper from '../../components/crm/CerrarCajaStepper'
 import { useInitialLoad } from '../../hooks/useInitialLoad'
 import Skeleton from '../../components/ui/Skeleton'
@@ -47,6 +46,32 @@ const TABS = [
   { value: 'sin_comprobante', label: 'Sin comprobante' },
   { value: 'gastos', label: 'Gastos' },
 ]
+
+// Todos los botones de la barra, misma altura y en neutro: el único color de
+// la barra es el chip de estado (nov 2026).
+const CLASE_ACCION = 'text-label shrink-0 flex items-center gap-2 px-4 xl:px-3 2xl:px-4 h-11 md:h-10 min-h-0 bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 hover:text-ink transition-all'
+
+// Difuminado de los bordes cuando la fila de acciones scrollea en horizontal —
+// misma técnica que SegmentedScroll (mask-image), sin componente nuevo.
+function useMaskScrollX(ref) {
+  const [bordes, setBordes] = useState({ izq: false, der: false })
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return undefined
+    const medir = () => {
+      const izq = el.scrollLeft > 1
+      const der = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+      setBordes((p) => (p.izq === izq && p.der === der ? p : { izq, der }))
+    }
+    medir()
+    el.addEventListener('scroll', medir, { passive: true })
+    const ro = new ResizeObserver(medir)
+    ro.observe(el)
+    return () => { el.removeEventListener('scroll', medir); ro.disconnect() }
+  }, [ref])
+  if (!bordes.izq && !bordes.der) return undefined
+  return `linear-gradient(to right, ${bordes.izq ? 'transparent 0, black 28px' : 'black 0'}, ${bordes.der ? 'black calc(100% - 28px), transparent 100%' : 'black 100%'})`
+}
 
 const todayStr = hoyAR
 
@@ -100,6 +125,9 @@ export default function Caja() {
   const [reabriendo, setReabriendo] = useState(false)
   const [motivoReapertura, setMotivoReapertura] = useState('')
 
+  const accionesRef = useRef(null)
+  const maskAcciones = useMaskScrollX(accionesRef)
+
   const [resumen, setResumen] = useState(null)
   const [movimientos, setMovimientos] = useState([])
   const [resumenLoading, setResumenLoading] = useState(false)
@@ -113,6 +141,17 @@ export default function Caja() {
 
   const esHoy = selectedDate === todayStr()
   const cajaSeleccionada = cajaPorFecha[selectedDate] || null
+  // Chip de estado: el único color de la barra (nov 2026). Con el arqueo
+  // pendiente el chip dice "Falta el arqueo" y no la frase larga de antes
+  // ("Cerrada automáticamente · falta el arqueo"): en una sola fila esa frase
+  // se comía el lugar de las acciones y terminaba cortada. El detalle completo
+  // queda en el title, y justo al lado está el botón "Hacer arqueo y Z".
+  const estadoCajaTexto = cajaSeleccionada?.arqueo_pendiente
+    ? 'Falta el arqueo'
+    : cajaSeleccionada?.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'
+  const estadoCajaTitle = cajaSeleccionada?.arqueo_pendiente
+    ? 'La caja se cerró automáticamente a las 00:00: falta el arqueo y la Z'
+    : estadoCajaTexto
   // ?cerrar=1 (desde los avisos de cierre): abre el cierre/arqueo de la caja elegida si corresponde.
   useEffect(() => {
     if (searchParams.get('cerrar') !== '1' || !cajaSeleccionada) return
@@ -221,70 +260,102 @@ export default function Caja() {
 
   return (
     <div className="space-y-6 anim-fade-up-page">
-      {/* Barra de navegación por fecha + historial. Pulido mobile iPhone (oct
-          2026): en mobile la navegación de fecha pasa a ser su propia fila
-          simétrica de ancho completo (flecha | fecha | flecha, las dos
-          flechas del mismo tamaño y la fecha ocupando el centro) — antes
-          quedaba apretada entre "Volver a Hoy" y el badge de estado, que
-          wrappeaban de forma impredecible. Debajo, estado + Historial en una
-          fila de dos columnas iguales. Desktop (sm+) sigue siendo la fila
-          única de siempre. */}
+      {/* UNA sola barra (nov 2026): antes eran tres piezas apiladas — la fila de
+          fecha/estado/Historial, una segunda fila solo-mobile y, más abajo, la
+          fila de acciones de la caja cerrada. Ahora va todo junto: a la
+          izquierda el navegador de fecha, el toggle ARS/USD y el chip de
+          estado; a la derecha las acciones. Los botones van todos en neutro y
+          con la misma altura: el único color de la barra es el chip de estado.
+          En <lg las acciones bajan a una segunda fila que scrollea en
+          horizontal con el difuminado de los bordes (mismo recurso que
+          SegmentedScroll). */}
       <ToolbarSticky>
-      <div className="toolbar-40 no-print space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
-        <div className="flex items-center gap-3 sm:contents">
+      <div className="toolbar-40 no-print space-y-3 xl:space-y-0 xl:flex xl:items-center xl:gap-2 2xl:gap-3">
+        {/* Izquierda (fecha + ARS/USD + chip): una sola fila desde lg, para que
+            la toolbar de desktop nunca pase de 2 filas (regla de CLAUDE.md,
+            "Toolbars sticky de desktop"). Desde xl se disuelve y comparte la
+            fila con las acciones. */}
+        <div className="space-y-3 lg:space-y-0 lg:flex lg:items-center lg:gap-3 xl:contents">
+        <div className="flex items-center gap-3 xl:contents">
           <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 md:p-0 md:w-10 md:h-10 md:min-h-0 md:min-w-0 flex items-center justify-center bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
             <ChevronLeft size={16} />
           </button>
-          {/* w-36 (144px) no entraba la fecha completa en mobile (texto 16px ahí
-              vs 14px en desktop) — encontrado auditando el fix de tabular-nums
-              del Plano, oct 2026. flex-1 en mobile para que la fecha ocupe el
-              centro de la fila simétrica; ancho fijo en desktop (sin cambios). */}
-          <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="[&_.field]:bg-card flex-1 min-w-0 sm:flex-none sm:w-[164px]" />
+          <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="[&_.field]:bg-card flex-1 min-w-0 lg:flex-none lg:w-[148px] 2xl:w-[164px]" />
           <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 md:p-0 md:w-10 md:h-10 md:min-h-0 md:min-w-0 flex items-center justify-center bg-surface hover:bg-surface anim-colors disabled:opacity-30 disabled:cursor-not-allowed border border-line rounded-full text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
             <ChevronRight size={16} />
           </button>
         </div>
-        {!esHoy && (
-          <button onClick={() => setSelectedDate(todayStr())} className="text-label w-full sm:w-auto px-4 py-3 md:py-0 md:h-10 bg-gold-100 hover:bg-gold-100 border border-gold-300 rounded-inner text-ink transition-all">
-            Volver a Hoy
-          </button>
-        )}
-        <MonedaSwitch
-          moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion}
-          fecha={mv.fecha} stale={mv.stale} compacto
-        />
-        {cajaSeleccionada && (
-          <span className={`text-label hidden sm:inline-flex items-center px-4 py-2 md:py-0 md:h-10 rounded-inner border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
-            {cajaSeleccionada.arqueo_pendiente ? 'Cerrada automáticamente · falta el arqueo' : cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
-          </span>
-        )}
-        <div className="hidden sm:block sm:flex-1" />
-        <button
-          onClick={() => setMostrarHistorial((v) => !v)}
-          className="text-label hidden sm:flex items-center gap-2 px-4 py-3 md:py-0 md:h-10 md:min-h-0 bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all min-h-[44px]"
-        >
-          <History size={14} /> Historial
-        </button>
-      </div>
-      </ToolbarSticky>
 
-      {/* Estado + Historial: fila de dos columnas iguales, solo mobile (sm:
-          ya los muestra arriba en la fila de siempre). */}
-      {cajaSeleccionada && (
-        <div className="no-print sm:hidden grid grid-cols-2 gap-grid">
-          <span className={`text-label flex items-center justify-center px-4 py-3 min-h-[44px] rounded-inner border ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}>
-            {cajaSeleccionada.arqueo_pendiente ? 'Cerrada automáticamente · falta el arqueo' : cajaSeleccionada.estado === 'cerrada' ? 'Caja Cerrada' : 'Caja Abierta'}
-          </span>
-          <button
-            onClick={() => setMostrarHistorial((v) => !v)}
-            className="text-label flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all"
-          >
+        {/* En pantallas chicas el chip baja de línea si no entra, en vez de cortarse. */}
+        <div className="flex flex-wrap items-center gap-3 xl:contents">
+          {!esHoy && (
+            <button onClick={() => setSelectedDate(todayStr())} className={`${CLASE_ACCION} shrink-0`}>
+              Volver a Hoy
+            </button>
+          )}
+          <MonedaSwitch
+            moneda={mv.moneda} onChange={mv.setMoneda} cotizacion={mv.cotizacion}
+            fecha={mv.fecha} stale={mv.stale} compacto
+          />
+          {/* Único color de la barra. */}
+          {cajaSeleccionada && (
+            <span
+              title={estadoCajaTitle}
+              className={`text-label inline-flex items-center px-4 h-11 md:h-10 rounded-full border whitespace-nowrap shrink-0 ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}
+            >
+              {estadoCajaTexto}
+            </span>
+          )}
+        </div>
+        </div>
+
+        <div className="hidden xl:block xl:flex-1" />
+
+        {/* Acciones. Siempre una fila que scrollea en horizontal si no entra,
+            con el difuminado en los bordes: abajo de xl va en su propia fila;
+            desde xl comparte la fila con la fecha y el chip. */}
+        <div
+          ref={accionesRef}
+          className="scroll-x-snap flex items-center gap-3 xl:gap-2 2xl:gap-3 min-w-0 -mx-page px-page xl:mx-0 xl:px-0"
+          style={{ maskImage: maskAcciones, WebkitMaskImage: maskAcciones }}
+        >
+          {cajaSeleccionada?.estado === 'cerrada' && (
+            <>
+              <button onClick={() => window.print()} aria-label="Imprimir A4" title="Imprimir A4" className={CLASE_ACCION}>
+                <Printer size={14} /> <span className="hidden 2xl:inline">Imprimir A4</span>
+              </button>
+              <button
+                onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })}
+                disabled={!resumen}
+                aria-label="Exportar CSV" title="Exportar CSV"
+                className={`${CLASE_ACCION} disabled:opacity-40`}
+              >
+                <Download size={14} /> <span className="hidden 2xl:inline">Exportar CSV</span>
+              </button>
+              {/* Reemplaza al banner amarillo: mismo flujo, sin color. */}
+              {cajaSeleccionada.arqueo_pendiente && (
+                <button onClick={() => setMostrarCierre(true)} className={CLASE_ACCION}>
+                  Hacer arqueo y Z
+                </button>
+              )}
+              {!reabriendo && puedeReabrir && (
+                <button onClick={() => setReabriendo(true)} className={CLASE_ACCION}>
+                  Reabrir Caja
+                </button>
+              )}
+            </>
+          )}
+          {cajaSeleccionada?.estado === 'abierta' && (
+            <button onClick={() => setMostrarCierre(true)} className={CLASE_ACCION}>
+              <Lock size={14} /> Cerrar Caja
+            </button>
+          )}
+          <button onClick={() => setMostrarHistorial((v) => !v)} className={CLASE_ACCION}>
             <History size={14} /> Historial
           </button>
         </div>
-      )}
-
-      <AvisoArqueoPendiente className="mb-grid" />
+      </div>
+      </ToolbarSticky>
 
       {mostrarHistorial && (
         <div className="card-surface card-pad no-print space-y-2">
@@ -588,12 +659,10 @@ export default function Caja() {
                     </p>
                   </div>
                 )}
+                {/* "Cerrar Caja" vive en la barra de arriba (nov 2026). */}
                 <div className="hidden md:flex gap-4">
                   <button onClick={() => setMostrarGasto(true)} className="text-label flex items-center gap-2 px-6 py-3 bg-surface hover:bg-line text-ink rounded-full border border-line transition-all">
                     <Plus size={16} /> Registrar Gasto
-                  </button>
-                  <button onClick={() => setMostrarCierre(true)} className="text-label flex items-center gap-2 px-6 py-3 bg-card border border-line hover:bg-surface text-ink rounded-full transition-all">
-                    <Lock size={16} /> Cerrar Caja
                   </button>
                 </div>
               </div>
@@ -608,9 +677,6 @@ export default function Caja() {
               <div className="md:hidden space-y-3">
                 <button onClick={() => setMostrarGasto(true)} className="text-label w-full py-4 bg-surface hover:bg-line border border-line text-ink rounded-inner transition-all flex items-center justify-center gap-2 min-h-[44px]">
                   <Plus size={16} /> Registrar Gasto
-                </button>
-                <button onClick={() => setMostrarCierre(true)} className="text-label w-full py-4 bg-ink hover:bg-ink text-on-ink rounded-inner transition-all flex items-center justify-center gap-2 min-h-[44px]">
-                  <Lock size={16} /> Cerrar Caja de Hoy
                 </button>
               </div>
             </div>
@@ -640,9 +706,6 @@ export default function Caja() {
               <button onClick={() => setMostrarGasto(true)} className="flex items-center justify-center gap-2 px-6 py-4 bg-card border border-line hover:bg-surface text-ink rounded-full font-medium text-body transition-all">
                 <Plus size={18} className="text-ink-2" /> Registrar gasto
               </button>
-              <button onClick={() => setMostrarCierre(true)} className="flex items-center justify-center gap-2 px-6 py-4 bg-card border border-line hover:bg-surface text-ink rounded-full font-medium text-body transition-all">
-                <Lock size={18} /> Cerrar caja diaria
-              </button>
             </aside>
           </div>
         </div>
@@ -651,26 +714,6 @@ export default function Caja() {
       {/* Estado D: caja cerrada — resumen del día */}
       {cajaSeleccionada && cajaSeleccionada.estado === 'cerrada' && (
         <>
-          <div className="no-print flex flex-wrap gap-3">
-            <button onClick={() => window.print()} className="text-label flex items-center gap-2 px-5 py-3 bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all">
-              <Printer size={14} /> Imprimir A4
-            </button>
-            <button onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })} disabled={!resumen} className="text-label flex items-center gap-2 px-5 py-3 bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all disabled:opacity-40">
-              <Download size={14} /> Exportar CSV
-            </button>
-            <div className="flex-1" />
-            {cajaSeleccionada.arqueo_pendiente && (
-              <button onClick={() => setMostrarCierre(true)} className="text-label flex items-center gap-2 px-5 py-3 bg-gold-100 border border-gold-300 rounded-full text-ink transition-all">
-                Hacer arqueo y Z
-              </button>
-            )}
-            {!reabriendo && puedeReabrir ? (
-              <button onClick={() => setReabriendo(true)} className="text-label flex items-center gap-2 px-5 py-3 bg-gold-100 hover:bg-gold-100 border border-gold-300 rounded-full text-ink transition-all">
-                Reabrir Caja
-              </button>
-            ) : null}
-          </div>
-
           {reabriendo && puedeReabrir && (
             <div className="card-surface card-pad no-print space-y-4 border-gold-300">
               <div className="flex items-center justify-between">

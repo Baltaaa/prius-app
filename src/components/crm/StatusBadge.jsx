@@ -20,6 +20,11 @@ const ESTADOS = {
   vencida: { color: COLOR_ESTADO.neutro, label: 'Vencida' },
 }
 
+/** Etiqueta de un estado, sin el badge — para texto plano (impresiones, CSV). */
+export function estadoLabel(status) {
+  return ESTADOS[status?.toLowerCase()]?.label || status || ''
+}
+
 export default function StatusBadge({ status }) {
   const { color, label, icon: Icon } = ESTADOS[status?.toLowerCase()] || { color: COLOR_ESTADO.neutro, label: status }
   return (
