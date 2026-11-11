@@ -174,4 +174,5 @@ Fuente de verdad: `design/DESIGN.md` (paleta, tipografía Manrope, forma, compon
 
 ## Caja Diaria — barra superior (nov 2026)
 - No hay banner amarillo de "caja cerrada automáticamente". Si la caja que se está viendo se cerró sola y le falta el arqueo, aparece en la barra el botón neutro "Hacer arqueo y Z".
-- Una sola barra: fecha, ARS/USD y chip de estado a la izquierda; Imprimir A4, Exportar CSV, Reabrir/Cerrar Caja e Historial a la derecha. Botones en neutro, el color solo en el chip de estado.
+- Una sola barra: fecha, ARS/USD y chip de estado a la izquierda; Imprimir A4, Exportar CSV y Reabrir/Cerrar Caja a la derecha. Botones en neutro, el color solo en el chip de estado.
+- No hay botón ni panel "Historial de cajas" dentro de Caja: para ver otro día se navega con las flechas y el calendario de la barra.

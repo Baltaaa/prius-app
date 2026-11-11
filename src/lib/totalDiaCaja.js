@@ -56,9 +56,9 @@ export function totalDiaResumen(resumen) {
 }
 
 /**
- * Total del día de una fila de `caja_diaria` (Historial de cajas y widget
- * "Caja diaria" del sidebar), que no tiene el resumen entero a mano.
- * `campo`: `total_neto` (historial) o `total_cobros` (sidebar).
+ * Total del día de una fila de `caja_diaria` — para quien tiene la fila pero no
+ * el resumen entero a mano (hoy, el widget "Caja diaria" del sidebar).
+ * `campo`: `total_cobros` (sidebar) o `total_neto`.
  */
 export function totalDiaCaja(caja, campo = 'total_neto') {
   return componerTotalDia(caja?.[campo], montoZ(caja)).total

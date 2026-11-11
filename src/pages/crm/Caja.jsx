@@ -13,7 +13,7 @@ import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 import { descargarCierreCaja } from '../../lib/export/cajaCsv'
 import {
   Plus, Wallet, ChevronLeft, ChevronRight, Banknote,
-  ArrowUpRight, ArrowDownRight, Printer, Download, Lock, History, AlertTriangle, X,
+  ArrowUpRight, ArrowDownRight, Printer, Download, Lock, AlertTriangle, X,
 } from 'lucide-react'
 import { formatMonto, formatFecha } from '../../lib/format'
 import { useDialog } from '../../context/DialogProvider'
@@ -32,7 +32,6 @@ import MonedaSwitch, { useMonedaVista } from '../../components/ui/MonedaSwitch'
 import { emojiEnTexto } from '../../lib/unidadIcono'
 import FilaMedioPago from '../../components/crm/FilaMedioPago'
 import { hoyAR, sumarDias } from '../../lib/fechas'
-import { totalDiaCaja } from '../../lib/totalDiaCaja'
 
 const FILTROS_MEDIO = [
   { value: 'todos', label: 'Todos los medios' },
@@ -111,7 +110,6 @@ export default function Caja() {
   const [filtroMedio, setFiltroMedio] = useFeatureUrlState('feat-7-caja-filtro-medio-url', 'medio', 'todos')
   const { perfil } = useAuth()
   const [abriendo, setAbriendo] = useState(false)
-  const [mostrarHistorial, setMostrarHistorial] = useState(false)
   const [mostrarGasto, setMostrarGasto] = useState(false)
   const [mostrarCierre, setMostrarCierre] = useState(false)
   // Respaldo del cierre automático de las 00:00 ART: al abrir Caja se vuelve a correr (idempotente).
@@ -350,35 +348,9 @@ export default function Caja() {
               <Lock size={14} /> Cerrar Caja
             </button>
           )}
-          <button onClick={() => setMostrarHistorial((v) => !v)} className={CLASE_ACCION}>
-            <History size={14} /> Historial
-          </button>
         </div>
       </div>
       </ToolbarSticky>
-
-      {mostrarHistorial && (
-        <div className="card-surface card-pad no-print space-y-2">
-          <h3 className="text-label text-ink-2 mb-3">Historial de cajas</h3>
-          {historialCajas.length === 0 ? (
-            <p className="text-label text-ink-2">Sin cajas registradas todavía.</p>
-          ) : historialCajas.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => { setSelectedDate(c.fecha); setMostrarHistorial(false) }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-inner hover:bg-surface anim-colors transition-all text-left"
-            >
-              <span className="text-body text-ink-2">{formatFecha(c.fecha)}</span>
-              <span className="flex items-center gap-4 text-label">
-                <span className="font-semibold text-ink tabular-nums">{fmtM(totalDiaCaja(c, 'total_neto'))}</span>
-                {c.diferencia != null && Number(c.diferencia) !== 0 && (
-                  <span className="text-ink tabular-nums">dif. {fmtM(c.diferencia)}</span>
-                )}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Estado A: sin caja */}
       {!cajaSeleccionada && (
