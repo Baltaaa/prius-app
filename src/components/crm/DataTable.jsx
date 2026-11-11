@@ -6,6 +6,10 @@ import ScrollFade from '../ui/ScrollFade'
 // para cada fila y montando el doble de nodos DOM. Ahora solo se monta el
 // layout que corresponde al ancho actual.
 
+// Gutter entre columnas: 4px por lado = 8px entre una columna y la siguiente.
+// Contra los bordes manda el padding de card de la app (`--space-card`).
+const BORDES_CARD = '[&_th:first-child]:pl-card [&_td:first-child]:pl-card [&_th:last-child]:pr-card [&_td:last-child]:pr-card'
+
 const query = '(min-width: 768px)'
 const mql = typeof window !== 'undefined' ? window.matchMedia(query) : null
 
@@ -25,6 +29,20 @@ function useIsDesktop() {
 // columna sin ancho en el array (ej. Cliente) se lleva todo el sobrante y
 // es la única que puede wrappear. Sin esta prop, se comporta exactamente
 // igual que antes (auto layout).
+// Espaciado (nov 2026, CLAUDE.md "Espaciado"): el contenido de la tabla se
+// alinea con el padding de card de la app (`--space-card`: 16/20/24px según
+// breakpoint), igual que la lista de Clientes y que cualquier otra card —
+// antes las celdas quedaban a 8px fijos del borde en todos los anchos, o sea
+// pegadas al filo de la card. El inset grande va SOLO contra los dos bordes
+// (primera y última celda); entre columnas queda un gutter de 8px (4px por
+// lado). Se aplica desde la `<table>` y no celda por celda, así vale también
+// para las filas que arma quien use el componente.
+// Ojo con `table-fixed` + `columnWidths`: el padding va DENTRO del ancho de
+// la columna, así que cada ancho se declara como contenido + su padding (ver
+// `columnWidths` en Reservas.jsx). Repartido así, lo que ganan las dos
+// columnas de los bordes es exactamente lo que ceden las del medio: la
+// columna elástica (Cliente) conserva el mismo ancho que tenía antes.
+//
 // `fillHeight` (mini-prompt 26/10/2026, solo Reservas/Clientes desktop por
 // ahora): la tabla pasa a ocupar el 100% del alto de su contenedor padre
 // (que a su vez ya viene con una altura fija vía flex-1/min-h-0 desde la
@@ -47,7 +65,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
       <div className={`w-full ${fillHeight ? 'lg:h-full' : ''}`}>
         <div className={`card-surface ${fillHeight ? 'lg:h-full lg:flex lg:flex-col lg:overflow-hidden' : 'overflow-x-auto'}`}>
           <ScrollFade arriba={false} wrapperClassName={fillHeight ? 'lg:flex-1' : ''} className={fillHeight ? 'overflow-auto' : 'overflow-x-auto'}>
-          <table className={`w-full text-left border-collapse ${columnWidths ? 'table-fixed' : ''}`}>
+          <table className={`w-full text-left border-collapse ${BORDES_CARD} ${columnWidths ? 'table-fixed' : ''}`}>
             {columnWidths && (
               <colgroup>
                 {headers.map((_, i) => (
@@ -58,7 +76,7 @@ export default function DataTable({ headers, data, renderRow, renderMobileCard, 
             <thead className={fillHeight ? 'lg:sticky lg:top-0 lg:z-10 bg-card' : undefined}>
               <tr className="border-b border-divider text-label text-ink-2">
                 {headers.map((h, i) => (
-                  <th key={i} className={`font-medium whitespace-nowrap h-12 ${columnWidths ? 'px-2' : 'px-6'}`}>{h}</th>
+                  <th key={i} className={`font-medium whitespace-nowrap h-12 ${columnWidths ? 'px-1' : 'px-4'}`}>{h}</th>
                 ))}
               </tr>
             </thead>

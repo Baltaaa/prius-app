@@ -383,7 +383,25 @@ export default function Reservas() {
   const origenAngosto = isDesktopXL && !isDesktop1440
   // Con origenAngosto la unidad también va compacta (ícono + número, el tipo
   // queda en el title): sin eso "Cliente" quedaba en ~74px y partía los nombres.
-  const columnWidths = ['88px', undefined, origenAngosto ? '72px' : '104px', '132px', '120px', origenAngosto ? '48px' : '84px']
+  //
+  // Nov 2026: los anchos se declaran como CONTENIDO + su propio padding, porque
+  // con `table-fixed` el padding va dentro del ancho de la columna. Las del
+  // medio llevan 4px por lado (gutter de 8px entre columnas); las de los
+  // bordes llevan 4px del lado de adentro y el padding de card de la app del
+  // lado de afuera (`--space-card`), para que la tabla se alinee con el resto
+  // de la app. Lo que ganan las dos de los bordes (+12px c/u en desktop) es
+  // exactamente lo que ceden las tres del medio (−8px c/u), así que "Cliente"
+  // —la elástica— queda con el mismo ancho que antes.
+  const medio = (contenido) => `${contenido + 8}px`
+  const borde = (contenido) => `calc(${contenido + 4}px + var(--space-card))`
+  const columnWidths = [
+    borde(72),                                  // Llegada
+    undefined,                                  // Cliente (se lleva el sobrante)
+    medio(origenAngosto ? 56 : 88),             // Unidad
+    medio(116),                                 // Monto total
+    medio(104),                                 // Estado
+    borde(origenAngosto ? 32 : 68),             // Origen
+  ]
 
   // Unidades con una reserva de TEMPORADA activa: quedan tomadas para toda la
   // temporada sin importar qué fecha se elija, así que ni siquiera aparecen
@@ -568,8 +586,8 @@ export default function Reservas() {
                 onClick={() => navigate(linkToCliente(res.cliente_id))}
                 className="hover:bg-row-hover anim-colors group cursor-pointer"
               >
-                <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-                <td className="px-2 py-2 h-14 align-middle text-ink break-words">
+                <td className="px-1 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+                <td className="px-1 py-2 h-14 align-middle text-ink break-words">
                   {formatNombre(res.clientes?.nombre) || 'S/N'}
                   {coSocios(res).length > 0 && (
                     <p className="text-label text-ink-2 font-normal normal-case mt-1">
@@ -577,9 +595,9 @@ export default function Reservas() {
                     </p>
                   )}
                 </td>
-                <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap" title={formatUnidad(res.unidades?.tipo, res.unidades?.numero)}><UnidadLabel tipo={res.unidades?.tipo} numero={res.unidades?.numero} soloNumero={origenAngosto} /></td>
-                <td className="px-2 py-2 h-14 align-middle text-ink"><MontoReserva reserva={res} /></td>
-                <td className="px-2 py-2 h-14 align-middle text-center">
+                <td className="px-1 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap" title={formatUnidad(res.unidades?.tipo, res.unidades?.numero)}><UnidadLabel tipo={res.unidades?.tipo} numero={res.unidades?.numero} soloNumero={origenAngosto} /></td>
+                <td className="px-1 py-2 h-14 align-middle text-ink"><MontoReserva reserva={res} /></td>
+                <td className="px-1 py-2 h-14 align-middle text-center">
                   <div className="flex items-center justify-center gap-2">
                     <StatusBadge status={estadoBadgeStatus(res)} />
                     <span className="text-label text-ink-2 border border-line rounded-swatch px-2 py-1 whitespace-nowrap">
@@ -587,7 +605,7 @@ export default function Reservas() {
                     </span>
                   </div>
                 </td>
-                <td className="px-2 py-2 h-14 align-middle text-center">
+                <td className="px-1 py-2 h-14 align-middle text-center">
                   {origenAngosto ? (
                     <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-ink-2">
                       {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
@@ -608,8 +626,8 @@ export default function Reservas() {
               onClick={() => handleOpenDetalle(res)}
               className={`hover:bg-row-hover anim-colors group cursor-pointer ${selectedReservaId === res.id ? 'bg-surface' : ''}`}
             >
-              <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
-              <td className="px-2 py-2 h-14 align-middle text-ink break-words">
+              <td className="px-1 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap">{formatFecha(fechaLlegada(res))}</td>
+              <td className="px-1 py-2 h-14 align-middle text-ink break-words">
                 {formatNombre(res.clientes?.nombre) || 'S/N'}
                 {coSocios(res).length > 0 && (
                   <p className="text-label text-ink-2 font-normal normal-case mt-1">
@@ -617,14 +635,14 @@ export default function Reservas() {
                   </p>
                 )}
               </td>
-              <td className="px-2 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap" title={formatUnidad(res.unidades?.tipo, res.unidades?.numero)}><UnidadLabel tipo={res.unidades?.tipo} numero={res.unidades?.numero} soloNumero={origenAngosto} /></td>
-              <td className="px-2 py-2 h-14 align-middle text-ink"><MontoReserva reserva={res} /></td>
-              <td className="px-2 py-2 h-14 align-middle text-center">
+              <td className="px-1 py-2 h-14 align-middle text-label text-ink-2 whitespace-nowrap" title={formatUnidad(res.unidades?.tipo, res.unidades?.numero)}><UnidadLabel tipo={res.unidades?.tipo} numero={res.unidades?.numero} soloNumero={origenAngosto} /></td>
+              <td className="px-1 py-2 h-14 align-middle text-ink"><MontoReserva reserva={res} /></td>
+              <td className="px-1 py-2 h-14 align-middle text-center">
                 <div className="flex items-center justify-center">
                   <StatusBadge status={estadoBadgeStatus(res)} />
                 </div>
               </td>
-              <td className="px-2 py-2 h-14 align-middle text-center">
+              <td className="px-1 py-2 h-14 align-middle text-center">
                 {origenAngosto ? (
                   <span title={res.origen === 'web' ? 'Web' : 'Manual'} className="inline-flex items-center justify-center text-ink-2">
                     {res.origen === 'web' ? <Globe size={14} /> : <MonitorSmartphone size={14} />}
