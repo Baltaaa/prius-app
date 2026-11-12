@@ -76,15 +76,15 @@ export default function PagoComprobanteCampos({ form }) {
                 <label className="text-label text-ink-2 shrink-0">
                   Cotización
                 </label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="0.01"
-                  value={tipoCambio ?? ''}
-                  onChange={(e) => setTipoCambioManual(e.target.value === '' ? null : Number(e.target.value))}
+                {/* Nov 2026: era el último `type="number"` de plata de la app
+                    y arrastraba el mismo bug que el Total Z (tipear "1.450"
+                    daba 1,45). Pasa al MoneyInput común, que ya acepta
+                    decimales con coma. */}
+                <MoneyInput
+                  className="w-36 shrink-0"
+                  value={tipoCambio ?? null}
+                  onChange={(v) => setTipoCambioManual(v)}
                   placeholder="—"
-                  className="w-32 text-right bg-surface rounded-inner px-3 py-2 text-base md:text-body font-semibold text-ink outline-none border border-transparent focus:ring-2 focus:ring-gold"
                 />
               </div>
               <p className="text-label text-ink-2">

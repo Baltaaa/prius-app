@@ -158,20 +158,20 @@ export default function Caja() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cajaSeleccionada?.id])
 
-  // Fuente única de verdad: pantalla, impresión y CSV parten siempre del
-  // mismo resumen_caja(caja_id) — si la caja está cerrada se usa el
-  // resumen_snapshot congelado al cerrar (no se recalcula), si está abierta
-  // se pide en vivo y se refresca con cada cambio de totales.
+  // Fuente única de verdad: pantalla, impresión A4 y CSV parten siempre del
+  // mismo resumen_caja(caja_id), EN VIVO, esté la caja abierta o cerrada
+  // (nov 2026). Antes una caja cerrada se leía de `resumen_snapshot`, la
+  // copia congelada al cerrar, así que una corrección hecha después desde la
+  // ficha del cliente (ej. un RB que en realidad era FB) nunca se veía acá.
+  // El snapshot sigue guardándose, pero solo como registro de auditoría de
+  // cómo estaba la caja al momento del cierre: no se muestra, no se imprime
+  // y no se exporta.
   const cargarResumen = useCallback(async (caja) => {
     if (!caja) { setResumen(null); setMovimientos([]); return }
-    if (caja.estado === 'cerrada' && caja.resumen_snapshot) {
-      setResumen(caja.resumen_snapshot)
-    } else {
-      setResumenLoading(true)
-      const { data } = await supabase.rpc('resumen_caja', { p_caja_id: caja.id })
-      setResumen(data || null)
-      setResumenLoading(false)
-    }
+    setResumenLoading(true)
+    const { data } = await supabase.rpc('resumen_caja', { p_caja_id: caja.id })
+    setResumen(data || null)
+    setResumenLoading(false)
     const { data: mov } = await supabase
       .from('v_caja_movimientos')
       .select('*')
@@ -180,10 +180,15 @@ export default function Caja() {
     setMovimientos(mov || [])
   }, [])
 
+  // `pagos` en las dependencias: el DataProvider lo refetchea con cada
+  // cambio en `pagos` O en `comprobantes` (Realtime), así que corregir el
+  // tipo/número/monto de un comprobante desde la ficha del cliente vuelve a
+  // pedir el resumen de la caja que lo contiene, sin recargar la página y
+  // esté esa caja abierta o cerrada.
   useEffect(() => {
     cargarResumen(cajaSeleccionada)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cajaSeleccionada?.id, cajaSeleccionada?.total_cobros, cajaSeleccionada?.total_gastos, cajaSeleccionada?.estado])
+  }, [cajaSeleccionada?.id, cajaSeleccionada?.total_cobros, cajaSeleccionada?.total_gastos, cajaSeleccionada?.estado, pagos])
 
   const movimientosFiltrados = useMemo(
     () => (filtroMedio === 'todos' ? movimientos : movimientos.filter((m) => m.medio_pago === filtroMedio)),

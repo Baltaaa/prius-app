@@ -32,9 +32,10 @@ const Fila = ({ label, value, tone, cliente }) => (
 )
 
 // Resumen del día (Tarea 5) — se alimenta siempre de resumen_caja(caja_id)
-// (congelado en resumen_snapshot al cerrar): pantalla, impresión A4
-// (CajaImpresion) y CSV (lib/caja.js) parten del mismo objeto, así que los
-// números nunca pueden desalinearse entre sí.
+// leído EN VIVO, también si la caja está cerrada (nov 2026): pantalla,
+// impresión A4 (CajaImpresion) y CSV (lib/export/cajaCsv.ts) parten del mismo
+// objeto, así que los números nunca pueden desalinearse entre sí ni quedarse
+// con un comprobante que ya se corrigió.
 export default function ResumenCaja({ resumen }) {
   if (!resumen) return null
   const { cabecera, totales, por_medio, arqueo, z, facturas, recibos, sin_comprobante, gastos, anulados } = resumen

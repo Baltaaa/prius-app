@@ -225,6 +225,14 @@ export function DataProvider({ children }) {
         () => debouncedRefetch('eventos', fetchEventos))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pagos' },
         () => { debouncedRefetch('pagos', fetchPagos); debouncedRefetch('reservas', fetchReservas); debouncedRefetch('ingresosCaja', fetchIngresosCaja); debouncedRefetch('caja', fetchCaja) })
+      // `comprobantes` (nov 2026): corregir el tipo (RB -> FB), el número, la
+      // fecha o el monto de un comprobante desde la ficha del cliente no
+      // toca `pagos`, así que sin este binding la Caja Diaria —abierta o
+      // cerrada— seguía mostrando el dato viejo hasta recargar la página.
+      // Refetchear `pagos` alcanza: Caja vuelve a pedir resumen_caja() y las
+      // fichas de cliente/reserva leen el comprobante embebido ahí.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comprobantes' },
+        () => debouncedRefetch('pagos', fetchPagos))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'codigos_reserva' },
         () => debouncedRefetch('codigosReserva', fetchCodigosReserva))
       .subscribe((status) => setRealtimeConectado(status === 'SUBSCRIBED'))

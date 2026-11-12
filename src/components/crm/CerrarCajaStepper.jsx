@@ -203,8 +203,8 @@ export default function CerrarCajaStepper({ isOpen, onClose, porMedio = [], ingr
                     <TextInput placeholder="N.° de Z" value={z.z_numero} onChange={(v) => setZ({ ...z, z_numero: v })} />
                     <DateInput value={z.z_fecha} onChange={(v) => setZ({ ...z, z_fecha: v })} max={hoyAR()} />
                   </div>
-                  {/* Total Z con decimales: la Z trae centavos (340000.00). */}
-                  <MoneyInput label="Total Z" decimales value={z.z_total} onChange={(v) => setZ({ ...z, z_total: v })} />
+                  {/* Total Z: la Z trae centavos (340000.00) y el punto de miles del administrador (3.150.000) — ver lib/monto.ts. */}
+                  <MoneyInput label="Total Z" value={z.z_total} onChange={(v) => setZ({ ...z, z_total: v })} />
                   <IntegerInput
                     placeholder="Cantidad de comprobantes"
                     value={z.z_cantidad_comprobantes}

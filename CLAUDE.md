@@ -177,3 +177,7 @@ Fuente de verdad: `design/DESIGN.md` (paleta, tipografía Manrope, forma, compon
 - No hay banner amarillo de "caja cerrada automáticamente". Si la caja que se está viendo se cerró sola y le falta el arqueo, aparece en la barra el botón neutro "Hacer arqueo y Z".
 - Una sola barra: fecha, ARS/USD y chip de estado a la izquierda; Imprimir A4, Exportar CSV y Reabrir/Cerrar Caja a la derecha. Botones en neutro, el color solo en el chip de estado.
 - No hay botón ni panel "Historial de cajas" dentro de Caja: para ver otro día se navega con las flechas y el calendario de la barra.
+
+## Montos y comprobantes en caja — nov 2026
+- Todos los inputs de dinero usan un único componente con formato argentino: punto de miles automático mientras se tipea, coma decimal (máximo 2 decimales), la tecla punto no crea decimales, el cursor no salta, pegar "3.150.000" o "340000.00" se interpreta bien y el valor se guarda numérico.
+- La caja diaria, abierta o cerrada, no guarda copia de los comprobantes: los lee siempre de la fuente y en vivo. Una corrección en la ficha del cliente (tipo RB/FB, número, monto, medio, fecha) se refleja en la caja correspondiente aunque esté cerrada, también en la impresión A4, el CSV y el Historial. El "contado" del arqueo no se modifica.
