@@ -1,13 +1,13 @@
 import { usePermiso } from '../../context/AuthProvider'
 import CategoriasGastoConfig from '../../components/crm/CategoriasGastoConfig'
+import NotificacionesConfig from '../../components/crm/NotificacionesConfig'
 import { ShieldAlert } from 'lucide-react'
 
 // Configuración del sistema (nov 2026) — solo superadmin.
 //
 // Acá viven los ajustes que cambian cómo se comporta la app para todos, no
 // las preferencias de una cuenta (esas siguen en "Mi cuenta"): las categorías
-// de egreso, y más adelante los destinatarios y el canal de los avisos de
-// cierre de caja.
+// de egreso, y los destinatarios y el canal de los avisos de cierre de caja.
 export default function Configuracion() {
   const esSuperadmin = usePermiso('categorias_gasto')
 
@@ -25,6 +25,7 @@ export default function Configuracion() {
 
   return (
     <div className="space-y-grid animate-premium-fade">
+      <NotificacionesConfig />
       <CategoriasGastoConfig />
     </div>
   )

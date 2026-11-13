@@ -44,3 +44,7 @@ supabase/.temp/
 
 # Capturas de verificación del rebranding
 design/rebrand-shots/
+
+# Claves VAPID de Web Push: la privada va como secret de la Edge Function,
+# nunca al repo (que además es público).
+vapid.local.json

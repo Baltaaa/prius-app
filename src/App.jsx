@@ -26,6 +26,7 @@ const Notificaciones = lazy(() => import('./pages/crm/Notificaciones'))
 const Comprobantes = lazy(() => import('./pages/crm/Comprobantes'))
 const Perfil = lazy(() => import('./pages/crm/Perfil'))
 const Configuracion = lazy(() => import('./pages/crm/Configuracion'))
+const CajaResumen = lazy(() => import('./pages/CajaResumen'))
 const Recepcion = lazy(() => import('./pages/Recepcion'))
 const PlanoPublicoPreview = lazy(() => import('./pages/dev/PlanoPublicoPreview'))
 const NotFound = lazy(() => import('./pages/crm/NotFound'))
@@ -63,6 +64,19 @@ function Contenido() {
               element={
                 <PrivateRoute>
                   <CambiarContrasena />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Resumen del cierre de un día: a donde llevan el botón del
+                WhatsApp y el tap en la notificación push. Ruta propia, fuera
+                de /app — se abre del celular para mirar un número y cerrar.
+                Sin sesión, PrivateRoute guarda el deep link y vuelve acá. */}
+            <Route
+              path="/caja/:fecha/resumen"
+              element={
+                <PrivateRoute>
+                  <CajaResumen />
                 </PrivateRoute>
               }
             />
