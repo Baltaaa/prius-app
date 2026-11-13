@@ -10,6 +10,7 @@ import DateInput from '../../components/inputs/DateInput'
 import BrandSelect from '../../components/ui/BrandSelect'
 import LoadingButton from '../../components/ui/LoadingButton'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
+import BadgeFactura from '../../components/crm/BadgeFactura'
 import { descargarCierreCaja } from '../../lib/export/cajaCsv'
 import {
   Plus, Wallet, ChevronLeft, ChevronRight, Banknote,
@@ -84,7 +85,7 @@ export default function Caja() {
   // llegan de la base ya están en pesos; `fmtM` los convierte para mostrar.
   const mv = useMonedaVista()
   const fmtM = mv.fmt
-  const { pagos, refetchAll } = useData()
+  const { pagos, refetchAll, categoriasGasto } = useData()
   const { alert, toast } = useDialog()
 
   // Fecha y tab en la URL (Tarea 9, oct 2026) — antes recargar la página a
@@ -189,6 +190,30 @@ export default function Caja() {
     cargarResumen(cajaSeleccionada)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cajaSeleccionada?.id, cajaSeleccionada?.total_cobros, cajaSeleccionada?.total_gastos, cajaSeleccionada?.estado, pagos])
+
+  // Egresos de la caja que se está viendo. Los subtotales F / SF solo cuentan
+  // los vigentes (un gasto anulado no es plata que salió).
+  const gastosDeLaCaja = useMemo(
+    () => todosGastos.filter((g) => g.caja_id === cajaSeleccionada?.id),
+    [todosGastos, cajaSeleccionada?.id],
+  )
+
+  const subtotalesGasto = useMemo(() => {
+    let f = 0, sf = 0
+    for (const g of gastosDeLaCaja) {
+      if (g.estado === 'anulado') continue
+      if (g.tipo_comprobante === 'F') f += Number(g.monto) || 0
+      else sf += Number(g.monto) || 0
+    }
+    return { f, sf, total: f + sf }
+  }, [gastosDeLaCaja])
+
+  // Nombre de la categoría: la verdad es la tabla `categorias_gasto`; el mapa
+  // de slugs queda como fallback para un gasto de una categoría borrada.
+  const nombreCategoria = useCallback((g) => {
+    const cat = (categoriasGasto || []).find((c) => c.id === g.categoria_id)
+    return cat?.nombre || CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria
+  }, [categoriasGasto])
 
   const movimientosFiltrados = useMemo(
     () => (filtroMedio === 'todos' ? movimientos : movimientos.filter((m) => m.medio_pago === filtroMedio)),
@@ -596,17 +621,41 @@ export default function Caja() {
                 )}
 
                 {tab === 'gastos' && (
-                  todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).length === 0 ? <p className="text-label text-ink-2">Sin gastos todavía.</p> : (
+                  gastosDeLaCaja.length === 0 ? <p className="text-label text-ink-2">Sin gastos todavía.</p> : (
                     <div className="space-y-2">
-                      {todosGastos.filter((g) => g.caja_id === cajaSeleccionada.id).map((g) => (
+                      {/* Subtotales F / SF / total arriba de la lista: es lo
+                          primero que mira la contadora. Salen de los gastos
+                          vigentes de esta caja, no del total_gastos de la
+                          fila (que no distingue tipo). */}
+                      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-1 border-b border-line">
+                        <div className="flex items-center gap-2 h-8 px-3 rounded-full bg-gold-100 border border-gold-300 text-label whitespace-nowrap shrink-0">
+                          <span className="text-ink-2">Con factura (F):</span>
+                          <span className="text-ink font-semibold tabular-nums">{fmtM(subtotalesGasto.f)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 h-8 px-3 rounded-full bg-surface border border-line text-label whitespace-nowrap shrink-0">
+                          <span className="text-ink-2">Sin factura (SF):</span>
+                          <span className="text-ink font-semibold tabular-nums">{fmtM(subtotalesGasto.sf)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 h-8 px-3 rounded-full bg-surface text-label whitespace-nowrap shrink-0">
+                          <span className="text-ink-2">Total:</span>
+                          <span className="text-ink font-semibold tabular-nums">{fmtM(subtotalesGasto.total)}</span>
+                        </div>
+                      </div>
+                      {gastosDeLaCaja.map((g) => (
                         <button
                           key={g.id}
                           onClick={() => setGastoSeleccionado(g)}
                           className={`w-full flex justify-between items-center py-3 px-2 border-b border-line last:border-0 hover:bg-surface rounded-icon text-left ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
                         >
-                          <div className="min-w-0">
-                            <p className={`text-body font-semibold text-ink-2 truncate ${g.estado === 'anulado' ? 'line-through' : ''}`} title={g.descripcion}>{g.descripcion}</p>
-                            <p className="text-label text-ink-2">{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} · {formatHora(g.created_at)}</p>
+                          <div className="min-w-0 flex items-start gap-2">
+                            <BadgeFactura tipo={g.tipo_comprobante} className="mt-0.5" />
+                            <div className="min-w-0">
+                              <p className={`text-body font-semibold text-ink-2 truncate ${g.estado === 'anulado' ? 'line-through' : ''}`} title={g.descripcion}>{g.descripcion}</p>
+                              <p className="text-label text-ink-2 truncate" title={g.proveedor || undefined}>
+                                {nombreCategoria(g)} · {formatHora(g.created_at)}
+                                {g.proveedor ? ` · ${g.proveedor}` : ''}
+                              </p>
+                            </div>
                           </div>
                           <span className="text-body font-semibold text-danger tabular-nums shrink-0 ml-3">{fmtM(g.monto)}</span>
                         </button>

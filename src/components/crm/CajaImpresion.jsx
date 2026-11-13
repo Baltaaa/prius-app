@@ -36,6 +36,12 @@ export default function CajaImpresion({ resumen }) {
           .ci-totales div { border: 0.3mm solid #000; padding: 2mm; text-align: center; }
           .ci-totales .label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.08em; }
           .ci-totales .valor { font-size: 11pt; font-weight: 700; }
+          /* Tres tiles (egresos F / SF / total, nov 2026): mismo lenguaje que
+             .ci-totales pero en 3 columnas y dentro de una sección. */
+          .ci-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-bottom: 2mm; }
+          .ci-grid-3 > div { border: 0.3mm solid #000; padding: 2mm; text-align: center; }
+          .ci-grid-3 .label { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.08em; }
+          .ci-grid-3 .valor { font-size: 11pt; font-weight: 700; }
           .ci-accent { color: #b8860b !important; }
           .ci-total-dia { margin-top: 1.2mm; padding: 1mm 1.5mm; border-top: 0.3mm solid #000; font-size: 8pt; text-align: right; font-variant-numeric: tabular-nums; }
           .ci-firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 10mm; page-break-inside: avoid; }
@@ -161,15 +167,49 @@ export default function CajaImpresion({ resumen }) {
         </div>
       )}
 
+      {/* Egresos (nov 2026): subtotal con factura / sin factura, desglose por
+          categoría y el detalle con los datos de la factura. En blanco y
+          negro el tipo se lee por la columna "Tipo" (F/SF), no por color. */}
       <div className="ci-section">
-        <h2>Gastos</h2>
+        <h2>Egresos</h2>
+        <div className="ci-grid-3">
+          <div><div className="label">Con factura (F)</div><div className="valor">{formatMontoReal(gastos?.total_f || 0)}</div></div>
+          <div><div className="label">Sin factura (SF)</div><div className="valor">{formatMontoReal(gastos?.total_sf || 0)}</div></div>
+          <div>
+            <div className="label">Total egresos</div>
+            <div className="valor">{formatMontoReal(gastos?.total || 0)}</div>
+            <div className="label">{gastos?.pct_sf == null ? 'Sin egresos' : `${gastos.pct_sf}% sin factura`}</div>
+          </div>
+        </div>
+
+        {(gastos?.por_categoria || []).length > 0 && (
+          <table className="ci-table">
+            <thead><tr><th>Categoría</th><th className="num">Cantidad</th><th className="num">Con factura</th><th className="num">Sin factura</th><th className="num">Total</th></tr></thead>
+            <tbody>
+              {gastos.por_categoria.map((c) => (
+                <tr key={c.categoria}>
+                  <td>{c.nombre || CATEGORIA_GASTO_LABEL[c.categoria] || c.categoria}</td>
+                  <td className="num">{c.cantidad}</td>
+                  <td className="num">{formatMontoReal(c.total_f)}</td>
+                  <td className="num">{formatMontoReal(c.total_sf)}</td>
+                  <td className="num">{formatMontoReal(c.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
         <table className="ci-table">
-          <thead><tr><th>Hora</th><th>Concepto</th><th>Categoría</th><th>Proveedor</th><th className="num">Monto</th></tr></thead>
+          <thead><tr><th>Hora</th><th>Tipo</th><th>Concepto</th><th>Categoría</th><th>Proveedor</th><th>Factura</th><th className="num">Monto</th></tr></thead>
           <tbody>
             {(gastos?.detalle || []).map((g) => (
               <tr key={g.gasto_id}>
-                <td>{formatHora(g.fecha_hora)}</td><td>{g.concepto}</td>
-                <td>{CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria}</td><td>{g.proveedor || '—'}</td>
+                <td>{formatHora(g.fecha_hora)}</td>
+                <td>{g.tipo_comprobante || '—'}</td>
+                <td>{g.concepto}</td>
+                <td>{g.categoria_nombre || CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria}</td>
+                <td>{g.proveedor || '—'}</td>
+                <td>{[g.letra_factura, g.numero_factura].filter(Boolean).join(' ') || '—'}</td>
                 <td className="num">{formatMontoReal(g.monto)}</td>
               </tr>
             ))}

@@ -45,9 +45,14 @@ function seccionResumen(resumen: any): Seccion {
   const dia = totalDiaResumen(resumen)
   const filas: Seccion['filas'] = [['Facturas y recibos', formatMontoCsv(dia.facturasYRecibos)]]
   if (dia.conZ) filas.push(['Cierre Z — controlador fiscal', formatMontoCsv(dia.z)])
+  const g = resumen.gastos || {}
   filas.push(
     ['Ingresos', formatMontoCsv(dia.ingresos)],
     ['Egresos', formatMontoCsv(dia.egresos)],
+    // Nov 2026: el corte F / SF arriba de todo, es lo primero que se mira.
+    ['Egresos con factura (F)', formatMontoCsv(g.total_f)],
+    ['Egresos sin factura (SF)', formatMontoCsv(g.total_sf)],
+    ['% sin factura', g.pct_sf == null ? '' : String(g.pct_sf)],
     ['Neto', formatMontoCsv(dia.neto)],
   )
   return { titulo: 'Resumen', columnas: ['Concepto', 'Monto'], filas }
@@ -143,6 +148,60 @@ function seccionMovimientos(movimientos: any[]): { seccion: Seccion; cobros: any
   }
 }
 
+/**
+ * Egresos detallados (nov 2026): una fila por gasto vigente, con el tipo de
+ * comprobante (F / SF), la categoría, el proveedor y los datos de factura.
+ * Debajo de "Comprobantes del día" y antes de las anulaciones, con subtotales
+ * F y SF en la fila de total — es la sección que le sirve a la contadora.
+ */
+function seccionEgresos(resumen: any): Seccion {
+  const detalle = resumen.gastos?.detalle || []
+  const filas = detalle.map((g: any) => [
+    formatHoraCsv(g.fecha_hora),
+    g.tipo_comprobante || '',
+    etiqueta('tipo_comprobante_gasto', g.tipo_comprobante),
+    g.categoria_nombre || etiqueta('categoria_gasto', g.categoria),
+    g.concepto || '',
+    g.proveedor || '',
+    g.letra_factura || '',
+    g.numero_factura || '',
+    etiqueta('medio_pago', g.medio_pago),
+    formatMontoCsv(g.monto),
+  ])
+  const g = resumen.gastos || {}
+  return {
+    titulo: 'Egresos del día',
+    columnas: [
+      'Hora', 'Tipo', 'Tipo de comprobante', 'Categoría', 'Concepto', 'Proveedor',
+      'Letra de factura', 'N° de factura', 'Medio de pago', 'Monto',
+    ],
+    filas,
+    filaTotal: [
+      'Total', '', `Con factura ${formatMontoCsv(g.total_f)} / Sin factura ${formatMontoCsv(g.total_sf)}`,
+      '', '', '', '', '', '', formatMontoCsv(g.total),
+    ],
+  }
+}
+
+/** Subtotales de egresos por categoría, con el corte F / SF de cada una. */
+function seccionEgresosPorCategoria(resumen: any): Seccion {
+  const porCategoria = resumen.gastos?.por_categoria || []
+  const filas = porCategoria.map((c: any) => [
+    c.nombre || etiqueta('categoria_gasto', c.categoria),
+    String(c.cantidad ?? ''),
+    formatMontoCsv(c.total_f),
+    formatMontoCsv(c.total_sf),
+    formatMontoCsv(c.total),
+  ])
+  const g = resumen.gastos || {}
+  return {
+    titulo: 'Egresos por categoría',
+    columnas: ['Categoría', 'Cantidad', 'Con factura (F)', 'Sin factura (SF)', 'Total'],
+    filas,
+    filaTotal: ['Total', String(g.cantidad ?? ''), formatMontoCsv(g.total_f), formatMontoCsv(g.total_sf), formatMontoCsv(g.total)],
+  }
+}
+
 function seccionComprobantes(resumen: any): Seccion {
   const todos = [...(resumen.facturas || []), ...(resumen.recibos || [])]
   const filas = todos.map((c: any) => [
@@ -207,6 +266,8 @@ export function construirCierreCajaCsv(resumen: any, meta: MetaExport): string {
       seccionArqueo(resumen),
       seccionMov,
       seccionComprobantes(resumen),
+      seccionEgresos(resumen),
+      seccionEgresosPorCategoria(resumen),
       ...(totalDiaResumen(resumen).conZ ? [seccionCierreZ(resumen)] : []),
       seccionAnulaciones(resumen),
     ],

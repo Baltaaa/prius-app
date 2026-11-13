@@ -23,11 +23,13 @@ export interface TextInputProps {
   type?: string
   className?: string
   id?: string
+  /** id de un <datalist> para autocompletar (proveedores ya usados, por ejemplo). */
+  list?: string
 }
 
 export default function TextInput({
   label, hint, error, value, onChange, onBlur, as = 'input', rows = 3, maxLength, placeholder, required, disabled,
-  type = 'text', className = '', id,
+  type = 'text', className = '', id, list,
 }: TextInputProps) {
   const autoId = useRef(`text-${Math.random().toString(36).slice(2, 9)}`).current
   const inputId = id || autoId
@@ -62,7 +64,7 @@ export default function TextInput({
       {as === 'textarea' ? (
         <textarea rows={rows} onChange={(e) => onChange(e.target.value)} {...commonProps} />
       ) : (
-        <input type={type} enterKeyHint="next" onChange={(e) => onChange(e.target.value)} {...commonProps} />
+        <input type={type} list={list} enterKeyHint="next" onChange={(e) => onChange(e.target.value)} {...commonProps} />
       )}
       <div className="flex justify-between mt-2">
         {error ? (

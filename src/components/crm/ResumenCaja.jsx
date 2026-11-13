@@ -2,6 +2,7 @@ import { formatMonto, formatFecha } from '../../lib/format'
 import { MEDIO_PAGO_LABEL } from '../../lib/pagos'
 import MontoStat from '../ui/MontoStat'
 import FilaMedioPago from './FilaMedioPago'
+import BadgeFactura from './BadgeFactura'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 import { totalDiaResumen } from '../../lib/totalDiaCaja'
 import {
@@ -221,15 +222,73 @@ export default function ResumenCaja({ resumen }) {
                   <Fila key={f.etiqueta} label={f.etiqueta} cliente={f.cliente} value={formatMonto(f.monto_total)} tone={f.estado === 'anulado' ? 'text-ink-2 line-through' : undefined} />
                 ))}
               </div>
-              <div>
-                <p className="text-label text-ink-2 mb-2">Gastos por categoría</p>
-                {(gastos?.por_categoria || []).length === 0 ? (
-                  <p className="text-label text-ink-2 bg-surface rounded-inner p-3">Sin gastos registrados en esta caja.</p>
-                ) : gastos.por_categoria.map((g) => (
-                  <Fila key={g.categoria} label={CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria} value={formatMonto(g.total)} tone="text-danger" />
-                ))}
+            </div>
+          </Section>
+
+          {/* Egresos (nov 2026): el dueño necesita ver separado lo que tiene
+              factura de lo que no, y el detalle por categoría — es el dato
+              que después va a la contadora. Todo sale de resumen_caja(). */}
+          <Section title="Egresos" icon={ArrowDownRight}>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="card-inner">
+                <p className="text-label text-ink-2 flex items-center gap-1.5">
+                  <BadgeFactura tipo="F" /> Con factura
+                </p>
+                <MontoStat value={gastos?.total_f || 0} size="sm" className="text-ink mt-1" />
+              </div>
+              <div className="card-inner">
+                <p className="text-label text-ink-2 flex items-center gap-1.5">
+                  <BadgeFactura tipo="SF" /> Sin factura
+                </p>
+                <MontoStat value={gastos?.total_sf || 0} size="sm" className="text-ink mt-1" />
+              </div>
+              <div className="card-inner">
+                <p className="text-label text-ink-2">Total egresos</p>
+                <MontoStat value={gastos?.total || 0} size="sm" className="text-danger mt-1" />
+                <p className="text-label text-ink-2 mt-1">
+                  {gastos?.pct_sf == null ? 'Sin egresos' : `${gastos.pct_sf}% sin factura`}
+                </p>
               </div>
             </div>
+
+            <div>
+              <p className="text-label text-ink-2 mb-2">Por categoría</p>
+              {(gastos?.por_categoria || []).length === 0 ? (
+                <p className="text-label text-ink-2 bg-surface rounded-inner p-3">Sin gastos registrados en esta caja.</p>
+              ) : gastos.por_categoria.map((g) => (
+                <Fila
+                  key={g.categoria}
+                  label={g.nombre || CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria}
+                  cliente={`F ${formatMonto(g.total_f)} · SF ${formatMonto(g.total_sf)}`}
+                  value={formatMonto(g.total)}
+                  tone="text-danger"
+                />
+              ))}
+            </div>
+
+            {(gastos?.detalle || []).length > 0 && (
+              <div>
+                <p className="text-label text-ink-2 mb-2">Detalle ({gastos.detalle.length})</p>
+                {gastos.detalle.map((g) => (
+                  <div key={g.gasto_id} className="flex items-start justify-between py-2 border-b border-line last:border-0 gap-3">
+                    <div className="flex items-start gap-2 min-w-0">
+                      <BadgeFactura tipo={g.tipo_comprobante} className="mt-0.5" />
+                      <div className="min-w-0">
+                        <span className="block text-body text-ink-2 truncate" title={g.concepto}>{g.concepto}</span>
+                        <span className="block text-label text-ink-2 truncate">
+                          {g.categoria_nombre || CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria}
+                          {g.proveedor ? ` · ${g.proveedor}` : ''}
+                          {g.tipo_comprobante === 'F' && (g.letra_factura || g.numero_factura)
+                            ? ` · Factura ${[g.letra_factura, g.numero_factura].filter(Boolean).join(' ')}`
+                            : ''}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-body font-semibold text-danger tabular-nums shrink-0">{formatMonto(g.monto)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </Section>
 
           {(sin_comprobante || []).length > 0 && (

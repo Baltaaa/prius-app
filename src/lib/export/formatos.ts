@@ -11,15 +11,45 @@ import { MEDIO_PAGO_LABEL, COMPROBANTE_TIPO_LABEL, TIPO_PAGO_LABEL } from '../pa
 
 // Única definición real (lib/caja.js la reexporta desde acá, no al revés —
 // evita el ciclo de imports export/formatos.ts <-> lib/caja.js).
+/**
+ * Etiquetas de categoría de gasto.
+ *
+ * Nov 2026: la fuente de verdad pasó a ser la tabla `categorias_gasto` (el
+ * dueño las administra desde Configuración). Este mapa queda como FALLBACK
+ * para los slugs de siempre — lo usan la impresión A4 y el CSV cuando
+ * trabajan sobre un resumen viejo que no trae `categoria_nombre`. Para una
+ * categoría nueva, el nombre viene de la base y este mapa no se toca.
+ */
 export const CATEGORIA_GASTO_LABEL: Record<string, string> = {
-  proveedores: 'Proveedores',
-  sueldos_adelantos: 'Sueldos / Adelantos',
-  mantenimiento: 'Mantenimiento',
-  limpieza: 'Limpieza',
-  insumos: 'Insumos',
-  servicios: 'Servicios',
-  retiro_dueno: 'Retiro del dueño',
+  proveedores: 'Proveedores y mercadería',
+  sueldos_adelantos: 'Sueldos y personal',
+  mantenimiento: 'Mantenimiento y reparaciones',
+  servicios: 'Servicios (luz, agua, gas, internet)',
+  limpieza: 'Limpieza e insumos',
+  gastronomia: 'Gastronomía',
+  impuestos: 'Impuestos y tasas',
+  publicidad: 'Publicidad',
+  retiro_dueno: 'Retiros del dueño',
   otros: 'Otros',
+  // `insumos` se absorbió en "Limpieza e insumos" (migración nov 2026); el
+  // slug no debería aparecer más, pero si quedó en un snapshot viejo se lee.
+  insumos: 'Limpieza e insumos',
+}
+
+/**
+ * Tipo de comprobante de un egreso: con factura (F) o sin factura (SF).
+ * Lo decide el que carga el gasto y es obligatorio — es el dato que la
+ * contadora necesita separado.
+ */
+export const TIPO_COMPROBANTE_GASTO_LABEL: Record<string, string> = {
+  F: 'Con factura',
+  SF: 'Sin factura',
+}
+
+/** "F · Con factura" / "SF · Sin factura" — para selects, CSV e impresión. */
+export function etiquetaTipoComprobanteGasto(tipo: string | null | undefined): string {
+  if (!tipo) return ''
+  return `${tipo} · ${TIPO_COMPROBANTE_GASTO_LABEL[tipo] || tipo}`
 }
 
 /**
@@ -32,11 +62,14 @@ export const CATEGORIA_GASTO_EMOJI: Record<string, string> = {
   proveedores: '📦',
   sueldos_adelantos: '👷',
   mantenimiento: '🔧',
-  limpieza: '🧹',
-  insumos: '🧺',
   servicios: '💡',
+  limpieza: '🧹',
+  gastronomia: '🍽️',
+  impuestos: '🧾',
+  publicidad: '📣',
   retiro_dueno: '🏦',
   otros: '📌',
+  insumos: '🧹',
 }
 
 /** DD/MM/AAAA */
@@ -84,6 +117,7 @@ const ETIQUETAS: Record<string, Record<string, string>> = {
   comprobante_tipo: COMPROBANTE_TIPO_LABEL,
   tipo_pago: TIPO_PAGO_LABEL,
   categoria_gasto: CATEGORIA_GASTO_LABEL,
+  tipo_comprobante_gasto: TIPO_COMPROBANTE_GASTO_LABEL,
   estado_pago: ESTADO_PAGO_LABEL,
   estado_comprobante: ESTADO_COMPROBANTE_LABEL,
   estado_caja: ESTADO_CAJA_LABEL,

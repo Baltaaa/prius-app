@@ -12,6 +12,7 @@ import {
   LogOut,
   FileText,
   UserCheck,
+  Settings,
   Activity,
   Inbox,
   GanttChartSquare,
@@ -84,7 +85,10 @@ export default function Sidebar() {
     ...(isFeatureEnabled('ocupacion') ? [{ name: 'Ocupación', path: '/app/ocupacion', icon: GanttChartSquare }] : []),
     { name: 'Historial', path: '/app/historial', icon: Activity },
     { name: 'Comprobantes', path: '/app/comprobantes', icon: FileText },
-    { name: 'Mi cuenta', path: '/app/perfil', icon: UserCheck }
+    { name: 'Mi cuenta', path: '/app/perfil', icon: UserCheck },
+    // Ajustes que afectan a todos (categorías de egreso, avisos de cierre):
+    // solo superadmin, igual que el guard real de la pantalla.
+    ...(permiso('categorias_gasto') ? [{ name: 'Configuración', path: '/app/configuracion', icon: Settings }] : []),
   ]
 
   const renderItem = (item) => (

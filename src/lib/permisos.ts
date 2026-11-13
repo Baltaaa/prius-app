@@ -19,6 +19,12 @@ export const PERMISOS: Record<string, Rol[]> = {
   editar_unidades: ['superadmin'],
   gestion_usuarios: ['superadmin'],
   editar_comprobante: ['superadmin'],
+  // Corregir el tipo F/SF, la categoría o los datos de factura de un gasto ya
+  // cargado, incluso con la caja cerrada (nov 2026) — espeja el guard real de
+  // `editar_gasto` en la base (es_superadmin + dispatcher con contraseña).
+  editar_gasto: ['superadmin'],
+  // Administrar las categorías de egreso (alta, renombrar, ordenar, desactivar).
+  categorias_gasto: ['superadmin'],
   // Anular un pago y corregir el monto de uno YA verificado (testing oct
   // 2026, items 9/10) — espeja el guard real de anular_pago/
   // fn_editar_monto_pago_vigente. Distinto de editar_monto_pago (abajo),

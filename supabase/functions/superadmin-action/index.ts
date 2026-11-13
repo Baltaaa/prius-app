@@ -42,6 +42,7 @@ const ACCIONES_VALIDAS = [
   "eliminar_lead",
   "anular_pago",
   "editar_comprobante",
+  "editar_gasto",
   "editar_monto_pago_vigente",
   "cambiar_estado_pago_manual",
   "revertir_estado_pago_automatico",
@@ -74,6 +75,8 @@ function describirAccion(accion: string, params: Record<string, unknown>): strin
       return `Anuló un pago${params.motivo ? ` — ${params.motivo}` : ""}`
     case "editar_comprobante":
       return "Editó el monto o tipo de un comprobante"
+    case "editar_gasto":
+      return `Corrigió un gasto de caja${params.tipo_comprobante ? ` — tipo ${params.tipo_comprobante}` : ""}`
     case "editar_monto_pago_vigente":
       return "Corrigió el monto de un pago ya verificado"
     case "cambiar_estado_pago_manual":

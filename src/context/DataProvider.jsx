@@ -40,6 +40,10 @@ export function DataProvider({ children }) {
   const [historialCajas, setHistorialCajas] = useState([])
   const [gastos, setGastos] = useState([])
   const [todosGastos, setTodosGastos] = useState([])
+  // Categorías de egreso: tabla administrable (`categorias_gasto`, nov 2026).
+  // El select de "Registrar gasto" solo ofrece las activas; el resto de la app
+  // las usa para poner nombre a un slug guardado.
+  const [categoriasGasto, setCategoriasGasto] = useState([])
   const [ingresosCaja, setIngresosCaja] = useState([])
   const [eventos, setEventos] = useState([])
   const [leads, setLeads] = useState([])
@@ -99,6 +103,13 @@ export function DataProvider({ children }) {
   const fetchTodosGastos = useCallback(async () => {
     const { data } = await supabase.from('gastos_caja').select('*').order('created_at', { ascending: false })
     setTodosGastos(data || [])
+  }, [])
+
+  const fetchCategoriasGasto = useCallback(async () => {
+    const { data } = await supabase
+      .from('categorias_gasto').select('*')
+      .order('orden', { ascending: true }).order('nombre', { ascending: true })
+    setCategoriasGasto(data || [])
   }, [])
 
   // Ingresos itemizados de caja (Fase 3): antes venían de la tabla puente
@@ -188,7 +199,7 @@ export function DataProvider({ children }) {
     try {
       await Promise.all([
         fetchUnidades(), fetchReservas(), fetchClientes(), fetchCaja(), fetchEventos(), fetchLeads(), fetchPagos(),
-        fetchTodosGastos(), fetchIngresosCaja(), fetchTemporadas(), fetchCodigosReserva(),
+        fetchTodosGastos(), fetchCategoriasGasto(), fetchIngresosCaja(), fetchTemporadas(), fetchCodigosReserva(),
       ])
       setError(null)
     } catch (err) {
@@ -197,7 +208,7 @@ export function DataProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos, fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva])
+  }, [fetchUnidades, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos, fetchTodosGastos, fetchCategoriasGasto, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva])
 
   useEffect(() => { refetchAll() }, [refetchAll])
 
@@ -416,10 +427,22 @@ export function DataProvider({ children }) {
     return data
   }, [])
 
-  const registrarGasto = useCallback(async ({ concepto, categoria, medioPago, monto, proveedor, comprobanteProveedor }) => {
+  // Nov 2026: la categoría se manda por id (tabla administrable) y el tipo de
+  // comprobante F / SF es obligatorio — sin él la RPC rechaza el gasto. El
+  // número y la letra de factura solo aplican cuando es F.
+  const registrarGasto = useCallback(async ({
+    concepto, categoriaId, medioPago, monto, tipoComprobante,
+    proveedor, numeroFactura, letraFactura,
+  }) => {
     const { data, error } = await supabase.rpc('registrar_gasto', {
-      p_concepto: concepto, p_categoria: categoria, p_medio_pago: medioPago, p_monto: Number(monto),
-      p_proveedor: proveedor || null, p_comprobante_proveedor: comprobanteProveedor || null,
+      p_concepto: concepto,
+      p_categoria_id: categoriaId,
+      p_medio_pago: medioPago,
+      p_monto: Number(monto),
+      p_tipo_comprobante: tipoComprobante,
+      p_proveedor: proveedor || null,
+      p_numero_factura: numeroFactura || null,
+      p_letra_factura: letraFactura || null,
     })
     if (error) throw error
     setTodosGastos((prev) => [data, ...prev])
@@ -427,6 +450,39 @@ export function DataProvider({ children }) {
     await fetchCaja()
     return data
   }, [cajaHoy, fetchCaja])
+
+  // Corrección de un gasto ya cargado (tipo F/SF, categoría, proveedor, datos
+  // de factura). Anda aunque la caja esté cerrada: la caja lee los gastos en
+  // vivo, así que el cierre, el A4, el CSV y Reportes reflejan el cambio sin
+  // tocar el "contado" del arqueo. Solo superadmin, con contraseña.
+  const editarGasto = useCallback(async ({
+    gastoId, categoriaId, tipoComprobante, proveedor, numeroFactura, letraFactura, concepto,
+  }, password) => {
+    await ejecutarAccionSuperadmin('editar_gasto', {
+      gasto_id: gastoId,
+      categoria_id: categoriaId || '',
+      tipo_comprobante: tipoComprobante || '',
+      proveedor: proveedor ?? null,
+      numero_factura: numeroFactura ?? null,
+      letra_factura: letraFactura || '',
+      concepto: concepto || '',
+    }, password)
+    await Promise.all([fetchTodosGastos(), fetchCaja()])
+  }, [fetchTodosGastos, fetchCaja])
+
+  // Alta / renombrado / orden / baja lógica de una categoría (solo superadmin;
+  // nunca se borra una categoría, se desactiva).
+  const guardarCategoriaGasto = useCallback(async ({ id, nombre, orden, activa }) => {
+    const { data, error } = await supabase.rpc('guardar_categoria_gasto', {
+      p_id: id || null,
+      p_nombre: nombre ?? null,
+      p_orden: orden ?? null,
+      p_activa: activa ?? null,
+    })
+    if (error) throw error
+    await fetchCategoriasGasto()
+    return data
+  }, [fetchCategoriasGasto])
 
   const anularGasto = useCallback(async (gastoId, motivo) => {
     const { data, error } = await supabase.rpc('anular_gasto', { p_gasto_id: gastoId, p_motivo: motivo })
@@ -698,27 +754,27 @@ export function DataProvider({ children }) {
   const temporadaActiva = useMemo(() => temporadas.find((t) => t.estado === 'activa') || null, [temporadas])
 
   const value = useMemo(() => ({
-    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
+    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, categoriasGasto, ingresosCaja,
     eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error, realtimeConectado,
     createReserva, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad, agregarCosocio, quitarCosocio,
-    iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
+    iniciarCaja, registrarGasto, editarGasto, anularGasto, cerrarCaja, reabrirCaja, guardarCategoriaGasto,
     updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
     cambiarEstadoPagoManual, revertirEstadoPagoAutomatico,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
-    fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
+    fetchTodosGastos, fetchCategoriasGasto, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
   }), [
-    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, ingresosCaja,
+    reservas, unidades, clientes, cajaHoy, historialCajas, gastos, todosGastos, categoriasGasto, ingresosCaja,
     eventos, leads, pagos, temporadas, temporadaActiva, codigosReserva, loading, error, realtimeConectado,
     createReserva, crearReservaConPago, updateReserva, deleteReserva, cancelarReserva, crearGrupoReservas,
     createCliente, updateCliente, deleteCliente, deleteUnidad, agregarCosocio, quitarCosocio,
-    iniciarCaja, registrarGasto, anularGasto, cerrarCaja, reabrirCaja,
+    iniciarCaja, registrarGasto, editarGasto, anularGasto, cerrarCaja, reabrirCaja, guardarCategoriaGasto,
     updateLead, deleteLead, registrarPago, anularPago, completarComprobante, editarComprobante, editarMontoPago, editarMontoPagoVigente, editarPagoCompleto, emitirComprobante,
     cambiarEstadoPagoManual, revertirEstadoPagoAutomatico,
     buscarPorCodigo, recepcionCobrar,
     refetchAll, fetchReservas, fetchClientes, fetchCaja, fetchEventos, fetchLeads, fetchPagos,
-    fetchTodosGastos, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
+    fetchTodosGastos, fetchCategoriasGasto, fetchIngresosCaja, fetchTemporadas, fetchCodigosReserva,
   ])
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
