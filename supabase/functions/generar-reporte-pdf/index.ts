@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "jsr:@supabase/supabase-js@2"
 import { servirConCors } from "../_shared/cors.ts"
+import { leerSecretos } from "../_shared/secretos.ts"
 import {
   A4, MARGEN, COLOR, crearDocumento, encabezado, pie, titulo, texto,
   tarjetasKpi, barras, barrasApiladas, barrasHorizontales, dona, ocupacionPorTipo, tabla,
@@ -26,7 +27,7 @@ import {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET") || ""
+// El secret interno sale del vault (ver _shared/secretos.ts), no de Deno.env.
 const BUCKET = "reportes"
 const VALIDEZ_URL_SEG = 3600
 
@@ -290,6 +291,7 @@ servirConCors(async (req, cors) => {
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 
   // Camino 1: secret interno (server-to-server, el aviso de cierre de caja).
+  const { INTERNAL_SECRET } = await leerSecretos()
   const secret = req.headers.get("x-prius-secret")
   let autorizado = Boolean(INTERNAL_SECRET) && secret === INTERNAL_SECRET
 

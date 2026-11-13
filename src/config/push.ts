@@ -1,15 +1,19 @@
 // Web Push (nov 2026).
 //
 // La clave pública VAPID es pública por definición: va en el bundle y el
-// navegador la usa como `applicationServerKey` al suscribirse. La privada
-// vive SOLO como secret de la Edge Function `notificar-cierre-caja` (ver
-// vapid.local.json, que no se commitea).
+// navegador la usa como `applicationServerKey` al suscribirse.
+//
+// La privada NUNCA estuvo acá ni en ningún archivo local: el par se generó
+// dentro de Supabase y la privada vive solo en el vault
+// (`prius_vapid_private_key`), de donde la lee `notificar-cierre-caja` vía
+// `fn_secrets_notificaciones()`. Para rotar el par, se regenera ahí y se
+// pega la pública nueva acá — es lo único que tiene que viajar.
 //
 // Se puede pisar con VITE_VAPID_PUBLIC_KEY si alguna vez hay que rotarla sin
 // tocar el código.
 export const VAPID_PUBLIC_KEY: string =
   import.meta.env.VITE_VAPID_PUBLIC_KEY
-  || 'BEPrbt9lr6KLumRoMAZfNdzCcEgqy2LBpJ6QLOQgfA760B65bUjed1eMYcHwBwvTezDwKJQsWiPY6XxwW5wll1w'
+  || 'BC7U2H52yXbK1CaJs11q7wvHdj1f41dvUcBUTWSsA5-wEaWVcJROidQCKqAi--SfOscmdYM9HKy8g8u5s6rKnBU'
 
 /** base64url -> Uint8Array, que es lo que pide `pushManager.subscribe`. */
 export function claveAplicacion(base64: string = VAPID_PUBLIC_KEY): Uint8Array {

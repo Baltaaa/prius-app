@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "jsr:@supabase/supabase-js@2"
 import * as webpush from "jsr:@negrel/webpush@^0.5.0"
 import { servirConCors } from "../_shared/cors.ts"
+import { leerSecretos } from "../_shared/secretos.ts"
 
 // Aviso automático al cerrar la caja (nov 2026, Tarea 5).
 //
@@ -22,17 +23,14 @@ import { servirConCors } from "../_shared/cors.ts"
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-const INTERNAL_SECRET = Deno.env.get("INTERNAL_SECRET") || ""
+// INTERNAL_SECRET y las VAPID salen del vault (ver _shared/secretos.ts), no
+// de Deno.env: el cron ya lee de ahí y así hay un solo lugar donde rotar.
 
 const WA_TOKEN = Deno.env.get("WHATSAPP_TOKEN") || ""
 const WA_PHONE_ID = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID") || ""
 const WA_TEMPLATE = Deno.env.get("WHATSAPP_TEMPLATE_NAME") || "resumen_cierre_caja"
 const WA_LANG = Deno.env.get("WHATSAPP_TEMPLATE_LANG") || "es_AR"
 const WA_API = Deno.env.get("WHATSAPP_API_VERSION") || "v21.0"
-
-const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY") || ""
-const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY") || ""
-const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:bruschettibalta@gmail.com"
 
 const SITIO = Deno.env.get("SITIO_URL") || "https://prius-app.pages.dev"
 const MAX_INTENTOS = 3
@@ -68,14 +66,14 @@ function ocupTipo(resumen: any, tipo: string): string {
 
 // -------------------------------------------------------------- canales
 
-async function pdfDeLaCaja(cajaId: string): Promise<string | null> {
+async function pdfDeLaCaja(cajaId: string, internalSecret: string): Promise<string | null> {
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/generar-reporte-pdf`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${SERVICE_KEY}`,
-        "x-prius-secret": INTERNAL_SECRET,
+        "x-prius-secret": internalSecret,
       },
       body: JSON.stringify({ modo: "cierre", caja_id: cajaId }),
       signal: AbortSignal.timeout(25000),
@@ -180,8 +178,8 @@ function textoResumen(resumen: any, esPrueba: boolean): string {
 }
 
 /** Web Push a los superadmin suscriptos. Borra las suscripciones muertas. */
-async function enviarPush(sb: any, resumen: any, mostrarMontos: boolean, esPrueba: boolean) {
-  if (!VAPID_PRIVATE || !VAPID_PUBLIC) return { canal: "push", ok: false, motivo: "faltan_vapid" }
+async function enviarPush(sb: any, resumen: any, mostrarMontos: boolean, esPrueba: boolean, vapid: { publica: string; privada: string; subject: string }) {
+  if (!vapid.privada || !vapid.publica) return { canal: "push", ok: false, motivo: "faltan_vapid" }
 
   const { data: supers } = await sb.from("perfiles").select("user_id").eq("rol", "superadmin").eq("activo", true)
   const ids = (supers ?? []).map((p: any) => p.user_id)
@@ -206,10 +204,10 @@ async function enviarPush(sb: any, resumen: any, mostrarMontos: boolean, esPrueb
   let app
   try {
     app = await webpush.ApplicationServer.new({
-      contactInformation: VAPID_SUBJECT,
+      contactInformation: vapid.subject || "mailto:bruschettibalta@gmail.com",
       // VAPID_PRIVATE_KEY es el par exportado en JWK ({publicKey, privateKey}),
       // que es exactamente lo que espera importVapidKeys.
-      vapidKeys: await webpush.importVapidKeys(JSON.parse(VAPID_PRIVATE), { extractable: false }),
+      vapidKeys: await webpush.importVapidKeys(JSON.parse(vapid.privada), { extractable: false }),
     })
   } catch (err) {
     console.error("[notificar] VAPID inválido:", err)
@@ -239,6 +237,13 @@ async function enviarPush(sb: any, resumen: any, mostrarMontos: boolean, esPrueb
 // ------------------------------------------------------------- proceso
 
 async function procesarCaja(sb: any, cajaId: string, esPrueba: boolean) {
+  const secretos = await leerSecretos()
+  const vapid = {
+    publica: secretos.VAPID_PUBLIC_KEY,
+    privada: secretos.VAPID_PRIVATE_KEY,
+    subject: secretos.VAPID_SUBJECT,
+  }
+
   const { data: resumen, error } = await sb.rpc("resumen_cierre_caja", { p_caja_id: cajaId })
   if (error || !resumen) throw new Error(`resumen_cierre_caja: ${error?.message ?? "sin datos"}`)
 
@@ -251,7 +256,7 @@ async function procesarCaja(sb: any, cajaId: string, esPrueba: boolean) {
   // WhatsApp: el PDF solo se genera si de verdad se va a mandar algo.
   if (canal !== "off" && destinatarios.length > 0) {
     if (canal === "cloud_api" && WA_TOKEN && WA_PHONE_ID) {
-      const pdfUrl = await pdfDeLaCaja(cajaId)
+      const pdfUrl = await pdfDeLaCaja(cajaId, secretos.INTERNAL_SECRET)
       resultado.whatsapp = await enviarCloudApi(resumen, destinatarios, pdfUrl, esPrueba)
     } else {
       // Sin secrets de Cloud API, o canal = callmebot: texto plano con el link.
@@ -262,7 +267,7 @@ async function procesarCaja(sb: any, cajaId: string, esPrueba: boolean) {
   }
 
   // Push: siempre, pase lo que pase con WhatsApp.
-  resultado.push = await enviarPush(sb, resumen, cfg?.mostrar_montos_en_push ?? true, esPrueba)
+  resultado.push = await enviarPush(sb, resumen, cfg?.mostrar_montos_en_push ?? true, esPrueba, vapid)
 
   return resultado
 }
@@ -313,6 +318,7 @@ servirConCors(async (req, cors) => {
   if (req.method !== "POST") return json({ ok: false, error: "metodo_no_permitido" }, 405, cors)
 
   const sb = admin()
+  const { INTERNAL_SECRET } = await leerSecretos()
   const secret = req.headers.get("x-prius-secret")
   const esInterno = Boolean(INTERNAL_SECRET) && secret === INTERNAL_SECRET
 
