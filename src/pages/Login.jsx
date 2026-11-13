@@ -358,6 +358,7 @@ export default function Login({ modo }) {
                       <label htmlFor="login-email" className={labelBase}>Email</label>
                       <input
                         id="login-email"
+                        name="username"
                         type="email"
                         inputMode="email"
                         autoComplete="username"
@@ -385,6 +386,7 @@ export default function Login({ modo }) {
                       <div className="relative">
                         <input
                           id="login-password"
+                          name="password"
                           type={showPassword ? "text" : "password"}
                           autoComplete="current-password"
                           enterKeyHint="go"
@@ -470,6 +472,7 @@ export default function Login({ modo }) {
                         <label htmlFor="recover-email" className={labelBase}>Email</label>
                         <input
                           id="recover-email"
+                          name="username"
                           type="email"
                           inputMode="email"
                           autoComplete="username"
