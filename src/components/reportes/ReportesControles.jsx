@@ -1,31 +1,67 @@
 import { useRef, useState } from 'react'
-import { Download, Printer, Share2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Printer, FileDown, Share2, Image as ImageIcon } from 'lucide-react'
+import SegmentedScroll from '../brand/SegmentedScroll'
 import SegmentedControl from '../brand/SegmentedControl'
 import RangoFechasChip from '../brand/RangoFechasChip'
 import WhatsAppIcon from '../ui/WhatsAppIcon'
 import PopoverAnclado from '../ui/PopoverAnclado'
+import BottomSheet from '../brand/BottomSheet'
 import { useOverlay } from '../../context/OverlayProvider'
-import { PERIODOS } from '../../lib/reportes'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { VISTAS, navegable } from '../../lib/periodos'
 
-// Controles de Reportes para la zona sticky superior (ToolbarSticky). Todo en
-// poco alto para que el primer pantallazo sea de datos:
-//   - Diario / Semanal / Mensual / Anual a ancho completo (hasta lg).
-//   - El rango de fechas es UN chip ("04/11/25 – 04/11/26", RangoFechasChip) que abre
-//     un bottom sheet con los dos selectores (mobile) o un popover (desktop).
-//   - Pesos / Dólares como toggle chico.
-//   - WhatsApp, Descargar e Imprimir: un botón "Compartir" con menú en mobile
-//     y tablet; tres íconos sueltos desde lg.
+// Barra sticky de Reportes (nov 2026, rediseño mobile-first).
+//
+// Fila 1: Día / Semana / Mes / Temporada / Año / Rango en UNA línea con scroll
+//         y snap (SegmentedScroll — nunca en dos líneas).
+// Fila 2: navegador ‹ período ›, el chip de rango cuando la vista es 'rango',
+//         el toggle ARS/USD y Exportar.
+//
+// Máximo dos filas y controles de 40px, como el resto de las toolbars de
+// desktop (ver CLAUDE.md).
 
 const MONEDAS = [
   { value: 'ARS', label: 'ARS' },
   { value: 'USD', label: 'USD' },
 ]
 
-function Compartir({ onWhatsApp, linkWa, onCsv, onImprimir }) {
+const ITEM = 'w-full text-left px-4 min-h-11 text-label text-ink hover:bg-surface flex items-center gap-3 rounded-icon disabled:opacity-40 disabled:cursor-not-allowed'
+
+function MenuExportar({ acciones, onCerrar }) {
+  return (
+    <div className="p-1">
+      <button type="button" onClick={() => { onCerrar(); acciones.onPdf() }} className={ITEM}>
+        <FileDown size={16} /> Descargar PDF
+      </button>
+      <button type="button" onClick={() => { onCerrar(); acciones.onImprimir() }} className={ITEM}>
+        <Printer size={16} /> Imprimir A4
+      </button>
+      <button type="button" onClick={() => { onCerrar(); acciones.onCsv() }} className={ITEM}>
+        <Download size={16} /> Descargar CSV
+      </button>
+      <button type="button" onClick={() => { onCerrar(); acciones.onImagen() }} className={ITEM}>
+        <ImageIcon size={16} /> Compartir imagen
+      </button>
+      <button
+        type="button"
+        disabled={!acciones.linkWa}
+        title={acciones.linkWa ? 'Enviar el resumen a mi WhatsApp' : 'Cargá tu teléfono en Mi cuenta'}
+        onClick={() => { onCerrar(); acciones.onWhatsApp() }}
+        className={ITEM}
+      >
+        <WhatsAppIcon size={16} /> Resumen por WhatsApp
+      </button>
+    </div>
+  )
+}
+
+function Exportar({ acciones }) {
   const [abierto, setAbierto] = useState(false)
-  const { bind } = useOverlay({ id: 'reportes-compartir', isOpen: abierto, onRequestClose: () => setAbierto(false) })
+  const { bind } = useOverlay({ id: 'reportes-exportar', isOpen: abierto, onRequestClose: () => setAbierto(false) })
   const anclaRef = useRef(null)
-  const item = 'w-full text-left px-4 min-h-11 text-label text-ink hover:bg-surface flex items-center gap-3 rounded-icon disabled:opacity-40 disabled:cursor-not-allowed'
+  const esMobile = useMediaQuery('(max-width: 767px)')
+  const cerrar = () => setAbierto(false)
+
   return (
     <div ref={anclaRef} className="relative shrink-0">
       <button
@@ -34,69 +70,79 @@ function Compartir({ onWhatsApp, linkWa, onCsv, onImprimir }) {
         onClick={() => setAbierto((v) => !v)}
         aria-expanded={abierto}
         aria-haspopup="menu"
-        aria-label="Compartir"
-        title="Compartir"
+        aria-label="Exportar"
+        title="Exportar"
         className="btn btn-secondary h-11 w-11 md:h-10 md:w-auto min-h-0 px-0 md:px-4"
       >
         <Share2 size={16} strokeWidth={1.5} />
-        <span className="hidden md:inline">Compartir</span>
+        <span className="hidden md:inline">Exportar</span>
       </button>
-      {abierto && (
-        <PopoverAnclado ref={bind} anchorRef={anclaRef} align="right" width={240} role="menu" className="p-1">
-          <button role="menuitem" type="button" disabled={!linkWa} title={linkWa ? 'Enviar a mi WhatsApp' : 'Cargá tu teléfono en Mi cuenta'}
-            onClick={() => { setAbierto(false); onWhatsApp() }} className={item}>
-            <WhatsAppIcon size={16} /> WhatsApp
-          </button>
-          <button role="menuitem" type="button" onClick={() => { setAbierto(false); onCsv() }} className={item}>
-            <Download size={16} /> Descargar CSV
-          </button>
-          <button role="menuitem" type="button" onClick={() => { setAbierto(false); onImprimir() }} className={item}>
-            <Printer size={16} /> Imprimir / PDF
-          </button>
+      {abierto && (esMobile ? (
+        <BottomSheet isOpen={abierto} onClose={cerrar} title="Exportar">
+          <MenuExportar acciones={acciones} onCerrar={cerrar} />
+        </BottomSheet>
+      ) : (
+        <PopoverAnclado ref={bind} anchorRef={anclaRef} align="right" width={260} role="menu" className="p-0">
+          <MenuExportar acciones={acciones} onCerrar={cerrar} />
         </PopoverAnclado>
-      )}
-    </div>
-  )
-}
-
-function AccionesDesktop({ onWhatsApp, linkWa, onCsv, onImprimir }) {
-  const btn = 'btn btn-secondary h-10 w-10 min-h-0 px-0 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed'
-  return (
-    <div className="hidden lg:flex items-center gap-2 ml-auto">
-      <button type="button" onClick={onWhatsApp} disabled={!linkWa} title={linkWa ? 'Enviar a mi WhatsApp' : 'Cargá tu teléfono en Mi cuenta'} aria-label="WhatsApp" className={btn}>
-        <WhatsAppIcon size={16} />
-      </button>
-      <button type="button" onClick={onCsv} title="Descargar CSV" aria-label="Descargar CSV" className={btn}>
-        <Download size={16} strokeWidth={1.5} />
-      </button>
-      <button type="button" onClick={onImprimir} title="Imprimir / PDF" aria-label="Imprimir / PDF" className={btn}>
-        <Printer size={16} strokeWidth={1.5} />
-      </button>
+      ))}
     </div>
   )
 }
 
 export default function ReportesControles({
-  periodo, setPeriodo, moneda, setMoneda, desde, hasta, setDesde, setHasta,
-  onWhatsApp, linkWa, onCsv, onImprimir,
+  vista, setVista, etiqueta, onAnterior, onSiguiente,
+  moneda, setMoneda, rango, setRango, acciones,
 }) {
+  const puedeNavegar = navegable(vista)
   return (
-    <div className="toolbar-40 no-print flex flex-wrap items-center gap-2">
-      <SegmentedControl
-        label="Agrupar por"
-        options={PERIODOS}
-        value={periodo}
-        onChange={setPeriodo}
-        fullWidth="hasta-lg"
-      />
-      <div className="flex items-center gap-2 w-full lg:w-auto lg:contents">
-        <RangoFechasChip desde={desde} hasta={hasta} setDesde={setDesde} setHasta={setHasta} conAnio className="flex-1 lg:flex-none lg:w-52" />
+    <div className="no-print space-y-2">
+      <SegmentedScroll options={VISTAS} value={vista} onChange={setVista} label="Período" />
+
+      <div className="toolbar-40 flex items-center gap-2">
+        {puedeNavegar ? (
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={onAnterior}
+              aria-label="Período anterior"
+              title="Período anterior"
+              className="btn btn-secondary h-11 w-11 md:h-10 md:w-10 min-h-0 px-0"
+            >
+              <ChevronLeft size={16} strokeWidth={1.5} />
+            </button>
+            <span className="text-body text-ink font-medium whitespace-nowrap px-2 min-w-0 truncate" title={etiqueta}>
+              {etiqueta}
+            </span>
+            <button
+              type="button"
+              onClick={onSiguiente}
+              aria-label="Período siguiente"
+              title="Período siguiente"
+              className="btn btn-secondary h-11 w-11 md:h-10 md:w-10 min-h-0 px-0"
+            >
+              <ChevronRight size={16} strokeWidth={1.5} />
+            </button>
+          </div>
+        ) : vista === 'rango' ? (
+          <RangoFechasChip
+            desde={rango.desde}
+            hasta={rango.hasta}
+            setDesde={(d) => setRango((r) => ({ ...r, desde: d }))}
+            setHasta={(h) => setRango((r) => ({ ...r, hasta: h }))}
+            conAnio
+            className="flex-1 min-w-0 lg:flex-none lg:w-52"
+          />
+        ) : (
+          <span className="text-body text-ink font-medium whitespace-nowrap min-w-0 truncate" title={etiqueta}>
+            {etiqueta}
+          </span>
+        )}
+
+        <div className="flex-1" />
         <SegmentedControl label="Moneda" options={MONEDAS} value={moneda} onChange={setMoneda} compact className="shrink-0" />
-        <div className="lg:hidden shrink-0">
-          <Compartir onWhatsApp={onWhatsApp} linkWa={linkWa} onCsv={onCsv} onImprimir={onImprimir} />
-        </div>
+        <Exportar acciones={acciones} />
       </div>
-      <AccionesDesktop onWhatsApp={onWhatsApp} linkWa={linkWa} onCsv={onCsv} onImprimir={onImprimir} />
     </div>
   )
 }
