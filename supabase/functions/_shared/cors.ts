@@ -31,7 +31,9 @@ export function origenPermitido(origin: string | null): boolean {
 
 export function corsHeaders(origin: string | null): Record<string, string> {
   const headers: Record<string, string> = {
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    // x-prius-secret: lo manda `notificar-cierre-caja` cuando llama a
+    // `generar-reporte-pdf` server-to-server (nov 2026).
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-prius-secret",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",

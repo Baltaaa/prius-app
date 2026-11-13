@@ -155,7 +155,10 @@ export default function Reportes() {
   const serie = useMemo(
     () => (resumen?.serie || []).map((r) => ({
       ...r,
-      label: etiquetaBucket(r.bucket, resumen.granularidad),
+      // `desde`, no `bucket`: con granularidad semanal o mensual el bucket
+      // arranca antes del inicio del período (date_trunc) y la etiqueta
+      // mostraría un día que no entra en el rango elegido.
+      label: etiquetaBucket(r.desde || r.bucket, resumen.granularidad),
       ingresos: Number(r.ingresos || 0),
       egresos_f: Number(r.egresos_f || 0),
       egresos_sf: Number(r.egresos_sf || 0),

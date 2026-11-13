@@ -12,9 +12,10 @@ import LoadingButton from '../../components/ui/LoadingButton'
 import { CATEGORIA_GASTO_LABEL, formatHora } from '../../lib/caja'
 import BadgeFactura from '../../components/crm/BadgeFactura'
 import { descargarCierreCaja } from '../../lib/export/cajaCsv'
+import { descargarCierrePdf } from '../../lib/reportePdf'
 import {
   Plus, Wallet, ChevronLeft, ChevronRight, Banknote,
-  ArrowUpRight, ArrowDownRight, Printer, Download, Lock, AlertTriangle, X,
+  ArrowUpRight, ArrowDownRight, Printer, Download, FileDown, Lock, AlertTriangle, X,
 } from 'lucide-react'
 import { formatMonto, formatFecha } from '../../lib/format'
 import { useDialog } from '../../context/DialogProvider'
@@ -215,6 +216,22 @@ export default function Caja() {
     return cat?.nombre || CATEGORIA_GASTO_LABEL[g.categoria] || g.categoria
   }, [categoriasGasto])
 
+  // PDF del cierre: lo genera la Edge Function con los mismos números del
+  // resumen (resumen_cierre_caja), y se abre en una pestaña nueva — en iPhone
+  // eso lo muestra en el visor nativo, con compartir e imprimir.
+  const [generandoPdf, setGenerandoPdf] = useState(false)
+  const handleDescargarPdf = useCallback(async () => {
+    if (!cajaSeleccionada?.id) return
+    setGenerandoPdf(true)
+    try {
+      await descargarCierrePdf(cajaSeleccionada.id)
+    } catch (err) {
+      toast(err.message || 'No pudimos generar el PDF.', { tone: 'error' })
+    } finally {
+      setGenerandoPdf(false)
+    }
+  }, [cajaSeleccionada?.id, toast])
+
   const movimientosFiltrados = useMemo(
     () => (filtroMedio === 'todos' ? movimientos : movimientos.filter((m) => m.medio_pago === filtroMedio)),
     [movimientos, filtroMedio],
@@ -351,6 +368,16 @@ export default function Caja() {
             <>
               <button onClick={() => window.print()} aria-label="Imprimir A4" title="Imprimir A4" className={CLASE_ACCION}>
                 <Printer size={14} /> <span className="hidden 2xl:inline">Imprimir A4</span>
+              </button>
+              {/* La impresión A4 de siempre no cambia; el PDF es el mismo
+                  documento que se adjunta al aviso de cierre (nov 2026). */}
+              <button
+                onClick={handleDescargarPdf}
+                disabled={generandoPdf}
+                aria-label="Descargar PDF" title="Descargar PDF"
+                className={`${CLASE_ACCION} disabled:opacity-40`}
+              >
+                <FileDown size={14} /> <span className="hidden 2xl:inline">{generandoPdf ? 'Generando…' : 'Descargar PDF'}</span>
               </button>
               <button
                 onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })}

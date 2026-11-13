@@ -27,11 +27,20 @@ export async function generarReportePdf({ modo, desde, hasta, cajaId }) {
  * se le asigna el destino cuando llega la respuesta.
  */
 async function abrirPdf(opciones) {
-  const pestania = window.open('', '_blank', 'noopener,noreferrer')
+  // Sin `noopener`: con esa opción `window.open` devuelve null y no habría
+  // forma de mandar la pestaña al PDF cuando llega la respuesta. El handle se
+  // suelta apenas se asigna el destino, así que la página abierta no queda con
+  // acceso a la nuestra.
+  const pestania = window.open('', '_blank')
   try {
     const { url } = await generarReportePdf(opciones)
-    if (pestania) pestania.location.href = url
-    else window.location.href = url
+    if (pestania) {
+      pestania.opener = null
+      pestania.location.href = url
+    } else {
+      // Popup bloqueado: se navega en la misma pestaña antes que no abrir nada.
+      window.location.href = url
+    }
     return url
   } catch (err) {
     pestania?.close()

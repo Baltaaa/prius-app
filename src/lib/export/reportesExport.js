@@ -86,7 +86,7 @@ export function construirReporteCsv(resumen, { moneda, cotizacion, vistaLabel, e
       titulo: 'Evolución',
       columnas: ['Período', `Ingresos (${moneda})`, `Egresos F (${moneda})`, `Egresos SF (${moneda})`, `Neto (${moneda})`, 'Ocupación %'],
       filas: (resumen.serie || []).map((r) => [
-        etiquetaBucket(r.bucket, resumen.granularidad),
+        etiquetaBucket(r.desde || r.bucket, resumen.granularidad),
         m(r.ingresos), m(r.egresos_f), m(r.egresos_sf), m(r.neto),
         r.ocupacion_pct == null ? '' : String(r.ocupacion_pct),
       ]),
