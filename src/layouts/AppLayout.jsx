@@ -6,6 +6,7 @@ import ProgressiveBlurHeader from '../components/brand/ProgressiveBlurHeader'
 import { ToolbarSlotContext } from '../components/brand/toolbarSlot'
 import AppFooter from '../components/crm/AppFooter'
 import AppShell from '../components/brand/AppShell'
+import BannerInstalar from '../components/brand/BannerInstalar'
 import InactivityWarningModal from '../components/crm/InactivityWarningModal'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
@@ -174,6 +175,9 @@ export default function AppLayout() {
             </main>
           </div>
         </AppShell>
+        {/* Invitación a instalar la app: solo fuera de standalone y una vez
+            por dispositivo (ver BannerInstalar). */}
+        <BannerInstalar />
         </ToolbarSlotContext.Provider>
         </NuevaReservaProvider>
         </NotificacionesProvider>

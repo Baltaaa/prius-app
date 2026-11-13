@@ -675,7 +675,7 @@ export default function Caja() {
                           className={`w-full flex justify-between items-center py-3 px-2 border-b border-line last:border-0 hover:bg-surface rounded-icon text-left ${g.estado === 'anulado' ? 'opacity-40' : ''}`}
                         >
                           <div className="min-w-0 flex items-start gap-2">
-                            <BadgeFactura tipo={g.tipo_comprobante} className="mt-0.5" />
+                            <BadgeFactura tipo={g.tipo_comprobante} className="mt-1" />
                             <div className="min-w-0">
                               <p className={`text-body font-semibold text-ink-2 truncate ${g.estado === 'anulado' ? 'line-through' : ''}`} title={g.descripcion}>{g.descripcion}</p>
                               <p className="text-label text-ink-2 truncate" title={g.proveedor || undefined}>

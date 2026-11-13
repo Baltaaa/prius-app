@@ -14,7 +14,7 @@ export default function Configuracion() {
   if (!esSuperadmin) {
     return (
       <div className="card-surface card-pad flex items-start gap-3 animate-premium-fade">
-        <ShieldAlert size={18} className="text-ink-2 shrink-0 mt-0.5" />
+        <ShieldAlert size={18} className="text-ink-2 shrink-0 mt-1" />
         <div>
           <p className="text-body text-ink">Esta pantalla es solo para el superadmin.</p>
           <p className="text-label text-ink-2 mt-1">Si necesitás cambiar algo de acá, pedíselo a quien administre el sistema.</p>

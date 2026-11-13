@@ -4,6 +4,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
+import { propsPrefetch } from '../../lib/prefetchRutas'
 import { useOverlay } from '../../context/OverlayProvider'
 import { useNuevaReserva } from '../../context/NuevaReservaProvider'
 import {
@@ -84,6 +85,8 @@ export default function BottomNav() {
     <NavLink
       key={item.path}
       to={item.path}
+      viewTransition
+      {...propsPrefetch(item.path)}
       onClick={() => { if (location.pathname === item.path) scrollMainToTop() }}
       className={({ isActive }) => `${claseItem} ${isActive ? 'text-ink' : 'text-ink-2'}`}
     >
@@ -148,6 +151,8 @@ export default function BottomNav() {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  viewTransition
+      {...propsPrefetch(item.path)}
                   onClick={() => setShowMore(false)}
                   className={({ isActive }) =>
                     `flex items-center justify-between gap-3 px-3 min-h-[48px] rounded-nav text-body anim-colors ${

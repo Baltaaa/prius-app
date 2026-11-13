@@ -24,7 +24,7 @@ import { unidadEmoji } from '../lib/unidadIcono'
 
 function Fila({ label, valor, sub, tono }) {
   return (
-    <div className="flex items-start justify-between gap-3 py-2.5 border-b border-line last:border-0">
+    <div className="flex items-start justify-between gap-3 py-2 border-b border-line last:border-0">
       <div className="min-w-0">
         <p className="text-body text-ink truncate">{label}</p>
         {sub && <p className="text-label text-ink-2 truncate">{sub}</p>}
@@ -99,7 +99,7 @@ export default function CajaResumen() {
           </>
         ) : !cajaId ? (
           <div className="card-surface card-pad flex items-start gap-3">
-            <AlertTriangle size={18} className="text-ink-2 shrink-0 mt-0.5" />
+            <AlertTriangle size={18} className="text-ink-2 shrink-0 mt-1" />
             <div>
               <p className="text-body text-ink">No hay ninguna caja para ese día.</p>
               <p className="text-label text-ink-2 mt-1">Revisá la fecha o abrí Caja diaria y navegá con las flechas.</p>
@@ -107,7 +107,7 @@ export default function CajaResumen() {
           </div>
         ) : (
           <>
-            <div className="card-surface p-7">
+            <div className="card-surface card-pad-hero">
               <p className="text-label text-ink-2">Resultado neto</p>
               <p className={`text-kpi tabular-nums whitespace-nowrap mt-1 ${Number(r?.neto || 0) >= 0 ? 'text-ink' : 'text-danger'}`}>
                 {formatMonto(r?.neto)}
@@ -150,11 +150,11 @@ export default function CajaResumen() {
               <h2 className="section-label text-ink">Egresos</h2>
               <div className="grid grid-cols-2 gap-3">
                 <div className="card-inner">
-                  <p className="text-label text-ink-2 flex items-center gap-1.5"><BadgeFactura tipo="F" /> Con factura</p>
+                  <p className="text-label text-ink-2 flex items-center gap-2"><BadgeFactura tipo="F" /> Con factura</p>
                   <p className="text-body text-ink tabular-nums mt-1">{formatMonto(egr.total_f)}</p>
                 </div>
                 <div className="card-inner">
-                  <p className="text-label text-ink-2 flex items-center gap-1.5"><BadgeFactura tipo="SF" /> Sin factura</p>
+                  <p className="text-label text-ink-2 flex items-center gap-2"><BadgeFactura tipo="SF" /> Sin factura</p>
                   <p className="text-body text-ink tabular-nums mt-1">{formatMonto(egr.total_sf)}</p>
                 </div>
               </div>

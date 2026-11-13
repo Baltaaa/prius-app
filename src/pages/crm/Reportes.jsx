@@ -72,9 +72,8 @@ function Kpi({ icono: Icono, label, valor, valorCompacto, sub, delta, onClick, t
     <button
       type="button"
       onClick={onClick}
-      data-card-compacta
       title={valor}
-      className="card-surface p-3 xl:p-4 min-w-0 flex flex-col justify-center text-left hover:bg-row-hover transition-colors active:scale-[.98] min-h-[88px]"
+      data-card-compacta className="card-surface p-3 xl:p-4 min-w-0 flex flex-col justify-center text-left hover:bg-row-hover transition-colors min-h-[88px]"
     >
       <p className="flex items-center gap-2 text-label text-ink-2">
         <Icono size={14} className="shrink-0" />
@@ -333,7 +332,7 @@ export default function Reportes() {
       </div>
 
       {/* Hero: el resultado neto, grande. */}
-      <div id="reportes-hero" className="card-surface p-7 flex flex-col sm:flex-row sm:items-center gap-5">
+      <div id="reportes-hero" className="card-surface card-pad-hero flex flex-col sm:flex-row sm:items-center gap-grid">
         <div className="min-w-0 flex-1">
           <p className="text-label text-ink-2 flex items-center gap-2">
             Resultado neto · {etiqueta}
@@ -451,12 +450,12 @@ export default function Reportes() {
       <Seccion id="reportes-egresos" titulo="Egresos" compartible onCompartir={compartirSeccion}>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="card-inner">
-            <p className="text-label text-ink-2 flex items-center gap-1.5"><BadgeFactura tipo="F" /> Con factura</p>
+            <p className="text-label text-ink-2 flex items-center gap-2"><BadgeFactura tipo="F" /> Con factura</p>
             <p className="text-body text-ink tabular-nums mt-1">{m(egr.total_f)}</p>
             <p className="text-label text-ink-2">{Number(egr.cantidad_f ?? 0) || ''}</p>
           </div>
           <div className="card-inner">
-            <p className="text-label text-ink-2 flex items-center gap-1.5"><BadgeFactura tipo="SF" /> Sin factura</p>
+            <p className="text-label text-ink-2 flex items-center gap-2"><BadgeFactura tipo="SF" /> Sin factura</p>
             <p className="text-body text-ink tabular-nums mt-1">{m(egr.total_sf)}</p>
             <p className="text-label text-ink-2">
               {egr.pct_sf == null ? 'Sin egresos' : `${formatPorcentaje(egr.pct_sf, 1)} del total`}
@@ -513,7 +512,7 @@ export default function Reportes() {
               {egr.mas_grandes.map((g) => (
                 <li key={g.gasto_id} className="py-2 flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2 min-w-0">
-                    <BadgeFactura tipo={g.tipo_comprobante} className="mt-0.5" />
+                    <BadgeFactura tipo={g.tipo_comprobante} className="mt-1" />
                     <div className="min-w-0">
                       <p className="text-body text-ink truncate" title={g.concepto}>{g.concepto}</p>
                       <p className="text-label text-ink-2 truncate">
@@ -580,7 +579,7 @@ export default function Reportes() {
           </div>
         </div>
         <p className="text-label text-ink-2 flex items-start gap-2">
-          <CalendarRange size={14} className="shrink-0 mt-0.5" />
+          <CalendarRange size={14} className="shrink-0 mt-1" />
           Lo cobrado incluye los pagos anteriores al 1/10/2026, que no cuentan como flujo de caja
           pero sí como plata ya cobrada de la temporada.
         </p>
@@ -616,7 +615,7 @@ function OcupacionPorTipo({ fecha }) {
             <p className="text-body text-ink tabular-nums mt-1">
               {t.ocupadas} de {t.total}
             </p>
-            <span className="block w-full h-2 mt-1.5 rounded-full bg-surface overflow-hidden">
+            <span className="block w-full h-2 mt-2 rounded-full bg-surface overflow-hidden">
               <span
                 className="block h-full rounded-full"
                 style={{ width: `${t.pct ?? 0}%`, background: colorIngresos(oscuro) }}

@@ -29,7 +29,7 @@ export function useOscuro() {
 function TooltipPrius({ active, payload, label, formato = formatMonto, sufijoLabel = '' }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-inner border border-line bg-card px-3 py-2 shadow-lg">
+    <div className="surface-pop px-3 py-2">
       {label != null && <p className="text-label text-ink-2">{label}{sufijoLabel}</p>}
       {payload.map((p) => (
         <p key={p.dataKey ?? p.name} className="text-body text-ink tabular-nums whitespace-nowrap flex items-center gap-2">
@@ -188,7 +188,7 @@ export function BarrasHorizontales({ datos, descripcion }) {
             <span className="text-body text-ink truncate min-w-0" title={d.nombre}>{d.etiqueta || d.nombre}</span>
             <span className="text-body text-ink tabular-nums shrink-0">{formatMonto(d.valor)}</span>
           </div>
-          <span className="block w-full h-2 mt-1.5 rounded-full bg-surface overflow-hidden">
+          <span className="block w-full h-2 mt-2 rounded-full bg-surface overflow-hidden">
             <span
               className="block h-full rounded-full transition-[width] duration-500"
               style={{ width: `${(d.valor / max) * 100}%`, background: d.color }}
@@ -296,7 +296,7 @@ export function ProgresoTemporada({ comprometido, cobrado, porCobrar, pct }) {
           <p className="text-body text-ink tabular-nums">{formatMonto(porCobrar)}</p>
         </div>
       </div>
-      <span className="block w-full h-3 rounded-full overflow-hidden" style={{ background: oscuro ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)' }}>
+      <span className="block w-full h-3 rounded-full overflow-hidden bg-surface">
         <span className="block h-full rounded-full transition-[width] duration-700" style={{ width: `${ancho}%`, background: color }} />
       </span>
       <div className="flex items-center justify-between gap-3 text-label text-ink-2">

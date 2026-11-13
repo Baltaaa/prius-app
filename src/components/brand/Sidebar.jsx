@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useRef } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useLeads } from '../../hooks/useLeads'
 import { useAuth } from '../../context/AuthProvider'
+import { propsPrefetch } from '../../lib/prefetchRutas'
 import {
   LayoutDashboard,
   CalendarDays,
@@ -95,6 +96,8 @@ export default function Sidebar() {
     <NavLink
       key={item.path}
       to={item.path}
+      viewTransition
+      {...propsPrefetch(item.path)}
       className={({ isActive }) =>
         `relative h-10 [@media(max-height:800px)]:h-9 flex items-center gap-3 px-3 rounded-nav text-body transition-colors ${
           isActive ? 'text-ink' : 'text-ink-2 hover:text-ink'

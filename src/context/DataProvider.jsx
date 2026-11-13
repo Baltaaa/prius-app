@@ -434,6 +434,20 @@ export function DataProvider({ children }) {
     concepto, categoriaId, medioPago, monto, tipoComprobante,
     proveedor, numeroFactura, letraFactura,
   }) => {
+    // UI optimista (nov 2026): el gasto aparece en la lista al instante con
+    // un id temporal y se reemplaza por la fila real cuando responde el
+    // server. Si falla, se saca y el error sube para que el modal avise.
+    const idTemporal = `temp-${Date.now()}`
+    const optimista = {
+      id: idTemporal, caja_id: cajaHoy?.id ?? null, descripcion: concepto,
+      categoria_id: categoriaId, medio_pago: medioPago, monto: Number(monto),
+      tipo_comprobante: tipoComprobante, proveedor: proveedor || null,
+      comprobante_proveedor: numeroFactura || null, letra_factura: letraFactura || null,
+      estado: 'vigente', created_at: new Date().toISOString(), _optimista: true,
+    }
+    setTodosGastos((prev) => [optimista, ...prev])
+    if (cajaHoy) setGastos((prev) => [...prev, optimista])
+
     const { data, error } = await supabase.rpc('registrar_gasto', {
       p_concepto: concepto,
       p_categoria_id: categoriaId,
@@ -444,9 +458,13 @@ export function DataProvider({ children }) {
       p_numero_factura: numeroFactura || null,
       p_letra_factura: letraFactura || null,
     })
-    if (error) throw error
-    setTodosGastos((prev) => [data, ...prev])
-    if (cajaHoy) setGastos((prev) => [...prev, data])
+    if (error) {
+      setTodosGastos((prev) => prev.filter((g) => g.id !== idTemporal))
+      setGastos((prev) => prev.filter((g) => g.id !== idTemporal))
+      throw error
+    }
+    setTodosGastos((prev) => [data, ...prev.filter((g) => g.id !== idTemporal)])
+    setGastos((prev) => (cajaHoy ? [...prev.filter((g) => g.id !== idTemporal), data] : prev))
     await fetchCaja()
     return data
   }, [cajaHoy, fetchCaja])

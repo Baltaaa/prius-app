@@ -5,3 +5,25 @@
   Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=()
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://www.windguru.cz; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src 'self' https://oslbsnwccchdxmbjhhcg.supabase.co wss://oslbsnwccchdxmbjhhcg.supabase.co https://www.windguru.cz; frame-src https://www.windguru.cz; worker-src 'self' blob:
+
+# PWA (nov 2026, Tarea 6). Los assets llevan hash en el nombre: se pueden
+# cachear para siempre. El service worker, el manifest y el index NO: si el
+# navegador se queda con un sw.js viejo, la app no se actualiza más.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/icons/*
+  Cache-Control: public, max-age=604800
+
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
+/manifest.webmanifest
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
+/
+  Cache-Control: no-cache

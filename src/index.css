@@ -926,3 +926,39 @@ button, a {
 .scroll-x-snap { overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none; }
 .scroll-x-snap::-webkit-scrollbar { display: none; }
 .scroll-x-snap > * { scroll-snap-align: start; }
+
+/*
+  Sensación nativa, Tarea 6 (nov 2026) — lo que faltaba del sistema táctil
+  que ya tenía la app (tap-highlight, touch-action, overscroll, 44px, 16px).
+*/
+
+/* Feedback de presión: la pieza "se hunde" apenas mientras está apretada.
+   Solo transform, así que no provoca layout ni repaint de nada más. */
+button:not(:disabled):active,
+a[href]:active,
+[role="button"]:not([aria-disabled="true"]):active,
+[data-presionable]:active {
+  transform: scale(0.97);
+}
+button, a[href], [role="button"], [data-presionable] {
+  transition: transform 120ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+/* Transición entre pantallas con la View Transitions API cuando el navegador
+   la tiene; donde no existe, simplemente no hay animación (nunca un
+   polyfill que cueste más que el efecto). Solo opacity: cruzar posiciones
+   entre dos pantallas distintas marea más de lo que suma. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) { animation: vt-salir 140ms ease-out both; }
+  ::view-transition-new(root) { animation: vt-entrar 180ms ease-out both; }
+}
+@keyframes vt-salir { to { opacity: 0; } }
+@keyframes vt-entrar { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled):active,
+  a[href]:active,
+  [role="button"]:not([aria-disabled="true"]):active,
+  [data-presionable]:active { transform: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}

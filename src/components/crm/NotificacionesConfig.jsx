@@ -46,7 +46,7 @@ function TarjetaPush() {
         </p>
       ) : requiereInstalar ? (
         <p className="text-label text-ink-2 card-inner flex items-start gap-2">
-          <Smartphone size={14} className="shrink-0 mt-0.5" />
+          <Smartphone size={14} className="shrink-0 mt-1" />
           En iPhone los avisos solo funcionan con la app abierta desde la pantalla de inicio. Agregala con
           Compartir → “Agregar a inicio” y volvé a entrar desde ahí.
         </p>

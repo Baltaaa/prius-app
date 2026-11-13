@@ -231,13 +231,13 @@ export default function ResumenCaja({ resumen }) {
           <Section title="Egresos" icon={ArrowDownRight}>
             <div className="grid grid-cols-3 gap-3">
               <div className="card-inner">
-                <p className="text-label text-ink-2 flex items-center gap-1.5">
+                <p className="text-label text-ink-2 flex items-center gap-2">
                   <BadgeFactura tipo="F" /> Con factura
                 </p>
                 <MontoStat value={gastos?.total_f || 0} size="sm" className="text-ink mt-1" />
               </div>
               <div className="card-inner">
-                <p className="text-label text-ink-2 flex items-center gap-1.5">
+                <p className="text-label text-ink-2 flex items-center gap-2">
                   <BadgeFactura tipo="SF" /> Sin factura
                 </p>
                 <MontoStat value={gastos?.total_sf || 0} size="sm" className="text-ink mt-1" />
@@ -272,7 +272,7 @@ export default function ResumenCaja({ resumen }) {
                 {gastos.detalle.map((g) => (
                   <div key={g.gasto_id} className="flex items-start justify-between py-2 border-b border-line last:border-0 gap-3">
                     <div className="flex items-start gap-2 min-w-0">
-                      <BadgeFactura tipo={g.tipo_comprobante} className="mt-0.5" />
+                      <BadgeFactura tipo={g.tipo_comprobante} className="mt-1" />
                       <div className="min-w-0">
                         <span className="block text-body text-ink-2 truncate" title={g.concepto}>{g.concepto}</span>
                         <span className="block text-label text-ink-2 truncate">

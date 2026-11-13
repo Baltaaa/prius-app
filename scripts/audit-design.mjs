@@ -9,6 +9,12 @@ const EXCEPCIONES = [
   /CajaImpresion|PlanoImpresion|ComprobanteDocumento|ComprobanteImpresionDoble|imprimirDocumento/,
   // Mapa del plano y colores de estado: congelados.
   /dashboard\/Cell\.jsx|dashboard\/CellMobile\.jsx|components\/plano\/|lib\/colors\.ts/,
+  // Paleta de los gráficos (nov 2026): recharts y el canvas de "compartir
+  // imagen" necesitan colores concretos en props y en el contexto 2D, no
+  // clases de Tailwind. Mismo criterio que lib/colors.ts: la paleta es UNA
+  // sola (lib/chartTheme.js), está validada contra las dos superficies y
+  // documentada ahí mismo; ningún componente inventa un color por su cuenta.
+  /lib\/chartTheme\.js|lib\/compartirImagen\.js/,
   // Tipos generados y tests.
   /database\.types\.ts|\.test\.ts/,
   // Colores de marca de terceros.
