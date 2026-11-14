@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useArranquePantalla } from "../context/ArranqueProvider"
 import { createPortal } from "react-dom"
 import { supabase } from "../lib/supabase"
 import { Expand, Layers, X } from "lucide-react"
@@ -46,6 +47,8 @@ export default function Dashboard() {
   // ESTA pantalla la primera vez; si el usuario ya navegó por otra pantalla
   // antes, `loading` ya viene en false y acá ni se nota.
   const readyPlano = useInitialLoad(loading)
+  // El loader del arranque espera a esta pantalla (ver ArranqueProvider).
+  useArranquePantalla(readyPlano)
 
   // Se guarda el ID, no una copia de `units[...]`: así el modal de preview
   // sigue leyendo el objeto vivo del useMemo de abajo en cada render y se

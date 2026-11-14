@@ -1,4 +1,5 @@
 import ToolbarSticky from '../../components/brand/ToolbarSticky'
+import { useArranquePantalla } from '../../context/ArranqueProvider'
 import PopoverAnclado from '../../components/ui/PopoverAnclado'
 import RangoFechasChip from '../../components/brand/RangoFechasChip'
 import React, { useState, useMemo, useEffect, useRef } from 'react'
@@ -76,6 +77,8 @@ export default function Reservas() {
   const { reservas, unidades, temporadas, loading: resLoading, updateReserva, deleteReserva, cancelarReserva } = useReservas()
   const { loading: cliLoading } = useClientes()
   const readyReservas = useInitialLoad(resLoading || cliLoading)
+  // El loader del arranque espera a esta pantalla (ver ArranqueProvider).
+  useArranquePantalla(readyReservas)
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const { confirm, alert } = useDialog()

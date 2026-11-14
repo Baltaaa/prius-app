@@ -1,4 +1,5 @@
 import { hoyAR } from '../../lib/fechas'
+import { useArranquePantalla } from '../../context/ArranqueProvider'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useReservas } from '../../hooks/useReservas'
@@ -136,6 +137,8 @@ export default function Home() {
   // ClimaHero cae sola a su estado "no disponible" (mismo tamaño de card).
   const loading = resLoading || cajaLoading || climaLoading
   const ready = useInitialLoad(loading)
+  // El loader del arranque espera a esta pantalla (ver ArranqueProvider).
+  useArranquePantalla(ready)
 
   if (!ready) {
     return (

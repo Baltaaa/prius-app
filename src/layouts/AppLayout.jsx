@@ -8,6 +8,8 @@ import AppFooter from '../components/crm/AppFooter'
 import AppShell from '../components/brand/AppShell'
 import BannerInstalar from '../components/brand/BannerInstalar'
 import InactivityWarningModal from '../components/crm/InactivityWarningModal'
+import ArranqueGate from '../components/ui/ArranqueGate'
+import { ArranqueProvider } from '../context/ArranqueProvider'
 import { DataProvider } from '../context/DataProvider'
 import { DialogProvider } from '../context/DialogProvider'
 import { NotificacionesProvider } from '../context/NotificacionesProvider'
@@ -96,6 +98,10 @@ export default function AppLayout() {
     <OverlayProvider>
     <DialogProvider>
       <DataProvider>
+        <ArranqueProvider>
+        {/* Loader del arranque: se queda arriba de todo hasta que esta
+            primera pantalla está completa (ver ArranqueGate.jsx). */}
+        <ArranqueGate />
         <NotificacionesProvider>
         <NuevaReservaProvider>
         <PuenteRecepcionRemota />
@@ -185,6 +191,7 @@ export default function AppLayout() {
         </ToolbarSlotContext.Provider>
         </NuevaReservaProvider>
         </NotificacionesProvider>
+        </ArranqueProvider>
       </DataProvider>
     </DialogProvider>
     </OverlayProvider>

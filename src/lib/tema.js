@@ -16,13 +16,16 @@ const COLOR_BARRA = { light: '#F8F7F2', dark: '#0E0E0D' }
 const CLAVE_DISPOSITIVO = 'prius:tema'
 const claveUsuario = (userId) => `prius:tema:${userId}`
 
+// Sin preferencia guardada el tema sigue al del sistema — el mismo criterio
+// que aplica public/tema-inicial.js antes del primer pintado: si los dos no
+// coinciden, la app arranca con un color y cambia al otro al montar React.
 export function leerPreferencia(userId) {
   try {
     const ls = window.localStorage
     const valor = (userId && ls.getItem(claveUsuario(userId))) || ls.getItem(CLAVE_DISPOSITIVO)
-    return TEMAS.includes(valor) ? valor : 'claro'
+    return TEMAS.includes(valor) ? valor : 'sistema'
   } catch {
-    return 'claro'
+    return 'sistema'
   }
 }
 
@@ -46,6 +49,11 @@ export function aplicarTema(resuelto) {
   if (html.getAttribute('data-theme') === resuelto) return
   html.classList.add('tema-cambiando')
   html.setAttribute('data-theme', resuelto)
+  // El background y el color-scheme en línea los puso tema-inicial.js antes
+  // del primer pintado: si no se actualizan acá quedan con el tema viejo y se
+  // ven en el rebote del scroll y en la barra del navegador.
+  html.style.backgroundColor = COLOR_BARRA[resuelto]
+  html.style.colorScheme = resuelto
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', COLOR_BARRA[resuelto])
   void getComputedStyle(html).color
   requestAnimationFrame(() => requestAnimationFrame(() => html.classList.remove('tema-cambiando')))

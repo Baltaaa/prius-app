@@ -1,4 +1,5 @@
 import ToolbarSticky from '../../components/brand/ToolbarSticky'
+import { useArranquePantalla } from '../../context/ArranqueProvider'
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useCaja } from '../../hooks/useCaja'
@@ -61,6 +62,8 @@ const shiftDate = sumarDias
 export default function Caja() {
   const { cajaHoy, historialCajas, todosGastos, loading, iniciarCaja, cerrarCaja, reabrirCaja } = useCaja()
   const readyCaja = useInitialLoad(loading)
+  // El loader del arranque espera a esta pantalla (ver ArranqueProvider).
+  useArranquePantalla(readyCaja)
   const puedeReabrir = usePermiso('reabrir_caja')
   // Switch Pesos/Dólares (31/10/2026): solo presentación — los montos que
   // llegan de la base ya están en pesos; `fmtM` los convierte para mostrar.

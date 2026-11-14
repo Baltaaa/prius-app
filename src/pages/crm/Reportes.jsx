@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import {
   TrendingUp, TrendingDown, Wallet, Receipt, Percent, Hourglass, CalendarRange,
 } from 'lucide-react'
+import { useArranquePantalla } from '../../context/ArranqueProvider'
 import { useAuth } from '../../context/AuthProvider'
 import { useData } from '../../context/DataProvider'
 import { useDialog } from '../../context/DialogProvider'
@@ -135,6 +136,8 @@ export default function Reportes() {
   // visto sea instantáneo (se repinta de la caché y se revalida por detrás).
   const params = useMemo(() => ({ p_desde: desde, p_hasta: hasta }), [desde, hasta])
   const { datos: resumen, cargando, revalidando, error } = useRpc('reporte_resumen', params)
+  // El loader del arranque espera a esta pantalla (ver ArranqueProvider).
+  useArranquePantalla(!cargando)
 
   const cot = tc.valor
   const m = useCallback((v) => montoEnMonedaVista(Number(v ?? 0), moneda, cot), [moneda, cot])

@@ -1,4 +1,5 @@
 import ToolbarSticky from '../../components/brand/ToolbarSticky'
+import { useArranquePantalla } from '../../context/ArranqueProvider'
 import PopoverAnclado from '../../components/ui/PopoverAnclado'
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import ScrollFade from '../../components/ui/ScrollFade'
@@ -136,6 +137,8 @@ export default function Clientes() {
   } = useReservas()
   const { pagos: todosPagos } = usePagos() // sin reservaId: historial completo, filtrado acá por cliente
   const readyClientes = useInitialLoad(loading || resLoading)
+  // El loader del arranque espera a esta pantalla (ver ArranqueProvider).
+  useArranquePantalla(readyClientes)
 
   const GRUPO_UNIDAD_CLIENTES = { carpa: 'Carpas', sombrilla: 'Sombrillas', cabina: 'Cabinas', locker: 'Lockers' }
   const opcionesUnidadTemporada = useMemo(
