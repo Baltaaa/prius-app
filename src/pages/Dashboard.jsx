@@ -14,6 +14,8 @@ import Cell from "../components/dashboard/Cell"
 import CellMobile from "../components/dashboard/CellMobile"
 import PlanoZoomBar from "../components/dashboard/PlanoZoomBar"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
+import PlanoImpresionCliente from "../components/dashboard/PlanoImpresionCliente"
+import { imprimirDocumento } from "../lib/imprimirDocumento"
 import PlanoGrid from "../components/plano/PlanoGrid"
 import PlanoRotable from "../components/dashboard/PlanoRotable"
 import PlanoViewport from "../components/plano/PlanoViewport"
@@ -410,6 +412,16 @@ export default function Dashboard() {
     [unidades, reservas, selectedDate],
   )
 
+  // Impresión para el CLIENTE (nov 2026): hoja de disponibilidad Libre /
+  // Ocupado de la fecha elegida, en su propio iframe. Es otra impresión: la
+  // hoja A4 de los carperos (PlanoImpresion + window.print()) no se toca.
+  const imprimirPlanoCliente = useCallback(() => {
+    imprimirDocumento(
+      <PlanoImpresionCliente units={units} fecha={selectedDate} />,
+      { titulo: `Prius - plano de disponibilidad ${selectedDate}` },
+    )
+  }, [units, selectedDate])
+
   // Caja de la fecha elegida (no siempre "hoy"): `cajaHoy` solo cubre el día
   // de hoy, `historialCajas` trae las últimas 30 por fecha — entre las dos
   // alcanza para el chip de "Ingresos del día" sin ninguna query nueva. Si
@@ -597,6 +609,7 @@ export default function Dashboard() {
           tipoFiltro={tipoFiltro}
           onTipo={setTipoFiltro}
           onImprimir={() => window.print()}
+          onImprimirCliente={imprimirPlanoCliente}
           rotado={rotado}
           onRotar={alternarRotar}
           fullscreen={fullscreen}
@@ -668,6 +681,7 @@ export default function Dashboard() {
                 tipoFiltro={tipoFiltro}
                 onTipo={setTipoFiltro}
                 onImprimir={() => window.print()}
+                onImprimirCliente={imprimirPlanoCliente}
               />
             </ToolbarSticky>
             <div data-card-compacta className="card-surface p-3 shrink-0">
