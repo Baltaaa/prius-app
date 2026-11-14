@@ -12,7 +12,8 @@ import { formatFechaCorta, formatFecha } from '../../lib/format'
 
 // Rango de fechas como UN solo chip ("28/10 – 04/11") que abre un popover con
 // los dos selectores (desde 768px) o un bottom sheet (mobile). Reemplaza a los
-// dos DateInput sueltos de las toolbars: ocupa una celda de 40px en la fila.
+// dos DateInput sueltos de las toolbars: una pill de 40px (`pill-control`) en
+// la fila única de la barra (ver PageTopbar.jsx).
 //
 const aDate = (iso) => { if (!iso) return undefined; const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d) }
 const aIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -102,7 +103,7 @@ export default function RangoFechasChip({
         aria-haspopup="dialog"
         title={etiqueta}
         aria-label={`${etiqueta}: ${texto}`}
-        className="btn btn-secondary w-full h-11 md:h-10 min-h-0 px-3 justify-start gap-2 tabular-nums"
+        className="pill-control w-full justify-start tabular-nums"
       >
         <CalendarDays size={16} strokeWidth={1.5} className="shrink-0 max-[400px]:hidden" />
         <span className="truncate">{texto}</span>

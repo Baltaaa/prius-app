@@ -1,4 +1,5 @@
 import ToolbarSticky from '../../components/brand/ToolbarSticky'
+import PopoverAnclado from '../../components/ui/PopoverAnclado'
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import ScrollFade from '../../components/ui/ScrollFade'
 import { createPortal } from 'react-dom'
@@ -37,7 +38,7 @@ import TextInput from '../../components/inputs/TextInput'
 import PhoneInput from '../../components/inputs/PhoneInput'
 import DniInput from '../../components/inputs/DniInput'
 import CuitInput from '../../components/inputs/CuitInput'
-import SearchInput from '../../components/inputs/SearchInput'
+import BuscadorColapsable from '../../components/brand/BuscadorColapsable'
 import BrandSelect from '../../components/ui/BrandSelect'
 import StatusBadge, { estadoLabel } from '../../components/crm/StatusBadge'
 import ClientesImpresion from '../../components/crm/ClientesImpresion'
@@ -155,6 +156,7 @@ export default function Clientes() {
   const [filtroEstado, setFiltroEstado] = useState('todos')
   const [showFiltros, setShowFiltros] = useState(false)
   const filtrosOverlay = useOverlay({ id: 'clientes-filtros', isOpen: showFiltros, onRequestClose: () => setShowFiltros(false) })
+  const filtrosAnclaRef = useRef(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCliente, setEditingCliente] = useState(null)
   const [pagoCliente, setPagoCliente] = useState(null)
@@ -773,32 +775,31 @@ export default function Clientes() {
           abajo (oct 2026) — antes "Nuevo Cliente" era una barra amarilla
           gigante en mobile; ahora es un botón chico (h-10) a la derecha,
           misma fila que el filtro ESTADO, en todos los breakpoints. */}
-      {/* Topbar de sección en una sola línea en desktop (ítem 6, oct 2026):
-          buscador propio con el MISMO ancho que el buscador global del
-          header (w-48 lg:w-64 xl:w-80), filtro Estado al lado, Nuevo
-          Cliente alineado a la derecha — los tres con la misma altura
-          (h-10). En mobile/tablet se mantiene el buscador a ancho completo
-          arriba y el filtro+alta abajo (mejor para touch). */}
+      {/* Controles en la barra única (PageTopbar): una sola fila de pills —
+          buscador de la lista, filtro Estado, Imprimir y Nuevo Cliente. El
+          buscador se colapsa a ícono entre 768 y 1279px (BuscadorColapsable),
+          como el global del header. */}
       <ToolbarSticky>
-      <div className={`toolbar-40 ${isDesktopLG ? 'flex items-center gap-3' : 'space-y-3'} lg:shrink-0`}>
-        <SearchInput
+        <BuscadorColapsable
           value={searchTerm}
           onChange={setSearchTerm}
           placeholder="Nombre, DNI, CUIT o unidad"
-          inputClassName="!bg-card"
-          className={isDesktopLG ? 'w-48 lg:w-64 xl:w-80 min-w-0 shrink' : 'w-full'}
-          inputClassName={isDesktopLG ? "h-10 min-h-0 py-0 focus:border-gold-300" : "focus:border-gold-300 py-3"}
+          className="w-48 xl:w-72 min-w-0"
         />
-        <div className={isDesktopLG ? 'flex items-center gap-3 flex-1 min-w-0' : 'flex items-center gap-3'}>
-          <div ref={filtrosOverlay.bind} className="relative">
+          {/* El popover va en portal (PopoverAnclado): adentro de la fila de
+              controles un `absolute` queda cortado por su overflow. */}
+          <div ref={(el) => { filtrosAnclaRef.current = el; filtrosOverlay.bind(el) }} className="relative">
             <button
               onClick={() => setShowFiltros((v) => !v)}
-              className={`text-label h-11 md:h-10 px-4 bg-card border border-line rounded-full flex items-center gap-2 transition-all ${filtroEstado !== 'todos' ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
+              aria-expanded={showFiltros}
+              aria-haspopup="menu"
+              title="Estado"
+              className={`pill-control ${filtroEstado !== 'todos' ? 'pill-control-activa' : ''}`}
             >
               <Filter size={16} /> {filtroEstado !== 'todos' ? FILTROS_ESTADO_CLIENTE.find((f) => f.value === filtroEstado)?.label : 'Estado'}
             </button>
             {showFiltros && (
-                <div className="absolute left-0 mt-2 w-48 capa-elevada bg-card border border-line rounded-inner overflow-hidden z-50 p-3">
+                <PopoverAnclado ref={filtrosOverlay.bind} anchorRef={filtrosAnclaRef} width={192} role="menu" aria-label="Filtrar por estado" className="p-3" scroll={false}>
                   {FILTROS_ESTADO_CLIENTE.map((f) => (
                     <button
                       key={f.value}
@@ -809,7 +810,7 @@ export default function Clientes() {
                       {filtroEstado === f.value && <Check size={14} className="text-ink" />}
                     </button>
                   ))}
-                </div>
+                </PopoverAnclado>
             )}
           </div>
           {/* Imprime el listado que coincide con el filtro de Estado y la
@@ -820,19 +821,18 @@ export default function Clientes() {
             onClick={handleImprimirListado}
             aria-label="Imprimir listado"
             title="Imprimir listado"
-            className="text-label h-11 md:h-10 px-4 bg-card border border-line rounded-full flex items-center gap-2 text-ink-2 hover:text-ink transition-all shrink-0"
+            className="pill-control pill-control-icono lg:w-auto lg:px-4"
           >
-            <Printer size={16} /> <span className="hidden sm:inline">Imprimir</span>
+            <Printer size={16} /> <span className="hidden lg:inline">Imprimir</span>
           </button>
-          <div className="flex-1" />
           <button
             onClick={handleOpenCreate}
-            className="btn btn-secondary h-11 md:h-10 shrink-0"
+            aria-label="Nuevo cliente"
+            title="Nuevo cliente"
+            className="pill-control pill-control-icono lg:w-auto lg:px-4"
           >
-            <Plus size={16} /> <span className="hidden sm:inline">Nuevo Cliente</span><span className="sm:hidden">Nuevo</span>
+            <Plus size={16} /> <span className="hidden lg:inline">Nuevo Cliente</span>
           </button>
-        </div>
-      </div>
       </ToolbarSticky>
 
       {/* Directorio maestro-detalle (oct 2026, mock 04-clientes): lista

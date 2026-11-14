@@ -17,7 +17,7 @@ import { isFeatureEnabled } from '../../lib/features'
 import SearchInput from '../inputs/SearchInput'
 import {
   Search, Bell, User, LogOut, X,
-  QrCode, EyeOff, Plus,
+  QrCode, EyeOff, Plus, ArrowLeft, Menu,
 } from 'lucide-react'
 import UnidadLabel from '../crm/UnidadLabel'
 
@@ -37,6 +37,14 @@ import PageHeader from './PageHeader'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useHoyAR } from '../../hooks/useHoyAR'
 import { usePrivacidad } from '../../context/PrivacidadProvider'
+import PageTopbar, { BotonCircular } from './PageTopbar'
+import { abrirMenuMas } from '../../lib/menuMas'
+
+// Mobile: el botón circular de la izquierda es "menú" en las secciones de la
+// bottom nav y "atrás" en todo lo que vive dentro del sheet "Más" (Caja,
+// Reportes, Historial, Comprobantes, Mi cuenta, Configuración…). Mismo
+// criterio de prefijo que usa NavLink.
+const RUTAS_NAV_PRINCIPAL = ['/app/home', '/app/plano', '/app/clientes', '/app/reservas']
 
 const normalize = normalizeText
 
@@ -80,8 +88,12 @@ function useHoverDropdown(isOpen, setIsOpen, enabled) {
   return { onPointerEnter, onPointerLeave }
 }
 
-export default function TopBar() {
+export default function TopBar({ controlesRef }) {
   const buscadorAncho = useMediaQuery('(min-width: 1280px)')
+  // Entre 768 y 1279px la fila única no alcanza para el campo de búsqueda:
+  // se colapsa a un botón ícono que se expande al hacer click y se cierra con
+  // click afuera (mismo gestor de overlays que el resto de la app).
+  const [busquedaExpandida, setBusquedaExpandida] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const section = useSection(location.pathname)
@@ -336,10 +348,18 @@ export default function TopBar() {
   // Pantalla completa, sin "afuera" — se registra solo para Escape y para
   // que abrirla cierre cualquier otro overlay que hubiera quedado abierto.
   const mobileSearchOverlay = useOverlay({ id: 'topbar-mobile-search', isOpen: mobileSearchOpen, onRequestClose: closeMobileSearch })
+  // Buscador colapsado (768-1279px): el "afuera" es el mismo ancla que el
+  // dropdown de resultados, así que se registra con el ancla de la búsqueda.
+  const busquedaOverlay = useOverlay({
+    id: 'topbar-search-colapsado',
+    isOpen: busquedaExpandida,
+    onRequestClose: () => { setBusquedaExpandida(false); closeSearch() },
+  })
   // Los anclas de los popovers son refs de objeto (estables): el territorio de
   // cada overlay (trigger + panel en portal) se registra una sola vez acá.
   useEffect(() => {
     searchOverlay.bind(searchAnchorRef.current)
+    busquedaOverlay.bind(searchAnchorRef.current)
     notifOverlay.bind(notifAnchorRef.current)
     profileOverlay.bind(profileAnchorRef.current)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -372,52 +392,70 @@ export default function TopBar() {
     closeSearch()
   }
 
-  return (
-    // Vive dentro de la zona sticky flotante (ProgressiveBlurHeader, montada en
-    // AppLayout): sin fondo propio, el degradé + blur lo pone la zona.
-    // Mobile: 56px (+ safe area) = 8 de aire arriba, 44 de área táctil, 4 abajo.
-    // Desktop: 64px, título de 24px.
-    <header
-      className="no-print relative flex items-center justify-between gap-3 md:gap-4 px-page-max pt-topbar pb-1 md:pb-0 md:h-16"
-    >
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        {!esHome && <img src="/images/prius-icon.png" alt="Prius" className="hidden min-[430px]:block md:hidden w-7 h-7 object-contain shrink-0" />}
-        <PageHeader
-          title={esHome ? `Hola, ${primerNombre}` : section.name}
-          shortTitle={esHome ? undefined : section.shortName}
-          greeting={esHome}
-          compacto={compacto}
-        >
-          {esHome && (
-            <p className="flex items-center gap-2 text-label text-ink-2 truncate">
-              {realtimeConectado && <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" title="Operativo" />}
-              {realtimeConectado && <span className="hidden sm:inline">Operativo ·</span>}
-              <span className="lg:hidden">{formatFechaCorta(hoyTopbar)}</span>
-              <span className="hidden lg:inline">{formatFechaLarga(hoyTopbar)}</span>
-            </p>
-          )}
-        </PageHeader>
-      </div>
+  // Botón circular de 40px de la izquierda (solo mobile): menú en las
+  // secciones de la bottom nav, atrás en las que viven dentro de "Más".
+  const esNavPrincipal = RUTAS_NAV_PRINCIPAL.some((r) => location.pathname.startsWith(r))
+  const izquierda = esNavPrincipal ? (
+    <BotonCircular
+      icono={Menu}
+      etiqueta="Más secciones"
+      onClick={abrirMenuMas}
+      className="md:hidden"
+    />
+  ) : (
+    <BotonCircular
+      icono={ArrowLeft}
+      etiqueta="Volver"
+      onClick={() => navigate(-1)}
+      className="md:hidden"
+    />
+  )
 
-      <div className="flex items-center md:gap-2 shrink-0">
-        {/* Búsqueda global inline (desktop/tablet) — mismo handler/datos de
-            siempre, solo el shell visual cambia (w-80, fondo prius-surface,
-            h-9, rounded-inner del mock). En mobile pasa a un ícono que abre
-            pantalla completa (ver bloque más abajo). */}
-        {/* Item 17 (testing oct 2026): `w-max lg:w-full` dejaba el buscador
-            sin tope de ancho — en 1280-1440px (ej. 1397x834) se comía todo
-            el espacio disponible del header y tapaba la fecha de la
-            derecha (quedaba "…de 2026" cortada). Ancho fijo que crece por
-            breakpoint, nunca `w-full` sin techo. */}
-        <div ref={searchAnchorRef} className="hidden md:block relative w-52 xl:w-72 min-w-0 shrink">
+  const titulo = (
+    <PageHeader
+      title={esHome ? `Hola, ${primerNombre}` : section.name}
+      shortTitle={esHome ? undefined : section.shortName}
+      greeting={esHome}
+      compacto={compacto}
+    >
+      {esHome && (
+        <p className="flex items-center gap-2 text-label text-ink-2 truncate">
+          {realtimeConectado && <span className="w-1.5 h-1.5 rounded-full bg-success shrink-0" title="Operativo" />}
+          {realtimeConectado && <span className="hidden sm:inline">Operativo ·</span>}
+          <span className="lg:hidden">{formatFechaCorta(hoyTopbar)}</span>
+          <span className="hidden lg:inline">{formatFechaLarga(hoyTopbar)}</span>
+        </p>
+      )}
+    </PageHeader>
+  )
+
+  const acciones = (
+    <>
+        {/* Búsqueda global: una sola fila en desktop, así que el campo solo
+            entra desde 1280px. Entre 768 y 1279px es un botón ícono que se
+            expande al hacer click (y se cierra con click afuera o Escape,
+            por `busquedaOverlay`); abajo de 768px pasa a un ícono que abre
+            la búsqueda a pantalla completa (ver bloque más abajo). */}
+        <div ref={searchAnchorRef} className="hidden md:block relative w-10 xl:w-72 min-w-0">
+        {!buscadorAncho && !busquedaExpandida && (
+          <BotonCircular
+            icono={Search}
+            etiqueta="Buscar"
+            onClick={() => { setBusquedaExpandida(true); setTimeout(() => searchInputRef.current?.focus(), 0) }}
+            aria-expanded={busquedaExpandida}
+            className={searchValue ? 'ring-1 ring-gold' : ''}
+          />
+        )}
+        <div className={buscadorAncho ? 'block' : busquedaExpandida ? 'absolute right-0 top-0 z-30 w-80 ui-open' : 'hidden'}>
         <SearchInput
           ref={searchInputRef}
           value={searchValue}
           onChange={setSearchValue}
           onKeyDown={handleSearchKeyDown}
           placeholder={buscadorAncho ? 'Búsqueda inteligente' : 'Buscar'}
-          inputClassName="!bg-card !rounded-full h-11"
+          inputClassName="!bg-card !rounded-full h-10"
         />
+        </div>
 
         {showDropdown && (
             <PopoverAnclado ref={searchOverlay.bind} anchorRef={searchAnchorRef} matchWidth minWidth={360} role="listbox">
@@ -514,7 +552,7 @@ export default function TopBar() {
             onClick={mostrarMontos}
             aria-label="Montos ocultos: tocá para mostrarlos"
             title="Montos ocultos: tocá para mostrarlos"
-            className="shrink-0 min-h-11 min-w-11 inline-flex items-center justify-center"
+            className="shrink-0 h-10 min-w-10 inline-flex items-center justify-center"
           >
             <span className="inline-flex items-center gap-1 h-8 px-2 min-[430px]:px-3 rounded-full bg-gold-50 border border-gold text-ink text-label font-semibold whitespace-nowrap">
               <EyeOff size={14} strokeWidth={1.5} />
@@ -522,7 +560,16 @@ export default function TopBar() {
             </span>
           </button>
         )}
-        <Button variant="grafito" icon={Plus} onClick={() => abrirNuevaReserva()} aria-label="Nueva reserva" className="hidden md:inline-flex shrink-0 max-lg:px-3">
+        {/* Un solo primario negro visible por vista (CLAUDE.md). Cuando no
+            entra queda solo el ícono, con tooltip. */}
+        <Button
+          variant="grafito"
+          icon={Plus}
+          onClick={() => abrirNuevaReserva()}
+          aria-label="Nueva reserva"
+          title="Nueva reserva"
+          className="hidden md:inline-flex shrink-0 !h-10 max-lg:w-10 max-lg:px-0"
+        >
           <span className="hidden lg:inline">Nueva reserva</span>
         </Button>
         {/* Fase 3 (Recepción, D1): acceso directo al escáner de QR — solo
@@ -530,22 +577,19 @@ export default function TopBar() {
             monta en desktop (no solo oculto por CSS): sin uso en escritorio
             y evita dejar en el DOM un botón que dispara cámara. */}
         {isFeatureEnabled('recepcion') && isMobile && (
-          <button
+          <BotonCircular
+            icono={QrCode}
+            etiqueta="Recepción — escanear QR"
             onClick={() => navigate(linkToRecepcion(null, { scan: true }))}
-            className="btn-icon"
-            title="Recepción — escanear QR"
-          >
-            <QrCode size={22} strokeWidth={1.5} />
-          </button>
+          />
         )}
         {/* Búsqueda (mobile): ícono que abre pantalla completa */}
-        <button
+        <BotonCircular
+          icono={Search}
+          etiqueta="Buscar"
           onClick={() => setMobileSearchOpen(true)}
-          aria-label="Buscar"
-          className="md:hidden btn-icon"
-        >
-          <Search size={22} strokeWidth={1.5} />
-        </button>
+          className="md:hidden"
+        />
         {/* Notificaciones (oct 2026, modelo "bandeja de pendientes") — punto
             dorado si hay pendientes abiertas, número neutro si solo hay
             novedades sin leer (ver CLAUDE.md "Notificaciones"). Desktop:
@@ -570,9 +614,10 @@ export default function TopBar() {
             aria-haspopup="menu"
             aria-expanded={showNotifications}
             aria-label="Notificaciones"
-            className="relative btn-icon"
+            title="Notificaciones"
+            className="relative shrink-0 w-10 h-10 rounded-full inline-flex items-center justify-center text-ink hover:bg-surface transition-colors"
           >
-            <Bell size={22} strokeWidth={1.5} />
+            <Bell size={20} strokeWidth={1.5} />
             {countPendientes > 0 ? (
               <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-ink rounded-full border-2 border-canvas" />
             ) : countNovedadesNoLeidas > 0 ? (
@@ -640,7 +685,8 @@ export default function TopBar() {
             aria-haspopup="menu"
             aria-expanded={showProfileMenu}
             aria-label="Menú de usuario"
-            className="flex items-center gap-2 p-1 min-h-[44px] rounded-full transition-colors"
+            title="Menú de usuario"
+            className="flex items-center gap-2 h-10 pl-1 rounded-full transition-colors"
           >
             {/* B5: indicador discreto mientras el modo incógnito está
                 activo — para que no quede prendido sin querer. */}
@@ -694,7 +740,17 @@ export default function TopBar() {
             </PopoverAnclado>
           )}
         </div>
-      </div>
+    </>
+  )
+
+  return (
+    <>
+      <PageTopbar
+        izquierda={izquierda}
+        titulo={titulo}
+        controlesRef={controlesRef}
+        acciones={acciones}
+      />
 
       {/* Búsqueda mobile a pantalla completa (Tarea 4.2) — mismos resultados
           que el buscador de desktop, reutiliza clienteMatches/reservaMatches. */}
@@ -799,6 +855,6 @@ export default function TopBar() {
         </div>,
         document.body,
       )}
-    </header>
+    </>
   )
 }

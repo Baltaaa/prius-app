@@ -199,8 +199,9 @@ export default function Comprobantes() {
   // por dentro.
   return (
     <div className="flex-1 min-h-0 flex flex-col gap-grid animate-premium-fade">
+      {/* Único control de la sección, en la barra única (PageTopbar). */}
       <ToolbarSticky>
-        <div className="toolbar-40 max-w-xl [&_.field]:bg-card">
+        <div className="w-[min(82vw,420px)] [&_.field]:bg-card">
           <BrandSelect
             value={selectedReservaId}
             onChange={setSelectedReservaId}

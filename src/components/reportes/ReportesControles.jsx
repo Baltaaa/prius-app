@@ -10,15 +10,12 @@ import { useOverlay } from '../../context/OverlayProvider'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { VISTAS, navegable } from '../../lib/periodos'
 
-// Barra sticky de Reportes (nov 2026, rediseño mobile-first).
+// Controles de Reportes dentro de la barra única (PageTopbar, nov 2026).
 //
-// Fila 1: Día / Semana / Mes / Temporada / Año / Rango en UNA línea con scroll
-//         y snap (SegmentedScroll — nunca en dos líneas).
-// Fila 2: navegador ‹ período ›, el chip de rango cuando la vista es 'rango',
-//         el toggle ARS/USD y Exportar.
-//
-// Máximo dos filas y controles de 40px, como el resto de las toolbars de
-// desktop (ver CLAUDE.md).
+// UNA sola fila: Día/Semana/Mes/Temporada/Año/Rango · navegador ‹ período › (o
+// el chip de rango) · ARS/USD · Exportar. Nunca dos filas: si no entran,
+// ToolbarSticky scrollea la fila en horizontal con fade en los bordes.
+// Controles de 40px (pills), igual que el resto de la zona sticky.
 
 const MONEDAS = [
   { value: 'ARS', label: 'ARS' },
@@ -64,6 +61,7 @@ function Exportar({ acciones }) {
 
   return (
     <div ref={anclaRef} className="relative shrink-0">
+      {/* Solo ícono con tooltip hasta lg: en una sola fila el texto no entra. */}
       <button
         ref={bind}
         type="button"
@@ -72,10 +70,10 @@ function Exportar({ acciones }) {
         aria-haspopup="menu"
         aria-label="Exportar"
         title="Exportar"
-        className="btn btn-secondary h-11 w-11 md:h-10 md:w-auto min-h-0 px-0 md:px-4"
+        className="pill-control pill-control-icono lg:w-auto lg:px-4"
       >
         <Share2 size={16} strokeWidth={1.5} />
-        <span className="hidden md:inline">Exportar</span>
+        <span className="hidden lg:inline">Exportar</span>
       </button>
       {abierto && (esMobile ? (
         <BottomSheet isOpen={abierto} onClose={cerrar} title="Exportar">
@@ -96,53 +94,47 @@ export default function ReportesControles({
 }) {
   const puedeNavegar = navegable(vista)
   return (
-    <div className="no-print space-y-2">
-      <SegmentedScroll options={VISTAS} value={vista} onChange={setVista} label="Período" />
+    <>
+      <SegmentedScroll options={VISTAS} value={vista} onChange={setVista} label="Período" className="min-w-0 max-w-[min(60vw,420px)]" />
 
-      <div className="toolbar-40 flex items-center gap-2">
-        {puedeNavegar ? (
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              type="button"
-              onClick={onAnterior}
-              aria-label="Período anterior"
-              title="Período anterior"
-              className="btn btn-secondary h-11 w-11 md:h-10 md:w-10 min-h-0 px-0"
-            >
-              <ChevronLeft size={16} strokeWidth={1.5} />
-            </button>
-            <span className="text-body text-ink font-medium whitespace-nowrap px-2 min-w-0 truncate" title={etiqueta}>
-              {etiqueta}
-            </span>
-            <button
-              type="button"
-              onClick={onSiguiente}
-              aria-label="Período siguiente"
-              title="Período siguiente"
-              className="btn btn-secondary h-11 w-11 md:h-10 md:w-10 min-h-0 px-0"
-            >
-              <ChevronRight size={16} strokeWidth={1.5} />
-            </button>
-          </div>
-        ) : vista === 'rango' ? (
-          <RangoFechasChip
-            desde={rango.desde}
-            hasta={rango.hasta}
-            setDesde={(d) => setRango((r) => ({ ...r, desde: d }))}
-            setHasta={(h) => setRango((r) => ({ ...r, hasta: h }))}
-            conAnio
-            className="flex-1 min-w-0 lg:flex-none lg:w-52"
-          />
-        ) : (
-          <span className="text-body text-ink font-medium whitespace-nowrap min-w-0 truncate" title={etiqueta}>
-            {etiqueta}
-          </span>
-        )}
+      {puedeNavegar ? (
+        // El navegador de fecha es UNA pill: ‹ Noviembre 2026 ›.
+        <div className="pill-control !px-1 gap-0">
+          <button
+            type="button"
+            onClick={onAnterior}
+            aria-label="Período anterior"
+            title="Período anterior"
+            className="w-8 h-8 rounded-full inline-flex items-center justify-center text-ink hover:bg-card/60 transition-colors"
+          >
+            <ChevronLeft size={16} strokeWidth={1.5} />
+          </button>
+          <span className="px-2 whitespace-nowrap" title={etiqueta}>{etiqueta}</span>
+          <button
+            type="button"
+            onClick={onSiguiente}
+            aria-label="Período siguiente"
+            title="Período siguiente"
+            className="w-8 h-8 rounded-full inline-flex items-center justify-center text-ink hover:bg-card/60 transition-colors"
+          >
+            <ChevronRight size={16} strokeWidth={1.5} />
+          </button>
+        </div>
+      ) : vista === 'rango' ? (
+        <RangoFechasChip
+          desde={rango.desde}
+          hasta={rango.hasta}
+          setDesde={(d) => setRango((r) => ({ ...r, desde: d }))}
+          setHasta={(h) => setRango((r) => ({ ...r, hasta: h }))}
+          conAnio
+          className="w-52"
+        />
+      ) : (
+        <span className="pill-control" title={etiqueta}>{etiqueta}</span>
+      )}
 
-        <div className="flex-1" />
-        <SegmentedControl label="Moneda" options={MONEDAS} value={moneda} onChange={setMoneda} compact className="shrink-0" />
-        <Exportar acciones={acciones} />
-      </div>
-    </div>
+      <SegmentedControl label="Moneda" options={MONEDAS} value={moneda} onChange={setMoneda} compact />
+      <Exportar acciones={acciones} />
+    </>
   )
 }

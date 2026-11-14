@@ -1,4 +1,5 @@
 import ToolbarSticky from '../../components/brand/ToolbarSticky'
+import PopoverAnclado from '../../components/ui/PopoverAnclado'
 import RangoFechasChip from '../../components/brand/RangoFechasChip'
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import ScrollFade from '../../components/ui/ScrollFade'
@@ -91,6 +92,7 @@ export default function Reservas() {
   const [pagoDetalle, setPagoDetalle] = useState(null)
   const [showFiltros, setShowFiltros] = useState(false)
   const filtrosOverlay = useOverlay({ id: 'reservas-filtros', isOpen: showFiltros, onRequestClose: () => setShowFiltros(false) })
+  const filtrosAnclaRef = useRef(null)
   const [filtroUnidadId, setFiltroUnidadId] = useState(null) // deep-link "Ver todas" desde el modal de unidad del Plano
 
   // Rediseño maestro-detalle (oct 2026, mock 03-reservas-*): un solo id
@@ -439,14 +441,12 @@ export default function Reservas() {
     // condicional y ya no necesita el wrapper-truco de antes para no dejar
     // un hueco vacío). Por debajo de lg, layout de siempre sin cambios.
     <div className="flex flex-col gap-grid lg:h-full anim-fade-up-page">
-      {/* Toolbar / filtros — feed cronológico con filtros siempre visibles,
-          pegado al navbar, con el alta en la misma fila. */}
+      {/* Controles en la barra única (PageTopbar): una sola fila de pills.
+          Buscador propio sacado (testing oct 2026): el global del header ya
+          busca cliente/unidad sobre todas las reservas y navega acá con
+          ?id=<reserva> — un solo buscador en toda la app, ver CLAUDE.md
+          "Navegación y deep-linking". Rango de llegada: UN chip con popover. */}
       <ToolbarSticky>
-      <div className="toolbar-40 flex flex-wrap gap-2 md:gap-3 items-center lg:shrink-0 [&_.field]:bg-card">
-        {/* Buscador propio sacado (testing oct 2026): el global del header ya
-            busca cliente/unidad sobre todas las reservas y navega acá con
-            ?id=<reserva> — un solo buscador en toda la app, ver CLAUDE.md
-            "Navegación y deep-linking". Rango de llegada: UN chip con popover. */}
         <RangoFechasChip
           desde={desde}
           hasta={hasta}
@@ -457,16 +457,21 @@ export default function Reservas() {
           etiqueta="Rango de llegada"
           className="w-52 shrink-0"
         />
-        <div ref={filtrosOverlay.bind} className="relative">
+        {/* El popover va en portal (PopoverAnclado): adentro de la fila de
+            controles un `absolute` queda cortado por su overflow. */}
+        <div ref={(el) => { filtrosAnclaRef.current = el; filtrosOverlay.bind(el) }} className="relative">
           <button
             onClick={() => setShowFiltros((v) => !v)}
-            className={`card-surface text-label px-4 h-11 md:h-10 rounded-full flex items-center gap-2 transition-all ${filtrosActivos ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
+            aria-expanded={showFiltros}
+            aria-haspopup="dialog"
+            title="Filtros"
+            className={`pill-control ${filtrosActivos ? 'pill-control-activa' : ''}`}
           >
             <Filter size={16} /> Filtros {filtrosActivos ? 'Activos' : ''}
           </button>
 
           {showFiltros && (
-              <div className="surface-pop absolute right-0 mt-2 w-56 overflow-hidden z-50 p-3 space-y-3">
+              <PopoverAnclado ref={filtrosOverlay.bind} anchorRef={filtrosAnclaRef} align="right" width={224} role="dialog" aria-label="Filtros de reservas" className="p-3 space-y-3" scroll={false}>
                 <div>
                   <p className="text-label text-ink-2 mb-1 px-1">Estado de pago</p>
                   {FILTROS_ESTADO.map((f) => (
@@ -501,10 +506,9 @@ export default function Reservas() {
                     Limpiar todos los filtros
                   </button>
                 )}
-              </div>
+              </PopoverAnclado>
           )}
         </div>
-      </div>
       </ToolbarSticky>
 
       {/* Envoltorio condicional (ítem 7, oct 2026): sin chips activos este

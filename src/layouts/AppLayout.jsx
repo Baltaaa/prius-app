@@ -70,12 +70,14 @@ export default function AppLayout() {
     document.title = esHome ? 'Prius App' : `${section.name} · Prius App`
   }, [esHome, section.name])
 
-  // Zona sticky superior (nov 2026): Topbar + toolbar de la sección flotan
-  // sobre el contenido (ProgressiveBlurHeader). Su alto real se mide acá y se
-  // publica como `--zona-h`: #app-main-scroll lo usa de padding superior
-  // (clase `pt-zona`), así la página arranca justo debajo y lo demás pasa por
-  // detrás. `slot` es el nodo donde las páginas montan su toolbar
-  // (<ToolbarSticky>, un portal).
+  // Zona sticky superior (nov 2026): UNA barra por página (PageTopbar, con
+  // título · controles · acciones) que flota sobre el contenido
+  // (ProgressiveBlurHeader). Su alto real se mide acá y se publica como
+  // `--zona-h`: #app-main-scroll lo usa de padding superior (clase
+  // `pt-zona`), así la página arranca justo debajo y lo demás pasa por
+  // detrás. En mobile la fila de pills de los controles suma alto a la misma
+  // zona, y el ResizeObserver lo refleja solo. `slot` es el nodo donde las
+  // páginas montan sus controles (<ToolbarSticky>, un portal).
   const layoutRef = useRef(null)
   const zonaRef = useRef(null)
   const [slot, setSlot] = useState(null)
@@ -112,10 +114,12 @@ export default function AppLayout() {
         <ToolbarSlotContext.Provider value={slot}>
         <AppShell>
           <div ref={layoutRef} className="layout-zona flex-1 flex flex-col h-dvh min-w-0 overflow-hidden relative">
+            {/* UNA sola barra sticky por página (PageTopbar): título,
+                controles de la sección y acciones globales. El slot de los
+                controles lo monta PageTopbar adentro de su grilla — ninguna
+                página agrega una segunda barra con blur propio. */}
             <ProgressiveBlurHeader ref={zonaRef} className="absolute top-0 inset-x-0 z-20">
-              <Topbar />
-              {/* Slot de la toolbar de la sección (ver ToolbarSticky.jsx). */}
-              <div ref={setSlot} className="px-page-max pt-4 pb-3 md:pb-4 empty:p-0" />
+              <Topbar controlesRef={setSlot} />
             </ProgressiveBlurHeader>
 
             {/* Content View with internal vertical scroll. Padding horizontal

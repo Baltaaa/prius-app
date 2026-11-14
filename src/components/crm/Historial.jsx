@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff, SlidersHorizontal,
+  CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff,
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
 import { formatFecha, formatHora, formatMonto, formatMontosEnTexto } from '../../lib/format'
@@ -394,9 +394,6 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
     return next
   }, { replace: true })
 
-  // Filtros colapsables en mobile (mock 07 mobile): la barra queda fija
-  // arriba y los controles finos se despliegan con el botón de ajustes.
-  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
   // Evento abierto en el detalle (panel derecho en desktop, sheet en mobile).
   const [seleccionado, setSeleccionado] = useState(null)
 
@@ -546,64 +543,44 @@ export default function Historial({ tipo = 'global', id, onEventoClick, compact 
   }
   return (
     <div className="anim-fade-up-page">
-      {/* Toolbar en la zona sticky superior (ToolbarSticky), junto a la topbar:
-          una sola pieza flotante con blur progresivo. Dos filas como máximo y
-          controles de 40px en desktop:
-          fila 1: buscador · Hoy/7 días/Mes · UN chip de rango ·
-          usuario; fila 2: tabs de tipo en una sola línea (scroll con fade).
-          En mobile los filtros finos se despliegan con el botón de ajustes. */}
+      {/* Controles en la barra única (PageTopbar): UNA sola fila de 40px —
+          buscador (colapsado a ícono por debajo de 1280px) · Hoy/7 días/Mes ·
+          UN chip de rango · usuario · tabs de tipo. Si no entran, la fila
+          scrollea en horizontal con fade en los bordes (ToolbarSticky);
+          nunca una segunda fila. */}
       <ToolbarSticky>
-        <div className="toolbar-40 flex flex-col gap-2 md:gap-3">
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <BuscadorColapsable
-              value={q}
-              onChange={(v) => setRango('hq', v, '')}
-              placeholder="Buscar por usuario, cliente o comprobante"
-              className="flex-1 min-w-0 md:max-w-[360px]"
-            />
-            <button
-              type="button"
-              onClick={() => setFiltrosAbiertos((v) => !v)}
-              aria-expanded={filtrosAbiertos}
-              aria-label="Mostrar filtros"
-              className={`md:hidden shrink-0 w-11 h-11 rounded-inner border flex items-center justify-center anim-colors anim-press ${
-                filtrosAbiertos ? 'bg-gold-100 border-gold text-ink' : 'bg-card border-line text-ink-2'
-              }`}
-            >
-              <SlidersHorizontal size={16} />
-            </button>
-            {/* Rango + usuario: siempre en la fila 1 en desktop, desplegable en mobile. */}
-            <div className={`${filtrosAbiertos ? 'flex' : 'hidden'} md:contents basis-full flex-col gap-2`}>
-              <SegmentedControl
-                label="Rango"
-                options={ATAJOS.map((a) => ({ value: a.key, label: a.label }))}
-                value={atajo}
-                onChange={(k) => elegirAtajo(ATAJOS.find((a) => a.key === k))}
-                fullWidth="hasta-md"
-                compact
-              />
-              <RangoFechasChip
-                desde={desde}
-                hasta={hasta}
-                setDesde={(v) => setRango('hDesde', v || addDays(todayStr(), -7), addDays(todayStr(), -7))}
-                setHasta={(v) => setRango('hHasta', v || todayStr(), todayStr())}
-                className="md:w-40 shrink-0"
-              />
-              {/* "Todos los usuarios" siempre completo: el select toma el ancho de su contenido (w-max) y
-                  no se achica nunca; si la fila no alcanza, se achica el buscador. */}
-              <div className="md:w-max md:min-w-fit shrink-0 [&_.field]:!bg-card">
-                <BrandSelect value={usuarioFiltro} onChange={(v) => setRango('hUsuario', v, '')} options={opcionesUsuario} className="w-full" />
-              </div>
-            </div>
-          </div>
-          <SegmentedScroll
-            label="Tipo de movimiento"
-            options={FILTROS.map((f) => ({ value: f.key, label: f.label }))}
-            value={filtro}
-            onChange={setFiltro}
-            className="self-start"
-          />
+        <BuscadorColapsable
+          value={q}
+          onChange={(v) => setRango('hq', v, '')}
+          placeholder="Buscar por usuario, cliente o comprobante"
+          className="w-[320px] min-w-0"
+        />
+        <SegmentedControl
+          label="Rango"
+          options={ATAJOS.map((a) => ({ value: a.key, label: a.label }))}
+          value={atajo}
+          onChange={(k) => elegirAtajo(ATAJOS.find((a) => a.key === k))}
+          compact
+        />
+        <RangoFechasChip
+          desde={desde}
+          hasta={hasta}
+          setDesde={(v) => setRango('hDesde', v || addDays(todayStr(), -7), addDays(todayStr(), -7))}
+          setHasta={(v) => setRango('hHasta', v || todayStr(), todayStr())}
+          className="w-40"
+        />
+        {/* "Todos los usuarios" siempre completo: el select toma el ancho de
+            su contenido y no se achica nunca. */}
+        <div className="w-max min-w-fit [&_.field]:!bg-card">
+          <BrandSelect value={usuarioFiltro} onChange={(v) => setRango('hUsuario', v, '')} options={opcionesUsuario} className="w-full" />
         </div>
+        <SegmentedScroll
+          label="Tipo de movimiento"
+          options={FILTROS.map((f) => ({ value: f.key, label: f.label }))}
+          value={filtro}
+          onChange={setFiltro}
+          className="min-w-0 max-w-[min(70vw,560px)]"
+        />
       </ToolbarSticky>
 
       {/* Lista + panel de detalle (desktop). `lg:pt-3` deja el tope de la lista

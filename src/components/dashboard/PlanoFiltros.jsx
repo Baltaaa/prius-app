@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Info, Printer } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Info, Printer, PrinterCheck } from 'lucide-react'
 import DateInput from '../inputs/DateInput'
 import SegmentedControl from '../brand/SegmentedControl'
 import PlanoLeyenda from './PlanoLeyenda'
@@ -103,7 +103,7 @@ export function PlanoReferencias({ soloIcono = false, className = '' }) {
         aria-expanded={abierto}
         aria-haspopup="dialog"
         title="Referencias"
-        className={`btn btn-secondary h-11 md:h-9 min-h-0 shrink-0 ${soloIcono ? 'w-11 md:w-9 px-0' : 'px-4'}`}
+        className={`pill-control ${soloIcono ? 'pill-control-icono' : ''}`}
       >
         <Info size={16} strokeWidth={1.5} />
         {!soloIcono && <span>Referencias</span>}
@@ -121,82 +121,92 @@ export function PlanoReferencias({ soloIcono = false, className = '' }) {
 
 export { PlanoLeyenda }
 
-// Referencias + Imprimir A4 (secundario). Desde lg viven en la franja de
-// controles; por debajo van en el encabezado de la card del mapa, para que el
-// navegador de fecha tenga el ancho completo.
-export function PlanoAcciones({ onImprimir, className = '' }) {
+// Referencias + las dos impresiones del Plano, como pills de 40px en la fila
+// de controles de la barra única:
+// - "Imprimir A4": la hoja de los carperos, sin cambios (PlanoImpresion.jsx).
+// - "Imprimir para el cliente": la hoja de disponibilidad Libre/Ocupado
+//   (PlanoImpresionCliente.jsx) — otra impresión, no toca la anterior.
+export function PlanoAcciones({ onImprimir, onImprimirCliente, className = '' }) {
   return (
-    <div className={`flex items-center gap-2 shrink-0 ${className}`}>
-      <PlanoReferencias soloIcono />
-      <button onClick={onImprimir} title="Imprimir A4" aria-label="Imprimir A4" className="btn btn-secondary h-11 md:h-9 min-h-0 w-11 md:w-9 px-0 2xl:w-auto 2xl:px-4 shrink-0">
-        <Printer size={16} strokeWidth={1.5} /> <span className="hidden 2xl:inline">Imprimir A4</span>
+    <>
+      <PlanoReferencias soloIcono className={className} />
+      <button onClick={onImprimir} title="Imprimir A4 (carperos)" aria-label="Imprimir A4 (carperos)" className="pill-control pill-control-icono">
+        <Printer size={16} strokeWidth={1.5} />
+      </button>
+      {onImprimirCliente && (
+        <button onClick={onImprimirCliente} title="Imprimir plano de disponibilidad (cliente)" aria-label="Imprimir plano de disponibilidad (cliente)" className="pill-control pill-control-icono xl:w-auto xl:px-4">
+          <PrinterCheck size={16} strokeWidth={1.5} />
+          <span className="hidden xl:inline">Imprimir</span>
+        </button>
+      )}
+    </>
+  )
+}
+
+// Navegador de fecha del Plano como UNA pill de 40px: ‹ fecha ›. Vive en la
+// fila de controles de la barra única (PageTopbar) y, en pantalla completa,
+// en la franja del modo cliente.
+export function PlanoNavegadorFecha({
+  selectedDate, esHoy, diaSemana, onPrevDay, onNextDay, onHoy, onDateChange, compacto = false, className = '',
+}) {
+  return (
+    <div className={`pill-control !px-1 gap-0 ${className}`}>
+      <button onClick={onPrevDay} className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-ink hover:bg-card/60 transition-colors" aria-label="Día anterior" title="Día anterior">
+        <ChevronLeft size={16} strokeWidth={1.5} />
+      </button>
+      <div className="min-w-0 flex items-center justify-center gap-1 px-1">
+        {/* Mobile (compacto): fecha corta que siempre entra ("Jue 06/11"),
+            con un chip "Hoy" cuando corresponde. Nunca truncada. */}
+        <DateInput
+          value={selectedDate}
+          onChange={(v) => v && onDateChange(v)}
+          calendarOnly
+          className={`${compacto ? 'w-[112px]' : 'w-[132px]'} [&_.field]:!bg-transparent [&_.field]:!border-transparent`}
+          formatoVisible={compacto ? formatDiaCorto : undefined}
+        />
+        {diaSemana && <span className="hidden xl:inline text-label text-ink-2 shrink-0">{diaSemana}</span>}
+        {compacto && esHoy && (
+          <span className="shrink-0 inline-flex items-center h-7 px-3 rounded-full bg-gold-100 text-label text-ink">Hoy</span>
+        )}
+        {!esHoy && (
+          <button onClick={onHoy} className="text-label text-ink shrink-0 h-8 px-2 rounded-full hover:bg-card/60 transition-colors">Hoy</button>
+        )}
+      </div>
+      <button onClick={onNextDay} className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-ink hover:bg-card/60 transition-colors" aria-label="Día siguiente" title="Día siguiente">
+        <ChevronRight size={16} strokeWidth={1.5} />
       </button>
     </div>
   )
 }
 
-// `modoCliente`: la versión mínima de pantalla completa (ver más abajo).
-// Controles completos del Plano (desktop, tablet y mobile comparten este
-// bloque): navegador de fecha, tiles-filtro de estado, segmented de tipo,
-// Referencias e Imprimir A4. Desde lg (1024px) todo va en dos filas (fecha ·
-// tipo · acciones / tiles); por debajo, en columna: fecha a ancho completo,
-// tiles 2x2 y segmented a ancho completo, con targets de 44px.
+// Controles del Plano que viven en la barra única (desktop, tablet y mobile
+// comparten este bloque): navegador de fecha, segmented de tipo, Referencias,
+// Imprimir A4 y la impresión para el cliente. Los tiles-filtro de estado NO
+// van acá: son stats de 4 celdas y siguen en la card de la página
+// (PlanoStatTiles), que es donde se leen como números.
+//
+// `modoCliente`: la versión mínima de pantalla completa — solo fecha y
+// Todo/Carpas/Sombrillas, sin Referencias ni impresiones.
 export function PlanoControles({
   selectedDate, esHoy, diaSemana, onPrevDay, onNextDay, onHoy, onDateChange,
-  planoStats, estadoFiltro, onEstado, tipoFiltro, onTipo, onImprimir, compacto = false, anchoFecha, modoCliente = false,
+  tipoFiltro, onTipo, onImprimir, onImprimirCliente, compacto = false, modoCliente = false,
 }) {
   return (
-    <div className={`flex flex-wrap items-center ${modoCliente && !compacto ? 'gap-2 lg:gap-4' : 'gap-2'}`}>
-      {/* En pantalla completa de escritorio el navegador de fecha es una pill, igual que el
-          contenedor del segmented de su derecha. */}
-      <div className={`order-1 flex items-center gap-1 bg-surface p-1 flex-1 min-w-0 lg:flex-none ${modoCliente && !compacto ? 'rounded-inner lg:rounded-full' : 'rounded-inner'}`}>
-        <button onClick={onPrevDay} className="w-11 h-11 md:w-9 md:h-9 shrink-0 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día anterior">
-          <ChevronLeft size={16} />
-        </button>
-        <div className="flex-1 min-w-0 flex items-center justify-center gap-2 px-1">
-          {/* Mobile (compacto): fecha corta que siempre entra ("Jue 06/11"),
-              con un chip "Hoy" cuando corresponde. Nunca truncada. */}
-          <DateInput
-            value={selectedDate}
-            onChange={(v) => v && onDateChange(v)}
-            calendarOnly
-            className={compacto ? 'flex-1 min-w-0' : anchoFecha}
-            formatoVisible={compacto ? formatDiaCorto : undefined}
-          />
-          {diaSemana && <span className="hidden md:inline lg:hidden xl:inline text-label text-ink-2 shrink-0">{diaSemana}</span>}
-          {compacto && esHoy && (
-            <span className="shrink-0 inline-flex items-center h-7 px-3 rounded-full bg-gold-100 text-label text-ink">Hoy</span>
-          )}
-          {!esHoy && (
-            <button onClick={onHoy} className="text-label text-ink shrink-0 min-h-11 md:min-h-0 min-w-11 md:min-w-0 px-2">Hoy</button>
-          )}
-        </div>
-        <button onClick={onNextDay} className="w-11 h-11 md:w-9 md:h-9 shrink-0 flex items-center justify-center rounded-full bg-card text-ink-2 hover:bg-line transition-colors" title="Día siguiente">
-          <ChevronRight size={16} />
-        </button>
-      </div>
-
-      {/* Modo cliente (pantalla completa): solo fecha y Todo/Carpas/Sombrillas. Sin tiles de
-          stats (con montos de pendientes), sin Referencias ni Imprimir A4. */}
-      {!modoCliente && <PlanoAcciones onImprimir={onImprimir} className="hidden lg:flex order-3 ml-auto" />}
-
-      {!modoCliente && (
-        <PlanoStatTiles
-          className="order-3 lg:order-4 basis-full"
-          stats={planoStats}
-          valor={estadoFiltro}
-          onChange={onEstado}
-          fecha={selectedDate}
-          compacto={compacto}
-        />
-      )}
-
-      <PlanoTipoSegmented
-        className="order-4 basis-full lg:order-2 lg:basis-auto"
-        fullWidth="hasta-lg"
-        valor={tipoFiltro}
-        onChange={onTipo}
+    <>
+      <PlanoNavegadorFecha
+        selectedDate={selectedDate}
+        esHoy={esHoy}
+        diaSemana={diaSemana}
+        onPrevDay={onPrevDay}
+        onNextDay={onNextDay}
+        onHoy={onHoy}
+        onDateChange={onDateChange}
+        compacto={compacto}
       />
-    </div>
+
+      <PlanoTipoSegmented valor={tipoFiltro} onChange={onTipo} />
+
+      {!modoCliente && <PlanoAcciones onImprimir={onImprimir} onImprimirCliente={onImprimirCliente} />}
+    </>
   )
 }

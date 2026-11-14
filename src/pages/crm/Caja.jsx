@@ -50,29 +50,9 @@ const TABS = [
 
 // Todos los botones de la barra, misma altura y en neutro: el único color de
 // la barra es el chip de estado (nov 2026).
-const CLASE_ACCION = 'text-label shrink-0 flex items-center gap-2 px-4 xl:px-3 2xl:px-4 h-11 md:h-10 min-h-0 bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 hover:text-ink transition-all'
-
-// Difuminado de los bordes cuando la fila de acciones scrollea en horizontal —
-// misma técnica que SegmentedScroll (mask-image), sin componente nuevo.
-function useMaskScrollX(ref) {
-  const [bordes, setBordes] = useState({ izq: false, der: false })
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return undefined
-    const medir = () => {
-      const izq = el.scrollLeft > 1
-      const der = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
-      setBordes((p) => (p.izq === izq && p.der === der ? p : { izq, der }))
-    }
-    medir()
-    el.addEventListener('scroll', medir, { passive: true })
-    const ro = new ResizeObserver(medir)
-    ro.observe(el)
-    return () => { el.removeEventListener('scroll', medir); ro.disconnect() }
-  }, [ref])
-  if (!bordes.izq && !bordes.der) return undefined
-  return `linear-gradient(to right, ${bordes.izq ? 'transparent 0, black 28px' : 'black 0'}, ${bordes.der ? 'black calc(100% - 28px), transparent 100%' : 'black 100%'})`
-}
+// Acciones de la barra única: pills de 40px, todas en neutro (el único color
+// de la barra es el chip de estado).
+const CLASE_ACCION = 'pill-control'
 
 const todayStr = hoyAR
 
@@ -125,8 +105,6 @@ export default function Caja() {
   const [reabriendo, setReabriendo] = useState(false)
   const [motivoReapertura, setMotivoReapertura] = useState('')
 
-  const accionesRef = useRef(null)
-  const maskAcciones = useMaskScrollX(accionesRef)
 
   const [resumen, setResumen] = useState(null)
   const [movimientos, setMovimientos] = useState([])
@@ -314,27 +292,25 @@ export default function Caja() {
           En <lg las acciones bajan a una segunda fila que scrollea en
           horizontal con el difuminado de los bordes (mismo recurso que
           SegmentedScroll). */}
-      <ToolbarSticky>
-      <div className="toolbar-40 no-print space-y-3 xl:space-y-0 xl:flex xl:items-center xl:gap-2 2xl:gap-3">
-        {/* Izquierda (fecha + ARS/USD + chip): una sola fila desde lg, para que
-            la toolbar de desktop nunca pase de 2 filas (regla de CLAUDE.md,
-            "Toolbars sticky de desktop"). Desde xl se disuelve y comparte la
-            fila con las acciones. */}
-        <div className="space-y-3 lg:space-y-0 lg:flex lg:items-center lg:gap-3 xl:contents">
-        <div className="flex items-center gap-3 xl:contents">
-          <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="shrink-0 p-3 md:p-0 md:w-10 md:h-10 md:min-h-0 md:min-w-0 flex items-center justify-center bg-surface hover:bg-surface anim-colors border border-line rounded-full text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día anterior">
-            <ChevronLeft size={16} />
-          </button>
-          <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} className="[&_.field]:bg-card flex-1 min-w-0 lg:flex-none lg:w-[148px] 2xl:w-[164px]" />
-          <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="shrink-0 p-3 md:p-0 md:w-10 md:h-10 md:min-h-0 md:min-w-0 flex items-center justify-center bg-surface hover:bg-surface anim-colors disabled:opacity-30 disabled:cursor-not-allowed border border-line rounded-full text-ink-2 transition-all min-w-[44px] min-h-[44px]" title="Día siguiente">
-            <ChevronRight size={16} />
-          </button>
-        </div>
+      {/* Controles en la barra única (PageTopbar): UNA sola fila de 40px —
+          navegador de fecha, ARS/USD y chip de estado a la izquierda; las
+          acciones a continuación. Si no entran, la fila scrollea en
+          horizontal con fade en los bordes (ToolbarSticky). Los botones van
+          todos en neutro: el único color de la barra es el chip de estado. */}
+      <ToolbarSticky className="no-print">
+          {/* Navegador de fecha: UNA pill ‹ fecha ›. */}
+          <div className="pill-control !px-1 gap-0">
+            <button onClick={() => setSelectedDate((d) => shiftDate(d, -1))} className="w-8 h-8 rounded-full inline-flex items-center justify-center text-ink hover:bg-card/60 transition-colors" aria-label="Día anterior" title="Día anterior">
+              <ChevronLeft size={16} strokeWidth={1.5} />
+            </button>
+            <DateInput value={selectedDate} onChange={(v) => v && setSelectedDate(v)} max={todayStr()} calendarOnly className="w-[132px] [&_.field]:!bg-transparent [&_.field]:!border-transparent" />
+            <button onClick={() => setSelectedDate((d) => shiftDate(d, 1))} disabled={esHoy} className="w-8 h-8 rounded-full inline-flex items-center justify-center text-ink hover:bg-card/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" aria-label="Día siguiente" title="Día siguiente">
+              <ChevronRight size={16} strokeWidth={1.5} />
+            </button>
+          </div>
 
-        {/* En pantallas chicas el chip baja de línea si no entra, en vez de cortarse. */}
-        <div className="flex flex-wrap items-center gap-3 xl:contents">
           {!esHoy && (
-            <button onClick={() => setSelectedDate(todayStr())} className={`${CLASE_ACCION} shrink-0`}>
+            <button onClick={() => setSelectedDate(todayStr())} className={CLASE_ACCION}>
               Volver a Hoy
             </button>
           )}
@@ -346,28 +322,16 @@ export default function Caja() {
           {cajaSeleccionada && (
             <span
               title={estadoCajaTitle}
-              className={`text-label inline-flex items-center px-4 h-11 md:h-10 rounded-full border whitespace-nowrap shrink-0 ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}
+              className={`text-label inline-flex items-center px-4 h-10 rounded-full border whitespace-nowrap ${cajaSeleccionada.estado === 'cerrada' ? 'bg-danger-soft text-danger border-danger/30' : 'bg-success-soft text-success-ink border-success/30'}`}
             >
               {estadoCajaTexto}
             </span>
           )}
-        </div>
-        </div>
 
-        <div className="hidden xl:block xl:flex-1" />
-
-        {/* Acciones. Siempre una fila que scrollea en horizontal si no entra,
-            con el difuminado en los bordes: abajo de xl va en su propia fila;
-            desde xl comparte la fila con la fecha y el chip. */}
-        <div
-          ref={accionesRef}
-          className="scroll-x-snap flex items-center gap-3 xl:gap-2 2xl:gap-3 min-w-0 -mx-page px-page xl:mx-0 xl:px-0"
-          style={{ maskImage: maskAcciones, WebkitMaskImage: maskAcciones }}
-        >
           {cajaSeleccionada?.estado === 'cerrada' && (
             <>
               <button onClick={() => window.print()} aria-label="Imprimir A4" title="Imprimir A4" className={CLASE_ACCION}>
-                <Printer size={14} /> <span className="hidden 2xl:inline">Imprimir A4</span>
+                <Printer size={14} /> <span className="hidden lg:inline">Imprimir A4</span>
               </button>
               {/* La impresión A4 de siempre no cambia; el PDF es el mismo
                   documento que se adjunta al aviso de cierre (nov 2026). */}
@@ -377,7 +341,7 @@ export default function Caja() {
                 aria-label="Descargar PDF" title="Descargar PDF"
                 className={`${CLASE_ACCION} disabled:opacity-40`}
               >
-                <FileDown size={14} /> <span className="hidden 2xl:inline">{generandoPdf ? 'Generando…' : 'Descargar PDF'}</span>
+                <FileDown size={14} /> <span className="hidden lg:inline">{generandoPdf ? 'Generando…' : 'Descargar PDF'}</span>
               </button>
               <button
                 onClick={() => resumen && descargarCierreCaja(resumen, { exportadoPorNombre: perfil?.nombre || perfil?.usuario || 'Usuario' })}
@@ -385,7 +349,7 @@ export default function Caja() {
                 aria-label="Exportar CSV" title="Exportar CSV"
                 className={`${CLASE_ACCION} disabled:opacity-40`}
               >
-                <Download size={14} /> <span className="hidden 2xl:inline">Exportar CSV</span>
+                <Download size={14} /> <span className="hidden lg:inline">Exportar CSV</span>
               </button>
               {/* Reemplaza al banner amarillo: mismo flujo, sin color. */}
               {cajaSeleccionada.arqueo_pendiente && (
@@ -405,8 +369,6 @@ export default function Caja() {
               <Lock size={14} /> Cerrar Caja
             </button>
           )}
-        </div>
-      </div>
       </ToolbarSticky>
 
       {/* Estado A: sin caja */}

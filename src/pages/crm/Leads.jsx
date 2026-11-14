@@ -3,7 +3,7 @@ import { Inbox, ChevronDown } from 'lucide-react'
 import ToolbarSticky from '../../components/brand/ToolbarSticky'
 import SegmentedScroll from '../../components/brand/SegmentedScroll'
 import ScrollFade from '../../components/ui/ScrollFade'
-import SearchInput from '../../components/inputs/SearchInput'
+import BuscadorColapsable from '../../components/brand/BuscadorColapsable'
 import LeadDetalle, { ESTADO_META, contactoDe } from '../../components/crm/LeadDetalle'
 import ConfirmarSuperadminModal from '../../components/crm/ConfirmarSuperadminModal'
 import { useFeatureUrlState } from '../../hooks/useFeatureUrlState'
@@ -129,18 +129,17 @@ export default function Leads() {
 
   return (
     <div className="animate-premium-fade">
-      {/* Toolbar: buscador + tabs con contador (una sola línea, scroll con snap). */}
+      {/* Controles en la barra única (PageTopbar): buscador + tabs con
+          contador, todo en una sola línea de 40px. */}
       <ToolbarSticky>
-        <div className="toolbar-40 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-          <SearchInput value={q} onChange={setQ} placeholder="Buscar nombre, email, teléfono o mensaje" className="md:w-80 md:shrink-0" inputClassName="!bg-card" />
-          <SegmentedScroll
-            label="Estado del lead"
-            options={FILTROS.map((f) => ({ value: f.key, label: `${f.label} ${contadores[f.key] ?? 0}` }))}
-            value={filtro}
-            onChange={setFiltro}
-            className="min-w-0"
-          />
-        </div>
+        <BuscadorColapsable value={q} onChange={setQ} placeholder="Buscar nombre, email, teléfono o mensaje" className="w-72 min-w-0" />
+        <SegmentedScroll
+          label="Estado del lead"
+          options={FILTROS.map((f) => ({ value: f.key, label: `${f.label} ${contadores[f.key] ?? 0}` }))}
+          value={filtro}
+          onChange={setFiltro}
+          className="min-w-0 max-w-[min(70vw,520px)]"
+        />
       </ToolbarSticky>
 
       {visibles.length === 0 ? (

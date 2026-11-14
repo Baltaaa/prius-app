@@ -1,5 +1,5 @@
 import { APP_VERSION } from '../../lib/appVersion'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { useLeads } from '../../hooks/useLeads'
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { isFeatureEnabled } from '../../lib/features'
 import { useMountTransition } from '../../hooks/useMountTransition'
+import { suscribirMenuMas } from '../../lib/menuMas'
 import { CountBadge } from './Badge'
 import ScrollFade from '../ui/ScrollFade'
 import SelectorTema from './SelectorTema'
@@ -67,6 +68,10 @@ export default function BottomNav() {
     { name: 'Mi cuenta', path: '/app/perfil', icon: UserCheck },
     ...(permiso('categorias_gasto') ? [{ name: 'Configuración', path: '/app/configuracion', icon: Settings }] : []),
   ]
+
+  // El botón de menú de la barra única (PageTopbar, mobile) abre este mismo
+  // sheet — el estado sigue viviendo acá, ver lib/menuMas.js.
+  useEffect(() => suscribirMenuMas(() => setShowMore(true)), [])
 
   const handleLogout = async () => {
     await signOut()

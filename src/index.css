@@ -41,6 +41,11 @@
   --muted-foreground: 107 107 107;
   --accent: var(--brand);
   --accent-foreground: var(--on-brand);
+  /* Pill de la zona sticky (PageTopbar): translúcida sobre lo que haya atrás
+     — negro 6% en claro, blanco 10% en oscuro. Nunca un gris opaco: la pill
+     vive sobre el blur, no sobre una card. */
+  --pill: 0 0 0;
+  --pill-a: .06;
   --border: 229 229 229;
   --border-a: 1;
   --divider: 240 239 234;
@@ -95,6 +100,8 @@
     --secondary: 36 36 34;
     --muted: 36 36 34;
     --muted-foreground: 163 162 156;
+    --pill: 255 255 255;
+    --pill-a: .10;
     --border: 255 255 255;
     --border-a: .08;
     --divider: 255 255 255;
@@ -736,52 +743,17 @@ button, a {
 .overscroll-contain { overscroll-behavior: contain; }
 
 /*
-  Blur de header sticky (nov 2026).
+  Zona sticky superior flotante (PageTopbar + ProgressiveBlurHeader, nov 2026).
 
-  Cuando un elemento es `sticky` y el contenido scrollea por detrás, un
-  fondo sólido corta el contenido de golpe. Este tratamiento suaviza el
-  borde con backdrop-filter + fondo semi-opaco + gradiente de fade al pie.
+  UNA sola barra por página: topbar (título · controles · acciones) y, en
+  mobile, su fila de pills — todo dentro del MISMO contenedor sticky y la
+  MISMA capa de blur. El contenido de la página scrollea por debajo.
 
-  Unlayered a propósito: necesita ganar sobre bg-canvas y
-  similares que están en @layer utilities.
-
-  Solo se aplica en Historial (barra de filtros) — no en el Plano
-  (sus tooltips usan .glass-tooltip con tema oscuro).
-
-  El ::after solo activa en mobile (<768px) donde la barra es `sticky`;
-  en desktop pasa a `md:static` y el gradiente sería ruido.
-*/
-.sticky-blur {
-  background-color: rgb(var(--background) / 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-@media (max-width: 767px) {
-  .sticky-blur::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    height: 16px;
-    background: linear-gradient(to bottom, rgb(var(--background) / 0.7) 0%, transparent 100%);
-    pointer-events: none;
-  }
-}
-/* Fallback: donde backdrop-filter no está soportado, fondo sólido. */
-@supports not (backdrop-filter: blur(1px)) {
-  .sticky-blur { background-color: rgb(var(--background)); }
-}
-
-/*
-  Zona sticky superior flotante (nov 2026) — ProgressiveBlurHeader.jsx.
-
-  Topbar + toolbar de la sección forman UNA pieza que flota sobre el
-  contenido (que scrollea por debajo). Fondo: degradé canvas 80% → transparente
-  y blur progresivo, fuerte arriba y cero en el borde inferior, con capas de
-  backdrop-filter de intensidad creciente y máscaras en degradé. El fondo se
-  extiende 20px por debajo de la zona: ahí el blur termina de apagarse sin
-  borde visible. Sin backdrop-filter queda solo el degradé.
+  Blur: SOLO backdrop-filter (20px + saturate 160%), sin color de fondo ni
+  tinte en ninguno de los dos temas, sin borde ni sombra. Se extiende 40px por
+  debajo de la barra con una máscara en degradé, así se difumina de a poco en
+  vez de cortar seco. Una sola capa por página: ninguna barra anidada lleva
+  blur propio (ver "Zona sticky superior" en DESIGN.md).
 
   `--zona-h` (alto real de la zona) lo mide AppLayout con un ResizeObserver y
   lo usa el padding superior de #app-main-scroll: la página arranca justo
@@ -791,7 +763,8 @@ button, a {
 @media (min-width: 768px) { .layout-zona { --zona-h: 64px; } }
 
 .pt-zona { padding-top: calc(var(--zona-h) + 4px); }
-/* Topbar: 8px de aire arriba más la safe area en mobile; en desktop la altura fija la centra. */
+/* Header propio de las pantallas fuera del shell (CajaResumen): 8px de aire
+   arriba más la safe area en mobile; en desktop la altura fija lo centra. */
 .pt-topbar { padding-top: calc(env(safe-area-inset-top) + 8px); }
 @media (min-width: 768px) { .pt-topbar { padding-top: 0; } }
 #app-main-scroll { scroll-padding-top: var(--zona-h); }
@@ -801,55 +774,135 @@ button, a {
   left: 0;
   right: 0;
   top: 0;
-  bottom: -20px;
+  bottom: 0;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgb(var(--background) / 0.8) 0%,
-    rgb(var(--background) / 0.8) 30%,
-    rgb(var(--background) / 0) 100%
-  );
+  background: none;
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
 }
-.pbh-capa {
+/* Cola de 40px: mismo blur, desvaneciéndose hacia abajo. */
+.pbh-fondo::after {
+  content: '';
   position: absolute;
-  inset: 0;
-  -webkit-backdrop-filter: blur(var(--pbh-blur));
-  backdrop-filter: blur(var(--pbh-blur));
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 40px;
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+  mask-image: linear-gradient(to bottom, black, transparent);
 }
-.pbh-capa-1 {
-  --pbh-blur: 1.5px;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 100%);
-}
-.pbh-capa-2 {
-  --pbh-blur: 3px;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 75%);
-  mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 75%);
-}
-.pbh-capa-3 {
-  --pbh-blur: 6px;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 15%, transparent 55%);
-  mask-image: linear-gradient(to bottom, black 0%, black 15%, transparent 55%);
-}
-.pbh-capa-4 {
-  --pbh-blur: 12px;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 5%, transparent 35%);
-  mask-image: linear-gradient(to bottom, black 0%, black 5%, transparent 35%);
-}
-/* Celulares de gama media: una capa menos (3 en lugar de 4). */
-@media (max-width: 767px) {
-  .pbh-capa-1 { display: none; }
-}
+/* Sin backdrop-filter (o con "reducir transparencia" del sistema) el texto
+   quedaría ilegible sobre el contenido: ahí, y solo ahí, fondo canvas sólido. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .pbh-capa { display: none; }
+  .pbh-fondo { background: rgb(var(--background)); }
+  .pbh-fondo::after { display: none; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .pbh-capa { display: none; }
+  .pbh-fondo { background: rgb(var(--background)); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .pbh-fondo::after { display: none; }
 }
 @media print {
   .pbh { display: none !important; }
   .pt-zona { padding-top: 0 !important; }
 }
+
+/*
+  PageTopbar — grilla de la barra única (components/brand/PageTopbar.jsx).
+
+  Mobile: fila de 56px (izquierda: botón circular de 40px + título; derecha:
+  acciones circulares de 40px) y, si la página tiene controles, una segunda
+  fila de pills DENTRO del mismo contenedor.
+  Desktop (≥768px): UNA sola fila de 64px — título · controles · acciones.
+  Nunca pasa a dos líneas: los controles scrollean en horizontal.
+*/
+.pt-grid {
+  display: grid;
+  grid-template-areas: "izq der" "ctrl ctrl";
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: 56px auto;
+  align-items: center;
+  column-gap: 8px;
+  padding-top: env(safe-area-inset-top);
+}
+@media (min-width: 768px) {
+  .pt-grid {
+    grid-template-areas: "izq ctrl der";
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: 64px;
+    column-gap: 16px;
+    padding-top: 0;
+  }
+}
+.pt-izq { grid-area: izq; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.pt-der { grid-area: der; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+@media (min-width: 768px) { .pt-der { gap: 8px; } }
+.pt-ctrl { grid-area: ctrl; min-width: 0; }
+.pt-ctrl:empty { display: none; }
+/* Mobile: la fila de pills respira 4px arriba y 8px abajo (56 + 48 = zona). */
+.pt-ctrl { padding-bottom: 8px; }
+@media (min-width: 768px) { .pt-ctrl { padding-bottom: 0; } }
+
+/*
+  Fila de controles: una sola línea, 40px de alto, scroll horizontal sin
+  barra visible y con fade en los bordes (lo calcula ToolbarSticky.jsx). Los
+  controles de las páginas entran acá tal cual: estas reglas los normalizan a
+  40px en TODOS los anchos, también en mobile (la zona sticky es la excepción
+  documentada al mínimo táctil de 44px, ver CLAUDE.md).
+*/
+.toolbar-fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+}
+.toolbar-fila::-webkit-scrollbar { display: none; }
+/* Desktop: los controles van centrados en la fila. `safe center` para que,
+   cuando no entran y la fila scrollea, el primer control siga alcanzable
+   (con `center` a secas el extremo izquierdo queda fuera del scroll). */
+@media (min-width: 768px) {
+  .toolbar-fila { justify-content: center; justify-content: safe center; }
+}
+.toolbar-fila > * { flex: 0 0 auto; scroll-snap-align: start; }
+.toolbar-fila .field { height: 40px; min-height: 40px; padding-top: 0; padding-bottom: 0; }
+.toolbar-fila .btn { height: 40px; min-height: 40px; }
+/* Segmented (SegmentedControl / SegmentedScroll): contenedor de 40px con su
+   padding de 1, botones de 32px. Se reconocen por aria-pressed, sin tocar
+   esos componentes. */
+.toolbar-fila [role="group"] > button[aria-pressed] { height: 32px; min-height: 32px; }
+
+/* Pill de control de la zona sticky: 40px, padding 16px, 15px semibold. */
+.pill-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: 16px;
+  border-radius: 9999px;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 0;
+  color: rgb(var(--primary));
+  background-color: rgb(var(--pill) / var(--pill-a));
+  transition: background-color .2s;
+}
+.pill-control:hover { background-color: rgb(var(--pill) / calc(var(--pill-a) * 1.8)); }
+.pill-control-icono { width: 40px; padding-inline: 0; }
+.pill-control-activa { background-color: rgb(var(--primary)); color: rgb(var(--primary-foreground)); }
+.pill-control-activa:hover { background-color: rgb(var(--chart-2)); }
+.pill-control:disabled { opacity: .4; }
+/* Las pills del topbar nunca llevan blur propio: una sola capa por página. */
+.pill-control, .toolbar-fila [role="group"] { -webkit-backdrop-filter: none; backdrop-filter: none; }
 
 /*
   Saludo del Dashboard (Home): arranca grande y, al scrollear, se compacta al

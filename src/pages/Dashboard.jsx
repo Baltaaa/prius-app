@@ -16,7 +16,8 @@ import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import PlanoGrid from "../components/plano/PlanoGrid"
 import PlanoRotable from "../components/dashboard/PlanoRotable"
 import PlanoViewport from "../components/plano/PlanoViewport"
-import { PlanoControles, PlanoAcciones } from "../components/dashboard/PlanoFiltros"
+import { PlanoControles, PlanoStatTiles } from "../components/dashboard/PlanoFiltros"
+import ToolbarSticky from "../components/brand/ToolbarSticky"
 import { useData } from "../context/DataProvider"
 import { calcularPlanoStats } from "../lib/planoStats"
 import { buildUnitsMap } from "../lib/planoUnits"
@@ -615,43 +616,67 @@ export default function Dashboard() {
 
     return (
       <div className="flex-1 min-h-0 flex flex-col gap-2.5">
-        {/* Franja superior: controles compartidos con el Plano mobile (ver
-            PlanoFiltros.jsx). Las stats son los filtros; no hay fila de chips. */}
-        <div data-card-compacta className="card-surface p-3 shrink-0">
-          {/* Modo cliente: logo dorado a la izquierda (centrado con los controles), controles a su
-              derecha con 16px, y la X de 44px a la derecha. Esc también cierra (useOverlay). */}
-          <div className={fullscreen ? 'flex items-center gap-4' : ''}>
-          {fullscreen && <img src="/images/prius-icon.png" alt="Prius" className="w-11 h-11 object-contain shrink-0" />}
-          <PlanoControles
-            selectedDate={selectedDate}
-            esHoy={esHoy}
-            diaSemana={diaSemana}
-            onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
-            onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
-            onHoy={() => goToDate(todayStr())}
-            onDateChange={goToDate}
-            planoStats={planoStats}
-            estadoFiltro={estadoFiltro}
-            onEstado={toggleEstadoFiltro}
-            tipoFiltro={tipoFiltro}
-            onTipo={setTipoFiltro}
-            onImprimir={() => window.print()}
-            anchoFecha="w-[148px]"
-            modoCliente={fullscreen}
-          />
-          {fullscreen && (
-            <button
-              type="button"
-              onClick={() => setFullscreenOpen(false)}
-              title="Cerrar pantalla completa"
-              aria-label="Cerrar pantalla completa"
-              className="ml-auto w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-ink hover:bg-surface transition-colors"
-            >
-              <X size={20} strokeWidth={1.5} />
-            </button>
-          )}
+        {/* Controles (fecha, tipo, Referencias, impresiones): en la vista
+            normal viven en la barra única de la página (ToolbarSticky ->
+            PageTopbar); en pantalla completa, en su propia franja junto al
+            logo y la X. Los tiles de stats, que SON los filtros de estado,
+            siguen en su card acá abajo. */}
+        {fullscreen ? (
+          <div data-card-compacta className="card-surface p-3 shrink-0">
+            {/* Modo cliente: logo a la izquierda (centrado con los controles),
+                controles a su derecha con 16px, y la X de 44px a la derecha.
+                Esc también cierra (useOverlay). */}
+            <div className="flex items-center gap-4">
+              <img src="/images/prius-icon.png" alt="Prius" className="w-11 h-11 object-contain shrink-0" />
+              <PlanoControles
+                selectedDate={selectedDate}
+                esHoy={esHoy}
+                diaSemana={diaSemana}
+                onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
+                onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
+                onHoy={() => goToDate(todayStr())}
+                onDateChange={goToDate}
+                tipoFiltro={tipoFiltro}
+                onTipo={setTipoFiltro}
+                modoCliente
+              />
+              <button
+                type="button"
+                onClick={() => setFullscreenOpen(false)}
+                title="Cerrar pantalla completa"
+                aria-label="Cerrar pantalla completa"
+                className="ml-auto w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-ink hover:bg-surface transition-colors"
+              >
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <ToolbarSticky>
+              <PlanoControles
+                selectedDate={selectedDate}
+                esHoy={esHoy}
+                diaSemana={diaSemana}
+                onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
+                onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
+                onHoy={() => goToDate(todayStr())}
+                onDateChange={goToDate}
+                tipoFiltro={tipoFiltro}
+                onTipo={setTipoFiltro}
+                onImprimir={() => window.print()}
+              />
+            </ToolbarSticky>
+            <div data-card-compacta className="card-surface p-3 shrink-0">
+              <PlanoStatTiles
+                stats={planoStats}
+                valor={estadoFiltro}
+                onChange={toggleEstadoFiltro}
+                fecha={selectedDate}
+              />
+            </div>
+          </>
+        )}
 
         {/* Workspace: grid (sin tocar) + panel lateral fijo (desktop) */}
         <div className="flex-1 min-h-0 flex gap-3">
@@ -668,7 +693,6 @@ export default function Dashboard() {
                     <span className="text-label">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
                   </span>
                 )}
-                {!fullscreen && <PlanoAcciones onImprimir={() => window.print()} className="lg:hidden" />}
               </div>
             </div>
             {loading ? (
