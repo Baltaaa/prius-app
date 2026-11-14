@@ -193,6 +193,11 @@
   .card-inner { @apply bg-surface rounded-inner p-inner; }
   /* Etiqueta de sección: 13px ink-2, 8px sobre su contenido. */
   .section-label { @apply block mb-2 text-label text-ink-2; }
+  /* Título de grupo de una lista de ajustes (Configuración, listas agrupadas
+     estilo app nativa): la etiqueta de sección en versalitas. Única excepción
+     a "sin mayúsculas" de DESIGN.md, y vive acá —no como clase suelta en el
+     JSX— para que haya un solo lugar donde cambiarla. */
+  .section-label-grupo { @apply section-label; text-transform: uppercase; letter-spacing: 0.06em; }
   /* Capa elevada (modales, popovers, sheets, dropdowns, toasts): en oscuro la elevación es más
      luz, no sombra. Redefine --card para todo lo que cuelga adentro; en claro no cambia nada. */
   .capa-elevada { --card: var(--elevated); }

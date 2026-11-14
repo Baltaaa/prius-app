@@ -1,9 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Topbar from '../components/brand/Topbar'
 import { AvisoCierreInminente } from '../components/crm/AvisosCaja'
 import ProgressiveBlurHeader from '../components/brand/ProgressiveBlurHeader'
 import { ToolbarSlotContext } from '../components/brand/toolbarSlot'
+import { TituloPaginaContext } from '../components/brand/tituloPagina'
 import AppFooter from '../components/crm/AppFooter'
 import AppShell from '../components/brand/AppShell'
 import BannerInstalar from '../components/brand/BannerInstalar'
@@ -83,6 +84,10 @@ export default function AppLayout() {
   const layoutRef = useRef(null)
   const zonaRef = useRef(null)
   const [slot, setSlot] = useState(null)
+  // Título de la barra: el de la sección salvo que una pantalla con
+  // subpantallas propias lo pise (ver tituloPagina.js).
+  const [tituloPagina, setTituloPagina] = useState(null)
+  const tituloCtx = useMemo(() => ({ titulo: tituloPagina, setTitulo: setTituloPagina }), [tituloPagina])
   useLayoutEffect(() => {
     const zona = zonaRef.current
     const layout = layoutRef.current
@@ -117,6 +122,7 @@ export default function AppLayout() {
             el BottomNav fijo y el contenido final de cada pantalla quedan
             dentro del área visible desde el primer render. AppShell decide
             Sidebar (≥1024px) / NavRail (768–1023px) / BottomNav (<768px). */}
+        <TituloPaginaContext.Provider value={tituloCtx}>
         <ToolbarSlotContext.Provider value={slot}>
         <AppShell>
           <div ref={layoutRef} className="layout-zona flex-1 flex flex-col h-dvh min-w-0 overflow-hidden relative">
@@ -189,6 +195,7 @@ export default function AppLayout() {
             por dispositivo (ver BannerInstalar). */}
         <BannerInstalar />
         </ToolbarSlotContext.Provider>
+        </TituloPaginaContext.Provider>
         </NuevaReservaProvider>
         </NotificacionesProvider>
         </ArranqueProvider>

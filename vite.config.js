@@ -1,6 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { readFileSync } from 'node:fs'
+
+// Versión de la app: la de package.json, leída en el build. Única fuente —
+// src/lib/appVersion.js la expone al front (ver "Acerca de" en Configuración).
+const { version: VERSION_PAQUETE } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
 
 /**
  * Preload de la tipografía de marca (nov 2026, Tarea 6).
@@ -36,6 +41,9 @@ function preloadManrope() {
 }
 
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(VERSION_PAQUETE),
+  },
   plugins: [
     react(),
     preloadManrope(),

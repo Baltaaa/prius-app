@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useRef, useEffect, useContext } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useNotificaciones } from '../../context/NotificacionesProvider'
@@ -39,6 +39,7 @@ import { useHoyAR } from '../../hooks/useHoyAR'
 import { usePrivacidad } from '../../context/PrivacidadProvider'
 import PageTopbar, { BotonCircular } from './PageTopbar'
 import { abrirMenuMas } from '../../lib/menuMas'
+import { TituloPaginaContext } from './tituloPagina'
 
 // Mobile: el botón circular de la izquierda es "menú" en las secciones de la
 // bottom nav y "atrás" en todo lo que vive dentro del sheet "Más" (Caja,
@@ -97,6 +98,9 @@ export default function TopBar({ controlesRef }) {
   const navigate = useNavigate()
   const location = useLocation()
   const section = useSection(location.pathname)
+  // Una pantalla con subpantallas propias (Configuración en mobile) pisa el
+  // título mientras una está abierta — ver tituloPagina.js.
+  const tituloPisado = useContext(TituloPaginaContext)?.titulo
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -394,7 +398,7 @@ export default function TopBar({ controlesRef }) {
 
   // Botón circular de 40px de la izquierda (solo mobile): menú en las
   // secciones de la bottom nav, atrás en las que viven dentro de "Más".
-  const esNavPrincipal = RUTAS_NAV_PRINCIPAL.some((r) => location.pathname.startsWith(r))
+  const esNavPrincipal = !tituloPisado && RUTAS_NAV_PRINCIPAL.some((r) => location.pathname.startsWith(r))
   const izquierda = esNavPrincipal ? (
     <BotonCircular
       icono={Menu}
@@ -413,8 +417,8 @@ export default function TopBar({ controlesRef }) {
 
   const titulo = (
     <PageHeader
-      title={esHome ? `Hola, ${primerNombre}` : section.name}
-      shortTitle={esHome ? undefined : section.shortName}
+      title={tituloPisado || (esHome ? `Hola, ${primerNombre}` : section.name)}
+      shortTitle={tituloPisado || esHome ? undefined : section.shortName}
       greeting={esHome}
       compacto={compacto}
     >
