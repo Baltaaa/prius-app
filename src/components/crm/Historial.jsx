@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff,
+  CalendarDays, Wallet, Users, MapPin, Receipt, Ban, StickyNote, Activity, History, Lock, Inbox, UserPlus, LogIn, LogOut, ShieldOff, Globe,
 } from 'lucide-react'
 import { useHistorial } from '../../hooks/useHistorial'
 import { formatFecha, formatHora, formatMonto, formatMontosEnTexto } from '../../lib/format'
@@ -81,6 +81,12 @@ const TIPO_EVENTO_META = {
   login: { icon: LogIn, label: 'Inicio de sesión', tono: 'exito', filtro: 'otros' },
   logout: { icon: LogOut, label: 'Cierre de sesión', tono: 'info', filtro: 'otros' },
   logout_inactividad: { icon: ShieldOff, label: 'Cierre por inactividad', tono: 'aviso', filtro: 'otros' },
+  // Fase 5A (nov 2026): cuentas web de clientes (trigger de clientes_cuentas;
+  // tabla 'clientes' → el destino es la ficha del cliente).
+  cuenta_web_vinculada: { icon: Globe, label: 'Cuenta web vinculada', tono: 'info', filtro: 'otros' },
+  cuenta_web_confirmada: { icon: Globe, label: 'Cuenta web confirmada', tono: 'exito', filtro: 'otros' },
+  cuenta_web_desvinculada: { icon: Globe, label: 'Cuenta web desvinculada', tono: 'peligro', filtro: 'otros' },
+  cuenta_web_editada: { icon: Globe, label: 'Cuenta web editada', tono: 'info', filtro: 'otros' },
 }
 
 const FILTROS = [

@@ -12,6 +12,7 @@ import ReservaPagosCard from './ReservaPagosCard'
 import Historial from './Historial'
 import ScrollFade from '../ui/ScrollFade'
 import UnidadLabel from './UnidadLabel'
+import CuentaWebCliente from './CuentaWebCliente'
 
 // Ficha de cliente — contenido compartido entre el panel lateral fijo de
 // desktop (≥1024px, master-detalle) y la pantalla completa de mobile/tablet
@@ -174,6 +175,9 @@ export default function ClienteDetalleContent({
               </div>
             )}
           </div>
+
+          {/* Cuenta web (Google) vinculada: solo si existe (Fase 5A). */}
+          <CuentaWebCliente clienteId={cliente.id} />
 
           {/* Reservas y pagos: UNA tarjeta por reserva o grupo, de todos los tipos. */}
           <div>

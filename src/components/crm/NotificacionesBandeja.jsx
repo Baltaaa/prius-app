@@ -4,7 +4,7 @@ import { useNotificaciones } from '../../context/NotificacionesProvider'
 import { formatTiempoRelativo } from '../../lib/format'
 import {
   Bell, Inbox, FileText, AlertCircle, Wallet, Clock, CalendarPlus,
-  CalendarClock, Ban, CheckCircle2, CheckCheck, ChevronDown, AlertTriangle,
+  CalendarClock, Ban, CheckCircle2, CheckCheck, ChevronDown, AlertTriangle, Globe,
 } from 'lucide-react'
 import { emojiEnTexto } from '../../lib/unidadIcono'
 import ScrollFade from '../ui/ScrollFade'
@@ -25,6 +25,10 @@ const TIPO_META = {
   pago_registrado: { icon: CheckCircle2, color: 'text-success-ink', accion: 'Ver pago', plural: 'pagos registrados' },
   arqueo_pendiente: { icon: AlertTriangle, color: 'text-danger-ink', accion: 'Hacer arqueo y Z', plural: 'cajas con arqueo pendiente', alerta: true },
   caja_cerrada: { icon: Wallet, color: 'text-success-ink', accion: 'Ver caja', plural: 'cajas cerradas' },
+  // Fase 5A (nov 2026): vínculo de cuenta web por DNI/teléfono, a confirmar
+  // en la ficha del cliente o en Recepción. Se resuelve sola al confirmar o
+  // desvincular (trigger de clientes_cuentas).
+  cuenta_web_pendiente: { icon: Globe, color: 'text-ink', accion: 'Confirmar cuenta', plural: 'cuentas web pendientes' },
 }
 
 const metaDe = (tipo) => TIPO_META[tipo] || { icon: Bell, color: 'text-ink-2', accion: null, plural: 'notificaciones' }

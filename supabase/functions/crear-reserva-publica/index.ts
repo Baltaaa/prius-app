@@ -6,6 +6,13 @@ import { obtenerIp, consumirLimite } from "../_shared/ratelimit.ts"
 import { verificarTurnstile } from "../_shared/turnstile.ts"
 import { normalizarNombre, parseTelefono, dniValido, parseDNI, emailValido, normalizarEmail } from "../_shared/parse.ts"
 import { json, datosInvalidos, captchaInvalido, rateLimited, errorInterno } from "../_shared/respuesta.ts"
+import { usuarioDelRequest } from "../_shared/usuario.ts"
+
+// Fase 5A (nov 2026): reservar exige login de cliente (Google). El gateway
+// NO verifica el JWT (verify_jwt: false en el deploy) para poder responder
+// 401 login_requerido con CORS; el token se valida acá con getUser().
+// El cliente de la reserva sale del vínculo de la cuenta (clientes_cuentas),
+// no del body; el email sale de la cuenta, nunca del body.
 
 const Entrada = z.object({
   tipo_alquiler: z.enum(["dia", "periodo"]),
@@ -19,7 +26,8 @@ const Entrada = z.object({
     nombre: z.string().min(1),
     apellido: z.string().min(1),
     telefono_e164: z.string().min(1),
-    email: z.string().min(1),
+    // Ignorado: el email sale de la cuenta de Google (JWT), no del form.
+    email: z.string().nullable().optional(),
     dni: z.string().nullable().optional(),
   }),
   lead_id: z.string().uuid().nullable().optional(),
@@ -35,13 +43,26 @@ Deno.serve(async (req) => {
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
   try {
+    const usuario = await usuarioDelRequest(supabase, req)
+    if (!usuario) {
+      return json(
+        { ok: false, error: "login_requerido", mensaje: "Ingresá con tu cuenta de Google para reservar." },
+        401,
+        cors,
+      )
+    }
+
     const ip = obtenerIp(req)
 
     const dentroDelLimite = await consumirLimite(supabase, "crear", ip, 5, 3600)
     if (!dentroDelLimite) return rateLimited(cors)
+    // Mismo límite por cuenta: cambiar de red no da más intentos.
+    const dentroDelLimiteCuenta = await consumirLimite(supabase, "crear_cuenta", usuario.id, 5, 3600)
+    if (!dentroDelLimiteCuenta) return rateLimited(cors)
 
     let body: unknown
     try {
@@ -66,19 +87,20 @@ Deno.serve(async (req) => {
     const nombre = normalizarNombre(input.cliente.nombre)
     const apellido = normalizarNombre(input.cliente.apellido)
     const telefono = parseTelefono(input.cliente.telefono_e164)
-    const email = normalizarEmail(input.cliente.email)
+    const email = normalizarEmail(usuario.email)
     const dni = input.cliente.dni ? parseDNI(input.cliente.dni) : null
 
     if (!nombre) campos["cliente.nombre"] = "Ingresá un nombre válido"
     if (!apellido) campos["cliente.apellido"] = "Ingresá un apellido válido"
     if (!telefono) campos["cliente.telefono_e164"] = "El teléfono no es válido"
-    if (!emailValido(email) || !email) campos["cliente.email"] = "El email no es válido"
+    if (!emailValido(email) || !email) campos["cliente.email"] = "Tu cuenta no tiene un email válido"
     if (dni !== null && !dniValido(dni)) campos["cliente.dni"] = "El DNI no es válido"
     if (input.hasta < input.desde) campos["hasta"] = "La fecha hasta no puede ser anterior a desde"
 
     if (Object.keys(campos).length > 0) return datosInvalidos(campos, cors)
 
     const { data, error } = await supabase.rpc("crear_reserva_publica", {
+      p_user_id: usuario.id,
       p: {
         tipo_alquiler: input.tipo_alquiler,
         desde: input.desde,

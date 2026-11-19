@@ -34,6 +34,12 @@ export const FEATURES = {
   // nav — poner en `true` cuando estén listas, sin tocar nada más.
   reportes: true,
   ocupacion: false,
+  // Fase 5A (nov 2026): cuentas web de clientes (login con Google en la
+  // landing). En el CRM: línea "Cuenta web" en la ficha de cliente con
+  // Confirmar/Desvincular, "Confirmar cuenta web" en Recepción y la
+  // notificación de cuenta pendiente. Apagado, el CRM queda como antes (la
+  // base y las funciones siguen igual).
+  cuentas_web: true,
 } as const
 
 export type FeatureKey = keyof typeof FEATURES

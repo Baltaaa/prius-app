@@ -66,6 +66,11 @@ export const PERMISOS: Record<string, Rol[]> = {
   imprimir_exportar_caja: ['superadmin', 'admin'],
   historial_cajas: ['superadmin', 'admin'],
   'recepcion.cobrar': ['superadmin', 'admin'],
+  // Fase 5A (nov 2026): confirmar o desvincular la cuenta web (Google) de un
+  // cliente — espeja el guard real de confirmar_cuenta_web /
+  // desvincular_cuenta_web (es_admin()) y la policy de update de
+  // clientes_cuentas.
+  'clientes.cuenta_web': ['superadmin', 'admin'],
 }
 
 /** Clave no registrada en la matriz → solo superadmin (default seguro). */

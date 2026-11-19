@@ -20,6 +20,7 @@ import StatusBadge from '../components/crm/StatusBadge'
 import MoneyInput from '../components/inputs/MoneyInput'
 import { supabase } from '../lib/supabase'
 import UnidadLabel from '../components/crm/UnidadLabel'
+import CuentaWebCliente from '../components/crm/CuentaWebCliente'
 import CodigoReservaInput from '../components/recepcion/CodigoReservaInput'
 import RecepcionHero from '../components/recepcion/RecepcionHero'
 import RecepcionStats from '../components/recepcion/RecepcionStats'
@@ -400,6 +401,10 @@ export default function Recepcion() {
                     )}
                   </div>
                 )}
+
+                {/* Fase 5A: cuenta web pendiente → se confirma acá, con el
+                    cliente en el mostrador, junto al cobro. */}
+                {primera.cliente_id && <CuentaWebCliente clienteId={primera.cliente_id} variante="recepcion" />}
 
                 {errorCobro && (
                   <p className="text-label text-danger flex items-center gap-2">

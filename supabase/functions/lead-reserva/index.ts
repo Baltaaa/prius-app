@@ -6,6 +6,12 @@ import { obtenerIp, consumirLimite } from "../_shared/ratelimit.ts"
 import { verificarTurnstile } from "../_shared/turnstile.ts"
 import { normalizarNombre, parseTelefono, normalizarEmail, emailValido } from "../_shared/parse.ts"
 import { json, datosInvalidos, captchaInvalido, rateLimited, errorInterno } from "../_shared/respuesta.ts"
+import { usuarioDelRequest } from "../_shared/usuario.ts"
+
+// Fase 5A (nov 2026): el token de usuario es opcional. Si viene uno válido
+// (cliente logueado con Google), el lead guarda el email de la cuenta en vez
+// del tipeado y queda marcado en datos_form.cuenta_google. verify_jwt: false
+// en el deploy: sin sesión el form sigue andando (Turnstile + rate limit).
 
 const Entrada = z.object({
   lead_id: z.string().uuid().nullable().optional(),
@@ -27,6 +33,7 @@ Deno.serve(async (req) => {
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
   try {
@@ -55,7 +62,9 @@ Deno.serve(async (req) => {
     const campos: Record<string, string> = {}
     const nombre = normalizarNombre(input.nombre)
     const telefono = parseTelefono(input.telefono_e164)
-    const email = input.email ? normalizarEmail(input.email) : null
+    const usuario = await usuarioDelRequest(supabase, req)
+    const emailCuenta = usuario?.email ? normalizarEmail(usuario.email) : null
+    const email = emailCuenta ?? (input.email ? normalizarEmail(input.email) : null)
 
     if (!nombre) campos["nombre"] = "Ingresá un nombre válido"
     if (!telefono) campos["telefono_e164"] = "El teléfono no es válido"
@@ -71,7 +80,9 @@ Deno.serve(async (req) => {
         email,
         motivo: input.motivo,
         mensaje: input.mensaje ?? null,
-        datos_form: input.datos_form ?? null,
+        datos_form: emailCuenta
+          ? { ...(input.datos_form ?? {}), cuenta_google: true, email_verificado: emailCuenta }
+          : (input.datos_form ?? null),
       },
     })
 

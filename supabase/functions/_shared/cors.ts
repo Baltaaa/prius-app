@@ -18,6 +18,9 @@ const ORIGENES_FIJOS = [
 ]
 // Previews de Cloudflare Pages: https://<hash-o-rama>.prius-app.pages.dev
 const PREVIEW_REGEX = /^https:\/\/[a-z0-9-]+\.prius-app\.pages\.dev$/
+// Previews de la landing (beachFlow), p. ej. la rama fase4b-reservas con
+// login de Google (Fase 5A, nov 2026).
+const PREVIEW_LANDING_REGEX = /^https:\/\/[a-z0-9-]+\.priusplayagrande\.pages\.dev$/
 
 const ORIGENES_ENV = (Deno.env.get("ALLOWED_ORIGINS") || "")
   .split(",")
@@ -26,7 +29,7 @@ const ORIGENES_ENV = (Deno.env.get("ALLOWED_ORIGINS") || "")
 
 export function origenPermitido(origin: string | null): boolean {
   if (!origin) return false
-  return ORIGENES_FIJOS.includes(origin) || ORIGENES_ENV.includes(origin) || PREVIEW_REGEX.test(origin)
+  return ORIGENES_FIJOS.includes(origin) || ORIGENES_ENV.includes(origin) || PREVIEW_REGEX.test(origin) || PREVIEW_LANDING_REGEX.test(origin)
 }
 
 export function corsHeaders(origin: string | null): Record<string, string> {
