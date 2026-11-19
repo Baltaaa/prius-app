@@ -85,7 +85,7 @@ for (const [nombre, w, h] of ANCHOS) {
     // fuera de pantalla completa SÍ están los tiles, Referencias e Imprimir
     await expect(page.getByRole('radiogroup', { name: 'Filtrar el plano por estado' })).toBeVisible()
     await expect(page.locator('button[title="Referencias"]:visible').first()).toBeVisible()
-    await expect(page.locator('button[title="Imprimir A4"]:visible').first()).toBeVisible()
+    await expect(page.locator('button[title="Imprimir A4 (carperos)"]:visible').first()).toBeVisible()
     // dejar un filtro de estado puesto: en modo cliente no debe aplicarse
     await page.getByRole('radio', { name: /Pendientes/ }).first().click()
 
@@ -96,7 +96,7 @@ for (const [nombre, w, h] of ANCHOS) {
     await expect(page.getByRole('radiogroup', { name: 'Filtrar el plano por estado' })).toHaveCount(0)
     for (const t of ['Todas', 'Ocupadas', 'Libres', /Pendientes/]) await expect(page.getByRole('radio', { name: t })).toHaveCount(0)
     await expect(page.locator('button[title="Referencias"]:visible')).toHaveCount(0)
-    await expect(page.locator('button[title="Imprimir A4"]:visible')).toHaveCount(0)
+    await expect(page.locator('button[title="Imprimir A4 (carperos)"]:visible')).toHaveCount(0)
     await expect(page.getByText(/Tocá una unidad para ver el detalle/)).toHaveCount(0)
     // visibles: fecha, Todo/Carpas/Sombrillas, zoom, rotar, salir
     await expect(page.getByRole('radiogroup', { name: 'Filtrar el plano por tipo de unidad' }).or(page.getByRole('group', { name: 'Filtrar el plano por tipo de unidad' })).first()).toBeVisible()

@@ -185,11 +185,12 @@ export function PlanoNavegadorFecha({
 // van acá: son stats de 4 celdas y siguen en la card de la página
 // (PlanoStatTiles), que es donde se leen como números.
 //
-// `modoCliente`: la versión mínima de pantalla completa — solo fecha y
-// Todo/Carpas/Sombrillas, sin Referencias ni impresiones.
+// La vista clientes (pantalla completa) no usa este bloque: monta
+// PlanoNavegadorFecha dentro de MarcoPlanoClaro (components/plano), que trae
+// sus propios chips Todo/Carpas/Sombrillas.
 export function PlanoControles({
   selectedDate, esHoy, diaSemana, onPrevDay, onNextDay, onHoy, onDateChange,
-  tipoFiltro, onTipo, onImprimir, onImprimirCliente, compacto = false, modoCliente = false,
+  tipoFiltro, onTipo, onImprimir, onImprimirCliente, compacto = false,
 }) {
   return (
     <>
@@ -206,7 +207,7 @@ export function PlanoControles({
 
       <PlanoTipoSegmented valor={tipoFiltro} onChange={onTipo} />
 
-      {!modoCliente && <PlanoAcciones onImprimir={onImprimir} onImprimirCliente={onImprimirCliente} />}
+      <PlanoAcciones onImprimir={onImprimir} onImprimirCliente={onImprimirCliente} />
     </>
   )
 }

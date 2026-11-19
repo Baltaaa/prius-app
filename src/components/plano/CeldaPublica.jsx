@@ -1,5 +1,9 @@
 import { Lock } from "lucide-react"
 
+// DEPRECADA (Fase 6A, nov 2026): la landing pasa a la "vista clientes" del CRM
+// (MarcoPlanoClaro + PlanoClaro + CeldaClara, ver PORTABILIDAD.md). Se deja
+// mientras beachFlow migra; no usar en código nuevo.
+
 // Celda de la landing pública (Fase 4A/4B). Mismo tamaño, forma, tipografía
 // y número que Cell.jsx (CRM) — para que el plano se vea idéntico — pero
 // SIN colores por tipo_alquiler: la landing no sabe qué tipo de alquiler

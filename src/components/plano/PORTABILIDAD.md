@@ -1,95 +1,191 @@
 # Portabilidad — src/components/plano
 
 Fuente de verdad: priusApp/src/components/plano. beachFlow tiene una copia
-exacta — cualquier cambio se hace acá y se vuelve a copiar.
+exacta de TODA la carpeta: cualquier cambio se hace acá y se vuelve a copiar,
+siempre desde un commit concreto de priusApp.
 
 ## Regla
 
 Los archivos de esta carpeta solo importan `react`, `lucide-react` y otros
 archivos de esta misma carpeta. Nada de DataProvider, router, permisos,
 OverlayProvider, `lib/format` ni `lib/colors` de afuera. Si algo de eso
-hiciera falta, se pasa por props, o se copia a esta carpeta (ver abajo).
+hiciera falta, se pasa por props.
+
+## Vista clientes (Fase 6A, nov 2026): lo que usa la landing
+
+La landing usa la misma interfaz que el modal "vista clientes" (pantalla
+completa) del Plano del CRM. El modal del CRM consume exactamente estos tres
+componentes, así que lo que se ve en el CRM es lo que se ve en la web
+(`e2e/plano-clientes-visual.spec.ts` lo compara píxel a píxel a 360, 390 y
+1440, en claro y oscuro).
+
+- `MarcoPlanoClaro.jsx` — el marco. Sin datos: todo por props y el cuerpo por
+  children.
+  - `variante="amplia"` (≥768px): header con `logo` (slot), `selectorFecha`
+    (slot), chips Todo / Carpas / Sombrillas y la X (`onCerrar`, opcional); el
+    mapa en `PlanoViewport` y a la derecha la columna +, −, Encuadrar, Rotar.
+    El zoom lo maneja `usePlanoEncuadre()` y se pasa como `encuadre`.
+  - `variante="compacta"` (<768px): fila con `selectorFecha` + chips (scroll
+    horizontal con snap), el mapa en `ZoomPanPinch` y una pill flotante con
+    +, −, Encuadrar, Rotar y cerrar (`onCerrar`).
+  - Props: `tipo` (null | 'carpas' | 'sombrillas') + `onTipo`, `emojiCarpa` /
+    `emojiSombrilla` (en el CRM salen de `lib/unidadIcono.js`: 🏠 y 🏖️),
+    `rotado` + `onRotar`, `cargando`, `resetKey` (compacta: re-encuadra al
+    cambiar), `slideRef` + `onAnimationEnd` (animación al cambiar de fecha).
+- `PlanoClaro.jsx` — el cuerpo: Recreación / Acceso / Pileta, las 6 hileras de
+  carpas con sus pasillos, el sector sombrillas y el océano animado. Es
+  `PlanoRotable` + `PlanoGrid` (la geometría sigue en un solo lugar,
+  `planoLayout.js`). Props: `unidades`, `renderCelda`, `rotado`, `mar`.
+- `CeldaClara.jsx` — la casilla.
+  - `estado`: `libre` (blanca, seleccionable), `ocupada` (negra, no
+    seleccionable), `elegida` (dorado #F2CA50 sólido), `sugerida` (blanca con
+    borde dorado).
+  - `deshabilitada`: el tipo quedó afuera por los chips (atenuada, sin click).
+  - `resaltada`: el tipo coincide con el chip elegido (aro dorado). El CRM
+    hace las dos cosas a la vez al filtrar: atenúa lo que no corresponde y
+    marca lo que sí.
+  - `tamano`: `compacta` (24×18 / 28×20, número afuera del lado `numberSide`;
+    para `amplia`) o `tactil` (44×36, número adentro; para `compacta`).
+  - `onClick(numero)` solo se llama en una casilla seleccionable. `etiqueta`
+    va como `aria-label` (ej. "Carpa 74, libre"). Los `data-*` pasan al botón.
+
+Ejemplo (landing, desktop):
+
+```jsx
+const encuadre = usePlanoEncuadre({ isMobile: false, remedir: cargando })
+<MarcoPlanoClaro
+  variante="amplia"
+  logo={<img src="/images/prius-icon.png" alt="Prius" className="w-11 h-11 object-contain shrink-0" />}
+  selectorFecha={<MiSelectorDeFecha />}
+  tipo={tipo} onTipo={setTipo} emojiCarpa="🏠" emojiSombrilla="🏖️"
+  rotado={rotado} onRotar={() => setRotado((v) => !v)}
+  cargando={cargando} encuadre={encuadre}
+>
+  <PlanoClaro
+    unidades={unidades}
+    rotado={rotado}
+    renderCelda={(slot) => (
+      <CeldaClara
+        key={`${slot.tipo}-${slot.numero}`}
+        numero={slot.numero}
+        numberSide={slot.numberSide}
+        tamano="compacta"
+        estado={estadoDe(slot)}            // de disponibilidad_publica + la selección
+        deshabilitada={tipo && !coincide(slot, tipo)}
+        resaltada={tipo && coincide(slot, tipo)}
+        onClick={elegir}
+      />
+    )}
+  />
+</MarcoPlanoClaro>
+```
+
+El selector de fecha es un slot porque el del CRM (`PlanoNavegadorFecha`, con
+`DateInput` y react-day-picker) no es portable. Para verse igual: una pill de
+40px de alto, fondo negro 6% (`bg-black/[0.06]`), ‹ fecha › con botones de
+32px.
+
+Ocupado / libre en la landing: `disponibilidad_publica(desde, hasta)` →
+`bloqueada` = `ocupada`. Tiempo real: canal Broadcast `disponibilidad`, evento
+`cambio` → volver a consultar (debounce ~500ms). El CRM calcula lo mismo con
+sus propios datos (`lib/planoUnits.js`): todo lo que no está libre (incluida
+la pendiente de confirmación) es `ocupada`.
 
 ## Lo que beachFlow necesita para que se vea idéntico
 
 ### CSS custom (fuera de Tailwind)
 
-Una sola clase, usada por el cluster de botones de zoom de
-`PlanoViewport.jsx`:
+Copiar tal cual de `priusApp/src/index.css`:
 
 ```css
-.glass-card {
-  background: rgba(23, 32, 48, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+/* Rotar 180° (PlanoRotable) y rótulos que contra-giran */
+.plano-rotable { transform: rotate(var(--plano-giro, 0deg)); transform-origin: 50% 50%; transition: transform 600ms cubic-bezier(.4, 0, .2, 1); }
+.plano-contra { display: inline-block; transform: rotate(var(--plano-contra, 0deg)); transition: transform 600ms cubic-bezier(.4, 0, .2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .plano-rotable, .plano-contra { transition-duration: 1ms; }
 }
+/* Olas del océano (MarCliente en PlanoGrid) */
+@keyframes plano-ola { to { transform: translateX(calc(var(--ola-p) * -1)); } }
+.plano-ola { animation: plano-ola 18s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .plano-ola { animation: none; } }
+/* Opcional: deslizamiento del mapa al cambiar de fecha (slideRef) */
+@keyframes plano-slide-in-left { from { transform: translateX(24px); opacity: 0.4; } to { transform: translateX(0); opacity: 1; } }
+@keyframes plano-slide-in-right { from { transform: translateX(-24px); opacity: 0.4; } to { transform: translateX(0); opacity: 1; } }
+.plano-slide-left { animation: plano-slide-in-left 200ms ease-out; }
+.plano-slide-right { animation: plano-slide-in-right 200ms ease-out; }
 ```
 
-(Fuente: `priusApp/src/index.css`. Sin `backdrop-filter` a propósito — el
-blur en tiempo real fuerza al compositor a re-rasterizar en cada
-hover/scroll, ver el comentario original ahí.)
+Sin `.plano-contra`/`.plano-rotable` el botón Rotar gira, pero los números
+quedan cabeza abajo: son obligatorias si se muestra Rotar.
 
-`PlanoGrid.jsx` lleva la clase `plano-contra` en sus rótulos (Recreación, Acceso, Pileta, Sector Sombrillas, Océano Atlántico): en el CRM sirve para que no queden cabeza abajo cuando el plano se rota 180° (`.plano-contra` en `src/index.css`). En beachFlow, sin esa regla CSS, la clase no hace nada.
+El marco también lleva las clases `plano-hoja`, `plano-mobile-root`,
+`plano-mobile-controles` y `scroll-x-snap`: en el CRM tienen reglas propias,
+pero el marco ya trae sus equivalentes en Tailwind, así que en beachFlow no
+hace falta definirlas.
 
-Dos agregados nuevos de `PlanoGrid.jsx` (ajustes del plano, 06/11/2026): los recuadros Recreación/Acceso (dorado 50 `#FEFBF3`, borde dorado 300 `#F7DF96`, 122px, mismo tratamiento que la Pileta; valores arbitrarios de Tailwind, nada que extender) y la prop `mar` (SVG inline `MarCliente`, solo CRM en pantalla completa; beachFlow no la pasa). Las olas usan `.plano-ola` + `@keyframes plano-ola` de `src/index.css`; sin esa regla el mar se ve estático.
-
-`CeldaPublica.jsx` no usa ninguna clase custom — solo
-utilidades de Tailwind (incluidos valores arbitrarios como `bg-[#FDE047]`).
+`.glass-card` solo la usa la barra de zoom flotante propia de
+`PlanoViewport.jsx`, que el marco oculta: no hace falta para la vista
+clientes.
 
 ### tailwind.config.js
 
-Nada que extender. Todos los colores de esta carpeta (`#FDE047`, `#F2CA50`,
-los `sky-*`/`gray-*` de los rótulos fijos) se usan como valores arbitrarios
-de Tailwind (`bg-[#FDE047]`) o clases de la paleta default — no dependen de
-ningún token agregado en `extend`. Cualquier proyecto con Tailwind v3 + JIT
-los resuelve sin tocar su config.
+Nada que extender. Todos los colores son valores arbitrarios (`bg-[#F2CA50]`,
+`bg-[#F2F1EC]`, `text-[#6B6B6B]`, `rounded-[24px]`) o de la paleta default.
+Hacen falta Tailwind v3.3+ (variantes arbitrarias como
+`[&>div:first-child]:hidden` y `[&::-webkit-scrollbar]:hidden`) y el JIT
+escaneando esta carpeta.
 
-**Una sola salvedad (modo oscuro del plano, nov 2026):** `PlanoGrid.jsx` ahora
-lleva variantes `dark:` en los rótulos fijos y en los recuadros Recreación /
-Acceso / Pileta / Océano Atlántico (valores arbitrarios, nada de tokens de la
-app). En el CRM se activan con `darkMode: ['class', '[data-theme="dark"]']`.
-beachFlow no tiene modo oscuro: para que NUNCA se activen por el tema del
-sistema operativo del visitante, su `tailwind.config.js` tiene que declarar el
-mismo `darkMode` basado en clase/atributo en vez del default `media`.
+**Modo oscuro:** los componentes llevan variantes `dark:` que leen variables
+del CRM (`rgb(var(--card))`, etc.). beachFlow no tiene modo oscuro: su
+`tailwind.config.js` tiene que declarar `darkMode: 'class'` (o el mismo
+`['class', '[data-theme="dark"]']` del CRM) y nunca ponerla, para que NO se
+activen por el tema del sistema operativo del visitante (el default `media`
+las prendería).
+
+### Botones y tamaños táctiles
+
+El CRM tiene una regla global `button { min-height: 44px }` en mobile. Las
+pills y chips del marco ya fijan su alto (`h-11 md:h-8 min-h-0`, `min-h-0` en
+la pill de zoom), así que se ven igual con o sin esa regla.
 
 ### Fuente
 
-Ninguna clase de esta carpeta fija `font-family` — hereda la que use el
-`body` de quien la use. El Montserrat del CRM no es un requisito de este
-paquete.
+Ninguna clase fija `font-family`: hereda la del `body` (Manrope en el CRM).
+
+### Assets
+
+- Logo: lo pasa quien usa el marco (`logo`). El CRM usa
+  `/images/prius-icon.png` (44px); beachFlow usa su propia copia.
+- Océano: SVG inline dentro de `PlanoGrid.jsx` (`MarCliente`), sin imágenes.
 
 ## Archivos
 
-- `planoLayout.js` — estructura visual pura: carpas por fila/pasillo (6
-  hileras + 3 bloques dobles espalda-con-espalda + pasillos A/B/C) y
-  sombrillas en 4 filas de dos columnas con hueco al medio. Indexada por
-  `fila`/`orden`, igual que `unidades.fila`/`orden` en la base — verificado
-  1:1 contra las 184 unidades reales (Fase 4A, Tarea 1).
-- `PlanoGrid.jsx` — dibuja el plano completo (rótulos fijos + carpas +
-  sombrillas) a partir de `planoLayout.js`. Recibe `unidades` (lista con
-  al menos `{ id, numero, tipo, fila, orden }`) y `renderCelda(unidad)` —
-  no sabe nada de reservas ni de estados, solo de dónde va cada unidad.
-- `PlanoViewport.jsx` — contenedor con zoom: pinch táctil + botones en
-  mobile, fit-to-container con pan por drag y Ctrl+rueda en desktop/tablet,
-  elegido por la prop `isFitMode`. Completamente controlado por props, sin
-  estado propio — así el zoom/pan no se resetea si el árbol que lo monta se
-  desmonta y remonta (caso real: el modal de pantalla completa del CRM).
-- `CeldaPublica.jsx` — celda de la landing: `libre` (seleccionable) /
-  `bloqueada` (candado, no seleccionable) / `seleccionada` (acento dorado
-  `#F2CA50`) / `sugerida` (mismo acento, más suave). Sin colores por
-  tipo_alquiler — la landing no sabe qué tipo de alquiler ocupa cada
-  unidad, solo si está disponible.
+- `planoLayout.js` — estructura visual pura (6 hileras + 3 pasillos de
+  carpas, sombrillas en 4 filas de dos columnas), indexada por `fila`/`orden`
+  igual que `unidades.fila`/`orden` (verificado 1:1 contra las 184 unidades).
+- `PlanoGrid.jsx` — dibuja el plano completo a partir de `planoLayout.js`.
+  Recibe `unidades` (al menos `{ id, numero, tipo, fila, orden }`),
+  `renderCelda(slot)` y `mar`.
+- `PlanoViewport.jsx` — contenedor con zoom (fit-to-container, pan por drag,
+  Ctrl+rueda, pinch), 100% controlado por props.
+- `usePlanoEncuadre.js` — el estado de ese zoom (desktop/tablet).
+- `ZoomPanPinch.jsx` — mapa táctil mobile con gestos propios (arrastre con
+  umbral, pinch anclado, doble tap, rebote) y API imperativa
+  (`acercar`/`alejar`/`encuadrar`).
+- `PlanoRotable.jsx` — capa que gira 180°.
+- `ControlesZoomPlano.jsx` — `BarraZoomPlano` (columna desktop) y
+  `PillZoomPlano` (pill mobile).
+- `MarcoPlanoClaro.jsx`, `PlanoClaro.jsx`, `CeldaClara.jsx` — la vista
+  clientes (arriba).
+- `CeldaPublica.jsx` — **deprecada** (Glass Dark de la Fase 4A). La landing
+  pasa a `CeldaClara`; no se borra todavía.
 
-`Cell.jsx` (la celda del CRM, con colores por `tipo_alquiler`, estado de
-pago, preconfirmada web, tooltip, etc.) sigue viviendo en
-`src/components/dashboard/` — es específica del CRM y no es portable; se le
-sigue pasando a `PlanoGrid` como `renderCelda` desde `Dashboard.jsx`.
+`Cell.jsx` / `CellMobile.jsx` (las celdas de la vista normal del CRM, con
+colores por tipo de alquiler y estado de pago) viven en
+`src/components/dashboard/` y no son portables.
 
 ## Desvío conocido
 
-`Cell.jsx` dibuja cada celda en `w-6 h-[18px] md:w-7 md:h-5` (24×18 / 28×20px)
-para que las ~184 entren en pantalla sin scroll excesivo — por debajo del
-mínimo táctil de 44×44 que pide el resto del CRM (ver CLAUDE.md
-"Mobile-first"). `CeldaPublica.jsx` usa ese mismo tamaño a propósito, para
-verse idéntica — no se infló el tamaño para cumplir el mínimo, tal como ya
-no lo cumple hoy el Plano del CRM.
+La casilla `compacta` mide 24×18 / 28×20px para que las 184 entren en
+pantalla: por debajo del mínimo táctil de 44×44. En mobile se usa `tactil`
+(44×36).

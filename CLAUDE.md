@@ -35,6 +35,11 @@ CRM a medida que reemplaza por completo el flujo manual en Excel del balneario: 
 4. `pagos`
 5. `caja_diaria`
 6. `gastos_caja`
+- `reserva_grupos` + `reservas.grupo_id` (precio unificado): varias reservas del mismo cliente (ej. períodos no contiguos) bajo un solo precio pactado; con `grupo_id`, el saldo y el estado de pago de cada fila los calculan los triggers contra `reserva_grupos.precio_total` y los pagos de TODO el grupo. Desde el 19/11/2026 no hay ningún grupo en uso (el único venía de la migración del Excel y pasó a temporada, ver "Registro de cambios de datos"). No confundir con `codigos_reserva` (código `PRIUS-XXXXXX` de las reservas web).
+
+## Registro de cambios de datos
+Cambios puntuales de datos reales pedidos por el administrador, siempre en una migración transaccional versionada en `supabase/migrations` con verificación adentro (si algo no da, rollback).
+- 19/11/2026, `fase6a_ana_lescano_temporada`: Ana Lescano pasó de 3 reservas por período con precio unificado (enero y marzo activas, febrero cancelada el 18/11; grupo f8dab462, "3 períodos de Carpa 74 bajo un pactado único, RB-1891") a UNA reserva de temporada 2026/2027 en la 🏠 Carpa 74 (7af3ff24…), bloqueada, precio_lista = valor_total = $ 3.100.000, saldo 0, pagado. Sus 3 pagos (1 vigente de $ 3.100.000 con el RB 1891, 2 anulados de la migración) solo cambiaron de `reserva_id`; las 3 originales y el grupo se borraron después de moverlos. Ningún dato del cliente ni de ninguna caja cambió. Historial: un evento "Pasada a temporada completa a pedido del administrador…" sobre la reserva nueva (los ids viejos van en `datos`); se vencieron las 2 novedades visibles de la reserva de febrero.
 
 ## Módulos del CRM (7)
 Home, Plano, Reservas, Clientes, Caja, Reportes, + el dashboard de plano existente.
@@ -179,6 +184,17 @@ Fuente de verdad: `design/DESIGN.md` (paleta, tipografía Manrope, forma, compon
 - No se cargan Neto gravado ni IVA: los calcula la contadora.
 - La Z se SUMA al total del día (facturas y recibos + Z). No existe cálculo de diferencia vs registrado. La Z no cambia el arqueo por medio de pago.
 - En la impresión A4 y el CSV, la Z va como sección propia debajo de Facturas y recibos, con el renglón Facturas y recibos + Cierre Z = Total del día.
+
+## Plano portable (src/components/plano)
+- El dibujo del plano vive en `src/components/plano/` y beachFlow tiene una copia exacta: todo cambio se hace acá y se vuelve a copiar. Esa carpeta solo importa react, lucide-react y archivos propios (ver `PORTABILIDAD.md`, con lo que beachFlow necesita de CSS y tailwind).
+- Base: `planoLayout.js` (única fuente de la geometría, indexada por fila/orden), `PlanoGrid.jsx` (dibuja con `renderCelda` por prop; `mar` = océano animado), `PlanoViewport.jsx` (zoom/pan controlado 100% por props), `usePlanoEncuadre.js` (el estado de ese zoom en desktop/tablet, sacado de Dashboard), `ZoomPanPinch.jsx` (gestos del mapa mobile; `components/ui/ZoomPanPinch` es un re-export), `PlanoRotable.jsx` (giro de 180°) y `ControlesZoomPlano.jsx` (`BarraZoomPlano` desktop, `PillZoomPlano` mobile, usados también por la vista normal del CRM).
+- Vista clientes (Fase 6A, nov 2026) = la variante que usa la landing en todo el flujo de reserva, y el modal de pantalla completa del CRM la consume tal cual (cero diferencia de píxeles, `e2e/plano-clientes-visual.spec.ts`):
+  - `MarcoPlanoClaro.jsx`: el marco. `variante="amplia"` (header con slot de logo, slot de fecha, chips Todo/Carpas/Sombrillas y X opcional; mapa en PlanoViewport con la columna +, −, Encuadrar, Rotar) o `"compacta"` (fila fecha + chips, mapa en ZoomPanPinch y pill flotante con cerrar). Sin datos: todo por props y el cuerpo por children. Los emojis de los chips los pasa quien lo usa (`unidadEmoji` en el CRM).
+  - `PlanoClaro.jsx`: el cuerpo (Recreación/Acceso/Pileta, hileras, pasillos, sombrillas, océano) = PlanoRotable + PlanoGrid con `renderCelda` por prop.
+  - `CeldaClara.jsx`: estados `libre` (blanca, seleccionable), `ocupada` (negra, no seleccionable), `elegida` (dorado #F2CA50 sólido), `sugerida` (borde dorado), más `deshabilitada` (tipo filtrado por los chips: atenuada, sin click) y `resaltada` (aro dorado del tipo elegido). Tamaños `compacta` (desktop, número afuera) y `tactil` (mobile, 44×36).
+  - Claro con valores fijos; las variantes `dark:` leen las variables del CRM y solo se activan ahí (beachFlow declara darkMode por clase y nunca las prende).
+- `CeldaPublica.jsx` (Glass Dark, Fase 4A) queda deprecada para la landing; no se borra todavía.
+- `Cell.jsx` / `CellMobile.jsx` (dashboard/) siguen siendo las celdas de la vista normal del CRM, con colores por tipo de alquiler y estado de pago; no son portables.
 
 ## Plano — nov 2026
 - El tooltip de unidad se renderiza en un portal fuera del contenedor del plano: position fixed, z-index máximo y siempre dentro del viewport, con cualquier zoom.

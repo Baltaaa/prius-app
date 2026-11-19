@@ -3,9 +3,9 @@ import { formatMonto, formatMontoVisible } from '../../lib/format'
 import { montoInfo, esPendienteConfirmacion } from '../../lib/reservas'
 
 // Un "$0" en pantalla es ambiguo: puede ser un monto real (bonificado) o un
-// monto que no se cargó porque no se pudo verificar/repartir (Ana Lescano:
-// 3 períodos de duración distinta sin desglose confiable de los $3.100.000
-// reales — ver auditoría sep 2026). Este componente es el único lugar que
+// monto que no se cargó porque no se pudo verificar/repartir (caso original:
+// varios períodos de un mismo cliente sin desglose confiable del total pactado,
+// de la migración del Excel, sep 2026). Este componente es el único lugar que
 // decide cómo mostrar valor_total, para que "sin verificar" nunca se vea
 // idéntico a "$0 real".
 export default function MontoReserva({ reserva, className = '' }) {

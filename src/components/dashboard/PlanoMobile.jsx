@@ -1,9 +1,9 @@
 import { useRef } from "react"
 import { Layers } from "lucide-react"
 import PlanoGrid from "../plano/PlanoGrid"
-import PlanoRotable from "./PlanoRotable"
-import ZoomPanPinch from "../ui/ZoomPanPinch"
-import PlanoZoomPill from "./PlanoZoomPill"
+import PlanoRotable from "../plano/PlanoRotable"
+import ZoomPanPinch from "../plano/ZoomPanPinch"
+import { PillZoomPlano } from "../plano/ControlesZoomPlano"
 import { PlanoControles, PlanoStatTiles } from "./PlanoFiltros"
 import ToolbarSticky from "../brand/ToolbarSticky"
 
@@ -21,7 +21,7 @@ import ToolbarSticky from "../brand/ToolbarSticky"
 export default function PlanoMobile({
   selectedDate, esHoy, onPrevDay, onNextDay, onHoy, onDateChange,
   planoStats, loading, estadoFiltro, onEstado, tipoFiltro, onTipo, onImprimir, onImprimirCliente,
-  rotado, onRotar, fullscreen, onToggleFullscreen, slideRef, onAnimationEnd,
+  rotado, onRotar, onAbrirVistaClientes, slideRef, onAnimationEnd,
   unidades, renderCelda,
 }) {
   const mapa = useRef(null)
@@ -38,33 +38,26 @@ export default function PlanoMobile({
       onImprimir={onImprimir}
       onImprimirCliente={onImprimirCliente}
       compacto
-      modoCliente={fullscreen}
     />
   )
   return (
     <div className="plano-mobile-root flex-1 min-h-0 flex flex-col gap-3">
-      {/* Controles compartidos con desktop/tablet (PlanoFiltros.jsx). En la
-          vista normal viven en la fila de pills de la barra única
-          (ToolbarSticky -> PageTopbar), así el mapa se queda con todo el alto;
-          en pantalla completa van en su propia franja, porque ahí el shell de
-          la app no está montado. La leyenda vive en "Referencias". */}
-      {fullscreen ? (
-        <div className="plano-mobile-controles shrink-0 flex items-center gap-2 overflow-x-auto scroll-x-snap">{controles}</div>
-      ) : (
-        <ToolbarSticky>{controles}</ToolbarSticky>
-      )}
+      {/* Controles compartidos con desktop/tablet (PlanoFiltros.jsx): viven
+          en la fila de pills de la barra única (ToolbarSticky -> PageTopbar),
+          así el mapa se queda con todo el alto. La leyenda vive en
+          "Referencias". La vista clientes (pantalla completa) no pasa por
+          acá: la dibuja MarcoPlanoClaro (components/plano) desde Dashboard. */}
+      <ToolbarSticky>{controles}</ToolbarSticky>
 
       {/* Tiles-filtro de estado: las stats SON los filtros (CLAUDE.md). */}
-      {!fullscreen && (
-        <PlanoStatTiles
-          className="plano-mobile-controles shrink-0"
-          stats={planoStats}
-          valor={estadoFiltro}
-          onChange={onEstado}
-          fecha={selectedDate}
-          compacto
-        />
-      )}
+      <PlanoStatTiles
+        className="plano-mobile-controles shrink-0"
+        stats={planoStats}
+        valor={estadoFiltro}
+        onChange={onEstado}
+        fecha={selectedDate}
+        compacto
+      />
 
       {/* Card del plano — PlanoGrid SIN modificar */}
       <section data-card-compacta className="card-surface flex-1 min-h-0 min-w-0 relative overflow-hidden flex flex-col p-3 gap-3">
@@ -87,19 +80,19 @@ export default function PlanoMobile({
               onAnimationEnd={onAnimationEnd}
             >
               <PlanoRotable rotado={rotado}>
-                <PlanoGrid unidades={unidades} renderCelda={renderCelda} mar={fullscreen} />
+                <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
               </PlanoRotable>
             </ZoomPanPinch>
             </div>
-            <PlanoZoomPill
+            <PillZoomPlano
               className="absolute top-0 right-0 z-10"
               onZoomIn={() => mapa.current?.acercar()}
               onZoomOut={() => mapa.current?.alejar()}
               onEncuadrar={() => mapa.current?.encuadrar()}
               onRotar={onRotar}
               rotado={rotado}
-              fullscreen={fullscreen}
-              onToggleFullscreen={onToggleFullscreen}
+              fullscreen={false}
+              onToggleFullscreen={onAbrirVistaClientes}
             />
           </div>
         )}

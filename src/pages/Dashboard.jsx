@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useArranquePantalla } from "../context/ArranqueProvider"
 import { createPortal } from "react-dom"
 import { supabase } from "../lib/supabase"
-import { Expand, Layers, X } from "lucide-react"
+import { Expand, Layers } from "lucide-react"
 
 import { STATUS } from "../components/dashboard/constants"
 import UnidadPreviewModal from "../components/dashboard/UnidadPreviewModal"
@@ -12,14 +12,19 @@ import AsignarUnidadModal from "../components/dashboard/AsignarUnidadModal"
 import MoverUnidadDialog from "../components/dashboard/MoverUnidadDialog"
 import Cell from "../components/dashboard/Cell"
 import CellMobile from "../components/dashboard/CellMobile"
-import PlanoZoomBar from "../components/dashboard/PlanoZoomBar"
 import PlanoImpresion from "../components/dashboard/PlanoImpresion"
 import PlanoImpresionCliente from "../components/dashboard/PlanoImpresionCliente"
 import { imprimirDocumento } from "../lib/imprimirDocumento"
 import PlanoGrid from "../components/plano/PlanoGrid"
-import PlanoRotable from "../components/dashboard/PlanoRotable"
+import PlanoRotable from "../components/plano/PlanoRotable"
+import PlanoClaro from "../components/plano/PlanoClaro"
+import CeldaClara from "../components/plano/CeldaClara"
+import MarcoPlanoClaro from "../components/plano/MarcoPlanoClaro"
+import usePlanoEncuadre from "../components/plano/usePlanoEncuadre"
+import { BarraZoomPlano } from "../components/plano/ControlesZoomPlano"
+import { unidadEmoji } from "../lib/unidadIcono"
 import PlanoViewport from "../components/plano/PlanoViewport"
-import { PlanoControles, PlanoStatTiles } from "../components/dashboard/PlanoFiltros"
+import { PlanoControles, PlanoNavegadorFecha, PlanoStatTiles } from "../components/dashboard/PlanoFiltros"
 import ToolbarSticky from "../components/brand/ToolbarSticky"
 import { useData } from "../context/DataProvider"
 import { calcularPlanoStats } from "../lib/planoStats"
@@ -103,270 +108,14 @@ export default function Dashboard() {
     return () => mql.removeEventListener('change', update)
   }, [])
 
-  // --- Fit al contenedor (mobile y desktop, Fase 4A hotfix oct 2026) -------
-  // Antes: por debajo de 768px el mapa usaba un modo aparte (scroll nativo +
-  // zoom simple por escala, sin encuadre). Bug real que eso causaba en
-  // mobile: el plano nunca entraba encuadrado al abrir (quedaba más ancho
-  // que la pantalla, forzando scroll horizontal de TODA la página, no solo
-  // del mapa) — ver CLAUDE.md "Plano portable". Ahora un solo modo para
-  // cualquier tamaño: fit-to-container con zoom relativo al punto tocado/
-  // clickeado y pan por drag — mouse (desktop) y touch (mobile) alimentan
-  // exactamente el mismo estado `transform`, nunca dos sistemas en paralelo.
-  // Bug real que esto corrige: la medición vieja corría en un `useEffect`
-  // sin `loading` como dependencia, así que si el mapa todavía no existía en
-  // el DOM (`loading=true` muestra "Cargando plano…" en vez del mapa) el
-  // observer nunca se enganchaba — `fitScale` se quedaba en su valor inicial
-  // (1), cortando la franja de arriba (Recreación/Acceso/Pileta) y además
-  // bloqueando el zoom-out (el piso del zoom ERA ese fitScale mal calculado).
-  //
-  // Estructura (sin flex-centering ni transform-origin center, a propósito):
-  // `viewportRef` = contenedor, `overflow:hidden; position:relative`.
-  // `contentRef`  = capa transformada, `position:absolute; top:0; left:0;
-  // transform-origin:0 0`, con el plano en su tamaño intrínseco adentro —
-  // medir su offsetWidth/offsetHeight es seguro en cualquier momento (CSS
-  // transform nunca cambia el layout size del propio elemento).
-  const viewportRef = useRef(null)
-  const contentRef = useRef(null)
-  const sizesRef = useRef({ contW: 0, contH: 0, contentW: 0, contentH: 0 })
-  const userInteractedRef = useRef(false) // ref (no solo state) para que el closure del ResizeObserver siempre lea el valor actual, no uno viejo capturado al montar
-  const dragRef = useRef({ dragging: false, startX: 0, startY: 0, startX0: 0, startY0: 0 })
-
-  const [fitScale, setFitScale] = useState(1)
-  const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 })
-  const [ready, setReady] = useState(false) // oculto hasta la primera medición válida — nunca se ve un frame cortado
-  const [, setUserInteractedState] = useState(false) // solo para que el botón "Encuadrar" pueda reflejar el estado si hiciera falta
-  const [isDragging, setIsDragging] = useState(false)
-
-  const round1 = (n) => Math.round(n * 10) / 10
-  // Aire alrededor del plano dentro de su caja. Bajado de 24 a 8 (29/10/2026,
-  // pedido del administrador: "que el plano se vea más grande, los números se
-  // leen chiquitos"). Sigue siendo un fit real — el plano entra COMPLETO, sin
-  // cortar ninguna punta — solo deja de desperdiciar 48px de margen por eje.
-  // El resto del agrandamiento viene de la franja superior compactada (abajo),
-  // que le devuelve alto a la caja del mapa.
-  const PLANO_PAD = 8
-  // Mobile (<768px, hotfix oct 2026): nunca se auto-achica para entrar en
-  // los dos ejes — eso era la causa real de las celdas microscópicas ("el
-  // componente desktop escalado" que reportó el dueño). El plano mobile
-  // arranca siempre a escala 1 (tamaño real de CellMobile, min 44x36) y, si
-  // no entra en algún eje, el pan/pinch-zoom ya existente resuelve el resto
-  // — nunca scroll de la página. `fitScale` (piso del zoom-out) queda fijo
-  // en 1*0.5 acá, independiente del tamaño real del contenido.
-  const computeFit = (contW, contH, contentW, contentH) => {
-    if (isMobile) return 1
-    return Math.min((contW - PLANO_PAD * 2) / contentW, (contH - PLANO_PAD * 2) / contentH)
-  }
-  const centeredPos = (contW, contH, contentW, contentH, scale) => ({
-    x: (contW - contentW * scale) / 2,
-    y: (contH - contentH * scale) / 2,
-  })
-  // Mobile, posición inicial (no `centeredPos`): a escala 1 el contenido
-  // real del plano (franja Recreación/Acceso/Pileta + 6 columnas de carpas +
-  // sombrillas + "Océano Atlántico") excede por mucho los ~340px de ancho
-  // útil de un celular — centrar matemáticamente arrancaba mostrando un
-  // tramo vacío del medio (el hueco entre bloques), en vez de la esquina
-  // superior izquierda real (Recreación + carpa 1). clampPan(0,0,scale)
-  // ancla arriba-izquierda cuando desborda y centra solo si en algún eje
-  // entra entero — mismo helper que ya usa el pan por drag/pinch.
-  const anchorPos = (scale) => clampPan(0, 0, scale)
-  const clampScale = (s) => Math.min(3, Math.max(fitScale * 0.5, s))
-  // Si el plano escalado entra en el eje, se fuerza centrado (no hay nada
-  // para desplazar ahí); si lo excede, se limita para que nunca salga
-  // completamente de vista (un borde como mucho llega a pegarse al del
-  // contenedor, nunca más allá).
-  const clampPan = (x, y, scale) => {
-    const { contW, contH, contentW, contentH } = sizesRef.current
-    const scaledW = contentW * scale
-    const scaledH = contentH * scale
-    const cx = scaledW <= contW ? (contW - scaledW) / 2 : Math.min(0, Math.max(contW - scaledW, x))
-    const cy = scaledH <= contH ? (contH - scaledH) / 2 : Math.min(0, Math.max(contH - scaledH, y))
-    return { x: cx, y: cy }
-  }
-  const markUserInteracted = () => {
-    if (userInteractedRef.current) return
-    userInteractedRef.current = true
-    setUserInteractedState(true)
-  }
-
-  // useLayoutEffect (no useEffect): mide y aplica el encuadre ANTES del
-  // primer paint visible, así `ready` nunca llega a pintarse en falso. Vuelve
-  // a correr cuando `loading` pasa a false (el mapa recién ahí existe en el
-  // DOM) y cuando cambia `fullscreenOpen` (el nodo real del viewport es otro).
-  useLayoutEffect(() => {
-    const viewport = viewportRef.current
-    const content = contentRef.current
-    if (!viewport || !content) return
-
-    const aplicarEncuadre = () => {
-      const contW = viewport.clientWidth
-      const contH = viewport.clientHeight
-      const contentW = content.offsetWidth
-      const contentH = content.offsetHeight
-      if (!contW || !contH || !contentW || !contentH) return
-      sizesRef.current = { contW, contH, contentW, contentH }
-      const fit = computeFit(contW, contH, contentW, contentH)
-      setFitScale(fit)
-      if (!userInteractedRef.current) {
-        setTransform({ scale: fit, ...(isMobile ? anchorPos(fit) : centeredPos(contW, contH, contentW, contentH, fit)) })
-      }
-      setReady(true)
-    }
-
-    aplicarEncuadre()
-    // Observa contenedor Y contenido (fuentes/datos/unidades pueden cambiar
-    // el tamaño intrínseco del plano después del primer render).
-    const ro = new ResizeObserver(aplicarEncuadre)
-    ro.observe(viewport)
-    ro.observe(content)
-    return () => ro.disconnect()
-    // `isMobile` en las deps: si se cruza el breakpoint 768px con la pantalla
-    // ya montada (resize del navegador), el observer tiene que releer el
-    // `computeFit` nuevo (closure fresca) — si no, seguía auto-encuadrando
-    // con la fórmula vieja hasta el próximo cambio de `fullscreenOpen`/
-    // `loading`.
-    //
-    // `readyPlano` en las deps (bug real, oct 2026 testing): el guard de
-    // arriba (`if (!viewport || !content) return`) corta en silencio si el
-    // skeleton (`readyPlano`, ver `useInitialLoad`) todavía está tapando el
-    // plano real en ese commit — `viewportRef`/`contentRef` recién existen
-    // cuando `readyPlano` pasa a true. Si `loading` del DataProvider ya
-    // estaba en false al montar (datos en caché de una navegación previa),
-    // este efecto corría una sola vez con los refs en null y nunca se
-    // volvía a ejecutar: el plano quedaba con `ready=false` para siempre
-    // (`visibility:hidden`, invisible y sin click) hasta que alguna otra
-    // dependencia cambiara por casualidad. Causa real de "el plano no
-    // responde" al navegar desde otra pantalla.
-  }, [fullscreenOpen, loading, isMobile, readyPlano])
-
-  const handleEncuadrar = () => {
-    userInteractedRef.current = false
-    setUserInteractedState(false)
-    const { contW, contH, contentW, contentH } = sizesRef.current
-    const fit = computeFit(contW, contH, contentW, contentH)
-    setFitScale(fit)
-    setTransform({ scale: fit, ...(isMobile ? anchorPos(fit) : centeredPos(contW, contH, contentW, contentH, fit)) })
-  }
-
-  // Zoom manteniendo fijo el punto (px, py) EN COORDENADAS DEL CONTENEDOR —
-  // los botones +/- usan el centro del contenedor, ctrl+rueda usa el cursor.
-  const zoomAt = (px, py, targetScale) => {
-    markUserInteracted()
-    setTransform((prev) => {
-      const scale = clampScale(targetScale)
-      const contentX = (px - prev.x) / prev.scale
-      const contentY = (py - prev.y) / prev.scale
-      const nx = px - contentX * scale
-      const ny = py - contentY * scale
-      const { x, y } = clampPan(nx, ny, scale)
-      return { scale, x, y }
-    })
-  }
-
-  // Pan por drag del mouse — solo si el plano escalado excede el contenedor
-  // en algún eje (si entero ya entra, no hay nada para desplazar). Listeners
-  // en `window` (no en el propio contenedor) para seguir recibiendo
-  // `mousemove` aunque el cursor salga del viewport mientras se arrastra.
-  const handleMapMouseDown = (e) => {
-    const { contW, contH, contentW, contentH } = sizesRef.current
-    if (contentW * transform.scale <= contW && contentH * transform.scale <= contH) return
-    dragRef.current = { dragging: true, startX: e.clientX, startY: e.clientY, startX0: transform.x, startY0: transform.y }
-    setIsDragging(true)
-  }
-  useEffect(() => {
-    const onMove = (e) => {
-      if (!dragRef.current.dragging) return
-      const dx = e.clientX - dragRef.current.startX
-      const dy = e.clientY - dragRef.current.startY
-      setTransform((prev) => {
-        const { x, y } = clampPan(dragRef.current.startX0 + dx, dragRef.current.startY0 + dy, prev.scale)
-        return { ...prev, x, y }
-      })
-    }
-    const onUp = () => {
-      if (!dragRef.current.dragging) return
-      dragRef.current.dragging = false
-      setIsDragging(false)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
-    return () => {
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-  }, [])
-
-  // Ctrl+rueda para zoom (desktop/tablet), relativo a la posición del cursor
-  // sobre el contenedor — sin Ctrl, la rueda no hace nada especial (el
-  // contenedor no tiene scroll nativo en este modo).
-  const handleMapWheel = (e) => {
-    if (!e.ctrlKey) return
-    e.preventDefault()
-    const rect = viewportRef.current.getBoundingClientRect()
-    const px = e.clientX - rect.left
-    const py = e.clientY - rect.top
-    const delta = e.deltaY > 0 ? -0.2 : 0.2
-    zoomAt(px, py, round1(transform.scale + delta))
-  }
-
-  // Táctil (mobile, Fase 4A hotfix): un dedo arrastra (mismo pan por drag
-  // que el mouse, con touch.clientX/Y en vez de e.clientX/Y); dos dedos
-  // pinchean, con el zoom centrado en el punto medio entre los dos toques —
-  // se recalcula en cada touchmove con el midpoint ACTUAL (no uno fijo al
-  // empezar), así el zoom "sigue" a los dedos mientras se mueven, igual que
-  // una app nativa. Reusa `zoomAt`/`clampPan`, el mismo camino que ya usan
-  // los botones y Ctrl+rueda — nunca un estado de escala en paralelo.
-  const touchPinchRef = useRef({ active: false, startDist: 0, startScale: 1 })
-  const touchDistance = (touches) => Math.hypot(
-    touches[0].clientX - touches[1].clientX,
-    touches[0].clientY - touches[1].clientY,
-  )
-  const touchMidpoint = (touches, rect) => ({
-    x: (touches[0].clientX + touches[1].clientX) / 2 - rect.left,
-    y: (touches[0].clientY + touches[1].clientY) / 2 - rect.top,
-  })
-  const handleTouchStart = (e) => {
-    if (e.touches.length === 2) {
-      touchPinchRef.current = { active: true, startDist: touchDistance(e.touches), startScale: transform.scale }
-      dragRef.current.dragging = false
-      setIsDragging(false)
-      return
-    }
-    if (e.touches.length === 1) {
-      const { contW, contH, contentW, contentH } = sizesRef.current
-      if (contentW * transform.scale <= contW && contentH * transform.scale <= contH) return
-      const t = e.touches[0]
-      dragRef.current = { dragging: true, startX: t.clientX, startY: t.clientY, startX0: transform.x, startY0: transform.y }
-      setIsDragging(true)
-    }
-  }
-  const handleTouchMove = (e) => {
-    if (touchPinchRef.current.active && e.touches.length === 2) {
-      e.preventDefault()
-      const rect = viewportRef.current.getBoundingClientRect()
-      const dist = touchDistance(e.touches)
-      const ratio = dist / touchPinchRef.current.startDist
-      const { x, y } = touchMidpoint(e.touches, rect)
-      zoomAt(x, y, round1(touchPinchRef.current.startScale * ratio))
-      return
-    }
-    if (dragRef.current.dragging && e.touches.length === 1) {
-      e.preventDefault()
-      const t = e.touches[0]
-      const dx = t.clientX - dragRef.current.startX
-      const dy = t.clientY - dragRef.current.startY
-      setTransform((prev) => {
-        const { x, y } = clampPan(dragRef.current.startX0 + dx, dragRef.current.startY0 + dy, prev.scale)
-        return { ...prev, x, y }
-      })
-    }
-  }
-  const handleTouchEnd = (e) => {
-    if (e.touches.length < 2) touchPinchRef.current.active = false
-    if (e.touches.length === 0) {
-      dragRef.current.dragging = false
-      setIsDragging(false)
-    }
-  }
+  // Zoom, encuadre y arrastre del mapa en desktop/tablet: usePlanoEncuadre
+  // (carpeta portable, Fase 6A: el mismo hook lo usa la landing). Un solo estado
+  // para la vista normal y la vista clientes, así abrir/cerrar pantalla completa
+  // no lo pierde. `remedir`: el nodo real del viewport cambia con la pantalla
+  // completa y recién existe cuando termina el loading y el skeleton
+  // (`readyPlano`, ver useInitialLoad): sin volver a medir ahí el plano quedaba
+  // invisible al navegar desde otra pantalla con los datos ya en caché.
+  const encuadre = usePlanoEncuadre({ isMobile, remedir: `${fullscreenOpen}|${loading}|${readyPlano}` })
   const [selectedDate, setSelectedDate] = useState(todayStr())
   const esHoy = selectedDate === todayStr()
 
@@ -510,22 +259,9 @@ export default function Dashboard() {
   )
 
   // useCallback: referencia estable para no romper el React.memo de las 184 Cell
-  // En modo cliente (pantalla completa) tocar una unidad no abre nada: ni titular ni saldo.
   const handleUnitClick = useCallback((unit) => {
-    if (unit && !fullscreenOpen) setSelectedUnitId(unit.id)
-  }, [fullscreenOpen])
-
-  // Pasos de 0.2, techo 3, piso = fitScale*0.5 (se puede alejar por debajo
-  // del encuadre), zoom relativo al centro del contenedor (el punto central
-  // queda fijo) — mismo comportamiento en mobile y desktop.
-  const handleZoomIn = () => {
-    const { contW, contH } = sizesRef.current
-    zoomAt(contW / 2, contH / 2, round1(transform.scale + 0.2))
-  }
-  const handleZoomOut = () => {
-    const { contW, contH } = sizesRef.current
-    zoomAt(contW / 2, contH / 2, round1(transform.scale - 0.2))
-  }
+    if (unit) setSelectedUnitId(unit.id)
+  }, [])
 
   // Puente entre PlanoGrid (portable, no sabe nada de reservas) y Cell
   // (CRM): recibe el slot que arma PlanoGrid ({numero, tipo, numberSide, ...}
@@ -542,11 +278,10 @@ export default function Dashboard() {
         unit={unit}
         onClick={handleUnitClick}
         numberSide={slot.numberSide}
-        modoCliente={fullscreenOpen}
         {...cellHighlight(unit)}
       />
     )
-  }, [units, handleUnitClick, cellHighlight, fullscreenOpen])
+  }, [units, handleUnitClick, cellHighlight])
 
   // Misma unidad/handlers que renderCelda, pero con CellMobile (celda nueva
   // y separada, ver ese archivo) — nunca Cell.jsx escalado. Mismo puente,
@@ -560,36 +295,81 @@ export default function Dashboard() {
         number={slot.numero}
         unit={unit}
         onClick={handleUnitClick}
-        modoCliente={fullscreenOpen}
         {...cellHighlight(unit)}
       />
     )
-  }, [units, handleUnitClick, cellHighlight, fullscreenOpen])
+  }, [units, handleUnitClick, cellHighlight])
+
+  // Vista clientes (pantalla completa, Fase 6A): CeldaClara, la misma casilla
+  // que usa la landing. Solo libre / ocupada (todo lo que no es libre, incluida
+  // la pendiente de confirmación): nada que distinga saldo, tipo de alquiler ni
+  // titular, y tocarla no abre nada. Los chips de tipo atenúan lo que no
+  // corresponde y marcan con el aro lo que sí.
+  const renderCeldaCliente = useCallback((slot) => {
+    const prefijo = PREFIJO[slot.tipo]
+    const unit = prefijo ? units[`${prefijo}${slot.numero}`] : null
+    const filtro = cellHighlight(unit)
+    return (
+      <CeldaClara
+        key={`${slot.tipo}-${slot.numero}`}
+        numero={slot.numero}
+        estado={unit && unit.status !== STATUS.LIBRE ? "ocupada" : "libre"}
+        tamano={isMobile ? "tactil" : "compacta"}
+        numberSide={slot.numberSide}
+        resaltada={!!filtro.isHighlighted}
+        deshabilitada={!!filtro.isDimmed}
+        data-deeplink-id={unit?.dbId}
+      />
+    )
+  }, [units, cellHighlight, isMobile])
 
   // Un solo nodo cumple el doble rol de "ref de la animación de slide al
-  // cambiar de fecha" y "ref del viewport para medir fitScale" — nunca dos
+  // cambiar de fecha" y "ref del viewport para medir el encuadre" — nunca dos
   // elementos distintos, porque solo hay UNO montado a la vez (ver abajo).
-  const setMapViewportRef = (node) => { mapSlideRef.current = node; viewportRef.current = node }
-
-  // Grid de 3 áreas (toolbar/stats/map en mobile+tablet <1280px; left/map/
-  // right en desktop >=1280px) + workspace del mapa (zoom + mapa) — un solo
-  // cuerpo reusado inline y adentro del modal de pantalla completa, para no
-  // duplicar el layout de las ~184 <Cell>. `fullscreen` solo cambia el botón
-  // de maximizar/minimizar: el resto del árbol es idéntico a propósito
-  // (WYSIWYG entre vista normal y pantalla completa). La impresión A4 no
-  // vive acá — sale de `PlanoImpresion` por fuera de `.no-print`, sin tocar.
-  const canPanAhora = sizesRef.current.contentW * transform.scale > sizesRef.current.contW || sizesRef.current.contentH * transform.scale > sizesRef.current.contH
+  const setMapViewportRef = (node) => { mapSlideRef.current = node; encuadre.viewportRef.current = node }
+  const quitarSlide = (e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")
 
   const renderPlanoBody = (fullscreen) => {
-    // Mismo estilo claro que PlanoZoomBar (ya no glass-card oscuro): este
-    // botón ahora vive DENTRO de esa barra, no flotando sobre el mapa.
-    const extraButtonsViewport = (
-      fullscreen ? null : (
-        <button onClick={() => setFullscreenOpen(true)} className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Ver en pantalla completa">
-          <Expand size={16} />
-        </button>
+    const diaSemana = new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-AR', { weekday: 'short' }).toUpperCase().replace('.', '')
+
+    // Vista clientes (pantalla completa): el marco y el cuerpo portables de
+    // src/components/plano (MarcoPlanoClaro + PlanoClaro + CeldaClara), los
+    // mismos que copia la landing. Acá solo se les pasan los datos del CRM.
+    if (fullscreen) {
+      return (
+        <MarcoPlanoClaro
+          variante={isMobile ? "compacta" : "amplia"}
+          logo={<img src="/images/prius-icon.png" alt="Prius" className="w-11 h-11 object-contain shrink-0" />}
+          selectorFecha={(
+            <PlanoNavegadorFecha
+              selectedDate={selectedDate}
+              esHoy={esHoy}
+              diaSemana={isMobile ? undefined : diaSemana}
+              onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
+              onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
+              onHoy={() => goToDate(todayStr())}
+              onDateChange={goToDate}
+              compacto={isMobile}
+            />
+          )}
+          tipo={tipoFiltro}
+          onTipo={setTipoFiltro}
+          emojiCarpa={unidadEmoji("carpa")}
+          emojiSombrilla={unidadEmoji("sombrilla")}
+          onCerrar={() => setFullscreenOpen(false)}
+          rotado={rotado}
+          onRotar={alternarRotar}
+          cargando={loading}
+          encuadre={encuadre}
+          resetKey={`${estadoFiltro ?? ""}|${tipoFiltro ?? ""}`}
+          slideRef={mapSlideRef}
+          onAnimationEnd={quitarSlide}
+        >
+          <PlanoClaro unidades={unidades} renderCelda={renderCeldaCliente} rotado={rotado} />
+        </MarcoPlanoClaro>
       )
-    )
+    }
+
     // Mobile (<768px): componente nuevo y separado (mock 02-plano-mobile) —
     // nunca comparte JSX con el layout desktop/tablet de acá abajo, solo los
     // mismos datos/handlers ya calculados en este componente.
@@ -612,10 +392,9 @@ export default function Dashboard() {
           onImprimirCliente={imprimirPlanoCliente}
           rotado={rotado}
           onRotar={alternarRotar}
-          fullscreen={fullscreen}
-          onToggleFullscreen={() => setFullscreenOpen(!fullscreen)}
+          onAbrirVistaClientes={() => setFullscreenOpen(true)}
           slideRef={mapSlideRef}
-          onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
+          onAnimationEnd={quitarSlide}
           unidades={unidades}
           renderCelda={renderCeldaMobile}
         />
@@ -628,72 +407,34 @@ export default function Dashboard() {
     // panel lateral fijo (UnidadDetallePanel) solo se ve en ≥1024px —
     // tablet sigue usando la hoja inferior (UnidadPreviewModal) para el
     // detalle, como pide la tarea.
-    const diaSemana = new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-AR', { weekday: 'short' }).toUpperCase().replace('.', '')
-
     return (
       <div className="flex-1 min-h-0 flex flex-col gap-2.5">
-        {/* Controles (fecha, tipo, Referencias, impresiones): en la vista
-            normal viven en la barra única de la página (ToolbarSticky ->
-            PageTopbar); en pantalla completa, en su propia franja junto al
-            logo y la X. Los tiles de stats, que SON los filtros de estado,
-            siguen en su card acá abajo. */}
-        {fullscreen ? (
-          <div data-card-compacta className="card-surface p-3 shrink-0">
-            {/* Modo cliente: logo a la izquierda (centrado con los controles),
-                controles a su derecha con 16px, y la X de 44px a la derecha.
-                Esc también cierra (useOverlay). */}
-            <div className="flex items-center gap-4">
-              <img src="/images/prius-icon.png" alt="Prius" className="w-11 h-11 object-contain shrink-0" />
-              <PlanoControles
-                selectedDate={selectedDate}
-                esHoy={esHoy}
-                diaSemana={diaSemana}
-                onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
-                onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
-                onHoy={() => goToDate(todayStr())}
-                onDateChange={goToDate}
-                tipoFiltro={tipoFiltro}
-                onTipo={setTipoFiltro}
-                modoCliente
-              />
-              <button
-                type="button"
-                onClick={() => setFullscreenOpen(false)}
-                title="Cerrar pantalla completa"
-                aria-label="Cerrar pantalla completa"
-                className="ml-auto w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-ink hover:bg-surface transition-colors"
-              >
-                <X size={20} strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <ToolbarSticky>
-              <PlanoControles
-                selectedDate={selectedDate}
-                esHoy={esHoy}
-                diaSemana={diaSemana}
-                onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
-                onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
-                onHoy={() => goToDate(todayStr())}
-                onDateChange={goToDate}
-                tipoFiltro={tipoFiltro}
-                onTipo={setTipoFiltro}
-                onImprimir={() => window.print()}
-                onImprimirCliente={imprimirPlanoCliente}
-              />
-            </ToolbarSticky>
-            <div data-card-compacta className="card-surface p-3 shrink-0">
-              <PlanoStatTiles
-                stats={planoStats}
-                valor={estadoFiltro}
-                onChange={toggleEstadoFiltro}
-                fecha={selectedDate}
-              />
-            </div>
-          </>
-        )}
+        {/* Controles (fecha, tipo, Referencias, impresiones): viven en la
+            barra única de la página (ToolbarSticky -> PageTopbar). Los tiles
+            de stats, que SON los filtros de estado, siguen en su card. */}
+        <ToolbarSticky>
+          <PlanoControles
+            selectedDate={selectedDate}
+            esHoy={esHoy}
+            diaSemana={diaSemana}
+            onPrevDay={() => goToDate(shiftDate(selectedDate, -1))}
+            onNextDay={() => goToDate(shiftDate(selectedDate, 1))}
+            onHoy={() => goToDate(todayStr())}
+            onDateChange={goToDate}
+            tipoFiltro={tipoFiltro}
+            onTipo={setTipoFiltro}
+            onImprimir={() => window.print()}
+            onImprimirCliente={imprimirPlanoCliente}
+          />
+        </ToolbarSticky>
+        <div data-card-compacta className="card-surface p-3 shrink-0">
+          <PlanoStatTiles
+            stats={planoStats}
+            valor={estadoFiltro}
+            onChange={toggleEstadoFiltro}
+            fecha={selectedDate}
+          />
+        </div>
 
         {/* Workspace: grid (sin tocar) + panel lateral fijo (desktop) */}
         <div className="flex-1 min-h-0 flex gap-3">
@@ -704,7 +445,7 @@ export default function Dashboard() {
                 <span className="text-label truncate">Pasillo A · B · C</span>
               </span>
               <div className="flex items-center gap-3 shrink-0">
-                {realtimeConectado && !fullscreen && (
+                {realtimeConectado && (
                   <span className="hidden md:inline-flex lg:hidden xl:inline-flex items-center gap-2 bg-surface px-3 h-7 rounded-full text-ink-2">
                     <span className="w-2 h-2 rounded-full bg-success" />
                     <span className="text-label">{planoStats?.ocupacion.total || 0} unidades sincronizadas</span>
@@ -719,53 +460,59 @@ export default function Dashboard() {
             ) : (
               <div className="flex-1 min-h-0 flex gap-3">
                 {/* `[&>div:first-child]:hidden` oculta la barra de zoom propia
-                    de PlanoViewport.jsx (congelado, vive adentro con
-                    position:absolute encima del mapa) sin tocar ese archivo —
-                    PlanoZoomBar.jsx la reemplaza acá al lado, fuera del mapa,
-                    llamando a las mismas funciones. */}
-                {/* Hoja del mapa: sigue el tema activo de la app (nov 2026). En
-                    oscuro el lienzo es la superficie oscura y las casillas, los
-                    números y los rótulos tienen su variante `dark:`; en claro
-                    queda exactamente como siempre. La impresión A4 del plano no
-                    cambia: la hace PlanoImpresion.jsx, aparte y en blanco. */}
+                    de PlanoViewport.jsx (vive adentro con position:absolute
+                    encima del mapa) — BarraZoomPlano la reemplaza acá al lado,
+                    fuera del mapa, llamando a las mismas funciones. */}
+                {/* Hoja del mapa: sigue el tema activo de la app (nov 2026). La
+                    impresión A4 del plano no cambia: la hace PlanoImpresion.jsx,
+                    aparte y en blanco. */}
                 <div className="plano-hoja flex-1 min-h-0 flex flex-col relative [&>div:first-child]:hidden">
                   <PlanoViewport
-                    transform={transform}
-                    ready={ready}
-                    isDragging={isDragging}
-                    canPan={canPanAhora}
-                    onZoomIn={handleZoomIn}
-                    onZoomOut={handleZoomOut}
-                    onEncuadrar={handleEncuadrar}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onMapMouseDown={handleMapMouseDown}
-                    onMapWheel={handleMapWheel}
-                    onAnimationEnd={(e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")}
+                    transform={encuadre.transform}
+                    ready={encuadre.ready}
+                    isDragging={encuadre.isDragging}
+                    canPan={encuadre.canPan}
+                    onZoomIn={encuadre.handleZoomIn}
+                    onZoomOut={encuadre.handleZoomOut}
+                    onEncuadrar={encuadre.handleEncuadrar}
+                    onTouchStart={encuadre.handleTouchStart}
+                    onTouchMove={encuadre.handleTouchMove}
+                    onTouchEnd={encuadre.handleTouchEnd}
+                    onMapMouseDown={encuadre.handleMapMouseDown}
+                    onMapWheel={encuadre.handleMapWheel}
+                    onAnimationEnd={quitarSlide}
                     viewportRef={setMapViewportRef}
-                    contentRef={contentRef}
+                    contentRef={encuadre.contentRef}
                   >
                     <PlanoRotable rotado={rotado}>
-                      <PlanoGrid unidades={unidades} renderCelda={renderCelda} mar={fullscreen} />
+                      <PlanoGrid unidades={unidades} renderCelda={renderCelda} />
                     </PlanoRotable>
                   </PlanoViewport>
                 </div>
-                <PlanoZoomBar onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} onEncuadrar={handleEncuadrar} onRotar={alternarRotar} rotado={rotado} extraButtons={extraButtonsViewport} />
+                <BarraZoomPlano
+                  onZoomIn={encuadre.handleZoomIn}
+                  onZoomOut={encuadre.handleZoomOut}
+                  onEncuadrar={encuadre.handleEncuadrar}
+                  onRotar={alternarRotar}
+                  rotado={rotado}
+                  extraButtons={(
+                    <button onClick={() => setFullscreenOpen(true)} className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-surface hover:bg-surface text-ink flex items-center justify-center transition-colors" title="Ver en pantalla completa">
+                      <Expand size={16} />
+                    </button>
+                  )}
+                />
               </div>
             )}
           </section>
 
-          {!fullscreen && (
-            <UnidadDetallePanel
-              unit={selectedUnit}
-              reservas={reservas}
-              temporadaActiva={temporadaActiva}
-              onClose={handleCerrarDetalle}
-              onAsignarTemporada={handleAsignarTemporada}
-              onMoverUnidad={handleMoverUnidadClick}
-            />
-          )}
+          <UnidadDetallePanel
+            unit={selectedUnit}
+            reservas={reservas}
+            temporadaActiva={temporadaActiva}
+            onClose={handleCerrarDetalle}
+            onAsignarTemporada={handleAsignarTemporada}
+            onMoverUnidad={handleMoverUnidadClick}
+          />
         </div>
       </div>
     )
