@@ -21,6 +21,10 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffec
 // Al abrir, al rotar y al cambiar `resetKey` (filtros) arranca encuadrado.
 //
 // Todo se escribe en UN wrapper con transform: translate3d + scale.
+//
+// Desde afuera (Fase 6A.1): la API imperativa (`ref`) tiene acercar, alejar,
+// encuadrar, acercarEn(clientX, clientY, factor) y estado(); `onCambio(estado)`
+// avisa cuando el mapa se queda quieto (120ms sin pintar), nunca por frame.
 
 const UMBRAL_ARRASTRE = 8 // px: por debajo es un tap
 const DOBLE_TAP_MS = 240
@@ -32,6 +36,7 @@ const MARGEN = 4 // aire alrededor del mapa encuadrado
 const ELASTICO = 0.35
 const ELASTICO_MAX = 72
 const PASO_BOTONES = 1.5
+const AVISO_QUIETO_MS = 120
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 // Límites de posición en un eje. `reserva` (px, solo eje X) es una franja del
@@ -58,7 +63,7 @@ const elastico = (v, lo, hi) => {
  * @type {import('react').ForwardRefExoticComponent<Record<string, any> & import('react').RefAttributes<any>>}
  */
 const ZoomPanPinch = forwardRef(function ZoomPanPinch(
-  { children, resetKey, slideRef, onAnimationEnd, reservaDerecha = 56, className = '' },
+  { children, resetKey, slideRef, onAnimationEnd, onCambio, reservaDerecha = 56, className = '' },
   ref,
 ) {
   const contenedor = useRef(null)
@@ -75,6 +80,11 @@ const ZoomPanPinch = forwardRef(function ZoomPanPinch(
   const suprimirClick = useRef(false)
   const reenviando = useRef(false)
   const primerReset = useRef(true)
+  const avisoCambio = useRef(0)
+  const onCambioRef = useRef(onCambio)
+  onCambioRef.current = onCambio
+
+  const estadoPublico = () => ({ ...st.current, fit: lim.current.fit, max: lim.current.max })
 
   const reducido = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -84,6 +94,10 @@ const ZoomPanPinch = forwardRef(function ZoomPanPinch(
     if (!el) return
     const { s, x, y } = st.current
     el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${s})`
+    if (onCambioRef.current) {
+      clearTimeout(avisoCambio.current)
+      avisoCambio.current = setTimeout(() => onCambioRef.current?.(estadoPublico()), AVISO_QUIETO_MS)
+    }
   }
   const programar = () => {
     if (!rafPintar.current) rafPintar.current = requestAnimationFrame(pintar)
@@ -166,8 +180,15 @@ const ZoomPanPinch = forwardRef(function ZoomPanPinch(
     acercar: () => zoomEn(dim.current.cw / 2, dim.current.ch / 2, st.current.s * PASO_BOTONES),
     alejar: () => zoomEn(dim.current.cw / 2, dim.current.ch / 2, st.current.s / PASO_BOTONES),
     encuadrar: () => animar(encuadrado(), 300),
-    // Para tests y diagnóstico: escala relativa al encuadre y escala absoluta.
-    estado: () => ({ ...st.current, fit: lim.current.fit, max: lim.current.max }),
+    // Acerca anclado a un punto de la pantalla (ej. donde se tocó una celda).
+    acercarEn: (clientX, clientY, factor = 1.8) => {
+      const c = contenedor.current
+      if (!c) return
+      const r = c.getBoundingClientRect()
+      zoomEn(clientX - r.left, clientY - r.top, st.current.s * factor)
+    },
+    // Escala actual (s), posición (x, y), escala de encuadre (fit) y máxima (max).
+    estado: estadoPublico,
   }))
 
   // Medición + encuadre inicial, ANTES del primer paint. Se repite cuando
@@ -205,6 +226,7 @@ const ZoomPanPinch = forwardRef(function ZoomPanPinch(
       ro.disconnect()
       detener()
       if (rafPintar.current) cancelAnimationFrame(rafPintar.current)
+      clearTimeout(avisoCambio.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

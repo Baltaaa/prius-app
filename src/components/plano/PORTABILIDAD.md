@@ -24,7 +24,8 @@ componentes, así que lo que se ve en el CRM es lo que se ve en la web
   - `variante="amplia"` (≥768px): header con `logo` (slot), `selectorFecha`
     (slot), chips Todo / Carpas / Sombrillas y la X (`onCerrar`, opcional); el
     mapa en `PlanoViewport` y a la derecha la columna +, −, Encuadrar, Rotar.
-    El zoom lo maneja `usePlanoEncuadre()` y se pasa como `encuadre`.
+    El zoom lo maneja `usePlanoEncuadre()`: se pasa como `encuadre` o, si no
+    se pasa, el marco usa uno propio.
   - `variante="compacta"` (<768px): fila con `selectorFecha` + chips (scroll
     horizontal con snap), el mapa en `ZoomPanPinch` y una pill flotante con
     +, −, Encuadrar, Rotar y cerrar (`onCerrar`).
@@ -32,6 +33,7 @@ componentes, así que lo que se ve en el CRM es lo que se ve en la web
     `emojiSombrilla` (en el CRM salen de `lib/unidadIcono.js`: 🏠 y 🏖️),
     `rotado` + `onRotar`, `cargando`, `resetKey` (compacta: re-encuadra al
     cambiar), `slideRef` + `onAnimationEnd` (animación al cambiar de fecha).
+  - Flujo de reserva (Fase 6A.1): ver "El marco en los 6 pasos" abajo.
 - `PlanoClaro.jsx` — el cuerpo: Recreación / Acceso / Pileta, las 6 hileras de
   carpas con sus pasillos, el sector sombrillas y el océano animado. Es
   `PlanoRotable` + `PlanoGrid` (la geometría sigue en un solo lugar,
@@ -46,7 +48,8 @@ componentes, así que lo que se ve en el CRM es lo que se ve en la web
     marca lo que sí.
   - `tamano`: `compacta` (24×18 / 28×20, número afuera del lado `numberSide`;
     para `amplia`) o `tactil` (44×36, número adentro; para `compacta`).
-  - `onClick(numero)` solo se llama en una casilla seleccionable. `etiqueta`
+  - `onClick(numero, evento)` solo se llama en una casilla seleccionable; el
+    evento trae `clientX`/`clientY` del toque. `etiqueta`
     va como `aria-label` (ej. "Carpa 74, libre"). Los `data-*` pasan al botón.
 
 Ejemplo (landing, desktop):
@@ -79,6 +82,74 @@ const encuadre = usePlanoEncuadre({ isMobile: false, remedir: cargando })
   />
 </MarcoPlanoClaro>
 ```
+
+## El marco en los 6 pasos (Fase 6A.1, nov 2026)
+
+`MarcoPlanoClaro` es el marco de TODO el flujo de reserva de la landing, no
+solo del Paso 3: reemplaza a `MarcoReserva` (provisorio de beachFlow, Fase
+6B), que se borra. Todas estas props son opcionales; sin ellas el marco
+dibuja exactamente lo de la 6A (el modal del CRM no usa ninguna).
+
+Header:
+- `selectorPersonas`: slot después de `selectorFecha` (la pill de personas).
+- `chipsDeshabilitados`: chips visibles pero sin click y al 50% (pasos sin
+  mapa).
+- `onRefrescar` + `refrescando` + `tituloRefrescar` (default "Actualizar
+  disponibilidad"): botón ↻ redondo de 44px; con `refrescando` el ícono gira
+  y el botón queda deshabilitado. En amplia va a la derecha, antes de la X;
+  en compacta, al final de la fila.
+- `onCerrar` / `tituloCerrar`: en amplia es la X del header; en compacta es
+  el botón de cerrar de la pill del mapa. Si en mobile la X va en la barra
+  del paso, no pasar `onCerrar` en compacta.
+
+Entre el header y el cuerpo:
+- `barra`: slot libre ("Paso X de 6 · nombre" + progreso). Lo dibuja quien
+  lo usa; el marco no sabe de pasos.
+
+Cuerpo:
+- `cuerpo="mapa"` (default): children = `<PlanoClaro/>`, con zoom, rótulo
+  de pasillos y controles, como siempre.
+- `cuerpo="libre"`: children = cualquier contenido. Card `flex-1` con scroll
+  interno (`overflow-y-auto`, `overscroll-contain`); la página y el header no
+  se mueven. El ancho del contenido (ej. 640px centrado) lo pone quien lo usa.
+- `claseCuerpo`: clases extra para la card del cuerpo en los dos modos (ej.
+  `border border-[#EDEDED]` si la hoja es blanca: la card es blanca también).
+- `aviso`: slot dentro de la card del cuerpo (`relative`), en los dos modos;
+  lo posiciona quien lo pasa (ej. `absolute top-3 left-1/2 -translate-x-1/2`).
+
+Pie:
+- `pie`: contenido del footer fijo (64px, borde superior), debajo del cuerpo.
+- `pieRef`: ref o callback ref del nodo del footer, para que cada paso dibuje
+  sus botones ahí por portal (el `PiePaso` de beachFlow). Con `pie` o
+  `pieRef` el footer existe; sin ninguno de los dos, no.
+
+Zoom desde afuera (para "el primer toque acerca", que vive en la landing):
+- `mapaRef`: `{ acercar(), alejar(), encuadrar(), acercarEn(clientX,
+  clientY, factor = 1.8), estado() }`, igual en las dos variantes.
+  `estado()` = `{ escala, escalaEncuadre, escalaMax, x, y }`.
+- `onCambioZoom(estado)`: mismo objeto, cuando el zoom se asienta (amplia:
+  en cada cambio; compacta: 120ms después del último frame, nunca por frame).
+
+Ejemplo del primer toque (en la landing, NO en esta carpeta). Alto de la
+casilla a escala 1: `compacta` 20px (md) y `tactil` 36px:
+
+```jsx
+const mapa = useRef(null)
+const tocar = (slot, evento) => {
+  const { escala } = mapa.current.estado()
+  if ((amplia ? 20 : 36) * escala < 44 && evento) {
+    mapa.current.acercarEn(evento.clientX, evento.clientY)
+    return // mostrar "Tocá de nuevo para elegir" con `aviso`
+  }
+  elegir(slot)
+}
+<MarcoPlanoClaro mapaRef={mapa} cuerpo={paso === 3 ? "mapa" : "libre"} barra={<BarraPaso/>} pieRef={setNodoPie} ...>
+  {paso === 3 ? <PlanoClaro renderCelda={(slot) => <CeldaClara onClick={(_, ev) => tocar(slot, ev)} .../>} /> : <Paso4 />}
+</MarcoPlanoClaro>
+```
+
+Probado con clicks reales en el CRM: `/app/dev/marco-reserva` (solo
+superadmin) y `e2e/plano-marco-reserva.spec.ts` (1440 y 390 táctil).
 
 El selector de fecha es un slot porque el del CRM (`PlanoNavegadorFecha`, con
 `DateInput` y react-day-picker) no es portable. Para verse igual: una pill de
@@ -168,10 +239,11 @@ Ninguna clase fija `font-family`: hereda la del `body` (Manrope en el CRM).
   `renderCelda(slot)` y `mar`.
 - `PlanoViewport.jsx` — contenedor con zoom (fit-to-container, pan por drag,
   Ctrl+rueda, pinch), 100% controlado por props.
-- `usePlanoEncuadre.js` — el estado de ese zoom (desktop/tablet).
+- `usePlanoEncuadre.js` — el estado de ese zoom (desktop/tablet), con
+  `acercarEn` y `fitScale`.
 - `ZoomPanPinch.jsx` — mapa táctil mobile con gestos propios (arrastre con
   umbral, pinch anclado, doble tap, rebote) y API imperativa
-  (`acercar`/`alejar`/`encuadrar`).
+  (`acercar`/`alejar`/`encuadrar`/`acercarEn`/`estado`) y `onCambio`.
 - `PlanoRotable.jsx` — capa que gira 180°.
 - `ControlesZoomPlano.jsx` — `BarraZoomPlano` (columna desktop) y
   `PillZoomPlano` (pill mobile).

@@ -29,6 +29,7 @@ const Configuracion = lazy(() => import('./pages/crm/Configuracion'))
 const CajaResumen = lazy(() => import('./pages/CajaResumen'))
 const Recepcion = lazy(() => import('./pages/Recepcion'))
 const PlanoPublicoPreview = lazy(() => import('./pages/dev/PlanoPublicoPreview'))
+const MarcoReservaPreview = lazy(() => import('./pages/dev/MarcoReservaPreview'))
 const NotFound = lazy(() => import('./pages/crm/NotFound'))
 
 export default function App() {
@@ -128,6 +129,17 @@ function Contenido() {
                 element={
                   <PrivateRoute clave="plano_publico_preview">
                     <PlanoPublicoPreview />
+                  </PrivateRoute>
+                }
+              />
+              {/* Fase 6A.1 (nov 2026): el marco del flujo de reserva de la landing
+                  (MarcoPlanoClaro con barra, pie, cuerpo libre y API del mapa),
+                  para probarlo con clicks reales antes de copiarlo a beachFlow. */}
+              <Route
+                path="dev/marco-reserva"
+                element={
+                  <PrivateRoute clave="plano_publico_preview">
+                    <MarcoReservaPreview />
                   </PrivateRoute>
                 }
               />

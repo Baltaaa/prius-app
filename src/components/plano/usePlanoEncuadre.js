@@ -216,6 +216,15 @@ export default function usePlanoEncuadre({ isMobile = false, remedir } = {}) {
     zoomAt(contW / 2, contH / 2, round1(transform.scale - 0.2))
   }
 
+  // Acerca anclado a un punto de la pantalla (ej. donde se tocó una celda):
+  // misma firma que ZoomPanPinch, para que la landing use una sola API.
+  const acercarEn = (clientX, clientY, factor = 1.8) => {
+    const node = viewportRef.current
+    if (!node) return
+    const rect = node.getBoundingClientRect()
+    zoomAt(clientX - rect.left, clientY - rect.top, transform.scale * factor)
+  }
+
   const { contW, contH, contentW, contentH } = sizesRef.current
   const canPan = contentW * transform.scale > contW || contentH * transform.scale > contH
 
@@ -223,6 +232,8 @@ export default function usePlanoEncuadre({ isMobile = false, remedir } = {}) {
     viewportRef,
     contentRef,
     transform,
+    fitScale,
+    escalaMax: 3,
     ready,
     isDragging,
     canPan,
@@ -234,5 +245,6 @@ export default function usePlanoEncuadre({ isMobile = false, remedir } = {}) {
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
+    acercarEn,
   }
 }

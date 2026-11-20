@@ -13,8 +13,9 @@ describe('CeldaClara (vista clientes portable)', () => {
     const el = render({ numero: 74, estado: 'libre', tamano: 'tactil', onClick })
     expect(el.props.className).toContain('bg-white')
     expect(el.props.disabled).toBe(false)
-    el.props.onClick()
-    expect(onClick).toHaveBeenCalledWith(74)
+    const evento = { clientX: 10, clientY: 20 }
+    el.props.onClick(evento)
+    expect(onClick).toHaveBeenCalledWith(74, evento)
   })
 
   it('ocupada: negra y no seleccionable', () => {

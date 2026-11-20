@@ -59,7 +59,9 @@ function CeldaClara({
   const colores = (COLORES[estado] || COLORES.libre)[tamano]
   const opacidad = deshabilitada ? ATENUADA[tamano] : "opacity-100"
   const aro = resaltada ? ARO[tamano] : ""
-  const elegir = seleccionable ? () => onClick(numero) : undefined
+  // onClick(numero, evento): el evento trae clientX/clientY del toque, para que
+  // quien la usa pueda acercar ahí en vez de elegir (ver mapaRef en MarcoPlanoClaro).
+  const elegir = seleccionable ? (evento) => onClick(numero, evento) : undefined
 
   if (tamano === "tactil") {
     return (
