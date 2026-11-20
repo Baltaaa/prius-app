@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 // Zoom, encuadre y arrastre del Plano en desktop/tablet (Fase 6A: sacado tal
 // cual de pages/Dashboard.jsx para que la landing tenga el mismo
@@ -9,8 +9,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 // (botones = centro, Ctrl+rueda = cursor, pinch = punto medio de los dedos) y
 // pan por drag (mouse o un dedo). Mouse y touch alimentan el mismo `transform`.
 //
-// Estructura que espera (PlanoViewport): `viewportRef` = contenedor con
-// overflow:hidden; `contentRef` = capa transformada absolute top/left 0 con
+// Estructura que espera (PlanoViewport): `setViewport` = callback ref del
+// contenedor con overflow:hidden (también se puede pasar `viewportRef` tal
+// cual; quien necesite el nodo para otra cosa llama a setViewport desde su
+// propio callback ref, nunca asigna `viewportRef.current` desde afuera: los
+// valores que devuelve un hook son inmutables, regla react-hooks/immutability); `contentRef` = capa transformada absolute top/left 0 con
 // transform-origin 0 0 y el plano en su tamaño intrínseco adentro.
 //
 // `isMobile`: nunca se auto-achica (arranca a escala 1, anclado arriba a la
@@ -32,6 +35,9 @@ export default function usePlanoEncuadre({ isMobile = false, remedir } = {}) {
   const [ready, setReady] = useState(false) // oculto hasta la primera medición válida
   const [, setUserInteractedState] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+
+  // Callback ref estable del viewport (la asignación vive acá adentro).
+  const setViewport = useCallback((node) => { viewportRef.current = node }, [])
 
   const computeFit = (contW, contH, contentW, contentH) => {
     if (isMobile) return 1
@@ -230,6 +236,7 @@ export default function usePlanoEncuadre({ isMobile = false, remedir } = {}) {
 
   return {
     viewportRef,
+    setViewport,
     contentRef,
     transform,
     fitScale,

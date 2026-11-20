@@ -14,13 +14,13 @@ import { BarraZoomPlano, PillZoomPlano } from "./ControlesZoomPlano"
 // variante="amplia" (desktop/tablet, ≥768px):
 //   header: [logo] [selectorFecha] [selectorPersonas] [chips] ... [↻] [X]
 //   [barra]
-//   cuerpo: mapa (card con "Pasillo A · B · C", PlanoViewport y la columna
+//   cuerpo: mapa (card con "Pasillo A · B · C" + [leyenda], PlanoViewport y la columna
 //   +, −, Encuadrar, Rotar) o contenido libre con scroll interno
 //   [pie]
 // variante="compacta" (mobile, <768px):
 //   fila: [selectorFecha] [selectorPersonas] [chips] [↻] (scroll horizontal)
 //   [barra]
-//   cuerpo: mapa (ZoomPanPinch y la pill +, −, Encuadrar, Rotar y cerrar) o
+//   cuerpo: mapa ("Pasillo A · B · C" + [leyenda], ZoomPanPinch y la pill +, −, Encuadrar, Rotar y cerrar) o
 //   contenido libre con scroll interno
 //   [pie]
 //
@@ -116,6 +116,7 @@ export default function MarcoPlanoClaro({
   barra = null, // slot entre el header y el cuerpo (ej. "Paso X de 6" + progreso)
   cuerpo = "mapa", // "mapa": children = <PlanoClaro/> con zoom; "libre": cualquier contenido, con scroll interno
   claseCuerpo = "", // clases extra para la card del cuerpo (ej. un borde si la hoja es blanca)
+  leyenda = null, // slot a la derecha de "Pasillo A · B · C" (referencias de colores de la landing)
   aviso = null, // slot absoluto arriba del cuerpo (toasts del paso); lo posiciona quien lo pasa
   pie = null, // slot del footer fijo, debajo del cuerpo
   pieRef, // ref o callback ref del nodo del footer (para dibujar ahí por portal)
@@ -193,7 +194,7 @@ export default function MarcoPlanoClaro({
 
   if (variante === "compacta") {
     return (
-      <div className="plano-mobile-root flex-1 min-h-0 flex flex-col gap-3">
+      <div data-marco-plano className="plano-mobile-root flex-1 min-h-0 flex flex-col gap-3">
         <div className="plano-mobile-controles scroll-x-snap shrink-0 flex items-center gap-2 overflow-x-auto [scroll-snap-type:x_proximity] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:[scroll-snap-align:start]">
           {selectorFecha}
           {selectorPersonas}
@@ -202,10 +203,11 @@ export default function MarcoPlanoClaro({
         </div>
         {barra}
         {!esMapa ? cuerpoLibre : (
-          <section data-card-compacta className={`${CARD} flex-1 min-h-0 min-w-0 relative overflow-hidden flex flex-col p-3 gap-3${claseCuerpo ? ` ${claseCuerpo}` : ""}`}>
+          <section data-card-compacta data-cuerpo-marco className={`${CARD} flex-1 min-h-0 min-w-0 relative overflow-hidden flex flex-col p-3 gap-3${claseCuerpo ? ` ${claseCuerpo}` : ""}`}>
             {aviso}
             <div className="flex items-center justify-between gap-3 shrink-0">
               <RotuloPasillos iconSize={14} />
+              {leyenda}
             </div>
             {cargando ? cargandoTexto : (
               <div className="flex-1 min-h-0 relative flex flex-col">
@@ -241,12 +243,12 @@ export default function MarcoPlanoClaro({
 
   // Un solo nodo para el viewport del zoom y la animación de cambio de fecha.
   const setViewport = (node) => {
-    enc.viewportRef.current = node
+    enc.setViewport(node)
     if (slideRef) slideRef.current = node
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col gap-2.5">
+    <div data-marco-plano className="flex-1 min-h-0 flex flex-col gap-2.5">
       <div data-card-compacta className={`${CARD} p-3 shrink-0`}>
         <div className="flex items-center gap-4">
           {logo}
@@ -272,11 +274,11 @@ export default function MarcoPlanoClaro({
 
       {!esMapa ? cuerpoLibre : (
         <div className="flex-1 min-h-0 flex gap-3">
-          <section data-card-compacta className={`${CARD} flex-1 relative overflow-hidden flex flex-col p-3 gap-3${claseCuerpo ? ` ${claseCuerpo}` : ""}`}>
+          <section data-card-compacta data-cuerpo-marco className={`${CARD} flex-1 relative overflow-hidden flex flex-col p-3 gap-3${claseCuerpo ? ` ${claseCuerpo}` : ""}`}>
             {aviso}
             <div className="flex items-center justify-between gap-3 shrink-0">
               <RotuloPasillos iconSize={16} />
-              <div className="flex items-center gap-3 shrink-0" />
+              <div className="flex items-center gap-3 shrink-0">{leyenda}</div>
             </div>
             {cargando ? cargandoTexto : (
               <div className="flex-1 min-h-0 flex gap-3">

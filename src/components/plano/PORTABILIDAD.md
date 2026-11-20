@@ -116,6 +116,16 @@ Cuerpo:
   `border border-[#EDEDED]` si la hoja es blanca: la card es blanca también).
 - `aviso`: slot dentro de la card del cuerpo (`relative`), en los dos modos;
   lo posiciona quien lo pasa (ej. `absolute top-3 left-1/2 -translate-x-1/2`).
+- `leyenda` (Fase 6A.2): slot en la fila "Pasillo A · B · C" del mapa, en
+  amplia y compacta (las referencias de colores de la landing), a la derecha
+  de la fila (`justify-between`; la pill de zoom de compacta flota sobre el
+  mapa, debajo de esa fila, así que no se pisan). Solo existe con
+  `cuerpo="mapa"`.
+
+Atributos para medir o probar desde afuera (Fase 6A.2):
+- `data-marco-plano`: la raíz del marco, en las dos variantes.
+- `data-cuerpo-marco`: la card del cuerpo, SIEMPRE (mapa y libre). Con
+  `cuerpo="libre"` el scroller es `[data-scroll-cuerpo]`, adentro.
 
 Pie:
 - `pie`: contenido del footer fijo (64px, borde superior), debajo del cuerpo.
@@ -240,7 +250,11 @@ Ninguna clase fija `font-family`: hereda la del `body` (Manrope en el CRM).
 - `PlanoViewport.jsx` — contenedor con zoom (fit-to-container, pan por drag,
   Ctrl+rueda, pinch), 100% controlado por props.
 - `usePlanoEncuadre.js` — el estado de ese zoom (desktop/tablet), con
-  `acercarEn` y `fitScale`.
+  `acercarEn`, `fitScale` y `setViewport` (callback ref del viewport). Si el
+  nodo del viewport hace falta para otra cosa (ej. la animación de cambio de
+  fecha), se usa un callback ref propio que llama a `encuadre.setViewport(node)`;
+  nunca `encuadre.viewportRef.current = node` (falla
+  `react-hooks/immutability`, que priusApp corre como error).
 - `ZoomPanPinch.jsx` — mapa táctil mobile con gestos propios (arrastre con
   umbral, pinch anclado, doble tap, rebote) y API imperativa
   (`acercar`/`alejar`/`encuadrar`/`acercarEn`/`estado`) y `onCambio`.

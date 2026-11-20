@@ -60,6 +60,20 @@ async function recorrido(page, amplia: boolean) {
   await expect(hoja.getByRole('button', { name: 'Cerrar', exact: true })).toHaveCount(amplia ? 1 : 0)
   await expect(hoja.getByRole('button', { name: 'Cerrar pantalla completa' })).toHaveCount(0)
 
+  // Fase 6A.2: data-marco-plano en la raíz, data-cuerpo-marco también con el
+  // mapa, y la leyenda en la fila "Pasillo A · B · C" (misma línea, a la derecha).
+  await expect(hoja.locator('[data-marco-plano]')).toHaveCount(1)
+  const cuerpoMapa = hoja.locator('[data-cuerpo-marco]')
+  await expect(cuerpoMapa).toHaveCount(1)
+  const leyenda = cuerpoMapa.locator('[data-leyenda]')
+  await expect(leyenda).toBeVisible()
+  const bRotulo = await cuerpoMapa.getByText('Pasillo A · B · C').boundingBox()
+  const bLeyenda = await leyenda.boundingBox()
+  expect(Math.abs((bRotulo.y + bRotulo.height / 2) - (bLeyenda.y + bLeyenda.height / 2))).toBeLessThan(4)
+  expect(bLeyenda.x).toBeGreaterThan(bRotulo.x + bRotulo.width)
+  const bCuerpo = await cuerpoMapa.boundingBox()
+  expect(bLeyenda.x + bLeyenda.width).toBeLessThanOrEqual(bCuerpo.x + bCuerpo.width)
+
   // Barra del paso y pie fijo (por portal) pegado abajo de la hoja.
   await expect(page.locator('[data-barra-paso]')).toContainText('Paso 3 de 6')
   const pie = page.locator('[data-pie-marco]')
@@ -95,6 +109,8 @@ async function recorrido(page, amplia: boolean) {
   await pie.getByRole('button', { name: 'Siguiente' }).click()
   await expect(page.locator('[data-barra-paso]')).toContainText('Paso 4 de 6')
   await expect(page.locator('[data-contenido-libre]')).toBeVisible()
+  await expect(hoja.locator('[data-cuerpo-marco]')).toHaveCount(1)
+  await expect(hoja.locator('[data-leyenda]')).toHaveCount(0)
   await expect(hoja.getByRole('group', { name: 'Filtrar el plano por tipo de unidad' }).getByRole('button', { name: 'Todo' })).toBeDisabled()
   const scroll = page.locator('[data-scroll-cuerpo]')
   const dims = await scroll.evaluate((el) => ({ sh: el.scrollHeight, ch: el.clientHeight }))

@@ -39,6 +39,10 @@ export default [
       }],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      // Lo que devuelve un hook (y las props) no se muta: nada de
+      // `encuadre.viewportRef.current = node` desde afuera del hook. beachFlow
+      // corre esta regla sobre src/components/plano (Fase 6A.2).
+      'react-hooks/immutability': 'error',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },

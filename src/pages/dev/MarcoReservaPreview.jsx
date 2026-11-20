@@ -143,6 +143,12 @@ export default function MarcoReservaPreview() {
           )}
           cuerpo={paso === 3 ? "mapa" : "libre"}
           claseCuerpo="border border-line"
+          leyenda={(
+            <span data-leyenda className="flex items-center gap-3 text-label text-ink-2">
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm border border-line bg-card" />Libre</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-ink" />Ocupada</span>
+            </span>
+          )}
           aviso={aviso && (
             <div role="status" className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-ink text-on-ink text-label rounded-full px-4 py-2">
               {aviso}

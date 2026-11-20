@@ -326,7 +326,7 @@ export default function Dashboard() {
   // Un solo nodo cumple el doble rol de "ref de la animación de slide al
   // cambiar de fecha" y "ref del viewport para medir el encuadre" — nunca dos
   // elementos distintos, porque solo hay UNO montado a la vez (ver abajo).
-  const setMapViewportRef = (node) => { mapSlideRef.current = node; encuadre.viewportRef.current = node }
+  const setMapViewportRef = (node) => { mapSlideRef.current = node; encuadre.setViewport(node) }
   const quitarSlide = (e) => e.currentTarget.classList.remove("plano-slide-left", "plano-slide-right")
 
   const renderPlanoBody = (fullscreen) => {
